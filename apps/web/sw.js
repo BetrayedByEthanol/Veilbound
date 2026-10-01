@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "veilbound-shell-";
-const CACHE = `${CACHE_PREFIX}v3`;
+const CACHE = `${CACHE_PREFIX}v4`;
 const SHELL = ["./", "./index.html", "./app.css", "./app.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -33,19 +33,25 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     (async () => {
+      let response;
+
       try {
-        const response = await fetch(event.request);
-
-        if (response.ok) {
-          const cache = await caches.open(CACHE);
-          await cache.put(event.request, response.clone());
-        }
-
-        return response;
+        response = await fetch(event.request);
       } catch {
         const cached = await caches.match(event.request);
         return cached || Response.error();
       }
+
+      if (response.ok) {
+        try {
+          const cache = await caches.open(CACHE);
+          await cache.put(event.request, response.clone());
+        } catch (error) {
+          console.warn("Veilbound cache update failed; serving network response.", error);
+        }
+      }
+
+      return response;
     })()
   );
 });
