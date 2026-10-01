@@ -8,6 +8,36 @@ A rules file should answer **how the game currently works**, not narrate every d
 
 Rules should cross-reference stable content IDs where practical rather than duplicate complete definitions.
 
+Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If the audit still marks a subsystem missing, conflicting, inherited, or provisional, keep that boundary visible until the rule is deliberately resolved.
+
+## Current promoted rules
+
+### 01 — Core resolution
+
+- [Core Resolution](01-core-resolution/core-resolution.md)
+
+### 02 — Character creation
+
+- [Abilities and Training](02-character-creation/abilities-and-training.md)
+
+### 05 — Combat
+
+- [Combat index](05-combat/README.md)
+- [Action Categories and Physical Tempo](05-combat/action-categories-and-physical-tempo.md)
+- [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
+- [Weapons and Armor](05-combat/weapons-and-armor.md)
+- [Off-Hand and Ranged Combat](05-combat/off-hand-and-ranged-combat.md)
+
+### 06 — Vigor, wounds and death
+
+- [HP and Vigor](06-vigor-wounds-death/hp-and-vigor.md)
+- [Dying and Wounds](06-vigor-wounds-death/dying-and-wounds.md)
+
+### 07 — Veil and magic
+
+- [Volition Points](07-veil-magic/volition-points.md)
+- [Technique Tiers and Expression Metadata](07-veil-magic/technique-tiers-and-expression.md)
+
 ## Planned sections
 
 ```text
@@ -28,4 +58,4 @@ Rules should cross-reference stable content IDs where practical rather than dupl
 14-gm-rules/
 ```
 
-These folders should be added as real content is promoted into them; empty directory placeholders are intentionally avoided.
+Folders should be added as real content is promoted into them; empty directory placeholders are intentionally avoided.
