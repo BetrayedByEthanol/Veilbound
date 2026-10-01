@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veilbound.local/schemas/rule.schema.json",
+  "title": "Veilbound Rule",
+  "type": "object",
+  "required": ["id", "name", "status", "text"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^rule\\.[a-z0-9.-]+$"},
+    "name": {"type": "string", "minLength": 1},
+    "status": {"enum": ["locked", "provisional"]},
+    "visibility": {"enum": ["player", "gm", "both"], "default": "both"},
+    "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "text": {"type": "string", "minLength": 1},
+    "references": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  },
+  "additionalProperties": false
+}
