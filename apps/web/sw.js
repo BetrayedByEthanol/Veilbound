@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "veilbound-shell-";
-const CACHE = `${CACHE_PREFIX}v2`;
+const CACHE = `${CACHE_PREFIX}v3`;
 const SHELL = ["./", "./index.html", "./app.css", "./app.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -32,14 +32,20 @@ self.addEventListener("fetch", (event) => {
   if (requestUrl.origin !== shellUrl.origin) return;
 
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
+    (async () => {
+      try {
+        const response = await fetch(event.request);
+
         if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          const cache = await caches.open(CACHE);
+          await cache.put(event.request, response.clone());
         }
+
         return response;
-      })
-      .catch(() => caches.match(event.request))
+      } catch {
+        const cached = await caches.match(event.request);
+        return cached || Response.error();
+      }
+    })()
   );
 });
