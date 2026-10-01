@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veilbound.local/schemas/archetype.schema.json",
+  "title": "Veilbound Archetype",
+  "type": "object",
+  "required": ["id", "name", "status", "accessModel"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^archetype\\.[a-z0-9.-]+$"},
+    "name": {"type": "string", "minLength": 1},
+    "status": {"enum": ["locked", "provisional"]},
+    "accessModel": {"type": "string", "minLength": 1},
+    "focusNotes": {
+      "type": "object",
+      "properties": {
+        "high": {"type": "string"},
+        "medium": {"type": "string"},
+        "low": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

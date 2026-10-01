@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veilbound.local/schemas/pillar.schema.json",
+  "title": "Veilbound Pillar",
+  "type": "object",
+  "required": ["id", "name", "status", "aspectIds"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^pillar\\.[a-z0-9.-]+$"},
+    "name": {"type": "string", "minLength": 1},
+    "status": {"enum": ["locked", "provisional"]},
+    "summary": {"type": "string"},
+    "aspectIds": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "string", "pattern": "^aspect\\.[a-z0-9.-]+$"},
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}
