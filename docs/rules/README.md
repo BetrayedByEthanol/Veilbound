@@ -38,6 +38,14 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Volition Points](07-veil-magic/volition-points.md)
 - [Technique Tiers and Expression Metadata](07-veil-magic/technique-tiers-and-expression.md)
 
+### 09 — Focus
+
+- [Focus: Veil Expression](09-focus/focus.md)
+
+### 10 — Advancement
+
+- [Advancement Architecture](10-advancement/progression-architecture.md)
+
 ## Planned sections
 
 ```text
