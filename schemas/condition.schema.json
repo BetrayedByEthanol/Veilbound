@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://veilbound.local/schemas/condition.schema.json",
+  "title": "Veilbound Condition",
+  "type": "object",
+  "required": ["id", "name", "status", "text"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^condition\\.[a-z0-9.-]+$"},
+    "name": {"type": "string", "minLength": 1},
+    "status": {"enum": ["locked", "provisional"]},
+    "text": {"type": "string", "minLength": 1},
+    "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  },
+  "additionalProperties": false
+}
