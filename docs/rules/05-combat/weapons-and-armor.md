@@ -40,7 +40,9 @@ The applicable physical contribution is not yet finalized.
 
 ## Two-Handed
 
-A weapon with **Two-Handed** requires two available hands to Attack or Guard with it.
+A weapon with **Two-Handed** requires two available hands to Attack or Guard with it **when that weapon is otherwise capable of Guarding the incoming attack**. The trait does not itself grant Guard capability.
+
+**Ordinary bows cannot Guard melee attacks.** A character threatened in melee while holding a bow must use another legal defense, such as Dodge, an explicit magical/Veil defense, or Take Hit, unless a specific feature says otherwise.
 
 - A two-handed **melee** weapon gains **+1 Guard Defense** from leverage.
 - Two-Handed grants no additional Guard capacity.
