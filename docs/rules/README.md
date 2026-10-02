@@ -38,6 +38,11 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Volition Points](07-veil-magic/volition-points.md)
 - [Technique Tiers and Expression Metadata](07-veil-magic/technique-tiers-and-expression.md)
 
+### 08 — Archetypes
+
+- [Archetype index](08-archetypes/README.md)
+- [Archetype Identities](08-archetypes/archetype-identities.md)
+
 ### 09 — Focus
 
 - [Focus: Veil Expression](09-focus/focus.md)
