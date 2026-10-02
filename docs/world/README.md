@@ -2,7 +2,11 @@
 
 Canonical setting and lore reference belongs here.
 
-Planned areas include:
+## Current promoted material
+
+- [The Veil and the Pillars](veil-and-pillars.md)
+
+## Planned areas
 
 - the Veil and metaphysics;
 - Pillars and Aspects;
@@ -14,3 +18,5 @@ Planned areas include:
 - player-visible versus GM-only knowledge.
 
 Structured entities that must be consumed directly by the application should also have a corresponding representation under `content/`.
+
+Where the design audit still records a contradiction, unresolved setting question, or missing mechanical procedure, the world compendium should preserve that boundary rather than silently decide it.
