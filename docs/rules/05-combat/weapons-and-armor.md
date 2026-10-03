@@ -1,6 +1,6 @@
 # Weapons and Armor
 
-> Canonical current playtest baseline extracted from Core Rules Audit v34. Weapon physical-contribution rules, exact attack-ability pairings, Reach/Brace, final armor Coverage, and rune-capacity numbers remain unresolved.
+> Canonical current playtest baseline. Weapon attack pairings and Physical Contribution are defined in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md). Reach/Brace, final armor Coverage, and rune-capacity numbers remain unresolved.
 
 ## Weapon damage
 
@@ -20,21 +20,27 @@ Effective Armor = max(Armor - Penetration, 0)
 HP Damage = max(rolled weapon damage + applicable physical contribution - Effective Armor, 0)
 ```
 
-The applicable physical contribution is not yet finalized.
+Physical Contribution is weapon-specific:
+
+- **None:** `0`
+- **Light:** `floor(max(Strength, 0) / 2)`
+- **Full:** `Strength`
+
+See [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md) for the current assignment by weapon.
 
 ## Mundane weapon baseline
 
-| Weapon | Hands | Damage | Pen | Trauma | Baseline identity |
-|---|---|---:|---:|---|---|
-| Dagger | 1 | 2 + d4 | 0 | Cut / Pierce | Concealable; poor against armor; strong gap/called-shot tool |
-| Rapier | 1 | 2 + d6 | 2 | Pierce | Precision weapon; moderate armor interaction |
-| Sword | 1 | 3 + d6 | 2 | Cut / Pierce | General-purpose one-handed baseline |
-| Spear | 1 or 2* | 3 + d6 | 3 | Pierce | Reach/penetration-oriented |
-| Axe | 1 | 3 + d8 | 2 | Cut | High raw Cut trauma |
-| Mace | 1 | 4 + d6 | 3 | Crush | Strong anti-armor one-handed weapon |
-| Greatsword | 2 | 4 + d8 | 2 | Cut | Two-handed Power profile; high raw damage rather than exceptional Penetration |
-| Bow | 2 | 2 + d4 | 3 | Pierce | Sustained ranged weapon; lower raw trauma, strong penetration |
-| Heavy crossbow | 2 | 4 + d8 | 4 | Pierce | High-penetration opening/burst weapon with substantial reload cost |
+| Weapon | Hands | Damage | Pen | Physical contribution | Trauma | Baseline identity |
+|---|---|---:|---:|---|---|---|
+| Dagger | 1 | 2 + d4 | 0 | Light | Cut / Pierce | Concealable; poor against armor; strong gap/called-shot tool |
+| Rapier | 1 | 2 + d6 | 2 | Light | Pierce | Precision weapon; moderate armor interaction |
+| Sword | 1 | 3 + d6 | 2 | Light | Cut / Pierce | General-purpose one-handed baseline |
+| Spear | 1 or 2* | 3 + d6 | 3 | Full | Pierce | Reach/penetration-oriented |
+| Axe | 1 | 3 + d8 | 2 | Full | Cut | High raw Cut trauma |
+| Mace | 1 | 4 + d6 | 3 | Full | Crush | Strong anti-armor one-handed weapon |
+| Greatsword | 2 | 4 + d8 | 2 | Full | Cut | Two-handed Power profile; high raw damage rather than exceptional Penetration |
+| Bow | 2 | 2 + d4 | 3 | None | Pierce | Sustained ranged weapon; lower raw trauma, strong penetration |
+| Heavy crossbow | 2 | 4 + d8 | 4 | None | Pierce | High-penetration opening/burst weapon with substantial reload cost |
 
 \* The spear profile may later be split when Reach is finalized.
 
@@ -42,7 +48,7 @@ The applicable physical contribution is not yet finalized.
 
 A weapon with **Two-Handed** requires two available hands to Attack or Guard with it **when that weapon is otherwise capable of Guarding the incoming attack**. The trait does not itself grant Guard capability.
 
-**Ordinary bows cannot Guard melee attacks.** A character threatened in melee while holding a bow must use another legal defense, such as Dodge, an explicit magical/Veil defense, or Take Hit, unless a specific feature says otherwise.
+**Ordinary bows and heavy crossbows cannot Guard.** A character threatened while holding one must use another legal defense, such as Dodge, an explicit magical/Veil defense, or Take Hit, unless a specific feature says otherwise.
 
 - A two-handed **melee** weapon gains **+1 Guard Defense** from leverage.
 - Two-Handed grants no additional Guard capacity.

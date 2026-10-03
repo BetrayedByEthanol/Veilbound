@@ -5,6 +5,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 ## Canonical files
 
 - [Action Categories and Physical Tempo](action-categories-and-physical-tempo.md)
+- [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
 - [Off-Hand and Ranged Combat](off-hand-and-ranged-combat.md)
@@ -19,8 +20,6 @@ The current audit does **not** yet provide complete canonical rules for:
 - the complete turn sequence;
 - full movement/reach rules;
 - the general opportunity-attack procedure;
-- the base Guard Defense formula;
-- attack ability pairings and physical damage contribution;
 - Strong Hit / Critical Hit extra damage;
 - cover/concealment/surprise as complete procedures;
 - grapple, shove, feint, trip, disarm, charge, and other universal maneuvers as complete procedures;
