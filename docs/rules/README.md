@@ -29,6 +29,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 
 - [Combat index](05-combat/README.md)
 - [Action Categories and Physical Tempo](05-combat/action-categories-and-physical-tempo.md)
+- [Weapon Attack, Guard, and Physical Contribution](05-combat/weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
 - [Weapons and Armor](05-combat/weapons-and-armor.md)
 - [Off-Hand and Ranged Combat](05-combat/off-hand-and-ranged-combat.md)
