@@ -1,6 +1,6 @@
 # Defensive Responses and Criticals
 
-> Canonical extraction from Core Rules Audit v34. The defensive response model and critical-confirmation ladder are locked. The audit does not yet define one complete universal base formula for Guard Defense, so this file does not invent one.
+> Canonical current defensive-response and critical-confirmation rules. Base Guard Defense and weapon Guard pairings are defined in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md).
 
 ## Declaring defense
 
@@ -45,6 +45,14 @@ When armor limits Agility for Dodge, use the armor-cap rules in [weapons-and-arm
 Guard unifies parrying and blocking into one defensive response.
 
 Guard capacity is limited by Physical Tempo and may be modified by equipment.
+
+Base Guard Defense is:
+
+```text
+10 + Guard Ability A + Guard Ability B + relevant Training + Guard modifiers
+```
+
+Use the Guard pairings in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md).
 
 Guard is binary:
 
