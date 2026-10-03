@@ -18,6 +18,8 @@ Shield size increases Guard Defense rather than Guard count.
 
 Ordinary weapons do not normally Guard arrows or crossbow bolts.
 
+Ordinary bows and heavy crossbows are not Guard-capable weapons. A future destructive emergency-block rule may allow an unsuitable held object to be sacrificed, but that is not part of their normal weapon profiles.
+
 ## Riposte
 
 A successful **melee Guard** creates a **Riposte Opening** against that attacker until the end of the defender's next turn.
