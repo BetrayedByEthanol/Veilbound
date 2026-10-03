@@ -61,3 +61,51 @@ Veilbound deliberately avoids mandatory broad umbrella skills such as generic Pe
 Training is not permanently tied to one ability. Medicine might pair with Intellect for diagnosis and Precision for surgery; Climbing might pair with Strength or Agility depending on the obstacle.
 
 Custom narrow trainings and knowledge fields are allowed. Knowledge training may grant information automatically when the character would simply know it; not every use requires a roll.
+
+
+## Common Training catalogue
+
+The current locked catalogue includes:
+
+- Climbing
+- Swimming
+- Acrobatics
+- Riding
+- Throwing
+- Lockwork
+- Sleight of Hand
+- Trapwork
+- Smithing
+- Carpentry
+- Tailoring
+- Engineering
+- Medicine
+- Herbalism
+- Alchemy
+- Navigation
+- Tracking
+- Hunting
+- Survival
+- Disguise
+- Acting
+- Oratory
+- Negotiation
+- Interrogation
+- cultural Etiquette
+- Command
+- Veil Theory
+- Veil Practice
+- Pillar Lore
+- regional/era History
+- regional Law
+- regional Politics
+- Religion & Cults
+- profession-specific Trades
+
+This is not a closed list. Custom narrow Trainings and knowledge fields are explicitly allowed.
+
+## Character-creation allocation status
+
+The Training scale is locked, but the audit does **not** yet define how many Training selections/points a new character receives.
+
+Do not import a 5e proficiency count or background proficiency package to fill that missing rule.

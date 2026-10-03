@@ -18,7 +18,12 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 
 ### 02 — Character creation
 
+- [Character Creation Foundation](02-character-creation/character-creation-foundation.md)
 - [Abilities and Training](02-character-creation/abilities-and-training.md)
+
+### 04 — Non-combat
+
+- [Non-Combat Play](04-non-combat/non-combat-play.md)
 
 ### 05 — Combat
 
@@ -50,6 +55,10 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 ### 10 — Advancement
 
 - [Advancement Architecture](10-advancement/progression-architecture.md)
+
+### 14 — GM rules
+
+- [GM Adjudication](14-gm-rules/adjudication.md)
 
 ## Planned sections
 
