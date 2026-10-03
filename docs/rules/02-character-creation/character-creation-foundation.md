@@ -161,7 +161,7 @@ The audit explicitly leaves these areas incomplete:
 - social origin and starting contacts;
 - starting Training allocation;
 - complete starting equipment packages;
-- complete native spell-defense/save formulas;
+- complete native defense/save mapping, including non-spell hazards and spell defenses;
 - some spell-derived formulas;
 - final repertoire/preparation counts for several Archetypes;
 - a final shared procedure for every remaining derived sheet value.

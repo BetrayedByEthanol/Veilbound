@@ -17,7 +17,7 @@ Effective Armor = max(Armor - Penetration, 0)
 ```
 
 ```
-HP Damage = max(rolled weapon damage + applicable physical contribution - Effective Armor, 0)
+HP Damage = max(rolled weapon damage - Effective Armor, 0)
 ```
 
 Physical Contribution is weapon-specific:
@@ -25,6 +25,8 @@ Physical Contribution is weapon-specific:
 - **None:** `0`
 - **Light:** `floor(max(Strength, 0) / 2)`
 - **Full:** `Strength`
+
+"Rolled weapon damage" already includes the applicable Physical Contribution exactly once. Do not add Physical Contribution again when applying Armor.
 
 See [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md) for the current assignment by weapon.
 
