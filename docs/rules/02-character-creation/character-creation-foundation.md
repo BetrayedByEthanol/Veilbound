@@ -10,10 +10,11 @@ A player character is currently defined by these major mechanical layers:
 2. **Focus** — High, Medium, or Low.
 3. **Nine Abilities** — Strength, Agility, Precision, Intellect, Awareness, Presence, Vitality, Veil Affinity, Veil Control.
 4. **Trainings** — narrow learned expertise using the +0 to +4 training scale.
-5. **Archetype-specific access choices** — such as a Priest's chosen Pillar, a Scholar's learned techniques, a Gifted's emotion-to-Aspect links, or an Anointed's bonded Aspect/Mission/Birth Imprint.
-6. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
-7. **Equipment** — currently only partially defined.
-8. **Background/origin/social starting position** — currently missing as a complete subsystem.
+5. **Resonance** — the universal -3 to +3 state describing internal coherence of Volition; the starting-value procedure is not yet locked.
+6. **Archetype-specific access choices** — such as a Priest's chosen Pillar and Pillar Accord, a Scholar's learned techniques, a Gifted's emotion-to-Aspect links, or an Anointed's bonded Aspect/Mission/Birth Imprint.
+7. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
+8. **Equipment** — currently only partially defined.
+9. **Background/origin/social starting position** — currently missing as a complete subsystem.
 
 ## Step 1 — Choose Archetype
 
@@ -71,6 +72,8 @@ Do not import 5e proficiency counts or background proficiencies to fill this gap
 ### Priest
 
 Choose one Pillar. Priest access is constrained to that Pillar's three Aspects and its Prepared Prayer structure.
+
+The Priest also uses the separate **Pillar Accord** state defined in the Priest foundation. Pillar Accord is not universal Resonance.
 
 Exact starting Prepared Prayer counts remain provisional.
 
@@ -160,6 +163,7 @@ The audit explicitly leaves these areas incomplete:
 - background/origin mechanics;
 - social origin and starting contacts;
 - starting Training allocation;
+- starting universal Resonance assignment/procedure;
 - complete starting equipment packages;
 - complete native defense/save mapping, including non-spell hazards and spell defenses;
 - some spell-derived formulas;

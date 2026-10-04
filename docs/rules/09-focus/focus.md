@@ -6,6 +6,8 @@ Focus does not simply mean **caster / hybrid / martial**. It defines **where a c
 
 Level represents deeper integration with the Veil. Focus determines the direction that integration takes.
 
+Different Focuses do **not** represent different total amounts of will, worth, or metaphysical integration at the same level. They differ in how much of that integration is persistently expressed versus left freely available as VP.
+
 | Focus | Core expression | Advancement character | Combat experience |
 |---|---|---|---|
 | **Low — Embodiment** | Veil power is primarily turned inward and becomes persistent bodily reinforcement. | Mostly passive/inherent developments selected while leveling. | Lower turn-by-turn complexity, more reliance on core combat actions and repeated dice resolution. |
@@ -14,7 +16,7 @@ Level represents deeper integration with the Veil. Focus determines the directio
 
 ## Low Focus — Embodiment
 
-Low-Focus advancement should primarily modify the character **passively or persistently**, rather than adding an action bar of activated combat techniques.
+Low-Focus advancement should primarily modify the character **passively or persistently**, rather than adding an action bar of activated combat techniques. A larger share of the character's Veil integration is already expressed through embodiment, leaving less of it freely available as VP.
 
 Typical developments may improve:
 
@@ -33,7 +35,7 @@ Low Focus is intended to support substantial build-time choice while keeping tur
 
 ## Medium Focus — Routing
 
-Medium Focus actively redirects Veil power and therefore supports more temporary, activated inward effects than Low Focus.
+Medium Focus actively redirects Veil power and therefore supports more temporary, activated inward effects than Low Focus. Its integration is partly developed as routing capability and partly retained as freely available VP.
 
 A Medium-Focus character may, for example:
 
@@ -59,7 +61,7 @@ Medium Focus should have:
 
 ## High Focus — Projection
 
-High Focus concentrates advancement on outward Veil manipulation.
+High Focus concentrates advancement on outward Veil manipulation and leaves the largest share of growing Veil integration freely available for deliberate allocation as VP.
 
 High-Focus characters should receive broader and stronger projected options, with their principal combat complexity coming from **selection** rather than numerous passive martial improvements.
 

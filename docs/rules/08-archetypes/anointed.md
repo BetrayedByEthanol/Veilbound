@@ -19,6 +19,10 @@ The defining relationship is depth:
 
 Anointed are born, not later granted the archetype by ordinary training.
 
+Universal **Resonance** and the Anointed's **Mission state** are separate. Resonance measures the character's internal coherence as a person; Mission state measures the relationship to the lifelong Mission imprinted by the surge. An Anointed may coherently reject the Mission and become Forsaken while retaining high Resonance, or remain Aligned while personally fragmented. Resonance does not replace Mission, Destiny, Aspect Authority, or bond Dormancy.
+
+See [Metaphysical Foundation](../07-veil-magic/metaphysical-foundation.md).
+
 ## Surge-born origin
 
 A Pillar surge does not require prior Pillar weakness and does not require a crisis.

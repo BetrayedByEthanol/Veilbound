@@ -6,6 +6,8 @@
 
 A Gifted is born with permanent links between emotion and Aspect.
 
+A Gifted is a **natural phenomenon of human Veil integration**, not a person selected, created, or deliberately shaped by a Pillar. Human emotion/desire and Pillar patterns arise within the same wider Veil metaphysics. A Gifted's innate emotional states naturally open unusually strong pathways into particular Aspect patterns; the linked Pillar does not need to choose, approve, or consciously recognize the Gifted.
+
 The eight core emotions are:
 
 - Joy
@@ -32,6 +34,8 @@ There is no required External/Internal/Transform distribution.
 Gifted do not use Priest-style daily preparation and do not individually learn techniques like Scholars.
 
 Emotion is the access mechanism. The emotion must be genuinely evoked, but no theatrical outward performance is required.
+
+Any Gifted formula that references **Resonance** uses the universal internal-coherence state defined in [Metaphysical Foundation](../07-veil-magic/metaphysical-foundation.md#universal-resonance), not a Pillar-relationship score.
 
 ## Compatibility at creation
 

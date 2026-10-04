@@ -23,4 +23,4 @@ The individual Archetype files promote that foundation while preserving unresolv
 - final persistent-effect numerical budgets;
 - later specialization/mastery mechanics.
 
-The next documentation stage should split out highly reusable subsystems—such as Priest Resonance/Miracle Petition, Gifted emotion rules, and Anointed Mission/Authority—into structured content or dedicated reference pages only where that improves lookup without creating duplicated sources of truth.
+The next documentation stage should split out highly reusable subsystems—such as Priest Pillar Accord/Miracle Petition, Gifted emotion rules, and Anointed Mission/Authority—into structured content or dedicated reference pages only where that improves lookup without creating duplicated sources of truth.

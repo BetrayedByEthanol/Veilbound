@@ -3527,3 +3527,76 @@ The remaining work is primarily calibration/content rather than foundation redes
 - Anointed Destiny numbers, Signatures, Authority catalogues, Total Investment synergies, Living Aspect packages, and final cadence testing;
 - universal persistent-effect numeric budgets against maximum Physical Tempo;
 - technique content metadata cleanup across the eventual full catalogue.
+
+
+---
+
+# Post-audit locked decision — Metaphysical Foundation
+
+The following decisions supersede older v34 assumptions where terminology or meaning conflicts.
+
+## Desire, Will, Volition, Resonance
+
+- **Desire** is the raw direction of wants, needs, emotions, convictions, impulses, and longings.
+- **Will** selects, organizes, sustains, and acts upon desire.
+- **Volition** is the usable metaphysical force produced when desire and will are directed through the Veil into coherent intention and action.
+- **Resonance** remains a universal **-3 to +3** character state, but its canonical meaning is now explicitly **internal coherence**: how coherently desires, emotions, beliefs, intentions, self-understanding, and actions reinforce rather than oppose one another.
+- Resonance is not morality, Pillar loyalty, obedience, confidence, or a generic spellcasting bonus.
+- The universal starting Resonance value, change cadence, recovery procedure, and full numerical effects remain **UNRESOLVED** pending the dedicated Resonance mechanics pass.
+
+This supersedes the older audit row that treated **starting Resonance as archetype-specific** (Priest +1, Scholar +1, Gifted 0, Anointed +2). Those values must not be promoted as universal starting Resonance values.
+
+## Priest Resonance renamed Pillar Accord
+
+The Priest-specific state formerly called **Priest Resonance** is renamed **Pillar Accord**.
+
+Pillar Accord remains a Priest-specific **-3 to +3** state measuring coherence between the Priest's genuine relationship, intentions, actions, and the principles/pattern of the chosen Pillar.
+
+Universal Resonance and Pillar Accord are separate and may move independently.
+
+The rename is not intended as a balance change. Existing Priest mechanics migrate from Priest Resonance to Pillar Accord:
+
+- Prepared Prayer capacity;
+- small final-effect Accord bonus;
+- Miracle Petition eligibility;
+- Miracle Petition probability;
+- Miracle Debt advancement/repayment;
+- gains/losses caused by sustained alignment or conflict with the chosen Pillar.
+
+Universal Resonance does not automatically stack into those Priest-specific mechanics.
+
+## VP, level, and Focus
+
+**VP is freely available Volition**, not total Volition or total Veil integration.
+
+No separate numeric Total Volition pool is tracked.
+
+**Level** canonically represents increasing depth of integration with the Veil.
+
+**Focus** determines where that growing integration is predominantly expressed:
+
+- High — Projection: more integration remains freely allocatable as VP;
+- Medium — Routing: integration is developed into active routing/reconfiguration plus a moderate free VP reservoir;
+- Low — Embodiment: more integration is already persistently expressed through body, reflexes, equipment interaction, and other embodied development, leaving less freely available as VP.
+
+Different Focuses therefore do not imply different total metaphysical worth or total will at the same level.
+
+## Archetype metaphysical access
+
+- **Scholar:** accesses real Pillar/Aspect patterns through learned technical methods without requiring Pillar approval, recognition, favor, or personal bond.
+- **Gifted:** is a natural phenomenon of human Veil integration rather than a person selected, created, or deliberately shaped by a Pillar. Innate emotional states naturally open fixed pathways into Aspect patterns.
+- **Anointed:** Mission state remains separate from universal Resonance. A coherent rejection of the Mission may produce Forsaken/Dormant consequences without requiring low Resonance.
+
+Existing Gifted formulas that already reference Resonance refer to the restored universal internal-coherence state.
+
+## Magical resistance terminology
+
+To avoid collision with the Pillar Aspect names **External / Internal / Transform**, the resistance taxonomy uses:
+
+- **Intrusion** — magic crosses into, originates within, overlaps, or directly alters the protected internal self of a living target; strongest magical resistance.
+- **Imposition** — magic acts directly on a target from outside without first becoming an independent manifested phenomenon; intended roughly even contest at equal capability.
+- **Manifestation** — magic creates an independently existing external phenomenon; once validly manifested outside the protected living target, the phenomenon is resolved through ordinary applicable defenses rather than magical resistance.
+
+A supposed Manifestation created inside or overlapping a living target is an **Intrusion**. This prevents manifestation wording from bypassing internal protection (for example, conjuring water inside lungs).
+
+Exact Intrusion/Imposition numerical formulas remain **UNRESOLVED**.

@@ -31,14 +31,14 @@ Core access identity:
 - one chosen Pillar;
 - access to techniques across all three Aspects of that Pillar through the **Pillar Catalogue**;
 - a limited set of **Prepared Prayers** selected through prayer/preparation;
-- **Resonance** representing sustained coherence between genuine belief, intention, action, and the chosen Pillar;
-- access to the Priest-wide **Miracle Petition** when positive Resonance permits it.
+- **Pillar Accord** representing sustained coherence between the Priest's relationship, intention, action, and the chosen Pillar;
+- access to the Priest-wide **Miracle Petition** when positive Pillar Accord permits it.
 
 Priests do not individually learn every technique the way Scholars do.
 
-Their strength is **aligned access**: broad access inside one Pillar, preparation, Resonance, and exceptional petition rather than cross-Pillar technical breadth.
+Their strength is **aligned access**: broad access inside one Pillar, preparation, Pillar Accord, and exceptional petition rather than cross-Pillar technical breadth.
 
-At equal level and before Resonance modification, the structural Prepared Prayer ordering is:
+At equal level and before Pillar Accord modification, the structural Prepared Prayer ordering is:
 
 > **High Priest > Medium Priest > Low Priest**
 
@@ -54,7 +54,7 @@ This distinguishes Priest motivation from the Anointed Mission model.
 
 ## Scholar
 
-A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond.
+A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond. Scholar techniques use real Pillar/Aspect patterns without requiring the Pillar's approval, recognition, favor, or personal relationship.
 
 Core access identity:
 
@@ -77,7 +77,7 @@ A Scholar is the Archetype most able to reshape their learned problem coverage o
 
 ## Gifted
 
-A Gifted is born with permanent links between emotion and Aspect.
+A Gifted is born with permanent links between emotion and Aspect. Gifted are natural phenomena of human Veil integration rather than people selected or deliberately created by Pillars.
 
 Core access identity:
 
@@ -139,6 +139,8 @@ A Priest deliberately cultivates the chosen Pillar's presence.
 
 An Anointed pursues the Mission imprinted by the surge. Doing so may strengthen the Pillar as a consequence, but strengthening the Pillar is not automatically the Anointed's primary motive.
 
+Universal **Resonance** remains a separate character state for every Archetype. It measures internal coherence of Volition rather than Pillar loyalty, learned skill, emotional intensity, or Mission compliance.
+
 ## Archetype comparison
 
 The current archetype balance model is:
@@ -146,7 +148,7 @@ The current archetype balance model is:
 | Archetype | Defining access advantage |
 |---|---|
 | Scholar | **Configurable breadth** — learns selected techniques across the full Pillar/Aspect space |
-| Priest | **Aligned access** — prepares from all three Aspects of one chosen Pillar and interacts with Resonance/Miracle Petition |
+| Priest | **Aligned access** — prepares from all three Aspects of one chosen Pillar and interacts with Pillar Accord/Miracle Petition |
 | Gifted | **Fixed breadth + conditional intensity** — eight permanent emotion-linked Aspect catalogues |
 | Anointed | **Depth** — one permanent Aspect with Signature and Aspect Authority |
 
