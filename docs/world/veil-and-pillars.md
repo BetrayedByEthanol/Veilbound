@@ -10,6 +10,8 @@ All magic ultimately originates through the Veil.
 
 The Veil is not a moral intelligence. Power responds to will, desire, pattern, and internal coherence rather than to a universal moral alignment.
 
+The canonical relationship between **Desire, Will, Volition, Resonance, level, Focus, Veil Affinity, and Veil Control** is defined in [Metaphysical Foundation](../rules/07-veil-magic/metaphysical-foundation.md). In particular, Resonance is universal internal coherence rather than morality or Pillar loyalty.
+
 ## There are no true gods
 
 Veilbound does not assume creator-deities that predate humanity and grant divine power from outside the world.
@@ -95,3 +97,16 @@ Ordinary people are not required to devote themselves exclusively to one Pillar.
 Pragmatic, everyday engagement with several Pillars is normal and supported by the setting.
 
 Priests are therefore distinct not because everyone else must reject other Pillars, but because a Priest forms a much deeper deliberate relationship with one chosen Pillar.
+
+That Priest-specific relationship is measured by **Pillar Accord**, which is separate from universal Resonance.
+
+## Archetype relationships to Pillar patterns
+
+The four Archetypes interact with the same Veil/Pillar metaphysics in different ways.
+
+- **Priest:** forms a deliberate relationship with one chosen Pillar. Pillar Accord measures that relationship.
+- **Scholar:** learns technical methods for accessing real Aspect patterns without requiring Pillar approval, recognition, favor, or personal bond.
+- **Gifted:** is a natural phenomenon of human Veil integration. Innate emotional states open fixed pathways into Aspect patterns; the linked Pillars did not need to choose or create the Gifted.
+- **Anointed:** is permanently bonded to one Aspect through a Pillar surge and receives a lifelong Mission imprint. Mission state remains separate from universal Resonance.
+
+These distinctions do not imply different sources of magic. All four ultimately operate through the Veil.
