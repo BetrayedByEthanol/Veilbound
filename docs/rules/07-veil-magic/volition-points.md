@@ -1,6 +1,16 @@
 # Volition Points
 
-> Canonical extraction from Core Rules Audit v34.
+> Canonical current rules. The metaphysical meaning of Volition and VP is defined in [Metaphysical Foundation](metaphysical-foundation.md).
+
+## What VP represents
+
+**Volition Points represent freely available Volition**: the portion of a character's Veil integration that is not already structurally expressed and can therefore be deliberately spent or committed to techniques and sustained effects.
+
+VP is not a measure of the character's total Veil integration, total willpower, moral conviction, or personal worth.
+
+Low- and Medium-Focus characters may have substantial Veil integration already expressed through embodiment, routing capability, body, reflexes, equipment interaction, or persistent magical structures. That integration remains real even though it is not represented as freely spendable VP.
+
+Veilbound does not track a separate numeric "Total Volition" pool.
 
 ## Maximum VP
 
@@ -10,7 +20,7 @@ Maximum Volition Points scale by Focus, Veil Affinity and character level.
 - **Medium Focus:** `max(1, 4 + Veil Affinity) × Level`
 - **Low Focus:** `max(1, 2 + Veil Affinity) × Level`
 
-Focus determines how efficiently and how often the character is expected to turn VP into active effects. Veil Affinity determines reservoir size.
+Focus determines how much growing Veil integration remains freely available for deliberate allocation. Veil Affinity determines the character's capacity to contain and channel that freely available power; level deepens overall Veil integration.
 
 ## VP states
 
