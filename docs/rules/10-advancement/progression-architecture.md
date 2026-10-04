@@ -6,7 +6,9 @@
 
 Veilbound currently uses **levels 1–20**.
 
-The 20-level scale is still classified by the audit as **inherited from 5e**, rather than a uniquely derived Veilbound progression scale.
+**Level has a canonical in-world meaning:** it represents the character's increasing depth of integration with the Veil. Focus determines where that integration is predominantly expressed.
+
+The choice of a 20-level numerical scale is still inherited from 5e rather than uniquely derived from Veilbound, but the meaning of progression within that scale is now Veilbound-specific.
 
 Within that chassis, Veilbound's three-stage progression structure is locked:
 
