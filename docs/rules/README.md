@@ -41,6 +41,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 
 ### 07 — Veil and magic
 
+- [Metaphysical Foundation](07-veil-magic/metaphysical-foundation.md)
 - [Volition Points](07-veil-magic/volition-points.md)
 - [Technique Tiers and Expression Metadata](07-veil-magic/technique-tiers-and-expression.md)
 
