@@ -6,12 +6,14 @@
 
 A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond.
 
+A Scholar does **not** require a Pillar's approval, recognition, favor, or personal relationship. Pillar Aspects are real stable patterns within the Veil; Scholar methods reproduce, enter, route, or shape Volition according to those patterns. The Pillar remains metaphysically relevant because the pattern exists, not because it consciously grants permission.
+
 - A Scholar may potentially learn techniques from **any Pillar or Aspect**.
 - Every technique is learned individually.
 - Techniques retain their real Pillar/Aspect identity; Scholars do not learn abstract setting-free buffs.
 - Ordinary learned techniques resolve at their normal listed effectiveness, VP cost, action requirement, and Veil Control scaling.
 - Scholars do not suffer a generalist penalty.
-- Scholars receive no automatic Priest Resonance amplification, Gifted emotional amplification, or Anointed Aspect Authority.
+- Scholars receive no automatic Priest Pillar Accord amplification, Gifted emotional amplification, or Anointed Aspect Authority.
 - Scholar strength is **configurable breadth**: selection, combination, preparation, technical shaping, and deliberate cross-Pillar repertoire.
 
 The final catalogue/repertoire calibration must preserve Scholar as the archetype with the strongest **player-configurable problem coverage over time**, even though Gifted may possess a large fixed catalogue.
