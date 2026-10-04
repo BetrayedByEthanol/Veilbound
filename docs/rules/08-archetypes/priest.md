@@ -325,13 +325,13 @@ The current foundation supersedes:
 - global Pillar Accord VP-cost modifiers;
 - percentage miracle inversion;
 - automatic universal inversion at -3;
-- legacy Wisdom-save Pillar Accord/Resonance Collapse;
+- legacy Wisdom-save Resonance Collapse (the retired Priest mechanic);
 - treating brief prayer as sufficient to erase genuine ideological conflict.
 
 ## Calibration still unresolved
 
 - exact base Prepared Prayer counts;
-- negative-Pillar-Accord preparation floor;
+- negative Pillar Accord preparation floor;
 - exact Open Invocation surcharge;
 - final Miracle Petition numerical calibration/frequency behavior;
 - exact Intercession cost/ranges;
