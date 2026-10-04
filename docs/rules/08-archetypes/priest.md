@@ -10,19 +10,19 @@ Priests do not individually learn every technique as permanent technical knowled
 
 During suitable prayer/preparation, the Priest selects a limited number of techniques from the chosen Pillar as **Prepared Prayers**.
 
-At equal level before Resonance modifiers:
+At equal level before Pillar Accord modifiers:
 
 > **High Priest Prepared Prayer capacity > Medium Priest capacity > Low Priest capacity**
 
 Exact base counts remain provisional.
 
-## Resonance
+## Pillar Accord
 
-Resonance is a slow-moving measure of coherence between the Priest's genuine beliefs, intentions, actions, and the principles of the chosen Pillar.
+**Pillar Accord** is a slow-moving Priest-specific measure of coherence between the Priest's genuine relationship, intentions, actions, and the principles/pattern of the chosen Pillar.
 
-It is **not morality**.
+It is **not morality** and is separate from the character's universal [Resonance](../07-veil-magic/metaphysical-foundation.md#universal-resonance).
 
-| Resonance | Priest state |
+| Pillar Accord | Priest state |
 |---:|---|
 | +3 | Deeply aligned |
 | +2 | Strongly aligned |
@@ -32,23 +32,25 @@ It is **not morality**.
 | -2 | Severe conflict |
 | -3 | Fundamentally opposed / inverted relationship |
 
-Doubt alone is not automatically dissonance. Hypocrisy, self-deception, or sustained action fundamentally opposed to the Priest's actual relationship with the Pillar are stronger causes.
+Doubt alone is not automatically dissonance. Sustained action or a sincerely changed relationship that conflicts with the chosen Pillar can reduce Accord even when the Priest is personally honest and internally coherent.
 
-Exact adjudication cadence remains provisional.
+Universal Resonance and Pillar Accord may therefore move independently.
+
+Exact Pillar Accord adjudication cadence remains provisional.
 
 ### Prepared access
 
-Positive Resonance adds Prepared Prayer capacity:
+Positive Pillar Accord adds Prepared Prayer capacity:
 
-- +1 Resonance → +1 prepared technique;
-- +2 Resonance → +2;
-- +3 Resonance → +3.
+- +1 Pillar Accord → +1 prepared technique;
+- +2 Pillar Accord → +2;
+- +3 Pillar Accord → +3.
 
-Negative Resonance reduces prepared access, but the exact minimum floor remains provisional.
+Negative Pillar Accord reduces prepared access, but the exact minimum floor remains provisional.
 
-### Pillar Resonance Bonus
+### Pillar Accord Bonus
 
-Positive Resonance provides a small final-effect bonus equal to the positive Resonance, maximum +3, where the individual technique supports it.
+Positive Pillar Accord provides a small final-effect bonus equal to the positive Accord, maximum +3, where the individual technique supports it.
 
 Examples include final damage, healing, barrier value, or movement distance.
 
@@ -60,7 +62,7 @@ The revised Miracle Petition is an uncertain request for exceptional interventio
 
 ### Eligibility
 
-- Priest must have **positive Resonance**.
+- Priest must have **positive Pillar Accord**.
 - Requested effect must belong to the chosen Pillar.
 - Normal benchmark is one technique tier above the Priest's normal maximum.
 - A Petition does not permanently add the technique to Prepared Prayers.
@@ -70,7 +72,7 @@ The revised Miracle Petition is an uncertain request for exceptional interventio
 Current calibration benchmark:
 
 ```
-d20 + (2 × Resonance) - (3 × Miracle Debt) vs 12
+d20 + (2 × Pillar Accord) - (3 × Miracle Debt) vs 12
 ```
 
 The formula numbers are provisional; the structure is locked.
@@ -94,12 +96,12 @@ Miracle Debt is not VP debt.
 
 Each successful Petition adds 1 Debt. Debt reduces later Petition chance and has no automatic daily reset.
 
-When the Priest earns a **Resonance Advance**, the player may normally:
+When the Priest earns a **Pillar Accord Advance**, the player may normally:
 
-1. increase Resonance by +1, to maximum +3; or
-2. repay 1 Miracle Debt while leaving Resonance unchanged.
+1. increase Pillar Accord by +1, to maximum +3; or
+2. repay 1 Miracle Debt while leaving Pillar Accord unchanged.
 
-A Resonance loss cannot be redirected into Debt repayment.
+A Pillar Accord loss cannot be redirected into Debt repayment.
 
 ### Tier 9
 
@@ -318,18 +320,18 @@ Low Focus therefore does not mean passive-only magic.
 
 The current foundation supersedes:
 
-- Faith Rest resetting Resonance;
-- Resonance-based VP recovery reduction/restoration;
-- global Resonance VP-cost modifiers;
+- Faith Rest resetting Pillar Accord;
+- Pillar Accord-based VP recovery reduction/restoration;
+- global Pillar Accord VP-cost modifiers;
 - percentage miracle inversion;
 - automatic universal inversion at -3;
-- legacy Wisdom-save Resonance Collapse;
+- legacy Wisdom-save Pillar Accord/Resonance Collapse;
 - treating brief prayer as sufficient to erase genuine ideological conflict.
 
 ## Calibration still unresolved
 
 - exact base Prepared Prayer counts;
-- negative-Resonance preparation floor;
+- negative-Pillar-Accord preparation floor;
 - exact Open Invocation surcharge;
 - final Miracle Petition numerical calibration/frequency behavior;
 - exact Intercession cost/ranges;
