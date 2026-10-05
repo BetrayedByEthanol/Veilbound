@@ -3883,6 +3883,18 @@ A technique may explicitly replace this generic scatter rule with an authored mi
 
 A near miss may still place the original target inside the resulting area.
 
+### Successful Guard against a projectile-delivered area
+
+A legal projectile Guard that stops the attack does not use scatter.
+
+By default, the projectile impacts the interposing Guard instrument at the defender's position, and the carried area resolves from that point.
+
+The successful Guard stops the direct projectile hit but does not automatically cancel the carried explosion, burst, cloud, splash, or other area.
+
+A shield, wall, or other barrier mitigates that resulting area only if the ordinary physical rules say it can actually interpose against the phenomenon.
+
+A technique may explicitly override this default by stating that a Guarded projectile dissipates, fails to trigger, ricochets, or uses another authored impact rule.
+
 ## Pointed beams
 
 A manifested beam that must be directly pointed at a target uses double Precision:
