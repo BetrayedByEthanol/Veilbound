@@ -61,6 +61,8 @@ Guard is binary:
 
 There is no partial or half-damage Guard state.
 
+For a projectile-delivered area effect, "stopped" means the Guard instrument physically intercepts the projectile. The projectile therefore impacts at the defender's position by default and any carried area resolves from that impact point. Guarding the projectile does not automatically cancel the carried area. See [Manifestation Resolution](../07-veil-magic/manifestation-resolution.md#successful-guard-against-an-area-projectile).
+
 Ordinary dual wielding does not stack Guard Defense bonuses. Use the best applicable Guard setup.
 
 Defensive off-hand weapons and shields may improve Guard. Equipment can grant **at most +1 additional Guard capacity per round** from the defensive off-hand/shield framework.
