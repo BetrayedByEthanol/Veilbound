@@ -3820,5 +3820,152 @@ The maximum level-derived gap from Veil Integration Bonus alone is +4, so level 
 
 ## Remaining magical-defense work
 
-- Manifestation already uses ordinary applicable defenses once a valid independent phenomenon exists; its final mapping into Dodge, Guard, armor, cover, and delivery-specific procedures still needs a dedicated integration pass.
-- Individual techniques still need authored Shaping Abilities, defensive Ability pairs, and any explicit Training interactions.
+- Manifestation delivery mapping is resolved by the post-audit decision below.
+- Individual Direct Veil techniques still need authored Shaping Abilities, defensive Ability pairs, and any explicit Training interactions.
+- Individual Manifestation techniques still need authored ranges, damage/effects, terrain consequences, beam parameters, and other content-specific values.
+
+
+---
+
+# Post-audit locked decision — Manifestation Resolution
+
+This decision resolves the remaining universal mapping for **Manifestation** delivery.
+
+## Core principle
+
+A valid Manifestation creates an independently existing external phenomenon.
+
+Once that phenomenon exists outside a living target, it does **not** use Direct Veil Resistance merely because magic created it.
+
+Instead, resolve it through the ordinary physical/world procedure that matches what the phenomenon actually does.
+
+A supposed Manifestation created inside or overlapping living tissue remains **Intrusion**.
+
+There is no new generic spell-attack, spell-save, or area-dodge subsystem for Manifestations.
+
+## Manifested projectiles
+
+A manifested projectile uses the normal thrown-projectile attack architecture unless the technique explicitly uses another ordinary launcher/delivery method:
+
+```
+Manifested Projectile Attack =
+d20
++ Agility
++ Precision
++ relevant Training
++ situational modifiers
+```
+
+The technique authors range, projectile properties, damage/effect, Penetration where relevant, and other constraints.
+
+Relevant Training is the ordinary narrow throwing/weapon Training that actually applies; Veil Practice is not automatically substituted.
+
+The thrown attack procedure does not automatically add Strength to a technique-authored damage packet. If the Manifestation creates an ordinary weapon profile, use that profile's normal Physical Contribution; otherwise use the authored technique damage/effect.
+
+The projectile does not gain Veil Control, Resonance, or Veil Integration Bonus on its attack merely because magic created it.
+
+Normal ranged defenses, projectile Guard where valid, cover, range, size/position, and other shot conditions apply.
+
+If a projectile carries an area effect, resolve projectile delivery first and then resolve the area from the impact point. The area grants no second generic Dodge.
+
+For a missed projectile-delivered area attack, determine a **Miss Impact Point**:
+
+```
+Miss Margin = max(0, Defense - Attack Total)
+Scatter Distance = 1 + floor(Miss Margin / 5)
+```
+
+A natural 1 remains an automatic miss; if its total would otherwise beat the Defense, use Miss Margin 0.
+
+Roll 1d8 for compass direction (N, NE, E, SE, S, SW, W, NW), move the impact point by Scatter Distance from the intended point, and resolve the area there.
+
+A technique may explicitly replace this generic scatter rule with an authored miss-placement procedure. Physical obstructions still intercept normally under the applicable physical/cover rules.
+
+A near miss may still place the original target inside the resulting area.
+
+## Pointed beams
+
+A manifested beam that must be directly pointed at a target uses double Precision:
+
+```
+Beam Attack =
+d20
++ Precision
++ Precision
++ explicit technique and situational modifiers
+```
+
+A Training applies only when an explicit rule or technique says a specific narrow Training applies.
+
+Pointed beams use normal applicable ranged defenses and shot conditions.
+
+Beam damage, dwell, penetration, rider, duration, and other effects are authored/calibrated around the double-Precision accuracy model.
+
+## Area Manifestations
+
+There is **no generic area-effect Dodge** that allows a character to remain in the affected space while avoiding the phenomenon.
+
+If the area occupies the character's position when it resolves, the character suffers its authored consequences unless another rule physically prevents or mitigates them.
+
+Relevant prevention/mitigation may include:
+
+- already being outside the area;
+- actual movement that occurs before resolution;
+- a suitable barrier or cover;
+- a shield/interposition rule when the shield can physically block the phenomenon;
+- resistance, immunity, armor, or another consequence-specific mitigation rule.
+
+Exact universal shield/cover handling against broad physical phenomena remains part of combat-defense work rather than a magical save.
+
+## Persistent terrain
+
+Manifested terrain resolves as terrain/hazard.
+
+Entering, crossing, or remaining in the affected space applies the authored consequence at the technique/hazard's stated timing.
+
+There is no Direct Veil Resistance or generic area Dodge merely because the terrain was created magically.
+
+Examples include burning floor, ice, smoke, thorns, acid, or rubble.
+
+Applicable resistance, immunity, armor, equipment, or other mitigation works normally when relevant.
+
+## Manifested restraints
+
+A manifested object or creature that physically grabs, binds, or restrains a target uses the ordinary grapple / grab / escape procedure.
+
+Examples include vines, chains, or a manifested hand.
+
+The restraint does not use Direct Veil Resistance merely because the restraining thing was created magically.
+
+The universal grapple/grab procedure itself remains a combat-procedure dependency.
+
+## Falling manifested objects
+
+A manifested object that falls, collapses, or is dropped onto a target uses the ordinary falling-object / physical-hazard procedure.
+
+The magic determines that the object exists; its subsequent collision is resolved as an equivalent ordinary falling object.
+
+The universal falling-object/collision procedure remains a physical-hazard dependency.
+
+## Melee and enchantments
+
+There is no separate Manifestation melee-attack category.
+
+A melee attack uses the normal melee rules.
+
+A manifested or magically created weapon that is physically wielded uses the ordinary melee procedure for its weapon profile.
+
+A magical enchantment, Embodiment, Signature, rider, or similar effect attached to a melee attack modifies what happens on or after the successful normal melee hit unless its own rule explicitly says otherwise.
+
+## Resulting attack/defense architecture
+
+- **Intrusion:** Direct Veil Pressure vs Direct Veil Resistance + Intrusion Barrier.
+- **Imposition:** Direct Veil Pressure vs Direct Veil Resistance.
+- **Manifestation projectile:** normal thrown/ranged projectile procedure.
+- **Manifestation pointed beam:** double-Precision ranged attack.
+- **Manifestation area/terrain:** authored physical consequence; no generic area Dodge.
+- **Manifestation restraint:** normal grapple/grab procedure.
+- **Manifestation falling object:** normal falling-object/hazard procedure.
+- **Melee enchantment / manifested wielded weapon:** normal melee attack with authored magical consequences.
+
+Remaining work is therefore physical combat/hazard procedure and technique content, not another universal magical-defense formula.

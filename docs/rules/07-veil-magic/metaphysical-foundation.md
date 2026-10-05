@@ -235,7 +235,9 @@ Examples include:
 
 Once validly manifested outside a protected living target, the phenomenon itself is not resisted as magic merely because magic created it.
 
-The target instead uses whatever ordinary defenses apply: Dodge, Guard where valid, cover, armor, movement, physical resistance, or the phenomenon's authored consequences.
+Its locked delivery mapping is defined in [Manifestation Resolution](manifestation-resolution.md). The ordinary physical/world procedure appropriate to the phenomenon is used instead of Direct Veil Resistance.
+
+This does **not** create a generic area-effect Dodge: an area occupying a character's position applies its authored physical consequence unless actual movement, a suitable barrier/shield, resistance, immunity, armor, or another applicable rule changes that outcome.
 
 A supposed Manifestation that originates **inside or overlapping a living target** is an **Intrusion** and must overcome Intrusion resistance. Calling an effect a Manifestation cannot bypass the protected internal boundary.
 

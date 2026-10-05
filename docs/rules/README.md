@@ -43,6 +43,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 
 - [Metaphysical Foundation](07-veil-magic/metaphysical-foundation.md)
 - [Universal Resonance and Direct Veil Magic](07-veil-magic/resonance-and-intrusion.md)
+- [Manifestation Resolution](07-veil-magic/manifestation-resolution.md)
 - [Volition Points](07-veil-magic/volition-points.md)
 - [Technique Tiers and Expression Metadata](07-veil-magic/technique-tiers-and-expression.md)
 

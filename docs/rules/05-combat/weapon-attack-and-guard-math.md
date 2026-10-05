@@ -189,7 +189,7 @@ Physical Contribution modifies damage, not Penetration, unless a specific weapon
 
 This page does not resolve:
 
-- spell attack and spell-defense/save formulas;
+- technique-specific magical delivery assignments beyond the locked Direct Veil and Manifestation procedures;
 - Strong Hit / Critical Hit bonus damage;
 - Reach and Brace;
 - complete thrown-weapon ranges/profiles;
