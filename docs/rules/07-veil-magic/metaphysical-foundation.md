@@ -1,6 +1,6 @@
 # Metaphysical Foundation: Desire, Will, Volition, and Resonance
 
-> **LOCKED metaphysical foundation.** This page defines what Veilbound's core metaphysical terms mean and how the four Archetypes relate to the same underlying system. Numerical procedures for universal Resonance and magical resistance remain deliberately unresolved unless an existing Archetype rule already says otherwise.
+> **LOCKED metaphysical foundation.** This page defines what Veilbound's core metaphysical terms mean and how the four Archetypes relate to the same underlying system. The locked universal Resonance procedure and Intrusion resolution are defined in [Universal Resonance and Intrusion](resonance-and-intrusion.md).
 
 ## The common metaphysical chain
 
@@ -50,24 +50,20 @@ Changing one's beliefs does not inherently lower Resonance. Honest recognition a
 
 Temporary doubt, fear, sadness, anger, or ordinary indecision do not automatically change Resonance. The eventual universal procedure for gaining and losing Resonance must focus on meaningful internal contradiction, integration, self-deception, and resolution rather than encounter-by-encounter optimization.
 
-### Mechanical boundary
+### Mechanical procedure
 
-The universal numerical procedure for Resonance is **not yet locked**.
+The universal Resonance procedure is locked in [Universal Resonance and Intrusion](resonance-and-intrusion.md).
 
-Still unresolved include:
+In summary:
 
-- starting Resonance;
-- exact gain/loss cadence;
-- whether changes are normally limited to one step at a time;
-- recovery or stabilization procedures;
-- the exact universal effects of positive and negative Resonance;
-- the final Intrusion-resistance formula;
-- whether Resonance affects VP recovery;
-- any special rules at +3 or -3.
+- new player characters normally begin at **Resonance 0**;
+- Resonance changes through meaningful **Resonance Events**, normally at most one step from one conflict;
+- rest, meditation, prayer, or elapsed time do not automatically restore Resonance;
+- Resonance does not modify Max VP or normal VP recovery;
+- Resonance enters **Intrusion Resistance** and existing Gifted checks that explicitly call for it;
+- Resonance has no universal automatic effect on spell attacks, damage, healing, technique tier, or ordinary checks.
 
-Existing Gifted rules that already include **Resonance** refer to this universal Resonance state.
-
-Resonance does not automatically add to all spell attacks, damage, healing, technique output, Max VP, or ordinary checks.
+Existing Gifted rules that include **Resonance** refer to this universal Resonance state.
 
 ## Volition Points are freely available Volition
 
@@ -209,7 +205,7 @@ Examples include:
 
 Intrusion receives the strongest form of magical resistance.
 
-The exact formula is not yet locked.
+Its native resolution procedure is locked in [Universal Resonance and Intrusion](resonance-and-intrusion.md).
 
 ### Imposition
 
