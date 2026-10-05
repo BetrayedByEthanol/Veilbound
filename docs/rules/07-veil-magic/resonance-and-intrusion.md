@@ -103,7 +103,7 @@ Resonance applies only where a rule explicitly calls for it.
 
 The locked universal uses are:
 
-- **Intrusion Resistance**;
+- **Direct Veil Resistance** for both Imposition and Intrusion;
 - existing Gifted emotional-control and Instability checks that already include Resonance;
 - any future rule explicitly designated as testing the coherence or stability of Volition.
 
