@@ -3866,7 +3866,22 @@ The projectile does not gain Veil Control, Resonance, or Veil Integration Bonus 
 
 Normal ranged defenses, projectile Guard where valid, cover, range, size/position, and other shot conditions apply.
 
-If a projectile carries an area effect, resolve the projectile delivery first and then resolve the area from the impact point. The area grants no second generic Dodge.
+If a projectile carries an area effect, resolve projectile delivery first and then resolve the area from the impact point. The area grants no second generic Dodge.
+
+For a missed projectile-delivered area attack, determine a **Miss Impact Point**:
+
+```
+Miss Margin = max(0, Defense - Attack Total)
+Scatter Distance = 1 + floor(Miss Margin / 5)
+```
+
+A natural 1 remains an automatic miss; if its total would otherwise beat the Defense, use Miss Margin 0.
+
+Roll 1d8 for compass direction (N, NE, E, SE, S, SW, W, NW), move the impact point by Scatter Distance from the intended point, and resolve the area there.
+
+A technique may explicitly replace this generic scatter rule with an authored miss-placement procedure. Physical obstructions still intercept normally under the applicable physical/cover rules.
+
+A near miss may still place the original target inside the resulting area.
 
 ## Pointed beams
 
