@@ -43,6 +43,16 @@ At the start of the wielder's turn, choose the offensive or defensive use. The c
 
 Dedicated dual-wield development may later expand these options.
 
+## Magical Manifestations using ranged defense
+
+A valid Manifestation that becomes an independent projectile or pointed beam uses the ordinary ranged-defense procedures on this page rather than Direct Veil Resistance.
+
+- manifested projectiles use the normal thrown-projectile attack architecture;
+- pointed beams use the locked double-Precision beam attack;
+- area Manifestations do **not** gain a generic ranged Dodge merely because they are magical.
+
+See [Manifestation Resolution](../07-veil-magic/manifestation-resolution.md) for the full mapping.
+
 ## Static ranged defense
 
 Unlike melee Take Hit, a normal ranged projectile does not automatically hit a target that simply does not actively evade.
