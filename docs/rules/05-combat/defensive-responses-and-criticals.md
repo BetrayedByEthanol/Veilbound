@@ -36,6 +36,8 @@ Dodge Pressure is **-2 for each previous Dodge chosen in the same round**:
 
 Only choosing Dodge increments Dodge Pressure. Taking Hit or using Guard does not.
 
+Dodge Pressure resets to 0 at **Round Begin** under [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).
+
 Dodge has no Training bonus and no minimum floor.
 
 When armor limits Agility for Dodge, use the armor-cap rules in [weapons-and-armor.md](weapons-and-armor.md).
@@ -44,7 +46,7 @@ When armor limits Agility for Dodge, use the armor-cap rules in [weapons-and-arm
 
 Guard unifies parrying and blocking into one defensive response.
 
-Guard capacity is limited by Physical Tempo and may be modified by equipment.
+Guard capacity is limited by Physical Tempo and may be modified by equipment. Normal Guard capacity refreshes at **Round Begin** under [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).
 
 Base Guard Defense is:
 
