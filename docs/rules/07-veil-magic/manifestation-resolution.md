@@ -53,7 +53,38 @@ If a Manifestation creates a projectile but a different physical launcher is act
 
 If a projectile carries an area effect, resolve the projectile's delivery first and then resolve the area from the resulting impact point.
 
-The area does **not** grant a second generic Dodge after the projectile has already established where the effect occurs. Characters in the resulting area use the area rules below.
+On a successful attack, the intended target point is the impact point.
+
+On a missed attack, determine a **Miss Impact Point** rather than discarding the projectile:
+
+1. Calculate the **Miss Margin**:
+   ```
+   Miss Margin = max(0, Defense - Attack Total)
+   ```
+   A natural 1 is still an automatic miss. If its Attack Total would otherwise beat the Defense, use Miss Margin 0.
+2. Calculate scatter distance:
+   ```
+   Scatter Distance = 1 + floor(Miss Margin / 5)
+   ```
+3. Roll **1d8** for direction from the intended impact point:
+   - 1 — north
+   - 2 — northeast
+   - 3 — east
+   - 4 — southeast
+   - 5 — south
+   - 6 — southwest
+   - 7 — west
+   - 8 — northwest
+4. Move the impact point that many squares in the rolled direction. That square is the **Miss Impact Point**.
+5. Resolve the projectile's area from that point.
+
+This uses the actual static Ranged Defense or active Ranged Dodge that defeated the attack.
+
+A technique may explicitly replace this scatter rule with a different authored miss-placement procedure when its projectile behaves differently.
+
+Physical interception by a wall, shield, cover, or other solid obstruction remains governed by the applicable physical/cover rule. Scatter does not allow a projectile to pass through an obstruction it could not physically cross.
+
+The area does **not** grant a second generic Dodge after the projectile has established where the effect occurs. A near miss can therefore still catch the original target if the resulting area reaches that target's space.
 
 ## Pointed beams
 
