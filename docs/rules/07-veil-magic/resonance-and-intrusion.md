@@ -1,6 +1,6 @@
-# Universal Resonance and Intrusion
+# Universal Resonance and Direct Veil Magic
 
-> **LOCKED rules.** This page defines the universal Resonance procedure and the native resolution procedure for **Intrusion** magic. The metaphysical meanings of Desire, Will, Volition, Resonance, level, Focus, and Pillar Accord are defined in [Metaphysical Foundation](metaphysical-foundation.md).
+> **LOCKED rules.** This page defines the universal Resonance procedure and the native shared resolution engine for direct Veil effects: **Imposition** and **Intrusion**. The metaphysical meanings of Desire, Will, Volition, Resonance, level, Focus, and Pillar Accord are defined in [Metaphysical Foundation](metaphysical-foundation.md).
 
 ## Universal Resonance
 
@@ -123,7 +123,7 @@ Resonance does **not** automatically modify:
 
 # Veil Integration Bonus
 
-For Intrusion contests, character level contributes a bounded **Veil Integration Bonus**:
+For direct Veil contests—both Imposition and Intrusion—character level contributes a bounded **Veil Integration Bonus**:
 
 ```
 Veil Integration Bonus = floor(Level / 5)
@@ -137,30 +137,28 @@ Veil Integration Bonus = floor(Level / 5)
 | **15-19** | +3 |
 | **20** | +4 |
 
-This represents the increasing difficulty of overwriting a person whose existence is more deeply integrated with the Veil, and the increasing ability of an experienced practitioner to impose a deliberate Veil pattern.
+This represents the increasing resistance of a person whose existence is more deeply integrated with the Veil, and the increasing ability of an experienced practitioner to impose a deliberate Veil pattern.
 
 Both sides receive the bonus, so equal-level opponents preserve the intended baseline probabilities.
 
 A creature without a character level uses the equivalent value stated by its stat block. If no equivalent value is defined, use **+0**.
 
-This bonus is locked for **Intrusion**. Whether the same bonus enters the final Imposition procedure is a separate design decision.
+This bonus is locked for both **Imposition** and **Intrusion**.
 
 ---
 
-# Intrusion
+# Shared direct Veil contest
 
-**Intrusion** is magic that crosses into, originates within, overlaps, or directly alters the protected internal self of a living target.
+**Imposition** and **Intrusion** use the same underlying direct-magic contest.
 
-Examples include mind control, forced sleep, direct perception or memory alteration, internal bodily transformation, and attempts to create or manifest matter inside living tissue.
+The difference is that Intrusion crosses the protected internal boundary of a living target and therefore adds the **Intrusion Barrier**. Imposition acts directly on the target from outside and does not receive that barrier.
 
-A Manifestation does not bypass this rule. If the attempted manifestation originates inside or overlaps a living target, resolve it as an Intrusion.
-
-## Intrusion Pressure
+## Direct Veil Pressure
 
 The acting character rolls:
 
 ```
-Intrusion Pressure =
+Direct Veil Pressure =
 d20
 + Veil Control
 + Shaping Ability
@@ -172,35 +170,80 @@ The **Shaping Ability** is specified by the technique according to what the magi
 
 There is no universal mandatory mundane casting Ability.
 
-**Veil Practice** or another Training is not automatically added to Intrusion Pressure. A Training contributes only when an explicit technique, feature, or situational rule says that the particular learned expertise applies.
+**Veil Practice** or another Training is not automatically added to Direct Veil Pressure. A Training contributes only when an explicit technique, feature, or situational rule says that the particular learned expertise applies.
 
-## Intrusion Resistance
+## Direct Veil Resistance
 
 The target has a static resistance:
 
 ```
-Intrusion Resistance =
+Direct Veil Resistance =
 10
 + Resistance Ability A
 + Resistance Ability B
 + Veil Integration Bonus
 + Resonance
-+ Intrusion Barrier
 + explicit technique and situational modifiers
 ```
 
-The technique specifies the two defensive Abilities according to what part of the target is being intruded upon and how the effect operates.
+The technique specifies the two defensive Abilities according to what part of the target is being acted upon and how the effect operates.
 
 Examples of design direction include:
 
 - identity, compulsion, or emotional overwrite: Awareness + Presence;
 - perception, memory, or cognition: Awareness + Intellect;
 - sleep or internal physiological suppression: Vitality + Awareness;
-- direct bodily transformation: a Vitality-based pair appropriate to the authored operation.
+- direct bodily transformation: a Vitality-based pair appropriate to the authored operation;
+- telekinetic restraint or forced movement: a physical pair appropriate to the authored force and method.
 
 These examples do not create a universal save catalogue. Individual techniques still author their actual defensive pair.
 
-The Intrusion succeeds only if **Intrusion Pressure exceeds Intrusion Resistance**. A tie resists the Intrusion.
+A direct Veil effect succeeds only if **Direct Veil Pressure exceeds Direct Veil Resistance**. A tie resists the effect.
+
+## Imposition
+
+**Imposition** is magic that directly acts upon a target from outside without first becoming an independent manifested phenomenon.
+
+Examples include:
+
+- directly telekinetically restraining a creature;
+- magically pushing or pulling a creature;
+- directly igniting worn clothing;
+- another external magical force applied directly to the target.
+
+Imposition uses **Direct Veil Pressure** against **Direct Veil Resistance as written**.
+
+It does **not** add the Intrusion Barrier.
+
+At equal non-barrier modifiers, equal Veil Integration Bonus, and Resonance 0, Imposition therefore succeeds on 11-20: **50%**.
+
+### Willing Imposition
+
+A target that understands the actual Imposition may knowingly **waive Direct Veil Resistance** to that specific effect.
+
+This permits effects such as willingly accepting telekinetic lifting without requiring a contest.
+
+Consent applies only to the effect actually understood and accepted. If the caster materially changes the effect—for example, obtaining consent to lift someone and then attempting to hurl them—the target receives normal Direct Veil Resistance.
+
+Imposition has no special "deceived acceptance" reduction. The +4 deceived state belongs specifically to the Intrusion Barrier because deception partially opens the otherwise protected internal boundary.
+
+## Intrusion
+
+**Intrusion** is magic that crosses into, originates within, overlaps, or directly alters the protected internal self of a living target.
+
+Examples include mind control, forced sleep, direct perception or memory alteration, internal bodily transformation, and attempts to create or manifest matter inside living tissue.
+
+A Manifestation does not bypass this rule. If the attempted manifestation originates inside or overlaps a living target, resolve it as an Intrusion.
+
+Intrusion uses the same shared contest, but its resistance is:
+
+```
+Intrusion Resistance =
+Direct Veil Resistance
++ Intrusion Barrier
+```
+
+The acting roll remains **Direct Veil Pressure**.
 
 ## Intrusion Barrier
 
@@ -244,23 +287,24 @@ If consent was obtained through a materially false description of the effect, us
 
 ## Natural d20 results
 
-Intrusion Pressure is resolved by its actual total.
+Direct Veil Pressure is resolved by its actual total.
 
-A natural 20 does **not** automatically overcome Intrusion Resistance.
+A natural 20 does **not** automatically overcome Direct Veil Resistance or Intrusion Resistance.
 
 This means sufficiently strong Intrusion Resistance can make an Intrusion impossible for an outmatched attacker until the attacker gains a real advantage through capability, deception, a technique-specific benefit, or changed circumstances.
 
-Intrusion Pressure is not a weapon attack merely because it uses a d20.
+Direct Veil Pressure is not a weapon attack merely because it uses a d20.
 
 ## Baseline probabilities
 
 When attacker and defender have equal non-barrier modifiers, equal Veil Integration Bonus, and the target has Resonance 0:
 
-| Target state | Attacker success |
+| Effect / target state | Attacker success |
 |---|---:|
-| **Unwilling (+8 barrier)** | **10%** |
-| **Deceived acceptance (+4 barrier)** | **30%** |
-| **Willing and resistance waived** | no resistance contest |
+| **Imposition** | **50%** |
+| **Intrusion: unwilling (+8 barrier)** | **10%** |
+| **Intrusion: deceived acceptance (+4 barrier)** | **30%** |
+| **Knowingly willing and resistance waived** | no resistance contest |
 
 Against an unwilling Resonance-0 target, the attacker needs approximately **+8 total advantage** in the non-barrier parts of the contest merely to reach an even 50% success chance.
 
