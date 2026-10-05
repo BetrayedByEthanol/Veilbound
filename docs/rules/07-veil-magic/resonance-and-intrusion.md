@@ -227,6 +227,37 @@ Consent applies only to the effect actually understood and accepted. If the cast
 
 Imposition has no special "deceived acceptance" reduction. The +4 deceived state belongs specifically to the Intrusion Barrier because deception partially opens the otherwise protected internal boundary.
 
+### Objects and attended equipment
+
+Ordinary nonliving objects do **not** generate Direct Veil Resistance by themselves.
+
+For an **unattended mundane object**:
+
+- do not build a Direct Veil Resistance total;
+- if the technique can target the object and the requested effect is within its authored size, mass, material, range, anchoring, and other limits, the Imposition succeeds without a resistance contest;
+- physical attachment, mass, hardness, or similar object constraints are not Resonance and must be handled by the technique's authored limits or another explicit physical rule.
+
+For an **attended object**—an object currently worn, carried, wielded, or otherwise under a creature's immediate physical control—the attending creature supplies the resistance:
+
+- use that creature's **Direct Veil Resistance**;
+- use the defensive Ability pair authored by the technique for an attended-object target;
+- the object itself contributes no separate Resonance or Veil Integration Bonus unless an explicit item rule says otherwise;
+- awareness of the attempt is not required for the creature's normal resistance to apply;
+- the attending creature may knowingly waive resistance to the specific effect.
+
+If an Imposition technique can target attended objects, it must define the appropriate defensive Ability pair for that use. If it does not, that technique cannot use the attended-object route.
+
+If multiple unwilling creatures simultaneously attend the same object, use the **highest applicable Direct Veil Resistance** among them unless the technique explicitly says otherwise.
+
+A magical, sentient, warded, or otherwise exceptional object may define its own Direct Veil Resistance or explicit modifiers. Use those authored rules instead of the mundane-object default.
+
+Examples:
+
+- igniting an unattended dry cloak within the technique's normal limits: no Direct Veil Resistance contest;
+- directly igniting a cloak being worn by an unwilling creature: use the wearer's Direct Veil Resistance;
+- telekinetically moving an unattended cup within the technique's mass limit: no Direct Veil Resistance contest;
+- wrenching a sword from an unwilling wielder by direct telekinesis: use the wielder's Direct Veil Resistance, plus any explicit technique or physical constraints.
+
 ## Intrusion
 
 **Intrusion** is magic that crosses into, originates within, overlaps, or directly alters the protected internal self of a living target.
