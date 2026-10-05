@@ -48,7 +48,7 @@ A cruel person may possess high Resonance if their internal state and actions ar
 
 Changing one's beliefs does not inherently lower Resonance. Honest recognition and integration of conflict may strengthen it.
 
-Temporary doubt, fear, sadness, anger, or ordinary indecision do not automatically change Resonance. The eventual universal procedure for gaining and losing Resonance must focus on meaningful internal contradiction, integration, self-deception, and resolution rather than encounter-by-encounter optimization.
+Temporary doubt, fear, sadness, anger, or ordinary indecision do not automatically change Resonance. The universal procedure for gaining and losing Resonance focuses on meaningful internal contradiction, integration, self-deception, and resolution rather than encounter-by-encounter optimization.
 
 ### Mechanical procedure
 
