@@ -10,7 +10,7 @@ A player character is currently defined by these major mechanical layers:
 2. **Focus** — High, Medium, or Low.
 3. **Nine Abilities** — Strength, Agility, Precision, Intellect, Awareness, Presence, Vitality, Veil Affinity, Veil Control.
 4. **Trainings** — narrow learned expertise using the +0 to +4 training scale.
-5. **Resonance** — the universal -3 to +3 state describing internal coherence of Volition; the starting-value procedure is not yet locked.
+5. **Resonance** — the universal -3 to +3 state describing internal coherence of Volition; new player characters normally begin at **0**.
 6. **Archetype-specific access choices** — such as a Priest's chosen Pillar and Pillar Accord, a Scholar's learned techniques, a Gifted's emotion-to-Aspect links, or an Anointed's bonded Aspect/Mission/Birth Imprint.
 7. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
 8. **Equipment** — currently only partially defined.
@@ -67,13 +67,27 @@ Until that allocation rule exists, a complete rules-legal level-1 character cann
 
 Do not import 5e proficiency counts or background proficiencies to fill this gap.
 
-## Step 5 — Make Archetype-specific choices
+## Step 5 — Set Resonance
+
+New player characters normally begin at:
+
+```
+Resonance 0
+```
+
+Archetype does not change this universal starting value.
+
+See [Universal Resonance and Intrusion](../07-veil-magic/resonance-and-intrusion.md).
+
+## Step 6 — Make Archetype-specific choices
 
 ### Priest
 
 Choose one Pillar. Priest access is constrained to that Pillar's three Aspects and its Prepared Prayer structure.
 
 The Priest also uses the separate **Pillar Accord** state defined in the Priest foundation. Pillar Accord is not universal Resonance.
+
+The exact starting Pillar Accord value remains unresolved.
 
 Exact starting Prepared Prayer counts remain provisional.
 
@@ -103,7 +117,7 @@ Define:
 
 Exact Signature/Authority packages remain Aspect-specific content work.
 
-## Step 6 — Calculate derived durability/resources
+## Step 7 — Calculate derived durability/resources
 
 Use the currently promoted native formulas.
 
@@ -140,7 +154,7 @@ At levels 1–3 all Focuses begin at:
 
 See [Action Categories and Physical Tempo](../05-combat/action-categories-and-physical-tempo.md).
 
-## Step 7 — Equipment
+## Step 8 — Equipment
 
 Core weapon and armor baselines exist, but the complete equipment system does not.
 
@@ -163,7 +177,6 @@ The audit explicitly leaves these areas incomplete:
 - background/origin mechanics;
 - social origin and starting contacts;
 - starting Training allocation;
-- starting universal Resonance assignment/procedure;
 - complete starting equipment packages;
 - complete native defense/save mapping, including non-spell hazards and spell defenses;
 - some spell-derived formulas;

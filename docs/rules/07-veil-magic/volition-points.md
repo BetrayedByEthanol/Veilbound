@@ -12,6 +12,8 @@ Low- and Medium-Focus characters may have substantial Veil integration already e
 
 Veilbound does not track a separate numeric "Total Volition" pool.
 
+Universal **Resonance** measures the coherence of Volition, not its quantity. Resonance therefore does **not** modify Maximum VP or normal VP Recovery unless a future explicit rule states otherwise.
+
 ## Maximum VP
 
 Maximum Volition Points scale by Focus, Veil Affinity and character level.

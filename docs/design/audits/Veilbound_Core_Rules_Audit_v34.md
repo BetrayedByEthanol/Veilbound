@@ -3522,7 +3522,7 @@ The five targeted updates from the 12-combination audit are now integrated into 
 
 The remaining work is primarily calibration/content rather than foundation redesign:
 - Scholar known/prepared repertoire counts and Composite Casting burst testing once High Physical Tempo reaches multiple Attack Units;
-- Priest Prepared Prayer counts, Open Invocation surcharge, Resonance floor/procedure, Miracle frequency calibration, and authored Living Liturgy compatibility tables;
+- Priest Prepared Prayer counts, Open Invocation surcharge, Pillar Accord floor/procedure, Miracle frequency calibration, and authored Living Liturgy compatibility tables;
 - Gifted Aspect/Form expressions, Amplification options, Projected Surge cost, and final persistent-output numbers;
 - Anointed Destiny numbers, Signatures, Authority catalogues, Total Investment synergies, Living Aspect packages, and final cadence testing;
 - universal persistent-effect numeric budgets against maximum Physical Tempo;
@@ -3599,4 +3599,187 @@ To avoid collision with the Pillar Aspect names **External / Internal / Transfor
 
 A supposed Manifestation created inside or overlapping a living target is an **Intrusion**. This prevents manifestation wording from bypassing internal protection (for example, conjuring water inside lungs).
 
-Exact Intrusion/Imposition numerical formulas remain **UNRESOLVED**.
+The **Intrusion** numerical procedure is now resolved by the post-audit decision below. **Imposition** remains unresolved.
+
+
+---
+
+# Post-audit locked decision — Universal Resonance and Intrusion
+
+This decision builds on the locked metaphysical foundation above and supersedes its unresolved placeholders for universal Resonance and Intrusion.
+
+## Universal Resonance procedure
+
+Universal Resonance remains a **-3 to +3** character state measuring internal coherence of Volition.
+
+### Starting value
+
+New player characters normally begin at:
+
+```
+Resonance 0
+```
+
+Archetype does not modify the universal starting value.
+
+The old archetype-specific starting Resonance row remains superseded. Priest **Pillar Accord** is a separate subsystem and its starting value is not decided by this universal rule.
+
+### Scale
+
+- **+3 Integrated**
+- **+2 Strongly coherent**
+- **+1 Coherent**
+- **0 Ordinary / mixed**
+- **-1 Dissonant**
+- **-2 Fractured**
+- **-3 Self-opposed**
+
+There is no additional universal special effect merely for reaching +3 or -3 unless an explicit rule says otherwise.
+
+### Resonance Events
+
+Resonance changes only through a meaningful **Resonance Event**:
+
+1. an important internal conflict exists;
+2. it becomes consequential in play;
+3. the character's response establishes a lasting change in how that conflict is integrated or denied;
+4. genuine recognition/integration may raise Resonance by +1;
+5. sustained self-deception, denial, or repeatedly acting against an acknowledged self without integrating the contradiction may reduce Resonance by -1.
+
+A single conflict normally changes Resonance by at most one step.
+
+The same resolved contradiction cannot be repeatedly farmed for increases.
+
+Temporary emotion, ordinary doubt, changing one's mind, one failed ideal, direct coercion, or magically controlled action do not automatically reduce Resonance.
+
+Rest, sleep, meditation, prayer, or elapsed time do not automatically restore Resonance.
+
+### Player/GM authority
+
+The player has primary authority over the character's genuine desires, beliefs, feelings, and self-understanding.
+
+The GM adjudicates whether established internal states and demonstrated actions have become coherent or contradictory enough to constitute a Resonance Event.
+
+Resonance changes are open rather than secretly imposed.
+
+The GM may not invent an unestablished hidden motive to reduce Resonance, and the player may not retroactively redefine an already-established motive solely to erase an established contradiction.
+
+Optional concise **Resonance Statements** may be recorded as descriptive reference points but are not permanent commandments.
+
+### Mechanical scope
+
+Locked universal uses:
+
+- **Intrusion Resistance**;
+- existing Gifted emotional-control and Instability checks that explicitly include Resonance;
+- future rules that explicitly test Volition coherence/stability.
+
+Universal Resonance does **not** modify:
+
+- Max VP;
+- normal VP recovery;
+- ordinary spell/technique attack rolls;
+- damage;
+- healing;
+- technique tier;
+- ordinary nonmagical checks;
+- Priest Pillar Accord;
+- Anointed Mission state.
+
+## Veil Integration Bonus
+
+For Intrusion contests:
+
+```
+Veil Integration Bonus = floor(Level / 5)
+```
+
+Progression:
+
+- Levels 1-4: +0
+- Levels 5-9: +1
+- Levels 10-14: +2
+- Levels 15-19: +3
+- Level 20: +4
+
+Both acting character and target use the bonus.
+
+A creature without a character level uses the equivalent value in its stat block; if none is defined, use +0.
+
+This bonus is locked for **Intrusion**. Its use in the future Imposition procedure remains unresolved.
+
+## Intrusion Pressure
+
+```
+Intrusion Pressure =
+d20
++ Veil Control
++ Shaping Ability
++ Veil Integration Bonus
++ explicit technique and situational modifiers
+```
+
+The technique authors the **Shaping Ability** according to what the magical operation actually requires.
+
+There is no universal mandatory mundane casting Ability.
+
+Veil Practice or another Training is not automatically added. Training contributes only when an explicit technique, feature, or situational rule says it applies.
+
+## Intrusion Resistance
+
+```
+Intrusion Resistance =
+10
++ Resistance Ability A
++ Resistance Ability B
++ Veil Integration Bonus
++ Resonance
++ Intrusion Barrier
++ explicit technique and situational modifiers
+```
+
+The technique authors the two defensive Abilities according to what part of the target is being intruded upon and how the effect operates.
+
+The Intrusion succeeds only when **Intrusion Pressure exceeds Intrusion Resistance**. A tie resists.
+
+There is no universal generic Will-save statistic.
+
+## Intrusion Barrier
+
+- **Unwilling / not knowingly consenting:** +8
+- **Genuinely deceived into accepting the magical contact:** +4
+- **Knowingly and willingly opens to the actual effect:** resistance may be waived entirely
+
+The +8 barrier is the default.
+
+Surprise, distraction, restraint, sleep, unconsciousness, or lack of awareness does not by itself reduce the barrier.
+
+The +4 deceived state requires genuine acceptance of the magical interaction under a materially false understanding of what it will do. Secret casting or surprise alone is not enough.
+
+A willing target may waive resistance only for the actual effect knowingly accepted. Consent obtained through material deception uses the +4 deceived barrier instead.
+
+## Natural d20 results
+
+Intrusion Pressure resolves by actual total.
+
+A natural 20 does **not** automatically overcome Intrusion Resistance.
+
+Intrusion Pressure is not automatically a weapon attack merely because it uses a d20.
+
+## Baseline calibration
+
+At equal non-barrier modifiers, equal Veil Integration Bonus, and Resonance 0:
+
+- full +8 Intrusion Barrier -> **10%** attacker success;
+- deceived +4 barrier -> **30%** attacker success;
+- knowingly willing and waived -> no resistance contest.
+
+Against an unwilling Resonance-0 target, the attacker needs approximately **+8 non-barrier advantage** merely to reach an even 50% success chance.
+
+The maximum level-derived gap from Veil Integration Bonus alone is +4, so level by itself cannot make hostile Intrusion reliable against a comparable target.
+
+## Remaining magical-defense work
+
+- **Imposition** exact offense/resistance formula remains unresolved.
+- Manifestation already uses ordinary applicable defenses once a valid independent phenomenon exists.
+- Individual techniques still need authored Shaping Abilities, defensive Ability pairs, and any explicit Training interactions.
