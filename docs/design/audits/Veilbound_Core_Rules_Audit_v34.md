@@ -3858,9 +3858,15 @@ d20
 
 The technique authors range, projectile properties, damage/effect, Penetration where relevant, and other constraints.
 
+Relevant Training is the ordinary narrow throwing/weapon Training that actually applies; Veil Practice is not automatically substituted.
+
+The thrown attack procedure does not automatically add Strength to a technique-authored damage packet. If the Manifestation creates an ordinary weapon profile, use that profile's normal Physical Contribution; otherwise use the authored technique damage/effect.
+
 The projectile does not gain Veil Control, Resonance, or Veil Integration Bonus on its attack merely because magic created it.
 
 Normal ranged defenses, projectile Guard where valid, cover, range, size/position, and other shot conditions apply.
+
+If a projectile carries an area effect, resolve the projectile delivery first and then resolve the area from the impact point. The area grants no second generic Dodge.
 
 ## Pointed beams
 
