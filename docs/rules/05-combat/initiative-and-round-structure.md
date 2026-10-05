@@ -162,7 +162,7 @@ Regeneration throughput =
 max(Vitality, 0) + Focus Rate
 ```
 
-While Dying, resolve the existing survival allocation during this same step:
+While Dying and still possessing Vigor, resolve the existing survival allocation during this same step. If no Vigor is available, the regeneration allocation cannot cancel the Dying loss or repair the wound unless another rule explicitly provides an alternative resource or conversion.
 
 1. determine available regeneration throughput;
 2. spend 1 point of throughput to cancel the default 1 HP Dying loss for this round, if possible and desired;
