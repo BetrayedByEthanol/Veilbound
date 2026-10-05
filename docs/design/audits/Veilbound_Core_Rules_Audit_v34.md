@@ -3763,6 +3763,7 @@ Ordinary nonliving objects do not generate Direct Veil Resistance.
 
 - **Unattended mundane object:** if the technique permits the target and the effect is within its authored size/mass/material/range/anchoring limits, the Imposition succeeds without a Direct Veil Resistance contest.
 - **Attended object:** if worn, carried, wielded, or under a creature's immediate physical control, the attending creature supplies Direct Veil Resistance using the defensive Ability pair authored for that attended-object use.
+- The attending creature may knowingly waive that resistance for the specific Imposition effect it understands and accepts.
 - The object itself contributes no Resonance or Veil Integration Bonus unless an explicit item rule says otherwise.
 - Awareness of the attempt is not required for the attending creature's normal resistance to apply.
 - Multiple unwilling attending creatures use the highest applicable Direct Veil Resistance unless the technique explicitly says otherwise.
