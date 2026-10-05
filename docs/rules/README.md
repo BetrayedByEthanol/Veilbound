@@ -28,6 +28,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 ### 05 — Combat
 
 - [Combat index](05-combat/README.md)
+- [Initiative and Round/Turn Procedure](05-combat/initiative-and-round-structure.md)
 - [Action Categories and Physical Tempo](05-combat/action-categories-and-physical-tempo.md)
 - [Weapon Attack, Guard, and Physical Contribution](05-combat/weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
