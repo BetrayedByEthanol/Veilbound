@@ -80,6 +80,20 @@ On a missed attack, determine a **Miss Impact Point** rather than discarding the
 
 This uses the actual static Ranged Defense or active Ranged Dodge that defeated the attack.
 
+### Successful Guard against an area projectile
+
+If a legal projectile Guard stops a projectile-delivered area attack, the projectile does **not** scatter.
+
+By default, the projectile impacts the **interposing Guard instrument at the defender's position**. Use the defender's occupied space as the impact point unless the battlefield representation tracks a more precise barrier boundary.
+
+Resolve the carried area from that impact point.
+
+A successful Guard therefore stops the projectile from striking the defender directly, but it does **not** automatically cancel an explosion, burst, cloud, splash, or other area carried by that projectile.
+
+A shield, wall, or other barrier may separately block or mitigate the resulting area only when the ordinary physical rules say that barrier can actually interpose against that phenomenon.
+
+A technique may explicitly state that being Guarded causes the projectile to dissipate, fail to trigger, ricochet, or use another authored impact rule. That specific rule overrides this default.
+
 A technique may explicitly replace this scatter rule with a different authored miss-placement procedure when its projectile behaves differently.
 
 Physical interception by a wall, shield, cover, or other solid obstruction remains governed by the applicable physical/cover rule. Scatter does not allow a projectile to pass through an obstruction it could not physically cross.
