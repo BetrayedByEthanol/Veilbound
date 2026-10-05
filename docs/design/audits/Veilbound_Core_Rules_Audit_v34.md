@@ -3757,6 +3757,19 @@ Consent applies only to the effect actually understood and accepted. If the cast
 
 Imposition has no special deceived-acceptance reduction. The +4 deceived state belongs specifically to the Intrusion Barrier.
 
+### Object targets
+
+Ordinary nonliving objects do not generate Direct Veil Resistance.
+
+- **Unattended mundane object:** if the technique permits the target and the effect is within its authored size/mass/material/range/anchoring limits, the Imposition succeeds without a Direct Veil Resistance contest.
+- **Attended object:** if worn, carried, wielded, or under a creature's immediate physical control, the attending creature supplies Direct Veil Resistance using the defensive Ability pair authored for that attended-object use.
+- The object itself contributes no Resonance or Veil Integration Bonus unless an explicit item rule says otherwise.
+- Awareness of the attempt is not required for the attending creature's normal resistance to apply.
+- Multiple unwilling attending creatures use the highest applicable Direct Veil Resistance unless the technique explicitly says otherwise.
+- Exceptional magical, sentient, or warded objects may define their own Direct Veil Resistance or modifiers.
+
+An Imposition technique that can target attended objects must author the defensive Ability pair for that route; otherwise it cannot use the attended-object route.
+
 ## Intrusion
 
 Intrusion uses the same shared contest, but:
