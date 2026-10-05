@@ -80,7 +80,7 @@ Specific wounds may impose ongoing effects until treated or repaired, such as bl
 
 At **0 HP or below**, a character is normally unconscious and **Dying**.
 
-By default, a Dying character loses **1 HP per round**.
+By default, a Dying character loses **1 HP per round**. That loss is resolved during the character's Regeneration Step unless it is cancelled by regeneration throughput as described below.
 
 ```
 Death threshold = HP <= -Maximum HP
@@ -88,16 +88,20 @@ Death threshold = HP <= -Maximum HP
 
 Once actually dead, ordinary Vigor regeneration cannot restart the body.
 
+A Dying or unconscious character retains its Initiative position and normal turn timing even when unable to take ordinary actions.
+
 ## Regeneration while Dying
 
-While Dying and still possessing Vigor, regeneration throughput is first available for survival and wound repair rather than ordinary HP recovery.
+Resolve this procedure during the character's Regeneration Step:
 
-The player may allocate that throughput mechanically even though the character is unconscious:
-
-1. spend 1 point to cancel the default -1 HP Dying loss for that round;
-2. use remaining throughput toward the active Wound Repair Requirement;
-3. prevent, offset, or medically control additional bleeding or similar ongoing losses;
-4. once the wound is repaired, remaining throughput in that regeneration step may restore HP;
-5. once HP rises above 0, the character can regain consciousness unless another effect prevents it.
+1. determine available regeneration throughput;
+2. spend 1 point to cancel the default -1 HP Dying loss for that round, if possible and desired;
+3. apply the default Dying loss if it was not cancelled;
+4. use remaining throughput toward the active Wound Repair Requirement;
+5. prevent, offset, or medically control additional bleeding or similar ongoing losses where the relevant rules permit;
+6. once the wound is repaired, remaining throughput in that regeneration step may restore HP;
+7. once HP rises above 0, the character can regain consciousness unless another effect prevents it.
 
 Medicine can stabilize, stop bleeding, immobilize injuries, and otherwise suppress ongoing consequences without necessarily restoring HP or completing supernatural tissue reconstruction.
+
+See [Initiative and Round/Turn Procedure](../05-combat/initiative-and-round-structure.md) for the exact turn timing.
