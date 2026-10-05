@@ -1,6 +1,6 @@
 # Action Categories and Physical Tempo
 
-> Canonical extraction from Core Rules Audit v34. This file promotes only the combat/action structure already marked locked. Initiative, the complete turn sequence, general movement rules, and the general opportunity-attack procedure remain unresolved elsewhere in the audit.
+> Canonical extraction from Core Rules Audit v34. Initiative and the round/turn timing skeleton are now defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). General movement/reach, opportunity attacks, and detailed Reaction/Interception declaration priority remain unresolved.
 
 ## Physical Tempo
 
@@ -43,7 +43,7 @@ Current locked action categories used by Veil effects and combat mechanics are:
 
 - **Attack Unit:** consumes one Attack unit.
 - **Full Action:** consumes the character's entire granted Attack-unit allotment for that turn.
-- **Reaction:** uses the character's one Reaction.
+- **Reaction:** uses the character's one Reaction. The Reaction refreshes at Round Begin.
 - **Sustained:** remains active over time and normally uses Committed VP according to the effect's rules.
 
 An effect may have an activation category and then become Sustained.
@@ -60,4 +60,6 @@ To intercept, reserve an otherwise valid action or effect and declare a specific
 
 When the trigger occurs, the reserved effect resolves using its normal Attack Unit, Full Action, or other category and its normal VP cost.
 
-If the trigger never occurs, the reserved action is lost.
+Unless another rule gives a different reservation window, the reservation lasts until the start of the reserving character's next turn. If the trigger never occurs, the reserved action is lost.
+
+Detailed competing-trigger priority and declaration procedure remain follow-up work. See [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).

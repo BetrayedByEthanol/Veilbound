@@ -3981,3 +3981,137 @@ A magical enchantment, Embodiment, Signature, rider, or similar effect attached 
 - **Melee enchantment / manifested wielded weapon:** normal melee attack with authored magical consequences.
 
 Remaining work is therefore physical combat/hazard procedure and technique content, not another universal magical-defense formula.
+
+
+---
+
+# LOCKED UPDATE: Initiative and Round/Turn Procedure
+
+## Status: LOCKED BASELINE
+
+The first native combat-procedure pass is now locked.
+
+Canonical rules live in:
+
+- `docs/rules/05-combat/initiative-and-round-structure.md`
+- `docs/rules/05-combat/action-categories-and-physical-tempo.md`
+- `docs/rules/06-vigor-wounds-death/hp-and-vigor.md`
+- `docs/rules/06-vigor-wounds-death/dying-and-wounds.md`
+
+This supersedes the earlier audit statement that Initiative is merely inherited/referenced but undefined.
+
+## Initiative
+
+```text
+Initiative =
+d20
++ Agility
++ Awareness
++ explicit Initiative modifiers
+```
+
+Locked baseline:
+
+- roll once at combat start;
+- higher total acts first;
+- natural 1/20 have no special Initiative effect;
+- no generic Training contribution;
+- willing allied ties may choose order;
+- otherwise ties compare Awareness, then Agility, then roll off;
+- order normally remains fixed;
+- completed turns are never retroactively undone;
+- later entrants roll when they enter, acting this round only if their Initiative position has not already passed.
+
+Awareness/participation is established before Initiative where fiction requires it, but a complete universal surprise/unaware procedure is still pending.
+
+## Round Begin
+
+Round Begin now provides the universal round-resource refresh point:
+
+1. start-of-round expiries;
+2. Guard capacity refresh;
+3. Dodge Pressure resets to 0;
+4. the one Reaction refreshes;
+5. other explicitly per-round resources refresh;
+6. authored start-of-round effects resolve.
+
+Guard and Dodge remain defensive responses and do not consume the Reaction.
+
+## Character turn
+
+The locked turn skeleton is:
+
+1. Start Expiry;
+2. Regeneration Step;
+3. start-of-turn effects/hazards;
+4. establish Attack Units and other turn resources;
+5. start-of-turn choices, including the Gifted Emotion Establishment Step;
+6. normal turn;
+7. end-of-turn effects;
+8. End Expiry;
+9. cleanup.
+
+The procedure does **not** require declaring an entire turn in advance.
+
+Attack Units are turn resources. Unspent Attack Units are lost during cleanup.
+
+## Regeneration and Dying
+
+Natural regeneration now has an exact timing anchor: once on the character's own turn during the Regeneration Step, before ordinary start-of-turn hazards and ongoing damage.
+
+This preserves the attrition model: damage suffered after the Regeneration Step normally remains until the next Regeneration Step.
+
+Dying characters retain Initiative/turn timing. Regeneration-based survival/wound repair still requires available Vigor unless another rule explicitly provides an alternative resource or conversion. During their Regeneration Step:
+
+1. determine throughput;
+2. optionally spend 1 throughput to cancel the default 1 HP Dying loss;
+3. apply that loss if not cancelled;
+4. allocate remaining throughput to wound repair and permitted bleeding/ongoing-loss control;
+5. restore HP only once wound-repair requirements permit it.
+
+## Round End
+
+Round End resolves authored end-of-round effects and end-of-round expiries, then the next round begins.
+
+There is no additional universal regeneration, damage, or resource-refresh event at Round End.
+
+## Hazards and sustained effects
+
+Default timing for an ongoing hazard already affecting a creature is the start of that creature's turn **after** its Regeneration Step unless the hazard authors another trigger.
+
+This is timing only; physical-hazard values/procedures remain unresolved.
+
+Sustained/persistent effects do not gain an automatic universal round tick. Their outputs continue to use the locked Expression Cadence framework: Continuous, Rider, Pulse, Spend.
+
+## Interception and duration baseline
+
+Interception remains a timing mechanic rather than a new action category.
+
+Default reservation window: until the start of the reserving character's next turn unless another rule says otherwise. If the trigger never occurs, the reservation is lost.
+
+Explicit duration anchors are preferred:
+
+- until start of next turn;
+- until end of next turn;
+- until start of next round;
+- until end of round;
+- once per round;
+- Emotion Window;
+- Sustained according to its own ending condition.
+
+Bare `for 1 round` language should be avoided when a precise anchor is available.
+
+## Explicit follow-up boundary
+
+This lock deliberately does **not** close:
+
+- detailed Reaction declaration and competing-trigger priority;
+- detailed Interception declaration/priority refinement;
+- broader turn-declaration rules;
+- movement allowance, splitting movement, reach and engagement;
+- opportunity attacks;
+- complete surprise/unaware rules;
+- physical-hazard values/procedures;
+- conditions.
+
+Those are follow-up combat-procedure layers and should integrate with this clock rather than silently replace it.
