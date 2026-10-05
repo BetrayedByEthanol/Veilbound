@@ -4061,7 +4061,7 @@ Natural regeneration now has an exact timing anchor: once on the character's own
 
 This preserves the attrition model: damage suffered after the Regeneration Step normally remains until the next Regeneration Step.
 
-Dying characters retain Initiative/turn timing. During their Regeneration Step:
+Dying characters retain Initiative/turn timing. Regeneration-based survival/wound repair still requires available Vigor unless another rule explicitly provides an alternative resource or conversion. During their Regeneration Step:
 
 1. determine throughput;
 2. optionally spend 1 throughput to cancel the default 1 HP Dying loss;
