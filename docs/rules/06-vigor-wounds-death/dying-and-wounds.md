@@ -92,7 +92,9 @@ A Dying or unconscious character retains its Initiative position and normal turn
 
 ## Regeneration while Dying
 
-Resolve this procedure during the character's Regeneration Step:
+While Dying and still possessing Vigor, regeneration throughput is first available for survival and wound repair rather than ordinary HP recovery.
+
+Resolve this procedure during the character's Regeneration Step. If no Vigor is available, the regeneration allocation cannot cancel the Dying loss or repair the wound unless another rule explicitly provides an alternative resource or conversion.
 
 1. determine available regeneration throughput;
 2. spend 1 point to cancel the default -1 HP Dying loss for that round, if possible and desired;
