@@ -35,7 +35,7 @@ Gifted do not use Priest-style daily preparation and do not individually learn t
 
 Emotion is the access mechanism. The emotion must be genuinely evoked, but no theatrical outward performance is required.
 
-Any Gifted formula that references **Resonance** uses the universal internal-coherence state defined in [Metaphysical Foundation](../07-veil-magic/metaphysical-foundation.md#universal-resonance) and resolved by [Universal Resonance and Intrusion](../07-veil-magic/resonance-and-intrusion.md), not a Pillar-relationship score.
+Any Gifted formula that references **Resonance** uses the universal internal-coherence state defined in [Metaphysical Foundation](../07-veil-magic/metaphysical-foundation.md#universal-resonance) and resolved by [Universal Resonance and Direct Veil Magic](../07-veil-magic/resonance-and-intrusion.md), not a Pillar-relationship score.
 
 ## Compatibility at creation
 

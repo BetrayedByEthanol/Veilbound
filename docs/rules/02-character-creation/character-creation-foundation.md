@@ -77,7 +77,7 @@ Resonance 0
 
 Archetype does not change this universal starting value.
 
-See [Universal Resonance and Intrusion](../07-veil-magic/resonance-and-intrusion.md).
+See [Universal Resonance and Direct Veil Magic](../07-veil-magic/resonance-and-intrusion.md).
 
 ## Step 6 — Make Archetype-specific choices
 

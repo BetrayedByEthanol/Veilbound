@@ -3599,14 +3599,14 @@ To avoid collision with the Pillar Aspect names **External / Internal / Transfor
 
 A supposed Manifestation created inside or overlapping a living target is an **Intrusion**. This prevents manifestation wording from bypassing internal protection (for example, conjuring water inside lungs).
 
-The **Intrusion** numerical procedure is now resolved by the post-audit decision below. **Imposition** remains unresolved.
+The shared **Direct Veil** numerical procedure for both Imposition and Intrusion is resolved by the post-audit decision below.
 
 
 ---
 
-# Post-audit locked decision — Universal Resonance and Intrusion
+# Post-audit locked decision — Universal Resonance and Direct Veil Magic
 
-This decision builds on the locked metaphysical foundation above and supersedes its unresolved placeholders for universal Resonance and Intrusion.
+This decision builds on the locked metaphysical foundation above and supersedes its unresolved placeholders for universal Resonance, Imposition, and Intrusion.
 
 ## Universal Resonance procedure
 
@@ -3670,7 +3670,7 @@ Optional concise **Resonance Statements** may be recorded as descriptive referen
 
 Locked universal uses:
 
-- **Intrusion Resistance**;
+- **Direct Veil Resistance** for both Imposition and Intrusion;
 - existing Gifted emotional-control and Instability checks that explicitly include Resonance;
 - future rules that explicitly test Volition coherence/stability.
 
@@ -3688,7 +3688,7 @@ Universal Resonance does **not** modify:
 
 ## Veil Integration Bonus
 
-For Intrusion contests:
+For direct Veil contests—both Imposition and Intrusion:
 
 ```
 Veil Integration Bonus = floor(Level / 5)
@@ -3706,12 +3706,12 @@ Both acting character and target use the bonus.
 
 A creature without a character level uses the equivalent value in its stat block; if none is defined, use +0.
 
-This bonus is locked for **Intrusion**. Its use in the future Imposition procedure remains unresolved.
+This bonus is locked for both **Imposition** and **Intrusion**.
 
-## Intrusion Pressure
+## Shared Direct Veil Pressure
 
 ```
-Intrusion Pressure =
+Direct Veil Pressure =
 d20
 + Veil Control
 + Shaping Ability
@@ -3725,24 +3725,49 @@ There is no universal mandatory mundane casting Ability.
 
 Veil Practice or another Training is not automatically added. Training contributes only when an explicit technique, feature, or situational rule says it applies.
 
-## Intrusion Resistance
+## Shared Direct Veil Resistance
 
 ```
-Intrusion Resistance =
+Direct Veil Resistance =
 10
 + Resistance Ability A
 + Resistance Ability B
 + Veil Integration Bonus
 + Resonance
-+ Intrusion Barrier
 + explicit technique and situational modifiers
 ```
 
-The technique authors the two defensive Abilities according to what part of the target is being intruded upon and how the effect operates.
+The technique authors the two defensive Abilities according to what part of the target is being acted upon and how the effect operates.
 
-The Intrusion succeeds only when **Intrusion Pressure exceeds Intrusion Resistance**. A tie resists.
+A direct Veil effect succeeds only when **Direct Veil Pressure exceeds Direct Veil Resistance**. A tie resists.
 
 There is no universal generic Will-save statistic.
+
+## Imposition
+
+Imposition uses **Direct Veil Pressure** against **Direct Veil Resistance as written**.
+
+It does not add the Intrusion Barrier.
+
+At equal non-barrier modifiers, equal Veil Integration Bonus, and Resonance 0, Imposition succeeds on 11-20: **50%**.
+
+A target that understands the actual Imposition may knowingly waive Direct Veil Resistance to that specific effect.
+
+Consent applies only to the effect actually understood and accepted. If the caster materially changes the effect, the target receives normal Direct Veil Resistance.
+
+Imposition has no special deceived-acceptance reduction. The +4 deceived state belongs specifically to the Intrusion Barrier.
+
+## Intrusion
+
+Intrusion uses the same shared contest, but:
+
+```
+Intrusion Resistance =
+Direct Veil Resistance
++ Intrusion Barrier
+```
+
+The acting roll remains **Direct Veil Pressure**.
 
 ## Intrusion Barrier
 
@@ -3760,18 +3785,19 @@ A willing target may waive resistance only for the actual effect knowingly accep
 
 ## Natural d20 results
 
-Intrusion Pressure resolves by actual total.
+Direct Veil Pressure resolves by actual total.
 
-A natural 20 does **not** automatically overcome Intrusion Resistance.
+A natural 20 does **not** automatically overcome Direct Veil Resistance or Intrusion Resistance.
 
-Intrusion Pressure is not automatically a weapon attack merely because it uses a d20.
+Direct Veil Pressure is not automatically a weapon attack merely because it uses a d20.
 
 ## Baseline calibration
 
 At equal non-barrier modifiers, equal Veil Integration Bonus, and Resonance 0:
 
+- Imposition -> **50%** attacker success;
 - full +8 Intrusion Barrier -> **10%** attacker success;
-- deceived +4 barrier -> **30%** attacker success;
+- deceived +4 Intrusion Barrier -> **30%** attacker success;
 - knowingly willing and waived -> no resistance contest.
 
 Against an unwilling Resonance-0 target, the attacker needs approximately **+8 non-barrier advantage** merely to reach an even 50% success chance.
@@ -3780,6 +3806,5 @@ The maximum level-derived gap from Veil Integration Bonus alone is +4, so level 
 
 ## Remaining magical-defense work
 
-- **Imposition** exact offense/resistance formula remains unresolved.
-- Manifestation already uses ordinary applicable defenses once a valid independent phenomenon exists.
+- Manifestation already uses ordinary applicable defenses once a valid independent phenomenon exists; its final mapping into Dodge, Guard, armor, cover, and delivery-specific procedures still needs a dedicated integration pass.
 - Individual techniques still need authored Shaping Abilities, defensive Ability pairs, and any explicit Training interactions.

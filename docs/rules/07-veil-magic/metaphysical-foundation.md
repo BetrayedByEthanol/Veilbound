@@ -1,6 +1,6 @@
 # Metaphysical Foundation: Desire, Will, Volition, and Resonance
 
-> **LOCKED metaphysical foundation.** This page defines what Veilbound's core metaphysical terms mean and how the four Archetypes relate to the same underlying system. The locked universal Resonance procedure and Intrusion resolution are defined in [Universal Resonance and Intrusion](resonance-and-intrusion.md).
+> **LOCKED metaphysical foundation.** This page defines what Veilbound's core metaphysical terms mean and how the four Archetypes relate to the same underlying system. The locked universal Resonance procedure and Intrusion resolution are defined in [Universal Resonance and Direct Veil Magic](resonance-and-intrusion.md).
 
 ## The common metaphysical chain
 
@@ -52,7 +52,7 @@ Temporary doubt, fear, sadness, anger, or ordinary indecision do not automatical
 
 ### Mechanical procedure
 
-The universal Resonance procedure is locked in [Universal Resonance and Intrusion](resonance-and-intrusion.md).
+The universal Resonance procedure is locked in [Universal Resonance and Direct Veil Magic](resonance-and-intrusion.md).
 
 In summary:
 
@@ -60,7 +60,7 @@ In summary:
 - Resonance changes through meaningful **Resonance Events**, normally at most one step from one conflict;
 - rest, meditation, prayer, or elapsed time do not automatically restore Resonance;
 - Resonance does not modify Max VP or normal VP recovery;
-- Resonance enters **Intrusion Resistance** and existing Gifted checks that explicitly call for it;
+- Resonance enters **Direct Veil Resistance** for both Imposition and Intrusion, and existing Gifted checks that explicitly call for it;
 - Resonance has no universal automatic effect on spell attacks, damage, healing, technique tier, or ordinary checks.
 
 Existing Gifted rules that include **Resonance** refer to this universal Resonance state.
@@ -205,7 +205,7 @@ Examples include:
 
 Intrusion receives the strongest form of magical resistance.
 
-Its native resolution procedure is locked in [Universal Resonance and Intrusion](resonance-and-intrusion.md).
+Its native resolution procedure is locked in [Universal Resonance and Direct Veil Magic](resonance-and-intrusion.md).
 
 ### Imposition
 
@@ -218,9 +218,9 @@ Examples include:
 - directly igniting worn clothing;
 - another external magical force applied directly to the target.
 
-At equal capability, the intended baseline is approximately an even contest.
+Imposition uses the same [Direct Veil Pressure and Direct Veil Resistance](resonance-and-intrusion.md#shared-direct-veil-contest) engine as Intrusion, but **without** the Intrusion Barrier.
 
-The exact formula is not yet locked.
+At equal non-barrier capability and Resonance 0, this produces the intended **50%** baseline contest.
 
 ### Manifestation
 
