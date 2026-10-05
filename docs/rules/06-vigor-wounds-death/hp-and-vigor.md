@@ -16,7 +16,9 @@ Low Focus does not automatically gain additional Vigor capacity.
 
 ## Natural regeneration
 
-Natural HP regeneration resolves once per character round after all damage taken before that regeneration step.
+Natural HP regeneration resolves once on each character's own turn during the **Regeneration Step** defined in [Initiative and Round/Turn Procedure](../05-combat/initiative-and-round-structure.md).
+
+The Regeneration Step occurs before ordinary start-of-turn hazards and ongoing damage. It restores damage taken before that step; damage suffered afterward must normally remain until the character's next Regeneration Step.
 
 Unless another rule changes the conversion, restoring 1 HP consumes 1 Vigor.
 
