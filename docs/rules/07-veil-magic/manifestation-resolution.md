@@ -34,6 +34,10 @@ d20
 
 The technique must still define its legal range, projectile properties, damage/effect, Penetration where relevant, and any other authored constraints.
 
+The **relevant Training** is the ordinary narrow throwing/weapon Training that actually applies to the projectile. **Veil Practice is not automatically substituted** merely because magic created it.
+
+Reusing the thrown attack procedure does not automatically add Strength to a technique-authored damage packet. If the Manifestation creates an ordinary weapon profile, use that profile's normal Physical Contribution; otherwise use the technique's authored damage/effect.
+
 A Manifestation does not gain **Veil Control**, **Resonance**, or **Veil Integration Bonus** on the projectile attack merely because magic created the projectile.
 
 The normal ranged-defense rules apply to the launched projectile:
@@ -44,6 +48,12 @@ The normal ranged-defense rules apply to the launched projectile:
 - cover, range, size/position, and other ordinary shot-condition modifiers.
 
 If a Manifestation creates a projectile but a different physical launcher is actually used, resolve the attack with that launcher's normal rules instead.
+
+### Projectile-delivered areas
+
+If a projectile carries an area effect, resolve the projectile's delivery first and then resolve the area from the resulting impact point.
+
+The area does **not** grant a second generic Dodge after the projectile has already established where the effect occurs. Characters in the resulting area use the area rules below.
 
 ## Pointed beams
 
