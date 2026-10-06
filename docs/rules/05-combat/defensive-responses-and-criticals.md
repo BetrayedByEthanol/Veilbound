@@ -4,7 +4,7 @@
 
 ## Declaring defense
 
-For each enemy's declared **Attack Sequence**, the defender assigns one of three responses to each incoming attack **before that sequence's rolls resolve**. Before defenses are assigned, the attacker must commit the number of attacks **and the weapon/profile plus other attack-specific choices for each attack**; see [Initiative and Round/Turn Procedure](initiative-and-round-structure.md#attack-sequence):
+For each enemy's declared **Attack Sequence**, the defender assigns one of three responses to each incoming attack **before that sequence's rolls resolve**. The sequence includes all ordinary on-turn attacks committed to that target, including granted bonus attacks such as an offensive dual-wield off-hand Attack. Before defenses are assigned, the attacker must commit the attacks **and the weapon/profile plus other attack-specific choices for each attack**; see [Initiative and Round/Turn Procedure](initiative-and-round-structure.md#attack-sequence):
 
 1. **Take Hit**
 2. **Dodge**
