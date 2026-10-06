@@ -171,16 +171,25 @@ The default procedure is:
 
 ### Attack Sequence
 
-When a creature uses one or more Attack Units on its turn to make ordinary attacks against the **same target**, it declares those attacks as one Attack Sequence before the first attack roll.
+When a creature makes one or more **ordinary on-turn attacks** against the same target, those attacks use one Attack Sequence. This includes attacks paid for with Attack Units and granted ordinary attacks such as the offensive dual-wield off-hand Attack.
 
-- declare how many Attack Units are committed to that target;
+Before the first attack roll:
+
+- declare every ordinary on-turn attack currently being committed to that target, including which attacks spend Attack Units and which come from granted bonus attacks;
 - for **each committed attack**, declare the weapon/profile and all attack-specific choices that could affect its resolution, including any chosen attack mode, special option, or other required choice known at declaration time;
-- commit those Attack Units and declared attack profiles/choices immediately;
-- the defender assigns Take Hit, Dodge, or Guard to each incoming attack with those declared profiles/choices known before any attack roll in that sequence resolves;
-- resolve the attacks in order;
-- after the sequence ends, the attacker may use any remaining turn resources normally.
+- commit the required Attack Units, granted attacks, and declared attack profiles/choices immediately;
+- the defender assigns Take Hit, Dodge, or Guard to each incoming attack with those declared profiles/choices known before any attack roll in that sequence resolves.
 
-A creature normally begins only **one Attack Sequence against a particular target during the same turn**. It cannot declare one attack, inspect the result, and then open another ordinary sequence against that same target to gain additional information. An explicit follow-up rule such as a Riposte may override this restriction.
+Then resolve the attacks in their declared order. **Each individual attack is a separate trigger occurrence.** Immediately before that attack's roll:
+
+1. treat that attack as the current triggering action;
+2. open and resolve its response window under the normal response procedure;
+3. if the attack is still legal after responses, resolve its already-declared attack roll and consequences;
+4. if it is Interrupted or otherwise made illegal, that attack is lost, then continue to the next committed attack unless a stronger rule cancels the remaining sequence.
+
+After the sequence ends, the attacker may use any remaining turn resources normally.
+
+A creature normally begins only **one Attack Sequence against a particular target during the same turn**. It cannot declare one attack, inspect the result, and then open another ordinary sequence against that same target to gain additional information. A granted ordinary bonus attack that is used against that target must therefore be included when that target's Attack Sequence is declared; if the sequence has already resolved, that bonus attack cannot later be added against the same target. It may still be used against another legal target that has not already received an Attack Sequence from this attacker that turn. An explicit follow-up rule such as a Riposte may override this restriction.
 
 If the target becomes unavailable or illegal before all committed attacks resolve, the unresolved attacks remain committed rather than being refunded. The attacker may redirect the unresolved remainder as a new sequence against another legal target **only if that target has not already been the target of an Attack Sequence from this attacker during the same turn**, unless an explicit rule permits reopening that target. The weapon/profile and other attack-specific choices already declared for each redirected attack remain fixed unless an explicit rule permits changing them. The new defender assigns defenses to those already-declared redirected attacks before their rolls resolve, and counts as having been the target of an Attack Sequence for that turn.
 
