@@ -4154,8 +4154,9 @@ Ordinary attacks against the same target on the attacker's turn are grouped into
 Before rolling:
 
 - the attacker declares how many Attack Units are committed against that target;
-- those Attack Units are committed;
-- the defender assigns Take Hit / Dodge / Guard to each incoming attack;
+- for each committed attack, the attacker declares its weapon/profile and other attack-specific choices that could affect resolution;
+- those Attack Units and declared profiles/choices are committed;
+- the defender assigns Take Hit / Dodge / Guard to each incoming attack with those declarations known;
 - then attacks resolve in order.
 
 A creature normally opens only one ordinary Attack Sequence against the same target per turn. This prevents drip-declaring attacks one at a time to gain information after each result.
@@ -4164,7 +4165,7 @@ Explicit follow-ups such as Riposte may override that restriction.
 
 A standalone attack outside an Attack Sequence—including a Reaction, Interception, Opportunity Attack, Full Action attack, or explicit follow-up—receives its own defense declaration after it is declared and before its attack roll. It uses the same round Guard capacity and Dodge Pressure as all other attacks.
 
-If the target becomes unavailable before all committed attacks resolve, unresolved committed attacks are not refunded. They may be redirected as a remaining sequence against another legal target, which assigns defenses before those redirected rolls.
+If the target becomes unavailable before all committed attacks resolve, unresolved committed attacks are not refunded. They may be redirected as a remaining sequence against another legal target, but their already-declared weapon/profile and attack-specific choices remain fixed unless an explicit rule permits changing them. The new target assigns defenses before those redirected rolls.
 
 ## Reactions
 
