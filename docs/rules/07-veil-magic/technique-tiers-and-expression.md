@@ -24,6 +24,42 @@ Maximum normal technique tier is universal across Focus:
 
 High, Medium and Low Focus all eventually gain normal access through Tier 9. Focus changes how power is expressed and resourced; it does not impose a lower maximum technique tier.
 
+## Veil Control scaling and damage targets
+
+Every damaging, healing, restorative, barrier, or otherwise numerically scaling technique must state how **Veil Control** affects that technique. There is no implicit rule that every magical effect uses the same coefficient or that every magical damage packet attacks the same resource.
+
+A technique that deals damage must identify whether each authored damage packet affects:
+
+- **HP** — physical integrity;
+- **Vigor** — regenerative reserve;
+- both through separately stated packets; or
+- another explicitly defined resource or wound procedure.
+
+Do not infer a damage target merely from a technique being magical, from its Pillar, or from whether its delivery is Intrusion, Imposition, or Manifestation.
+
+### Standard Veil Control scaling
+
+When a technique explicitly says it uses **standard Veil Control scaling**, use:
+
+```
+Standard Veil Control packet =
+max(Veil Control, 0) × Character Level
+```
+
+For a damaging technique, the standard packet is **bonus Vigor damage** unless that technique explicitly defines another use for the packet.
+
+The standard packet is applied **once per technique resolution**, not once per projectile, target, Attack Unit, pulse, or repeated hit, unless the technique explicitly defines a different coefficient and cadence.
+
+This is the baseline for straightforward single-target magical output. Area, multi-hit, rapid-fire, persistent, healing, control, defensive, utility, and other effects should author their own coefficient, parameter, or cadence when applying the full standard packet would multiply output excessively or scale the wrong property.
+
+Negative Veil Control does not create negative bonus output.
+
+### Physical Manifestation damage
+
+When a valid Manifestation creates an independent physical phenomenon and that phenomenon harms a creature through the ordinary physical/world procedure, its ordinary physical damage affects **HP** unless an explicit technique or hazard rule says otherwise.
+
+A technique may separately deal Vigor damage if authored to disrupt regenerative reserve. Vigor damage does not directly reduce HP.
+
 ## Persistent Expression Cadence
 
 Any sustained, persistent, attached, embodied, invested, consecrated, routed or similar effect that can interact repeatedly with ordinary actions must declare an **Expression Cadence** for each output.

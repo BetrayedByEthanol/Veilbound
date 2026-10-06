@@ -103,6 +103,8 @@ When the Priest earns a **Pillar Accord Advance**, the player may normally:
 
 A Pillar Accord loss cannot be redirected into Debt repayment.
 
+The choice between **deepening Pillar Accord** and **repaying Miracle Debt** is intentional. Pillar Accord Advances should be meaningful and infrequent enough that repeated Miracle Debt cannot be trivially cleared; exact cadence remains provisional and should preserve consequences for repeated Petition use.
+
 ### Tier 9
 
 Once normal Tier-9 access is reached, there is no Tier 10.

@@ -6,7 +6,7 @@
 
 A Gifted is born with permanent links between emotion and Aspect.
 
-A Gifted is a **natural phenomenon of human Veil integration**, not a person selected, created, or deliberately shaped by a Pillar. Human emotion/desire and Pillar patterns arise within the same wider Veil metaphysics. A Gifted's innate emotional states naturally open unusually strong pathways into particular Aspect patterns; the linked Pillar does not need to choose, approve, or consciously recognize the Gifted.
+A Gifted is a **natural phenomenon of human Veil integration**, not a person selected, created, or deliberately shaped by a Pillar. Human emotion, Volition, and Pillar patterns arise within the same wider Veil metaphysics. Pillars are formed and sustained by recurring human Volition expressed through practice and interpreted through belief; a Gifted's innate emotional states naturally open unusually strong pathways into particular Aspect patterns. The linked Pillar does not need to choose, approve, or consciously recognize the Gifted.
 
 The eight core emotions are:
 
