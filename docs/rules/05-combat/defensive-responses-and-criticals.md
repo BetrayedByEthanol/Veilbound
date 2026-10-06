@@ -4,11 +4,15 @@
 
 ## Declaring defense
 
-For each enemy's declared attack sequence, the defender assigns one of three responses to each incoming attack **before that enemy's rolls resolve**:
+For each enemy's declared **Attack Sequence**, the defender assigns one of three responses to each incoming attack **before that sequence's rolls resolve**. The sequence includes all ordinary on-turn attacks committed to that target, including granted bonus attacks such as an offensive dual-wield off-hand Attack. Before defenses are assigned, the attacker must commit the attacks **and the weapon/profile plus other attack-specific choices for each attack**; see [Initiative and Round/Turn Procedure](initiative-and-round-structure.md#attack-sequence):
 
 1. **Take Hit**
 2. **Dodge**
 3. **Guard**
+
+For a **standalone attack** that occurs outside an Attack Sequence—such as an attack made by a Reaction, Interception, Opportunity Attack, Full Action, or explicit follow-up—the defender assigns **Take Hit, Dodge, or Guard after that attack is declared and before its attack roll resolves**.
+
+Standalone attacks use the **same round defense resources** as attacks inside Attack Sequences. Guard spends normal Guard capacity, and choosing Dodge uses the defender's current Dodge Pressure and increments it normally. There is no separate out-of-turn defense pool.
 
 Repeated incoming attacks do not automatically reduce defense. Only repeated chosen Dodges create Dodge Pressure.
 

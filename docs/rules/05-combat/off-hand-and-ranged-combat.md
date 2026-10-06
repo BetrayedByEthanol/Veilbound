@@ -41,6 +41,8 @@ At the start of the wielder's turn, choose the offensive or defensive use. The c
 - **Medium + Light:** either gain **+1 off-hand Attack with the light weapon at -2 to the attack roll**, or **+1 Guard capacity** until the next turn. A parrying dagger may also provide its Riposte improvement.
 - **Medium + Medium:** no baseline extra Attack or Guard. The benefit is flexibility to choose which weapon profile to use for each normal attack.
 
+A granted off-hand Attack is an **ordinary on-turn attack** for Attack Sequence declaration. If used against a target, it must be declared as part of that target's Attack Sequence rather than added after that sequence resolves. It does not become an additional Attack Unit.
+
 Dedicated dual-wield development may later expand these options.
 
 ## Magical Manifestations using ranged defense
@@ -95,11 +97,13 @@ These are the current bow/crossbow baseline bands. Specific ranged weapons may l
 
 ## Ranged weapons while threatened
 
-A bow or crossbow may be fired while the wielder is threatened in melee, but doing so provokes an opportunity attack **before** the ranged attack resolves.
+A bow or crossbow may be fired while the wielder is threatened in melee, but doing so creates an **Opportunity** before the ranged attack resolves.
 
-If the provoking attack hits, the ranged attack is interrupted and lost.
+An eligible enemy may exploit that Opportunity through the universal **Opportunity Response** procedure in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md#opportunity-framework).
 
-The audit still lacks a complete general opportunity-attack procedure, so only this specific locked interaction is canonical here.
+This trigger has a specific stronger consequence: if the resulting Opportunity Attack hits, the provoking ranged attack is **Interrupted and lost**.
+
+That hit-to-Interrupt clause belongs to this trigger specifically. A generic Opportunity Attack does not automatically Interrupt its provoking action.
 
 ## Heavy crossbow timing
 

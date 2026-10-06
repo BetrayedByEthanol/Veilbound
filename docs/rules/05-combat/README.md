@@ -17,11 +17,8 @@ Durability, Dying, and wound-repair rules live under [../06-vigor-wounds-death/]
 
 The current canonical combat foundation still requires Veilbound-native rules for:
 
-- detailed Reaction declaration and competing-trigger priority;
-- detailed Interception declaration/priority refinements;
-- broader turn-declaration rules beyond the locked timing skeleton;
-- full movement/reach/engagement rules;
-- the general opportunity-attack procedure;
+- full movement/reach/engagement rules and movement-based Opportunity triggers;
+- exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
 - cover/concealment/surprise as complete procedures;
 - grapple, shove, feint, trip, disarm, charge, and other universal maneuvers as complete procedures;
