@@ -261,9 +261,9 @@ When an action/event creates a valid trigger, pause that action/event before it 
 
 For responses to the **same trigger occurrence**:
 
-1. identify all reserved Interceptions whose declared triggers have occurred;
+1. for each creature, identify at most one reserved Interception that releases from that trigger occurrence; if several of that creature's reservations have the same qualifying trigger, the earliest-declared matching reservation releases and the others remain reserved for later qualifying occurrences;
 2. eligible creatures decide whether to declare optional Reactions before same-trigger responses begin resolving;
-3. same-trigger responses resolve in Initiative order among their users;
+3. same-trigger responses resolve in Initiative order among their users; if one creature has more than one legal response through different resources, that creature chooses their internal order;
 4. if one of those responses creates a new trigger, open a nested response window and resolve that newer window before returning to the older response;
 5. after all responses are resolved, return to the original action/event and re-check whether it is still legal.
 
