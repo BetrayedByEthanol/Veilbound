@@ -4147,7 +4147,7 @@ The default flow is:
 
 Costs/action capacity are not refunded merely because the declared action is later interrupted, becomes impossible, or fails unless an explicit rule says otherwise.
 
-## Attack Sequences
+## Attack Sequences and standalone attacks
 
 Ordinary attacks against the same target on the attacker's turn are grouped into an **Attack Sequence**.
 
@@ -4161,6 +4161,8 @@ Before rolling:
 A creature normally opens only one ordinary Attack Sequence against the same target per turn. This prevents drip-declaring attacks one at a time to gain information after each result.
 
 Explicit follow-ups such as Riposte may override that restriction.
+
+A standalone attack outside an Attack Sequence—including a Reaction, Interception, Opportunity Attack, Full Action attack, or explicit follow-up—receives its own defense declaration after it is declared and before its attack roll. It uses the same round Guard capacity and Dodge Pressure as all other attacks.
 
 If the target becomes unavailable before all committed attacks resolve, unresolved committed attacks are not refunded. They may be redirected as a remaining sequence against another legal target, which assigns defenses before those redirected rolls.
 
@@ -4180,11 +4182,13 @@ Guard and Dodge remain separate defensive responses and do not spend the Reactio
 
 When an event creates a valid trigger, pause the event before resolution.
 
-Same-trigger responses resolve in Initiative order among their users.
+Precommitted Interceptions resolve before spontaneous responses to that same original trigger. Interceptions resolve in Initiative order, with any nested triggers they create resolved immediately.
+
+After Interceptions finish, re-check the original event. If it remains legal/relevant, collect spontaneous Reactions plus Opportunity Attacks from either a newly activated or already-active Opportunity Response. Those responses resolve in Initiative order.
 
 A response can create a nested response window; the nested window resolves before returning to the older response.
 
-Once a Reaction is declared or a reserved Interception has triggered, it remains committed even if an earlier response cancels the original action, provided the responding action itself remains legal.
+Once a Reaction, Opportunity Attack, or released Interception is declared, its relevant capacity remains committed even if an earlier response later cancels the original action, provided the responding action itself remains legal.
 
 ## Atomic Interception
 
