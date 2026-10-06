@@ -259,15 +259,24 @@ Guard and Dodge remain defensive responses and do **not** spend the Reaction.
 
 When an action/event creates a valid trigger, pause that action/event before it resolves.
 
-For responses to the **same trigger occurrence**:
+Precommitted Interceptions have priority over spontaneous responses to the same original trigger.
 
-1. for each creature, identify at most one reserved Interception that releases from that trigger occurrence; if several of that creature's reservations have the same qualifying trigger, the earliest-declared matching reservation releases and the others remain reserved for later qualifying occurrences;
-2. eligible creatures decide whether to declare optional Reactions before same-trigger responses begin resolving;
-3. same-trigger responses resolve in Initiative order among their users; if one creature has more than one legal response through different resources, that creature chooses their internal order;
-4. if one of those responses creates a new trigger, open a nested response window and resolve that newer window before returning to the older response;
-5. after all responses are resolved, return to the original action/event and re-check whether it is still legal.
+For each trigger occurrence:
 
-Once a Reaction is declared or a reserved Interception has triggered, its action capacity is committed. It may still resolve if the original action is later cancelled, provided the responding action/effect itself remains legal.
+1. **Release matching Interceptions.** For each creature, identify at most one reserved Interception that releases from that trigger occurrence. If several of that creature's reservations have the same qualifying trigger, the earliest-declared matching reservation releases and the others remain reserved for later qualifying occurrences.
+2. **Resolve released Interceptions first.** Released Interceptions resolve in Initiative order among their users.
+3. **Resolve nested triggers immediately.** If an Interception creates a new trigger, open a nested response window before that Interception finishes. A valid Reaction, Opportunity Attack, or further Interception may respond to that new trigger under the normal rules.
+4. **Re-check the original event.** After all released Interceptions and their nested responses resolve, determine whether the original triggering action/event is still legal and relevant. If it has been cancelled or made impossible, it does not proceed to spontaneous responses unless a rule's trigger remains satisfied independently of the cancelled event.
+5. **Collect spontaneous responses to the original event.** If the original event remains legal/relevant, eligible creatures may declare either:
+   - an optional Reaction whose trigger is satisfied;
+   - the first Opportunity Attack by spending the creature's available Reaction to activate Opportunity Response; or
+   - a later Opportunity Attack from an already-active Opportunity Response with remaining Opportunity Capacity.
+6. **Resolve spontaneous same-trigger responses.** These responses resolve in Initiative order among their users. If one response creates a new trigger, resolve that nested response window before returning to the older response.
+7. **Resume the original event.** After all responses finish, re-check legality once more and resolve the original action/event if it remains legal.
+
+Once a Reaction, Opportunity Attack, or released Interception is declared, its relevant capacity is committed. It may still resolve if the original action is later cancelled, provided the responding action/effect itself remains legal.
+
+A creature with an active Opportunity Response does not need another Reaction to make later Opportunity Attacks; those later attacks still must be explicitly declared in Step 5 when a new qualifying Opportunity occurs.
 
 ### Interception
 
@@ -334,7 +343,8 @@ The first time a creature chooses to exploit an Opportunity in a round:
 
 While Opportunity Response remains active:
 
-- the creature may make additional Opportunity Attacks without spending another Reaction;
+- each later qualifying Opportunity creates a new chance to declare one Opportunity Attack during the spontaneous-response step of that trigger's response window;
+- the creature may make that Opportunity Attack without spending another Reaction;
 - it may make at most Opportunity Capacity Opportunity Attacks during that round in total;
 - each distinct Opportunity trigger can produce at most **one** Opportunity Attack from that creature;
 - one creature may trigger multiple distinct Opportunities during the round;
