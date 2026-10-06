@@ -4149,17 +4149,18 @@ Costs/action capacity are not refunded merely because the declared action is lat
 
 ## Attack Sequences and standalone attacks
 
-Ordinary attacks against the same target on the attacker's turn are grouped into an **Attack Sequence**.
+All ordinary on-turn attacks against the same target are grouped into one **Attack Sequence**, including granted bonus attacks such as an offensive dual-wield off-hand Attack.
 
 Before rolling:
 
-- the attacker declares how many Attack Units are committed against that target;
+- the attacker declares every ordinary on-turn attack committed against that target, including Attack-Unit attacks and any granted bonus attacks;
 - for each committed attack, the attacker declares its weapon/profile and other attack-specific choices that could affect resolution;
-- those Attack Units and declared profiles/choices are committed;
-- the defender assigns Take Hit / Dodge / Guard to each incoming attack with those declarations known;
-- then attacks resolve in order.
+- the relevant Attack Units, granted attacks, and declared profiles/choices are committed;
+- the defender assigns Take Hit / Dodge / Guard to each incoming attack with those declarations known.
 
-A creature normally opens only one ordinary Attack Sequence against the same target per turn. This prevents drip-declaring attacks one at a time to gain information after each result.
+The attacks then resolve in order. Each committed attack is its own trigger occurrence and opens its own response window immediately before its roll. If that attack survives the response window, it resolves; otherwise it is lost and the sequence proceeds to the next committed attack unless a stronger rule cancels the remaining sequence.
+
+A creature normally opens only one ordinary Attack Sequence against the same target per turn. This prevents drip-declaring attacks one at a time to gain information after each result. A granted bonus attack used against that target must be included in that sequence; if the sequence has already resolved, the bonus attack cannot later be added against the same target, though it may be used against another eligible target.
 
 Explicit follow-ups such as Riposte may override that restriction.
 
