@@ -4199,7 +4199,7 @@ A Full Action cannot be used to bundle multiple ordinary Attack Units into one I
 
 One trigger occurrence can release at most **one** reserved Interception from the same creature.
 
-Multiple reservations with the same trigger therefore cover successive qualifying trigger occurrences. If fewer occurrences happen than were reserved for, unused reservations expire and are lost.
+Multiple reservations with the same trigger therefore cover successive qualifying trigger occurrences in declaration order. If fewer occurrences happen than were reserved for, unused reservations expire and are lost.
 
 Different creatures may each release one reserved Interception from the same trigger occurrence.
 
