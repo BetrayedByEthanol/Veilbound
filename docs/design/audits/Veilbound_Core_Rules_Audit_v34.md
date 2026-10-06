@@ -4115,3 +4115,154 @@ This lock deliberately does **not** close:
 - conditions.
 
 Those are follow-up combat-procedure layers and should integrate with this clock rather than silently replace it.
+
+
+---
+
+# LOCKED UPDATE: Turn Declaration, Reactions, Interception, and Opportunity Responses
+
+## Status: LOCKED STRUCTURE
+
+The deferred timing layer following Initiative/Round Structure is now locked at the structural level.
+
+Canonical procedure lives primarily in:
+
+- `docs/rules/05-combat/initiative-and-round-structure.md`
+- `docs/rules/05-combat/action-categories-and-physical-tempo.md`
+- `docs/rules/05-combat/defensive-responses-and-criticals.md`
+- `docs/rules/05-combat/off-hand-and-ranged-combat.md`
+
+## Sequential turn declaration
+
+A creature does **not** pre-declare its entire turn.
+
+The default flow is:
+
+1. declare the next action/effect;
+2. commit its action capacity;
+3. resolve any response window;
+4. re-check legality;
+5. resolve the action if still legal;
+6. then choose the next action/effect.
+
+Costs/action capacity are not refunded merely because the declared action is later interrupted, becomes impossible, or fails unless an explicit rule says otherwise.
+
+## Attack Sequences
+
+Ordinary attacks against the same target on the attacker's turn are grouped into an **Attack Sequence**.
+
+Before rolling:
+
+- the attacker declares how many Attack Units are committed against that target;
+- those Attack Units are committed;
+- the defender assigns Take Hit / Dodge / Guard to each incoming attack;
+- then attacks resolve in order.
+
+A creature normally opens only one ordinary Attack Sequence against the same target per turn. This prevents drip-declaring attacks one at a time to gain information after each result.
+
+Explicit follow-ups such as Riposte may override that restriction.
+
+If the target becomes unavailable before all committed attacks resolve, unresolved committed attacks are not refunded. They may be redirected as a remaining sequence against another legal target, which assigns defenses before those redirected rolls.
+
+## Reactions
+
+Reaction remains one per round and refreshes at Round Begin.
+
+A Reaction:
+
+- may be used during the creature's own turn when a valid trigger occurs;
+- may respond to another Reaction, Interception, Opportunity Attack, or other response if its own trigger is met;
+- does not by itself grant an action—an authored rule/effect must define the trigger and consequence.
+
+Guard and Dodge remain separate defensive responses and do not spend the Reaction.
+
+## Response windows
+
+When an event creates a valid trigger, pause the event before resolution.
+
+Same-trigger responses resolve in Initiative order among their users.
+
+A response can create a nested response window; the nested window resolves before returning to the older response.
+
+Once a Reaction is declared or a reserved Interception has triggered, it remains committed even if an earlier response cancels the original action, provided the responding action itself remains legal.
+
+## Atomic Interception
+
+Interception remains a timing mechanic rather than an action category.
+
+A reservation contains exactly:
+
+- one legal Attack Unit action/effect; or
+- one action/effect inherently defined as a Full Action.
+
+A Full Action cannot be used to bundle multiple ordinary Attack Units into one Interception.
+
+One trigger occurrence can release at most **one** reserved Interception from the same creature.
+
+Multiple reservations with the same trigger therefore cover successive qualifying trigger occurrences. If fewer occurrences happen than were reserved for, unused reservations expire and are lost.
+
+Different creatures may each release one reserved Interception from the same trigger occurrence.
+
+## Interception is not automatic interruption
+
+An ordinary Interception resolves before its triggering action but does **not** inherently cancel it.
+
+After the Interception:
+
+- if the action remains legal, it continues;
+- if consequences make it illegal, it fails naturally;
+- if circumstances changed but it remains legal, resolve it under the new circumstances.
+
+An **Interrupt** must be an explicit consequence.
+
+By default an Interrupt cancels only the current action and its committed cost.
+
+For an Attack Sequence:
+
+- interrupting one attack loses that attack;
+- remaining committed attacks continue unless a stronger rule explicitly cancels the sequence;
+- ending the entire turn requires explicit stronger wording.
+
+The same current action cannot be explicitly cancelled more than once. Other already-triggered responses may still resolve, but their Interrupt components do not consume additional Attack Units from that one cancelled action.
+
+Weapon traits, maneuvers, techniques, or similar content may later improve deliberate interruption. The universal numeric cost/modifier for a generic Disrupting Interception is **not** locked here.
+
+## Opportunity Response
+
+An Opportunity is an authored event that exposes a creature to an Opportunity Attack.
+
+```text
+Opportunity Capacity = Physical Tempo
+```
+
+The first time a creature exploits an Opportunity during a round:
+
+1. spend its Reaction;
+2. activate Opportunity Response until Round End;
+3. make one eligible Opportunity Attack.
+
+While active:
+
+- further Opportunity Attacks do not spend another Reaction;
+- total Opportunity Attacks that round cannot exceed Opportunity Capacity;
+- each distinct Opportunity trigger can produce at most one Opportunity Attack from that creature;
+- one creature may trigger multiple distinct Opportunities;
+- multiple eligible enemies may separately exploit the same Opportunity.
+
+A generic Opportunity Attack is one authorized attack, normally melee, and is not an Attack Sequence.
+
+A generic Opportunity Attack does **not** automatically Interrupt its provoking action.
+
+The existing threatened-ranged rule is a specific stronger trigger: firing a bow or crossbow while threatened creates an Opportunity before the ranged attack, and a successful resulting Opportunity Attack Interrupts that ranged attack.
+
+## Remaining timing/combat dependencies
+
+Still unresolved:
+
+- movement allowance and splitting movement;
+- reach, threatened space, engagement, and movement-based Opportunity triggers;
+- exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
+- complete surprise/unaware rules;
+- physical-hazard values/procedures;
+- conditions;
+- universal physical maneuvers.
