@@ -4165,7 +4165,7 @@ Explicit follow-ups such as Riposte may override that restriction.
 
 A standalone attack outside an Attack Sequence—including a Reaction, Interception, Opportunity Attack, Full Action attack, or explicit follow-up—receives its own defense declaration after it is declared and before its attack roll. It uses the same round Guard capacity and Dodge Pressure as all other attacks.
 
-If the target becomes unavailable before all committed attacks resolve, unresolved committed attacks are not refunded. They may be redirected as a remaining sequence against another legal target, but their already-declared weapon/profile and attack-specific choices remain fixed unless an explicit rule permits changing them. The new target assigns defenses before those redirected rolls.
+If the target becomes unavailable before all committed attacks resolve, unresolved committed attacks are not refunded. They may be redirected as a remaining sequence against another legal target only if that target has not already received an Attack Sequence from this attacker during the same turn, unless an explicit rule permits reopening that target. Their already-declared weapon/profile and attack-specific choices remain fixed unless an explicit rule permits changing them. The new target assigns defenses before those redirected rolls.
 
 ## Reactions
 
