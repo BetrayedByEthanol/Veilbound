@@ -65,7 +65,7 @@ A reservation is atomic:
 
 A Full Action cannot be used to bundle several ordinary Attack Units into one Interception.
 
-Only one reserved Interception from the same creature can release from one trigger occurrence. Multiple reservations with the same trigger apply to successive qualifying occurrences.
+Only one reserved Interception from the same creature can release from one trigger occurrence. Multiple reservations with the same trigger apply in declaration order to successive qualifying occurrences.
 
 When a trigger occurs, the reserved effect resolves using its normal action/effect rules and costs. If too few trigger occurrences happen, unused reservations are lost when they expire.
 
