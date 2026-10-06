@@ -174,14 +174,15 @@ The default procedure is:
 When a creature uses one or more Attack Units on its turn to make ordinary attacks against the **same target**, it declares those attacks as one Attack Sequence before the first attack roll.
 
 - declare how many Attack Units are committed to that target;
-- commit those Attack Units immediately;
-- the defender assigns Take Hit, Dodge, or Guard to each incoming attack before any attack roll in that sequence resolves;
+- for **each committed attack**, declare the weapon/profile and all attack-specific choices that could affect its resolution, including any chosen attack mode, special option, or other required choice known at declaration time;
+- commit those Attack Units and declared attack profiles/choices immediately;
+- the defender assigns Take Hit, Dodge, or Guard to each incoming attack with those declared profiles/choices known before any attack roll in that sequence resolves;
 - resolve the attacks in order;
 - after the sequence ends, the attacker may use any remaining turn resources normally.
 
 A creature normally begins only **one Attack Sequence against a particular target during the same turn**. It cannot declare one attack, inspect the result, and then open another ordinary sequence against that same target to gain additional information. An explicit follow-up rule such as a Riposte may override this restriction.
 
-If the target becomes unavailable or illegal before all committed attacks resolve, the unresolved attacks remain committed rather than being refunded. The attacker may redirect the unresolved remainder as a new sequence against another legal target. That new defender assigns defenses to the redirected attacks before their rolls resolve, and counts as having been the target of an Attack Sequence for that turn.
+If the target becomes unavailable or illegal before all committed attacks resolve, the unresolved attacks remain committed rather than being refunded. The attacker may redirect the unresolved remainder as a new sequence against another legal target. The weapon/profile and other attack-specific choices already declared for each redirected attack remain fixed unless an explicit rule permits changing them. The new defender assigns defenses to those already-declared redirected attacks before their rolls resolve, and counts as having been the target of an Attack Sequence for that turn.
 
 A Full Action is not permission to bundle several ordinary Attack Units into one action. It is a separate action category used only by actions/effects that are actually defined as Full Actions.
 
