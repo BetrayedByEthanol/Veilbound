@@ -95,11 +95,13 @@ These are the current bow/crossbow baseline bands. Specific ranged weapons may l
 
 ## Ranged weapons while threatened
 
-A bow or crossbow may be fired while the wielder is threatened in melee, but doing so provokes an opportunity attack **before** the ranged attack resolves.
+A bow or crossbow may be fired while the wielder is threatened in melee, but doing so creates an **Opportunity** before the ranged attack resolves.
 
-If the provoking attack hits, the ranged attack is interrupted and lost.
+An eligible enemy may exploit that Opportunity through the universal **Opportunity Response** procedure in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md#opportunity-framework).
 
-The audit still lacks a complete general opportunity-attack procedure, so only this specific locked interaction is canonical here.
+This trigger has a specific stronger consequence: if the resulting Opportunity Attack hits, the provoking ranged attack is **Interrupted and lost**.
+
+That hit-to-Interrupt clause belongs to this trigger specifically. A generic Opportunity Attack does not automatically Interrupt its provoking action.
 
 ## Heavy crossbow timing
 
