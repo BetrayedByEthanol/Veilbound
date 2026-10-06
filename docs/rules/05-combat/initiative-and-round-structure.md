@@ -1,6 +1,6 @@
 # Initiative and Round/Turn Procedure
 
-> Canonical Veilbound combat-procedure baseline. This file locks initiative, the round/turn skeleton, core resource refresh timing, regeneration timing, and universal duration anchors. Detailed reaction/interception priority, full declaration procedure, movement/reach, opportunity attacks, surprise, and hazard values remain separate refinement work.
+> Canonical Veilbound combat-procedure baseline. This file locks initiative, the round/turn skeleton, turn/action declaration, Attack Sequences, Reaction timing, Interception timing, interruption behavior, Opportunity Attack capacity, core resource refresh timing, regeneration timing, and universal duration anchors. Movement/reach triggers, surprise, hazard values, and several combat maneuvers remain separate refinement work.
 
 ## Combat start
 
@@ -70,7 +70,9 @@ Guard and Dodge are defensive responses, not Reaction expenditures.
 
 Combatants then take turns in Initiative order.
 
-Out-of-turn responses, reserved effects, defensive responses, and other interruptions may occur when their triggers permit. Their detailed declaration and priority procedure remains separate refinement work.
+A creature does **not** pre-declare its entire turn. Normal actions are declared and resolved sequentially. Multi-attack use against one target is grouped into an **Attack Sequence** so the attacker must commit those attacks before seeing their results.
+
+Out-of-turn Reactions, reserved Interceptions, defensive responses, Opportunity Attacks, and other interruptions occur when their triggers permit under the response procedure below.
 
 ### Round End
 
@@ -135,9 +137,9 @@ The Gifted procedure remains exactly as defined in [Gifted Foundation](../08-arc
 
 The character may spend Attack Units, take a Full Action where legal, use techniques, make attacks, reserve eligible actions/effects for Interception, and move as permitted by the movement rules.
 
-This file does **not** require a character to pre-declare an entire turn.
+The character declares and resolves the next action or effect before choosing the next part of the turn. Costs or action capacity committed to a declaration are not refunded merely because the action is later interrupted, becomes impossible, or fails unless an explicit rule says otherwise.
 
-The exact rules for splitting movement, action declaration, trigger priority, and other sequencing choices remain future refinement.
+Ordinary attacks against the same target use the Attack Sequence procedure below rather than being drip-declared one at a time.
 
 ### 7. End-of-turn effects
 
@@ -152,6 +154,38 @@ Expire effects that explicitly last until the end of this character's turn.
 Unspent Attack Units are lost.
 
 Reserved actions/effects that remain valid continue only for their defined reservation window.
+
+## Turn declaration and Attack Sequences
+
+A character does **not** declare the entire turn in advance.
+
+The default procedure is:
+
+1. declare the next action/effect and its target or other required choices;
+2. commit the required Attack Unit, Full Action, Reaction, reservation, or other action capacity;
+3. open any applicable response window;
+4. resolve responses and nested responses;
+5. re-check whether the declared action is still legal;
+6. if legal, resolve it under the current circumstances;
+7. then choose the next action/effect.
+
+### Attack Sequence
+
+When a creature uses one or more Attack Units on its turn to make ordinary attacks against the **same target**, it declares those attacks as one Attack Sequence before the first attack roll.
+
+- declare how many Attack Units are committed to that target;
+- commit those Attack Units immediately;
+- the defender assigns Take Hit, Dodge, or Guard to each incoming attack before any attack roll in that sequence resolves;
+- resolve the attacks in order;
+- after the sequence ends, the attacker may use any remaining turn resources normally.
+
+A creature normally begins only **one Attack Sequence against a particular target during the same turn**. It cannot declare one attack, inspect the result, and then open another ordinary sequence against that same target to gain additional information. An explicit follow-up rule such as a Riposte may override this restriction.
+
+If the target becomes unavailable or illegal before all committed attacks resolve, the unresolved attacks remain committed rather than being refunded. The attacker may redirect the unresolved remainder as a new sequence against another legal target. That new defender assigns defenses to the redirected attacks before their rolls resolve, and counts as having been the target of an Attack Sequence for that turn.
+
+A Full Action is not permission to bundle several ordinary Attack Units into one action. It is a separate action category used only by actions/effects that are actually defined as Full Actions.
+
+Out-of-turn attacks from a Reaction, Interception, or Opportunity normally consist of the one action/effect that authorized them and do not become an Attack Sequence unless a rule explicitly says otherwise.
 
 ## Regeneration and Dying timing
 
@@ -206,20 +240,111 @@ Committed VP remains committed across turn and round boundaries until the sustai
 
 There is no hidden universal upkeep roll or automatic per-round VP payment.
 
-## Reactions, Guard, Dodge, and Interception
+## Reactions, responses, Interception, and interruption
 
-The current baseline distinctions are:
+### Reaction
 
-- **Reaction:** one Reaction per combatant, refreshed at Round Begin;
-- **Guard:** uses Guard capacity and does not consume the Reaction;
-- **Dodge:** does not consume the Reaction and instead accumulates Dodge Pressure;
-- **Interception:** remains a timing mechanic that reserves an otherwise valid action/effect and names a trigger.
+A **Reaction** is a once-per-round timing resource that allows an effect or rule explicitly usable as a Reaction to resolve when its trigger occurs.
 
-Unless a rule gives a different reservation window, a reserved Interception remains available until the start of the reserving character's next turn. If the trigger never occurs, the reserved action/effect is lost.
+- each combatant normally has one Reaction;
+- it refreshes at Round Begin;
+- spending it makes it unavailable until the next Round Begin;
+- a Reaction may be used during the creature's own turn if a valid trigger occurs;
+- a Reaction may respond to another Reaction, an Interception, an Opportunity Attack, or another interrupting effect if its own trigger is satisfied;
+- the Reaction resource itself does nothing without a rule/effect that defines a trigger and consequence.
 
-When an out-of-turn response resolves, resolve that response before resuming the triggering event if the triggering event is still legal.
+Guard and Dodge remain defensive responses and do **not** spend the Reaction.
 
-This is the current baseline only. Detailed trigger declaration, competing-response priority, simultaneous reactions, opportunity-attack integration, and broader interruption procedure remain explicit follow-up work.
+### Response windows and nested responses
+
+When an action/event creates a valid trigger, pause that action/event before it resolves.
+
+For responses to the **same trigger occurrence**:
+
+1. identify all reserved Interceptions whose declared triggers have occurred;
+2. eligible creatures decide whether to declare optional Reactions before same-trigger responses begin resolving;
+3. same-trigger responses resolve in Initiative order among their users;
+4. if one of those responses creates a new trigger, open a nested response window and resolve that newer window before returning to the older response;
+5. after all responses are resolved, return to the original action/event and re-check whether it is still legal.
+
+Once a Reaction is declared or a reserved Interception has triggered, its action capacity is committed. It may still resolve if the original action is later cancelled, provided the responding action/effect itself remains legal.
+
+### Interception
+
+**Interception** is a timing mechanic, not a separate action category and not an automatic Interrupt.
+
+On the reserving creature's turn:
+
+1. reserve one otherwise legal action/effect;
+2. declare a specific trigger with a meaningful possibility that it will not occur;
+3. commit the required action capacity immediately.
+
+Other costs such as VP are paid at the action/effect's normal resolution timing unless its own rule says otherwise.
+
+An Interception reservation is **atomic**:
+
+- one reservation may contain one legal **Attack Unit** action/effect; or
+- one action/effect that is inherently a **Full Action**;
+- a Full Action reservation cannot be used to bundle several ordinary Attack-Unit attacks into one Interception.
+
+A single trigger occurrence can release **at most one reserved Interception from the same creature**.
+
+If the creature reserved several Interceptions with the same trigger, they apply to successive qualifying trigger occurrences rather than all firing together. If fewer trigger occurrences happen than the creature reserved for, the unused reservations are lost when their reservation window expires.
+
+Different creatures may each have one Interception released by the same trigger occurrence. Once that trigger has occurred, those Interceptions remain triggered even if an earlier response Interrupts the original action; they still resolve if their own actions/effects remain legal.
+
+Unless another rule gives a different reservation window, an unused Interception expires at the start of the reserving creature's next turn.
+
+### Interception versus Interrupt
+
+An ordinary Interception resolves **before** its triggering action but does not automatically cancel that action.
+
+After the Interception resolves, re-check the triggering action under the new circumstances:
+
+- if the action is still legal, it continues;
+- if the Interception changed the fiction so the action is no longer legal, the action fails and its committed cost is lost;
+- if the action remains legal but circumstances changed, resolve it using the new circumstances and applicable modifiers.
+
+For example, causing an attacker to fall prone does not inherently cancel an attack. If the attack is still legal while prone, it continues under the applicable prone rules. If the fall moves the attacker out of reach or otherwise makes the attack impossible, it fails naturally.
+
+An **Interrupt** is an explicit consequence that cancels the action currently being resolved.
+
+- by default, Interrupt cancels only that current action and its committed cost;
+- interrupting one attack in an Attack Sequence does not cancel the remaining committed attacks;
+- cancelling the remaining Attack Sequence or ending the creature's turn requires explicit stronger wording;
+- one current action can only be explicitly cancelled once. Additional responses that were already triggered may still resolve, but additional Interrupt components cannot consume extra Attack Units from that same cancelled action.
+
+Weapons, maneuvers, techniques, or other rules may grant or improve deliberate disruption/Interrupt capability. No ordinary Interception gains automatic interruption merely because it hits, and the universal numerical modifier for a generic Disrupting Interception is not locked here.
+
+## Opportunity framework
+
+An **Opportunity** is an authored event that exposes a creature to an Opportunity Attack. The movement/reach subsystem will define its general movement triggers; existing specific rules may define other opportunities.
+
+### Opportunity Response
+
+```text
+Opportunity Capacity = Physical Tempo
+```
+
+The first time a creature chooses to exploit an Opportunity in a round:
+
+1. spend its available Reaction;
+2. activate its **Opportunity Response** until Round End;
+3. make one eligible Opportunity Attack against that triggering creature.
+
+While Opportunity Response remains active:
+
+- the creature may make additional Opportunity Attacks without spending another Reaction;
+- it may make at most Opportunity Capacity Opportunity Attacks during that round in total;
+- each distinct Opportunity trigger can produce at most **one** Opportunity Attack from that creature;
+- one creature may trigger multiple distinct Opportunities during the round;
+- several eligible enemies may each exploit the same Opportunity with their own Opportunity Response/capacity.
+
+An Opportunity Attack is one attack authorized by the triggering rule, normally a melee attack unless that rule says otherwise. It does not consume a future Attack Unit and is not a full Attack Sequence.
+
+A generic Opportunity Attack does **not** automatically Interrupt the provoking action. A trigger may explicitly say that a successful Opportunity Attack Interrupts it. Firing a bow or crossbow while threatened is one existing such special case.
+
+Spending the Reaction to activate Opportunity Response means that Reaction is no longer available for another Reaction effect during that round, even if Opportunity Capacity remains unused.
 
 ## Duration language
 
@@ -267,9 +392,10 @@ Character turn
 
 During/between turns
 → Guard / Dodge
-→ Reactions
-→ reserved Interceptions
-→ future opportunity attacks and other interruptions
+→ Reactions and nested response windows
+→ atomic reserved Interceptions
+→ Opportunity Response / Opportunity Attacks
+→ explicit Interrupts
 
 Round End
 → round-end effects
@@ -279,11 +405,8 @@ Round End
 
 The following remain deliberately unresolved or only minimally integrated here:
 
-- detailed Reaction declaration and competing-trigger priority;
-- detailed Interception declaration/priority refinements;
-- general turn-declaration rules beyond the timing skeleton;
-- movement allowance, splitting movement, reach, and engagement;
-- opportunity attacks;
+- movement allowance, splitting movement, reach, engagement, and the general movement-based Opportunity triggers;
+- exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - complete surprise/unaware rules;
 - hazard values and physical-hazard procedures;
 - conditions.
