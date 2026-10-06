@@ -10,6 +10,10 @@ For each enemy's declared **Attack Sequence**, the defender assigns one of three
 2. **Dodge**
 3. **Guard**
 
+For a **standalone attack** that occurs outside an Attack Sequence—such as an attack made by a Reaction, Interception, Opportunity Attack, Full Action, or explicit follow-up—the defender assigns **Take Hit, Dodge, or Guard after that attack is declared and before its attack roll resolves**.
+
+Standalone attacks use the **same round defense resources** as attacks inside Attack Sequences. Guard spends normal Guard capacity, and choosing Dodge uses the defender's current Dodge Pressure and increments it normally. There is no separate out-of-turn defense pool.
+
 Repeated incoming attacks do not automatically reduce defense. Only repeated chosen Dodges create Dodge Pressure.
 
 ## Take Hit
