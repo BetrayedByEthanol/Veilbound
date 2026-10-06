@@ -29,7 +29,7 @@ A Pillar surge does not require prior Pillar weakness and does not require a cri
 
 The locked general pattern is:
 
-> **successful practice → adoption → cultural reinforcement → concentrated collective commitment/celebration → Pillar surge**
+> **successful practice → adoption → cultural reinforcement → synchronized collective Volition/commitment → Pillar surge**
 
 Important contributors may include:
 
@@ -40,6 +40,8 @@ Important contributors may include:
 - visible successful results;
 - synchronized celebration, rite, victory, harvest, unveiling, or similar event;
 - explicit prayer or thanks, although formal religion is not mandatory.
+
+The concentration that produces a surge is collective Volition coherently expressing the Pillar pattern; prayer can help coordinate that Volition but is not a separate fuel.
 
 Priests may help cultivate these conditions but cannot simply perform a ritual and manufacture an Anointed.
 
