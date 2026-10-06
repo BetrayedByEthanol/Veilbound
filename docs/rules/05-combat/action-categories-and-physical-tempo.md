@@ -1,6 +1,6 @@
 # Action Categories and Physical Tempo
 
-> Canonical extraction from Core Rules Audit v34. Initiative and the round/turn timing skeleton are now defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). General movement/reach, opportunity attacks, and detailed Reaction/Interception declaration priority remain unresolved.
+> Canonical extraction from Core Rules Audit v34. Initiative, turn declaration, Reactions, Interception, interruption timing, and the general Opportunity Attack capacity framework are defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). General movement/reach and movement-based Opportunity triggers remain unresolved.
 
 ## Physical Tempo
 
@@ -54,12 +54,19 @@ Permanent or long-term binding into magic items is a separate future subsystem.
 
 ## Interception
 
-Interception is a **timing mechanic**, not a separate spell/effect category.
+Interception is a **timing mechanic**, not a separate spell/effect category and not an automatic Interrupt.
 
-To intercept, reserve an otherwise valid action or effect and declare a specific trigger with a meaningful failure case.
+To intercept, reserve one otherwise valid action/effect and declare a specific trigger with a meaningful failure case.
 
-When the trigger occurs, the reserved effect resolves using its normal Attack Unit, Full Action, or other category and its normal VP cost.
+A reservation is atomic:
 
-Unless another rule gives a different reservation window, the reservation lasts until the start of the reserving character's next turn. If the trigger never occurs, the reserved action is lost.
+- one Attack Unit action/effect; or
+- one action/effect that is inherently a Full Action.
 
-Detailed competing-trigger priority and declaration procedure remain follow-up work. See [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).
+A Full Action cannot be used to bundle several ordinary Attack Units into one Interception.
+
+Only one reserved Interception from the same creature can release from one trigger occurrence. Multiple reservations with the same trigger apply to successive qualifying occurrences.
+
+When a trigger occurs, the reserved effect resolves using its normal action/effect rules and costs. If too few trigger occurrences happen, unused reservations are lost when they expire.
+
+See [Initiative and Round/Turn Procedure](initiative-and-round-structure.md) for response order, nested responses, interruption, and Opportunity timing.
