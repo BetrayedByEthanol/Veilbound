@@ -7,6 +7,15 @@
 - **INHERITED FROM 5e** — Veilbound currently assumes the D&D 5e rule rather than defining its own.
 - **CONFLICTING** — two or more files, or two parts of one file, give incompatible rules.
 - **MISSING** — a rule required to run the game is not actually defined in these eight files.
+- **SUPERSEDED** — the audit finding accurately described the legacy source set, but a later canonical rule now replaces it.
+
+## October 2026 supersession note
+
+This audit records the state of the legacy source set and is no longer itself the source of truth where later canonical files exist.
+
+In particular, the former **"desire / will over faith"** fuel wording is superseded. Current canon defines **Volition as the fundamental force that sustains Pillars; belief gives that Volition meaning and helps stabilize Pillar identity**. See `docs/world/veil-and-pillars.md` and `docs/rules/07-veil-magic/metaphysical-foundation.md`.
+
+Several legacy conflict rows below are marked **SUPERSEDED** where native canonical rules have since resolved them. Pillar communication remains genuinely unresolved.
 
 ## Source-of-truth hierarchy
 
@@ -131,8 +140,8 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Rule / concept | Status | Audit finding |
 |---|---|---|
 | The Veil is a parallel non-physical realm underlying reality | **LOCKED** | Clear and consistent. All magic ultimately originates through the Veil. |
-| There are no actual gods | **LOCKED** | Pillars are emergent forces created by accumulated human desire rather than creator-deities. |
-| Will/desire is the fundamental source of Pillar energy | **LOCKED** | “Will over faith” is one of the clearest setting principles. |
+| There are no actual gods | **LOCKED / UPDATED** | Pillars remain emergent rather than creator-deities. Later canon supersedes "accumulated desire" as fuel: Volition is fundamental; belief gives meaning and stability. |
+| Volition is the fundamental source of Pillar energy | **SUPERSEDED** | The legacy "will/desire" and "will over faith" wording is replaced by the canonical model: Volition sustains Pillars; desire supplies motive, belief supplies meaning, and will selects/sustains direction. |
 | Power rewards internal coherence rather than morality | **LOCKED** | The Veil is morally neutral; conviction and self-consistency matter more than virtue. |
 | Pillars are semi-conscious pattern-recognition structures | **LOCKED** | They recognize energy signatures, learn patterns and react instinctively, but do not possess normal human cognition. |
 | Pillars cannot directly communicate like gods | **CONFLICTING** | Worldbuilding says they cannot communicate directly, while Oracle/Prophet material refers to divine visions, interpreting Pillar will and speaking for the Pillar. Clarify whether these are inference, symbolic manifestations, or literal communication. |
@@ -158,7 +167,7 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Focus VP multipliers: 1 / 0.75 / 0.5 | **LOCKED** | Present in the finalized/integrated VP system. |
 | Martial-Only Focus | **PROVISIONAL** | Appears in character creation, but disappears from the specialization/mastery architecture and “total build options.” It is not developed into a playable path. |
 | Native ability chassis | **LOCKED** | Strength, Agility, Precision, Intellect, Awareness, Presence, Vitality, Veil Affinity and Veil Control replace the inherited D&D six-ability chassis. |
-| Archetype casting-stat mapping | **CONFLICTING / REQUIRES REWRITE** | Existing files reference WIS/CHA/INT/CON. Those legacy mappings must be translated onto the new Intellect / Presence / Vitality / Veil Affinity model. |
+| Archetype casting-stat mapping | **SUPERSEDED** | Native canon no longer assigns one mandatory mundane casting stat by Archetype. Individual magical operations author the abilities they actually use. |
 | Ability-score generation | **LOCKED** | All nine abilities begin at −2. Character creation uses 28 points with escalating cumulative costs: −2=0, −1=1, 0=2, +1=3, +2=5, +3=7, +4=10. Normal creation cap is +4. |
 | Training / skill model | **LOCKED** | Narrow acquired trainings use +0 to +4 and pair situationally with an ability. Generic umbrella skills such as Perception, Investigation, Athletics and Persuasion are deliberately avoided. Custom narrow trainings are allowed. |
 | Training bonus progression | **LOCKED** | None +0, Familiar +1, Trained +2, Expert +3, Master +4. This does not use the 5e proficiency bonus. |
@@ -186,7 +195,7 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Group checks / helping | **MISSING** | Core individual resolution is locked, but cooperative assistance/group-resolution rules still need definition. |
 | Extended tasks / progress clocks | **MISSING** | No procedure. |
 | When the GM should call for a roll | **LOCKED** | Do not roll for routine/trivial competence. Passive uncertainty uses 10 + modifiers; active tasks with safe time allow roll/Take 10/Take 20; pressured or consequential tasks require a roll. |
-| Old freeform “Performing Miracles” procedure | **CONFLICTING** | `veilbound_rework.md` uses 3–5 VP plus a Faith Check; newer mechanics use spell-level VP costs and normally no casting roll for Priest/Scholar/Anointed. Decide whether freeform miracles are removed or retained as a separate improvisational system. |
+| Old freeform “Performing Miracles” procedure | **SUPERSEDED** | The canonical Priest Miracle Petition system replaces the legacy Faith Check/freeform procedure. |
 
 ---
 
@@ -266,13 +275,13 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 |---|---|---|
 | Emotion-linked natural magic | **LOCKED** | This is one of the strongest archetype identities. |
 | Eight core emotions | **LOCKED** | Joy, sadness, anger, fear, surprise, disgust, trust, anticipation. |
-| Number/permanence of emotion-aspect links | **CONFLICTING** | Integrated mechanics says **8 permanent pairs set at creation**. Worldbuilding says people may have fewer and can unlock aspects by learning new emotions. |
+| Number/permanence of emotion-aspect links | **SUPERSEDED** | Canonical Gifted rules use exactly **8 permanent emotion-to-Aspect links**, fixed at birth. |
 | Natural vs invoked emotion casting | **LOCKED** concept | Both are consistently distinguished. |
 | Intentional casting-check DCs | **PROVISIONAL** | A DC-by-Resonance table exists, but the exact roll formula is not cleanly stated in the integrated mechanics. |
 | Accidental manifestation trigger from overwhelming emotion | **PROVISIONAL** | Detailed and usable, but heavily GM-discretionary. |
-| Emotional Stability Check | **CONFLICTING** | Formula already adds Resonance directly, while a second modifier table adds another ±2 for high/low Resonance, making double-counting ambiguous. |
-| d100 manifestation table | **CONFLICTING** | Results become more dangerous as the roll rises, yet positive Resonance adds +10/+20/+30 and is described as making results safer. Negative Resonance subtracts while being described as more dangerous. The sign is backwards unless the result table is reversed. |
-| Low-Focus Gifted `+20 = safer` interaction | **CONFLICTING** | Confirms the same sign-direction problem. |
+| Emotional Stability Check | **SUPERSEDED** | Replaced by the current Gifted Emotion Establishment / Deepen Emotion / Instability procedures using universal Resonance where explicitly stated. |
+| d100 manifestation table | **SUPERSEDED** | The legacy d100 manifestation table is not part of the current Gifted foundation. |
+| Low-Focus Gifted `+20 = safer` interaction | **SUPERSEDED** | Retired with the legacy d100 manifestation table. |
 | Suppression / Redirection / Grounding | **PROVISIONAL** | Detailed subsystem, but not yet integrated into the base level progression. |
 | Complex-emotion fusion | **PROVISIONAL** | Explicitly an advanced, GM-creative rule. |
 | Voluntary emotional overload | **PROVISIONAL** | Playable draft, but depends on fixing the manifestation-table direction first. |
@@ -290,10 +299,10 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Destiny Point pool = Proficiency Bonus | **LOCKED** | Dedicated and integrated files agree. |
 | DP recovery from mission progress | **PROVISIONAL** | Entirely milestone/GM-discretion based. |
 | Signature base scaling | **PROVISIONAL** | Dedicated file gives a complete draft, but it is not demonstrated for all 48 aspects and has not been balance-validated. |
-| DP enhancement list/costs | **CONFLICTING** | `veilbound_mechanics.md` and `veilbound_anointed.md` give materially different options and costs. Example: Area Expansion is 1 DP in one and 2 DP in the dedicated file. |
+| DP enhancement list/costs | **SUPERSEDED** | Current Anointed canon uses Destiny and Aspect Authority rather than the conflicting legacy DP enhancement lists. |
 | Secondary miracles cost +50% VP | **PROVISIONAL** | Defined only in the dedicated file. |
 | Falling/abandoning mission | **PROVISIONAL** | “Lose all powers permanently”/must start a new path is dramatic but lacks formal triggers and recovery/exception rules. |
-| Anointed can be gained later through prestige | **CONFLICTING** | Prestige material says a Priest may earn Anointed status through devotion, contradicting the birth-during-surge rule. Decide whether Ascension is an explicit exception or rewrite Priest+Anointed hybrids as characters born Anointed who later train as Priests. |
+| Anointed can be gained later through prestige | **SUPERSEDED** | Current Anointed canon states that Anointed are born during a Pillar surge and are not later granted the Archetype by ordinary training. Separate multi-pathing rules remain future work. |
 
 ---
 
@@ -338,7 +347,7 @@ Against an incoming attack, the defender chooses one of only **three core respon
 | Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **INHERITED FROM 5e** | Used extensively without a conditions appendix. |
 | Exhaustion | **INHERITED FROM 5e** | Used as a capstone cost, but version/effects are not specified. |
 | Critical-hit core rule | **LOCKED FRAMEWORK / DAMAGE BONUS PENDING** | Natural 1 is an automatic miss without fumble. Natural 20 creates a confirmation-based critical opportunity; a second natural 20 creates a Devastating Critical. Exact Strong Hit/Critical damage bonuses remain to be calibrated. |
-| Low-Focus Extra Attack progression | **CONFLICTING** | Dedicated talent file gives 2 attacks at 5, 3 at 11, 4 at 17; mastery material later says Low Focus “improves to 3 attacks” at level 18. |
+| Low-Focus Extra Attack progression | **SUPERSEDED** | Replaced by canonical Physical Tempo formulas and the current Focus/level cadence. |
 | Medium-Focus attack progression | **PROVISIONAL** | Baseline is 2 attacks from level 5, but specific specializations/masteries can increase it. Needs a single progression table. |
 | Fighting Styles | **INHERITED FROM 5e** | Mostly direct 5e Fighting Styles with minor additions. |
 | Superiority Dice / Combat Talents | **PROVISIONAL**, 5e-derived | A detailed system exists, but much is adapted directly from Battle Master mechanics and has not been integrated across all Focus paths. |
