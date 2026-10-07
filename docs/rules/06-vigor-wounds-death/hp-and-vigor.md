@@ -36,7 +36,23 @@ These throughput values remain subject to encounter calibration.
 
 Because regeneration resolves only once each round, multiple attacks can overwhelm current HP before regeneration occurs even when substantial Vigor remains.
 
+## Vigor recovery
+
+A character has:
+
+```
+Vigor Recovery = 25% of Max Vigor
+```
+
+Round recovery fractions **half up** to the nearest whole point: a fractional part of .5 or greater rounds up; a fractional part below .5 rounds down. Minimum recovery is 1 Vigor when Max Vigor is above 0.
+
+For every **completed 6-hour interval** of elapsed in-world time, restore one Vigor Recovery amount, up to Max Vigor. Partial intervals grant no recovery.
+
+This uses the same recovery cadence and rounding rule as VP.
+
 ## Anti-regeneration effects
+
+**Vigor damage does not directly deal or convert into HP damage.** It removes regenerative reserve, reducing the character's ability to restore HP, repair wounds, and spend Vigor to offset Dying losses. A character at 0 Vigor can therefore become more vulnerable to later HP loss or death without Vigor damage itself being HP damage.
 
 Valid mechanics may include:
 
