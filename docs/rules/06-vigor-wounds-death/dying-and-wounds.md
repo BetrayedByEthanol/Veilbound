@@ -70,6 +70,8 @@ Wound repair cost represents bodily trauma and does not scale with level.
 | Irreparable | Cannot be naturally reconstructed |
 | Fatal | Immediate death; no natural repair |
 
+A wound's repair requirement may exceed the character's current or even maximum Vigor. That is intentional: natural regeneration is not guaranteed to solve every injury at every level. Such a wound remains unrepaired until sufficient regenerative reserve becomes available or an explicit external healing, reconstruction, medical, or other rule addresses it.
+
 Current example values:
 
 | Wound | Repair requirement / class |
