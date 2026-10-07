@@ -60,6 +60,8 @@ When a valid Manifestation creates an independent physical phenomenon and that p
 
 A technique may separately deal Vigor damage if authored to disrupt regenerative reserve. Vigor damage does not directly reduce HP.
 
+**Standard Veil Control scaling does not automatically add damage to an HP-damage packet.** A technique that is intended to scale HP damage with Veil Control must explicitly author and calibrate that scaling rather than inheriting the Standard Vigor-damage packet.
+
 ## Persistent Expression Cadence
 
 Any sustained, persistent, attached, embodied, invested, consecrated, routed or similar effect that can interact repeatedly with ordinary actions must declare an **Expression Cadence** for each output.
