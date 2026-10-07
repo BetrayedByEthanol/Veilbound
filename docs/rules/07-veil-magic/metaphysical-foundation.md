@@ -60,6 +60,8 @@ Worship, vows, doctrine, ritual, and institutions do not create a separate form 
 
 A single act may reinforce more than one Pillar when multiple principles genuinely motivate it. The actor's established intent is the primary guide; cultural framing may clarify ambiguous cases but does not override the actor's actual Volition.
 
+For a player character, the **player establishes the character's genuine intent**, constrained by previously established fiction, motives, and choices. For an NPC, the **GM establishes intent** under the same constraint. Intent cannot be retroactively redefined solely to redirect which Pillar an already-established act reinforces.
+
 Personal Volition and Pillar strength are separate bookkeeping:
 
 - **VP expenditure does not inherently feed a Pillar.** Spending or committing VP on a technique contributes nothing merely because VP was used.
