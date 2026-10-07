@@ -36,6 +36,8 @@ A parrying dagger improves the Riposte attack bonus to **+3** instead of +2.
 
 ## Dual wield
 
+The **Light** and **Medium** labels in this section are weapon-handling classes for dual wield. They are **not** the same thing as the current **Light Physical Contribution** damage category. Final weapon-class assignments remain unresolved until the weapon-family/handedness pass is completed.
+
 At the start of the wielder's turn, choose the offensive or defensive use. The character does not gain both in the same turn.
 
 - **Light + Light:** either gain **+1 off-hand Attack** that turn, or use the defensive off-hand framework for **+1 Guard capacity** until the start of the wielder's next turn.
