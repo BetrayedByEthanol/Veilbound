@@ -63,6 +63,14 @@ Valid mechanics may include:
 - blocking external Vigor restoration;
 - temporary maximum-Vigor reduction.
 
+Unless an effect explicitly says it reduces or prevents **Vigor Recovery**, anti-regeneration effects do **not** stop the normal 6-hour Vigor Recovery cadence.
+
+In particular:
+
+- **regeneration suppression** stops or alters the Regeneration Step and related HP/wound-repair use of Vigor;
+- **blocking external Vigor restoration** stops Vigor supplied by another creature, technique, item, or other external source;
+- neither automatically prevents the character's own elapsed-time Vigor Recovery.
+
 ## Wound triggers
 
 Ordinary hits do not normally create persistent wounds. A wound occurs only when:

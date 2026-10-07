@@ -70,7 +70,15 @@ Wound repair cost represents bodily trauma and does not scale with level.
 | Irreparable | Cannot be naturally reconstructed |
 | Fatal | Immediate death; no natural repair |
 
-A wound's repair requirement may exceed the character's current or even maximum Vigor. That is intentional: natural regeneration is not guaranteed to solve every injury at every level. Such a wound remains unrepaired until sufficient regenerative reserve becomes available or an explicit external healing, reconstruction, medical, or other rule addresses it.
+A wound's repair requirement may exceed the character's current or even maximum Vigor. Repair is **incremental and cumulative**, not a lump-sum payment.
+
+Each point of regeneration throughput allocated to wound repair consumes **1 Vigor** and adds **1 point of Repair Progress** to that wound. Repair Progress persists between turns, encounters, rests, and Vigor Recovery intervals unless an explicit effect removes it.
+
+When accumulated Repair Progress reaches the wound's Repair Requirement, that wound is repaired. A character may therefore naturally repair a large wound over multiple Vigor-recovery cycles even when the wound's total requirement exceeds Max Vigor.
+
+External healing, reconstruction, or medical rules may add Repair Progress, substitute another resource, accelerate recovery, or bypass part of this procedure when they explicitly say so.
+
+**Irreparable** wounds do not accumulate ordinary natural Repair Progress toward reconstruction; they require an explicit effect capable of reconstructing the lost structure. **Fatal** wounds use no repair track because death has already occurred.
 
 Current example values:
 
@@ -81,7 +89,7 @@ Current example values:
 | Severed tendon | 15 |
 | Broken leg | 20 |
 | Major artery | 20 plus ongoing bleeding |
-| Destroyed eye | Irreparable unless an explicit reconstruction effect applies |
+| Destroyed eye | ~25 |
 | Shattered leg | 30 |
 | Punctured lung | 30 |
 | Severe abdominal organ injury | 30 |
@@ -114,9 +122,9 @@ Resolve this procedure during the character's Regeneration Step. If no Vigor is 
 1. determine available regeneration throughput;
 2. spend 1 point to cancel the default -1 HP Dying loss for that round, if possible and desired;
 3. apply the default Dying loss if it was not cancelled;
-4. use remaining throughput toward the active Wound Repair Requirement;
+4. use remaining throughput to spend Vigor and add cumulative Repair Progress to the active wound;
 5. prevent, offset, or medically control additional bleeding or similar ongoing losses where the relevant rules permit;
-6. once the wound is repaired, remaining throughput in that regeneration step may restore HP;
+6. once accumulated Repair Progress reaches the Wound Repair Requirement, the wound is repaired; remaining throughput in that regeneration step may then restore HP;
 7. once HP rises above 0, the character can regain consciousness unless another effect prevents it.
 
 Medicine can stabilize, stop bleeding, immobilize injuries, and otherwise suppress ongoing consequences without necessarily restoring HP or completing supernatural tissue reconstruction.
