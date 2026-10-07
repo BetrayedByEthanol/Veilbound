@@ -46,11 +46,11 @@ Standard Veil Control packet =
 max(Veil Control, 0) × Character Level
 ```
 
-For a damaging technique, the standard packet is **bonus Vigor damage** unless that technique explicitly defines another use for the packet.
+For a straightforward **single-target damaging technique**, add the Standard Veil Control packet once to that technique's authored **Vigor-damage packet against that target**, unless the technique explicitly defines another use for the packet.
 
-The standard packet is applied **once per technique resolution**, not once per projectile, target, Attack Unit, pulse, or repeated hit, unless the technique explicitly defines a different coefficient and cadence.
+The standard packet is not implicitly repeated per projectile, target, Attack Unit, pulse, or repeated hit.
 
-This is the baseline for straightforward single-target magical output. Area, multi-hit, rapid-fire, persistent, healing, control, defensive, utility, and other effects should author their own coefficient, parameter, or cadence when applying the full standard packet would multiply output excessively or scale the wrong property.
+Area, multi-target, multi-hit, rapid-fire, persistent, healing, control, defensive, utility, and other effects must explicitly author their own Veil Control coefficient, parameter, distribution, or cadence. They do not inherit one full Standard Veil Control packet per target or hit merely by referring to Veil Control.
 
 Negative Veil Control does not create negative bonus output.
 
