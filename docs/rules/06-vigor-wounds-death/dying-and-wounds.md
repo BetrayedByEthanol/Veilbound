@@ -42,9 +42,20 @@ Weapon trauma type determines the relevant injury family.
 
 Severity is determined by the event that caused the wound rather than by a second random roll.
 
-- **Called Shot:** normally Serious if it qualifies; exceptional results may upgrade it.
-- **0 HP:** Serious or Critical depending on how far the attack carries the target below zero. The exact overkill threshold remains unresolved.
-- **Devastating Critical:** at least Critical and may be Fatal when the weapon, location and circumstances physically permit it.
+The canonical wound ladder is:
+
+> **Serious → Severe → Critical → Catastrophic → Irreparable or Fatal**
+
+**Irreparable** and **Fatal** are different terminal outcomes:
+
+- **Irreparable:** the character may survive, but ordinary natural Vigor regeneration cannot reconstruct the lost or destroyed structure. A fully severed limb is the baseline example. Prosthetics, exceptional reconstruction, or an explicit supernatural technique may still provide another solution.
+- **Fatal:** the injury destroys a vital structure so completely that the character dies rather than entering the ordinary Dying process. Decapitation is the baseline example. Once actually dead, ordinary Vigor regeneration cannot restart the body.
+
+Event guidance:
+
+- **Called Shot:** normally Serious if it qualifies; exceptional results may upgrade to Severe, Critical, Catastrophic, or become Irreparable where the attack physically severs or destroys a structure.
+- **0 HP:** normally Serious, Severe, or Critical depending on how far the attack carries the target below zero and the resulting injury. Exact overkill thresholds remain unresolved.
+- **Devastating Critical:** at least Critical; sufficiently destructive results may become Catastrophic or Irreparable, and may be Fatal when the weapon, location, and circumstances physically destroy a vital structure.
 
 ## Repair requirement
 
@@ -56,23 +67,27 @@ Wound repair cost represents bodily trauma and does not scale with level.
 | Severe | ~20 Vigor |
 | Critical | ~30 Vigor |
 | Catastrophic | 40+ Vigor |
-| Irreparable / immediately fatal | Cannot be naturally regenerated |
+| Irreparable | Cannot be naturally reconstructed |
+| Fatal | Immediate death; no natural repair |
+
+A wound's repair requirement may exceed the character's current or even maximum Vigor. That is intentional: natural regeneration is not guaranteed to solve every injury at every level. Such a wound remains unrepaired until sufficient regenerative reserve becomes available or an explicit external healing, reconstruction, medical, or other rule addresses it.
 
 Current example values:
 
-| Wound | Repair requirement |
+| Wound | Repair requirement / class |
 |---|---:|
 | Deep arm wound | 10 |
 | Broken arm | 15 |
 | Severed tendon | 15 |
 | Broken leg | 20 |
 | Major artery | 20 plus ongoing bleeding |
-| Destroyed eye | ~25 |
+| Destroyed eye | Irreparable unless an explicit reconstruction effect applies |
 | Shattered leg | 30 |
 | Punctured lung | 30 |
 | Severe abdominal organ injury | 30 |
-| Crushed skull | 40+ |
-| Decapitation / destroyed vital structure beyond repair | — |
+| Crushed skull | 40+ or Fatal where the brain is destroyed |
+| Fully severed limb | Irreparable |
+| Decapitation | Fatal |
 
 Specific wounds may impose ongoing effects until treated or repaired, such as bleeding, reduced movement, impaired Dodge, reduced regeneration throughput, or sensory penalties.
 

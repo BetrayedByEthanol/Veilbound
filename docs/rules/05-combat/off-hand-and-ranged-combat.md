@@ -29,7 +29,8 @@ A Riposte:
 - spends one of the defender's normal Attack units;
 - gains **+2 to the attack roll**;
 - is not a free additional attack;
-- consumes the opening after one attack.
+- consumes the opening after one attack;
+- is an explicit follow-up that may target the same attacker even if that attacker already received an Attack Sequence from the riposting character during the same turn.
 
 A parrying dagger improves the Riposte attack bonus to **+3** instead of +2.
 
@@ -37,9 +38,11 @@ A parrying dagger improves the Riposte attack bonus to **+3** instead of +2.
 
 At the start of the wielder's turn, choose the offensive or defensive use. The character does not gain both in the same turn.
 
-- **Light + Light:** either gain **+1 off-hand Attack** that turn, or **+1 Guard capacity** until the next turn.
-- **Medium + Light:** either gain **+1 off-hand Attack with the light weapon at -2 to the attack roll**, or **+1 Guard capacity** until the next turn. A parrying dagger may also provide its Riposte improvement.
+- **Light + Light:** either gain **+1 off-hand Attack** that turn, or use the defensive off-hand framework for **+1 Guard capacity** until the start of the wielder's next turn.
+- **Medium + Light:** either gain **+1 off-hand Attack with the light weapon at -2 to the attack roll**, or use the defensive off-hand framework for **+1 Guard capacity** until the start of the wielder's next turn. A parrying dagger may also provide its Riposte improvement.
 - **Medium + Medium:** no baseline extra Attack or Guard. The benefit is flexibility to choose which weapon profile to use for each normal attack.
+
+The defensive dual-wield option is the same **defensive off-hand/shield Guard-capacity framework** used above; it does not stack into a second +1 Guard-capacity bonus from the same framework. If the bonus remains active through Round Begin, the refreshed Guard capacity includes that +1 until it expires at the start of the wielder's next turn.
 
 A granted off-hand Attack is an **ordinary on-turn attack** for Attack Sequence declaration. If used against a target, it must be declared as part of that target's Attack Sequence rather than added after that sequence resolves. It does not become an additional Attack Unit.
 
