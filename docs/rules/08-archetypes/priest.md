@@ -75,6 +75,8 @@ Current calibration benchmark:
 d20 + (2 × Pillar Accord) - (3 × Miracle Debt) vs 12
 ```
 
+A final total of **12 or higher succeeds**.
+
 The formula numbers are provisional; the structure is locked.
 
 ### Success
