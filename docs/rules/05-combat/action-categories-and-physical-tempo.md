@@ -25,11 +25,17 @@ Physical Tempo governs both:
 | 18 | 4 / 4 | 4 / 4 | 5 / 5 |
 | 20 | 4 / 4 | 5 / 5 | 6 / 6 |
 
-Equivalent cadence:
+Equivalent formulas:
 
-- **High Focus:** +1 Attack and +1 Guard every 6 levels.
-- **Medium Focus:** +1 Attack and +1 Guard every 5 levels.
-- **Low Focus:** +1 Attack and +1 Guard every 4 levels.
+```
+High Focus Physical Tempo = 1 + floor(Level / 6)
+Medium Focus Physical Tempo = 1 + floor(Level / 5)
+Low Focus Physical Tempo = 1 + floor(Level / 4)
+```
+
+Each point of Physical Tempo supplies one ordinary Attack Unit when the character takes the Attack action and one normal Guard capacity per round, subject to explicit modifiers.
+
+These formulas lock the current **martial Attack/Guard cadence**. They do **not** by themselves establish that every Attack-Unit technique may be repeated once per Attack Unit, nor that mixed martial/magical turns are finally balanced at high Tempo. The interaction between multiple Attack Units, repeated Veil techniques, and mixing ordinary attacks with techniques remains a calibration/rework boundary. A technique uses only the action category and repetition permissions explicitly authored for it.
 
 Training improves **quality**, not attack quantity.
 
