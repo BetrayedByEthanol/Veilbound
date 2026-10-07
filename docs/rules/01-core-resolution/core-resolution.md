@@ -72,4 +72,4 @@ The same principle applies socially: players do not need to personally deliver a
 
 On an attack roll, a natural 1 is an automatic miss. It carries no universal fumble or critical-failure effect.
 
-Natural-20 handling and non-combat natural-1/20 handling are not promoted here because their final procedures remain provisional.
+Attack-roll natural-20 handling is defined in [Defensive Responses and Criticals](../05-combat/defensive-responses-and-criticals.md#natural-20-and-confirmation). Non-combat natural-1/20 handling remains unresolved unless a specific rule states otherwise.
