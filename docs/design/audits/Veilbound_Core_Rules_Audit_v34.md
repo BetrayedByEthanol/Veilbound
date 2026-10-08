@@ -4316,7 +4316,7 @@ Diagonal step = 3 MP
 
 Movement is separate from Turn AP. Twelve MP permits 6 orthogonal squares, approximately 9 m / 30 ft, or 4 diagonal squares.
 
-Movement may be freely split around actions. An action/effect ends the current movement segment; later movement begins a new segment. Switching between Normal and Cautious Movement does not itself create a new segment.
+Movement may be freely split around actions. An action/effect begun by the **moving creature** ends that creature's current movement segment; enemy Opportunity Attacks, Reactions, and other spontaneous responses do not do so by themselves. Later movement after the mover's own intervening action/effect begins a new segment. Switching between Normal and Cautious Movement does not itself create a new segment.
 
 ## Cautious Movement
 
@@ -4363,7 +4363,7 @@ A creature may reserve any amount of remaining MP through the existing Intercept
 
 The exact route is chosen only when the trigger occurs. Reserved movement follows ordinary movement, occupancy, Cautious Movement, and Opportunity rules.
 
-When a Movement Interception resolves during another creature's movement, that active creature's movement segment ends. After the Interception resolves, the mover re-evaluates the new state and may use remaining MP as a new movement segment.
+When a Movement Interception completes at least one legal movement step during another creature's movement, that active creature's movement segment ends. Releasing the reservation without moving does not break the segment. After a qualifying Movement Interception resolves, the mover re-evaluates the new state and may use remaining MP as a new movement segment.
 
 ## Still deferred
 
