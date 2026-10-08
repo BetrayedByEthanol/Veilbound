@@ -4402,7 +4402,7 @@ Sprint Movement Allowance =
 
 An unimpaired ordinary creature therefore has **36 MP** while Sprinting.
 
-MP already spent earlier in the turn remains spent. Sprint does not create a second movement pool.
+MP already spent earlier in the turn remains spent. MP already reserved for Movement Interception also counts against the Sprint allowance. Sprint does not create a second movement pool, and Sprint MP cannot be newly reserved after Sprint is declared. A pre-existing reservation remains ordinary reserved movement rather than inheriting Sprint Heading.
 
 When Sprint movement begins, choose one of the 8 grid directions as the Sprint Heading. Sprint movement continues along that heading; stopping or changing movement segments does not reset it. Sprint cannot use Cautious Movement.
 
@@ -4468,9 +4468,9 @@ Cautious Crawl = 3 × base
 
 Thus Cautious Crawl costs 6 MP orthogonally or 9 MP diagonally before flat terrain/occupancy surcharges.
 
-Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance.
+Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance. Beginning to Stand ends the current movement segment; movement after Standing begins a new segment.
 
-If a creature was knocked Prone after Sprint was activated, it cannot Sprint while Prone; after Standing it may resume any remaining Sprint movement under the existing Sprint Heading if still legal.
+If a creature was knocked Prone after Sprint was activated, it cannot Sprint while Prone; after Standing it may resume any remaining Sprint movement as a new segment under the existing Sprint Heading if still legal.
 
 ## Explicitly unresolved
 
