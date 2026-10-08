@@ -7,6 +7,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Initiative and Round/Turn Procedure](initiative-and-round-structure.md)
 - [Turn Action Points and Tempo](action-categories-and-physical-tempo.md)
 - [Movement Foundation](movement-foundation.md)
+- [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
@@ -18,7 +19,8 @@ Durability, Dying, and wound-repair rules live under [../06-vigor-wounds-death/]
 
 The current canonical combat foundation still requires Veilbound-native rules for:
 
-- Sprint/Charge, difficult terrain, prone/crawling, climbing, swimming, jumping, squeezing, size exceptions, flight, and other special movement modes;
+- Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and other special movement modes;
+- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;

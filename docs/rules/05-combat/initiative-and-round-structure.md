@@ -274,8 +274,8 @@ Precommitted Interceptions have priority over spontaneous responses to the same 
 For each trigger occurrence:
 
 1. **Release matching Interceptions.** For each creature, identify at most one reserved Interception that releases from that trigger occurrence. If several of that creature's reservations have the same qualifying trigger, the earliest-declared matching reservation releases and the others remain reserved for later qualifying occurrences.
-2. **Resolve released Interceptions first.** Released Interceptions resolve in Initiative order among their users.
-3. **Resolve nested triggers immediately.** If an Interception creates a new trigger, open a nested response window before that Interception finishes. A valid Reaction, Opportunity Attack, or further Interception may respond to that new trigger under the normal rules.
+2. **Resolve released Interceptions first.** Released Interceptions resolve in Initiative order among their users. A released Movement Interception remains a live committed movement pool while waiting in this queue and remains subject to current mobility limits before its resolution begins.
+3. **Resolve nested triggers immediately.** If an Interception creates a new trigger, open a nested response window before that Interception finishes. A valid Reaction, Opportunity Attack, or further Interception may respond to that new trigger under the normal rules. A Movement Interception suspended by this nested window remains live and subject to mobility changes until it resumes and fully finishes.
 4. **Re-check the original event.** After all released Interceptions and their nested responses resolve, determine whether the original triggering action/event is still legal and relevant. If it has been cancelled or made impossible, it does not proceed to spontaneous responses unless a rule's trigger remains satisfied independently of the cancelled event.
 5. **Collect spontaneous responses to the original event.** If the original event remains legal/relevant, eligible creatures may declare either:
    - an optional Reaction whose trigger is satisfied;
@@ -303,10 +303,10 @@ Other costs such as VP are paid at the action/effect's normal resolution timing 
 An Interception reservation is **atomic**:
 
 - one reservation may contain one legal AP-based action/effect, committing its normal Physical, Projection, or General Tempo AP cost immediately;
-- one action/effect that is inherently a **Full Action**, which requires and commits the reserving creature's entire Turn AP allotment; or
+- one action/effect that is inherently a **Full Action and otherwise eligible for Interception**, which requires and commits the reserving creature's entire Turn AP allotment; or
 - one **Movement Interception**, committing a chosen amount of the creature's remaining MP.
 
-A Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception. A Movement Interception reserves movement only and follows the route/timing rules in [Movement Foundation](movement-foundation.md).
+A Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception. Full Action status alone does not grant reservation eligibility; specific rules may prohibit it, as Sprint does. A Movement Interception reserves movement only and follows the route/timing rules in [Movement Foundation](movement-foundation.md).
 
 A single trigger occurrence can release **at most one reserved Interception from the same creature**.
 
@@ -427,7 +427,8 @@ Round End
 
 The following remain deliberately unresolved or only minimally integrated here:
 
-- Sprint/Charge, difficult terrain, prone/crawling, climbing, swimming, jumping, squeezing, size exceptions, flight, and other special movement modes;
+- Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and other still-undefined special movement modes;
+- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - weapon-family Reach assignments beyond the ordinary adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - complete surprise/unaware rules;
