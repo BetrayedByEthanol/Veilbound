@@ -146,6 +146,90 @@ This is intentional as a baseline, but technique authoring must verify that:
 - physical HP-damage techniques do not double-dip by receiving both strong physical damage and the full standard Vigor-scaling packet;
 - techniques that should scale HP damage with Veil Control explicitly author a smaller or otherwise calibrated coefficient.
 
+
+## Medium Focus action-economy identity
+
+**Status: WATCH / NOT MATHEMATICALLY DOMINATED**
+
+Current Turn AP costs are:
+
+| Focus | Physical Action | Projection Action |
+|---|---:|---:|
+| High | 30 AP | 20 AP |
+| Medium | 24 AP | 24 AP |
+| Low | 20 AP | 30 AP |
+
+Medium Focus does not exceed the best specialist's maximum pure-action count, and only a small number of mixed physical/projection combinations are uniquely available to it at the same level. This is an **identity and calibration concern**, not proof that Medium Focus is globally dominated: High wins projection-heavy turns, Low wins physical-heavy turns, while Medium can pivot between both without paying either specialist's 30-AP off-focus cost.
+
+Do not change to a benchmark such as 22/22 AP solely from the action-count table. Reassess Medium using the full package, including:
+
+- intermediate VP capacity;
+- Focus Rate;
+- archetype-specific routing/conduit/investment mechanics;
+- mixed-turn flexibility;
+- remainder-AP behavior.
+
+If Medium consistently lacks a compelling tactical niche after those systems are represented, then test alternate AP costs and rerun the mixed-action tables.
+
+## Full Action scaling and heavy crossbows
+
+**Status: SERIOUS WEAPON-PASS DECISION**
+
+A Full Action intentionally consumes the character's entire Turn AP allotment. Its opportunity cost therefore grows as normal Physical/Projection throughput rises.
+
+The heavy crossbow currently uses one Full Action to fire and another Full Action to reload. At high level, each of those Full Actions displaces several ordinary tempo actions. This may be appropriate for an exceptionally cumbersome weapon, but it should not be accepted accidentally.
+
+During the weapon pass, explicitly compare:
+
+- keeping fire and reload as Full Actions;
+- giving one or both a fixed Turn AP cost;
+- using a staged reload, preparation, or equipment trait;
+- the resulting damage/penetration throughput against bows and melee weapons.
+
+Do not change the universal Full Action definition merely to solve the heavy-crossbow profile.
+
+## VP technique-cost design
+
+**Status: NEW CANONICAL COST-CURVE DESIGN / LEGACY TABLE ONLY A COMPARISON**
+
+The legacy technique-cost curve:
+
+```
+0.75 × tier²
+```
+
+is **not** a safe migration candidate for current canon. Current VP pools and universal Tier-9 access already expose incompatibilities, especially for Low Focus at ordinary Veil Affinity.
+
+Design and calibrate a new canonical VP cost curve against:
+
+- High / Medium / Low VP pools across levels;
+- universal technique-tier access;
+- expected encounter and recovery cadence;
+- Projection Tempo, which can reach six projected actions in a mature High-Focus turn;
+- authored repeatability and Expression Cadence.
+
+Use the legacy quadratic table only as a numerical comparison baseline. VP cost must contribute to bounding repeated projected output; cadence rules should not be the only safeguard.
+
+## Composite Casting action compression
+
+**Status: INTENTIONAL ARCHITECTURE / NUMERICAL CALIBRATION REQUIRED**
+
+High Scholar Composite Casting intentionally provides **action compression rather than VP efficiency**.
+
+Two compatible Projection components that would separately cost two Projection Actions may resolve as one Composite Projection Action, while still paying full VP for both components and reducing the Secondary's independent/numerical expression.
+
+At High Focus this can compress what would otherwise be 40 AP of separate Projection Actions into one 20-AP Composite action. That compression is intentional and is part of the High Scholar identity.
+
+Calibration must still verify that the combination of:
+
+- full Primary output;
+- reduced Secondary output/property;
+- full combined VP cost;
+- High Projection Tempo;
+- repeated Composite use where cadence permits
+
+does not produce excessive burst or utility density.
+
 ## Turn AP technique mixing
 
 **Status: ACTION-ECONOMY ARCHITECTURE LOCKED / REPEATABILITY WATCH**

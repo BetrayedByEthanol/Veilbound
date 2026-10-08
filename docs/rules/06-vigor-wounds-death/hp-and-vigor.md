@@ -34,6 +34,19 @@ Regeneration throughput = max(Vitality, 0) + Focus Rate
 
 These throughput values remain subject to encounter calibration.
 
+### Non-Dying allocation
+
+If the character is **not Dying** and has both lost HP and one or more repairable wounds with incomplete Repair Progress, the **player chooses how to allocate each point of available regeneration throughput** among:
+
+- restoring HP; and
+- adding Repair Progress to any repairable wound.
+
+Each point used either way consumes 1 Vigor unless another rule changes that conversion.
+
+This allocation may be split in any proportion during the Regeneration Step. Unspent throughput is lost when that step ends.
+
+Dying characters do **not** use this free allocation order; they use the stricter survival/wound-repair procedure in [Dying and Wounds](dying-and-wounds.md).
+
 Because regeneration resolves only once each round, multiple attacks can overwhelm current HP before regeneration occurs even when substantial Vigor remains.
 
 ## Vigor recovery

@@ -211,9 +211,9 @@ While Dying and still possessing Vigor, resolve the existing survival allocation
 1. determine available regeneration throughput;
 2. spend 1 point of throughput to cancel the default 1 HP Dying loss for this round, if possible and desired;
 3. apply the default Dying loss if it was not cancelled;
-4. use remaining throughput toward the active Wound Repair Requirement;
+4. use remaining throughput to spend Vigor and add cumulative **Repair Progress** to the active repairable wound;
 5. prevent, offset, or medically control additional bleeding or similar ongoing losses where the relevant rules permit;
-6. once the wound is repaired, remaining throughput may restore HP;
+6. once accumulated Repair Progress reaches that wound's Repair Requirement, the wound is repaired; remaining throughput may then restore HP;
 7. once HP rises above 0, the character may regain consciousness unless another effect prevents it.
 
 A Dying or unconscious creature retains its Initiative position and turn timing even when it cannot take normal actions.

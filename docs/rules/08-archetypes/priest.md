@@ -48,6 +48,14 @@ Positive Pillar Accord adds Prepared Prayer capacity:
 
 Negative Pillar Accord reduces prepared access, but the exact minimum floor remains provisional.
 
+### Why Accord affects capacity
+
+Pillar Accord does **not** represent a conscious Pillar granting permission that Scholars somehow bypass.
+
+A Scholar reproduces stable Aspect patterns through learned technical methods. A Priest instead structures practice around a sustained relationship of alignment with one Pillar. Higher Accord means the Priest's own Volition, practice, and interpretation fit that Pillar pattern more coherently, allowing more prepared expressions of that pattern to remain stably available at once.
+
+The difference is therefore **technical reproduction versus relational coherence**, not approval versus disapproval.
+
 ### Pillar Accord Bonus
 
 Positive Pillar Accord provides a small final-effect bonus equal to the positive Accord, maximum +3, where the individual technique supports it.
@@ -59,6 +67,8 @@ This bonus is **not Veil Control** and is not routinely added to attack rolls or
 ## Miracle Petition
 
 The revised Miracle Petition is an uncertain request for exceptional intervention rather than a guaranteed daily resource.
+
+Its exact metaphysical mechanism remains open. Until that mechanism is deliberately settled, describe a successful Petition provisionally as **transient localized Pillar reinforcement** or **localized pattern amplification**. Do **not** call an ordinary successful Petition a "Pillar surge": that term is reserved for the exceptional surge phenomenon associated with Anointed origin.
 
 ### Eligibility
 
