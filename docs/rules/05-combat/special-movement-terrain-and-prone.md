@@ -48,6 +48,10 @@ Sprint Movement Allowance =
 
 Sprint replaces the creature's normal Movement Allowance for that turn; it does not add a second pool. MP already spent earlier in the turn remains spent and counts against the Sprint allowance.
 
+MP already committed to a Movement Interception before Sprint is declared also counts against the Sprint allowance and remains reserved under its original reservation. **Sprint MP cannot be newly reserved for a Movement Interception after Sprint is declared.**
+
+A pre-existing Movement Interception reservation does not become Sprint movement when it later releases. It follows the ordinary reserved-movement rules and is not constrained by Sprint Heading. Because the reserved MP already counted against the Sprint allowance, this does not create additional movement beyond the Sprint total.
+
 A Sprint that has resolved is not refunded or undone merely because a later Movement Interception or other response changes the battlefield.
 
 ### Sprint Heading
@@ -232,9 +236,12 @@ Standing:
 - costs no Turn AP;
 - does not restore or reset Movement Allowance;
 - does not refund MP already spent during the turn;
+- **ends the creature's current movement segment when Standing begins**;
 - ends the Prone movement state once completed.
 
-If a creature was knocked Prone after activating Sprint, it cannot Sprint while Prone. If it later spends 4 MP to Stand and still has Sprint MP remaining, it may resume Sprint under the existing Sprint Heading unless another rule or the battlefield state prevents it.
+Any movement after Standing is completed begins a **new movement segment**.
+
+If a creature was knocked Prone after activating Sprint, it cannot Sprint while Prone. If it later spends 4 MP to Stand and still has Sprint MP remaining, it may resume Sprint as a new movement segment under the existing Sprint Heading unless another rule or the battlefield state prevents it.
 
 Whether **Standing while threatened** creates its own authored Opportunity is deliberately **not locked here**. The current general Movement Opportunity rule only triggers when voluntarily leaving a threatened square; the full Prone condition pass will determine whether Standing adds a separate trigger.
 
