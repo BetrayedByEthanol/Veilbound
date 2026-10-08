@@ -294,17 +294,19 @@ A creature with an active Opportunity Response does not need another Reaction to
 
 On the reserving creature's turn:
 
-1. reserve one otherwise legal action/effect;
+1. reserve one otherwise legal action/effect, or a Movement Interception permitted by [Movement Foundation](movement-foundation.md);
 2. declare a specific trigger with a meaningful possibility that it will not occur;
-3. commit the required action capacity immediately.
+3. commit the required action capacity or reserved MP immediately.
 
 Other costs such as VP are paid at the action/effect's normal resolution timing unless its own rule says otherwise.
 
 An Interception reservation is **atomic**:
 
-- one reservation may contain one legal AP-based action/effect, committing its normal Physical, Projection, or General Tempo AP cost immediately; or
-- one action/effect that is inherently a **Full Action**, which requires and commits the reserving creature's entire Turn AP allotment;
-- a Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception.
+- one reservation may contain one legal AP-based action/effect, committing its normal Physical, Projection, or General Tempo AP cost immediately;
+- one action/effect that is inherently a **Full Action**, which requires and commits the reserving creature's entire Turn AP allotment; or
+- one **Movement Interception**, committing a chosen amount of the creature's remaining MP.
+
+A Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception. A Movement Interception reserves movement only and follows the route/timing rules in [Movement Foundation](movement-foundation.md).
 
 A single trigger occurrence can release **at most one reserved Interception from the same creature**.
 
