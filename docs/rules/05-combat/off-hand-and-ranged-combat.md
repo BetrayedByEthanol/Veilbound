@@ -26,7 +26,7 @@ A successful **melee Guard** creates a **Riposte Opening** against that attacker
 
 A Riposte:
 
-- spends one of the defender's normal Attack units;
+- costs the defender one **Physical Action** worth of Turn AP;
 - gains **+2 to the attack roll**;
 - is not a free additional attack;
 - consumes the opening after one attack;
@@ -46,7 +46,7 @@ At the start of the wielder's turn, choose the offensive or defensive use. The c
 
 The defensive dual-wield option is the same **defensive off-hand/shield Guard-capacity framework** used above; it does not stack into a second +1 Guard-capacity bonus from the same framework. If the bonus remains active through Round Begin, the refreshed Guard capacity includes that +1 until it expires at the start of the wielder's next turn.
 
-A granted off-hand Attack is an **ordinary on-turn attack** for Attack Sequence declaration. If used against a target, it must be declared as part of that target's Attack Sequence rather than added after that sequence resolves. It does not become an additional Attack Unit.
+A granted off-hand Attack is an **ordinary on-turn attack** for Attack Sequence declaration. If used against a target, it must be declared as part of that target's Attack Sequence rather than added after that sequence resolves. It costs **no additional Turn AP** and does not increase Physical Tempo.
 
 Dedicated dual-wield development may later expand these options.
 
@@ -116,8 +116,8 @@ Firing a heavy crossbow is a **Full Action**.
 
 Reloading a heavy crossbow is also a **Full Action**.
 
-Each consumes the character's entire granted Attack-unit allotment for that turn regardless of Physical Tempo.
+Each is a **Full Action** and therefore requires the character's entire Turn AP allotment to remain available and consumes that entire allotment.
 
 Dropping a held item such as a fired crossbow is normally free.
 
-Drawing or readying another weapon costs **one Attack Unit**.
+Drawing or readying another weapon costs one **General Tempo Action (24 AP)**.
