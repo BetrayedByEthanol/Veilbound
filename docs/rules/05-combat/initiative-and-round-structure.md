@@ -303,10 +303,10 @@ Other costs such as VP are paid at the action/effect's normal resolution timing 
 An Interception reservation is **atomic**:
 
 - one reservation may contain one legal AP-based action/effect, committing its normal Physical, Projection, or General Tempo AP cost immediately;
-- one action/effect that is inherently a **Full Action**, which requires and commits the reserving creature's entire Turn AP allotment; or
+- one action/effect that is inherently a **Full Action and otherwise eligible for Interception**, which requires and commits the reserving creature's entire Turn AP allotment; or
 - one **Movement Interception**, committing a chosen amount of the creature's remaining MP.
 
-A Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception. A Movement Interception reserves movement only and follows the route/timing rules in [Movement Foundation](movement-foundation.md).
+A Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception. Full Action status alone does not grant reservation eligibility; specific rules may prohibit it, as Sprint does. A Movement Interception reserves movement only and follows the route/timing rules in [Movement Foundation](movement-foundation.md).
 
 A single trigger occurrence can release **at most one reserved Interception from the same creature**.
 
