@@ -173,6 +173,22 @@ This makes an impairment proportionally meaningful at both walking and Sprint sp
 
 An especially serious impairment may explicitly state that the creature **cannot Sprint**, regardless of remaining MP.
 
+### Becoming unable to Sprint after Sprint is active
+
+If a creature becomes **unable to Sprint** after Sprint has already replaced its Movement Allowance for the turn:
+
+1. Sprint remains activated, but its remaining Sprint MP becomes **suspended**;
+2. the creature cannot convert that suspended pool back into ordinary movement;
+3. the creature cannot spend suspended Sprint MP while the prohibition lasts unless an explicit rule permits a specific expenditure;
+4. the current Sprint movement segment ends when the prohibition takes effect;
+5. the Sprint Heading is retained.
+
+If the prohibition ends before turn cleanup, the creature may resume Sprint as a **new movement segment** using the same Sprint Heading and whatever Sprint MP remains. Any numeric movement impairment that also changed during the prohibition recalculates the Sprint allowance normally and may reduce what remains available.
+
+If the prohibition is still active at turn cleanup, all unused suspended Sprint MP is lost normally.
+
+**Prone** uses this same suspension rule. Its Standing rule is an explicit exception that allows **4 suspended Sprint MP** to be spent to Stand.
+
 Movement Allowance cannot fall below 0 MP.
 
 ### Impairments, spent MP, and Movement Interceptions
@@ -266,7 +282,7 @@ A Prone creature:
 - may normally move by **Crawling**;
 - may spend MP to **Stand**.
 
-**Sprint exception:** if Sprint has already replaced the creature's Movement Allowance for the current turn and the creature becomes Prone, that remaining Sprint allowance is suspended while Prone. It cannot be spent on Crawl or Cautious Crawl. The creature may spend **4 MP from that remaining Sprint allowance only to Stand**. If it cannot pay the 4 MP Stand cost, it cannot voluntarily move using that Sprint allowance while Prone.
+**Sprint exception:** Prone applies the general [becoming unable to Sprint after Sprint is active](#becoming-unable-to-sprint-after-sprint-is-active) rule. The suspended Sprint pool cannot fund Crawl or Cautious Crawl. Prone explicitly allows **4 MP from that suspended Sprint pool only to Stand**. If the creature cannot pay the 4 MP Stand cost, it cannot voluntarily move using that suspended Sprint allowance while Prone.
 
 ### Dropping Prone
 
@@ -335,7 +351,7 @@ Standing:
 
 Any movement after Standing is completed begins a **new movement segment**.
 
-If a creature was knocked Prone after activating Sprint, its remaining Sprint allowance is suspended except for paying the 4 MP Stand cost. If it Stands and still has Sprint MP remaining, it may resume Sprint as a new movement segment under the existing Sprint Heading unless another rule or the battlefield state prevents it.
+If a creature was knocked Prone after activating Sprint, its remaining Sprint allowance is suspended under the general cannot-Sprint rule except for paying the 4 MP Stand cost. If it Stands and still has Sprint MP remaining, the Prone prohibition ends and it may resume Sprint as a new movement segment under the existing Sprint Heading unless another rule or the battlefield state prevents it.
 
 Whether **Standing while threatened** creates its own authored Opportunity is deliberately **not locked here**. The current general Movement Opportunity rule only triggers when voluntarily leaving a threatened square; the full Prone condition pass will determine whether Standing adds a separate trigger.
 
