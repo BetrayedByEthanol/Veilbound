@@ -5,7 +5,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 ## Canonical files
 
 - [Initiative and Round/Turn Procedure](initiative-and-round-structure.md)
-- [Action Categories and Physical Tempo](action-categories-and-physical-tempo.md)
+- [Turn Action Points and Tempo](action-categories-and-physical-tempo.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
