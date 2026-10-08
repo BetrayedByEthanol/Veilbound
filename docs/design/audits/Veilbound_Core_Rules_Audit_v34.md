@@ -4393,7 +4393,7 @@ Canonical procedure lives in:
 
 ## Sprint
 
-Sprint is a **Full Action** and replaces the normal Movement Allowance for the turn.
+Sprint is a **Full Action**, is explicitly **ineligible for Interception reservation**, and replaces the normal Movement Allowance for the turn.
 
 ```text
 Sprint Movement Allowance =
@@ -4448,7 +4448,7 @@ The existing **+2 MP** allied-square surcharge remains flat and is applied after
 
 This lock defines only the movement consequences of Prone.
 
-A Prone creature cannot use ordinary walking movement or Sprint. It may Crawl or Stand.
+A Prone creature cannot use ordinary walking movement or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the remaining Sprint allowance is suspended: it cannot fund Crawl or Cautious Crawl and may be spent only on the 4 MP Stand cost until the creature is standing again.
 
 Voluntarily dropping Prone costs **0 MP / 0 Turn AP** and does not by itself end the current movement segment.
 
@@ -4470,7 +4470,7 @@ Thus Cautious Crawl costs 6 MP orthogonally or 9 MP diagonally before flat terra
 
 Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance. Beginning to Stand ends the current movement segment; movement after Standing begins a new segment.
 
-If a creature was knocked Prone after Sprint was activated, it cannot Sprint while Prone; after Standing it may resume any remaining Sprint movement as a new segment under the existing Sprint Heading if still legal.
+If a creature was knocked Prone after Sprint was activated, the remaining Sprint allowance is suspended except for paying the Stand cost; after Standing it may resume any remaining Sprint movement as a new segment under the existing Sprint Heading if still legal.
 
 ## Explicitly unresolved
 
