@@ -105,7 +105,7 @@ A naturally strong matching emotion may establish Heightened intensity without a
 
 From Evoked:
 
-- cost: **one **General Tempo Action (24 AP)****;
+- cost: **1 General Tempo Action (24 AP)**;
 - check: `d20 + Awareness + Emotional Discipline Training + Resonance` vs **DC 12** benchmark;
 - success: become Heightened for the current Emotion Window;
 - failure: remain Evoked;
@@ -113,7 +113,7 @@ From Evoked:
 
 ### Emotional Overload
 
-A Heightened Gifted may spend **one **General Tempo Action (24 AP)**** to become Overwhelming.
+A Heightened Gifted may spend **1 General Tempo Action (24 AP)** to become Overwhelming.
 
 No second emotional check is required merely to enter Overwhelming.
 
@@ -243,7 +243,7 @@ Changing Grade is Reconduction.
 
 Reconduction changes a conduit's anchor, form, or Grade.
 
-- cost: **one **General Tempo Action (24 AP)****;
+- cost: **1 General Tempo Action (24 AP)**;
 - levels 1–3: **3 Spent VP**;
 - levels 4–5: **2 Spent VP**;
 - then commit/release any VP difference required by the new Grade.
@@ -254,10 +254,10 @@ Automatic emotional retuning is not Reconduction.
 
 | Level | Medium Gifted foundation |
 |---:|---|
-| 1 | **1 conduit**; Grades I–III available; Reconduction costs 24 AP + 3 Spent VP |
+| 1 | **1 conduit**; Grades I–III available; Reconduction costs 1 General Tempo Action (24 AP) + 3 Spent VP |
 | 2 | No additional universal conduit slot is added; expression growth is primarily technique/Form content |
 | 3 | **2 conduits** |
-| 4 | +1 Ability; Reconduction cost becomes 24 AP + **2 Spent VP** |
+| 4 | +1 Ability; Reconduction cost becomes 1 General Tempo Action (24 AP) + **2 Spent VP** |
 | 5 | **3 conduits** |
 
 ### Conduit Pulse and cadence
@@ -304,7 +304,7 @@ Outside combat, the Gifted may settle into one emotion at a time for the corresp
 
 To voluntarily change Anchor:
 
-- spend **one **General Tempo Action (24 AP)****;
+- spend **1 General Tempo Action (24 AP)**;
 - genuinely evoke another linked emotion;
 - no roll if no competing dominant emotion interferes;
 - new emotion becomes Active and the new Anchor;
@@ -361,4 +361,4 @@ The current foundation supersedes:
 - Medium Conduit Form expressions and Grade scaling;
 - Low Embodied and Deep Embodiment expressions;
 - Aspect-specific Instability Profiles;
-- persistent Rider/Pulse numbers against maximum eligible tempo.
+- persistent Rider/Pulse numbers against the maximum applicable Physical or Projection Tempo.
