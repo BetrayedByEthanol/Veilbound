@@ -4438,7 +4438,7 @@ Sprint then triples the impaired normal allowance, making the impairment proport
 
 Movement Allowance cannot fall below 0 MP.
 
-Movement Interception reservations do not preserve movement capacity against later impairments. The total unreleased MP reserved for Movement Interceptions cannot exceed the creature's current **impaired normal Movement Allowance**. If a new impairment pushes the reservation total above that cap, trim the newest reservation first, then earlier reservations as necessary. Trimmed MP is lost; a reservation reduced to 0 expires; later recovery does not restore trimmed MP. Sprint does not change this cap.
+Movement Interception reservations and MP already spent during the current turn do not preserve movement capacity against later impairments. When an impairment changes during the creature's turn, recalculate the current movement allowance (including Sprint as 3 × impaired normal allowance where active); already-spent MP remains spent, and spent MP plus unreleased reserved MP cannot exceed that recalculated allowance. Separately, total unreleased reserved MP can never exceed the creature's current **impaired normal Movement Allowance**. If either cap is exceeded, trim the newest reservation first, then earlier reservations as necessary. Trimmed MP is lost; a reservation reduced to 0 expires; later recovery does not restore trimmed MP. After the turn ends, spent MP from that completed turn no longer counts against surviving reservations.
 
 ## Allied-square transit
 
