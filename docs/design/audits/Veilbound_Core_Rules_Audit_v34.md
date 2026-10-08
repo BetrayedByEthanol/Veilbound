@@ -1071,7 +1071,7 @@ Crossbows are **low-training, high-alpha** ranged weapons rather than scaling su
 
 **Firing a heavy crossbow is a Full Action. Reloading a heavy crossbow is also a Full Action.** Each requires the character's entire current Turn AP allotment to remain available and consumes that allotment. A high-Tempo character therefore does not gain multiple heavy-crossbow shots from higher Physical Tempo.
 
-Dropping a held item such as a fired crossbow is normally free. Drawing/readying another weapon costs one Attack unit. Thus a character may use a preloaded heavy crossbow as an opening Full Action, then on a later turn drop it, spend one Attack unit to draw a melee weapon, and use any remaining Attack units normally. This preserves the prepared-volley tactic without allowing a high-level character to fire the heavy crossbow and transition into melee offense during the same turn.
+Dropping a held item such as a fired crossbow is normally free. Drawing/readying another weapon costs one **General Tempo Action (24 AP)**. Thus a character may use a preloaded heavy crossbow as an opening Full Action, then on a later turn drop it, spend 24 AP to draw a melee weapon, and use any remaining Turn AP normally. This preserves the prepared-volley tactic without allowing a character to fire the heavy crossbow and transition into melee offense during the same turn.
 
 Dedicated Archers therefore outscale crossbows in sustained fire as Physical Tempo rises, while crossbows remain useful for prepared opening shots, ambushes, militia/guards and NPC volley fire.
 
@@ -4361,7 +4361,7 @@ Forced movement does not provoke by default. Teleportation/non-traversal relocat
 
 A creature may reserve any amount of remaining MP through the existing Interception framework, committing that MP immediately and declaring a specific trigger.
 
-The exact route is chosen only when the trigger occurs. Reserved movement follows ordinary movement, occupancy, Cautious Movement, and Opportunity rules.
+The exact route is chosen only when the trigger occurs. Reserved movement follows ordinary movement, occupancy, Cautious Movement, and Opportunity rules. A reserved Movement Interception cannot release during the reserving creature's own turn; it is an out-of-turn positioning reservation.
 
 When a Movement Interception completes at least one legal movement step during another creature's movement, that active creature's movement segment ends. Releasing the reservation without moving does not break the segment. After a qualifying Movement Interception resolves, the mover re-evaluates the new state and may use remaining MP as a new movement segment.
 
