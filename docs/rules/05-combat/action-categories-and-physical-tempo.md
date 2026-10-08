@@ -1,58 +1,140 @@
-# Action Categories and Physical Tempo
+# Turn Action Points and Tempo
 
-> Canonical extraction from Core Rules Audit v34. Initiative, turn declaration, Reactions, Interception, interruption timing, and the general Opportunity Attack capacity framework are defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). General movement/reach and movement-based Opportunity triggers remain unresolved.
+> Canonical Veilbound turn-economy foundation. Initiative, declaration, Reactions, Interception, interruption timing, Attack Sequences, and Opportunity timing are defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). General movement/reach and movement-based Opportunity triggers remain unresolved.
 
-## Physical Tempo
+## Turn Action Points
 
-Physical martial tempo scales by **Focus + character level** before optional inward Veil developments.
+Each character receives one shared **Turn Action Point (Turn AP)** pool on their turn.
 
-Physical Tempo governs both:
-
-- attacks available when taking the Attack action; and
-- Guard capacity available each round.
-
-| Level | High Focus | Medium Focus | Low Focus |
-|---:|---:|---:|---:|
-| 1–3 | 1 Attack / 1 Guard | 1 / 1 | 1 / 1 |
-| 4 | 1 / 1 | 1 / 1 | 2 / 2 |
-| 5 | 1 / 1 | 2 / 2 | 2 / 2 |
-| 6 | 2 / 2 | 2 / 2 | 2 / 2 |
-| 8 | 2 / 2 | 2 / 2 | 3 / 3 |
-| 10 | 2 / 2 | 3 / 3 | 3 / 3 |
-| 12 | 3 / 3 | 3 / 3 | 4 / 4 |
-| 15 | 3 / 3 | 4 / 4 | 4 / 4 |
-| 16 | 3 / 3 | 4 / 4 | 5 / 5 |
-| 18 | 4 / 4 | 4 / 4 | 5 / 5 |
-| 20 | 4 / 4 | 5 / 5 | 6 / 6 |
-
-Equivalent formulas:
-
-```
-High Focus Physical Tempo = 1 + floor(Level / 6)
-Medium Focus Physical Tempo = 1 + floor(Level / 5)
-Low Focus Physical Tempo = 1 + floor(Level / 4)
+```text
+Turn AP = min(120, 30 + 6 × (Level - 1))
 ```
 
-Each point of Physical Tempo supplies one ordinary Attack Unit when the character takes the Attack action and one normal Guard capacity per round, subject to explicit modifiers.
+Turn AP is established at the start of the character's turn and is a **turn resource**, not a round resource. Unspent Turn AP is lost during turn cleanup.
 
-These formulas lock the current **martial Attack/Guard cadence**. They do **not** by themselves establish that every Attack-Unit technique may be repeated once per Attack Unit, nor that mixed martial/magical turns are finally balanced at high Tempo. The interaction between multiple Attack Units, repeated Veil techniques, and mixing ordinary attacks with techniques remains a calibration/rework boundary. A technique uses only the action category and repetition permissions explicitly authored for it.
+| Level | Turn AP |
+|---:|---:|
+| 1 | 30 |
+| 2 | 36 |
+| 3 | 42 |
+| 4 | 48 |
+| 5 | 54 |
+| 6 | 60 |
+| 7 | 66 |
+| 8 | 72 |
+| 9 | 78 |
+| 10 | 84 |
+| 11 | 90 |
+| 12 | 96 |
+| 13 | 102 |
+| 14 | 108 |
+| 15 | 114 |
+| 16–20 | 120 |
 
-Training improves **quality**, not attack quantity.
+The shared pool means physical and projected actions compete directly for the same finite turn. Focus changes **how efficiently** that pool can be expressed, not how many separate action pools the character receives.
 
-Dodge is separate from Physical Tempo and is not usage-limited by this table.
+## Focus action costs
 
-Permanent extra-attack developments should be rare because the baseline already reaches 4 / 5 / 6 attacks at level 20.
+Tempo-scale actions use one of three AP cost classes.
 
-## Action categories
+| Focus | Physical Action | Projection Action | General Tempo Action |
+|---|---:|---:|---:|
+| **High — Projection** | 30 AP | 20 AP | 24 AP |
+| **Medium — Routing** | 24 AP | 24 AP | 24 AP |
+| **Low — Embodiment** | 20 AP | 30 AP | 24 AP |
 
-Current locked action categories used by Veil effects and combat mechanics are:
+### Physical Action
 
-- **Attack Unit:** consumes one Attack unit.
-- **Full Action:** consumes the character's entire granted Attack-unit allotment for that turn.
+A **Physical Action** is ordinary physical combat activity whose cadence should follow embodied physical tempo, including an ordinary weapon attack and other actions explicitly authored with the Physical Action cost.
+
+### Projection Action
+
+A **Projection Action** is an outward/projected Veil technique authored at tempo-action scale. It uses the Projection Action cost for the character's Focus.
+
+Projection cost does not grant universal repeatability. A technique may still be once per turn, limited by Expression Cadence, or otherwise restricted by its own rule.
+
+### General Tempo Action
+
+A **General Tempo Action** costs **24 AP** regardless of Focus.
+
+Use this for turn-economy actions whose timing should not inherently favor Embodiment or Projection, such as setup, reconfiguration, or similar neutral tempo costs when a rule explicitly assigns the General Tempo Action cost.
+
+### Full Action
+
+A **Full Action** requires the character's **entire Turn AP allotment for that turn to remain available** and consumes that entire allotment.
+
+A Full Action therefore occupies the whole AP-based action economy at every level. It does not cost a fixed 120 AP.
+
+A Full Action is not permission to bundle several ordinary tempo actions together. Only an action/effect explicitly authored as a Full Action uses this category.
+
+## Derived tempo
+
+Physical and Projection Tempo are derived values, not separate spendable pools.
+
+```text
+Physical Tempo =
+floor(Turn AP / Physical Action Cost)
+
+Projection Tempo =
+floor(Turn AP / Projection Action Cost)
+```
+
+They represent the maximum number of corresponding ordinary tempo actions the character could perform in a turn **if the entire Turn AP pool were spent only on that action class**.
+
+Mixed turns require no conversion rule: pay each action's AP cost from the same Turn AP pool.
+
+At the mature 120-AP cadence:
+
+| Focus | Physical Tempo | Projection Tempo |
+|---|---:|---:|
+| High | 4 | 6 |
+| Medium | 5 | 5 |
+| Low | 6 | 4 |
+
+Examples at 120 AP:
+
+- High Focus: Physical actions cost 30 AP; Projection actions cost 20 AP.
+- Medium Focus: both cost 24 AP.
+- Low Focus: Physical actions cost 20 AP; Projection actions cost 30 AP.
+
+Unused remainder AP does not create a partial action.
+
+## Guard and Opportunity capacity
+
+Normal Guard capacity is locked to derived Physical Tempo:
+
+```text
+Guard Capacity = Physical Tempo
+```
+
+Equipment and explicit features may modify Guard capacity.
+
+The general Opportunity framework likewise uses:
+
+```text
+Opportunity Capacity = Physical Tempo
+```
+
+Guard and Opportunity capacity are round-side resources/capacities. Spending Turn AP on Projection or General Tempo actions does **not** reduce already-derived Guard or Opportunity capacity for that round.
+
+Dodge remains separate from Physical Tempo and is not usage-limited by this table.
+
+## Granted bonus actions
+
+A rule may grant an attack or other action without an additional AP cost.
+
+Such a grant is not extra Turn AP and does not change Physical or Projection Tempo. It follows its own restrictions and still participates in procedures such as Attack Sequence declaration where applicable.
+
+Permanent or repeatable free-action grants should remain rare because they bypass the shared Turn AP economy.
+
+## Reactions and Sustained effects
+
+Current non-AP action/timing categories remain:
+
 - **Reaction:** uses the character's one Reaction. The Reaction refreshes at Round Begin.
 - **Sustained:** remains active over time and normally uses Committed VP according to the effect's rules.
 
-An effect may have an activation category and then become Sustained.
+An effect may have an AP-based activation cost and then become Sustained.
 
 Prepared effects are not a separate core action category. They are ordinary effects applied in advance with a defined duration.
 
@@ -60,19 +142,19 @@ Permanent or long-term binding into magic items is a separate future subsystem.
 
 ## Interception
 
-Interception is a **timing mechanic**, not a separate spell/effect category and not an automatic Interrupt.
+Interception is a **timing mechanic**, not a separate action category and not an automatic Interrupt.
 
 To intercept, reserve one otherwise valid action/effect and declare a specific trigger with a meaningful failure case.
 
 A reservation is atomic:
 
-- one Attack Unit action/effect; or
-- one action/effect that is inherently a Full Action.
+- one legal AP-based action/effect, committing that action's normal Physical, Projection, or General Tempo AP cost immediately; or
+- one action/effect inherently defined as a Full Action, which requires and commits the entire Turn AP allotment.
 
-A Full Action cannot be used to bundle several ordinary Attack Units into one Interception.
+A Full Action cannot be used to bundle several ordinary tempo actions into one Interception.
 
 Only one reserved Interception from the same creature can release from one trigger occurrence. Multiple reservations with the same trigger apply in declaration order to successive qualifying occurrences.
 
-When a trigger occurs, the reserved effect resolves using its normal action/effect rules and costs. If too few trigger occurrences happen, unused reservations are lost when they expire.
+Other costs such as VP are paid at the action/effect's normal resolution timing unless its own rule says otherwise.
 
 See [Initiative and Round/Turn Procedure](initiative-and-round-structure.md) for response order, nested responses, interruption, and Opportunity timing.
