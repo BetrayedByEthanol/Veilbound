@@ -1,6 +1,6 @@
 # Turn Action Points and Tempo
 
-> Canonical Veilbound turn-economy foundation. Initiative, declaration, Reactions, Interception, interruption timing, Attack Sequences, and Opportunity timing are defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). General movement/reach and movement-based Opportunity triggers remain unresolved.
+> Canonical Veilbound turn-economy foundation. Initiative, declaration, Reactions, Interception, interruption timing, Attack Sequences, and Opportunity timing are defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). Ordinary grid movement, Reach, threatened space, and movement-based Opportunity triggers are defined in [Movement Foundation](movement-foundation.md).
 
 ## Turn Action Points
 
