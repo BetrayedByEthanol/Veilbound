@@ -4436,6 +4436,8 @@ Impaired normal Movement Allowance =
 
 Sprint then triples the impaired normal allowance, making the impairment proportionally meaningful at running speed. A serious effect may explicitly prohibit Sprint.
 
+If a cannot-Sprint effect applies after Sprint is already active, the remaining Sprint pool is **suspended**, not lost or converted to ordinary movement. The current Sprint movement segment ends and Sprint Heading is retained. Suspended Sprint MP cannot be spent unless a rule explicitly permits a specific expenditure. If the prohibition ends before turn cleanup, Sprint may resume as a new movement segment under the same heading with whatever MP remains after any numeric impairment recalculation; if the prohibition persists through cleanup, the unused pool is lost. Prone uses this rule and uniquely permits 4 suspended Sprint MP to pay its Stand cost.
+
 Movement Allowance cannot fall below 0 MP.
 
 Movement Interception reservations are grouped into **reservation cohorts** by the turn whose Movement Allowance funded them. Reservations, queued releases, active/suspended releases, completed Interception spend from a cohort that still has live pools, and already-spent current-turn MP do not preserve movement capacity against later impairments. During the creature's own turn, spent MP plus unreleased reserved MP cannot exceed the recalculated current-turn allowance. Separately, Movement Interception accounting is continuously capped by the current **impaired normal Movement Allowance**: retained completed spend from cohorts that still have live pools + MP already spent by live released Interceptions + all unspent MP across unreleased, queued, active, and suspended pools cannot exceed that cap. When the cap falls, trim unreleased reservations newest-first, then released-but-not-started pools from latest pending resolution backward, then remaining MP in already-started pools newest-started first. Already-spent Interception MP is not rolled back. Completed spend stops counting only when its cohort has no live pools remaining. If retained completed spend plus live already-spent MP meets/exceeds the new cap, all remaining live Movement Interception MP is lost. Trimmed MP does not return if the impairment later ends.
@@ -4452,7 +4454,7 @@ The existing **+2 MP** allied-square surcharge remains flat and is applied after
 
 This lock defines only the movement consequences of Prone.
 
-A Prone creature cannot use ordinary walking movement or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the remaining Sprint allowance is suspended: it cannot fund Crawl or Cautious Crawl and may be spent only on the 4 MP Stand cost until the creature is standing again.
+A Prone creature cannot use ordinary walking movement or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the general active-Sprint prohibition rule suspends the remaining Sprint allowance: it cannot fund Crawl or Cautious Crawl and may be spent only on the explicit 4 MP Stand exception until the creature is standing again.
 
 Voluntarily dropping Prone costs **0 MP / 0 Turn AP** and does not by itself end the current movement segment.
 
