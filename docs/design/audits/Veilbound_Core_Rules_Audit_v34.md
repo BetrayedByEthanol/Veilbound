@@ -339,12 +339,12 @@ Against an incoming attack, the defender chooses one of only **three core respon
 
 | Rule / concept | Status | Audit finding |
 |---|---|---|
-| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, and ordinary Movement Points now have native Veilbound procedures. Specialized movement/action content remains later work. |
+| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
 | Attack action and weapon attacks | **PROVISIONAL / REQUIRES NATIVE MATH** | Universal physical Attack remains a core action. A two-ability attack formula is favored conceptually, but exact ability pairings, training contribution and attack-quality thresholds are not yet locked. |
 | Initiative | **LOCKED NATIVE SYSTEM** | Initiative, ties, late entry, round refresh, and turn timing are defined in the canonical Initiative and Round/Turn Procedure. |
-| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, and Movement Interception are defined. Sprint/Charge, terrain, special movement modes, size exceptions, and final weapon Reach assignments remain pending. |
+| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Sprint, terrain surcharges, movement impairments, allied-square transit, and Prone/Crawl/Stand movement are defined. Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
 | Damage / durability | **PARTLY LOCKED, PARTLY MISSING** | Damage normally reduces physical HP. Vigor is a regenerative reserve rather than temporary HP; some supernatural effects may target Vigor directly. Resistance/immunity categories still need native definitions. |
-| Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **INHERITED FROM 5e** | Used extensively without a conditions appendix. |
+| Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **PARTLY NATIVE / MOSTLY UNRESOLVED** | Prone now has native movement consequences (Crawl/Stand/Sprint restriction), but its attack/Guard/Dodge effects and the other named conditions still require a Veilbound-native conditions appendix. |
 | Exhaustion | **INHERITED FROM 5e** | Used as a capstone cost, but version/effects are not specified. |
 | Critical-hit core rule | **LOCKED FRAMEWORK / DAMAGE BONUS PENDING** | Natural 1 is an automatic miss without fumble. Natural 20 creates a confirmation-based critical opportunity; a second natural 20 creates a Devastating Critical. Exact Strong Hit/Critical damage bonuses remain to be calibrated. |
 | Low-Focus Extra Attack progression | **SUPERSEDED** | Replaced by canonical Physical Tempo formulas and the current Focus/level cadence. |
@@ -1055,7 +1055,7 @@ Current baseline bow/crossbow range bands are:
 | Long | 31–60 | 46.5–90 m | +5 |
 | Extreme | 61–120 | 91.5–180 m | +8 |
 
-These bands are calibrated against the locked baseline movement of 6 orthogonal squares (12 MP). Earlier drafts assumed running at roughly 12 squares; Sprint/Charge is not yet locked and the range bands should be retested when that movement layer is defined. Short-range Blink assumptions in the roughly 20–30 square range likewise remain technique calibration rather than movement-foundation canon. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
+These bands are calibrated against the locked baseline movement of 6 orthogonal squares (12 MP). Sprint is now locked at three times the impaired normal Movement Allowance—36 MP / 18 orthogonal squares for an unimpaired ordinary creature—so the range bands should be retested against that faster closing speed. Charge remains unresolved. Short-range Blink assumptions in the roughly 20–30 square range likewise remain technique calibration rather than movement-foundation canon. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
 
 ### Archer battlefield identity
 
@@ -4284,7 +4284,8 @@ The existing threatened-ranged rule is a specific stronger trigger: firing a bow
 
 Still unresolved:
 
-- Sprint/Charge, difficult terrain, prone/crawling, climbing, swimming, jumping, squeezing, size exceptions, flight, and other special movement modes;
+- Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and other special movement modes;
+- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
 - complete surprise/unaware rules;
@@ -4367,14 +4368,116 @@ When a Movement Interception completes at least one legal movement step during a
 
 ## Still deferred
 
-- Sprint and Charge;
-- extra movement purchased with Turn AP;
-- difficult terrain;
-- prone/crawling;
+- Charge and other attack-linked movement maneuvers;
+- extra movement purchased directly with Turn AP;
 - climbing, swimming, jumping/falling;
 - squeezing;
 - size-based occupancy/reach exceptions;
 - flight and other special movement modes;
 - final weapon-family Reach assignments;
 - detailed forced-movement procedures;
+- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - Reaction Blink AP Debt / Overdraw as technique/action-economy content.
+
+
+---
+
+# LOCKED UPDATE: Special Movement, Terrain, and Prone
+
+## Status: LOCKED BASELINE
+
+Canonical procedure lives in:
+
+- `docs/rules/05-combat/special-movement-terrain-and-prone.md`
+- `docs/rules/05-combat/movement-foundation.md`
+
+## Sprint
+
+Sprint is a **Full Action** and replaces the normal Movement Allowance for the turn.
+
+```text
+Sprint Movement Allowance =
+3 × impaired normal Movement Allowance
+```
+
+An unimpaired ordinary creature therefore has **36 MP** while Sprinting.
+
+MP already spent earlier in the turn remains spent. Sprint does not create a second movement pool.
+
+When Sprint movement begins, choose one of the 8 grid directions as the Sprint Heading. Sprint movement continues along that heading; stopping or changing movement segments does not reset it. Sprint cannot use Cautious Movement.
+
+If an external effect or response physically blocks further movement along the current Sprint Heading, the sprinter may pay **2 MP** for Forced Redirection and select a new heading. Voluntary turning without an external obstruction is not permitted.
+
+Sprint otherwise follows ordinary terrain, occupancy, threatened-space, and Opportunity rules.
+
+## Terrain
+
+Terrain modifies **step cost**, not whole-turn Movement Allowance.
+
+| Terrain | Step surcharge |
+|---|---:|
+| Normal | +0 MP |
+| Difficult | +2 MP |
+| Severe | +4 MP |
+| Impassable | cannot normally enter |
+
+Flat terrain and occupancy surcharges are applied after movement-mode base-cost changes.
+
+## Movement impairments
+
+Movement impairments reduce the creature's normal Movement Allowance.
+
+For the ordinary 12-MP baseline:
+
+```text
+Impaired normal Movement Allowance =
+12 MP - explicit impairment
+```
+
+Sprint then triples the impaired normal allowance, making the impairment proportionally meaningful at running speed. A serious effect may explicitly prohibit Sprint.
+
+Movement Allowance cannot fall below 0 MP.
+
+## Allied-square transit
+
+Entering an allied occupied square requires enough MP and a legal route to enter and then leave that square as one continuous passage. The mover cannot intentionally begin the passage if it would become stranded sharing the ally's square under the known state.
+
+The existing **+2 MP** allied-square surcharge remains flat and is applied after movement-mode changes.
+
+## Prone, Crawl, and Stand
+
+This lock defines only the movement consequences of Prone.
+
+A Prone creature cannot use ordinary walking movement or Sprint. It may Crawl or Stand.
+
+Voluntarily dropping Prone costs **0 MP / 0 Turn AP** and does not by itself end the current movement segment.
+
+Crawl costs:
+
+- orthogonal: **4 MP**;
+- diagonal: **6 MP**.
+
+Cautious Movement and Crawl stack additively by copies of the base step cost:
+
+```text
+Normal = 1 × base
+Cautious = 2 × base
+Crawl = 2 × base
+Cautious Crawl = 3 × base
+```
+
+Thus Cautious Crawl costs 6 MP orthogonally or 9 MP diagonally before flat terrain/occupancy surcharges.
+
+Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance.
+
+If a creature was knocked Prone after Sprint was activated, it cannot Sprint while Prone; after Standing it may resume any remaining Sprint movement under the existing Sprint Heading if still legal.
+
+## Explicitly unresolved
+
+- attack/Guard/Dodge and other combat effects of Prone;
+- whether Standing while threatened creates a separate authored Opportunity;
+- Charge;
+- climbing, swimming, jumping/falling;
+- squeezing;
+- size exceptions;
+- flight and other special movement modes.
