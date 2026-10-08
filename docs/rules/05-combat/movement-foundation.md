@@ -1,6 +1,6 @@
 # Movement Foundation
 
-> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. Sprint/Charge, difficult terrain, prone/crawling, climbing, swimming, jumping, squeezing, size exceptions, and special movement modes remain later work.
+> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md).
 
 ## Grid scale and Movement Points
 
@@ -94,6 +94,8 @@ Examples:
 | diagonal, Cautious | 8 MP |
 
 A creature cannot normally end its movement in a square occupied by an ally.
+
+Entering an allied occupied square is a transit: the mover must have enough MP and a legal route to enter and then leave that square as one continuous passage. See [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#allied-square-transit).
 
 Specific rules may later override these occupancy limits for size differences, phasing, tumbling, forced movement, or similar cases.
 
@@ -226,10 +228,8 @@ The active creature is not forced to continue along a route chosen before the In
 
 The following are intentionally not defined by Movement Foundation:
 
-- Sprint and Charge;
-- extra movement purchased through Turn AP;
-- difficult terrain;
-- prone and crawling;
+- Charge and other attack-linked movement maneuvers;
+- extra movement purchased directly through Turn AP;
 - climbing;
 - swimming;
 - jumping and falling;
@@ -238,5 +238,5 @@ The following are intentionally not defined by Movement Foundation:
 - flight and other special movement modes;
 - generic movement checks;
 - detailed forced-movement resolution;
-- movement-specific conditions;
+- movement-specific conditions beyond the locked Prone movement consequences;
 - weapon-family Reach assignments beyond the ordinary adjacent baseline.
