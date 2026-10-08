@@ -1,6 +1,6 @@
 # Turn Action Points and Tempo
 
-> Canonical Veilbound turn-economy foundation. Initiative, declaration, Reactions, Interception, interruption timing, Attack Sequences, and Opportunity timing are defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). General movement/reach and movement-based Opportunity triggers remain unresolved.
+> Canonical Veilbound turn-economy foundation. Initiative, declaration, Reactions, Interception, interruption timing, Attack Sequences, and Opportunity timing are defined in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md). Ordinary grid movement, Reach, threatened space, and movement-based Opportunity triggers are defined in [Movement Foundation](movement-foundation.md).
 
 ## Turn Action Points
 
@@ -144,14 +144,15 @@ Permanent or long-term binding into magic items is a separate future subsystem.
 
 Interception is a **timing mechanic**, not a separate action category and not an automatic Interrupt.
 
-To intercept, reserve one otherwise valid action/effect and declare a specific trigger with a meaningful failure case.
+To intercept, reserve one otherwise valid action/effect or an explicitly permitted movement reservation and declare a specific trigger with a meaningful failure case.
 
 A reservation is atomic:
 
-- one legal AP-based action/effect, committing that action's normal Physical, Projection, or General Tempo AP cost immediately; or
-- one action/effect inherently defined as a Full Action, which requires and commits the entire Turn AP allotment.
+- one legal AP-based action/effect, committing that action's normal Physical, Projection, or General Tempo AP cost immediately;
+- one action/effect inherently defined as a Full Action, which requires and commits the entire Turn AP allotment; or
+- one **Movement Interception**, committing a chosen amount of remaining MP under [Movement Foundation](movement-foundation.md).
 
-A Full Action cannot be used to bundle several ordinary tempo actions into one Interception.
+A Full Action cannot be used to bundle several ordinary tempo actions into one Interception. Reserved movement is movement, not a bundled AP-based action.
 
 Only one reserved Interception from the same creature can release from one trigger occurrence. Multiple reservations with the same trigger apply in declaration order to successive qualifying occurrences.
 
