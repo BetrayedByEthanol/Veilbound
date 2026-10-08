@@ -146,10 +146,12 @@ This is intentional as a baseline, but technique authoring must verify that:
 - physical HP-damage techniques do not double-dip by receiving both strong physical damage and the full standard Vigor-scaling packet;
 - techniques that should scale HP damage with Veil Control explicitly author a smaller or otherwise calibrated coefficient.
 
-## Action-Unit technique mixing
+## Turn AP technique mixing
 
-**Status: WATCH / possible rework**
+**Status: ACTION-ECONOMY ARCHITECTURE LOCKED / REPEATABILITY WATCH**
 
-Physical Tempo formulas now define the current martial Attack/Guard cadence, but they do not settle how many Attack-Unit Veil techniques should be repeatable in one turn or how freely martial attacks and techniques should be mixed at high Tempo.
+The shared Turn AP system now separates physical and projected action efficiency by Focus instead of allowing Physical Tempo to multiply all tempo-scale techniques.
 
-Watch for cases where rising Physical Tempo unintentionally becomes a multiplier on full technique output. Technique cadence, Attack-Unit permissions, and mixed martial/magical turns may need a dedicated action-economy pass once authored techniques exist.
+At mature cadence, High / Medium / Low Focus derive approximately 4/5/6 maximum pure-physical actions and 6/5/4 maximum pure-projection actions from the same 120-AP turn pool. Mixed turns simply pay each action's relevant AP cost.
+
+Continue watching authored techniques for repeatability problems. Projection Tempo is a maximum throughput measure, not universal permission to repeat every technique. Full-strength damage, healing, control, Vigor restoration, Composite Casting, and persistent Riders must still be calibrated against their authored cadence and VP costs.

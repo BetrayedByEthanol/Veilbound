@@ -612,49 +612,58 @@ The cleanest next design task is **combat math calibration**: finalize the two-a
 
 ---
 
-# LOCKED UPDATE: Physical Tempo Progression
+# SUPERSEDED UPDATE: Physical Tempo Progression
+
+## Status: SUPERSEDED BY TURN AP
+
+The former direct Focus/level Physical Tempo table is no longer canonical. It is replaced by the shared Turn AP architecture below. Earlier audit discussion that assumes spendable Attack Units is historical unless restated by current canonical rules.
+
+---
+
+# LOCKED UPDATE: Turn Action Points, Physical Tempo, and Projection Tempo
 
 ## Status: LOCKED
 
-Physical martial tempo now scales by **Focus + level** before optional inward Veil developments.
+All Focuses use one shared level-based Turn AP pool:
 
-**Physical Tempo** governs both:
-- attacks made when taking the Attack action; and
-- Guard capacity available each round.
+```text
+Turn AP = min(120, 30 + 6 × (Level - 1))
+```
 
-The baseline progression is:
+Turn AP begins at 30 at level 1, increases by 6 per level, reaches 120 at level 16, and remains 120 through level 20.
 
-| Level | High Focus | Medium Focus | Low Focus |
-|---:|---:|---:|---:|
-| 1–3 | 1 Attack / 1 Guard | 1 / 1 | 1 / 1 |
-| 4 | 1 / 1 | 1 / 1 | 2 / 2 |
-| 5 | 1 / 1 | 2 / 2 | 2 / 2 |
-| 6 | 2 / 2 | 2 / 2 | 2 / 2 |
-| 8 | 2 / 2 | 2 / 2 | 3 / 3 |
-| 10 | 2 / 2 | 3 / 3 | 3 / 3 |
-| 12 | 3 / 3 | 3 / 3 | 4 / 4 |
-| 15 | 3 / 3 | 4 / 4 | 4 / 4 |
-| 16 | 3 / 3 | 4 / 4 | 5 / 5 |
-| 18 | 4 / 4 | 4 / 4 | 5 / 5 |
-| 20 | 4 / 4 | 5 / 5 | 6 / 6 |
+Focus determines fixed AP efficiency:
 
-Equivalent cadence:
-- **High Focus:** +1 Attack and +1 Guard every 6 levels.
-- **Medium Focus:** +1 Attack and +1 Guard every 5 levels.
-- **Low Focus:** +1 Attack and +1 Guard every 4 levels.
+| Focus | Physical Action | Projection Action | General Tempo Action |
+|---|---:|---:|---:|
+| High — Projection | 30 AP | 20 AP | 24 AP |
+| Medium — Routing | 24 AP | 24 AP | 24 AP |
+| Low — Embodiment | 20 AP | 30 AP | 24 AP |
 
-### Design consequences
+Derived values are:
 
-- Training improves **quality**, not attack quantity.
-- Dodge remains unlimited and separate from Physical Tempo; Dodge Pressure increases only when Dodge is actually chosen.
-- Low Focus receives the strongest passive/inward physical tempo scaling.
-- Medium Focus may temporarily exceed its baseline through VP-powered inward routing effects.
-- High Focus gains the least physical tempo because more of its Veil integration is expressed through projection.
-- Permanent extra-attack developments should be rare because the baseline already reaches 4/5/6 attacks at level 20.
+```text
+Physical Tempo = floor(Turn AP / Physical Action Cost)
+Projection Tempo = floor(Turn AP / Projection Action Cost)
+Guard Capacity = Physical Tempo
+Opportunity Capacity = Physical Tempo
+```
 
-## Next unresolved combat item
+Physical Tempo and Projection Tempo are throughput measures, not separate action pools. Mixed physical/projected turns simply pay each action's AP cost from the same Turn AP pool.
 
-With attack and Guard quantity now fixed, the next priority is **Guard resolution math**: how a Guard check/value is calculated, how weapon training and shields modify it, how partial Guards work, and how Guard interacts with attack quality and armor.
+At the mature 120-AP cadence:
+
+| Focus | Physical Tempo / Guard | Projection Tempo |
+|---|---:|---:|
+| High | 4 | 6 |
+| Medium | 5 | 5 |
+| Low | 6 | 4 |
+
+A **Full Action** requires the entire current Turn AP allotment to remain available and consumes that entire allotment. It does not cost a fixed 120 AP.
+
+A **General Tempo Action** costs 24 AP regardless of Focus and is used for neutral setup/reconfiguration actions whose timing should not inherently favor Embodiment or Projection.
+
+Projection Tempo does not grant universal technique repeatability. Technique-specific cadence, VP costs, Pulse/Spend limits, and other restrictions continue to govern repeated magical output.
 
 ---
 
@@ -4053,7 +4062,7 @@ The locked turn skeleton is:
 1. Start Expiry;
 2. Regeneration Step;
 3. start-of-turn effects/hazards;
-4. establish Attack Units and other turn resources;
+4. establish Turn AP and derived Physical/Projection Tempo;
 5. start-of-turn choices, including the Gifted Emotion Establishment Step;
 6. normal turn;
 7. end-of-turn effects;
@@ -4062,7 +4071,7 @@ The locked turn skeleton is:
 
 The procedure does **not** require declaring an entire turn in advance.
 
-Attack Units are turn resources. Unspent Attack Units are lost during cleanup.
+Turn AP is a turn resource. Unspent Turn AP is lost during cleanup.
 
 ## Regeneration and Dying
 
@@ -4162,9 +4171,9 @@ All ordinary on-turn attacks against the same target are grouped into one **Atta
 
 Before rolling:
 
-- the attacker declares every ordinary on-turn attack committed against that target, including Attack-Unit attacks and any granted bonus attacks;
+- the attacker declares every ordinary on-turn attack committed against that target, including each attack's AP cost class and any granted bonus attacks;
 - for each committed attack, the attacker declares its weapon/profile and other attack-specific choices that could affect resolution;
-- the relevant Attack Units, granted attacks, and declared profiles/choices are committed;
+- the relevant Turn AP, granted attacks, and declared profiles/choices are committed;
 - the defender assigns Take Hit / Dodge / Guard to each incoming attack with those declarations known.
 
 The attacks then resolve in order. Each committed attack is its own trigger occurrence and opens its own response window immediately before its roll. If that attack survives the response window, it resolves; otherwise it is lost and the sequence proceeds to the next committed attack unless a stronger rule cancels the remaining sequence.
@@ -4207,10 +4216,10 @@ Interception remains a timing mechanic rather than an action category.
 
 A reservation contains exactly:
 
-- one legal Attack Unit action/effect; or
-- one action/effect inherently defined as a Full Action.
+- one legal AP-based action/effect, committing its normal Physical, Projection, or General Tempo AP cost; or
+- one action/effect inherently defined as a Full Action, requiring and committing the entire Turn AP allotment.
 
-A Full Action cannot be used to bundle multiple ordinary Attack Units into one Interception.
+A Full Action cannot be used to bundle multiple ordinary AP-based actions into one Interception.
 
 One trigger occurrence can release at most **one** reserved Interception from the same creature.
 
@@ -4238,7 +4247,7 @@ For an Attack Sequence:
 - remaining committed attacks continue unless a stronger rule explicitly cancels the sequence;
 - ending the entire turn requires explicit stronger wording.
 
-The same current action cannot be explicitly cancelled more than once. Other already-triggered responses may still resolve, but their Interrupt components do not consume additional Attack Units from that one cancelled action.
+The same current action cannot be explicitly cancelled more than once. Other already-triggered responses may still resolve, but their Interrupt components do not make that one cancelled action lose its committed Turn AP cost more than once.
 
 Weapon traits, maneuvers, techniques, or similar content may later improve deliberate interruption. The universal numeric cost/modifier for a generic Disrupting Interception is **not** locked here.
 

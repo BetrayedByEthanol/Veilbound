@@ -50,7 +50,7 @@ When armor limits Agility for Dodge, use the armor-cap rules in [weapons-and-arm
 
 Guard unifies parrying and blocking into one defensive response.
 
-Guard capacity is limited by Physical Tempo and may be modified by equipment. Normal Guard capacity refreshes at **Round Begin** under [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).
+Base Guard capacity equals the character's derived **Physical Tempo** and may be modified by equipment. Normal Guard capacity refreshes at **Round Begin** under [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).
 
 Base Guard Defense is:
 

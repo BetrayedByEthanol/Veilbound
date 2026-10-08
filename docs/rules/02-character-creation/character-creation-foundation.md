@@ -145,14 +145,28 @@ Use Focus:
 
 See [Volition Points](../07-veil-magic/volition-points.md).
 
-### Physical Tempo
+### Turn AP and Tempo
 
-At levels 1–3 all Focuses begin at:
+Turn AP and derived Tempo come from level plus Focus.
 
-- **1 Attack**
-- **1 Guard**
+At levels 1–2, all Focuses have:
 
-See [Action Categories and Physical Tempo](../05-combat/action-categories-and-physical-tempo.md).
+- **30 / 36 Turn AP** respectively;
+- **Physical Tempo 1**;
+- **Projection Tempo 1**;
+- **Guard Capacity 1**.
+
+At level 3, Turn AP is **42** and Focus begins to differentiate cadence:
+
+| Focus | Physical Tempo | Projection Tempo | Guard Capacity |
+|---|---:|---:|---:|
+| High — Projection | 1 | 2 | 1 |
+| Medium — Routing | 1 | 1 | 1 |
+| Low — Embodiment | 2 | 1 | 2 |
+
+Guard Capacity equals Physical Tempo unless modified by equipment or another explicit rule.
+
+See [Turn Action Points and Tempo](../05-combat/action-categories-and-physical-tempo.md).
 
 ## Step 8 — Equipment
 

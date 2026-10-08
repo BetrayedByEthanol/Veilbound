@@ -114,11 +114,11 @@ Examples may later include fire, corrosive terrain, bleeding, poison, environmen
 
 ### 4. Establish turn resources
 
-Determine the character's Attack-unit allotment for this turn from Physical Tempo and explicit modifiers.
+Determine the character's **Turn AP** allotment from level and explicit modifiers under [Turn Action Points and Tempo](action-categories-and-physical-tempo.md).
 
-Attack Units are **turn resources**, not round resources.
+Turn AP is a **turn resource**, not a round resource. Also determine the character's derived Physical Tempo and Projection Tempo from the current Turn AP allotment and the Focus-based action costs.
 
-A Full Action continues to consume the character's entire granted Attack-unit allotment for that turn.
+A Full Action may be declared only while the character's entire Turn AP allotment remains available and consumes that entire allotment.
 
 Movement allowance will also be established here once the movement subsystem is locked.
 
@@ -131,11 +131,11 @@ Current examples include:
 - choosing offensive or defensive dual-wield use;
 - the Gifted Emotion Establishment Step.
 
-The Gifted procedure remains exactly as defined in [Gifted Foundation](../08-archetypes/gifted.md): it occurs after ordinary start-of-turn housekeeping and before normal actions, and may spend an Attack Unit from the upcoming turn when its rules require it.
+The Gifted procedure remains exactly as defined in [Gifted Foundation](../08-archetypes/gifted.md): it occurs after ordinary start-of-turn housekeeping and before normal actions, and may spend the required **General Tempo Action AP** from the upcoming turn when its rules require it.
 
 ### 6. Normal turn
 
-The character may spend Attack Units, take a Full Action where legal, use techniques, make attacks, reserve eligible actions/effects for Interception, and move as permitted by the movement rules.
+The character may spend Turn AP on Physical, Projection, or General Tempo actions; take a Full Action where legal; use techniques; make attacks; reserve eligible actions/effects for Interception; and move as permitted by the movement rules.
 
 The character declares and resolves the next action or effect before choosing the next part of the turn. Costs or action capacity committed to a declaration are not refunded merely because the action is later interrupted, becomes impossible, or fails unless an explicit rule says otherwise.
 
@@ -151,7 +151,7 @@ Expire effects that explicitly last until the end of this character's turn.
 
 ### 9. Cleanup
 
-Unspent Attack Units are lost.
+Unspent Turn AP is lost.
 
 Reserved actions/effects that remain valid continue only for their defined reservation window.
 
@@ -162,7 +162,7 @@ A character does **not** declare the entire turn in advance.
 The default procedure is:
 
 1. declare the next action/effect and its target or other required choices;
-2. commit the required Attack Unit, Full Action, Reaction, reservation, or other action capacity;
+2. commit the required Turn AP, Full Action, Reaction, reservation, or other action capacity;
 3. open any applicable response window;
 4. resolve responses and nested responses;
 5. re-check whether the declared action is still legal;
@@ -171,13 +171,13 @@ The default procedure is:
 
 ### Attack Sequence
 
-When a creature makes one or more **ordinary on-turn attacks** against the same target, those attacks use one Attack Sequence. This includes attacks paid for with Attack Units and granted ordinary attacks such as the offensive dual-wield off-hand Attack.
+When a creature makes one or more **ordinary on-turn attacks** against the same target, those attacks use one Attack Sequence. This includes attacks paid for with Physical, Projection, or General Tempo AP as applicable, plus granted ordinary attacks such as the offensive dual-wield off-hand Attack.
 
 Before the first attack roll:
 
-- declare every ordinary on-turn attack currently being committed to that target, including which attacks spend Attack Units and which come from granted bonus attacks;
+- declare every ordinary on-turn attack currently being committed to that target, including each attack's AP cost class and any attacks coming from granted bonus attacks;
 - for **each committed attack**, declare the weapon/profile and all attack-specific choices that could affect its resolution, including any chosen attack mode, special option, or other required choice known at declaration time;
-- commit the required Attack Units, granted attacks, and declared attack profiles/choices immediately;
+- commit the required Turn AP, granted attacks, and declared attack profiles/choices immediately;
 - the defender assigns Take Hit, Dodge, or Guard to each incoming attack with those declared profiles/choices known before any attack roll in that sequence resolves.
 
 Then resolve the attacks in their declared order. **Each individual attack is a separate trigger occurrence.** Immediately before that attack's roll:
@@ -193,7 +193,7 @@ A creature normally begins only **one Attack Sequence against a particular targe
 
 If the target becomes unavailable or illegal before all committed attacks resolve, the unresolved attacks remain committed rather than being refunded. The attacker may redirect the unresolved remainder as a new sequence against another legal target **only if that target has not already been the target of an Attack Sequence from this attacker during the same turn**, unless an explicit rule permits reopening that target. The weapon/profile and other attack-specific choices already declared for each redirected attack remain fixed unless an explicit rule permits changing them. The new defender assigns defenses to those already-declared redirected attacks before their rolls resolve, and counts as having been the target of an Attack Sequence for that turn.
 
-A Full Action is not permission to bundle several ordinary Attack Units into one action. It is a separate action category used only by actions/effects that are actually defined as Full Actions.
+A Full Action is not permission to bundle several ordinary AP-based actions into one action. It is a separate action category used only by actions/effects that are actually defined as Full Actions.
 
 Out-of-turn attacks from a Reaction, Interception, or Opportunity normally consist of the one action/effect that authorized them and do not become an Attack Sequence unless a rule explicitly says otherwise.
 
@@ -302,9 +302,9 @@ Other costs such as VP are paid at the action/effect's normal resolution timing 
 
 An Interception reservation is **atomic**:
 
-- one reservation may contain one legal **Attack Unit** action/effect; or
-- one action/effect that is inherently a **Full Action**;
-- a Full Action reservation cannot be used to bundle several ordinary Attack-Unit attacks into one Interception.
+- one reservation may contain one legal AP-based action/effect, committing its normal Physical, Projection, or General Tempo AP cost immediately; or
+- one action/effect that is inherently a **Full Action**, which requires and commits the reserving creature's entire Turn AP allotment;
+- a Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception.
 
 A single trigger occurrence can release **at most one reserved Interception from the same creature**.
 
@@ -331,7 +331,7 @@ An **Interrupt** is an explicit consequence that cancels the action currently be
 - by default, Interrupt cancels only that current action and its committed cost;
 - interrupting one attack in an Attack Sequence does not cancel the remaining committed attacks;
 - cancelling the remaining Attack Sequence or ending the creature's turn requires explicit stronger wording;
-- one current action can only be explicitly cancelled once. Additional responses that were already triggered may still resolve, but additional Interrupt components cannot consume extra Attack Units from that same cancelled action.
+- one current action can only be explicitly cancelled once. Additional responses that were already triggered may still resolve, but additional Interrupt components cannot make that same cancelled action lose its committed Turn AP cost more than once.
 
 Weapons, maneuvers, techniques, or other rules may grant or improve deliberate disruption/Interrupt capability. No ordinary Interception gains automatic interruption merely because it hits, and the universal numerical modifier for a generic Disrupting Interception is not locked here.
 
@@ -360,7 +360,7 @@ While Opportunity Response remains active:
 - one creature may trigger multiple distinct Opportunities during the round;
 - several eligible enemies may each exploit the same Opportunity with their own Opportunity Response/capacity.
 
-An Opportunity Attack is one attack authorized by the triggering rule, normally a melee attack unless that rule says otherwise. It does not consume a future Attack Unit and is not a full Attack Sequence.
+An Opportunity Attack is one attack authorized by the triggering rule, normally a melee attack unless that rule says otherwise. It does not consume Turn AP and is not a full Attack Sequence. Its round-side limit is Opportunity Capacity.
 
 A generic Opportunity Attack does **not** automatically Interrupt the provoking action. A trigger may explicitly say that a successful Opportunity Attack Interrupts it. Firing a bow or crossbow while threatened is one existing such special case.
 
@@ -403,7 +403,7 @@ Character turn
 → start expiry
 → Regeneration Step
 → start-of-turn effects
-→ establish Attack Units
+→ establish Turn AP and derived Tempo
 → start-of-turn choices
 → normal actions/movement
 → end-of-turn effects
