@@ -67,6 +67,20 @@ High-Focus characters should receive broader and stronger projected options, wit
 
 High Focus is therefore the natural home of full-caster-like builds because most of their Veil integration is projected outward rather than embodied inwardly.
 
+## Turn-economy expression
+
+All Focuses use the same level-based Turn AP pool. Focus changes the AP efficiency of physical versus projected tempo actions:
+
+| Focus | Physical Action | Projection Action | General Tempo Action |
+|---|---:|---:|---:|
+| High — Projection | 30 AP | 20 AP | 24 AP |
+| Medium — Routing | 24 AP | 24 AP | 24 AP |
+| Low — Embodiment | 20 AP | 30 AP | 24 AP |
+
+This means High Focus can express more projected actions when spending a turn heavily on projection, Low Focus can express more physical actions when spending a turn heavily on embodiment, and Medium Focus mixes the two at equal AP efficiency. All of them draw from the same Turn AP pool.
+
+Physical Tempo and Projection Tempo are derived from that shared pool and the relevant Focus cost rather than being separate action pools.
+
 ## Cross-Focus rules
 
 1. **Level deepens Veil integration for everyone.** High-level physical characters become extraordinary because the Veil increasingly sustains and reinforces them, not because mundane biology simply scales without explanation.
@@ -82,10 +96,11 @@ High Focus is therefore the natural home of full-caster-like builds because most
 Focus also determines:
 
 - Max VP scaling;
-- Physical Tempo progression;
+- Turn AP action economy;
+- Physical and Projection Tempo;
 - the expected balance between persistent inward expression, routing, and projection.
 
 See:
 
 - [Volition Points](../07-veil-magic/volition-points.md)
-- [Action Categories and Physical Tempo](../05-combat/action-categories-and-physical-tempo.md)
+- [Turn Action Points and Tempo](../05-combat/action-categories-and-physical-tempo.md)
