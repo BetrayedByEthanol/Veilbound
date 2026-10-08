@@ -1,6 +1,6 @@
 # Initiative and Round/Turn Procedure
 
-> Canonical Veilbound combat-procedure baseline. This file locks initiative, the round/turn skeleton, turn/action declaration, Attack Sequences, Reaction timing, Interception timing, interruption behavior, Opportunity Attack capacity, core resource refresh timing, regeneration timing, and universal duration anchors. Movement/reach triggers, surprise, hazard values, and several combat maneuvers remain separate refinement work.
+> Canonical Veilbound combat-procedure baseline. This file locks initiative, the round/turn skeleton, turn/action declaration, Attack Sequences, Reaction timing, Interception timing, interruption behavior, Opportunity Attack capacity, core resource refresh timing, regeneration timing, and universal duration anchors. Ordinary grid movement, Reach, threatened space, Movement Opportunities, and Movement Interception are defined in [Movement Foundation](movement-foundation.md). Surprise, hazard values, special movement modes, and several combat maneuvers remain separate refinement work.
 
 ## Combat start
 
@@ -120,7 +120,7 @@ Turn AP is a **turn resource**, not a round resource. Also determine the charact
 
 A Full Action may be declared only while the character's entire Turn AP allotment remains available and consumes that entire allotment.
 
-Movement allowance will also be established here once the movement subsystem is locked.
+Also establish the creature's ordinary **12 MP Movement Allowance** under [Movement Foundation](movement-foundation.md). Movement Points are separate from Turn AP.
 
 ### 5. Start-of-turn choices
 
@@ -337,7 +337,7 @@ Weapons, maneuvers, techniques, or other rules may grant or improve deliberate d
 
 ## Opportunity framework
 
-An **Opportunity** is an authored event that exposes a creature to an Opportunity Attack. The movement/reach subsystem will define its general movement triggers; existing specific rules may define other opportunities.
+An **Opportunity** is an authored event that exposes a creature to an Opportunity Attack. [Movement Foundation](movement-foundation.md) defines the general voluntary-movement trigger from threatened space; specific rules may define additional Opportunities.
 
 ### Opportunity Response
 
@@ -403,7 +403,7 @@ Character turn
 → start expiry
 → Regeneration Step
 → start-of-turn effects
-→ establish Turn AP and derived Tempo
+→ establish Turn AP, derived Tempo, and Movement Allowance
 → start-of-turn choices
 → normal actions/movement
 → end-of-turn effects
@@ -425,7 +425,8 @@ Round End
 
 The following remain deliberately unresolved or only minimally integrated here:
 
-- movement allowance, splitting movement, reach, engagement, and the general movement-based Opportunity triggers;
+- Sprint/Charge, difficult terrain, prone/crawling, climbing, swimming, jumping, squeezing, size exceptions, flight, and other special movement modes;
+- weapon-family Reach assignments beyond the ordinary adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - complete surprise/unaware rules;
 - hazard values and physical-hazard procedures;
