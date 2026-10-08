@@ -46,7 +46,7 @@ A **movement segment** is one continuous period of movement between actions/effe
 - beginning an action or effect ends the current movement segment;
 - after that action/effect resolves, later movement begins a new segment;
 - switching between Normal and Cautious Movement does **not** by itself end the segment;
-- an Interception that resolves during an active creature's movement ends that creature's current movement segment as described under Movement Interception below.
+- a **Movement Interception** that resolves during an active creature's movement ends that creature's current movement segment as described under Movement Interception below.
 
 A creature may change direction, change between Normal and Cautious Movement, or stop moving without creating a new segment merely by changing movement mode. A new segment begins when movement resumes after an intervening action/effect or after an Interception has broken the segment.
 
