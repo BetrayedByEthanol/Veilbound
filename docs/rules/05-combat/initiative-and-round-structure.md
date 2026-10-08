@@ -274,8 +274,8 @@ Precommitted Interceptions have priority over spontaneous responses to the same 
 For each trigger occurrence:
 
 1. **Release matching Interceptions.** For each creature, identify at most one reserved Interception that releases from that trigger occurrence. If several of that creature's reservations have the same qualifying trigger, the earliest-declared matching reservation releases and the others remain reserved for later qualifying occurrences.
-2. **Resolve released Interceptions first.** Released Interceptions resolve in Initiative order among their users.
-3. **Resolve nested triggers immediately.** If an Interception creates a new trigger, open a nested response window before that Interception finishes. A valid Reaction, Opportunity Attack, or further Interception may respond to that new trigger under the normal rules.
+2. **Resolve released Interceptions first.** Released Interceptions resolve in Initiative order among their users. A released Movement Interception remains a live committed movement pool while waiting in this queue and remains subject to current mobility limits before its resolution begins.
+3. **Resolve nested triggers immediately.** If an Interception creates a new trigger, open a nested response window before that Interception finishes. A valid Reaction, Opportunity Attack, or further Interception may respond to that new trigger under the normal rules. A Movement Interception suspended by this nested window remains live and subject to mobility changes until it resumes and fully finishes.
 4. **Re-check the original event.** After all released Interceptions and their nested responses resolve, determine whether the original triggering action/event is still legal and relevant. If it has been cancelled or made impossible, it does not proceed to spontaneous responses unless a rule's trigger remains satisfied independently of the cancelled event.
 5. **Collect spontaneous responses to the original event.** If the original event remains legal/relevant, eligible creatures may declare either:
    - an optional Reaction whose trigger is satisfied;
