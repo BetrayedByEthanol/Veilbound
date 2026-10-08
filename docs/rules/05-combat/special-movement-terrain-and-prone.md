@@ -179,14 +179,18 @@ Movement Allowance cannot fall below 0 MP.
 
 A movement impairment applies to movement capacity that has already been partly spent, reserved, released, queued, or temporarily suspended by nested responses. None of those states preserves the old allowance.
 
-A **live Movement Interception pool** is any MP commitment that has not fully finished its Interception lifecycle. It includes:
+A **Movement Interception reservation cohort** consists of all Movement Interception reservations made from the same turn's Movement Allowance.
+
+A **live Movement Interception pool** is any MP commitment from a cohort that has not fully finished its Interception lifecycle. It includes:
 
 - an unreleased Movement Interception reservation;
 - a released Interception waiting in the Initiative-order resolution queue;
 - a released Interception currently resolving;
 - a released Interception whose resolution is temporarily suspended while a nested response resolves.
 
-A Movement Interception stops being live only when its resolution has fully finished or the reservation/pool expires or is reduced to 0 MP.
+A particular pool stops being live when its resolution fully finishes or the reservation/pool expires or is reduced to 0 MP.
+
+However, MP actually spent by a completed Movement Interception remains **retained cohort spend** while any other pool from the same reservation cohort remains live. Retained cohort spend stops being tracked only when that cohort has no live Movement Interception pools remaining.
 
 When an impairment changes during the creature's own turn:
 
@@ -205,20 +209,23 @@ MP already spent this turn
 
 If the left side exceeds the recalculated allowance, reduce unreleased reservations until the total fits. Reduce the **newest-declared Movement Interception reservation first**, then continue backward through earlier reservations if necessary. MP already spent is never retroactively undone.
 
-Separately, all live Movement Interception pools are continuously bounded by the creature's current impaired normal Movement Allowance.
+Separately, Movement Interception commitments are continuously bounded by the creature's current impaired normal Movement Allowance.
 
 At all times:
 
 ```text
-MP already spent by live released Movement Interceptions
+retained completed Interception spend
++ MP already spent by live released Movement Interceptions
 + unspent MP remaining across all live Movement Interception pools
 ≤ current impaired normal Movement Allowance
 ```
 
 For this formula:
 
-- **already spent** includes MP spent by a released Interception that has begun resolving but has not yet fully finished, even if its resolution is currently suspended by a nested response;
+- **retained completed Interception spend** is MP actually spent by completed Interceptions whose reservation cohort still has at least one live pool;
+- **already spent by live released Interceptions** includes MP spent by a released Interception that has begun resolving but has not yet fully finished, even if its resolution is currently suspended by a nested response;
 - **unspent MP** includes unreleased reservations, released-but-queued pools, the remaining MP of currently resolving Interceptions, and the remaining MP of suspended Interceptions;
+- completed spend from a cohort is discarded from this accounting only when the final live pool from that cohort finishes or expires;
 - use the creature's **normal impaired allowance** for this cap even if Sprint has replaced its current-turn allowance;
 - Sprint MP itself cannot be newly reserved.
 
@@ -234,7 +241,7 @@ If the cap is exceeded, reduce unspent live MP in this order:
 
 MP already spent by an already-started Interception is never rolled back.
 
-If the MP already spent by live released Interceptions equals or exceeds the new impaired normal Movement Allowance, all of that creature's live Movement Interceptions lose their remaining MP. A currently resolving Interception ends immediately after the effect that caused the impairment finishes resolving; queued Interceptions reduced to 0 never begin movement.
+If retained completed Interception spend plus MP already spent by live released Interceptions equals or exceeds the new impaired normal Movement Allowance, all of that creature's live Movement Interceptions lose their remaining MP. A currently resolving Interception ends immediately after the effect that caused the impairment finishes resolving; queued Interceptions reduced to 0 never begin movement.
 
 Any MP removed by these rules is lost. A reservation or released pool reduced to 0 MP expires/finishes as appropriate. Later recovery or removal of the impairment does **not** restore trimmed MP.
 
@@ -244,8 +251,9 @@ Examples:
 - A creature releases a 12-MP Movement Interception and spends 2 MP. An impairment then reduces its normal Movement Allowance to 6 MP and it has no other live pools. The released Interception is immediately reduced to **4 MP remaining**, for a maximum of 6 MP spent by that Interception in total.
 - Two of a creature's Movement Interceptions are live: one has released and is queued with 6 MP, while another 4 MP remains unreleased. If an impairment reduces the normal allowance to 6 MP, trim the unreleased 4 MP first; the queued 6-MP pool remains. If the allowance instead falls to 2 MP, the unreleased pool is lost and the queued pool is then reduced to **2 MP** before it begins.
 - A released Interception has spent 2 MP and is suspended by a nested response with 6 MP remaining. If that nested response reduces the creature's normal allowance to 4 MP and no other live pools exist, the suspended Interception is reduced to **2 MP remaining** before it resumes.
+- A creature reserves two 6-MP Movement Interceptions from the same turn. The first later resolves and spends all 6 MP while the second remains reserved. That completed 6 MP remains retained cohort spend. If an impairment then reduces the creature's normal allowance to 6 MP, the remaining 6-MP reservation is reduced to **0 MP** and expires.
 
-After the creature's own turn ends, ordinary MP spent during that completed turn no longer counts against a surviving reservation. MP spent by any **live released Movement Interception** continues to count against the live-pool cap until that Interception fully finishes.
+After the creature's own turn ends, ordinary MP spent during that completed turn no longer counts against a surviving reservation. MP spent by a live released Movement Interception continues to count while that pool is live. MP spent by a **completed** Movement Interception continues to count as retained cohort spend only while another pool from the same reservation cohort remains live. Once the cohort has no live pools remaining, its completed spend no longer affects future movement accounting.
 ## Prone movement state
 
 This section defines only the **movement consequences** of being Prone. Attack, Guard, Dodge, targeting, and any other combat consequences of Prone remain part of the later conditions/combat-position pass.
