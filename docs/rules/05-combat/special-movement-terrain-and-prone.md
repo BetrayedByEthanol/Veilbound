@@ -164,29 +164,49 @@ An especially serious impairment may explicitly state that the creature **cannot
 
 Movement Allowance cannot fall below 0 MP.
 
-### Impairments and reserved movement
+### Impairments, spent MP, and reserved movement
 
-A Movement Interception reservation does **not** preserve movement capacity against a later impairment.
+A movement impairment applies to movement capacity that has already been partly spent or reserved; neither spent movement nor a Movement Interception reservation protects the old allowance.
 
-At all times:
+When an impairment changes during the creature's own turn:
+
+1. recalculate its current normal Movement Allowance;
+2. if Sprint is active, also recalculate its current Sprint allowance as `3 × impaired normal Movement Allowance`;
+3. MP already spent during that turn remains spent and counts against the recalculated current-turn allowance;
+4. unreleased Movement Interception reservations also count against that recalculated allowance.
+
+During the creature's own turn:
 
 ```text
-total unreleased MP reserved for Movement Interceptions
+MP already spent this turn
++ total unreleased reserved MP
+≤ recalculated current-turn Movement Allowance
+```
+
+If the left side exceeds the recalculated allowance, reduce unreleased reservations until the total fits. Reduce the **newest-declared Movement Interception reservation first**, then continue backward through earlier reservations if necessary. MP already spent is never retroactively undone.
+
+Separately, at all times:
+
+```text
+total unreleased reserved MP
 ≤ current impaired normal Movement Allowance
 ```
 
-Use the creature's **normal impaired allowance** for this cap even if Sprint has replaced its current-turn allowance. Sprint MP itself cannot be newly reserved.
+Use the creature's **normal impaired allowance** for this reservation cap even if Sprint has replaced its current-turn allowance. Sprint MP itself cannot be newly reserved.
 
-Whenever an impairment lowers the normal Movement Allowance below the creature's current total of unreleased reserved MP:
+When either cap is exceeded:
 
-1. immediately reduce reserved MP until the total fits the new allowance;
-2. reduce the **newest-declared Movement Interception reservation first**, then continue backward through earlier reservations if necessary;
-3. MP removed from a reservation is lost and does not return to ordinary movement;
-4. a reservation reduced to 0 MP expires immediately.
+- trim the newest reservation first, then earlier reservations as necessary;
+- MP removed from a reservation is lost and does not return to ordinary movement;
+- a reservation reduced to 0 MP expires immediately;
+- later recovery or removal of the impairment does **not** restore trimmed MP.
 
-Example: a creature has reserved 12 MP and is then reduced to a 6-MP normal Movement Allowance. Its reservation is immediately reduced to **6 MP**. If its allowance falls to 0 MP, the reservation expires.
+Examples:
 
-If the impairment later ends or weakens, trimmed reservation MP is **not restored**.
+- A creature moves 6 MP, reserves its remaining 6 MP, then suffers an impairment that reduces its normal allowance to 6 MP. Since `6 spent + 6 reserved > 6`, the reservation is reduced to **0 MP** and expires.
+- A creature with Sprint active has a recalculated Sprint allowance of 24 MP after an impairment. If it has already spent 20 MP and has 6 MP reserved from before Sprint, only **4 MP** of that reservation can remain under the current-turn cap.
+
+After the creature's turn ends, spent MP from that completed turn no longer counts against a surviving reservation; the reservation remains subject to the separate **impaired normal Movement Allowance** cap until it releases or expires.
 
 ## Prone movement state
 
