@@ -152,7 +152,7 @@ At levels 1–3 all Focuses begin at:
 - **1 Attack**
 - **1 Guard**
 
-See [Action Categories and Physical Tempo](../05-combat/action-categories-and-physical-tempo.md).
+See [Turn Action Points and Tempo](../05-combat/action-categories-and-physical-tempo.md).
 
 ## Step 8 — Equipment
 
