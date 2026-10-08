@@ -66,9 +66,9 @@ There is no default discount. Composite Casting provides **action compression**,
 
 Use the slower action requirement of the two components:
 
-- Attack Unit + Attack Unit → 1 Attack Unit;
-- Attack Unit + Full Action → 1 Full Action;
-- Full Action + Full Action → 1 Full Action.
+- Projection Action + Projection Action → **1 Projection Action**;
+- Projection Action + Full Action → **1 Full Action**;
+- Full Action + Full Action → **1 Full Action**.
 
 Ordinary single-technique casting remains fully competent and is often the more resource-efficient choice.
 
@@ -268,4 +268,4 @@ The following remain outside the locked structural foundation:
 - exact prepared-technique counts;
 - exact prepared composite-formula counts at High levels 1–2;
 - technique-specific Intensification costs/effects;
-- numerical Composite Casting burst calibration once High Physical Tempo gains multiple Attack Units.
+- numerical Composite Casting burst calibration once High Projection Tempo supports multiple Projection Actions.
