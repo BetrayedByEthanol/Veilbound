@@ -136,7 +136,18 @@ Example in Difficult terrain:
 
 This prevents movement costs from leaving two creatures stranded in the same square.
 
-If an external response changes the battlefield after the passage has legally begun, resolve the changed state under the normal movement/interruption rules rather than retroactively making the original entry illegal.
+If an external response changes the battlefield after the passage has legally begun, do not retroactively make the original entry illegal. Resolve the response normally.
+
+If the mover can no longer complete a legal exit from the allied square because it is Prone, lacks sufficient usable MP, has every exit blocked, or is otherwise unable to leave, use **Interrupted Allied Transit**:
+
+1. keep every consequence of the interruption;
+2. return the mover to the last legal square it occupied immediately before entering the ally's square;
+3. refund **no MP** spent to enter the allied square;
+4. this fallback repositioning is not voluntary movement and does not create a Movement Opportunity.
+
+If that previous square is itself no longer legal or occupiable, place the mover in the nearest legal square adjacent to the ally's square, minimizing distance from the previous square. If several such squares are equally near, the mover chooses among them. This fallback placement likewise costs no MP and does not provoke.
+
+Only if no legal adjacent square exists may the mover temporarily co-occupy the allied square. That exceptional co-occupancy lasts only until the first legal opportunity for either creature to leave the square; neither creature may voluntarily choose to remain co-occupied when a legal separation is available.
 
 ## Movement impairments
 
@@ -166,7 +177,7 @@ Movement Allowance cannot fall below 0 MP.
 
 ### Impairments, spent MP, and reserved movement
 
-A movement impairment applies to movement capacity that has already been partly spent or reserved; neither spent movement nor a Movement Interception reservation protects the old allowance.
+A movement impairment applies to movement capacity that has already been partly spent, reserved, or released; none of those states preserves the old allowance.
 
 When an impairment changes during the creature's own turn:
 
@@ -185,29 +196,46 @@ MP already spent this turn
 
 If the left side exceeds the recalculated allowance, reduce unreleased reservations until the total fits. Reduce the **newest-declared Movement Interception reservation first**, then continue backward through earlier reservations if necessary. MP already spent is never retroactively undone.
 
-Separately, at all times:
+Separately, movement committed to Interception is always bounded by the creature's current impaired normal Movement Allowance.
+
+When no Movement Interception is currently resolving:
 
 ```text
 total unreleased reserved MP
 ≤ current impaired normal Movement Allowance
 ```
 
-Use the creature's **normal impaired allowance** for this reservation cap even if Sprint has replaced its current-turn allowance. Sprint MP itself cannot be newly reserved.
+When one Movement Interception is currently resolving:
 
-When either cap is exceeded:
+```text
+MP already spent in the current released Movement Interception
++ MP still available in that released Movement Interception
++ total unreleased reserved MP
+≤ current impaired normal Movement Allowance
+```
 
-- trim the newest reservation first, then earlier reservations as necessary;
-- MP removed from a reservation is lost and does not return to ordinary movement;
-- a reservation reduced to 0 MP expires immediately;
-- later recovery or removal of the impairment does **not** restore trimmed MP.
+Use the creature's **normal impaired allowance** for these Interception caps even if Sprint has replaced its current-turn allowance. Sprint MP itself cannot be newly reserved.
+
+### Impairment during a released Movement Interception
+
+If an impairment changes while a Movement Interception is already resolving, immediately recalculate the cap before any further step is taken.
+
+Apply the reduction in this order:
+
+1. trim **unreleased reservations newest-first**;
+2. if the cap is still exceeded, reduce the MP still available in the currently resolving Movement Interception;
+3. MP already spent by that released Interception is never rolled back;
+4. if MP already spent equals or exceeds the new impaired normal Movement Allowance, the current Movement Interception ends immediately and no further movement from it is permitted.
+
+Any MP removed by these rules is lost. A reservation reduced to 0 MP expires immediately. Later recovery or removal of the impairment does **not** restore trimmed MP.
 
 Examples:
 
 - A creature moves 6 MP, reserves its remaining 6 MP, then suffers an impairment that reduces its normal allowance to 6 MP. Since `6 spent + 6 reserved > 6`, the reservation is reduced to **0 MP** and expires.
-- A creature with Sprint active has a recalculated Sprint allowance of 24 MP after an impairment. If it has already spent 20 MP and has 6 MP reserved from before Sprint, only **4 MP** of that reservation can remain under the current-turn cap.
+- A creature releases a 12-MP Movement Interception and spends 2 MP. An impairment then reduces its normal Movement Allowance to 6 MP and it has no other reservations. The released Interception is immediately reduced to **4 MP remaining**, for a maximum of 6 MP spent by that Interception in total.
+- A creature has spent 2 MP in a released Interception and also has 4 MP in an unreleased reservation. If an impairment reduces its normal allowance to 4 MP, trim the unreleased reservation to **2 MP** first; the current Interception then has no room to spend additional MP unless further reserved MP is lost.
 
-After the creature's turn ends, spent MP from that completed turn no longer counts against a surviving reservation; the reservation remains subject to the separate **impaired normal Movement Allowance** cap until it releases or expires.
-
+After the creature's own turn ends, ordinary MP spent during that completed turn no longer counts against a surviving reservation. MP spent during a **currently resolving Movement Interception** continues to count against that released Interception's mobility cap until that Interception finishes.
 ## Prone movement state
 
 This section defines only the **movement consequences** of being Prone. Attack, Guard, Dodge, targeting, and any other combat consequences of Prone remain part of the later conditions/combat-position pass.
