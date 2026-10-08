@@ -199,7 +199,7 @@ The Consecration:
 
 **Reassign Consecration**
 
-- costs 1 Attack Unit;
+- costs one **General Tempo Action (24 AP)**;
 - moves the same effect to another valid recipient;
 - does not change the technique.
 
@@ -235,7 +235,7 @@ Each commits and resolves independently.
 
 Once per turn, Reassign one Active Consecration with **no action cost**.
 
-Further reassignments that turn still cost 1 Attack Unit.
+Further reassignments that turn still cost one **General Tempo Action (24 AP)**.
 
 The universal zero-action/no-refresh rule applies.
 
