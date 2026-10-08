@@ -12,7 +12,7 @@ A wound occurs only when:
 2. a **Devastating Critical** occurs; or
 3. the target reaches **0 HP**.
 
-A Called Shot consumes the character's entire Attack action regardless of normal attack count and carries substantial location difficulty. The exact called-shot procedure is not yet fully specified in the audit.
+The exact Called Shot action cost and procedure remain unresolved. The legacy statement that a Called Shot consumes an entire **Attack action** is superseded by the shared Turn AP architecture and must be re-authored as an explicit AP or Full Action cost during the maneuver/weapon pass. Called Shots should continue to carry substantial location difficulty.
 
 ## Random wound location
 
