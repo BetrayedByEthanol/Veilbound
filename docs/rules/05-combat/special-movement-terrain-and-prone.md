@@ -164,6 +164,30 @@ An especially serious impairment may explicitly state that the creature **cannot
 
 Movement Allowance cannot fall below 0 MP.
 
+### Impairments and reserved movement
+
+A Movement Interception reservation does **not** preserve movement capacity against a later impairment.
+
+At all times:
+
+```text
+total unreleased MP reserved for Movement Interceptions
+≤ current impaired normal Movement Allowance
+```
+
+Use the creature's **normal impaired allowance** for this cap even if Sprint has replaced its current-turn allowance. Sprint MP itself cannot be newly reserved.
+
+Whenever an impairment lowers the normal Movement Allowance below the creature's current total of unreleased reserved MP:
+
+1. immediately reduce reserved MP until the total fits the new allowance;
+2. reduce the **newest-declared Movement Interception reservation first**, then continue backward through earlier reservations if necessary;
+3. MP removed from a reservation is lost and does not return to ordinary movement;
+4. a reservation reduced to 0 MP expires immediately.
+
+Example: a creature has reserved 12 MP and is then reduced to a 6-MP normal Movement Allowance. Its reservation is immediately reduced to **6 MP**. If its allowance falls to 0 MP, the reservation expires.
+
+If the impairment later ends or weakens, trimmed reservation MP is **not restored**.
+
 ## Prone movement state
 
 This section defines only the **movement consequences** of being Prone. Attack, Guard, Dodge, targeting, and any other combat consequences of Prone remain part of the later conditions/combat-position pass.
