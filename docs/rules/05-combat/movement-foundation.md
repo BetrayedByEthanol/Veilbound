@@ -41,14 +41,15 @@ The creature does not predeclare its entire route.
 
 ## Movement segments
 
-A **movement segment** is one continuous period of movement between actions/effects.
+A **movement segment** is one continuous period of movement between actions/effects begun by the moving creature.
 
-- beginning an action or effect ends the current movement segment;
-- after that action/effect resolves, later movement begins a new segment;
+- when the **moving creature** begins one of its own actions or effects, its current movement segment ends;
+- after that action/effect resolves, later movement by that creature begins a new segment;
+- an enemy's Opportunity Attack, Reaction, or other spontaneous response does **not** by itself end the mover's segment;
 - switching between Normal and Cautious Movement does **not** by itself end the segment;
-- a **Movement Interception** that resolves during an active creature's movement ends that creature's current movement segment as described under Movement Interception below.
+- a **Movement Interception** that completes at least one legal step during an active creature's movement ends that creature's current movement segment as described under Movement Interception below.
 
-A creature may change direction, change between Normal and Cautious Movement, or stop moving without creating a new segment merely by changing movement mode. A new segment begins when movement resumes after an intervening action/effect or after an Interception has broken the segment.
+A creature may change direction, change between Normal and Cautious Movement, or stop moving without creating a new segment merely by changing movement mode. A new segment begins when movement resumes after one of the mover's own intervening actions/effects or after a qualifying Movement Interception has broken the segment.
 
 ## Cautious Movement
 
@@ -204,9 +205,11 @@ Unless another rule provides a different reservation window, unused reserved MP 
 
 ### Effect on an active mover
 
-When a Movement Interception resolves during another creature's active movement, that active creature's current movement segment ends.
+When a Movement Interception resolves during another creature's active movement, it ends that active creature's current movement segment **only if the interceptor completes at least one legal movement step**.
 
-After the Interception and any nested responses resolve:
+Merely releasing the reservation, spending 0 MP, or having too little reserved MP to complete any legal step does not break the active mover's segment. A released reservation remains committed/used under the normal Interception rules even if no movement occurs.
+
+After a Movement Interception that completed at least one legal step, and any nested responses resolve:
 
 1. re-evaluate the battlefield state;
 2. re-check whether the active creature's intended next step remains legal;
