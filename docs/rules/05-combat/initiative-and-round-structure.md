@@ -151,9 +151,9 @@ Expire effects that explicitly last until the end of this character's turn.
 
 ### 9. Cleanup
 
-Unspent Turn AP is lost.
+Unspent Turn AP and unreserved MP are lost.
 
-Reserved actions/effects that remain valid continue only for their defined reservation window.
+MP already committed to a valid Movement Interception remains reserved only for that reservation's defined window. Other reserved actions/effects likewise continue only for their defined reservation window.
 
 ## Turn declaration and Attack Sequences
 
