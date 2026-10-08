@@ -339,10 +339,10 @@ Against an incoming attack, the defender chooses one of only **three core respon
 
 | Rule / concept | Status | Audit finding |
 |---|---|---|
-| Action economy | **PARTLY MISSING / REQUIRES NATIVE DESIGN** | The defensive response model is now native, but turn actions, movement, spell timing and any reaction-like limits still need a Veilbound-specific action economy. |
+| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, and ordinary Movement Points now have native Veilbound procedures. Specialized movement/action content remains later work. |
 | Attack action and weapon attacks | **PROVISIONAL / REQUIRES NATIVE MATH** | Universal physical Attack remains a core action. A two-ability attack formula is favored conceptually, but exact ability pairings, training contribution and attack-quality thresholds are not yet locked. |
-| Initiative | **INHERITED FROM 5e** | Referenced but never established. |
-| Movement, reach and opportunity attacks | **INHERITED FROM 5e** | Feet, 5-ft reach and opportunity attacks are used directly. |
+| Initiative | **LOCKED NATIVE SYSTEM** | Initiative, ties, late entry, round refresh, and turn timing are defined in the canonical Initiative and Round/Turn Procedure. |
+| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, and Movement Interception are defined. Sprint/Charge, terrain, special movement modes, size exceptions, and final weapon Reach assignments remain pending. |
 | Damage / durability | **PARTLY LOCKED, PARTLY MISSING** | Damage normally reduces physical HP. Vigor is a regenerative reserve rather than temporary HP; some supernatural effects may target Vigor directly. Resistance/immunity categories still need native definitions. |
 | Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **INHERITED FROM 5e** | Used extensively without a conditions appendix. |
 | Exhaustion | **INHERITED FROM 5e** | Used as a capstone cost, but version/effects are not specified. |
@@ -1055,13 +1055,13 @@ Current baseline bow/crossbow range bands are:
 | Long | 31–60 | 46.5–90 m | +5 |
 | Extreme | 61–120 | 91.5–180 m | +8 |
 
-These bands are calibrated against baseline movement of 6 squares, running at roughly 12 squares, and short-range Blink effects in the roughly 20–30 square range. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
+These bands are calibrated against the locked baseline movement of 6 orthogonal squares (12 MP). Earlier drafts assumed running at roughly 12 squares; Sprint/Charge is not yet locked and the range bands should be retested when that movement layer is defined. Short-range Blink assumptions in the roughly 20–30 square range likewise remain technique calibration rather than movement-foundation canon. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
 
 ### Archer battlefield identity
 
 Archers are primarily **long-range debuff, status-delivery, interruption and Interception specialists**, rather than top sustained HP/Vigor killers. Their advantage is applying useful effects from distance and threatening declared actions or lanes. Melee/contact weapon enchantments may later support stronger direct Vigor burn and anti-regeneration than projectile enchantments, while projectile enchantments emphasize marks, debuffs, interruption, tracking, slowing, suppression and related control effects.
 
-Close range is intentionally dangerous for an Archer. Bows normally cannot Guard melee attacks; a shield is generally unavailable while actively using a two-handed bow; readying another weapon costs an Attack unit; and melee-focused characters or Spellblades can close or Blink into engagement. The close-range accuracy benefit does not remove this positional risk.
+Close range is intentionally dangerous for an Archer. Bows normally cannot Guard melee attacks; a shield is generally unavailable while actively using a two-handed bow; readying another weapon costs one General Tempo Action (24 AP); and melee-focused characters or Spellblades can close or Blink into engagement. The close-range accuracy benefit does not remove this positional risk.
 
 A bow or crossbow may be fired while the wielder is threatened in melee, but doing so provokes an opportunity attack before the ranged attack resolves. If the provoking attack hits, the ranged attack is interrupted and lost. Because an ordinary bow cannot Guard melee attacks, the Archer usually must Dodge, use an explicit magical/Veil defense, or Take Hit and accept the resulting interruption.
 
@@ -1069,7 +1069,7 @@ A bow or crossbow may be fired while the wielder is threatened in melee, but doi
 
 Crossbows are **low-training, high-alpha** ranged weapons rather than scaling sustained-fire weapons. The current heavy-crossbow baseline is **4+d8 damage, Pen 4**.
 
-**Firing a heavy crossbow is a Full Action. Reloading a heavy crossbow is also a Full Action.** Each consumes the character's entire granted Attack-unit allotment for that turn, regardless of Physical Tempo. A high-Tempo character therefore does not gain multiple heavy-crossbow shots from extra Attack units.
+**Firing a heavy crossbow is a Full Action. Reloading a heavy crossbow is also a Full Action.** Each requires the character's entire current Turn AP allotment to remain available and consumes that allotment. A high-Tempo character therefore does not gain multiple heavy-crossbow shots from higher Physical Tempo.
 
 Dropping a held item such as a fired crossbow is normally free. Drawing/readying another weapon costs one Attack unit. Thus a character may use a preloaded heavy crossbow as an opening Full Action, then on a later turn drop it, spend one Attack unit to draw a melee weapon, and use any remaining Attack units normally. This preserves the prepared-volley tactic without allowing a high-level character to fire the heavy crossbow and transition into melee offense during the same turn.
 
@@ -4126,8 +4126,8 @@ This lock deliberately does **not** close:
 - detailed Reaction declaration and competing-trigger priority;
 - detailed Interception declaration/priority refinement;
 - broader turn-declaration rules;
-- movement allowance, splitting movement, reach and engagement;
-- opportunity attacks;
+- specialized movement layers beyond the Movement Foundation;
+- weapon-family Reach assignments beyond the adjacent baseline;
 - complete surprise/unaware rules;
 - physical-hazard values/procedures;
 - conditions.
@@ -4283,10 +4283,97 @@ The existing threatened-ranged rule is a specific stronger trigger: firing a bow
 
 Still unresolved:
 
-- movement allowance and splitting movement;
-- reach, threatened space, engagement, and movement-based Opportunity triggers;
+- Sprint/Charge, difficult terrain, prone/crawling, climbing, swimming, jumping, squeezing, size exceptions, flight, and other special movement modes;
+- final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
 - complete surprise/unaware rules;
 - physical-hazard values/procedures;
 - conditions;
 - universal physical maneuvers.
+
+
+---
+
+# LOCKED UPDATE: Movement Foundation
+
+## Status: LOCKED FOUNDATION
+
+Canonical procedure lives in:
+
+- `docs/rules/05-combat/movement-foundation.md`
+- `docs/rules/05-combat/initiative-and-round-structure.md`
+
+## Grid and Movement Points
+
+One square represents approximately **1.5 m / 5 ft**.
+
+```text
+Movement Allowance = 12 MP per turn
+Orthogonal step = 2 MP
+Diagonal step = 3 MP
+```
+
+Movement is separate from Turn AP. Twelve MP permits 6 orthogonal squares, approximately 9 m / 30 ft, or 4 diagonal squares.
+
+Movement may be freely split around actions. An action/effect ends the current movement segment; later movement begins a new segment. Switching between Normal and Cautious Movement does not itself create a new segment.
+
+## Cautious Movement
+
+Cautious Movement doubles the base step cost before flat surcharges and prevents that step from creating the general Movement Opportunity for leaving threatened space.
+
+Current examples:
+
+- orthogonal Cautious step: 4 MP;
+- diagonal Cautious step: 6 MP;
+- orthogonal Cautious step through an ally: 6 MP;
+- diagonal Cautious step through an ally: 8 MP.
+
+## Occupancy and blocked corners
+
+Hostile occupied squares cannot normally be entered or passed through.
+
+Allied occupied squares may be passed through with a **+2 MP flat surcharge** applied after movement-mode multiplication, but cannot normally be used as the ending square.
+
+Diagonal movement cannot pass through the touching corner of two orthogonally adjacent blockers when no usable physical gap exists.
+
+## Reach and threatened space
+
+Melee Reach is the set of squares presently targetable by an ordinary melee attack using a ready melee capability. The ordinary baseline is the 8 surrounding squares.
+
+A creature threatens those squares while capable of the relevant melee attack. Remaining Turn AP does not determine whether Reach exists.
+
+There is no separate universal engagement lock beyond Reach, threatened space, occupancy, and authored Opportunity triggers.
+
+## Movement Opportunities
+
+Entering threatened space does not provoke by default.
+
+When a creature voluntarily attempts a **Normal** step out of a threatened square, the threatening enemy gains a Movement Opportunity **before the mover leaves the starting square**.
+
+This applies whether the destination remains threatened or lies outside Reach.
+
+The same enemy can gain at most one general Movement Opportunity from that mover during one movement segment. Cautious steps do not create this Opportunity.
+
+Forced movement does not provoke by default. Teleportation/non-traversal relocation does not provoke from skipped squares, though activating a specific effect may separately be authored to create an Opportunity.
+
+## Movement Interception
+
+A creature may reserve any amount of remaining MP through the existing Interception framework, committing that MP immediately and declaring a specific trigger.
+
+The exact route is chosen only when the trigger occurs. Reserved movement follows ordinary movement, occupancy, Cautious Movement, and Opportunity rules.
+
+When a Movement Interception resolves during another creature's movement, that active creature's movement segment ends. After the Interception resolves, the mover re-evaluates the new state and may use remaining MP as a new movement segment.
+
+## Still deferred
+
+- Sprint and Charge;
+- extra movement purchased with Turn AP;
+- difficult terrain;
+- prone/crawling;
+- climbing, swimming, jumping/falling;
+- squeezing;
+- size-based occupancy/reach exceptions;
+- flight and other special movement modes;
+- final weapon-family Reach assignments;
+- detailed forced-movement procedures;
+- Reaction Blink AP Debt / Overdraw as technique/action-economy content.
