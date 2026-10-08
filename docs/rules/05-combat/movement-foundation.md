@@ -184,7 +184,7 @@ Reaction-based Blink, next-turn AP Debt, and any desperation Overdraw rule are t
 
 ## Movement Interception
 
-Movement may be reserved through the existing **Interception** framework.
+Movement may be reserved through the existing **Interception** framework. Sprint-specific limits on reserving MP are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#sprint).
 
 On the reserving creature's turn:
 
