@@ -48,7 +48,7 @@ max(Veil Control, 0) × Character Level
 
 For a straightforward **single-target damaging technique**, add the Standard Veil Control packet once to that technique's authored **Vigor-damage packet against that target**, unless the technique explicitly defines another use for the packet.
 
-The standard packet is not implicitly repeated per projectile, target, Attack Unit, pulse, or repeated hit.
+The standard packet is not implicitly repeated per projectile, target, AP-based action, pulse, or repeated hit.
 
 Area, multi-target, multi-hit, rapid-fire, persistent, healing, control, defensive, utility, and other effects must explicitly author their own Veil Control coefficient, parameter, distribution, or cadence. They do not inherit one full Standard Veil Control packet per target or hit merely by referring to Veil Control.
 
@@ -66,12 +66,12 @@ A technique may separately deal Vigor damage if authored to disrupt regenerative
 
 Any sustained, persistent, attached, embodied, invested, consecrated, routed or similar effect that can interact repeatedly with ordinary actions must declare an **Expression Cadence** for each output.
 
-- **Continuous** — a static or persistent property. It does not multiply with Attack Units and normally remains active while the effect remains valid.
-- **Rider** — a modest effect that may apply to each eligible action, attack, Guard, movement or other listed event. Rider values must be calibrated against the maximum Physical Tempo capable of triggering them.
+- **Continuous** — a static or persistent property. It does not multiply merely because a character can spend more Turn AP and normally remains active while the effect remains valid.
+- **Rider** — a modest effect that may apply to each eligible action, attack, Guard, movement or other listed event. Rider values must be calibrated against the maximum eligible Physical or Projection Tempo capable of triggering them.
 - **Pulse** — a stronger finite effect with an explicit refresh unit such as once per turn, round, Emotion Window or another authored interval.
 - **Spend** — a stronger repeatable output that requires an explicit additional cost each time it is used, such as VP, Vigor, Destiny or another listed resource.
 
-A full technique-scale instance of damage, healing, Vigor restoration, strong control or comparable major output must not be an unrestricted per-Attack-Unit Rider. Use Pulse, Spend, a finite budget or another explicitly bounded cadence.
+A full technique-scale instance of damage, healing, Vigor restoration, strong control or comparable major output must not be an unrestricted per-action Rider merely because the user can afford several AP-based actions. Use Pulse, Spend, a finite budget or another explicitly bounded cadence.
 
 A single effect may contain multiple cadence components, but each component must state its own cadence.
 
@@ -89,5 +89,6 @@ These are descriptors and permissions, not automatic bonuses.
 - **Conduit Form compatibility** — defines which Medium-Gifted conduit forms may express the technique or Aspect package.
 - **Investment compatibility** — defines which Vessel categories a Medium Anointed may validly invest for that interaction.
 - **Cadence** — declares each persistent output as Continuous, Rider, Pulse, Spend or another explicitly bounded cadence.
+- **Action cost** — when activated during ordinary turn economy, states whether the technique uses a Physical Action cost, Projection Action cost, General Tempo Action cost, Full Action, Reaction, or another explicitly authored timing/cost. Outward tempo-scale [Projection] techniques normally use the character's Projection Action cost unless a technique says otherwise.
 
 Archetype-specific rules may add narrower qualifiers, but should not duplicate an existing universal concept without a mechanical reason.
