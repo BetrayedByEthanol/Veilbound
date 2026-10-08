@@ -4438,11 +4438,13 @@ Sprint then triples the impaired normal allowance, making the impairment proport
 
 Movement Allowance cannot fall below 0 MP.
 
-Movement Interception reservations and MP already spent during the current turn do not preserve movement capacity against later impairments. When an impairment changes during the creature's turn, recalculate the current movement allowance (including Sprint as 3 × impaired normal allowance where active); already-spent MP remains spent, and spent MP plus unreleased reserved MP cannot exceed that recalculated allowance. Separately, total unreleased reserved MP can never exceed the creature's current **impaired normal Movement Allowance**. If either cap is exceeded, trim the newest reservation first, then earlier reservations as necessary. Trimmed MP is lost; a reservation reduced to 0 expires; later recovery does not restore trimmed MP. After the turn ends, spent MP from that completed turn no longer counts against surviving reservations.
+Movement Interception reservations, already-spent current-turn MP, and a Movement Interception already in resolution do not preserve movement capacity against later impairments. During the creature's own turn, spent MP plus unreleased reserved MP cannot exceed the recalculated current-turn allowance. Separately, Interception movement is capped by the current **impaired normal Movement Allowance**: when no Interception is resolving, this caps total unreleased reserved MP; while one is resolving, it caps MP already spent by that released Interception + its remaining available MP + all unreleased reservations. On a mid-resolution impairment, trim unreleased reservations newest-first, then trim the current Interception's remaining MP; already-spent Interception MP is not rolled back, and if it equals/exceeds the new cap the Interception ends immediately. Trimmed MP is lost and does not return if the impairment later ends.
 
 ## Allied-square transit
 
 Entering an allied occupied square requires enough MP and a legal route to enter and then leave that square as one continuous passage. The mover cannot intentionally begin the passage if it would become stranded sharing the ally's square under the known state.
+
+If an interruption makes the passage impossible after entry, keep the interruption's consequences and return the mover to the last legal square it occupied before entering the ally's square, with no MP refund and no Movement Opportunity from the fallback. If that square is no longer legal, use the nearest legal square adjacent to the ally's square, minimizing distance from the prior square; ties are chosen by the mover. Temporary co-occupancy is permitted only when no legal adjacent fallback exists and must end at the first legal opportunity.
 
 The existing **+2 MP** allied-square surcharge remains flat and is applied after movement-mode changes.
 
