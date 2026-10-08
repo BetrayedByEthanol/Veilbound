@@ -4438,6 +4438,8 @@ Sprint then triples the impaired normal allowance, making the impairment proport
 
 Movement Allowance cannot fall below 0 MP.
 
+Movement Interception reservations do not preserve movement capacity against later impairments. The total unreleased MP reserved for Movement Interceptions cannot exceed the creature's current **impaired normal Movement Allowance**. If a new impairment pushes the reservation total above that cap, trim the newest reservation first, then earlier reservations as necessary. Trimmed MP is lost; a reservation reduced to 0 expires; later recovery does not restore trimmed MP. Sprint does not change this cap.
+
 ## Allied-square transit
 
 Entering an allied occupied square requires enough MP and a legal route to enter and then leave that square as one continuous passage. The mover cannot intentionally begin the passage if it would become stranded sharing the ally's square under the known state.
