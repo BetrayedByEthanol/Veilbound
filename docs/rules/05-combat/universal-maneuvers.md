@@ -564,7 +564,12 @@ Attempting a Takedown costs **one Physical Action** and requires:
 
 - an existing Controller/Controlled Grappling State;
 - a Controlled creature that is not already Prone;
+- **Prone must be a meaningful physical result for the Controlled creature in its current position**;
 - a plausible way to convert the current hold into a takedown.
+
+A creature that is climbing, swimming, falling, suspended, unsupported, or otherwise in a position where the ground-based Prone state is not physically meaningful cannot be subjected to Takedown v0 merely because it is not already Prone.
+
+If the intended maneuver is instead to tear a creature away from climbing support, disrupt swimming propulsion, force it from a ledge, or create another traversal/hazard consequence, resolve that through the applicable Traversal Disruption, forced-movement, or later hazard/maneuver procedure rather than substituting Takedown.
 
 Because the participants are already in secured bodily contact, Takedown does **not** create another Close-Contact Opportunity between them.
 
@@ -599,6 +604,8 @@ The Controller puts the target down and releases the hold.
 #### Follow Down
 
 The Controller follows the target to the ground to preserve the grapple.
+
+Follow Down may be chosen only if **Prone is also a meaningful physical result for the Controller** in the resulting position. If the Controller cannot meaningfully become Prone there, the Controller may choose Dump instead but cannot use Follow Down.
 
 - the Controlled creature becomes **Prone**;
 - the Controller also becomes **Prone** as part of resolving the Takedown;
