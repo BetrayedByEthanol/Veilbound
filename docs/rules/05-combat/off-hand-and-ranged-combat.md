@@ -88,6 +88,8 @@ Evasion Bonus = Physical Tempo - 1
 
 This gives +0 / +1 / +2 / +3 / +4 / +5 at Tempo 1 / 2 / 3 / 4 / 5 / 6.
 
+Explicit **Size/Position** modifiers that say they apply to active ranged defense are added to Ranged Dodge after this formula. In particular, the locked [Prone ranged-profile rule](special-movement-terrain-and-prone.md#ranged-attacks-against-a-prone-target) can grant +2 Position Defense to both static Ranged Defense and active Ranged Dodge.
+
 ## Bow and crossbow range bands
 
 | Range | Squares | Approx. distance | Difficulty modifier |
