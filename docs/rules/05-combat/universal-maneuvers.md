@@ -345,15 +345,19 @@ A creature may still attack, Guard, manipulate an item, cast, or perform another
 
 This applies to both Controller and Controlled creature.
 
-Control also requires the Controller to remain physically capable of **actively maintaining** the controlling position.
+Every Grappling State requires its participants to remain physically capable of **actively maintaining the bodily contact** that defines that state.
 
-If the Controller becomes unconscious or otherwise incapable of actively maintaining Control:
+If a participant becomes unconscious or otherwise incapable of actively maintaining that contact:
 
-- any Pin maintained by that Controller ends immediately;
-- if the other participant is capable of maintaining the existing bodily contact and chooses to do so, the Grappling State becomes **Neutral**;
-- otherwise, the Grappling State ends immediately.
+- the Grappling State ends immediately;
+- any Pin or Control dependent on that Grappling State ends with it;
+- the other participant does not need to spend an Escape action or otherwise contest the release.
 
-Becoming unable to contest a particular Grapple Contest does not automatically end Control unless that same state or effect also makes active maintenance of the hold impossible.
+This applies to **Neutral** Grapples as well as Controller/Controlled Grapples. A Neutral participant who can no longer maintain contact cannot keep the other creature bound merely because neither side had Control.
+
+If the still-capable creature wants to establish a new Grapple against the now-incapable creature, it may do so normally once both are free of the ended Grappling State; the shared **Unable to contest** rule then applies to that new initiation.
+
+Becoming unable to contest a particular Grapple Contest does not automatically end an existing Grappling State unless that same state or effect also makes active maintenance of the required bodily contact impossible.
 
 ## Gain or Reverse Control
 
