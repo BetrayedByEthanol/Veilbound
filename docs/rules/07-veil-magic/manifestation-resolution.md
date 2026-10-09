@@ -171,7 +171,7 @@ Examples include:
 
 The restraint does not use Direct Veil Resistance merely because the restraining thing was created by magic.
 
-The final universal grapple/grab procedure remains part of the combat-procedure work. Until that procedure is locked, individual techniques must not substitute a new generic magical save for it unless the technique is actually an **Imposition** rather than a Manifestation.
+The locked [Grapple v0](../05-combat/universal-maneuvers.md#grapple-v0) foundation now supplies the ordinary close-contact state, Control, Escape, Pin framework, and Intervention procedure. A Manifestation that physically restrains a creature uses that foundation when the manifested object or creature can plausibly establish and maintain the required physical contact. Technique-specific anatomy, reach, number of restraints, and unusual multi-creature restraint behavior must still be authored explicitly rather than replaced by a generic magical save.
 
 ## Falling manifested objects
 
@@ -213,7 +213,7 @@ This page locks the **mapping principle and delivery families**, not every physi
 
 Still to be completed in the combat/hazard rules:
 
-- the full grapple/grab/escape procedure;
+- detailed Grapple layers beyond the locked v0 foundation, including Drive/Drag, Throw/Takedown, limb control, cooperative restraint, and unusual manifested-restraint anatomy;
 - final shield and cover handling against broad physical phenomena;
 - general movement/reaction timing that may allow actual movement before an area resolves;
 - falling-object and collision damage;
