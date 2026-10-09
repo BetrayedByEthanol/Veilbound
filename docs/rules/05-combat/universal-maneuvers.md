@@ -1,6 +1,6 @@
 # Universal Maneuvers
 
-> Canonical Veilbound universal physical maneuvers. This page begins with the locked **Shove v0** procedure. Other universal maneuvers remain future work unless separately promoted.
+> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, and **Trip/Takedown v0** foundations. Other universal maneuvers remain future work unless separately promoted.
 
 ## Shove v0
 
@@ -232,6 +232,127 @@ Shove v0 does not define:
 Those remain explicit later design work.
 
 
+# Trip v0
+
+**Trip** is a universal **Physical Maneuver** used to make a standing creature lose its footing and become Prone without first establishing Grapple Control.
+
+A Trip costs **one Physical Action**.
+
+The attacker must have a plausible method that can actually attack the target's balance, such as:
+
+- a foot sweep or leg reap;
+- a body or shoulder action directed at the target's base;
+- a shield, staff, hook, haft, or other suitable contact method;
+- another method explicitly capable of Tripping.
+
+Ordinary contact with a sword edge, spear point, axe head, or similar weapon does **not** automatically provide a Trip merely because that weapon can make an ordinary attack.
+
+The target must be within the usable reach of the actual Trip method. A body or foot Trip normally requires close bodily measure; a suitable hooked or extended implement may work from its authored melee reach.
+
+A creature already Prone cannot be made meaningfully more Prone by Trip.
+
+## Close-contact Trip entry
+
+If the chosen Trip method requires entering close bodily measure rather than operating from an already-usable weapon/contact distance, use the same **Close-Contact Opportunity** framework as Shove and Grapple.
+
+If the target currently threatens the attacker, resolve that Opportunity before the Trip contest.
+
+If the resulting Opportunity Attack **hits**, the attacker suffers:
+
+```text
+-2 to this Trip contest
+```
+
+The hit otherwise applies its normal damage and consequences and does not automatically Interrupt Trip. Recheck whether the Trip remains physically possible after the response.
+
+A Trip method that operates entirely from an already-established usable melee distance does not create this additional Close-Contact Opportunity merely for making the Trip.
+
+## Trip contest
+
+Attacker:
+
+```text
+Trip Pressure =
+d20
++ Strength or Agility
++ applicable Training
++ Trip modifiers
+```
+
+Defender:
+
+```text
+Balance Resistance =
+d20
++ Strength or Agility
++ applicable Training
++ Balance modifiers
+```
+
+Each participant uses the Ability that matches the actual method:
+
+- attacker **Strength** for forceful reaps, wrenching the base, or powering through stance;
+- attacker **Agility** for timing, placement, sweeps, hooks, or technical balance attacks;
+- defender **Strength** for bracing, planting, or physically resisting the off-balance force;
+- defender **Agility** for stepping clear, recovering balance, or redirecting the attempt.
+
+A participant may not choose an Ability that the described method cannot plausibly use.
+
+A narrow relevant Training applies only when it genuinely helps the particular Trip or resistance method.
+
+The attacker must **beat** Balance Resistance.
+
+- attacker wins → target becomes **Prone**;
+- tie → target remains standing;
+- defender wins → target remains standing.
+
+A failed Trip does not automatically Trip the attacker or otherwise reverse the maneuver.
+
+## Unable to contest Trip
+
+Trip resistance represents active balance, bracing, or recovery.
+
+If the defender is unable to make any plausible active resistance:
+
+- the defender does not roll Balance Resistance;
+- the Trip succeeds automatically if the attacker still has a physically valid Trip method and the target can meaningfully become Prone.
+
+If the target is already unsupported, falling, or otherwise in a state where Prone is not the meaningful physical result, use the applicable movement/hazard procedure instead rather than forcing the Prone state.
+
+## Trip result
+
+A successful Trip:
+
+- makes the target **Prone** in its current square or position;
+- does not inherently move the target to another square;
+- does not inherently deal damage;
+- does not establish Grappling State;
+- does not give the attacker Control.
+
+Use the existing [Prone movement rules](special-movement-terrain-and-prone.md#prone-movement-state) immediately after the result.
+
+The non-movement attack, Guard, Dodge, targeting, and other combat consequences of Prone remain part of the later Prone-condition pass.
+
+## Trip while already Grappling
+
+Trip v0 is not used as a shortcut around the Grapple control structure.
+
+A creature does not use ordinary Trip against the other participant in its current Grappling State. A Controller who wants to take the Controlled creature to the ground uses **Takedown** instead.
+
+Controlled and Neutral participants must first change or end the Grappling State through its existing procedures before using ordinary Trip against that same creature.
+
+## Trip calibration boundary
+
+Trip v0 does not yet define:
+
+- weapon-specific Trip bonuses or penalties;
+- size-category modifiers or impossibility thresholds;
+- special interactions with unusual anatomy;
+- terrain-specific Balance modifiers;
+- Prone's non-movement combat effects.
+
+Those remain later equipment, creature, terrain, and condition calibration.
+
 # Grapple v0
 
 **Grapple** is a persistent close-contact physical state between two creatures. It represents an established bodily clinch, hold, or wrestling engagement rather than a one-sided condition simply applied to one target.
@@ -433,6 +554,79 @@ If both participants voluntarily cease maintaining contact, the Grappling State 
 
 A Controller may also voluntarily release the Controlled creature on its own turn without spending a Physical Action unless another effect explicitly prevents release.
 
+## Takedown
+
+**Takedown** is the Grapple escalation used by a Controller to force the Controlled creature Prone.
+
+Only the **Controller** may attempt a Takedown.
+
+Attempting a Takedown costs **one Physical Action** and requires:
+
+- an existing Controller/Controlled Grappling State;
+- a Controlled creature that is not already Prone;
+- a plausible way to convert the current hold into a takedown.
+
+Because the participants are already in secured bodily contact, Takedown does **not** create another Close-Contact Opportunity between them.
+
+Make the normal **Grapple Contest**.
+
+- **Controller wins** → Takedown succeeds;
+- **tie** → Takedown fails and the existing Control position remains unchanged;
+- **Controlled creature wins** → Takedown fails, any Pin that depended on the former Control ends, and Control degrades to **Neutral**.
+
+This follows the positional progression:
+
+```text
+win  -> gain the intended positional advantage
+tie  -> preserve the current position
+lose -> lose the current controlling advantage
+```
+
+### Successful Takedown
+
+When the Controller wins, choose one of the following results.
+
+#### Dump
+
+The Controller puts the target down and releases the hold.
+
+- the Controlled creature becomes **Prone**;
+- the Grappling State ends;
+- any Pin or Control dependent on that Grappling State ends;
+- the Controller does **not** become Prone merely because of the Takedown;
+- neither creature is automatically displaced to another square.
+
+#### Follow Down
+
+The Controller follows the target to the ground to preserve the grapple.
+
+- the Controlled creature becomes **Prone**;
+- the Controller also becomes **Prone** as part of resolving the Takedown;
+- the Grappling State continues;
+- the same creature remains Controller;
+- neither creature is automatically displaced to another square.
+
+Follow Down represents accepting the positional cost of going to the ground in order to preserve Control.
+
+Under Takedown v0, a Controller cannot both remain standing **and** preserve Grapple Control after putting the target Prone. A later technique or explicit feature may author such a result.
+
+### Takedown and existing Pin
+
+A Takedown changes body position substantially. An existing Pin persists only if its already-defined physical requirements remain genuinely satisfied through the resulting position.
+
+If the required limbs, leverage, or body position cease to be valid, the Pin ends under the normal Pin-dependency rule even though the Grappling State may continue through Follow Down.
+
+### Takedown result boundary
+
+Takedown does not inherently:
+
+- deal damage;
+- move either participant to another square;
+- create a free strike;
+- establish a new Pin.
+
+Damage from a throw, collision, edge, falling surface, or similar hazard requires the later Throw/collision/hazard procedures.
+
 ## Pin
 
 A **Pin** is a stronger position established from existing Control. It remains part of the same Grappling State rather than creating a separate grapple.
@@ -589,7 +783,7 @@ Dedicated rules for cooperative dogpiles, multiple creatures restraining one tar
 Grapple v0 does not yet define:
 
 - Drive / Drag movement of a Grappling pair;
-- Throw / Takedown procedures;
+- Throw procedures beyond the locked Takedown v0;
 - Grapple-specific Disarm procedures;
 - detailed limb-control or weapon-control actions;
 - a catalogue of Pin configurations;
