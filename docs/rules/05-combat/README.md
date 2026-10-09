@@ -22,7 +22,7 @@ Durability, Dying, and wound-repair rules live under [../06-vigor-wounds-death/]
 The current canonical combat foundation still requires Veilbound-native rules for:
 
 - Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
-- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
+- weapon-specific Prone posture restrictions beyond the locked baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
