@@ -544,8 +544,10 @@ If the **Controller** becomes unconscious or otherwise incapable of actively mai
 - any Pin maintained by that Controller ends immediately;
 - that Controller loses Control;
 - if the other participant is capable of maintaining contact and chooses to do so, that participant becomes the new **Controller** immediately;
-- otherwise, if the other participant can legally separate into an adjacent free square, that participant may separate immediately and the Grappling State ends;
-- if the other participant does not take Control and no legal separation square exists, the Grappling State becomes **Neutral** and persists only because the creatures remain physically confined together.
+- otherwise, if the other participant can legally separate into an adjacent free square and chooses to do so, that participant separates immediately and the Grappling State ends;
+- if the other participant does **not** take Control and does **not** complete a legal immediate separation, the Grappling State becomes **Neutral**.
+
+The Neutral fallback applies whether separation was impossible or merely declined. It preserves a defined control position for the shared-square state until a later legal separation, Gain Control, or other Grapple procedure changes it.
 
 Changing Controller or taking the immediate separation through this incapacity transition does not cost a Physical Action because the former Controller is no longer capable of opposing it.
 
@@ -738,7 +740,17 @@ Attempting a Takedown costs **one Physical Action** and requires:
 - an existing Controller/Controlled Grappling State;
 - a Controlled creature that is not already Prone;
 - **Prone must be a meaningful physical result for the Controlled creature in its current position**;
-- a plausible way to convert the current hold into a takedown.
+- a plausible way to convert the current hold into a takedown;
+- at least one currently legal successful result: **Dump** or **Follow Down**.
+
+Do not make the Grapple Contest unless at least one successful result is legal when the Takedown is declared. Recheck immediately before the contest if an intervening effect changed positioning or terrain.
+
+For this availability check:
+
+- **Dump** is legal only if an adjacent legal free square exists for the Controlled creature;
+- **Follow Down** is legal only if Prone is also a meaningful physical result for the Controller in the resulting position.
+
+If exactly one result is legal, a successful Takedown must use that result. If both are legal, the Controller chooses between them after winning the contest.
 
 A creature that is climbing, swimming, falling, suspended, unsupported, or otherwise in a position where the ground-based Prone state is not physically meaningful cannot be subjected to Takedown v0 merely because it is not already Prone.
 
