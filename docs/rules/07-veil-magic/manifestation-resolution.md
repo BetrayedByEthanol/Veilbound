@@ -231,7 +231,7 @@ This page locks the **mapping principle and delivery families**, not every physi
 
 Still to be completed in the combat/hazard rules:
 
-- detailed Grapple layers beyond the locked v0 foundation, including Drive/Drag, Throw/Takedown, limb control and cooperative restraint;
+- detailed Grapple layers beyond the locked v0 foundation, including Drive/Drag, Throw beyond the locked Takedown v0 procedure, limb control and cooperative restraint;
 - a universal physical restraint model for inert manifested objects such as chains, vines, bands, cages, or other non-creature restraints;
 - final shield and cover handling against broad physical phenomena;
 - general movement/reaction timing that may allow actual movement before an area resolves;
