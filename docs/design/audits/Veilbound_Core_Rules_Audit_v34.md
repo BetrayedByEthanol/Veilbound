@@ -4284,7 +4284,7 @@ The existing threatened-ranged rule is a specific stronger trigger: firing a bow
 
 Still unresolved:
 
-- Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and other special movement modes;
+- Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
 - non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
