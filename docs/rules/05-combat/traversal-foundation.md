@@ -173,8 +173,8 @@ An action is legal while traversing only if the creature can continue satisfying
 
 For climbing:
 
-- if the creature is holding position, use **Hold Support**;
-- if an action is performed while also making climbing progress, use **Progress Support**;
+- beginning an ordinary action ends the current Traversal Segment first, so the creature normally uses **Hold Support** while performing that action;
+- if an explicit action/effect itself includes climbing progress, it must satisfy **Progress Support** for that progress;
 - hands committed to support are unavailable for weapon, shield, item, or other hand-dependent use.
 
 For swimming, the creature must retain enough usable propulsion/control for the action and current water conditions.
