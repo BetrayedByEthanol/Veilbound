@@ -275,6 +275,20 @@ A participant may not choose an Ability that the described method cannot plausib
 
 A narrow relevant Training applies normally. Veilbound does not create a mandatory broad Athletics skill for Grappling.
 
+### Unable to contest
+
+A Grapple Contest represents **active physical opposition**. A creature that is unconscious or otherwise physically incapable of making any plausible active Grapple response does **not** roll a Grapple Contest.
+
+When a Grapple Contest is required:
+
+- if exactly one participant is capable of actively contesting, that participant **wins the Grapple Contest automatically**;
+- if neither participant is capable of actively contesting, no opposed Grapple Contest can be resolved and an action that requires winning that contest cannot establish a new result;
+- an explicit effect may state that a creature remains capable of contesting despite otherwise restricted actions.
+
+This rule does not make an impossible physical interaction possible. The acting creature must still satisfy the maneuver's normal contact, anatomy, position, and capability requirements.
+
+For Grapple initiation, an incapable target therefore cannot roll high enough to become Controller: if the initiator remains capable of completing the Grapple after all responses, the initiator wins the initiation contest automatically.
+
 ### Initiation result
 
 Compare the two Grapple Contest totals:
@@ -330,6 +344,16 @@ Hands, arms, legs, or other body parts actually committed to maintaining a hold 
 A creature may still attack, Guard, manipulate an item, cast, or perform another action while Grappling when the required body parts and position remain physically available.
 
 This applies to both Controller and Controlled creature.
+
+Control also requires the Controller to remain physically capable of **actively maintaining** the controlling position.
+
+If the Controller becomes unconscious or otherwise incapable of actively maintaining Control:
+
+- any Pin maintained by that Controller ends immediately;
+- if the other participant is capable of maintaining the existing bodily contact and chooses to do so, the Grappling State becomes **Neutral**;
+- otherwise, the Grappling State ends immediately.
+
+Becoming unable to contest a particular Grapple Contest does not automatically end Control unless that same state or effect also makes active maintenance of the hold impossible.
 
 ## Gain or Reverse Control
 
