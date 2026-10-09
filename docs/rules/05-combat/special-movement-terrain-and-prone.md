@@ -1,6 +1,6 @@
 # Special Movement, Terrain, and Prone
 
-> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement consequences of Prone. Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and the non-movement combat effects of Prone remain later work.
+> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement consequences of Prone. Climbing and swimming foundations are defined separately in [Traversal Foundation](traversal-foundation.md). Charge, traversal speed calibration, jumping/falling, squeezing, size exceptions, flight, and the non-movement combat effects of Prone remain later work.
 
 ## Calculation order
 
@@ -360,8 +360,8 @@ Whether **Standing while threatened** creates its own authored Opportunity is de
 Still unresolved:
 
 - Charge and other attack-linked movement maneuvers;
-- climbing;
-- swimming;
+- exact Climb/Swim MP costs and traversal speed calibration;
+- Catch Grip, falling, and detailed water hazards;
 - jumping and falling;
 - squeezing;
 - size-based occupancy and Reach exceptions;

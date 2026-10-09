@@ -342,7 +342,7 @@ Against an incoming attack, the defender chooses one of only **three core respon
 | Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
 | Attack action and weapon attacks | **PROVISIONAL / REQUIRES NATIVE MATH** | Universal physical Attack remains a core action. A two-ability attack formula is favored conceptually, but exact ability pairings, training contribution and attack-quality thresholds are not yet locked. |
 | Initiative | **LOCKED NATIVE SYSTEM** | Initiative, ties, late entry, round refresh, and turn timing are defined in the canonical Initiative and Round/Turn Procedure. |
-| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Sprint, terrain surcharges, movement impairments, allied-square transit, and Prone/Crawl/Stand movement are defined. Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
+| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Sprint, terrain surcharges, movement impairments, allied-square transit, Prone/Crawl/Stand, and the Climb/Swim Traversal Foundation are defined. Exact Climb/Swim speeds, Catch Grip, falling/water hazards, Charge, jumping, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
 | Damage / durability | **PARTLY LOCKED, PARTLY MISSING** | Damage normally reduces physical HP. Vigor is a regenerative reserve rather than temporary HP; some supernatural effects may target Vigor directly. Resistance/immunity categories still need native definitions. |
 | Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **PARTLY NATIVE / MOSTLY UNRESOLVED** | Prone now has native movement consequences (Crawl/Stand/Sprint restriction), but its attack/Guard/Dodge effects and the other named conditions still require a Veilbound-native conditions appendix. |
 | Exhaustion | **INHERITED FROM 5e** | Used as a capstone cost, but version/effects are not specified. |
@@ -4284,7 +4284,7 @@ The existing threatened-ranged rule is a specific stronger trigger: firing a bow
 
 Still unresolved:
 
-- Charge, climbing, swimming, jumping/falling, squeezing, size exceptions, flight, and other special movement modes;
+- Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
 - non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
@@ -4370,7 +4370,7 @@ When a Movement Interception completes at least one legal movement step during a
 
 - Charge and other attack-linked movement maneuvers;
 - extra movement purchased directly with Turn AP;
-- climbing, swimming, jumping/falling;
+- exact Climb/Swim MP costs, Catch Grip, falling/water hazards, and jumping;
 - squeezing;
 - size-based occupancy/reach exceptions;
 - flight and other special movement modes;
@@ -4483,7 +4483,112 @@ If a creature was knocked Prone after Sprint was activated, the remaining Sprint
 - attack/Guard/Dodge and other combat effects of Prone;
 - whether Standing while threatened creates a separate authored Opportunity;
 - Charge;
-- climbing, swimming, jumping/falling;
+- exact Climb/Swim MP costs, Catch Grip, jumping/falling, and detailed water hazards;
 - squeezing;
 - size exceptions;
 - flight and other special movement modes.
+
+
+---
+
+# LOCKED UPDATE: Traversal Foundation
+
+## Status: LOCKED FOUNDATION / SPEEDS AND HAZARDS PENDING
+
+Canonical procedure lives in:
+
+- `docs/rules/05-combat/traversal-foundation.md`
+- `docs/rules/05-combat/movement-foundation.md`
+- `docs/rules/02-character-creation/abilities-and-training.md`
+
+## Ground travel and traversal boundary
+
+Ordinary supported ground travel does not require a generic movement check merely to walk or travel.
+
+Climbing and swimming are **Traversal** activities. Resolve them in this order:
+
+1. Capability — is the traversal possible by the current method?
+2. Risk — if possible, is meaningful failure uncertainty present?
+3. Effort — does sustained exertion matter?
+4. Combat movement — only after valid traversal is established, determine combat progress through MP.
+
+Traversal capability has no derived universal score. The GM adjudicates the actual route, method, abilities, Training, equipment, injuries, load, and environment as **Automatic**, **Hazardous**, or **Impossible by current method**. A roll cannot make a physically impossible attempt possible; changing route, equipment, assistance, or method can change the category.
+
+Hazardous traversal uses ordinary Core Resolution:
+
+```text
+d20 + relevant Ability + applicable Training + situational modifiers
+```
+
+The GM chooses one Ability for the immediate challenge. Climbing and Swimming may use Strength for force, Agility for body control/technical movement, or Vitality for sustained exertion. Multiple Abilities are not added together.
+
+Risk and effort are separate. Safe but strenuous traversal does not require repeated checks merely because it is tiring. Exact fatigue intervals and exhaustion consequences remain unresolved.
+
+## Traversal State and Traversal Segments
+
+Traversal State persists while the creature depends on climbing support, swimming propulsion, or another authored traversal method. Stopping progress or beginning another action does not itself end Traversal State.
+
+A **Traversal Segment** is one continuous period of making traversal progress and is a specialized movement segment.
+
+A Traversal Segment ends when the traverser begins one of its own actions/effects, leaves the Traversal State, changes to a materially different traversal route/mode, suffers a Traversal Disruption that breaks progress, or another rule explicitly ends the segment.
+
+Enemy responses do not end the segment merely by occurring; they must actually disrupt traversal.
+
+Transitioning from ground movement into traversal ends the ordinary movement segment and begins a Traversal Segment. Leaving traversal for ground movement ends the Traversal Segment; resumed ground movement begins a new ordinary movement segment.
+
+Traversal Segments use the ordinary one-Movement-Opportunity-per-enemy-per-segment limit.
+
+## Climbing support
+
+Climbing routes may specify separate **Hold Support** and **Progress Support** requirements using Support 0/1/2 usable hands.
+
+A hand committed to support cannot simultaneously wield/use/manipulate an item.
+
+If Progress Support exceeds Hold Support, a climber may stop making progress and free hands down to the Hold Support requirement, but must satisfy Progress Support again before resuming movement.
+
+## Swimming propulsion
+
+Swimming uses propulsion requirements rather than the climbing hand-support scale. Available limbs, occupied hands, injuries, Swimming Training, carried equipment, armor, and water conditions may change whether controlled swimming is Automatic, Hazardous, or Impossible.
+
+No universal numerical swimming penalty for an occupied hand, shield, weapon, injury, or armor is locked yet.
+
+## Combat legality and defenses
+
+An action while traversing is legal only when the creature can continue satisfying its current support or propulsion requirements while performing it.
+
+Traversal applies no universal attack, Guard, or Dodge penalty. A defense is legal only when it is physically executable while satisfying traversal requirements; defensive repositioning must move through positions the creature can actually occupy in that Traversal State.
+
+Detailed underwater weapon restrictions remain pending.
+
+## Opportunities
+
+Climbing and swimming do not inherently create Opportunities.
+
+Ordinary Reach and threatened-space rules use the creature's actual position. Voluntarily leaving threatened space through traversal can create the ordinary Movement Opportunity before departure. Entering threatened space does not provoke.
+
+A traversal that permits deliberate controlled movement may permit Cautious traversal and thereby avoid the general Movement Opportunity. Exact Cautious Climb/Swim MP costs remain pending with traversal-speed calibration.
+
+Vertical movement or diving does not erase an Opportunity from a threatened starting position; the Opportunity resolves before the creature leaves that Reach.
+
+## Traversal Disruption
+
+An attack does not automatically disrupt traversal merely because it hits.
+
+Traversal Disruption occurs when an effect materially removes required support/control, such as losing required support, forced displacement away from support/path, destruction of the route/support, or an explicit traversal-disrupting effect.
+
+For climbing: if Hold Support is still satisfied, the climber remains secured. If Hold Support is lost or the climber is displaced away from usable support, the creature begins to fall unless another valid support is immediately established. A future Catch Grip procedure will calibrate attempts to re-establish support.
+
+For swimming: loss of controlled propulsion does not use the falling rule. Water/buoyancy hazards determine drift, sinking/rising, breath, drowning, currents, and waves; those remain unresolved.
+
+## Explicitly unresolved
+
+- exact Climb and Swim MP costs/speeds;
+- fixed Ability or Training thresholds;
+- starting-character Climbing/Swimming competence allocation;
+- Catch Grip timing/modifiers;
+- falling distance/damage/collisions;
+- breath, drowning, buoyancy, currents, waves;
+- armor-specific traversal effects;
+- detailed underwater weapon behavior;
+- universal fatigue/exhaustion intervals;
+- jumping, squeezing, flight, and other future traversal modes.

@@ -1,6 +1,6 @@
 # Movement Foundation
 
-> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md).
+> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md). Climbing and swimming capability/state/segment rules are defined in [Traversal Foundation](traversal-foundation.md).
 
 ## Grid scale and Movement Points
 
@@ -230,13 +230,13 @@ The following are intentionally not defined by Movement Foundation:
 
 - Charge and other attack-linked movement maneuvers;
 - extra movement purchased directly through Turn AP;
-- climbing;
-- swimming;
+- exact Climb/Swim MP costs and speed calibration;
+- Catch Grip, falling, and detailed water-hazard procedures;
 - jumping and falling;
 - squeezing;
 - size-based occupancy/reach exceptions;
 - flight and other special movement modes;
-- generic movement checks;
+- generic movement checks outside authored traversal/hazard procedures;
 - detailed forced-movement resolution;
 - movement-specific conditions beyond the locked Prone movement consequences;
 - weapon-family Reach assignments beyond the ordinary adjacent baseline.
