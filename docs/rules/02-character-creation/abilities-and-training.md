@@ -58,7 +58,7 @@ Veilbound deliberately avoids mandatory broad umbrella skills such as generic Pe
 | Expert | +3 |
 | Master | +4 |
 
-Training is not permanently tied to one ability. Medicine might pair with Intellect for diagnosis and Precision for surgery; Climbing might pair with Strength or Agility depending on the obstacle.
+Training is not permanently tied to one ability. Medicine might pair with Intellect for diagnosis and Precision for surgery. Climbing and Swimming may pair with Strength, Agility, or Vitality depending on whether the immediate challenge is force, body control, or sustained exertion; see [Traversal Foundation](../05-combat/traversal-foundation.md#traversal-checks).
 
 Custom narrow trainings and knowledge fields are allowed. Knowledge training may grant information automatically when the character would simply know it; not every use requires a roll.
 
