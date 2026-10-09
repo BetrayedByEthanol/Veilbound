@@ -715,12 +715,15 @@ Drive / Drag itself does not create collision, crushing, chain-displacement, or 
 
 For Movement Opportunity purposes, the **Controller** is the voluntary mover and the Controlled creature is being moved as part of the Grapple.
 
-When the shared Grapple square leaves a square threatened by an enemy during Drive / Drag:
+When the shared Grapple square leaves a square threatened by a **third-party enemy** during Drive / Drag:
 
-- that enemy gains **one** Movement Opportunity for that Drive / Drag movement segment, subject to the normal one-per-enemy-per-segment limit;
+- that third-party enemy gains **one** Movement Opportunity for that Drive / Drag movement segment, subject to the normal one-per-enemy-per-segment limit;
+- the Controlled creature does **not** gain a Movement Opportunity against its Controller merely because the shared Grapple square moves;
 - the pair does **not** generate two Opportunities merely because two creatures occupy the shared square;
-- when the enemy exploits that Opportunity, **either Grapple participant may be chosen as the attack target** if that participant is otherwise a legal target for the attack;
+- when the third-party enemy exploits that Opportunity, **either Grapple participant may be chosen as the attack target** if that participant is otherwise a legal target for the attack;
 - movement of the Controlled creature does not create a second general Movement Opportunity because it is not the voluntary mover.
+
+The Grapple Contest used to resist Drive / Drag is the Controlled creature's authored opposition to that pair movement; Drive / Drag does not also grant that creature a general Movement Opportunity against the Controller.
 
 If an Opportunity response breaks the Grappling State, removes the Controller's Control, incapacitates the Controller, or otherwise makes pair movement illegal, the Drive / Drag Movement Segment ends immediately.
 
@@ -801,13 +804,22 @@ To do so:
 
 1. there must be an adjacent legal free square for the Controller;
 2. the Controller must be able to pay the normal **4 MP Stand cost** plus the normal MP cost of one legal separation step into that square;
-3. the Grappling State and any dependent Pin end when the committed Stand-and-separate procedure begins;
-4. after Standing completes, the Controller immediately makes the paid separation step into the chosen square;
-5. that separation step follows ordinary Movement Opportunity rules.
+3. the Grappling State remains in force while the Controller Stands, so the shared-square occupancy remains legal;
+4. when Standing completes, any dependent Pin ends and Control becomes **Neutral**; the Grappling State itself remains as the temporary shared-square occupancy state;
+5. the Controller then immediately attempts the paid separation step into the chosen square;
+6. that separation step follows ordinary Movement Opportunity rules;
+7. the Grappling State ends only when the Controller actually completes the separation step and leaves the shared square.
 
-If the Controller cannot complete the full Stand-and-separate procedure, it cannot use Standing to obtain a standing position while preserving or silently ending Follow Down Control.
+If an Opportunity or other interruption prevents the separation step from completing:
 
-Under Takedown v0, a Controller therefore cannot both become standing **and** preserve Grapple Control over a creature that remains Prone. A later technique or explicit feature may author a standing-control result or a separate contest that permits it.
+- the Controller remains in the shared square;
+- the Grappling State remains **Neutral**;
+- the former Follow Down Control and any dependent Pin do not return automatically;
+- a later legal separation, Gain Control, Reverse Control, or other Grapple procedure resolves the resulting position normally.
+
+If the Controller cannot legally begin the full Stand-and-separate procedure, it cannot use Standing to obtain a standing position while preserving or silently ending Follow Down Control.
+
+Under Takedown v0, a Controller therefore cannot both become standing **and** preserve Grapple Control over a creature that remains Prone. The transient Neutral shared-square state exists only to keep occupancy legal until separation succeeds or another Grapple result replaces it. A later technique or explicit feature may author a standing-control result or a separate contest that permits it.
 
 ### Takedown and existing Pin
 
