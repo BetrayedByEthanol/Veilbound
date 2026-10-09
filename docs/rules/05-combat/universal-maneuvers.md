@@ -993,11 +993,11 @@ The intervener suffers:
 
 Make a Grapple Contest between the intervener and the Controller.
 
-- **intervener wins** → the original Controlled creature separates into an adjacent legal free square; the intervener enters the shared Grapple square; the original Grappling State ends; a new Grappling State begins between intervener and former Controller with the intervener as Controller;
+- **intervener wins** → the intervener chooses an adjacent legal free square for the original Controlled creature; that creature separates into the chosen square; the intervener enters the shared Grapple square; the original Grappling State ends; a new Grappling State begins between intervener and former Controller with the intervener as Controller;
 - **Controller wins** → the original Grappling State and Control remain unchanged;
-- **tie** → the original Controlled creature separates into an adjacent legal free square; the intervener enters the shared Grapple square; the original Grappling State ends; the intervener and former Controller enter a new **Neutral Grappling State**.
+- **tie** → the intervener chooses an adjacent legal free square for the original Controlled creature; that creature separates into the chosen square; the intervener enters the shared Grapple square; the original Grappling State ends; the intervener and former Controller enter a new **Neutral Grappling State**.
 
-The replacement movement on a successful or tied Take Over is part of the Intervention action, costs no MP, and does not create the general Movement Opportunity.
+The intervener chooses the released creature's destination on both a successful and tied Take Over. The replacement movement is part of the Intervention action, costs no MP, and does not create the general Movement Opportunity.
 
 Take Over is harder than Peel Off because it asks the intervener not only to break the existing control relationship but to convert that intervention into a controlling position of their own.
 
