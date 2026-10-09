@@ -615,7 +615,20 @@ Follow Down may be chosen only if **Prone is also a meaningful physical result f
 
 Follow Down represents accepting the positional cost of going to the ground in order to preserve Control.
 
-Under Takedown v0, a Controller cannot both remain standing **and** preserve Grapple Control after putting the target Prone. A later technique or explicit feature may author such a result.
+### Standing after Follow Down
+
+The preserved Control created by Follow Down is explicitly dependent on the Controller remaining down with the Prone target.
+
+If the Follow Down Controller begins **Standing** while the Controlled creature remains Prone:
+
+- the Grappling State ends immediately when Standing begins;
+- the Controller loses Control;
+- any Pin dependent on that Grappling State ends;
+- Standing then continues under the normal 4 MP Standing procedure.
+
+No Escape or Grapple Contest is required for this release.
+
+Under Takedown v0, a Controller therefore cannot both become standing **and** preserve Grapple Control over a creature that remains Prone. A later technique or explicit feature may author a standing-control result or a separate contest that permits it.
 
 ### Takedown and existing Pin
 
