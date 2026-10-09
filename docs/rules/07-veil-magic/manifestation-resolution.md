@@ -161,17 +161,35 @@ Applicable resistance, immunity, armor, equipment, or other mitigation works nor
 
 ## Manifested restraints
 
-A manifested object or creature that physically grabs, binds, or restrains a target uses the normal **grapple / grab / escape** procedure.
-
-Examples include:
-
-- vines wrapping around a creature;
-- a chain physically seizing a limb;
-- a manifested hand grabbing a target.
+A Manifestation that physically grabs, binds, or restrains a target uses the ordinary physical procedure appropriate to **what was manifested**.
 
 The restraint does not use Direct Veil Resistance merely because the restraining thing was created by magic.
 
-The locked [Grapple v0](../05-combat/universal-maneuvers.md#grapple-v0) foundation now supplies the ordinary close-contact state, Control, Escape, Pin framework, and Intervention procedure. A Manifestation that physically restrains a creature uses that foundation when the manifested object or creature can plausibly establish and maintain the required physical contact. Technique-specific anatomy, reach, number of restraints, and unusual multi-creature restraint behavior must still be authored explicitly rather than replaced by a generic magical save.
+### Manifested creatures or creature-like agents
+
+A manifested **creature** or independently acting creature-like agent may use the locked [Grapple v0](../05-combat/universal-maneuvers.md#grapple-v0) foundation only when its authored profile supplies everything Grapple v0 requires, including:
+
+- usable Strength and/or Agility values for Grapple Contests;
+- any applicable Training or explicit contest modifiers;
+- the anatomy/reach needed to establish and maintain physical contact;
+- an action/timing model capable of initiating, maintaining, releasing, and exploiting a Grappling State.
+
+An animated manifested hand, vine-creature, chain-creature, or similar agent therefore uses Grapple v0 only if the technique actually gives it such a creature-like Grapple profile.
+
+### Manifested objects
+
+An inert or non-creature manifested object—such as ordinary conjured chains, binding vines, bands, or a fixed restraint—does **not** automatically enter Grappling State and does not roll a Grapple Contest merely because it restrains physically.
+
+Its technique must instead author the physical restraint procedure it needs, such as:
+
+- how the restraint is initially applied;
+- what physical values or fixed resistance the object provides;
+- what action/check allows a creature to break, slip, cut, or otherwise escape it;
+- how damage, destruction, release, duration, or loss of anchoring ends the restraint.
+
+Those authored rules remain physical restraint mechanics, not Direct Veil Resistance.
+
+Until a universal object-restraint controller model is separately locked, do not treat an inert manifested object as a creature for Grapple v0.
 
 ## Falling manifested objects
 
@@ -198,7 +216,7 @@ Magic does not replace the normal melee attack roll merely because the weapon or
 | Effect | Classification | Resolution |
 |---|---|---|
 | Telekinetically hold a creature with direct Veil force | Imposition | Direct Veil Pressure vs Direct Veil Resistance |
-| Create chains that physically grab a creature | Manifestation | normal grapple/grab procedure |
+| Create an animated hand/creature that physically grabs a creature | Manifestation | Grapple v0 if its authored creature-like profile supplies the required contest/action values |
 | Create and throw an ice spike | Manifestation | normal thrown-projectile rules |
 | Point a cutting beam at a creature | Manifestation | double-Precision beam attack vs normal ranged defense |
 | Create a wall of fire through occupied spaces | Manifestation | no generic area Dodge; occupants suffer/mitigate authored consequence |
@@ -213,7 +231,8 @@ This page locks the **mapping principle and delivery families**, not every physi
 
 Still to be completed in the combat/hazard rules:
 
-- detailed Grapple layers beyond the locked v0 foundation, including Drive/Drag, Throw/Takedown, limb control, cooperative restraint, and unusual manifested-restraint anatomy;
+- detailed Grapple layers beyond the locked v0 foundation, including Drive/Drag, Throw/Takedown, limb control and cooperative restraint;
+- a universal physical restraint model for inert manifested objects such as chains, vines, bands, cages, or other non-creature restraints;
 - final shield and cover handling against broad physical phenomena;
 - general movement/reaction timing that may allow actual movement before an area resolves;
 - falling-object and collision damage;
