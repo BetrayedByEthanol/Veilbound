@@ -300,7 +300,13 @@ While Grappling:
 - the Controller cannot ordinary-move away while simultaneously claiming to maintain the grapple;
 - moving the grapple as a pair requires a future **Drive / Drag** procedure rather than ordinary movement.
 
-Voluntary release, Escape, forced separation, or another explicit effect can end the state.
+The Grappling State requires continued plausible bodily contact between its participants.
+
+If an effect, forced movement, teleportation, fall, displacement, or other event places the participants so that the physical contact required to maintain the grapple no longer exists, the **Grappling State ends immediately**.
+
+This automatic end does not require an Escape action or contest. Any Pin or other control dependent on that Grappling State ends with it.
+
+Voluntary release, Escape, or another explicit effect may also end the state.
 
 ## Control and available actions
 
@@ -443,9 +449,11 @@ Because the strike may transfer, **both grapplers assign their defense before th
 - each assignment must be legal in the current Grappling State;
 - Guard capacity, Dodge Pressure, and other defense resources are committed exactly as they are for any other assigned defense; there is no free late defense after seeing the attack roll.
 
-If the attack fails to hit the chosen target because that target successfully uses a legal Dodge or another positional defense that causes the strike to pass through the entangled space, compare the **same attack total** against the defense already assigned by the other grappler.
+If the attack fails to hit the chosen target because that target successfully uses a legal Dodge or another positional defense that causes the strike to pass through the entangled space, resolve the transfer against the defense already assigned by the other grappler.
 
-- if the same attack total beats the other grappler's defense, the other grappler is hit instead;
+- if the other grappler assigned **Take Hit**, the transferred melee attack hits them automatically under the normal Take Hit rule; a natural 1 cannot reach this step because natural 1 does not transfer;
+- if the other grappler assigned a defense with a Defense total, compare the **same attack total** against that already-assigned defense;
+- if the same attack total beats that defense, the other grappler is hit instead;
 - if it does not, the attack misses both;
 - a successful Guard against the original attack physically stops or redirects the strike and therefore prevents transfer;
 - a natural 1 remains an automatic miss and does **not** transfer to the other grappler.
