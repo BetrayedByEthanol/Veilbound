@@ -229,9 +229,12 @@ Initiating a Grapple costs **one Physical Action** and requires:
 
 - an adjacent target;
 - a physically plausible way to establish bodily contact;
-- enough usable limbs, body position, or anatomy to maintain that contact.
+- enough usable limbs, body position, or anatomy to maintain that contact;
+- **neither the initiator nor the target is already participating in another Grappling State**.
 
 Ordinary weapon reach alone is not enough. A Grapple represents entering bodily contact rather than merely extending a weapon through fighting measure.
+
+A creature already in a Grappling State cannot start a second ordinary Grapple and cannot be selected as the target of a second ordinary Grapple. The existing Grappling State must first end. When a third creature is trying to free or replace a Controller in an existing controlled grapple, use **Grapple Intervention** instead. Neutral multi-creature dogpiles and other overlapping Grappling States remain outside Grapple v0.
 
 ### Close-contact entry
 
@@ -336,9 +339,9 @@ A **Controlled** creature may spend one Physical Action to try to **Reverse Cont
 
 Make a Grapple Contest:
 
-- Controlled creature wins → Control reverses immediately;
-- Controller wins → current Control remains;
-- tie → Control breaks down to **Neutral**.
+- Controlled creature wins → any Pin maintained by the former Controller ends immediately, then Control reverses;
+- Controller wins → current Control remains; an existing Pin remains only if its physical requirements are still being maintained;
+- tie → any existing Pin ends immediately and Control breaks down to **Neutral**.
 
 The Grappling State itself continues through Gain Control or Reverse Control unless another rule ends it.
 
@@ -372,6 +375,21 @@ Make a Grapple Contest:
 - tie or Controlled creature wins → the Pin is not established and the existing Control position remains unchanged.
 
 A Pin does not include a free attack.
+
+### Pin dependency
+
+A Pin exists only while the **same Controller** continues to control the same creature and continues to satisfy the physical requirements of that Pin.
+
+The Pin ends immediately if:
+
+- Control reverses;
+- Control becomes Neutral;
+- the Grappling State ends;
+- Grapple Intervention releases the Pinned creature or replaces the Controller;
+- the Controller voluntarily releases the hold; or
+- the Controller can no longer maintain the body position or committed limbs required by that Pin.
+
+Ending a Pin does not by itself end the underlying Grappling State unless the event that ended the Pin also ends that state.
 
 A Pinned creature:
 
@@ -418,7 +436,14 @@ The attack gains:
 +2 to the melee attack roll
 ```
 
-If the attack fails to hit the chosen target because that target successfully uses a legal Dodge or another positional defense that causes the strike to pass through the entangled space, compare the **same attack total** against the other grappler's legal defense.
+Because the strike may transfer, **both grapplers assign their defense before the attack roll**:
+
+- the declared target assigns Take Hit, Dodge, or Guard under the normal defense rules;
+- the other grappler simultaneously assigns the defense they will use if the strike transfers to them;
+- each assignment must be legal in the current Grappling State;
+- Guard capacity, Dodge Pressure, and other defense resources are committed exactly as they are for any other assigned defense; there is no free late defense after seeing the attack roll.
+
+If the attack fails to hit the chosen target because that target successfully uses a legal Dodge or another positional defense that causes the strike to pass through the entangled space, compare the **same attack total** against the defense already assigned by the other grappler.
 
 - if the same attack total beats the other grappler's defense, the other grappler is hit instead;
 - if it does not, the attack misses both;
@@ -439,7 +464,11 @@ Close weapons, fists, knees, headbutts, daggers, or similar methods may be usabl
 
 A third creature may spend one Physical Action to **Intervene** against a Controller that is Grappling an ally or another creature.
 
-The intervener must be adjacent to the Controller and able to establish plausible close bodily contact.
+The intervener must:
+
+- not already be participating in another Grappling State;
+- be adjacent to the Controller; and
+- be able to establish plausible close bodily contact.
 
 If the Controller currently threatens the intervener, entering that contact creates the normal **Close-Contact Opportunity** before the Intervention contest. A hit applies the same **-2** modifier to the intervener's ensuing Grapple Contest.
 
@@ -477,7 +506,7 @@ Take Over is harder than Peel Off because it asks the intervener not only to bre
 
 Grapple v0 does not model arbitrary chains of simultaneous control such as one creature controlling a second creature that simultaneously controls a third.
 
-Use **Grapple Intervention** when a third creature is trying to break or replace an existing control relationship.
+Ordinary Grapple initiation therefore requires both participants to be free of any existing Grappling State. Use **Grapple Intervention** when an eligible third creature is trying to break or replace an existing control relationship.
 
 Dedicated rules for cooperative dogpiles, multiple creatures restraining one target, unusual multi-limbed creatures, and other true multi-participant Grapples remain future work.
 
