@@ -115,11 +115,15 @@ A creature may attempt to Shove the other participant in its current Grappling S
 
 Because Grappling participants already share secured bodily contact and occupy the same Grapple square, this Shove does **not** create a new Close-Contact Opportunity between those two participants.
 
+Before making the Shove contest, the attacker chooses **one of the 8 adjacent grid directions** from the shared Grapple square as the Shove direction.
+
+That declared direction fixes the defender's destination if the Shove succeeds. It is also the destination used to determine whether blocked-displacement rules prevent the Shove. The attacker cannot wait to see the contest result before choosing the direction.
+
 Resolve the Shove contest normally.
 
 If the Shove produces the normal one-square displacement:
 
-- the defender is displaced one square directly away from the shared Grapple square;
+- the defender is displaced one square from the shared Grapple square in the declared Shove direction;
 - the attacker remains in the shared Grapple square, which becomes the attacker's ordinary occupied square;
 - the Grappling State ends immediately;
 - any Pin or Control dependent on that Grappling State ends with it;
@@ -453,7 +457,21 @@ Compare the two Grapple Contest totals:
 
 There is no generic "close enough" tie band. Only an actual tied total produces Neutral through this rule.
 
-The close-contact footwork of a successful initiation or Counter-Control is part of the Grapple action and spends no MP.
+The close-contact footwork of a successful initiation, Neutral result, or Counter-Control is part of the Grapple action and spends no MP.
+
+### Grapple-entry Opportunities
+
+When an initiation result would establish Grappling State, the initiator has not yet left its original square.
+
+Before moving the initiator into the defender's square:
+
+- each **third-party enemy** that threatens the initiator's current square gains one Opportunity from that Grapple-entry movement;
+- resolve those Opportunities through the normal Opportunity Response procedure before the initiator changes squares;
+- the Grapple target does **not** gain a second Opportunity from this entry movement, because its authored **Close-Contact Opportunity** already represents its chance to punish the entry;
+- Repel creates no Grapple-entry movement and therefore no Grapple-entry Opportunity;
+- if a response makes the Grapple establishment illegal or impossible, recheck the result normally before moving the initiator.
+
+This authored entry Opportunity exists even though the footwork spends no MP and is part of the Grapple action rather than an ordinary Normal step.
 
 ### Shared Grapple square
 
@@ -465,6 +483,8 @@ While the Grappling State persists:
 
 - both creatures are still separate creatures and separate legal targets;
 - both use the shared square as their position for Reach, threatened space, targeting, terrain, area effects, and other square-based rules;
+- **each participant is explicitly within the other's Melee Reach while the Grappling State persists**;
+- if a participant remains capable of making a relevant melee attack, it **threatens the other participant despite sharing the same square**;
 - an effect that includes the shared square can affect both creatures normally;
 - neither participant may use ordinary voluntary movement to leave the shared square while preserving the Grappling State;
 - a third creature cannot voluntarily enter the shared Grapple square unless an explicit rule such as Grapple Intervention permits it;
