@@ -206,7 +206,295 @@ Shove v0 does not define:
 - special shield-size Shove bonuses;
 - size-category modifiers or impossibility thresholds;
 - weapon bind or hook procedures;
-- Grapple, Trip, Disarm, Feint, Charge, or other universal maneuvers;
+- Trip, Disarm, Feint, Charge, or other universal maneuvers beyond the locked Grapple v0 foundation;
 - Catch Grip and falling damage.
 
 Those remain explicit later design work.
+
+
+# Grapple v0
+
+**Grapple** is a persistent close-contact physical state between two creatures. It represents an established bodily clinch, hold, or wrestling engagement rather than a one-sided condition simply applied to one target.
+
+A Grappling State has one of two control positions:
+
+- **Neutral** — both creatures are engaged, but neither currently has superior control;
+- **Controlled** — one creature is the **Controller** and the other is the **Controlled** creature.
+
+Control describes positional advantage **inside the grapple**. It does not make the Controller safe from other enemies and does not make the Controlled creature helpless.
+
+## Initiating a Grapple
+
+Initiating a Grapple costs **one Physical Action** and requires:
+
+- an adjacent target;
+- a physically plausible way to establish bodily contact;
+- enough usable limbs, body position, or anatomy to maintain that contact.
+
+Ordinary weapon reach alone is not enough. A Grapple represents entering bodily contact rather than merely extending a weapon through fighting measure.
+
+### Close-contact entry
+
+If the target currently threatens the initiator, declaring the Grapple creates the same **Close-Contact Opportunity** used by Shove before the Grapple Contest resolves.
+
+Resolve that Opportunity normally.
+
+If the resulting Opportunity Attack **hits**, the initiator suffers:
+
+```text
+-2 to this Grapple Contest
+```
+
+The attack otherwise applies its normal damage and consequences.
+
+A hit does not automatically Interrupt the Grapple attempt. After the response resolves, recheck whether establishing the Grapple remains physically possible.
+
+Once two creatures are already in the same Grappling State, actions that merely contest or exploit that existing grapple do **not** create another Close-Contact Opportunity between those two creatures merely for remaining in bodily contact.
+
+## Grapple Contest
+
+When a Grapple rule calls for a **Grapple Contest**, each participant rolls:
+
+```text
+Grapple Contest =
+d20
++ Strength or Agility
++ applicable Training
++ situational modifiers
+```
+
+Each participant uses **Strength** or **Agility** according to the actual method being used in that contest:
+
+- **Strength** for overpowering, driving, wrenching, or forcefully maintaining control;
+- **Agility** for leverage, body positioning, slipping a hold, turning an entry, or technical positional control.
+
+A participant may not choose an Ability that the described method cannot plausibly use.
+
+A narrow relevant Training applies normally. Veilbound does not create a mandatory broad Athletics skill for Grappling.
+
+### Initiation result
+
+Compare the two Grapple Contest totals:
+
+- **initiator wins** → both creatures enter Grappling State; the initiator is Controller and the defender is Controlled;
+- **defender wins** → both creatures enter Grappling State; the defender is Controller and the initiator is Controlled;
+- **exact tie** → both creatures enter Grappling State in **Neutral** control.
+
+There is no generic "close enough" tie band. Only an actual tied total produces Neutral through this rule.
+
+This means entering a Grapple is a commitment: an opponent who wins the entry contest may immediately turn that contact into their own controlling position.
+
+## Position on the grid
+
+Entering Grappling State does not merge the creatures into one occupied square.
+
+Both creatures remain in their actual grid positions unless another rule moves them.
+
+While Grappling:
+
+- neither creature may use ordinary voluntary movement simply to increase distance from the other while the Grappling State persists;
+- a Controlled creature cannot simply walk out of the grapple;
+- the Controller cannot ordinary-move away while simultaneously claiming to maintain the grapple;
+- moving the grapple as a pair requires a future **Drive / Drag** procedure rather than ordinary movement.
+
+Voluntary release, Escape, forced separation, or another explicit effect can end the state.
+
+## Control and available actions
+
+Control grants permission to attempt stronger grapple actions. It does **not** automatically apply every possible wrestling consequence.
+
+A Controller does not automatically:
+
+- knock the target Prone;
+- Pin the target;
+- drag the target;
+- disarm the target;
+- prevent all attacks or magic;
+- make attacks against the target automatically hit.
+
+Those outcomes require their own actions or explicit effects.
+
+### Maintaining physical control
+
+Hands, arms, legs, or other body parts actually committed to maintaining a hold or Pin are not simultaneously available for incompatible actions.
+
+A creature may still attack, Guard, manipulate an item, cast, or perform another action while Grappling when the required body parts and position remain physically available.
+
+This applies to both Controller and Controlled creature.
+
+## Gain or Reverse Control
+
+A creature in a **Neutral** Grapple may spend one Physical Action to try to **Gain Control**.
+
+Make a Grapple Contest:
+
+- acting creature wins → acting creature becomes Controller;
+- other creature wins → other creature becomes Controller;
+- tie → Grapple remains Neutral.
+
+A **Controlled** creature may spend one Physical Action to try to **Reverse Control**.
+
+Make a Grapple Contest:
+
+- Controlled creature wins → Control reverses immediately;
+- Controller wins → current Control remains;
+- tie → Control breaks down to **Neutral**.
+
+The Grappling State itself continues through Gain Control or Reverse Control unless another rule ends it.
+
+## Escape
+
+A Controlled or Neutral participant may spend one Physical Action to try to **Escape** the Grapple entirely.
+
+Make a Grapple Contest between the escaping creature and the other participant.
+
+- escaping creature wins → the Grappling State ends;
+- other creature wins → the current control position remains unchanged;
+- tie → the current control position remains unchanged.
+
+Escape means the creature is trying to disengage rather than take the upper hand.
+
+If both participants voluntarily cease maintaining contact, the Grappling State ends without a contest.
+
+A Controller may also voluntarily release the Controlled creature on its own turn without spending a Physical Action unless another effect explicitly prevents release.
+
+## Pin
+
+A **Pin** is a stronger position established from existing Control. It remains part of the same Grappling State rather than creating a separate grapple.
+
+Only the Controller may attempt to establish a Pin.
+
+Attempting a Pin costs **one Physical Action** and requires a plausible way to convert the current controlling position into a more restrictive hold.
+
+Make a Grapple Contest:
+
+- Controller wins → the Controlled creature becomes **Pinned** under that Controller;
+- tie or Controlled creature wins → the Pin is not established and the existing Control position remains unchanged.
+
+A Pin does not include a free attack.
+
+A Pinned creature:
+
+- remains Controlled;
+- cannot use ordinary voluntary movement to separate from the Controller;
+- cannot use a body part that is actually trapped or committed by the Pin for an incompatible action;
+- cannot normally Dodge an attack from the Controller when the Pin physically prevents the repositioning that Dodge would require;
+- may still Guard, attack, use magic, or perform another action when the Pin leaves the required body parts and position physically available.
+
+The Controller may make later attacks from the Pin using body parts or weapons that remain free. For example, a Controller maintaining a plausible Pin with body weight and one arm may be able to punch with the other arm.
+
+The Controller cannot simultaneously claim that a hand or limb is required to maintain the Pin and use that same hand or limb for an incompatible attack or item action.
+
+Pin does **not** mean unconscious, paralyzed, helpless, or automatically hit.
+
+The exact catalogue of Pin configurations and any future Pin-specific bonuses to Escape, Reverse Control, or Intervention remain later calibration.
+
+## Vulnerability to outside melee attacks
+
+Grappling makes **both** participants more vulnerable to outside melee threats. Having Control helps inside the grapple; it does not provide general protection from a third combatant.
+
+Against a melee attack made by a creature **outside** the Grappling State:
+
+- ordinary Dodge is normally unavailable to either grappler because the close-contact state prevents the free repositioning assumed by ordinary Dodge;
+- an explicit effect or position may permit Dodge if it genuinely provides enough movement;
+- Guard remains available only with a legal Guard instrument and body parts not committed to maintaining the grapple or Pin;
+- Take Hit remains available normally.
+
+### Controlled Strike into a grapple
+
+An outside melee attacker may make a **Controlled Strike** against one participant.
+
+Resolve the attack normally against the chosen target.
+
+A Controlled Strike gains no special attack bonus from the Grapple and cannot transfer to the other participant merely because it misses.
+
+### Committed Strike into a grapple
+
+An outside melee attacker may instead exploit the target's restricted movement with a **Committed Strike**.
+
+The attack gains:
+
+```text
++2 to the melee attack roll
+```
+
+If the attack fails to hit the chosen target because that target successfully uses a legal Dodge or another positional defense that causes the strike to pass through the entangled space, compare the **same attack total** against the other grappler's legal defense.
+
+- if the same attack total beats the other grappler's defense, the other grappler is hit instead;
+- if it does not, the attack misses both;
+- a successful Guard against the original attack physically stops or redirects the strike and therefore prevents transfer;
+- a natural 1 remains an automatic miss and does **not** transfer to the other grappler.
+
+This transfer rule applies only to the authored Committed Strike into a Grapple. It is not a universal friendly-fire rule.
+
+## Attacks between the grapplers
+
+A participant attacking the other creature in the same Grappling State does not use the outside Committed Strike transfer rule.
+
+The attack is legal only if the current body position and available limbs make that attack physically possible.
+
+Close weapons, fists, knees, headbutts, daggers, or similar methods may be usable where long weapons or large swings are not. Exact weapon-by-weapon Grapple restrictions remain part of the later weapon/maneuver pass.
+
+## Third-party Grapple Intervention
+
+A third creature may spend one Physical Action to **Intervene** against a Controller that is Grappling an ally or another creature.
+
+The intervener must be adjacent to the Controller and able to establish plausible close bodily contact.
+
+If the Controller currently threatens the intervener, entering that contact creates the normal **Close-Contact Opportunity** before the Intervention contest. A hit applies the same **-2** modifier to the intervener's ensuing Grapple Contest.
+
+Before rolling, the intervener chooses one objective.
+
+### Peel Off
+
+**Peel Off** attempts only to break the Controller's hold on the original Controlled creature.
+
+Make a Grapple Contest between the intervener and the Controller.
+
+- intervener wins → the original Grappling State ends; the original Controlled creature is free; the intervener and former Controller do not automatically enter Grappling State;
+- Controller wins → the original Grappling State and Control remain unchanged;
+- tie → the original Controlled creature is released, and the intervener and former Controller enter a new **Neutral Grappling State** with each other.
+
+### Take Over
+
+**Take Over** attempts to free the original Controlled creature **and** establish Control over the former Controller.
+
+The intervener suffers:
+
+```text
+-2 to this Intervention Grapple Contest
+```
+
+Make a Grapple Contest between the intervener and the Controller.
+
+- intervener wins → the original Controlled creature is released; the intervener and former Controller enter Grappling State with the intervener as Controller;
+- Controller wins → the original Grappling State and Control remain unchanged;
+- tie → the original Controlled creature is released; the intervener and former Controller enter a new **Neutral Grappling State**.
+
+Take Over is harder than Peel Off because it asks the intervener not only to break the existing control relationship but to convert that intervention into a controlling position of their own.
+
+## Multi-participant boundary
+
+Grapple v0 does not model arbitrary chains of simultaneous control such as one creature controlling a second creature that simultaneously controls a third.
+
+Use **Grapple Intervention** when a third creature is trying to break or replace an existing control relationship.
+
+Dedicated rules for cooperative dogpiles, multiple creatures restraining one target, unusual multi-limbed creatures, and other true multi-participant Grapples remain future work.
+
+## Deliberately unresolved Grapple layers
+
+Grapple v0 does not yet define:
+
+- Drive / Drag movement of a Grappling pair;
+- Throw / Takedown procedures;
+- Grapple-specific Disarm procedures;
+- detailed limb-control or weapon-control actions;
+- a catalogue of Pin configurations;
+- Pin-specific numerical bonuses to Escape, Reverse Control, or Intervention;
+- size-category modifiers and impossibility thresholds;
+- cooperative multi-creature Grapples and dogpiles;
+- weapon-by-weapon restrictions while Grappling;
+- ranged attacks into a Grapple;
+- creature anatomy exceptions beyond ordinary humanoid assumptions.
+
+Those remain explicit later maneuver, equipment, creature, and calibration work.
