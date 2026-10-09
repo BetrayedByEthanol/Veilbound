@@ -27,7 +27,7 @@ The current canonical combat foundation still requires Veilbound-native rules fo
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
 - cover/concealment/surprise as complete procedures;
-- grapple, feint, trip, disarm, charge, and other universal maneuvers beyond the locked Shove v0 procedure;
+- Drive/Drag, Throw/Takedown, grapple-specific Disarm/limb control, cooperative multi-creature Grapples, feint, trip, disarm, charge, and other universal maneuvers beyond the locked Shove v0 and Grapple v0 foundations;
 - physical-hazard values/procedures;
 - conditions;
 - encounter building and NPC/creature construction.
