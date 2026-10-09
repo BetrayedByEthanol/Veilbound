@@ -800,7 +800,7 @@ If the required limbs, leverage, or body position cease to be valid, the Pin end
 Takedown does not inherently:
 
 - deal damage;
-- move either participant to another square;
+- create displacement beyond the one-square separation required by **Dump**;
 - create a free strike;
 - establish a new Pin.
 
