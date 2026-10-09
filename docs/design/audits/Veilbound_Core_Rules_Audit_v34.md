@@ -4483,7 +4483,7 @@ If a creature was knocked Prone after Sprint was activated, the remaining Sprint
 - attack/Guard/Dodge and other combat effects of Prone;
 - whether Standing while threatened creates a separate authored Opportunity;
 - Charge;
-- climbing, swimming, jumping/falling;
+- exact Climb/Swim MP costs, Catch Grip, jumping/falling, and detailed water hazards;
 - squeezing;
 - size exceptions;
 - flight and other special movement modes.
