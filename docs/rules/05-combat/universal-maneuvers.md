@@ -226,7 +226,7 @@ Shove v0 does not define:
 - special shield-size Shove bonuses;
 - size-category modifiers or impossibility thresholds;
 - weapon bind or hook procedures;
-- Trip, Disarm, Feint, Charge, or other universal maneuvers beyond the locked Grapple v0 foundation;
+- Disarm, Feint, Charge, or other universal maneuvers beyond the locked Grapple v0 and Trip/Takedown v0 foundations;
 - Catch Grip and falling damage.
 
 Those remain explicit later design work.
