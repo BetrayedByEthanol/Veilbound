@@ -78,6 +78,8 @@ Changing from Cautious Movement to Normal Movement, or vice versa, does not crea
 
 A creature cannot voluntarily enter or pass through a square occupied by a hostile creature unless an explicit rule permits it.
 
+The [Grappling State](universal-maneuvers.md#shared-grapple-square) is one such explicit exception: its two participants occupy one shared Grapple square until that state ends or an effect separates them.
+
 ### Allied creatures
 
 A creature may pass through an allied creature's square by paying a **+2 MP flat surcharge** for the step that enters that occupied square.
