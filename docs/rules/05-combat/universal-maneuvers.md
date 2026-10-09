@@ -109,6 +109,26 @@ Other enemies may still gain ordinary Movement Opportunities if the attacker's b
 
 A Shove does not inherently deal damage and does not inherently make the target Prone.
 
+### Shove against a Grapple partner
+
+A creature may attempt to Shove the other participant in its current Grappling State if the current hold and available body position make that Shove physically possible.
+
+Because the two creatures are already in secured bodily contact, this Shove does **not** create a new Close-Contact Opportunity between those two participants.
+
+Resolve the Shove contest normally.
+
+If the Shove produces the normal one-square displacement:
+
+- the Grappling State ends immediately when that displacement breaks the existing hold;
+- any Pin or Control dependent on that Grappling State ends with it;
+- the Shove attacker **does not** take the normal built-in advance into the defender's former square.
+
+The attacker remains in its own square. This makes the maneuver a break-contact Shove rather than movement of the Grappling pair.
+
+If the Shove fails, or if the displacement is completely prevented by the blocked-displacement rules, the Grappling State is not ended merely by the attempt.
+
+Shove cannot therefore be used to move both participants together while preserving Grappling State. Moving an intact Grappling pair remains reserved for the future **Drive / Drag** procedure.
+
 ## Blocked displacement
 
 A full-square Shove requires the target to be able to enter the destination square or position.
