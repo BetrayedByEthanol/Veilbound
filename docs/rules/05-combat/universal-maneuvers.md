@@ -993,11 +993,38 @@ The intervener suffers:
 
 Make a Grapple Contest between the intervener and the Controller.
 
-- **intervener wins** → the intervener chooses an adjacent legal free square for the original Controlled creature; that creature separates into the chosen square; the intervener enters the shared Grapple square; the original Grappling State ends; a new Grappling State begins between intervener and former Controller with the intervener as Controller;
+- **intervener wins** → the Take Over is eligible to resolve as a successful replacement, with the intervener becoming Controller over the former Controller;
 - **Controller wins** → the original Grappling State and Control remain unchanged;
-- **tie** → the intervener chooses an adjacent legal free square for the original Controlled creature; that creature separates into the chosen square; the intervener enters the shared Grapple square; the original Grappling State ends; the intervener and former Controller enter a new **Neutral Grappling State**.
+- **tie** → the Take Over is eligible to resolve as a Neutral replacement between the intervener and former Controller.
 
-The intervener chooses the released creature's destination on both a successful and tied Take Over. The replacement movement is part of the Intervention action, costs no MP, and does not create the general Movement Opportunity.
+### Take Over replacement movement
+
+On an intervener win or tie, the intervener chooses an adjacent legal destination for the original Controlled creature.
+
+The released creature's separation and the intervener's entry into the shared Grapple square are resolved as **one simultaneous replacement**:
+
+- assess the released creature's chosen destination as though the intervener's starting square is vacated by the same replacement;
+- the original Controlled creature moves into the chosen adjacent legal square at the same time the intervener enters the former shared Grapple square;
+- the former Controller remains in that shared square;
+- if the Grapple Contest was an intervener win, a new Grappling State begins between the intervener and former Controller with the intervener as Controller;
+- if the Grapple Contest was a tie, a new **Neutral Grappling State** begins between the intervener and former Controller.
+
+Because the replacement is simultaneous, the intervener's starting square is a legal destination for the released creature when it would be legal after the swap. No intermediate occupied-square state is created.
+
+### Opportunities during Take Over replacement
+
+Before the simultaneous replacement occurs, the intervener is still in its original square.
+
+Each **third-party enemy** that threatens the intervener's starting square gains one Opportunity from the intervener's Take Over entry movement:
+
+- resolve those Opportunities before the simultaneous replacement;
+- the former Controller does **not** gain another Opportunity from this movement, because its authored Close-Contact Opportunity already represented its chance to punish the Intervention entry;
+- the original Controlled creature does not create a Movement Opportunity from its separation; that movement is part of being released by the Intervention;
+- the replacement movement costs no MP.
+
+If a third-party response makes the replacement illegal or impossible—for example by incapacitating or displacing the intervener—the Take Over replacement does not occur and the original Grappling State remains unchanged.
+
+The intervener chooses the released creature's destination on both a successful and tied Take Over.
 
 Take Over is harder than Peel Off because it asks the intervener not only to break the existing control relationship but to convert that intervention into a controlling position of their own.
 
