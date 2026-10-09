@@ -4450,9 +4450,9 @@ If an interruption makes the passage impossible after entry, keep the interrupti
 
 The existing **+2 MP** allied-square surcharge remains flat and is applied after movement-mode changes.
 
-## Prone, Crawl, and Stand
+## Prone, Crawl, Stand, and combat posture
 
-This lock defines only the movement consequences of Prone.
+Prone v0 now defines both movement and baseline combat posture.
 
 A Prone creature cannot use ordinary walking movement or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the general active-Sprint prohibition rule suspends the remaining Sprint allowance: it cannot fund Crawl or Cautious Crawl and may be spent only on the explicit 4 MP Stand exception until the creature is standing again.
 
@@ -4474,14 +4474,23 @@ Cautious Crawl = 3 × base
 
 Thus Cautious Crawl costs 6 MP orthogonally or 9 MP diagonally before flat terrain/occupancy surcharges.
 
-Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance. Beginning to Stand ends the current movement segment; movement after Standing begins a new segment.
+Combat posture:
+
+- melee attacks made while Prone suffer **-2**;
+- a non-Prone attacker gains **+2** to melee attacks against a Prone target;
+- Prone does not inherently increase damage, Penetration, critical tier, wound severity, or Called Shot effect;
+- Guard and Dodge remain available when physically possible from the actual posture;
+- targeted ranged attacks from **3+ squares** gain **+2 Position Defense** against a Prone target when the lower profile materially applies; the modifier applies to both static Ranged Defense and active Ranged Dodge;
+- the Prone profile bonus does not apply at 1-2 squares, where angle/elevation negates it, or merely because an area effect includes the creature;
+- an ordinary bow cannot normally make its standard shot while Prone unless an explicit technique, posture, or weapon rule permits it.
+
+Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance. The 4 MP is committed when Standing begins. Beginning to Stand ends the current movement segment and, if the creature is threatened, creates the authored **Standing Opportunity** before Prone ends. Generic Opportunity hits do not automatically Interrupt Standing; recheck whether the Stand remains physically possible after responses. Movement after a completed Stand begins a new movement segment.
 
 If a creature was knocked Prone after Sprint was activated, the remaining Sprint allowance is suspended except for paying the Stand cost; after Standing it may resume any remaining Sprint movement as a new segment under the existing Sprint Heading if still legal.
 
 ## Explicitly unresolved
 
-- attack/Guard/Dodge and other combat effects of Prone;
-- whether Standing while threatened creates a separate authored Opportunity;
+- weapon-specific Prone posture restrictions beyond the baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
 - Charge;
 - exact Climb/Swim MP costs, Catch Grip, jumping/falling, and detailed water hazards;
 - squeezing;
