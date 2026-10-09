@@ -333,9 +333,7 @@ A successful Trip:
 - does not establish Grappling State;
 - does not give the attacker Control.
 
-Use the existing [Prone movement rules](special-movement-terrain-and-prone.md#prone-movement-state) immediately after the result.
-
-The non-movement attack, Guard, Dodge, targeting, and other combat consequences of Prone remain part of the later Prone-condition pass.
+Use the locked [Prone movement and combat rules](special-movement-terrain-and-prone.md#prone-movement-state) immediately after the result.
 
 ## Trip while already Grappling
 
@@ -352,8 +350,7 @@ Trip v0 does not yet define:
 - weapon-specific Trip bonuses or penalties;
 - size-category modifiers or impossibility thresholds;
 - special interactions with unusual anatomy;
-- terrain-specific Balance modifiers;
-- Prone's non-movement combat effects.
+- terrain-specific Balance modifiers.
 
 Those remain later equipment, creature, terrain, and condition calibration.
 
