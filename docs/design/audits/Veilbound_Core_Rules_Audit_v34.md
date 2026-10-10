@@ -3888,18 +3888,21 @@ Normal ranged defenses, projectile Guard where valid, cover, range, size/positio
 
 If a projectile carries an area effect, resolve projectile delivery first and then resolve the area from the impact point. The area grants no second generic Dodge.
 
-For a missed projectile-delivered area attack, determine a **Miss Impact Point**:
+For an **ordinary miss** by a projectile-delivered area attack (not a **cover hit** or **successful projectile Guard**), determine a **Miss Impact Point** using the selected defense's **Scatter Defense**:
 
-```
-Miss Margin = max(0, Defense - Attack Total)
+- Without applicable Cover Difficulty, **Scatter Defense** is the actual selected defense.
+- With partial cover, use the **coverless Base Defense `B`**, not the final Cover-adjusted `D = B + C`. This applies when `A <= B` and to automatic natural-1 misses even if their numerical total exceeds `B`. Retain all other modifiers actually present in `B`, including any Aim mitigation against Range.
+
+```text
+Miss Margin = max(0, Scatter Defense - Attack Total)
 Scatter Distance = 1 + floor(Miss Margin / 5)
 ```
 
-A natural 1 remains an automatic miss; if its total would otherwise beat the Defense, use Miss Margin 0.
+A natural 1 remains an automatic miss; if its Attack Total would otherwise beat **Scatter Defense**, use Miss Margin 0.
 
-Roll 1d8 for compass direction (N, NE, E, SE, S, SW, W, NW), move the impact point by Scatter Distance from the intended point, and resolve the area there.
+For example, `B = 10`, `C = 8`, and `A = 5` is an ordinary miss: **Miss Margin = 5**, **Scatter Distance = 2 squares**, not margin 13 and scatter 3. Roll 1d8 for compass direction (N, NE, E, SE, S, SW, W, NW), move the impact point by Scatter Distance from the intended point, and resolve the area there.
 
-A technique may explicitly replace this generic scatter rule with an authored miss-placement procedure. Physical obstructions still intercept normally under the applicable physical/cover rules.
+A cover-hit projectile impacts the **actual blocking surface** instead of scattering; a successful legal projectile Guard impacts its **Guard instrument** instead. An entirely blocked direct target is illegal. A technique may explicitly replace this generic scatter rule with an authored miss-placement procedure. Physical obstructions still intercept normally under the applicable physical/cover rules. See [Manifestation Resolution](../../rules/07-veil-magic/manifestation-resolution.md#projectile-delivered-areas) and [Cover and Line of Fire v0](../../rules/05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location).
 
 A near miss may still place the original target inside the resulting area.
 
@@ -4640,7 +4643,7 @@ Aim may precede an ordinary Attack Sequence (identify the aimed attack and all o
 
 **One-roll cover-hit window:** Let **B** be the applicable defense without Cover, **C** the positive Cover Difficulty after any separately declared Aim against Cover, and **D=B+C**. A legal attack that rolls **A>B but A<=D** strikes the physical cover; **A<=B** is a normal miss/Dodge/Guard outcome; **A>D** hits the intended creature, subject to existing natural-roll/critical rules. Natural 1 automatically misses; no universal cover strike or extra percent roll is added. A hit on cover does not hit the creature or grant on-hit effects.
 
-**Projectile-area interaction:** A cover-hit projectile impacts the real intervening surface and any authored surface-triggered explosion, burst, cloud, or other carried area originates there. It does **not** use the Manifestation random Miss Impact Point procedure; an ordinary miss continues to scatter, while a legal instrument Guard continues to impact the Guard instrument. Full cover prevents targeting the creature directly. Other magical area/Direct Intrusion procedures remain distinct.
+**Projectile-area interaction:** A cover-hit projectile impacts the real intervening surface and any authored surface-triggered explosion, burst, cloud, or other carried area originates there. It does **not** use the Manifestation random Miss Impact Point procedure. An **ordinary miss** uses **Scatter Defense = Base Defense `B` without effective Cover Difficulty `C`**, not `D = B+C`; a legal instrument Guard continues to impact the Guard instrument without scatter. Full cover prevents targeting the creature directly. Other magical area/Direct Intrusion procedures remain distinct.
 
 **Aim integration:** Aim's current **single-source up-to-4 mitigation** can reduce the **authored Cover Difficulty** where selected. It does not offset both Range and Cover, bypass blocked geometry, or increase magical rider magnitude. Aim doc and both Ranged Defense formulas have been synchronized with cover now being authored for active Dodge; Aim alone still cannot invent an unauthored defense modifier.
 
