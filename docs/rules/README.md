@@ -39,6 +39,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Feint Combination v0](05-combat/feint-combination-v0.md)
 - [Rapid Advance and Charge v0](05-combat/rapid-advance-and-charge-v0.md)
 - [Aim v0](05-combat/aim-v0.md)
+- [Cover and Line of Fire v0](05-combat/cover-and-line-of-fire-v0.md)
 - [Weapon Attack, Guard, and Physical Contribution](05-combat/weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
 - [Weapons and Armor](05-combat/weapons-and-armor.md)
