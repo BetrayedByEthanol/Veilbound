@@ -1035,11 +1035,13 @@ Against melee, choosing **Take Hit** means the attack lands unless the attacker 
 
 Against a normal ranged projectile, a target that does not actively evade is **not automatically hit**. Use a static **Ranged Defense** based on:
 
-`10 + Range Difficulty + Cover + Size/Position and other shot-condition modifiers`
+`10 + Range Difficulty + Cover Difficulty + Size/Position and other shot-condition modifiers`
 
 An aware target may actively Dodge a ranged attack.
 
-`Ranged Dodge = 10 + capped Agility + Awareness + Evasion Bonus + Range Difficulty − Dodge Pressure`
+`Ranged Dodge = 10 + capped Agility + Awareness + Evasion Bonus + Range Difficulty + Cover Difficulty − Dodge Pressure + other expressly applicable active-Dodge modifiers`
+
+**Cover Difficulty** is the applicable directional +0/+2/+4/+6/+8 modifier from [Cover and Line of Fire v0](../rules/05-combat/cover-and-line-of-fire-v0.md); it applies **once** to static Ranged Defense and active Ranged Dodge, and once as an external shot condition to an otherwise legal projectile Guard. This does not grant extra Guard capacity, a free Dodge, or a second cover roll. [Aim v0](../rules/05-combat/aim-v0.md) can mitigate only the **one declared applicable source**, including Cover Difficulty, by up to 4; it cannot bypass physically solid obstruction.
 
 Awareness represents reading the shooter's posture, aim and timing rather than reacting after the projectile is already in flight.
 
