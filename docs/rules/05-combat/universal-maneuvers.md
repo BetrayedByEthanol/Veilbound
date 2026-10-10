@@ -728,7 +728,7 @@ If an Opportunity response breaks the Grappling State, removes the Controller's 
 
 ## Takedown
 
-**Takedown** is the Grapple escalation used by a Controller to force the Controlled creature Prone.
+**Takedown** is the Grapple escalation used by a Controller to force the Controlled creature Prone **without displacing either participant or ending the Grapple**.
 
 Only the **Controller** may attempt a Takedown.
 
@@ -737,27 +737,17 @@ Attempting a Takedown costs **one Physical Action** and requires:
 - an existing Controller/Controlled Grappling State;
 - a Controlled creature that is not already Prone;
 - **Prone must be a meaningful physical result for the Controlled creature in its current position**;
-- a plausible way to convert the current hold into a takedown;
-- at least one currently legal successful result: **Dump** or **Follow Down**.
-
-Do not make the Grapple Contest unless at least one successful result is legal when the Takedown is declared. Recheck immediately before the contest if an intervening effect changed positioning or terrain.
-
-For this availability check:
-
-- **Dump** is legal only if an adjacent legal free square exists for the Controlled creature;
-- **Follow Down** is legal only if Prone is also a meaningful physical result for the Controller in the resulting position.
-
-If exactly one result is legal, a successful Takedown must use that result. If both are legal, the Controller chooses between them after winning the contest.
+- a plausible way to convert the current hold into a takedown while maintaining bodily contact.
 
 A creature that is climbing, swimming, falling, suspended, unsupported, or otherwise in a position where the ground-based Prone state is not physically meaningful cannot be subjected to Takedown v0 merely because it is not already Prone.
 
-If the intended maneuver is instead to tear a creature away from climbing support, disrupt swimming propulsion, force it from a ledge, or create another traversal/hazard consequence, resolve that through the applicable Traversal Disruption, forced-movement, or later hazard/maneuver procedure rather than substituting Takedown.
+If the intended maneuver is instead to tear a creature away from climbing support, disrupt swimming propulsion, force it from a ledge, or create another traversal/hazard consequence, resolve that through the applicable Traversal Disruption, forced-movement, Throw, or later hazard/maneuver procedure rather than substituting Takedown.
 
 Because the participants are already in secured bodily contact, Takedown does **not** create another Close-Contact Opportunity between them.
 
 Make the normal **Grapple Contest**.
 
-- **Controller wins** → Takedown succeeds;
+- **Controller wins** → the Controlled creature becomes **Prone**; both participants remain in the same shared Grapple square; the Grappling State continues; the same creature remains Controller;
 - **tie** → Takedown fails and the existing Control position remains unchanged;
 - **Controlled creature wins** → Takedown fails, any Pin that depended on the former Control ends, and Control degrades to **Neutral**.
 
@@ -771,81 +761,40 @@ lose -> lose the current controlling advantage
 
 ### Successful Takedown
 
-When the Controller wins, choose one of the following results.
+A successful Takedown changes the Controlled creature's posture, not its square.
 
-#### Dump
-
-The Controller puts the target down and releases the hold.
-
-Dump may be chosen only if there is an adjacent legal free square for the Controlled creature.
-
-- the Controller remains in the shared Grapple square;
-- the Controller chooses an adjacent legal free square for the Controlled creature;
-- the Controlled creature is placed there **Prone**;
-- that separation costs no MP and does not create the general Movement Opportunity;
-- the Grappling State ends;
-- any Pin or Control dependent on that Grappling State ends;
-- the Controller does **not** become Prone merely because of the Takedown.
-
-The one-square separation is part of resolving Dump, not a general Throw or collision effect.
-
-#### Follow Down
-
-The Controller follows the target to the ground to preserve the grapple.
-
-Follow Down may be chosen only if **Prone is also a meaningful physical result for the Controller** in the resulting position. If the Controller cannot meaningfully become Prone there, the Controller may choose Dump instead but cannot use Follow Down.
-
-- the Controlled creature becomes **Prone**;
-- the Controller also becomes **Prone** as part of resolving the Takedown;
-- both remain in the same shared Grapple square;
+- the Controlled creature becomes **Prone** in the shared Grapple square;
+- the Controller remains in its existing posture unless another rule or voluntary posture change alters it;
 - the Grappling State continues;
-- the same creature remains Controller.
+- the same creature remains Controller;
+- there is no forced movement, separation, or built-in release.
 
-Follow Down represents accepting the positional cost of going to the ground in order to preserve Control.
+The Controller may therefore remain standing while controlling a Prone creature when that posture is physically plausible.
 
-### Standing after Follow Down
+This does **not** automatically create a Pin. Prone and Controlled remain separate positional facts.
 
-The preserved Control created by Follow Down is explicitly dependent on the Controller remaining down with the Prone target.
+If the Controller wants to go to the ground as well, it may voluntarily **Drop Prone** under the normal Prone rules if doing so remains physically plausible. Dropping Prone does not by itself end or change Control.
 
-A Follow Down Controller may Stand while the Controlled creature remains Prone only as part of a **voluntary release and separation**.
-
-To do so:
-
-1. there must be an adjacent legal free square for the Controller;
-2. the Controller must be able to pay the normal **4 MP Stand cost** plus the normal MP cost of one legal separation step into that square;
-3. the Grappling State remains in force while the Controller Stands, so the shared-square occupancy remains legal;
-4. when Standing completes, any dependent Pin ends and Control becomes **Neutral**; the Grappling State itself remains as the temporary shared-square occupancy state;
-5. the Controller then immediately attempts the paid separation step into the chosen square;
-6. that separation step follows ordinary Movement Opportunity rules;
-7. the Grappling State ends only when the Controller actually completes the separation step and leaves the shared square.
-
-If an Opportunity or other interruption prevents the separation step from completing:
-
-- the Controller remains in the shared square;
-- the Grappling State remains **Neutral**;
-- the former Follow Down Control and any dependent Pin do not return automatically;
-- a later legal separation, Gain Control, Reverse Control, or other Grapple procedure resolves the resulting position normally.
-
-If the Controller cannot legally begin the full Stand-and-separate procedure, it cannot use Standing to obtain a standing position while preserving or silently ending Follow Down Control.
-
-Under Takedown v0, a Controller therefore cannot both become standing **and** preserve Grapple Control over a creature that remains Prone. The transient Neutral shared-square state exists only to keep occupancy legal until separation succeeds or another Grapple result replaces it. A later technique or explicit feature may author a standing-control result or a separate contest that permits it.
+If the Controller instead wants to disengage after the Takedown, use the normal **Voluntary Controller release** procedure: the Controller makes the required legal separation step, the Grappling State ends, and the former Controlled creature remains Prone in the former shared square.
 
 ### Takedown and existing Pin
 
 A Takedown changes body position substantially. An existing Pin persists only if its already-defined physical requirements remain genuinely satisfied through the resulting position.
 
-If the required limbs, leverage, or body position cease to be valid, the Pin ends under the normal Pin-dependency rule even though the Grappling State may continue through Follow Down.
+If the required limbs, leverage, or body position cease to be valid, the Pin ends under the normal Pin-dependency rule even though the Grappling State and Control may continue.
 
 ### Takedown result boundary
 
 Takedown does not inherently:
 
 - deal damage;
-- create displacement beyond the one-square separation required by **Dump**;
+- move either participant to another square;
+- end the Grappling State;
+- force the Controller Prone;
 - create a free strike;
 - establish a new Pin.
 
-Damage from a throw, collision, edge, falling surface, or similar hazard requires the later Throw/collision/hazard procedures.
+Displacement belongs to **Throw** or another forced-movement procedure. Damage from a collision, edge, falling surface, or similar hazard requires the applicable later collision/hazard procedures.
 
 ## Pin
 
