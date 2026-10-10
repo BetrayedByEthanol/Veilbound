@@ -460,7 +460,7 @@ Beginning to Stand while threatened creates one authored **Standing Opportunity*
 
 Standing Opportunity is separate from the general Movement Opportunity for leaving a threatened square. A later movement step after Standing belongs to the new movement segment and can create its own ordinary Movement Opportunity normally.
 
-A more specific rule may further constrain Standing. For example, a Controller attempting to Stand from a Follow Down Grapple must also satisfy the shared-square separation procedure in [Universal Maneuvers](universal-maneuvers.md#standing-after-follow-down).
+A more specific rule may further constrain Standing when posture, restraint, Pin, terrain, or another authored effect makes the motion physically unavailable.
 
 ## Deferred special movement
 
