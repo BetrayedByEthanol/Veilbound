@@ -28,6 +28,8 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 ### 05 — Combat
 
 - [Combat index](05-combat/README.md)
+- [Initiative and Round/Turn Procedure](05-combat/initiative-and-round-structure.md)
+- [Action Categories and Physical Tempo](05-combat/action-categories-and-physical-tempo.md)
 - [Turn Action Points and Tempo](05-combat/action-categories-and-physical-tempo.md)
 - [Movement Foundation](05-combat/movement-foundation.md)
 - [Special Movement, Terrain, and Prone](05-combat/special-movement-terrain-and-prone.md)
