@@ -180,6 +180,8 @@ Before the first attack roll:
 - commit the required Turn AP, granted attacks, and declared attack profiles/choices immediately;
 - the defender assigns Take Hit, Dodge, or Guard to each incoming attack with those declared profiles/choices known before any attack roll in that sequence resolves.
 
+A [Charge v0](rapid-advance-and-charge-v0.md#attack-sequence-and-interception-timing) may start with a declared intended target, attack profile, and straight-line movement **before** the attack's AP becomes committed or defenses are assigned. Only the culminating attack has this limited deferred-commitment exception. Once the approach ends in an actual attack, finalize its legal target, commit any outstanding AP and all other ordinary attacks against that same target, and assign defenses to the **whole** Attack Sequence before the first attack roll. Charge never reopens an already-resolved sequence against that target.
+
 A declared [Feint Combination](feint-combination-v0.md) may link two consecutive, separately paid melee attacks as part of this same sequence. Both attack profiles and the conditional **-2/+4/-2 accuracy rule** are fully committed before the defender assigns defenses; calculating the second attack's already-declared modifier from the first attack's outcome is **not** permission to change profiles, add attacks, or reopen defense choices afterward.
 
 Then resolve the attacks in their declared order. **Each individual attack is a separate trigger occurrence.** Immediately before that attack's roll:
@@ -429,7 +431,7 @@ Round End
 
 The following remain deliberately unresolved or only minimally integrated here:
 
-- Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other still-undefined special movement modes;
+- specialized Charge variants beyond locked [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md), exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other still-undefined special movement modes;
 - weapon-family Reach assignments beyond the ordinary adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - complete surprise/unaware rules;
