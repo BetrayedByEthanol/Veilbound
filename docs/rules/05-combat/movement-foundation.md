@@ -1,6 +1,6 @@
 # Movement Foundation
 
-> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md). Climbing and swimming capability/state/segment rules are defined in [Traversal Foundation](traversal-foundation.md).
+> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md) author fixed-heading faster approaches; Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md). Climbing and swimming capability/state/segment rules are defined in [Traversal Foundation](traversal-foundation.md).
 
 ## Grid scale and Movement Points
 
@@ -49,7 +49,7 @@ A **movement segment** is one continuous period of movement between actions/effe
 - switching between Normal and Cautious Movement does **not** by itself end the segment;
 - a **Movement Interception** that completes at least one legal step during an active creature's movement ends that creature's current movement segment as described under Movement Interception below.
 
-A creature may change direction, change between Normal and Cautious Movement, or stop moving without creating a new segment merely by changing movement mode. A new segment begins when movement resumes after one of the mover's own intervening actions/effects or after a qualifying Movement Interception has broken the segment.
+A creature using ordinary movement may change direction, change between Normal and Cautious Movement, or stop moving without creating a new segment merely by changing movement mode. A new segment begins when movement resumes after one of the mover's own intervening actions/effects or after a qualifying Movement Interception has broken the segment. **Rapid Advance, Charge, and Sprint** override the ordinary permission to change heading: their authored heading persists across breaks in movement segments.
 
 ## Cautious Movement
 
@@ -186,7 +186,7 @@ Reaction-based Blink, next-turn AP Debt, and any desperation Overdraw rule are t
 
 ## Movement Interception
 
-Movement may be reserved through the existing **Interception** framework. Sprint-specific limits on reserving MP are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#sprint).
+Movement may be reserved through the existing **Interception** framework. Sprint-specific limits on reserving MP are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#sprint); [Rapid Advance and Charge](rapid-advance-and-charge-v0.md#shared-movement-model) also prohibit new MP reservations after their activation. Their extra allowance does not become out-of-turn Interception movement.
 
 On the reserving creature's turn:
 
@@ -230,7 +230,7 @@ The active creature is not forced to continue along a route chosen before the In
 
 The following are intentionally not defined by Movement Foundation:
 
-- Charge and other attack-linked movement maneuvers;
+- specialized charge variants beyond locked [Charge v0](rapid-advance-and-charge-v0.md), and other attack-linked movement maneuvers;
 - extra movement purchased directly through Turn AP;
 - exact Climb/Swim MP costs and speed calibration;
 - Catch Grip, falling, and detailed water-hazard procedures;
