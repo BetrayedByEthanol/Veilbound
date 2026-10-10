@@ -59,7 +59,7 @@ On an **ordinary miss not already stopped by Cover or a successful physical Guar
 
 1. Determine **Scatter Defense** from the defense that actually resolved the shot:
    - **No applicable Cover Difficulty:** use that actual defense unchanged.
-   - **Partial cover, and the attack is an ordinary miss** (`A <= B` under [Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location)): use **Base Defense `B`**, the actual selected defense **excluding effective Cover Difficulty `C`**, rather than final Cover-adjusted Defense `D = B + C`.
+   - **Partial cover, and the attack is an ordinary miss** (`A <= B`, or an automatic natural-1 miss regardless of its numerical total, under [Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location)): use **Base Defense `B`**, the actual selected defense **excluding effective Cover Difficulty `C`**, rather than final Cover-adjusted Defense `D = B + C`.
    - **Cover-hit band** (`B < A <= D`), physically illegal direct shot, or successful projectile Guard: this ordinary-miss scatter procedure **does not apply**. Resolve the actual cover/Guard impact or illegality first.
 2. Calculate the **Miss Margin**:
    ```text
