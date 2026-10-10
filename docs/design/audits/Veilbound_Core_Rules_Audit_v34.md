@@ -339,7 +339,7 @@ Against an incoming attack, the defender chooses one of only **three core respon
 
 | Rule / concept | Status | Audit finding |
 |---|---|---|
-| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Rapid Advance, Charge, Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
+| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Rapid Advance, Charge, Sprint, **Aim v0**, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
 | Attack action and weapon attacks | **PROVISIONAL / REQUIRES NATIVE MATH** | Universal physical Attack remains a core action. A two-ability attack formula is favored conceptually, but exact ability pairings, training contribution and attack-quality thresholds are not yet locked. |
 | Initiative | **LOCKED NATIVE SYSTEM** | Initiative, ties, late entry, round refresh, and turn timing are defined in the canonical Initiative and Round/Turn Procedure. |
 | Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Rapid Advance, Charge v0, Sprint, terrain surcharges, movement impairments, allied-square transit, Prone/Crawl/Stand, the authored Standing Opportunity, and the Climb/Swim Traversal Foundation are defined. Rapid Advance locks 1.5× impaired normal MP (floor) at 0 AP with fixed heading; Charge locks 2× impaired MP with fixed heading, minimum 3 steps and one paid melee attack. Neither applies a Dodge penalty or universal attack/damage bonus. Mounted/momentum Charge extensions, exact Climb/Swim speeds, Catch Grip, falling/water hazards, jumping, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
@@ -4606,3 +4606,20 @@ For swimming: loss of controlled propulsion does not use the falling rule. Water
 - detailed underwater weapon behavior;
 - universal fatigue/exhaustion intervals;
 - jumping, squeezing, flight, and other future traversal modes.
+
+
+---
+
+# LOCKED UPDATE: Aim v0 — precision setup
+
+**Status: LOCKED NATIVE UNIVERSAL MANEUVER / NUMERIC BENEFIT PLAYTEST-SENSITIVE.** Canonical procedure: `docs/rules/05-combat/aim-v0.md`.
+
+Aim is a **separately paid Focus-priced Physical Action** (Low 20 / Medium 24 / High 30 Turn AP), **not** a free ranged attack, not an Attack Sequence, and not an Interception/Interrupt. The player must commit one **observable target**, one **ranged attack profile / ammunition or effect-bearing delivery**, and one **specific aiming objective / difficulty source** when declaring it.
+
+The first later valid shot using that exact declaration mitigates **min(4, max(0, selected applicable positive shot-difficulty modifier))** from the selected source, to a minimum source modifier of 0. There is no unconditional +4 Attack. It does not reduce an enemy's inherent Dodge/Agility/Awareness/Evasion, Armor, penetration requirements, or costs, and it cannot cross physically blocking cover. Range Difficulty is an existing eligible source; cover, shooting into melee and Called Shot numeric complications require later authored rules. A selected source absent at attack resolution grants zero mitigation; the benefit does not transfer.
+
+Aim applies to **one** attack only and cannot stack with another Aim. Preparation expires when its selected shot begins (including a shot later Interrupted), when the character changes target/profile/objective or loses the meaningful firing position or target track, or at the **start of the second subsequent turn** after preparation. Mere incoming damage is not an automatic Aim-break. A later attack pays its own AP, VP and/or Full Action as applicable; heavy crossbow firing remains Full Action.
+
+Aim may precede an ordinary Attack Sequence (identify the aimed attack and all other attacks before defense assignment) or **one separately reserved legal Interception attack**, never a bundled atomic Aim+Attack reservation. Interception still resolves **before** its declared triggering event and does not create line of fire or automatic Interrupt. Applicable physical/ranged manifested projectiles and pointed beams may benefit where their legal authored delivery actually uses a ranged attack roll, without improving Veil Control, damage, effect magnitude, on-hit riders, or interruption.
+
+**Still deferred:** Cover and line-of-fire geometry/modifiers, shooting into melee and intervening-creature/friendly-fire rules, native Called Shot Turn AP/Full Action and wounds/Interrupts, enhanced precision traits and the +4 cap calibration with enchanted status-ammunition and low-level AP.
