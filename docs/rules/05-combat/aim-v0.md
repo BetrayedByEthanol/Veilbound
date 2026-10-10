@@ -42,15 +42,15 @@ Aim mitigation = min(4, max(0, selected applicable shot-difficulty modifier))
 
 The affected difficulty is reduced by that mitigation **to no lower than 0**. Aim does not add an unconditional +4 to the attack roll and cannot turn a favorable negative modifier into an additional bonus.
 
-Eligible difficulty is a **shot-condition modifier that actually applies to the chosen attack and relevant defense calculation**. Current examples include the positive Range Difficulty of an eligible bow/crossbow shot; future authored examples may include **numeric, aimable** partial-cover gaps, intervening combatants, small exposed targets, or **legal** Called Shot location difficulty. If the applicable rule lacks a numeric targeting penalty or if the penalty does not apply to a particular defense, **Aim has nothing to mitigate in that calculation**. Do not invent a cover, melee, or Called Shot modifier merely to use Aim.
+Eligible difficulty is a **shot-condition modifier that actually applies to the chosen attack and relevant defense calculation**. Current examples include positive Range Difficulty and the **numeric Cover Difficulty now authored by [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md#cover-difficulty-tiers)**. Future authored examples may include intervening combatants, small exposed targets, or **legal** Called Shot location difficulty. If the applicable rule lacks a numeric targeting penalty or if the penalty does not apply to a particular defense, **Aim has nothing to mitigate in that calculation**. Do not invent a cover, melee, or Called Shot modifier merely to use Aim.
 
 - If a difficulty source contributes to both static Ranged Defense and active Ranged Dodge (such as **Range Difficulty**), apply the mitigation to that source in **whichever defense actually resolves** the shot; do not apply the same mitigation twice.
-- If the source contributes only to static defense, reduce it only there. The existing [Ranged Dodge](off-hand-and-ranged-combat.md#active-ranged-dodge) formula does **not** automatically acquire a Cover modifier because the shooter Aimed.
+- If the source contributes only to static defense, reduce it only there. Cover Difficulty is present in active Ranged Dodge **only because the independently authored [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md#apply-cover-to-the-selected-ranged-defense) adds it**. Aim still cannot insert an unauthored modifier into a defense.
 - If there is no positive modifier from the selected source when the shot resolves, Aim gives **0 benefit**; it does not transfer to another source or become an attack bonus.
 - Aim does not reduce Armor, Penetration requirements, a defender's **Agility, Awareness, Evasion Bonus, or Dodge Pressure**, weapon handling/action costs, or independent attack/resistance tests.
 - Aim cannot turn an **illegal or physically blocked line of fire** into a legal shot. It does not erase an interposing body, solid wall, barrier protection, or the eventual consequences of a missed shot.
 
-**Examples with existing bow range bands:** Aimed **Medium** range changes its +2 source to +0; **Long** changes +5 to +1; **Extreme** changes +8 to +4. A point-blank/Close range modifier of -2 remains -2: Aim does not change it. Other illustrative +3 partial-cover or +6 Called Shot penalties are **not canonical numbers** until separately authored.
+**Examples with existing bow range bands:** Aimed **Medium** range changes its +2 source to +0; **Long** changes +5 to +1; **Extreme** changes +8 to +4. A point-blank/Close range modifier of -2 remains -2: Aim does not change it. **Cover Difficulty is now canonical at +2/+4/+6/+8** where a partial-cover geometry applies; illustrative +6 Called Shot or shooting-into-melee penalties remain **noncanonical** until separately authored.
 
 The aim benefit is capped at **4 for the selected source**, even if the character has taken several Aim actions.
 
@@ -87,7 +87,7 @@ An Aim action is **not an attack**, does not deal damage, and does **not** itsel
 
 ## Deferred integrations (do not silently import legacy rules)
 
-- **Cover and line of fire:** define partial/complete cover, visible gaps, range of angles, physical projectile obstruction, and numeric modifiers when cover **actually** complicates targeting. Aiming never bypasses solid obstruction.
+- **Cover and line of fire:** [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md) now defines numeric physical partial-cover tiers, directions/openings, and the one-roll cover-hit window. Aim can mitigate only a **declared, actually applicable** positive Cover Difficulty and never bypasses solid obstruction. More detailed cover destruction/penetration remains deferred.
 - **Shooting into melee:** distinguish an engaged target with a genuinely clear shot from intervening allies/enemies, define authored targeting modifiers, and establish any friendly-fire/stray-hit and obstruction procedure. Being in melee does **not** itself gain a new universal penalty from Aim.
 - **Called Shots:** author the native Turn AP-compatible Called Shot action, location difficulty, wound qualification and effect/Interrupt interactions. Legacy references to an entire "Attack action" are **not** automatically valid under Turn AP. Aim for a specific body part is only a preparation, not permission to inflict a wound or Interrupt.
 - **Special precision techniques:** multiple-target aim, sniper traits, aim from moving platforms, special cover penetration, guided shots, and unusually stable magical targeting need independent explicit rules.
