@@ -1,6 +1,6 @@
 # Special Movement, Terrain, and Prone
 
-> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement consequences of Prone. Climbing and swimming foundations are defined separately in [Traversal Foundation](traversal-foundation.md). Charge, traversal speed calibration, jumping/falling, squeezing, size exceptions, flight, and the non-movement combat effects of Prone remain later work.
+> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement and combat consequences of Prone. Climbing and swimming foundations are defined separately in [Traversal Foundation](traversal-foundation.md). Charge, traversal speed calibration, jumping/falling, squeezing, size exceptions, flight, and weapon-specific Prone handling beyond the baseline remain later work.
 
 ## Calculation order
 
@@ -272,7 +272,9 @@ Examples:
 After the creature's own turn ends, ordinary MP spent during that completed turn no longer counts against a surviving reservation. MP spent by a live released Movement Interception continues to count while that pool is live. MP spent by a **completed** Movement Interception continues to count as retained cohort spend only while another pool from the same reservation cohort remains live. Once the cohort has no live pools remaining, its completed spend no longer affects future movement accounting.
 ## Prone movement state
 
-This section defines only the **movement consequences** of being Prone. Attack, Guard, Dodge, targeting, and any other combat consequences of Prone remain part of the later conditions/combat-position pass.
+This section defines the baseline **movement and combat consequences** of being Prone.
+
+Prone is a positional state, not helplessness. A Prone creature may still attack, Guard, Dodge, use magic, manipulate equipment, and perform other actions when its actual body position, free limbs, equipment, and the action's physical requirements permit them.
 
 A Prone creature:
 
@@ -337,6 +339,96 @@ Diagonal Cautious Crawl through Difficult terrain
 
 A Cautious Crawl step receives the normal benefit of Cautious Movement and does not create the general Movement Opportunity merely for leaving a threatened square.
 
+### Attacking while Prone
+
+A Prone creature may attack when the chosen attack is physically usable from its current posture.
+
+For **melee attacks** made while Prone:
+
+```text
+Prone melee attack modifier = -2
+```
+
+This represents reduced leverage, reach management, footwork, and ability to drive through the strike.
+
+Prone does **not** apply a universal modifier to every ranged attack. Instead, the ranged weapon or attack method must actually be usable from the posture.
+
+- an ordinary bow cannot normally make its standard shot while Prone unless an explicit technique, position, or weapon rule permits it;
+- an already-loaded crossbow or another ranged weapon that can genuinely be aimed and fired from the posture may attack normally;
+- exact weapon-by-weapon restrictions for spears, halberds, other long weapons, unusual bows, reload procedures, and specialized firing postures remain part of the weapon pass.
+
+A weapon being merely held is not enough. If its required swing, draw, bracing, line of fire, or body mechanics cannot be performed from Prone, that attack profile is unavailable.
+
+### Melee attacks against a Prone target
+
+A non-Prone attacker making a melee attack against a Prone target gains:
+
+```text
++2 to the melee attack roll
+```
+
+This represents superior angle, reach control, and access against a target that cannot use ordinary standing footwork.
+
+A Prone attacker does **not** gain this +2 merely because its target is also Prone. The attacker's own Prone melee penalty still applies normally.
+
+Being Prone does **not** inherently increase:
+
+- damage;
+- Penetration;
+- critical tier;
+- wound severity;
+- Called Shot effect.
+
+If a specific exposed body part or vital is being deliberately targeted, use the applicable Called Shot or later targeting procedure rather than treating Prone as an automatic damage multiplier.
+
+### Guard while Prone
+
+Prone does not inherently remove Guard and does not apply a universal Guard Defense penalty.
+
+A Prone creature may Guard only when it can physically orient and operate the chosen Guard instrument from its actual posture.
+
+Examples include raising a usable shield, turning a blade into the attack, or parrying with a sufficiently free weapon. A weapon trapped beneath the creature, a limb committed to another hold, or an instrument that cannot be brought into the attack line cannot provide that Guard.
+
+All ordinary Guard capacity, weapon capability, body-part commitment, and other Guard rules still apply.
+
+### Dodge while Prone
+
+Prone does not inherently remove Dodge and does not apply a universal Dodge Defense penalty.
+
+A Prone Dodge represents physically plausible repositioning within the creature's posture, such as:
+
+- rolling;
+- twisting the torso;
+- pulling a limb clear;
+- flattening or shifting the body;
+- another movement that does not require ordinary standing footwork.
+
+If the current position, Pin, restraint, terrain, confinement, or another effect prevents the required repositioning, Dodge is unavailable under the normal physical-feasibility rule.
+
+The melee attacker's +2 against a Prone target already represents the standing positional advantage; do not also apply a generic Prone Dodge penalty for the same disadvantage.
+
+### Ranged attacks against a Prone target
+
+Prone can reduce a creature's presented target profile against sufficiently distant, roughly horizontal ranged attacks.
+
+For a targeted ranged attack made from **3 or more squares away**, a Prone target gains:
+
+```text
++2 Position Defense
+```
+
+when the Prone posture materially presents a smaller target profile to that attack.
+
+This modifier:
+
+- applies to both static **Ranged Defense** and active **Ranged Dodge**;
+- stacks with the attack's normal Range Difficulty;
+- does not apply at **1 or 2 squares**;
+- does not apply when elevation, firing angle, target posture, or another circumstance substantially negates the reduced profile;
+- does not protect against an area effect merely because the creature is Prone.
+
+The GM does not grant an additional bonus merely because the range is very long; long-range difficulty is already represented by the ordinary Range Difficulty modifier.
+
 ### Standing
 
 Standing from Prone costs **4 MP**.
@@ -349,11 +441,26 @@ Standing:
 - **ends the creature's current movement segment when Standing begins**;
 - ends the Prone movement state once completed.
 
+The 4 MP Stand cost is committed when Standing begins. If Standing is later Interrupted or made impossible, that MP is not refunded.
+
 Any movement after Standing is completed begins a **new movement segment**.
 
 If a creature was knocked Prone after activating Sprint, its remaining Sprint allowance is suspended under the general cannot-Sprint rule except for paying the 4 MP Stand cost. If it Stands and still has Sprint MP remaining, the Prone prohibition ends and it may resume Sprint as a new movement segment under the existing Sprint Heading unless another rule or the battlefield state prevents it.
 
-Whether **Standing while threatened** creates its own authored Opportunity is deliberately **not locked here**. The current general Movement Opportunity rule only triggers when voluntarily leaving a threatened square; the full Prone condition pass will determine whether Standing adds a separate trigger.
+### Standing Opportunity
+
+Beginning to Stand while threatened creates one authored **Standing Opportunity** before the Prone state ends.
+
+- each enemy that currently threatens the Prone creature may exploit that Opportunity through the normal [Opportunity Response procedure](initiative-and-round-structure.md#opportunity-framework);
+- the creature is still **Prone** while those Opportunity Attacks resolve, so all applicable Prone attack and defense modifiers still apply;
+- a generic Opportunity Attack does **not** automatically Interrupt Standing merely because it hits;
+- after all responses resolve, recheck whether Standing remains physically possible;
+- if Standing remains legal, it completes normally;
+- if a response incapacitates, restrains, displaces, or otherwise leaves the creature unable to complete the Stand, the creature does not Stand and the committed 4 MP remains spent.
+
+Standing Opportunity is separate from the general Movement Opportunity for leaving a threatened square. A later movement step after Standing belongs to the new movement segment and can create its own ordinary Movement Opportunity normally.
+
+A more specific rule may further constrain Standing when posture, restraint, Pin, terrain, or another authored effect makes the motion physically unavailable.
 
 ## Deferred special movement
 
@@ -368,5 +475,4 @@ Still unresolved:
 - flight and other special movement modes;
 - detailed forced-movement procedures;
 - movement checks for exceptional terrain;
-- non-movement combat effects of Prone;
-- whether Standing while threatened creates a specific Opportunity.
+- weapon-specific Prone restrictions beyond the locked baseline, including detailed long-weapon handling and specialized ranged firing/reload postures.

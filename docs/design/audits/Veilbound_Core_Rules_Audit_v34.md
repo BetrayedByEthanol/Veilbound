@@ -342,9 +342,9 @@ Against an incoming attack, the defender chooses one of only **three core respon
 | Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
 | Attack action and weapon attacks | **PROVISIONAL / REQUIRES NATIVE MATH** | Universal physical Attack remains a core action. A two-ability attack formula is favored conceptually, but exact ability pairings, training contribution and attack-quality thresholds are not yet locked. |
 | Initiative | **LOCKED NATIVE SYSTEM** | Initiative, ties, late entry, round refresh, and turn timing are defined in the canonical Initiative and Round/Turn Procedure. |
-| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Sprint, terrain surcharges, movement impairments, allied-square transit, Prone/Crawl/Stand, and the Climb/Swim Traversal Foundation are defined. Exact Climb/Swim speeds, Catch Grip, falling/water hazards, Charge, jumping, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
+| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Sprint, terrain surcharges, movement impairments, allied-square transit, Prone/Crawl/Stand, the authored Standing Opportunity, and the Climb/Swim Traversal Foundation are defined. Exact Climb/Swim speeds, Catch Grip, falling/water hazards, Charge, jumping, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
 | Damage / durability | **PARTLY LOCKED, PARTLY MISSING** | Damage normally reduces physical HP. Vigor is a regenerative reserve rather than temporary HP; some supernatural effects may target Vigor directly. Resistance/immunity categories still need native definitions. |
-| Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **PARTLY NATIVE / MOSTLY UNRESOLVED** | Prone now has native movement consequences (Crawl/Stand/Sprint restriction), but its attack/Guard/Dodge effects and the other named conditions still require a Veilbound-native conditions appendix. |
+| Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **PARTLY NATIVE / MOSTLY UNRESOLVED** | **Prone v0 is now a LOCKED native condition foundation.** It defines Crawl/Stand/Sprint restrictions, -2 melee attacks made while Prone, +2 melee attacks against Prone from a non-Prone attacker, physically feasible Guard/Dodge, +2 ranged Position Defense from 3+ squares when the reduced profile materially applies, ordinary bow incompatibility with standard Prone firing, and the Standing Opportunity. Weapon-specific posture exceptions and the other named conditions still require later work. |
 | Exhaustion | **INHERITED FROM 5e** | Used as a capstone cost, but version/effects are not specified. |
 | Critical-hit core rule | **LOCKED FRAMEWORK / DAMAGE BONUS PENDING** | Natural 1 is an automatic miss without fumble. Natural 20 creates a confirmation-based critical opportunity; a second natural 20 creates a Devastating Critical. Exact Strong Hit/Critical damage bonuses remain to be calibrated. |
 | Low-Focus Extra Attack progression | **SUPERSEDED** | Replaced by canonical Physical Tempo formulas and the current Focus/level cadence. |
@@ -356,7 +356,7 @@ Against an incoming attack, the defender chooses one of only **three core respon
 | Weapon/armor properties | **PARTLY LOCKED NATIVE SYSTEM** | Damage, Penetration, Armor reduction, Dodge Agility caps and the Two-Handed trait now have native Veilbound rules. Reach, shield numbers, dual wielding and some weapon-specific traits remain to be finalized. |
 | Dropping to 0 HP / dying / death | **LOCKED FRAMEWORK** | At 0 HP the character is normally unconscious and Dying, loses 1 HP/round, and dies at −Max HP unless an applicable effect intervenes. Wound repair and Cheat Death rules are defined below. |
 | Natural healing / regeneration | **LOCKED concept / PROVISIONAL numbers** | Missing HP regenerates by consuming Vigor at a Vitality-driven rate. Vigor recovers much more slowly. Exact timing, capacity and conversion require playtesting; Hit Dice are not assumed. |
-| Cover, concealment, surprise, grappling, shoving | **PARTLY NATIVE / PARTLY MISSING** | Grapple, shove, feint and similar physically plausible maneuvers are intended as universal core actions rather than class techniques. Exact procedures plus cover/concealment/surprise still need definition. |
+| Cover, concealment, surprise, grappling, shoving | **PARTLY NATIVE / PARTLY MISSING** | **Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, and Throw v0 are LOCKED foundations.** Grappling now uses shared-square occupancy once the clinch is established; defender victory on initiation chooses Repel or Counter-Control; Escape and voluntary release require legal separation. Shove breaks the shared grapple without moving the pair. Trip provides ordinary Prone pressure; Takedown now changes only the Controlled creature's posture to Prone while both remain in the shared square and the same Controller retains Control. It creates no built-in displacement, release, Pin, or forced Prone result for the Controller. Drive/Drag uses one Controller Grapple Contest to create one slow pair-movement segment; the Controller spends MP, one Opportunity is generated per threatening enemy/segment, and either grappler can be targeted by that Opportunity. Throw converts Control into forced displacement: margin 1–4 moves 1 square, 5–9 moves 1 square plus Prone where meaningful, and 10+ moves 2 squares plus Prone where meaningful; successful displacement ends the Grapple and does not create the general Movement Opportunity. Exact physical-scale modifiers, collision/falling damage, grapple-specific Disarm/limb control, cooperative multi-creature grapples, exact Pin calibration, feint, cover/concealment/surprise, and other later layers remain incomplete. |
 | Encounter building / enemy challenge rules | **MISSING** | No CR-equivalent, encounter budget or balancing method. |
 | Creature/NPC combat stat construction | **MISSING** | No bestiary or NPC builder. |
 
@@ -4285,7 +4285,6 @@ The existing threatened-ranged rule is a specific stronger trigger: firing a bow
 Still unresolved:
 
 - Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
-- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
 - complete surprise/unaware rules;
@@ -4450,9 +4449,9 @@ If an interruption makes the passage impossible after entry, keep the interrupti
 
 The existing **+2 MP** allied-square surcharge remains flat and is applied after movement-mode changes.
 
-## Prone, Crawl, and Stand
+## Prone, Crawl, Stand, and combat posture
 
-This lock defines only the movement consequences of Prone.
+Prone v0 now defines both movement and baseline combat posture.
 
 A Prone creature cannot use ordinary walking movement or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the general active-Sprint prohibition rule suspends the remaining Sprint allowance: it cannot fund Crawl or Cautious Crawl and may be spent only on the explicit 4 MP Stand exception until the creature is standing again.
 
@@ -4474,14 +4473,23 @@ Cautious Crawl = 3 × base
 
 Thus Cautious Crawl costs 6 MP orthogonally or 9 MP diagonally before flat terrain/occupancy surcharges.
 
-Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance. Beginning to Stand ends the current movement segment; movement after Standing begins a new segment.
+Combat posture:
+
+- melee attacks made while Prone suffer **-2**;
+- a non-Prone attacker gains **+2** to melee attacks against a Prone target;
+- Prone does not inherently increase damage, Penetration, critical tier, wound severity, or Called Shot effect;
+- Guard and Dodge remain available when physically possible from the actual posture;
+- targeted ranged attacks from **3+ squares** gain **+2 Position Defense** against a Prone target when the lower profile materially applies; the modifier applies to both static Ranged Defense and active Ranged Dodge;
+- the Prone profile bonus does not apply at 1-2 squares, where angle/elevation negates it, or merely because an area effect includes the creature;
+- an ordinary bow cannot normally make its standard shot while Prone unless an explicit technique, posture, or weapon rule permits it.
+
+Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance. The 4 MP is committed when Standing begins. Beginning to Stand ends the current movement segment and, if the creature is threatened, creates the authored **Standing Opportunity** before Prone ends. Generic Opportunity hits do not automatically Interrupt Standing; recheck whether the Stand remains physically possible after responses. Movement after a completed Stand begins a new movement segment.
 
 If a creature was knocked Prone after Sprint was activated, the remaining Sprint allowance is suspended except for paying the Stand cost; after Standing it may resume any remaining Sprint movement as a new segment under the existing Sprint Heading if still legal.
 
 ## Explicitly unresolved
 
-- attack/Guard/Dodge and other combat effects of Prone;
-- whether Standing while threatened creates a separate authored Opportunity;
+- weapon-specific Prone posture restrictions beyond the baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
 - Charge;
 - exact Climb/Swim MP costs, Catch Grip, jumping/falling, and detailed water hazards;
 - squeezing;

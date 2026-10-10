@@ -428,7 +428,6 @@ Round End
 The following remain deliberately unresolved or only minimally integrated here:
 
 - Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other still-undefined special movement modes;
-- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
 - weapon-family Reach assignments beyond the ordinary adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - complete surprise/unaware rules;

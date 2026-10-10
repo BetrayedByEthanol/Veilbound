@@ -46,6 +46,8 @@ Dodge has no Training bonus and no minimum floor.
 
 When armor limits Agility for Dodge, use the armor-cap rules in [weapons-and-armor.md](weapons-and-armor.md).
 
+Being **Prone** does not inherently remove Dodge or apply a second blanket Dodge penalty. A Prone Dodge is legal only when the required rolling, twisting, or other repositioning is physically possible; see [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#dodge-while-prone).
+
 ## Guard
 
 Guard unifies parrying and blocking into one defensive response.
@@ -70,6 +72,8 @@ There is no partial or half-damage Guard state.
 For a projectile-delivered area effect, "stopped" means the Guard instrument physically intercepts the projectile. The projectile therefore impacts at the defender's position by default and any carried area resolves from that impact point. Guarding the projectile does not automatically cancel the carried area. See [Manifestation Resolution](../07-veil-magic/manifestation-resolution.md#successful-guard-against-an-area-projectile).
 
 Ordinary dual wielding does not stack Guard Defense bonuses. Use the best applicable Guard setup.
+
+Being **Prone** does not inherently remove Guard or reduce Guard Defense. The chosen Guard instrument must still be physically usable from the current posture; see [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#guard-while-prone).
 
 Defensive off-hand weapons and shields may improve Guard. Equipment can grant **at most +1 additional Guard capacity per round** from the defensive off-hand/shield framework.
 
