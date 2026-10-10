@@ -229,7 +229,7 @@ Shove v0 does not define:
 - chain displacement into another creature;
 - special shield-size Shove bonuses;
 - size-category modifiers or impossibility thresholds;
-- weapon bind or hook procedures;
+- persistent weapon-bind, hook-control, and weapon-control procedures beyond the one-off contact methods allowed by Trip and [Disarm v0](disarm-v0.md);
 - Feint, Charge, or other universal maneuvers beyond the locked maneuver foundations;
 - Catch Grip and falling damage.
 
