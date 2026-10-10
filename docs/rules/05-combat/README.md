@@ -10,6 +10,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md)
 - [Traversal Foundation](traversal-foundation.md)
 - [Universal Maneuvers](universal-maneuvers.md)
+- [Disarm v0](disarm-v0.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
@@ -27,7 +28,7 @@ The current canonical combat foundation still requires Veilbound-native rules fo
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
 - cover/concealment/surprise as complete procedures;
-- grapple-specific Disarm/limb control, cooperative multi-creature Grapples, feint, disarm, charge, and other universal maneuvers beyond the locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, and Throw v0 foundations;
+- detailed limb/weapon control, cooperative multi-creature Grapples, Feint, Charge, and other universal maneuvers beyond locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, Throw v0, and Disarm v0;
 - physical-hazard values/procedures;
 - conditions;
 - encounter building and NPC/creature construction.
