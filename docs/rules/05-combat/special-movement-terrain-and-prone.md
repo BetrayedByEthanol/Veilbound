@@ -1,6 +1,6 @@
 # Special Movement, Terrain, and Prone
 
-> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement and combat consequences of Prone. Climbing and swimming foundations are defined separately in [Traversal Foundation](traversal-foundation.md). Charge, traversal speed calibration, jumping/falling, squeezing, size exceptions, flight, and weapon-specific Prone handling beyond the baseline remain later work.
+> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement and combat consequences of Prone. Climbing and swimming foundations are defined separately in [Traversal Foundation](traversal-foundation.md). [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md) are now locked as straight-heading walking modes; traversal speed calibration, jumping/falling, squeezing, size exceptions, flight, and weapon-specific Prone handling beyond the baseline remain later work.
 
 ## Calculation order
 
@@ -27,11 +27,19 @@ base step cost
 
 Flat terrain and occupancy surcharges are not multiplied by Cautious Movement, Crawl, or another slow movement mode unless a rule explicitly says otherwise.
 
+## Rapid Advance and Charge
+
+[Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md) lock two additional fixed-heading walking/running modes:
+
+- **Rapid Advance:** no AP, `floor(3 × impaired normal Movement Allowance / 2)`, usually **18 MP**.
+- **Charge:** one Physical Action for its culminating melee attack, `2 × impaired normal Movement Allowance`, usually **24 MP**, minimum 3 completed steps, with conditional AP commitment on attack or use beyond the Rapid allowance.
+- Both require starting before any MP is spent/reserved; use a fixed heading, ordinary terrain and Opportunity rules, and **no Dodge penalty**. See the dedicated rule for attack, abort, retargeting and Interception timing.
+
 ## Sprint
 
 **Sprint is a Full Action.**
 
-Sprint is **not eligible to be reserved as an Interception**. It must be declared and resolved during the creature's own turn.
+Sprint is **not eligible to be reserved as an Interception**. It must be declared and resolved during the creature's own turn. It cannot begin in a turn where Rapid Advance or Charge was already initiated, including an aborted Charge; Rapid Advance and Charge likewise cannot begin after Sprint.
 
 The creature must meet the normal Full Action requirement: its entire Turn AP allotment for the turn must still be available, and declaring Sprint consumes that entire allotment.
 
@@ -162,11 +170,12 @@ Impaired normal Movement Allowance =
 
 An effect that impairs movement states its MP reduction.
 
-Sprint is calculated from the impaired normal allowance:
+Rapid Advance, Charge, and Sprint are calculated from the impaired normal allowance:
 
 ```text
-Sprint MP =
-3 × impaired normal Movement Allowance
+Rapid Advance MP = floor(3 × impaired normal Movement Allowance / 2)
+Charge MP        = 2 × impaired normal Movement Allowance
+Sprint MP        = 3 × impaired normal Movement Allowance
 ```
 
 This makes an impairment proportionally meaningful at both walking and Sprint speeds.
@@ -211,7 +220,7 @@ However, MP actually spent by a completed Movement Interception remains **retain
 When an impairment changes during the creature's own turn:
 
 1. recalculate its current normal Movement Allowance;
-2. if Sprint is active, also recalculate its current Sprint allowance as `3 × impaired normal Movement Allowance`;
+2. if Rapid Advance, Charge, or Sprint is active, also recalculate that mode's allowance using its defined multiplier (with floor for Rapid Advance);
 3. MP already spent during that turn remains spent and counts against the recalculated current-turn allowance;
 4. unreleased Movement Interception reservations also count against that recalculated allowance.
 
@@ -280,7 +289,7 @@ A Prone creature:
 
 - remains in its current square;
 - cannot use ordinary walking movement while Prone;
-- cannot Sprint while Prone;
+- cannot Sprint, Rapid Advance, or Charge while Prone;
 - may normally move by **Crawling**;
 - may spend MP to **Stand**.
 
@@ -466,7 +475,7 @@ A more specific rule may further constrain Standing when posture, restraint, Pin
 
 Still unresolved:
 
-- Charge and other attack-linked movement maneuvers;
+- specialized mounted/momentum variants beyond locked [Charge v0](rapid-advance-and-charge-v0.md), and other attack-linked movement maneuvers;
 - exact Climb/Swim MP costs and traversal speed calibration;
 - Catch Grip, falling, and detailed water hazards;
 - jumping and falling;
