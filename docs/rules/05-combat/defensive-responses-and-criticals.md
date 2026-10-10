@@ -22,7 +22,7 @@ When attacks are declared as a [Feint Combination](feint-combination-v0.md), ass
 
 Against melee, Take Hit means the attack lands unless the attacker rolls a natural 1.
 
-Ranged attacks use the separate ranged-defense rules because an undefended projectile is not automatically assumed to strike its target.
+Ranged attacks use the separate ranged-defense rules because an undefended projectile is not automatically assumed to strike its target. **[Cover and Line of Fire v0](cover-and-line-of-fire-v0.md)** adds its external Cover Difficulty to the actual static Ranged Defense or active Ranged Dodge, without granting a free active response. Completely blocked direct paths cannot be targeted. A shot in the cover-hit band contacts the obstruction rather than the intended creature.
 
 ## Dodge
 
@@ -63,6 +63,8 @@ Base Guard Defense is:
 ```
 
 Use the Guard pairings in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md).
+
+**Ranged projectiles and environmental cover:** When a Guard instrument is independently legal against a projectile, the current [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md#apply-cover-to-the-selected-ranged-defense) applies external Cover Difficulty **once** to that Guard Defense. This does not increase Guard capacity or permit an ineligible weapon to Guard. Do not count a held shield simultaneously as **both** the Guard instrument and environmental Cover from that same object. In the one-roll [cover-hit band](cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location), the projectile impacts cover; if the attack instead fails to beat the ordinary Guard Defense *without* Cover, the Guard instrument stops it normally (including its usual area-projectile impact rule). No extra roll or defense reassignment occurs.
 
 Guard is binary:
 
