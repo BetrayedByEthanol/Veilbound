@@ -501,7 +501,7 @@ When a rule says one participant leaves or separates:
 - the other participant remains in the former shared Grapple square;
 - if there is no legal adjacent free square for the leaving participant, that voluntary separation cannot be completed.
 
-A rule such as Shove, forced movement, teleportation, Dump, or Grapple Intervention may provide its own separation placement instead.
+A rule such as Shove, forced movement, teleportation, Throw, or Grapple Intervention may provide its own separation placement instead.
 
 ## Control and available actions
 
