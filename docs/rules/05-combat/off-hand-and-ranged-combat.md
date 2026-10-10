@@ -68,7 +68,7 @@ Use:
 
 ```
 Ranged Defense =
-10 + Range Difficulty + Cover + Size/Position and other shot-condition modifiers
+10 + Range Difficulty + Cover Difficulty + Size/Position and other shot-condition modifiers
 ```
 
 ## Active ranged Dodge
@@ -77,7 +77,7 @@ An aware target may actively Dodge a ranged attack.
 
 ```
 Ranged Dodge =
-10 + capped Agility + Awareness + Evasion Bonus + Range Difficulty - Dodge Pressure
+10 + capped Agility + Awareness + Evasion Bonus + Range Difficulty + Cover Difficulty - Dodge Pressure + other expressly applicable active-Dodge modifiers
 ```
 
 Awareness represents reading the shooter's posture, aim, and timing rather than reacting only after the projectile is already in flight.
@@ -92,7 +92,11 @@ Explicit **Size/Position** modifiers that say they apply to active ranged defens
 
 ## Aim v0 — precision preparation
 
-[Aim v0](aim-v0.md) is a **separate Focus-priced Physical Action** before a specific ranged attack. Declare its **one target, attack profile, and particular difficulty source/objective** when preparing. The eventual eligible shot mitigates **min(4, positive applicable selected difficulty)**; no generic +4 Attack bonus, no damage or magical rider improvement, and no new Interrupt or Interception timing. A positive Range Difficulty is an existing eligible source; future numeric partial-cover, shooting-into-melee, and legal Called Shot difficulty require their **own authored rules**. Apply mitigation only to the selected source in whatever static or active Ranged Defense formula actually contains it. **Aim does not insert Cover into active Ranged Dodge**, change inherent evasion, or permit an otherwise physically blocked shot. The Aim expires on use/break or at the start of the shooter's **second subsequent turn**. See its dedicated preparation, cancellation, and Attack Sequence/Interception rules.
+[Aim v0](aim-v0.md) is a **separate Focus-priced Physical Action** before a specific ranged attack. Declare its **one target, attack profile, and particular difficulty source/objective** when preparing. The eventual eligible shot mitigates **min(4, positive applicable selected difficulty)**; no generic +4 Attack bonus, no damage or magical rider improvement, and no new Interrupt or Interception timing. A positive Range Difficulty is an existing eligible source; future numeric partial-cover, shooting-into-melee, and legal Called Shot difficulty require their **own authored rules**. Apply mitigation only to the selected source in whatever static or active Ranged Defense formula actually contains it. **Cover and Line of Fire v0 independently adds Cover Difficulty to active Ranged Dodge**, so Aim may mitigate that source once when selected; Aim itself does not invent a different Dodge rule, change inherent evasion, or permit an otherwise physically blocked shot. The Aim expires on use/break or at the start of the shooter's **second subsequent turn**. See its dedicated preparation, cancellation, and Attack Sequence/Interception rules.
+
+## Cover and line of fire
+
+[Cover and Line of Fire v0](cover-and-line-of-fire-v0.md) defines directional physical obstruction and the **+0 / +2 / +4 / +6 / +8** cover ladder. **Full solid cover makes an ordinary direct targeted shot illegal.** An otherwise legal shot adds applicable Cover Difficulty to static Ranged Defense **and active Ranged Dodge** (and once as an external shot condition to a legal projectile Guard, without granting Guard eligibility/capacity). When the single Attack total beats the defense without Cover but not the same defense with Cover, the projectile **strikes the barrier**, not the intended creature. A projectile-delivered area triggers from that barrier instead of using miss scatter; see [Manifestation Resolution](../07-veil-magic/manifestation-resolution.md#projectile-delivered-areas). Cover does not itself impose shooting-into-melee or friendly-fire modifiers, permit Called Shots, or add a second cover roll.
 
 ## Bow and crossbow range bands
 
