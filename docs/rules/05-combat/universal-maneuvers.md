@@ -655,7 +655,7 @@ During that segment:
 - the Controller spends its own MP;
 - the Controlled creature spends no MP;
 - both participants move together and continue occupying the same shared Grapple square after every successful step;
-- direction may change normally; Drive / Drag has no Sprint-style heading restriction;
+- direction may change normally **unless the Controller is already bound by an active fixed-heading mode such as [Rapid Advance](rapid-advance-and-charge-v0.md#rapid-advance-with-drive--drag)**. Drive / Drag itself adds no heading restriction, but it cannot override an existing one;
 - the Controller may continue taking legal steps until the segment ends.
 
 The segment ends when:
@@ -695,6 +695,8 @@ Examples on ordinary ground:
 The Controlled creature's own Movement Allowance is not spent.
 
 Drive / Drag v0 cannot be combined with Cautious Movement. A later rule may explicitly author Cautious pair movement.
+
+**Rapid Advance integration:** A Controller that activated [Rapid Advance](rapid-advance-and-charge-v0.md#rapid-advance-with-drive--drag) before any MP spending/reservation may attempt Drive / Drag as its normal **separately paid Physical Action**. Its successful pair movement spends the Controller's existing enlarged Rapid Advance allowance, **follows the previously fixed heading**, and keeps the ordinary doubled Drive / Drag step costs (4 MP orthogonally, 6 MP diagonally on normal ground). One contest still creates only one Drive / Drag Movement Segment; the Controlled creature spends no MP; Movement Opportunities apply as authored. Ending the segment or failing the contest does not reset the Controller's heading or grant new MP. Drive / Drag is not permitted **inside an ongoing Charge approach**: Charge cannot move a shared Grapple pair without the separately authored Drive / Drag action, which Charge's own movement-plus-attack sequence does not permit. Once a tentative Charge is aborted and converted to Rapid Advance, a later Drive / Drag action is legal under these Rapid Advance restrictions.
 
 ### Legal pair movement
 
