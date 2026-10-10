@@ -1,34 +1,49 @@
 # Disarm v0
 
-> **LOCKED native foundation.** Disarm is one universal Physical Maneuver for forcing release of a **held item**, usable ordinarily or from an established Grapple. See [Universal Maneuvers](universal-maneuvers.md) for Close-Contact Opportunities and Grapple Control, and [Turn Action Points and Tempo](action-categories-and-physical-tempo.md) for Physical and General Tempo Action costs.
+> **LOCKED native foundation; numerical calibration remains playtest-sensitive.** Disarm is one universal Physical Maneuver that forces release of a specific **held item**. Ordinary Disarm and Grapple Disarm share one contest. See [Universal Maneuvers](universal-maneuvers.md) for Close-Contact Opportunities and Grapple Control; [Turn Action Points and Tempo](action-categories-and-physical-tempo.md) for action costs; and [Defensive Responses and Criticals](defensive-responses-and-criticals.md) for lost-Guard fallbacks.
 
-## Scope and declaration
+## Declaration and eligible contact
 
-**Disarm** costs **one Physical Action** at the actor's normal Focus-based Physical Action cost.
+**Disarm costs one Physical Action**, using the actor's normal Focus-based Physical Action cost. Before opening responses, identify **one held item**, its holder, and the actual contact method. A two-handed item remains one item; one success must plausibly overcome *all* grips maintaining it.
 
-Before opening responses or rolling, identify **one specific item** and the physical method intended to dislodge it. The method must be capable of actually breaking the target's grip: a hand twist, levering contact, suitable weapon bind/hook, or comparable close physical action. The item or gripping hand must be within the actual method's usable reach, with sufficient free hands, limbs, or body position to do it.
+An **eligible Disarm contact method** is a physical action able to apply leverage, torque, or controlled force to make the holder release the item. It must satisfy **all four** requirements:
 
-One item is the target even when held with both hands. A normal attack profile does **not** automatically make every weapon a valid Disarm tool; contact with an ordinary sword or axe must genuinely provide leverage or access. Disarm grants no extra weapon Reach.
+1. **Releasable target.** The item is gripped or wielded and can physically leave that grip. An object merely worn, sheathed, packed away, firmly strapped on without a releasable grip, built into the creature, or otherwise anchored is not ordinarily Disarmable.
+2. **Reachable control point.** The actor can actually contact the item, its gripping hand/wrist, or another mechanically relevant control point with the method's present reach and positioning. Disarm grants no extra melee Reach.
+3. **Grip-breaking mechanism.** The method can wrench, twist, trap, lever, or otherwise defeat possession of the **whole item**. Merely striking its surface is insufficient.
+4. **Available control.** The actor has sufficient usable limbs, implement geometry, leverage, and body position. A limb already needed for an incompatible Pin/Grapple hold is not also available for the Disarm.
 
-Ordinary Disarm targets **gripped/wielded items** such as weapons, shields held by a usable grip, or implements. It does not remove objects merely worn, sheathed, strapped on without a releasable grip, attached to the creature, or carried inside another container. An item which cannot physically be released through the declared method is not a legal target; tearing off secured equipment and item destruction require other rules.
+Eligible method families:
+
+| Contact family | Eligibility | Baseline positioning |
+|---|---|---|
+| **Direct hand/body control** | A free hand or suitable body contact can grip or lever the weapon hand, wrist, hilt, or comparable control point. Universally available when physically plausible; no mandatory Training. | Normally requires entering close bodily measure. |
+| **Weapon-assisted capture or leverage** | The implement has an **actually suitable hooking, trapping, catching, or levering feature**, an explicitly authored Disarm-capable technique, or another *already-established* source of comparable leverage. | Uses only its genuinely usable method Reach; no free bodily entry. |
+| **Established Grapple control** | An existing Controller has a **usable contact method** against the Controlled creature's item. Control is positional permission, not automatically a secured weapon hand. | Already shares the Grapple square; see Grapple Disarm. |
+
+Examples: gripping a swordsman's wrist with a free hand **qualifies** if close contact is possible; an appropriate hooked polearm catching a weapon shaft **qualifies** if its geometry really provides leverage; a Controller manipulating a reachable weapon wrist **qualifies** if the requisite limb is free. An ordinary sword hit against a blade, a mace blow against fingers, a normal Guard/parry, or claiming any weapon strike is a "bind" **does not by itself qualify**. Damaging a hand belongs to an actual weapon attack or Called Shot, not this non-damaging contest.
+
+A weapon profile alone neither grants Disarm eligibility nor a modifier. A real hook/trap geometry can authorize a one-action attempt without establishing a **persistent weapon-bind state**; weapon-specific traits and authored Disarm techniques may later formalize access. The GM adjudicates real geometry, not a blanket permission granted by narration. A method that cannot overcome both grips on a two-handed weapon cannot release that weapon.
+
+Recheck item, grip, reach, and contact prerequisites **after responses** and before the contest resolves. An impossible interaction never becomes possible because of a high roll.
 
 ## Ordinary Disarm and Close-Contact Opportunity
 
-Use **ordinary Disarm** against any creature **other than the actor's current Grapple partner**, including an accessible item of a named participant in somebody else's Grapple.
+Use **ordinary Disarm** against a creature **other than the actor's own Grapple partner**, including a named, physically accessible item of a participant in someone else's Grapple.
 
-If the method requires entering close bodily measure and the target currently threatens the actor, the declaration creates the normal **Close-Contact Opportunity** before the Disarm Contest:
+If the chosen method must **enter close bodily measure** and the target threatens the attacker, it creates the normal **Close-Contact Opportunity** before the Disarm Contest:
 
-- the target may make its eligible Opportunity Attack under [Opportunity Response](initiative-and-round-structure.md#opportunity-framework);
-- if that Opportunity Attack **hits**, apply **-2 to this Disarm Contest** in addition to the normal hit consequences;
-- the hit does not automatically Interrupt the Disarm, but the action must still be possible after all responses.
+- the target receives an eligible Opportunity under [Opportunity Response](initiative-and-round-structure.md#opportunity-framework);
+- a hitting Opportunity Attack applies **-2 to the ensuing Disarm Contest**, in addition to damage and its normal consequences;
+- a hit does not automatically Interrupt Disarm, though injury, displacement, or another effect may make it physically impossible.
 
-Disarm using an already-usable weapon bind, hook, or implement at its normal contact distance does **not** create a separate Close-Contact Opportunity merely for declaring Disarm. This footwork spends no MP and does not establish Grappling State or shared-square occupancy.
+A qualifying weapon-assisted method operating entirely within its **already usable contact distance** creates **no additional Close-Contact Opportunity** merely from attempting Disarm. Such contact spends no MP and does not create shared-square Grappling State. The absence of an Opportunity is a positional advantage, **not** an automatic bonus to the contest.
 
-If the declared grip, position, tool, or other prerequisite becomes illegal during the response window, the declared Disarm cannot resolve. Against someone in another Grapple, name the **specific defender and item**: Disarm does not invoke the outside **Committed Strike** transfer mechanic or create a third Grapple participant.
+Against a target engaged in a different Grapple, designate exactly one holder/item. This is not an outside **Committed Strike** and cannot transfer to the other grappler.
 
 ## Shared Disarm Contest
 
-Ordinary and Grapple Disarm use exactly the **same opposed contest**:
+Both ordinary and Grapple Disarm resolve as the same opposed contest.
 
 Attacker:
 
@@ -47,59 +62,88 @@ Grip Resistance =
 d20
 + Strength or Agility
 + applicable Training
-+ 2 Grip Retention
++ 6 Grip Retention
 + Grip modifiers
 ~~~
 
-**Strength** applies to forceful leverage, wrenching, or overpowering a grip; **Agility** applies to timing, hand placement, precise hooks, and reorientation. Defenders use **Strength** to hold or brace the item, or **Agility** to reposition/resecure its grip. Each uses only an Ability plausible for the particular method. Narrow weapon or Grapple Training applies only if it materially helps that interaction; neither party substitutes the two-Ability weapon Attack or Guard formula.
+**Strength** applies to forceful leverage, wrenching, and resisting a pull. **Agility** applies to timing, technical leverage, grip repositioning, and controlled twisting. Each participant uses the **single Ability that plausibly fits the actual method**. Narrow relevant Training applies when that learned skill materially helps. Neither participant substitutes the two-Ability weapon Attack or Guard formula.
 
-The **+2 Grip Retention** is the baseline advantage of already holding the item. It applies only once per item, **not per gripping hand**, and is **not** Shove's Hold Ground, Guard Defense, or an automatic two-handed-item bonus. Equipment-specific and anatomy modifiers remain later calibration.
+The **+6 Grip Retention** is the baseline advantage of securing an item already held. It applies **once per item**, not per hand, and does not stack with Shove's Hold Ground, Guard Defense, or an invented two-handed bonus. Holding with two hands matters to **physical eligibility**, but does not automatically add another numeric retention bonus.
 
-| Result | Consequence |
+At equal Ability, Training, and other modifiers, a valid attempt succeeds **22.75%** of the time. This is a game-balance target, not a real-world disarm frequency. Bonuses from specific authored equipment/techniques may modify Disarm Pressure or Grip Resistance; **there is no generic +2 from having a weapon hook, proximity, Grapple Control, or Pin**. Future weapon-bind and secured-limb techniques may grant a **single, non-stacking positional advantage**, with exact values defined in those later rules rather than inferred here.
+
+| Contest result | Consequence |
 |---|---|
-| Disarmer beats Grip Resistance | Defender releases the named item |
-| Exact tie | Defender retains the item |
-| Defender beats Disarm Pressure | Defender retains the item |
+| Disarmer beats Grip Resistance | Holder releases the named item |
+| Exact tie | Holder retains the item |
+| Holder beats Disarm Pressure | Holder retains the item |
 
-On tie or failure, Disarm does not automatically reverse the maneuver, damage the acting creature, grant a counter-Disarm, or change Grapple Control.
+Failure or tie does not automatically reverse a Grapple, disarm the actor, damage either creature, or confer another condition.
 
-An opponent that cannot make any plausible active grip resistance does **not** roll; the item is released automatically if the disarmer can physically complete the action. Being Prone, Controlled, or Pinned does **not alone** imply inability to resist: assess the actual free body parts and position. If the attempted interaction is physically impossible, no automatic win creates one. This is a **non-attack contest**: ordinary attack-roll natural-1/20 and critical damage procedures do not apply.
+A holder that is genuinely unable to make any plausible active grip resistance does not roll. The Disarm succeeds automatically if the actor can *actually* complete the release. **Prone, Controlled, and Pinned do not alone prove inability to resist.** Inability to resist never bypasses an impossible contact or release mechanism. The Attack roll's natural-1/20 and critical procedures do not apply.
+
+## Attempt frequency
+
+Each creature may **declare at most one Disarm against the same specific item during any one turn**, including eligible out-of-turn actions resolving in that turn. A failed or interrupted declared attempt counts. Another creature may attempt a Disarm independently if it has a valid action and method; allied cooperation is not an automatic bonus. A different item may be targeted separately.
+
+This prevents one high-Tempo creature from repeatedly fishing for a successful item release before its Attack Sequence without granting the target blanket immunity from coordinated opponents.
 
 ## Grapple Disarm
 
-Against the **other participant of the same Grappling State**, use Grapple Disarm:
+Against the **other participant of the same Grappling State**, use **Grapple Disarm**:
 
-- only the **Controller** can declare it; a Neutral creature must Gain Control and a Controlled creature must Reverse Control first;
-- it costs **one Physical Action** and specifies a held item of the Controlled creature;
-- both participants occupy the established shared Grapple square, so **no new Close-Contact Opportunity** arises between them;
-- use the **same Disarm Contest**, including the existing +2 Grip Retention, with **no additional numeric Control or Pin bonus**;
-- the Controller must have a physically available method reaching the item/grip. Control does not automatically trap the weapon hand or free a limb otherwise committed to maintaining the hold;
-- the existing Grappling State, Controller/Controlled positions, and any independently maintained Pin remain intact after either result.
+- only the **Controller** may declare it. A Neutral participant must Gain Control and a Controlled participant must Reverse Control first;
+- it costs **one Physical Action**, names a specific item held by the Controlled creature, and uses the **same Disarm Contest**, including +6 Grip Retention;
+- no new Close-Contact Opportunity occurs **between the Grapple partners**, because they already share close bodily measure;
+- Grapple Control **grants permission**, not an automatic numeric bonus, weapon-hand restraint, free limb, or assured release;
+- the Controller must have an eligible free-hand, suitable implement, or other physically valid contact method, accounting for limbs already committed to Grapple/Pin;
+- after success, tie, or failure, the existing Grappling State, Controller/Controlled position, and independently maintained Pin remain unchanged.
 
-A Pin can restrict active resistance only to the extent the actual pinned body parts make that resistance impossible. The Pin does not itself strip equipment. A limb needed to maintain Grapple Control or Pin cannot simultaneously execute an incompatible Disarm method.
+A Pin matters only through the body parts it actually restrains. A Controller cannot claim a limb is required to maintain Pin and simultaneously use that same limb for an incompatible Disarm. Persistent **secured weapon-hand or limb control** is separate future rules content, not a free consequence of Grapple.
 
-The Controlled or Neutral creature cannot evade this permission boundary by calling an ordinary Disarm against its same Grapple partner. Disarm against someone **outside** the current Grapple uses ordinary Disarm if that external item is genuinely reachable without violating existing body-part restrictions.
+The Controlled or Neutral participant cannot evade these restrictions by calling its attempt an ordinary Disarm against its current Grapple partner. Ordinary Disarm against someone **outside** the current Grapple remains physically possible only if the actor truly has the free limbs/reach required.
 
-## Item release and recovery
+## Item release, defensive consequences, and battlefield control
 
-On a successful Disarm:
+On success:
 
-- the named item is **dropped at its holder's current position**; in a Grapple, this is the shared square;
-- the attacker does **not** automatically take, wield, throw, catch, or relocate it;
-- neither participant is inherently displaced, made Prone, damaged, or placed in any new condition;
-- the item does not create a general Movement Opportunity merely by being dropped;
-- existing Grip-dependent attacks, Guard instruments, and other benefits immediately cease to be legal if the item is required; already committed resources are **not** refunded.
+- the named item drops **at its holder's current position** (the shared square if Grappling);
+- the disarmer does **not** automatically catch, seize, wield, throw, or relocate it;
+- neither creature is inherently displaced, made Prone, damaged, or placed in another condition;
+- the drop itself creates **no Movement Opportunity**;
+- item-dependent Attack profiles, Guard instruments, and other benefits become unavailable until a legal alternative is established; previously committed AP and defense capacity are not refunded.
 
-Dropping over an unsupported surface or into another hazard is handled by the actual environmental/physical-hazard rules when available; Disarm does not invent falling-object or collision damage.
+**Being Disarmed does not consume or disable the victim's Reaction, Opportunity Capacity, or active Opportunity Response.** It may instead make a particular Opportunity Attack **illegal**, if the victim no longer has any usable melee weapon, natural attack, or other explicit melee capability. Re-evaluate the victim's **Melee Reach/threatened squares** from the attacks still legal in the new equipment/body state. A retained shield or other legal Guard instrument remains usable. The disarmed creature still occupies space and can impede passage under normal occupancy rules.
 
-A creature can **retrieve and ready one reachable dropped item** as one **General Tempo Action (24 Turn AP)**, if the item is accessible and a usable hand is available. This is not a free pickup, a way to take an item still held by somebody else, or permission to ignore Pin, Grapple, or barriers. Explicit technique/item rules may authorize a different recovery method.
+When a Guard was already assigned in an Attack Sequence and its required instrument disappears before that attack's resolution, use the [lost-Guard fallback](defensive-responses-and-criticals.md#guard-instrument-lost-after-defense-assignment). Disarm does **not** automatically turn every committed Guard into an unopposed hit.
 
-## Timing and scope limits
+An item landing over an unsupported surface or in a hazard follows actual environment/hazard rules when those exist. No automatic collision/falling-item damage arises from Disarm.
 
-Disarm is **not** an ordinary weapon Attack or part of an **Attack Sequence**. The defender contests Grip Resistance rather than choosing Take Hit, Dodge, or Guard, and the contest itself does not consume Guard capacity or add Dodge Pressure. It does not produce ordinary weapon damage or an automatic Riposte Opening.
+## Recovering a dropped item
 
-Disarm cannot be inserted between **already-committed attacks** to revise their profiles or the defenses assigned against them. Ordinary attacks made before or after a Disarm still obey the [one Attack Sequence per target per turn](initiative-and-round-structure.md#attack-sequence) rule.
+A creature with a usable hand can retrieve and ready **one reachable dropped item** when the item is genuinely accessible; normal physical restrictions from Grapple, Pin, occupancy, support, posture, or barriers still apply. The item must no longer be held by another creature.
 
-If a Disarm resolves as a legal response/Interception before another action, the existing action procedure rechecks whether that action still has a legal required item. Removing the item can make that action illegal; **Disarm itself is not a universal automatic Interrupt** and does not cancel unrelated committed attacks.
+| Recovery | Cost | Exposure |
+|---|---|---|
+| **Quick Recovery** | **One Physical Action** (normal Focus-based Physical AP cost) | Creates a **Recovery Opportunity** for each eligible enemy currently threatening the recoverer's square |
+| **Guarded Recovery** | **One Full Action** | Creates **no Recovery Opportunity from the retrieval itself** |
 
-Disarm v0 **does not** define persistent limb/weapon control, a continuing weapon-bind condition, automatic catch-and-seize, special theft/remote removal, size-category modifiers, creature-anatomy exceptions, or weapon/shield-specific Disarm and retention bonuses. Those remain future Grapple, equipment, and physical-scale work.
+**Quick Recovery:** Declare the specific item, commit the Physical Action cost, and open the response window **before the item is picked up**. Each eligible threatening enemy may make at most one Opportunity Attack from this Recovery Opportunity, subject to their existing Reaction/Opportunity Response and round Opportunity Capacity. Each enemy is assessed independently; this is one authored action-trigger Opportunity, not a Movement Opportunity.
+
+The item is **not yet ready** when those Opportunity Attacks resolve, so it cannot be used to Guard them. A generic hitting Opportunity Attack does **not automatically Interrupt recovery**; resolve its ordinary consequences, then recheck whether the item is still reachable and recovery physically possible. Successful recovery picks up and readies the item as part of the same Physical Action, without a second draw cost. If recovery becomes impossible, the action is lost under ordinary committed-action timing.
+
+**Guarded Recovery:** A Full Action requires the creature's entire original Turn AP allotment to remain available and consumes it all. It represents a deliberately protected retrieval. It avoids only the **Recovery Opportunity** generated by retrieving the item, not independent movement, Standing, spell, or other authored Opportunities, and is not a blanket immunity to attacks.
+
+Both methods remain subject to actual limb/posture restrictions. **There is no universal free Reaction to catch or retrieve a disarmed item.** Specialized reactions/techniques may define such an option later. Drawing a stored replacement item still uses its separately authored General Tempo Action cost (24 AP); it is not the same action as retrieving an item from the ground.
+
+## Action and defense timing
+
+Disarm is a **non-damaging maneuver contest**, **not** an ordinary weapon Attack or a member of an Attack Sequence. Its defender rolls Grip Resistance rather than selecting Take Hit, Dodge, or Guard for the Disarm Contest; no Guard capacity is spent and no Dodge Pressure incurred by that contest alone. Disarm creates no automatic Riposte Opening.
+
+A Disarm cannot be inserted into the middle of an already committed Attack Sequence to change its attack profiles or the defender's earlier defense assignments. Ordinary attacks against that target still obey the [one Attack Sequence per target per turn](initiative-and-round-structure.md#attack-sequence) rule.
+
+A legal Disarm resolving during an Interception or other valid response window can change whether a later action still has the item necessary to resolve. Recheck legality through the normal response procedure. **Disarm is not an automatic Interrupt** and never retroactively refunds or uncommits unrelated actions.
+
+## Deliberately deferred
+
+This v0 does not define persistent limb/weapon control, formal weapon-bind states, catch-and-seize in the same action, remote theft, forceful strap removal, special shield/two-hand retention values, creature size/anatomy exceptions, a universal unarmed Guard profile, or specific equipment-based Disarm bonuses. Weapon-control and Limb Control systems may authorize additional methods or bonuses later; they must explicitly state what they change.
