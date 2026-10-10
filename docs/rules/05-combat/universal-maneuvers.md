@@ -1,6 +1,6 @@
 # Universal Maneuvers
 
-> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, **Drive/Drag v0**, **Throw v0**, and [**Disarm v0**](disarm-v0.md) foundations. Other universal maneuvers remain future work unless separately promoted.
+> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, **Drive/Drag v0**, **Throw v0**, and [**Disarm v0**](disarm-v0.md) foundations, plus the [**Secure Limb v0**](limb-control-v0.md) Grapple rider. Other universal maneuvers remain future work unless separately promoted.
 
 ## Shove v0
 
@@ -902,6 +902,8 @@ Those remain later physical-scale, collision, falling, hazard, creature, and man
 
 ## Pin
 
+**Secure Limb** is the separately authored [targeted-limb control rider](limb-control-v0.md) available to a Controller. Pin remains a broader physically maintained hold; neither automatically establishes the other, and their required body parts cannot be used incompatibly.
+
 A **Pin** is a stronger position established from existing Control. It remains part of the same Grappling State rather than creating a separate grapple.
 
 Only the Controller may attempt to establish a Pin.
@@ -1090,7 +1092,7 @@ Dedicated rules for cooperative dogpiles, multiple creatures restraining one tar
 
 Grapple v0 does not yet define:
 
-- detailed limb-control or weapon-control actions;
+- persistent weapon-to-weapon binds or weapon-control actions outside Grapple (targeted [Secure Limb v0](limb-control-v0.md) is now defined);
 - a catalogue of Pin configurations;
 - Pin-specific numerical bonuses to Escape, Reverse Control, or Intervention;
 - size-category modifiers and impossibility thresholds;
