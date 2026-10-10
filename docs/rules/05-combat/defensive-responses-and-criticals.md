@@ -4,11 +4,15 @@
 
 ## Declaring defense
 
-For each enemy's declared attack sequence, the defender assigns one of three responses to each incoming attack **before that enemy's rolls resolve**:
+For each enemy's declared **Attack Sequence**, the defender assigns one of three responses to each incoming attack **before that sequence's rolls resolve**. The sequence includes all ordinary on-turn attacks committed to that target, including granted bonus attacks such as an offensive dual-wield off-hand Attack. Before defenses are assigned, the attacker must commit the attacks **and the weapon/profile plus other attack-specific choices for each attack**; see [Initiative and Round/Turn Procedure](initiative-and-round-structure.md#attack-sequence):
 
 1. **Take Hit**
 2. **Dodge**
 3. **Guard**
+
+For a **standalone attack** that occurs outside an Attack Sequence—such as an attack made by a Reaction, Interception, Opportunity Attack, Full Action, or explicit follow-up—the defender assigns **Take Hit, Dodge, or Guard after that attack is declared and before its attack roll resolves**.
+
+Standalone attacks use the **same round defense resources** as attacks inside Attack Sequences. Guard spends normal Guard capacity, and choosing Dodge uses the defender's current Dodge Pressure and increments it normally. There is no separate out-of-turn defense pool.
 
 Repeated incoming attacks do not automatically reduce defense. Only repeated chosen Dodges create Dodge Pressure.
 
@@ -42,11 +46,13 @@ Dodge has no Training bonus and no minimum floor.
 
 When armor limits Agility for Dodge, use the armor-cap rules in [weapons-and-armor.md](weapons-and-armor.md).
 
+Being **Prone** does not inherently remove Dodge or apply a second blanket Dodge penalty. A Prone Dodge is legal only when the required rolling, twisting, or other repositioning is physically possible; see [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#dodge-while-prone).
+
 ## Guard
 
 Guard unifies parrying and blocking into one defensive response.
 
-Guard capacity is limited by Physical Tempo and may be modified by equipment. Normal Guard capacity refreshes at **Round Begin** under [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).
+Base Guard capacity equals the character's derived **Physical Tempo** and may be modified by equipment. Normal Guard capacity refreshes at **Round Begin** under [Initiative and Round/Turn Procedure](initiative-and-round-structure.md).
 
 Base Guard Defense is:
 
@@ -66,6 +72,8 @@ There is no partial or half-damage Guard state.
 For a projectile-delivered area effect, "stopped" means the Guard instrument physically intercepts the projectile. The projectile therefore impacts at the defender's position by default and any carried area resolves from that impact point. Guarding the projectile does not automatically cancel the carried area. See [Manifestation Resolution](../07-veil-magic/manifestation-resolution.md#successful-guard-against-an-area-projectile).
 
 Ordinary dual wielding does not stack Guard Defense bonuses. Use the best applicable Guard setup.
+
+Being **Prone** does not inherently remove Guard or reduce Guard Defense. The chosen Guard instrument must still be physically usable from the current posture; see [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md#guard-while-prone).
 
 Defensive off-hand weapons and shields may improve Guard. Equipment can grant **at most +1 additional Guard capacity per round** from the defensive off-hand/shield framework.
 

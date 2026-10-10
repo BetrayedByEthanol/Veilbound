@@ -34,9 +34,38 @@ Regeneration throughput = max(Vitality, 0) + Focus Rate
 
 These throughput values remain subject to encounter calibration.
 
+### Non-Dying allocation
+
+If the character is **not Dying** and has both lost HP and one or more repairable wounds with incomplete Repair Progress, the **player chooses how to allocate each point of available regeneration throughput** among:
+
+- restoring HP; and
+- adding Repair Progress to any repairable wound.
+
+Each point used either way consumes 1 Vigor unless another rule changes that conversion.
+
+This allocation may be split in any proportion during the Regeneration Step. Unspent throughput is lost when that step ends.
+
+Dying characters do **not** use this free allocation order; they use the stricter survival/wound-repair procedure in [Dying and Wounds](dying-and-wounds.md).
+
 Because regeneration resolves only once each round, multiple attacks can overwhelm current HP before regeneration occurs even when substantial Vigor remains.
 
+## Vigor recovery
+
+A character has:
+
+```
+Vigor Recovery = 25% of Max Vigor
+```
+
+Round recovery fractions **half up** to the nearest whole point: a fractional part of .5 or greater rounds up; a fractional part below .5 rounds down. Minimum recovery is 1 Vigor when Max Vigor is above 0.
+
+For every **completed 6-hour interval** of elapsed in-world time, restore one Vigor Recovery amount, up to Max Vigor. Partial intervals grant no recovery.
+
+This uses the same recovery cadence and rounding rule as VP.
+
 ## Anti-regeneration effects
+
+**Vigor damage does not directly deal or convert into HP damage.** It removes regenerative reserve, reducing the character's ability to restore HP, repair wounds, and spend Vigor to offset Dying losses. A character at 0 Vigor can therefore become more vulnerable to later HP loss or death without Vigor damage itself being HP damage.
 
 Valid mechanics may include:
 
@@ -46,6 +75,14 @@ Valid mechanics may include:
 - increased Vigor cost per HP restored;
 - blocking external Vigor restoration;
 - temporary maximum-Vigor reduction.
+
+Unless an effect explicitly says it reduces or prevents **Vigor Recovery**, anti-regeneration effects do **not** stop the normal 6-hour Vigor Recovery cadence.
+
+In particular:
+
+- **regeneration suppression** stops or alters the Regeneration Step and related HP/wound-repair use of Vigor;
+- **blocking external Vigor restoration** stops Vigor supplied by another creature, technique, item, or other external source;
+- neither automatically prevents the character's own elapsed-time Vigor Recovery.
 
 ## Wound triggers
 

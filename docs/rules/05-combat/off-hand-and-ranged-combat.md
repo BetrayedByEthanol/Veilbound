@@ -26,20 +26,27 @@ A successful **melee Guard** creates a **Riposte Opening** against that attacker
 
 A Riposte:
 
-- spends one of the defender's normal Attack units;
+- costs the defender one **Physical Action** worth of Turn AP;
 - gains **+2 to the attack roll**;
 - is not a free additional attack;
-- consumes the opening after one attack.
+- consumes the opening after one attack;
+- is an explicit follow-up that may target the same attacker even if that attacker already received an Attack Sequence from the riposting character during the same turn.
 
 A parrying dagger improves the Riposte attack bonus to **+3** instead of +2.
 
 ## Dual wield
 
+The **Light** and **Medium** labels in this section are weapon-handling classes for dual wield. They are **not** the same thing as the current **Light Physical Contribution** damage category. Final weapon-class assignments remain unresolved until the weapon-family/handedness pass is completed.
+
 At the start of the wielder's turn, choose the offensive or defensive use. The character does not gain both in the same turn.
 
-- **Light + Light:** either gain **+1 off-hand Attack** that turn, or **+1 Guard capacity** until the next turn.
-- **Medium + Light:** either gain **+1 off-hand Attack with the light weapon at -2 to the attack roll**, or **+1 Guard capacity** until the next turn. A parrying dagger may also provide its Riposte improvement.
+- **Light + Light:** either gain **+1 off-hand Attack** that turn, or use the defensive off-hand framework for **+1 Guard capacity** until the start of the wielder's next turn.
+- **Medium + Light:** either gain **+1 off-hand Attack with the light weapon at -2 to the attack roll**, or use the defensive off-hand framework for **+1 Guard capacity** until the start of the wielder's next turn. A parrying dagger may also provide its Riposte improvement.
 - **Medium + Medium:** no baseline extra Attack or Guard. The benefit is flexibility to choose which weapon profile to use for each normal attack.
+
+The defensive dual-wield option is the same **defensive off-hand/shield Guard-capacity framework** used above; it does not stack into a second +1 Guard-capacity bonus from the same framework. If the bonus remains active through Round Begin, the refreshed Guard capacity includes that +1 until it expires at the start of the wielder's next turn.
+
+A granted off-hand Attack is an **ordinary on-turn attack** for Attack Sequence declaration. If used against a target, it must be declared as part of that target's Attack Sequence rather than added after that sequence resolves. It costs **no additional Turn AP** and does not increase Physical Tempo.
 
 Dedicated dual-wield development may later expand these options.
 
@@ -81,6 +88,8 @@ Evasion Bonus = Physical Tempo - 1
 
 This gives +0 / +1 / +2 / +3 / +4 / +5 at Tempo 1 / 2 / 3 / 4 / 5 / 6.
 
+Explicit **Size/Position** modifiers that say they apply to active ranged defense are added to Ranged Dodge after this formula. In particular, the locked [Prone ranged-profile rule](special-movement-terrain-and-prone.md#ranged-attacks-against-a-prone-target) can grant +2 Position Defense to both static Ranged Defense and active Ranged Dodge.
+
 ## Bow and crossbow range bands
 
 | Range | Squares | Approx. distance | Difficulty modifier |
@@ -95,11 +104,13 @@ These are the current bow/crossbow baseline bands. Specific ranged weapons may l
 
 ## Ranged weapons while threatened
 
-A bow or crossbow may be fired while the wielder is threatened in melee, but doing so provokes an opportunity attack **before** the ranged attack resolves.
+A bow or crossbow may be fired while the wielder is threatened in melee, but doing so creates an **Opportunity** before the ranged attack resolves.
 
-If the provoking attack hits, the ranged attack is interrupted and lost.
+An eligible enemy may exploit that Opportunity through the universal **Opportunity Response** procedure in [Initiative and Round/Turn Procedure](initiative-and-round-structure.md#opportunity-framework).
 
-The audit still lacks a complete general opportunity-attack procedure, so only this specific locked interaction is canonical here.
+This trigger has a specific stronger consequence: if the resulting Opportunity Attack hits, the provoking ranged attack is **Interrupted and lost**.
+
+That hit-to-Interrupt clause belongs to this trigger specifically. A generic Opportunity Attack does not automatically Interrupt its provoking action.
 
 ## Heavy crossbow timing
 
@@ -107,8 +118,8 @@ Firing a heavy crossbow is a **Full Action**.
 
 Reloading a heavy crossbow is also a **Full Action**.
 
-Each consumes the character's entire granted Attack-unit allotment for that turn regardless of Physical Tempo.
+Each is a **Full Action** and therefore requires the character's entire Turn AP allotment to remain available and consumes that entire allotment.
 
 Dropping a held item such as a fired crossbow is normally free.
 
-Drawing or readying another weapon costs **one Attack Unit**.
+Drawing or readying another weapon costs one **General Tempo Action (24 AP)**.

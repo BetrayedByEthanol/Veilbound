@@ -58,7 +58,7 @@ Veilbound deliberately avoids mandatory broad umbrella skills such as generic Pe
 | Expert | +3 |
 | Master | +4 |
 
-Training is not permanently tied to one ability. Medicine might pair with Intellect for diagnosis and Precision for surgery; Climbing might pair with Strength or Agility depending on the obstacle.
+Training is not permanently tied to one ability. Medicine might pair with Intellect for diagnosis and Precision for surgery. Climbing and Swimming may pair with Strength, Agility, or Vitality depending on whether the immediate challenge is force, body control, or sustained exertion; see [Traversal Foundation](../05-combat/traversal-foundation.md#traversal-checks).
 
 Custom narrow trainings and knowledge fields are allowed. Knowledge training may grant information automatically when the character would simply know it; not every use requires a roll.
 
@@ -93,6 +93,7 @@ The current locked catalogue includes:
 - Interrogation
 - cultural Etiquette
 - Command
+- Emotional Discipline
 - Veil Theory
 - Veil Practice
 - Pillar Lore
@@ -103,6 +104,12 @@ The current locked catalogue includes:
 - profession-specific Trades
 
 This is not a closed list. Custom narrow Trainings and knowledge fields are explicitly allowed.
+
+**Emotional Discipline** is the learned practice used by Gifted rules that explicitly test trained regulation, deepening, or stability of emotion.
+
+**Veil Theory** is primarily theoretical and analytical expertise: recognizing Veil principles, interpreting magical structures, understanding authored technique theory, and answering technical knowledge questions where that expertise applies.
+
+**Veil Practice** is practical learned expertise in deliberate Veil procedures where a rule, technique, experiment, ritual, or situation explicitly calls for hands-on magical practice. It is **not** a universal casting bonus and is not automatically added to Direct Veil Pressure, technique attacks, or other magical rolls.
 
 ## Character-creation allocation status
 

@@ -7,6 +7,15 @@
 - **INHERITED FROM 5e** — Veilbound currently assumes the D&D 5e rule rather than defining its own.
 - **CONFLICTING** — two or more files, or two parts of one file, give incompatible rules.
 - **MISSING** — a rule required to run the game is not actually defined in these eight files.
+- **SUPERSEDED** — the audit finding accurately described the legacy source set, but a later canonical rule now replaces it.
+
+## October 2026 supersession note
+
+This audit records the state of the legacy source set and is no longer itself the source of truth where later canonical files exist.
+
+In particular, the former **"desire / will over faith"** fuel wording is superseded. Current canon defines **Volition as the fundamental force that sustains Pillars; belief gives that Volition meaning and helps stabilize Pillar identity**. See `docs/world/veil-and-pillars.md` and `docs/rules/07-veil-magic/metaphysical-foundation.md`.
+
+Several legacy conflict rows below are marked **SUPERSEDED** where native canonical rules have since resolved them. Pillar communication remains genuinely unresolved.
 
 ## Source-of-truth hierarchy
 
@@ -131,8 +140,8 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Rule / concept | Status | Audit finding |
 |---|---|---|
 | The Veil is a parallel non-physical realm underlying reality | **LOCKED** | Clear and consistent. All magic ultimately originates through the Veil. |
-| There are no actual gods | **LOCKED** | Pillars are emergent forces created by accumulated human desire rather than creator-deities. |
-| Will/desire is the fundamental source of Pillar energy | **LOCKED** | “Will over faith” is one of the clearest setting principles. |
+| There are no actual gods | **LOCKED / UPDATED** | Pillars remain emergent rather than creator-deities. Later canon supersedes "accumulated desire" as fuel: Volition is fundamental; belief gives meaning and stability. |
+| Volition is the fundamental source of Pillar energy | **SUPERSEDED** | The legacy "will/desire" and "will over faith" wording is replaced by the canonical model: Volition sustains Pillars; desire supplies motive, belief supplies meaning, and will selects/sustains direction. |
 | Power rewards internal coherence rather than morality | **LOCKED** | The Veil is morally neutral; conviction and self-consistency matter more than virtue. |
 | Pillars are semi-conscious pattern-recognition structures | **LOCKED** | They recognize energy signatures, learn patterns and react instinctively, but do not possess normal human cognition. |
 | Pillars cannot directly communicate like gods | **CONFLICTING** | Worldbuilding says they cannot communicate directly, while Oracle/Prophet material refers to divine visions, interpreting Pillar will and speaking for the Pillar. Clarify whether these are inference, symbolic manifestations, or literal communication. |
@@ -158,7 +167,7 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Focus VP multipliers: 1 / 0.75 / 0.5 | **LOCKED** | Present in the finalized/integrated VP system. |
 | Martial-Only Focus | **PROVISIONAL** | Appears in character creation, but disappears from the specialization/mastery architecture and “total build options.” It is not developed into a playable path. |
 | Native ability chassis | **LOCKED** | Strength, Agility, Precision, Intellect, Awareness, Presence, Vitality, Veil Affinity and Veil Control replace the inherited D&D six-ability chassis. |
-| Archetype casting-stat mapping | **CONFLICTING / REQUIRES REWRITE** | Existing files reference WIS/CHA/INT/CON. Those legacy mappings must be translated onto the new Intellect / Presence / Vitality / Veil Affinity model. |
+| Archetype casting-stat mapping | **SUPERSEDED** | Native canon no longer assigns one mandatory mundane casting stat by Archetype. Individual magical operations author the abilities they actually use. |
 | Ability-score generation | **LOCKED** | All nine abilities begin at −2. Character creation uses 28 points with escalating cumulative costs: −2=0, −1=1, 0=2, +1=3, +2=5, +3=7, +4=10. Normal creation cap is +4. |
 | Training / skill model | **LOCKED** | Narrow acquired trainings use +0 to +4 and pair situationally with an ability. Generic umbrella skills such as Perception, Investigation, Athletics and Persuasion are deliberately avoided. Custom narrow trainings are allowed. |
 | Training bonus progression | **LOCKED** | None +0, Familiar +1, Trained +2, Expert +3, Master +4. This does not use the 5e proficiency bonus. |
@@ -186,7 +195,7 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Group checks / helping | **MISSING** | Core individual resolution is locked, but cooperative assistance/group-resolution rules still need definition. |
 | Extended tasks / progress clocks | **MISSING** | No procedure. |
 | When the GM should call for a roll | **LOCKED** | Do not roll for routine/trivial competence. Passive uncertainty uses 10 + modifiers; active tasks with safe time allow roll/Take 10/Take 20; pressured or consequential tasks require a roll. |
-| Old freeform “Performing Miracles” procedure | **CONFLICTING** | `veilbound_rework.md` uses 3–5 VP plus a Faith Check; newer mechanics use spell-level VP costs and normally no casting roll for Priest/Scholar/Anointed. Decide whether freeform miracles are removed or retained as a separate improvisational system. |
+| Old freeform “Performing Miracles” procedure | **SUPERSEDED** | The canonical Priest Miracle Petition system replaces the legacy Faith Check/freeform procedure. |
 
 ---
 
@@ -266,13 +275,13 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 |---|---|---|
 | Emotion-linked natural magic | **LOCKED** | This is one of the strongest archetype identities. |
 | Eight core emotions | **LOCKED** | Joy, sadness, anger, fear, surprise, disgust, trust, anticipation. |
-| Number/permanence of emotion-aspect links | **CONFLICTING** | Integrated mechanics says **8 permanent pairs set at creation**. Worldbuilding says people may have fewer and can unlock aspects by learning new emotions. |
+| Number/permanence of emotion-aspect links | **SUPERSEDED** | Canonical Gifted rules use exactly **8 permanent emotion-to-Aspect links**, fixed at birth. |
 | Natural vs invoked emotion casting | **LOCKED** concept | Both are consistently distinguished. |
 | Intentional casting-check DCs | **PROVISIONAL** | A DC-by-Resonance table exists, but the exact roll formula is not cleanly stated in the integrated mechanics. |
 | Accidental manifestation trigger from overwhelming emotion | **PROVISIONAL** | Detailed and usable, but heavily GM-discretionary. |
-| Emotional Stability Check | **CONFLICTING** | Formula already adds Resonance directly, while a second modifier table adds another ±2 for high/low Resonance, making double-counting ambiguous. |
-| d100 manifestation table | **CONFLICTING** | Results become more dangerous as the roll rises, yet positive Resonance adds +10/+20/+30 and is described as making results safer. Negative Resonance subtracts while being described as more dangerous. The sign is backwards unless the result table is reversed. |
-| Low-Focus Gifted `+20 = safer` interaction | **CONFLICTING** | Confirms the same sign-direction problem. |
+| Emotional Stability Check | **SUPERSEDED** | Replaced by the current Gifted Emotion Establishment / Deepen Emotion / Instability procedures using universal Resonance where explicitly stated. |
+| d100 manifestation table | **SUPERSEDED** | The legacy d100 manifestation table is not part of the current Gifted foundation. |
+| Low-Focus Gifted `+20 = safer` interaction | **SUPERSEDED** | Retired with the legacy d100 manifestation table. |
 | Suppression / Redirection / Grounding | **PROVISIONAL** | Detailed subsystem, but not yet integrated into the base level progression. |
 | Complex-emotion fusion | **PROVISIONAL** | Explicitly an advanced, GM-creative rule. |
 | Voluntary emotional overload | **PROVISIONAL** | Playable draft, but depends on fixing the manifestation-table direction first. |
@@ -290,10 +299,10 @@ Higher-tier effects may restore both. Serious lasting wounds/structural injuries
 | Destiny Point pool = Proficiency Bonus | **LOCKED** | Dedicated and integrated files agree. |
 | DP recovery from mission progress | **PROVISIONAL** | Entirely milestone/GM-discretion based. |
 | Signature base scaling | **PROVISIONAL** | Dedicated file gives a complete draft, but it is not demonstrated for all 48 aspects and has not been balance-validated. |
-| DP enhancement list/costs | **CONFLICTING** | `veilbound_mechanics.md` and `veilbound_anointed.md` give materially different options and costs. Example: Area Expansion is 1 DP in one and 2 DP in the dedicated file. |
+| DP enhancement list/costs | **SUPERSEDED** | Current Anointed canon uses Destiny and Aspect Authority rather than the conflicting legacy DP enhancement lists. |
 | Secondary miracles cost +50% VP | **PROVISIONAL** | Defined only in the dedicated file. |
 | Falling/abandoning mission | **PROVISIONAL** | “Lose all powers permanently”/must start a new path is dramatic but lacks formal triggers and recovery/exception rules. |
-| Anointed can be gained later through prestige | **CONFLICTING** | Prestige material says a Priest may earn Anointed status through devotion, contradicting the birth-during-surge rule. Decide whether Ascension is an explicit exception or rewrite Priest+Anointed hybrids as characters born Anointed who later train as Priests. |
+| Anointed can be gained later through prestige | **SUPERSEDED** | Current Anointed canon states that Anointed are born during a Pillar surge and are not later granted the Archetype by ordinary training. Separate multi-pathing rules remain future work. |
 
 ---
 
@@ -330,15 +339,15 @@ Against an incoming attack, the defender chooses one of only **three core respon
 
 | Rule / concept | Status | Audit finding |
 |---|---|---|
-| Action economy | **PARTLY MISSING / REQUIRES NATIVE DESIGN** | The defensive response model is now native, but turn actions, movement, spell timing and any reaction-like limits still need a Veilbound-specific action economy. |
+| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
 | Attack action and weapon attacks | **PROVISIONAL / REQUIRES NATIVE MATH** | Universal physical Attack remains a core action. A two-ability attack formula is favored conceptually, but exact ability pairings, training contribution and attack-quality thresholds are not yet locked. |
-| Initiative | **INHERITED FROM 5e** | Referenced but never established. |
-| Movement, reach and opportunity attacks | **INHERITED FROM 5e** | Feet, 5-ft reach and opportunity attacks are used directly. |
+| Initiative | **LOCKED NATIVE SYSTEM** | Initiative, ties, late entry, round refresh, and turn timing are defined in the canonical Initiative and Round/Turn Procedure. |
+| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Sprint, terrain surcharges, movement impairments, allied-square transit, Prone/Crawl/Stand, the authored Standing Opportunity, and the Climb/Swim Traversal Foundation are defined. Exact Climb/Swim speeds, Catch Grip, falling/water hazards, Charge, jumping, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
 | Damage / durability | **PARTLY LOCKED, PARTLY MISSING** | Damage normally reduces physical HP. Vigor is a regenerative reserve rather than temporary HP; some supernatural effects may target Vigor directly. Resistance/immunity categories still need native definitions. |
-| Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **INHERITED FROM 5e** | Used extensively without a conditions appendix. |
+| Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **PARTLY NATIVE / MOSTLY UNRESOLVED** | **Prone v0 is now a LOCKED native condition foundation.** It defines Crawl/Stand/Sprint restrictions, -2 melee attacks made while Prone, +2 melee attacks against Prone from a non-Prone attacker, physically feasible Guard/Dodge, +2 ranged Position Defense from 3+ squares when the reduced profile materially applies, ordinary bow incompatibility with standard Prone firing, and the Standing Opportunity. Weapon-specific posture exceptions and the other named conditions still require later work. |
 | Exhaustion | **INHERITED FROM 5e** | Used as a capstone cost, but version/effects are not specified. |
 | Critical-hit core rule | **LOCKED FRAMEWORK / DAMAGE BONUS PENDING** | Natural 1 is an automatic miss without fumble. Natural 20 creates a confirmation-based critical opportunity; a second natural 20 creates a Devastating Critical. Exact Strong Hit/Critical damage bonuses remain to be calibrated. |
-| Low-Focus Extra Attack progression | **CONFLICTING** | Dedicated talent file gives 2 attacks at 5, 3 at 11, 4 at 17; mastery material later says Low Focus “improves to 3 attacks” at level 18. |
+| Low-Focus Extra Attack progression | **SUPERSEDED** | Replaced by canonical Physical Tempo formulas and the current Focus/level cadence. |
 | Medium-Focus attack progression | **PROVISIONAL** | Baseline is 2 attacks from level 5, but specific specializations/masteries can increase it. Needs a single progression table. |
 | Fighting Styles | **INHERITED FROM 5e** | Mostly direct 5e Fighting Styles with minor additions. |
 | Superiority Dice / Combat Talents | **PROVISIONAL**, 5e-derived | A detailed system exists, but much is adapted directly from Battle Master mechanics and has not been integrated across all Focus paths. |
@@ -347,7 +356,7 @@ Against an incoming attack, the defender chooses one of only **three core respon
 | Weapon/armor properties | **PARTLY LOCKED NATIVE SYSTEM** | Damage, Penetration, Armor reduction, Dodge Agility caps and the Two-Handed trait now have native Veilbound rules. Reach, shield numbers, dual wielding and some weapon-specific traits remain to be finalized. |
 | Dropping to 0 HP / dying / death | **LOCKED FRAMEWORK** | At 0 HP the character is normally unconscious and Dying, loses 1 HP/round, and dies at −Max HP unless an applicable effect intervenes. Wound repair and Cheat Death rules are defined below. |
 | Natural healing / regeneration | **LOCKED concept / PROVISIONAL numbers** | Missing HP regenerates by consuming Vigor at a Vitality-driven rate. Vigor recovers much more slowly. Exact timing, capacity and conversion require playtesting; Hit Dice are not assumed. |
-| Cover, concealment, surprise, grappling, shoving | **PARTLY NATIVE / PARTLY MISSING** | Grapple, shove, feint and similar physically plausible maneuvers are intended as universal core actions rather than class techniques. Exact procedures plus cover/concealment/surprise still need definition. |
+| Cover, concealment, surprise, grappling, shoving | **PARTLY NATIVE / PARTLY MISSING** | **Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, and Throw v0 are LOCKED foundations.** Grappling now uses shared-square occupancy once the clinch is established; defender victory on initiation chooses Repel or Counter-Control; Escape and voluntary release require legal separation. Shove breaks the shared grapple without moving the pair. Trip provides ordinary Prone pressure; Takedown now changes only the Controlled creature's posture to Prone while both remain in the shared square and the same Controller retains Control. It creates no built-in displacement, release, Pin, or forced Prone result for the Controller. Drive/Drag uses one Controller Grapple Contest to create one slow pair-movement segment; the Controller spends MP, one Opportunity is generated per threatening enemy/segment, and either grappler can be targeted by that Opportunity. Throw converts Control into forced displacement: margin 1–4 moves 1 square, 5–9 moves 1 square plus Prone where meaningful, and 10+ moves 2 squares plus Prone where meaningful; successful displacement ends the Grapple and does not create the general Movement Opportunity. Exact physical-scale modifiers, collision/falling damage, grapple-specific Disarm/limb control, cooperative multi-creature grapples, exact Pin calibration, feint, cover/concealment/surprise, and other later layers remain incomplete. |
 | Encounter building / enemy challenge rules | **MISSING** | No CR-equivalent, encounter budget or balancing method. |
 | Creature/NPC combat stat construction | **MISSING** | No bestiary or NPC builder. |
 
@@ -603,49 +612,58 @@ The cleanest next design task is **combat math calibration**: finalize the two-a
 
 ---
 
-# LOCKED UPDATE: Physical Tempo Progression
+# SUPERSEDED UPDATE: Physical Tempo Progression
+
+## Status: SUPERSEDED BY TURN AP
+
+The former direct Focus/level Physical Tempo table is no longer canonical. It is replaced by the shared Turn AP architecture below. Earlier audit discussion that assumes spendable Attack Units is historical unless restated by current canonical rules.
+
+---
+
+# LOCKED UPDATE: Turn Action Points, Physical Tempo, and Projection Tempo
 
 ## Status: LOCKED
 
-Physical martial tempo now scales by **Focus + level** before optional inward Veil developments.
+All Focuses use one shared level-based Turn AP pool:
 
-**Physical Tempo** governs both:
-- attacks made when taking the Attack action; and
-- Guard capacity available each round.
+```text
+Turn AP = min(120, 30 + 6 × (Level - 1))
+```
 
-The baseline progression is:
+Turn AP begins at 30 at level 1, increases by 6 per level, reaches 120 at level 16, and remains 120 through level 20.
 
-| Level | High Focus | Medium Focus | Low Focus |
-|---:|---:|---:|---:|
-| 1–3 | 1 Attack / 1 Guard | 1 / 1 | 1 / 1 |
-| 4 | 1 / 1 | 1 / 1 | 2 / 2 |
-| 5 | 1 / 1 | 2 / 2 | 2 / 2 |
-| 6 | 2 / 2 | 2 / 2 | 2 / 2 |
-| 8 | 2 / 2 | 2 / 2 | 3 / 3 |
-| 10 | 2 / 2 | 3 / 3 | 3 / 3 |
-| 12 | 3 / 3 | 3 / 3 | 4 / 4 |
-| 15 | 3 / 3 | 4 / 4 | 4 / 4 |
-| 16 | 3 / 3 | 4 / 4 | 5 / 5 |
-| 18 | 4 / 4 | 4 / 4 | 5 / 5 |
-| 20 | 4 / 4 | 5 / 5 | 6 / 6 |
+Focus determines fixed AP efficiency:
 
-Equivalent cadence:
-- **High Focus:** +1 Attack and +1 Guard every 6 levels.
-- **Medium Focus:** +1 Attack and +1 Guard every 5 levels.
-- **Low Focus:** +1 Attack and +1 Guard every 4 levels.
+| Focus | Physical Action | Projection Action | General Tempo Action |
+|---|---:|---:|---:|
+| High — Projection | 30 AP | 20 AP | 24 AP |
+| Medium — Routing | 24 AP | 24 AP | 24 AP |
+| Low — Embodiment | 20 AP | 30 AP | 24 AP |
 
-### Design consequences
+Derived values are:
 
-- Training improves **quality**, not attack quantity.
-- Dodge remains unlimited and separate from Physical Tempo; Dodge Pressure increases only when Dodge is actually chosen.
-- Low Focus receives the strongest passive/inward physical tempo scaling.
-- Medium Focus may temporarily exceed its baseline through VP-powered inward routing effects.
-- High Focus gains the least physical tempo because more of its Veil integration is expressed through projection.
-- Permanent extra-attack developments should be rare because the baseline already reaches 4/5/6 attacks at level 20.
+```text
+Physical Tempo = floor(Turn AP / Physical Action Cost)
+Projection Tempo = floor(Turn AP / Projection Action Cost)
+Guard Capacity = Physical Tempo
+Opportunity Capacity = Physical Tempo
+```
 
-## Next unresolved combat item
+Physical Tempo and Projection Tempo are throughput measures, not separate action pools. Mixed physical/projected turns simply pay each action's AP cost from the same Turn AP pool.
 
-With attack and Guard quantity now fixed, the next priority is **Guard resolution math**: how a Guard check/value is calculated, how weapon training and shields modify it, how partial Guards work, and how Guard interacts with attack quality and armor.
+At the mature 120-AP cadence:
+
+| Focus | Physical Tempo / Guard | Projection Tempo |
+|---|---:|---:|
+| High | 4 | 6 |
+| Medium | 5 | 5 |
+| Low | 6 | 4 |
+
+A **Full Action** requires the entire current Turn AP allotment to remain available and consumes that entire allotment. It does not cost a fixed 120 AP.
+
+A **General Tempo Action** costs 24 AP regardless of Focus and is used for neutral setup/reconfiguration actions whose timing should not inherently favor Embodiment or Projection.
+
+Projection Tempo does not grant universal technique repeatability. Technique-specific cadence, VP costs, Pulse/Spend limits, and other restrictions continue to govern repeated magical output.
 
 ---
 
@@ -1037,13 +1055,13 @@ Current baseline bow/crossbow range bands are:
 | Long | 31–60 | 46.5–90 m | +5 |
 | Extreme | 61–120 | 91.5–180 m | +8 |
 
-These bands are calibrated against baseline movement of 6 squares, running at roughly 12 squares, and short-range Blink effects in the roughly 20–30 square range. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
+These bands are calibrated against the locked baseline movement of 6 orthogonal squares (12 MP). Sprint is now locked at three times the impaired normal Movement Allowance—36 MP / 18 orthogonal squares for an unimpaired ordinary creature—so the range bands should be retested against that faster closing speed. Charge remains unresolved. Short-range Blink assumptions in the roughly 20–30 square range likewise remain technique calibration rather than movement-foundation canon. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
 
 ### Archer battlefield identity
 
 Archers are primarily **long-range debuff, status-delivery, interruption and Interception specialists**, rather than top sustained HP/Vigor killers. Their advantage is applying useful effects from distance and threatening declared actions or lanes. Melee/contact weapon enchantments may later support stronger direct Vigor burn and anti-regeneration than projectile enchantments, while projectile enchantments emphasize marks, debuffs, interruption, tracking, slowing, suppression and related control effects.
 
-Close range is intentionally dangerous for an Archer. Bows normally cannot Guard melee attacks; a shield is generally unavailable while actively using a two-handed bow; readying another weapon costs an Attack unit; and melee-focused characters or Spellblades can close or Blink into engagement. The close-range accuracy benefit does not remove this positional risk.
+Close range is intentionally dangerous for an Archer. Bows normally cannot Guard melee attacks; a shield is generally unavailable while actively using a two-handed bow; readying another weapon costs one General Tempo Action (24 AP); and melee-focused characters or Spellblades can close or Blink into engagement. The close-range accuracy benefit does not remove this positional risk.
 
 A bow or crossbow may be fired while the wielder is threatened in melee, but doing so provokes an opportunity attack before the ranged attack resolves. If the provoking attack hits, the ranged attack is interrupted and lost. Because an ordinary bow cannot Guard melee attacks, the Archer usually must Dodge, use an explicit magical/Veil defense, or Take Hit and accept the resulting interruption.
 
@@ -1051,9 +1069,9 @@ A bow or crossbow may be fired while the wielder is threatened in melee, but doi
 
 Crossbows are **low-training, high-alpha** ranged weapons rather than scaling sustained-fire weapons. The current heavy-crossbow baseline is **4+d8 damage, Pen 4**.
 
-**Firing a heavy crossbow is a Full Action. Reloading a heavy crossbow is also a Full Action.** Each consumes the character's entire granted Attack-unit allotment for that turn, regardless of Physical Tempo. A high-Tempo character therefore does not gain multiple heavy-crossbow shots from extra Attack units.
+**Firing a heavy crossbow is a Full Action. Reloading a heavy crossbow is also a Full Action.** Each requires the character's entire current Turn AP allotment to remain available and consumes that allotment. A high-Tempo character therefore does not gain multiple heavy-crossbow shots from higher Physical Tempo.
 
-Dropping a held item such as a fired crossbow is normally free. Drawing/readying another weapon costs one Attack unit. Thus a character may use a preloaded heavy crossbow as an opening Full Action, then on a later turn drop it, spend one Attack unit to draw a melee weapon, and use any remaining Attack units normally. This preserves the prepared-volley tactic without allowing a high-level character to fire the heavy crossbow and transition into melee offense during the same turn.
+Dropping a held item such as a fired crossbow is normally free. Drawing/readying another weapon costs one **General Tempo Action (24 AP)**. Thus a character may use a preloaded heavy crossbow as an opening Full Action, then on a later turn drop it, spend 24 AP to draw a melee weapon, and use any remaining Turn AP normally. This preserves the prepared-volley tactic without allowing a character to fire the heavy crossbow and transition into melee offense during the same turn.
 
 Dedicated Archers therefore outscale crossbows in sustained fire as Physical Tempo rises, while crossbows remain useful for prepared opening shots, ambushes, militia/guards and NPC volley fire.
 
@@ -4044,7 +4062,7 @@ The locked turn skeleton is:
 1. Start Expiry;
 2. Regeneration Step;
 3. start-of-turn effects/hazards;
-4. establish Attack Units and other turn resources;
+4. establish Turn AP and derived Physical/Projection Tempo;
 5. start-of-turn choices, including the Gifted Emotion Establishment Step;
 6. normal turn;
 7. end-of-turn effects;
@@ -4053,7 +4071,7 @@ The locked turn skeleton is:
 
 The procedure does **not** require declaring an entire turn in advance.
 
-Attack Units are turn resources. Unspent Attack Units are lost during cleanup.
+Turn AP is a turn resource. Unspent Turn AP is lost during cleanup.
 
 ## Regeneration and Dying
 
@@ -4108,10 +4126,477 @@ This lock deliberately does **not** close:
 - detailed Reaction declaration and competing-trigger priority;
 - detailed Interception declaration/priority refinement;
 - broader turn-declaration rules;
-- movement allowance, splitting movement, reach and engagement;
-- opportunity attacks;
+- specialized movement layers beyond the Movement Foundation;
+- weapon-family Reach assignments beyond the adjacent baseline;
 - complete surprise/unaware rules;
 - physical-hazard values/procedures;
 - conditions.
 
 Those are follow-up combat-procedure layers and should integrate with this clock rather than silently replace it.
+
+
+---
+
+# LOCKED UPDATE: Turn Declaration, Reactions, Interception, and Opportunity Responses
+
+## Status: LOCKED STRUCTURE
+
+The deferred timing layer following Initiative/Round Structure is now locked at the structural level.
+
+Canonical procedure lives primarily in:
+
+- `docs/rules/05-combat/initiative-and-round-structure.md`
+- `docs/rules/05-combat/action-categories-and-physical-tempo.md`
+- `docs/rules/05-combat/defensive-responses-and-criticals.md`
+- `docs/rules/05-combat/off-hand-and-ranged-combat.md`
+
+## Sequential turn declaration
+
+A creature does **not** pre-declare its entire turn.
+
+The default flow is:
+
+1. declare the next action/effect;
+2. commit its action capacity;
+3. resolve any response window;
+4. re-check legality;
+5. resolve the action if still legal;
+6. then choose the next action/effect.
+
+Costs/action capacity are not refunded merely because the declared action is later interrupted, becomes impossible, or fails unless an explicit rule says otherwise.
+
+## Attack Sequences and standalone attacks
+
+All ordinary on-turn attacks against the same target are grouped into one **Attack Sequence**, including granted bonus attacks such as an offensive dual-wield off-hand Attack.
+
+Before rolling:
+
+- the attacker declares every ordinary on-turn attack committed against that target, including each attack's AP cost class and any granted bonus attacks;
+- for each committed attack, the attacker declares its weapon/profile and other attack-specific choices that could affect resolution;
+- the relevant Turn AP, granted attacks, and declared profiles/choices are committed;
+- the defender assigns Take Hit / Dodge / Guard to each incoming attack with those declarations known.
+
+The attacks then resolve in order. Each committed attack is its own trigger occurrence and opens its own response window immediately before its roll. If that attack survives the response window, it resolves; otherwise it is lost and the sequence proceeds to the next committed attack unless a stronger rule cancels the remaining sequence.
+
+A creature normally opens only one ordinary Attack Sequence against the same target per turn. This prevents drip-declaring attacks one at a time to gain information after each result. A granted bonus attack used against that target must be included in that sequence; if the sequence has already resolved, the bonus attack cannot later be added against the same target, though it may be used against another eligible target.
+
+Explicit follow-ups such as Riposte may override that restriction.
+
+A standalone attack outside an Attack Sequence—including a Reaction, Interception, Opportunity Attack, Full Action attack, or explicit follow-up—receives its own defense declaration after it is declared and before its attack roll. It uses the same round Guard capacity and Dodge Pressure as all other attacks.
+
+If the target becomes unavailable before all committed attacks resolve, unresolved committed attacks are not refunded. They may be redirected as a remaining sequence against another legal target only if that target has not already received an Attack Sequence from this attacker during the same turn, unless an explicit rule permits reopening that target. Their already-declared weapon/profile and attack-specific choices remain fixed unless an explicit rule permits changing them. The new target assigns defenses before those redirected rolls.
+
+## Reactions
+
+Reaction remains one per round and refreshes at Round Begin.
+
+A Reaction:
+
+- may be used during the creature's own turn when a valid trigger occurs;
+- may respond to another Reaction, Interception, Opportunity Attack, or other response if its own trigger is met;
+- does not by itself grant an action—an authored rule/effect must define the trigger and consequence.
+
+Guard and Dodge remain separate defensive responses and do not spend the Reaction.
+
+## Response windows
+
+When an event creates a valid trigger, pause the event before resolution.
+
+Precommitted Interceptions resolve before spontaneous responses to that same original trigger. Interceptions resolve in Initiative order, with any nested triggers they create resolved immediately.
+
+After Interceptions finish, re-check the original event. If it remains legal/relevant, collect spontaneous Reactions plus Opportunity Attacks from either a newly activated or already-active Opportunity Response. Those responses resolve in Initiative order.
+
+A response can create a nested response window; the nested window resolves before returning to the older response.
+
+Once a Reaction, Opportunity Attack, or released Interception is declared, its relevant capacity remains committed even if an earlier response later cancels the original action, provided the responding action itself remains legal.
+
+## Atomic Interception
+
+Interception remains a timing mechanic rather than an action category.
+
+A reservation contains exactly:
+
+- one legal AP-based action/effect, committing its normal Physical, Projection, or General Tempo AP cost;
+- one action/effect inherently defined as a Full Action **and otherwise eligible for Interception**, requiring and committing the entire Turn AP allotment; or
+- one Movement Interception, committing a chosen amount of remaining MP.
+
+A Full Action cannot be used to bundle multiple ordinary AP-based actions into one Interception. Full Action status alone does **not** make an action reservable; a specific rule may prohibit Interception reservation. **Sprint is explicitly ineligible for Interception reservation.** A Movement Interception reserves movement only and follows the canonical Movement Foundation.
+
+One trigger occurrence can release at most **one** reserved Interception from the same creature.
+
+Multiple reservations with the same trigger therefore cover successive qualifying trigger occurrences in declaration order. If fewer occurrences happen than were reserved for, unused reservations expire and are lost.
+
+Different creatures may each release one reserved Interception from the same trigger occurrence.
+
+## Interception is not automatic interruption
+
+An ordinary Interception resolves before its triggering action but does **not** inherently cancel it.
+
+After the Interception:
+
+- if the action remains legal, it continues;
+- if consequences make it illegal, it fails naturally;
+- if circumstances changed but it remains legal, resolve it under the new circumstances.
+
+An **Interrupt** must be an explicit consequence.
+
+By default an Interrupt cancels only the current action and its committed cost.
+
+For an Attack Sequence:
+
+- interrupting one attack loses that attack;
+- remaining committed attacks continue unless a stronger rule explicitly cancels the sequence;
+- ending the entire turn requires explicit stronger wording.
+
+The same current action cannot be explicitly cancelled more than once. Other already-triggered responses may still resolve, but their Interrupt components do not make that one cancelled action lose its committed Turn AP cost more than once.
+
+Weapon traits, maneuvers, techniques, or similar content may later improve deliberate interruption. The universal numeric cost/modifier for a generic Disrupting Interception is **not** locked here.
+
+## Opportunity Response
+
+An Opportunity is an authored event that exposes a creature to an Opportunity Attack.
+
+```text
+Opportunity Capacity = Physical Tempo
+```
+
+The first time a creature exploits an Opportunity during a round:
+
+1. spend its Reaction;
+2. activate Opportunity Response until Round End;
+3. make one eligible Opportunity Attack.
+
+While active:
+
+- further Opportunity Attacks do not spend another Reaction;
+- total Opportunity Attacks that round cannot exceed Opportunity Capacity;
+- each distinct Opportunity trigger can produce at most one Opportunity Attack from that creature;
+- one creature may trigger multiple distinct Opportunities;
+- multiple eligible enemies may separately exploit the same Opportunity.
+
+A generic Opportunity Attack is one authorized attack, normally melee, and is not an Attack Sequence.
+
+A generic Opportunity Attack does **not** automatically Interrupt its provoking action.
+
+The existing threatened-ranged rule is a specific stronger trigger: firing a bow or crossbow while threatened creates an Opportunity before the ranged attack, and a successful resulting Opportunity Attack Interrupts that ranged attack.
+
+## Remaining timing/combat dependencies
+
+Still unresolved:
+
+- Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
+- final weapon-family Reach assignments beyond the adjacent baseline;
+- exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
+- complete surprise/unaware rules;
+- physical-hazard values/procedures;
+- conditions;
+- universal physical maneuvers.
+
+
+---
+
+# LOCKED UPDATE: Movement Foundation
+
+## Status: LOCKED FOUNDATION
+
+Canonical procedure lives in:
+
+- `docs/rules/05-combat/movement-foundation.md`
+- `docs/rules/05-combat/initiative-and-round-structure.md`
+
+## Grid and Movement Points
+
+One square represents approximately **1.5 m / 5 ft**.
+
+```text
+Movement Allowance = 12 MP per turn
+Orthogonal step = 2 MP
+Diagonal step = 3 MP
+```
+
+Movement is separate from Turn AP. Twelve MP permits 6 orthogonal squares, approximately 9 m / 30 ft, or 4 diagonal squares.
+
+Movement may be freely split around actions. An action/effect begun by the **moving creature** ends that creature's current movement segment; enemy Opportunity Attacks, Reactions, and other spontaneous responses do not do so by themselves. Later movement after the mover's own intervening action/effect begins a new segment. Switching between Normal and Cautious Movement does not itself create a new segment.
+
+## Cautious Movement
+
+Cautious Movement doubles the base step cost before flat surcharges and prevents that step from creating the general Movement Opportunity for leaving threatened space.
+
+Current examples:
+
+- orthogonal Cautious step: 4 MP;
+- diagonal Cautious step: 6 MP;
+- orthogonal Cautious step through an ally: 6 MP;
+- diagonal Cautious step through an ally: 8 MP.
+
+## Occupancy and blocked corners
+
+Hostile occupied squares cannot normally be entered or passed through.
+
+Allied occupied squares may be passed through with a **+2 MP flat surcharge** applied after movement-mode multiplication, but cannot normally be used as the ending square.
+
+Diagonal movement cannot pass through the touching corner of two orthogonally adjacent blockers when no usable physical gap exists.
+
+## Reach and threatened space
+
+Melee Reach is the set of squares presently targetable by an ordinary melee attack using a ready melee capability. The ordinary baseline is the 8 surrounding squares.
+
+A creature threatens those squares while capable of the relevant melee attack. Remaining Turn AP does not determine whether Reach exists.
+
+There is no separate universal engagement lock beyond Reach, threatened space, occupancy, and authored Opportunity triggers.
+
+## Movement Opportunities
+
+Entering threatened space does not provoke by default.
+
+When a creature voluntarily attempts a **Normal** step out of a threatened square, the threatening enemy gains a Movement Opportunity **before the mover leaves the starting square**.
+
+This applies whether the destination remains threatened or lies outside Reach.
+
+The same enemy can gain at most one general Movement Opportunity from that mover during one movement segment. Cautious steps do not create this Opportunity.
+
+Forced movement does not provoke by default. Teleportation/non-traversal relocation does not provoke from skipped squares, though activating a specific effect may separately be authored to create an Opportunity.
+
+## Movement Interception
+
+A creature may reserve any amount of remaining MP through the existing Interception framework, committing that MP immediately and declaring a specific trigger.
+
+The exact route is chosen only when the trigger occurs. Reserved movement follows ordinary movement, occupancy, Cautious Movement, and Opportunity rules. A reserved Movement Interception cannot release during the reserving creature's own turn; it is an out-of-turn positioning reservation.
+
+When a Movement Interception completes at least one legal movement step during another creature's movement, that active creature's movement segment ends. Releasing the reservation without moving does not break the segment. After a qualifying Movement Interception resolves, the mover re-evaluates the new state and may use remaining MP as a new movement segment.
+
+## Still deferred
+
+- Charge and other attack-linked movement maneuvers;
+- extra movement purchased directly with Turn AP;
+- exact Climb/Swim MP costs, Catch Grip, falling/water hazards, and jumping;
+- squeezing;
+- size-based occupancy/reach exceptions;
+- flight and other special movement modes;
+- final weapon-family Reach assignments;
+- detailed forced-movement procedures;
+- non-movement combat effects of Prone and whether Standing while threatened creates a specific Opportunity;
+- Reaction Blink AP Debt / Overdraw as technique/action-economy content.
+
+
+---
+
+# LOCKED UPDATE: Special Movement, Terrain, and Prone
+
+## Status: LOCKED BASELINE
+
+Canonical procedure lives in:
+
+- `docs/rules/05-combat/special-movement-terrain-and-prone.md`
+- `docs/rules/05-combat/movement-foundation.md`
+
+## Sprint
+
+Sprint is a **Full Action**, is explicitly **ineligible for Interception reservation**, and replaces the normal Movement Allowance for the turn.
+
+```text
+Sprint Movement Allowance =
+3 × impaired normal Movement Allowance
+```
+
+An unimpaired ordinary creature therefore has **36 MP** while Sprinting.
+
+MP already spent earlier in the turn remains spent. MP already reserved for Movement Interception also counts against the Sprint allowance. Sprint does not create a second movement pool, and Sprint MP cannot be newly reserved after Sprint is declared. A pre-existing reservation remains ordinary reserved movement rather than inheriting Sprint Heading.
+
+When Sprint movement begins, choose one of the 8 grid directions as the Sprint Heading. Sprint movement continues along that heading; stopping or changing movement segments does not reset it. Sprint cannot use Cautious Movement.
+
+If an external effect or response physically blocks further movement along the current Sprint Heading, the sprinter may pay **2 MP** for Forced Redirection and select a new heading. Voluntary turning without an external obstruction is not permitted.
+
+Sprint otherwise follows ordinary terrain, occupancy, threatened-space, and Opportunity rules.
+
+## Terrain
+
+Terrain modifies **step cost**, not whole-turn Movement Allowance.
+
+| Terrain | Step surcharge |
+|---|---:|
+| Normal | +0 MP |
+| Difficult | +2 MP |
+| Severe | +4 MP |
+| Impassable | cannot normally enter |
+
+Flat terrain and occupancy surcharges are applied after movement-mode base-cost changes.
+
+## Movement impairments
+
+Movement impairments reduce the creature's normal Movement Allowance.
+
+For the ordinary 12-MP baseline:
+
+```text
+Impaired normal Movement Allowance =
+12 MP - explicit impairment
+```
+
+Sprint then triples the impaired normal allowance, making the impairment proportionally meaningful at running speed. A serious effect may explicitly prohibit Sprint.
+
+If a cannot-Sprint effect applies after Sprint is already active, the remaining Sprint pool is **suspended**, not lost or converted to ordinary movement. The current Sprint movement segment ends and Sprint Heading is retained. Suspended Sprint MP cannot be spent unless a rule explicitly permits a specific expenditure. If the prohibition ends before turn cleanup, Sprint may resume as a new movement segment under the same heading with whatever MP remains after any numeric impairment recalculation; if the prohibition persists through cleanup, the unused pool is lost. Prone uses this rule and uniquely permits 4 suspended Sprint MP to pay its Stand cost.
+
+Movement Allowance cannot fall below 0 MP.
+
+Movement Interception reservations are grouped into **reservation cohorts** by the turn whose Movement Allowance funded them. Reservations, queued releases, active/suspended releases, completed Interception spend from a cohort that still has live pools, and already-spent current-turn MP do not preserve movement capacity against later impairments. During the creature's own turn, spent MP plus unreleased reserved MP cannot exceed the recalculated current-turn allowance. Separately, Movement Interception accounting is continuously capped by the current **impaired normal Movement Allowance**: retained completed spend from cohorts that still have live pools + MP already spent by live released Interceptions + all unspent MP across unreleased, queued, active, and suspended pools cannot exceed that cap. When the cap falls, trim unreleased reservations newest-first, then released-but-not-started pools from latest pending resolution backward, then remaining MP in already-started pools newest-started first. Already-spent Interception MP is not rolled back. Completed spend stops counting only when its cohort has no live pools remaining. If retained completed spend plus live already-spent MP meets/exceeds the new cap, all remaining live Movement Interception MP is lost. Trimmed MP does not return if the impairment later ends.
+
+## Allied-square transit
+
+Entering an allied occupied square requires enough MP and a legal route to enter and then leave that square as one continuous passage. The mover cannot intentionally begin the passage if it would become stranded sharing the ally's square under the known state.
+
+If an interruption makes the passage impossible after entry, keep the interruption's consequences and return the mover to the last legal square it occupied before entering the ally's square, with no MP refund and no Movement Opportunity from the fallback. If that square is no longer legal, use the nearest legal square adjacent to the ally's square, minimizing distance from the prior square; ties are chosen by the mover. Temporary co-occupancy is permitted only when no legal adjacent fallback exists and must end at the first legal opportunity.
+
+The existing **+2 MP** allied-square surcharge remains flat and is applied after movement-mode changes.
+
+## Prone, Crawl, Stand, and combat posture
+
+Prone v0 now defines both movement and baseline combat posture.
+
+A Prone creature cannot use ordinary walking movement or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the general active-Sprint prohibition rule suspends the remaining Sprint allowance: it cannot fund Crawl or Cautious Crawl and may be spent only on the explicit 4 MP Stand exception until the creature is standing again.
+
+Voluntarily dropping Prone costs **0 MP / 0 Turn AP** and does not by itself end the current movement segment.
+
+Crawl costs:
+
+- orthogonal: **4 MP**;
+- diagonal: **6 MP**.
+
+Cautious Movement and Crawl stack additively by copies of the base step cost:
+
+```text
+Normal = 1 × base
+Cautious = 2 × base
+Crawl = 2 × base
+Cautious Crawl = 3 × base
+```
+
+Thus Cautious Crawl costs 6 MP orthogonally or 9 MP diagonally before flat terrain/occupancy surcharges.
+
+Combat posture:
+
+- melee attacks made while Prone suffer **-2**;
+- a non-Prone attacker gains **+2** to melee attacks against a Prone target;
+- Prone does not inherently increase damage, Penetration, critical tier, wound severity, or Called Shot effect;
+- Guard and Dodge remain available when physically possible from the actual posture;
+- targeted ranged attacks from **3+ squares** gain **+2 Position Defense** against a Prone target when the lower profile materially applies; the modifier applies to both static Ranged Defense and active Ranged Dodge;
+- the Prone profile bonus does not apply at 1-2 squares, where angle/elevation negates it, or merely because an area effect includes the creature;
+- an ordinary bow cannot normally make its standard shot while Prone unless an explicit technique, posture, or weapon rule permits it.
+
+Standing from Prone costs **4 MP**, costs no Turn AP, and does not refresh Movement Allowance. The 4 MP is committed when Standing begins. Beginning to Stand ends the current movement segment and, if the creature is threatened, creates the authored **Standing Opportunity** before Prone ends. Generic Opportunity hits do not automatically Interrupt Standing; recheck whether the Stand remains physically possible after responses. Movement after a completed Stand begins a new movement segment.
+
+If a creature was knocked Prone after Sprint was activated, the remaining Sprint allowance is suspended except for paying the Stand cost; after Standing it may resume any remaining Sprint movement as a new segment under the existing Sprint Heading if still legal.
+
+## Explicitly unresolved
+
+- weapon-specific Prone posture restrictions beyond the baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
+- Charge;
+- exact Climb/Swim MP costs, Catch Grip, jumping/falling, and detailed water hazards;
+- squeezing;
+- size exceptions;
+- flight and other special movement modes.
+
+
+---
+
+# LOCKED UPDATE: Traversal Foundation
+
+## Status: LOCKED FOUNDATION / SPEEDS AND HAZARDS PENDING
+
+Canonical procedure lives in:
+
+- `docs/rules/05-combat/traversal-foundation.md`
+- `docs/rules/05-combat/movement-foundation.md`
+- `docs/rules/02-character-creation/abilities-and-training.md`
+
+## Ground travel and traversal boundary
+
+Ordinary supported ground travel does not require a generic movement check merely to walk or travel.
+
+Climbing and swimming are **Traversal** activities. Resolve them in this order:
+
+1. Capability — is the traversal possible by the current method?
+2. Risk — if possible, is meaningful failure uncertainty present?
+3. Effort — does sustained exertion matter?
+4. Combat movement — only after valid traversal is established, determine combat progress through MP.
+
+Traversal capability has no derived universal score. The GM adjudicates the actual route, method, abilities, Training, equipment, injuries, load, and environment as **Automatic**, **Hazardous**, or **Impossible by current method**. A roll cannot make a physically impossible attempt possible; changing route, equipment, assistance, or method can change the category.
+
+Hazardous traversal uses ordinary Core Resolution:
+
+```text
+d20 + relevant Ability + applicable Training + situational modifiers
+```
+
+The GM chooses one Ability for the immediate challenge. Climbing and Swimming may use Strength for force, Agility for body control/technical movement, or Vitality for sustained exertion. Multiple Abilities are not added together.
+
+Risk and effort are separate. Safe but strenuous traversal does not require repeated checks merely because it is tiring. Exact fatigue intervals and exhaustion consequences remain unresolved.
+
+## Traversal State and Traversal Segments
+
+Traversal State persists while the creature depends on climbing support, swimming propulsion, or another authored traversal method. Stopping progress or beginning another action does not itself end Traversal State.
+
+A **Traversal Segment** is one continuous period of making traversal progress and is a specialized movement segment.
+
+A Traversal Segment ends when the traverser begins one of its own actions/effects, leaves the Traversal State, changes to a materially different traversal route/mode, suffers a Traversal Disruption that breaks progress, or another rule explicitly ends the segment.
+
+Enemy responses do not end the segment merely by occurring; they must actually disrupt traversal.
+
+Transitioning from ground movement into traversal ends the ordinary movement segment and begins a Traversal Segment. Leaving traversal for ground movement ends the Traversal Segment; resumed ground movement begins a new ordinary movement segment.
+
+Traversal Segments use the ordinary one-Movement-Opportunity-per-enemy-per-segment limit.
+
+## Climbing support
+
+Climbing routes may specify separate **Hold Support** and **Progress Support** requirements using Support 0/1/2 usable hands.
+
+A hand committed to support cannot simultaneously wield/use/manipulate an item.
+
+If Progress Support exceeds Hold Support, a climber may stop making progress and free hands down to the Hold Support requirement, but must satisfy Progress Support again before resuming movement.
+
+## Swimming propulsion
+
+Swimming uses propulsion requirements rather than the climbing hand-support scale. Available limbs, occupied hands, injuries, Swimming Training, carried equipment, armor, and water conditions may change whether controlled swimming is Automatic, Hazardous, or Impossible.
+
+No universal numerical swimming penalty for an occupied hand, shield, weapon, injury, or armor is locked yet.
+
+## Combat legality and defenses
+
+An action while traversing is legal only when the creature can continue satisfying its current support or propulsion requirements while performing it.
+
+Traversal applies no universal attack, Guard, or Dodge penalty. A defense is legal only when it is physically executable while satisfying traversal requirements; defensive repositioning must move through positions the creature can actually occupy in that Traversal State.
+
+Detailed underwater weapon restrictions remain pending.
+
+## Opportunities
+
+Climbing and swimming do not inherently create Opportunities.
+
+Ordinary Reach and threatened-space rules use the creature's actual position. Voluntarily leaving threatened space through traversal can create the ordinary Movement Opportunity before departure. Entering threatened space does not provoke.
+
+A traversal that permits deliberate controlled movement may permit Cautious traversal and thereby avoid the general Movement Opportunity. Exact Cautious Climb/Swim MP costs remain pending with traversal-speed calibration.
+
+Vertical movement or diving does not erase an Opportunity from a threatened starting position; the Opportunity resolves before the creature leaves that Reach.
+
+## Traversal Disruption
+
+An attack does not automatically disrupt traversal merely because it hits.
+
+Traversal Disruption occurs when an effect materially removes required support/control, such as losing required support, forced displacement away from support/path, destruction of the route/support, or an explicit traversal-disrupting effect.
+
+For climbing: if Hold Support is still satisfied, the climber remains secured. If Hold Support is lost or the climber is displaced away from usable support, the creature begins to fall unless another valid support is immediately established. A future Catch Grip procedure will calibrate attempts to re-establish support.
+
+For swimming: loss of controlled propulsion does not use the falling rule. Water/buoyancy hazards determine drift, sinking/rising, breath, drowning, currents, and waves; those remain unresolved.
+
+## Explicitly unresolved
+
+- exact Climb and Swim MP costs/speeds;
+- fixed Ability or Training thresholds;
+- starting-character Climbing/Swimming competence allocation;
+- Catch Grip timing/modifiers;
+- falling distance/damage/collisions;
+- breath, drowning, buoyancy, currents, waves;
+- armor-specific traversal effects;
+- detailed underwater weapon behavior;
+- universal fatigue/exhaustion intervals;
+- jumping, squeezing, flight, and other future traversal modes.

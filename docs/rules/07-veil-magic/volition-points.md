@@ -62,10 +62,12 @@ A feature must explicitly state that moving or changing the effect refreshes suc
 A character has:
 
 ```
-VP Recovery = 25% of Max VP, rounded to the nearest whole VP
+VP Recovery = 25% of Max VP
 ```
 
-Minimum recovery is 1 VP when Max VP is above 0.
+Round recovery fractions **half up** to the nearest whole point: a fractional part of .5 or greater rounds up; a fractional part below .5 rounds down. Minimum recovery is 1 VP when Max VP is above 0.
+
+This is the shared recovery-rounding rule used by both VP and Vigor.
 
 For every **completed 6-hour interval** of elapsed in-world time, restore one VP Recovery amount from Spent VP, up to Max VP. Partial intervals grant no recovery.
 

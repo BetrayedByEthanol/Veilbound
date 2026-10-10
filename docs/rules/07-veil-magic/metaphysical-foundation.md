@@ -1,10 +1,10 @@
-# Metaphysical Foundation: Desire, Will, Volition, and Resonance
+# Metaphysical Foundation: Desire, Belief, Will, Volition, and Resonance
 
 > **LOCKED metaphysical foundation.** This page defines what Veilbound's core metaphysical terms mean and how the four Archetypes relate to the same underlying system. The locked universal Resonance procedure and Intrusion resolution are defined in [Universal Resonance and Direct Veil Magic](resonance-and-intrusion.md).
 
 ## The common metaphysical chain
 
-Veilbound distinguishes four related concepts.
+Veilbound distinguishes four core concepts in the metaphysical chain.
 
 ### Desire
 
@@ -12,7 +12,13 @@ Veilbound distinguishes four related concepts.
 
 Desire does not have to be rational, moral, conscious, or internally consistent.
 
-Collective human desire is one of the forces from which Pillars emerge and change.
+### Belief
+
+**Belief** is what a person holds to be true, meaningful, or right.
+
+Belief gives interpretation to desire and action. It helps determine what a deliberate act means to the person performing it and therefore which Pillar patterns that act may reinforce.
+
+Belief is not itself a separate source of metaphysical power.
 
 ### Will
 
@@ -22,7 +28,7 @@ Will is not identical to stubbornness or certainty. A person may possess strong 
 
 ### Volition
 
-**Volition** is the usable metaphysical force produced when desire and will are directed into coherent intention and action through the Veil.
+**Volition** is the usable metaphysical force produced when desire, belief, and will are directed into coherent intention and action through the Veil.
 
 Volition is not the same thing as character level, Veil Affinity, Veil Control, or Resonance.
 
@@ -33,6 +39,36 @@ Those concepts describe different properties of the same wider relationship:
 - **Veil Affinity** describes how much Veil power/Volition the character can contain and channel.
 - **Veil Control** describes how precisely, efficiently, and forcefully the character can shape it.
 - **Resonance** describes the internal coherence of the person producing and directing that Volition.
+
+### Choice and agency
+
+A deliberate **choice** is an expression of Will, not a separate metaphysical resource or character state.
+
+External pressure may constrain a choice without eliminating it. Threats, duties, social pressure, scarcity, or competing obligations can still leave meaningful agency.
+
+An action performed without meaningful agency—such as direct magical control or physically forced movement—does not express the controlled person's Volition.
+
+## Volition and the Pillars
+
+**Volition is the fundamental force that sustains and changes Pillars.**
+
+A Pillar is reinforced when sapient beings exercise Volition in ways that genuinely express its pattern. Belief gives those choices meaning; Will selects and sustains them; repeated practice makes the pattern persistent.
+
+The clarity and deliberateness of commitment matter more than suffering for its own sake. Cost, risk, or sacrifice can demonstrate commitment by making alternatives meaningful, but pain or loss is not itself metaphysical fuel.
+
+Worship, vows, doctrine, ritual, and institutions do not create a separate form of Pillar energy. They organize interpretation and practice, repeatedly direct Volition toward recognizable patterns, and stabilize shared understandings of what a Pillar represents.
+
+A single act may reinforce more than one Pillar when multiple principles genuinely motivate it. The actor's established intent is the primary guide; cultural framing may clarify ambiguous cases but does not override the actor's actual Volition.
+
+For a player character, the **player establishes the character's genuine intent**, constrained by previously established fiction, motives, and choices. For an NPC, the **GM establishes intent** under the same constraint. Intent cannot be retroactively redefined solely to redirect which Pillar an already-established act reinforces.
+
+Personal Volition and Pillar strength are separate bookkeeping:
+
+- **VP expenditure does not inherently feed a Pillar.** Spending or committing VP on a technique contributes nothing merely because VP was used.
+- A technique bearing a Pillar/Aspect identity does not automatically strengthen that Pillar. Any contribution comes from the deliberate choice expressed through the act.
+- Strengthening a Pillar does not automatically increase an individual practitioner's personal power.
+- Scholars can use real Aspect patterns without worship, Pillar approval, or a Priest-style relationship.
+- Veilbound does not track a separate numeric "Volition contributed" statistic. Pillar Accord, Resonance, and Mission state remain the relevant tracked coherence states.
 
 ## Universal Resonance
 
@@ -246,7 +282,9 @@ A supposed Manifestation that originates **inside or overlapping a living target
 The following distinctions are canonical:
 
 - **Desire** gives direction.
+- **Belief** gives interpretation and meaning.
 - **Will** selects and sustains direction.
+- A deliberate **choice** expresses Will through intention or action; it is not a separate resource.
 - **Volition** is the usable metaphysical force produced through that directed relationship with the Veil.
 - **VP** is freely available Volition, not total integration.
 - **Resonance** is universal internal coherence.

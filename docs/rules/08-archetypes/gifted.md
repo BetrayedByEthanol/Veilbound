@@ -6,7 +6,7 @@
 
 A Gifted is born with permanent links between emotion and Aspect.
 
-A Gifted is a **natural phenomenon of human Veil integration**, not a person selected, created, or deliberately shaped by a Pillar. Human emotion/desire and Pillar patterns arise within the same wider Veil metaphysics. A Gifted's innate emotional states naturally open unusually strong pathways into particular Aspect patterns; the linked Pillar does not need to choose, approve, or consciously recognize the Gifted.
+A Gifted is a **natural phenomenon of human Veil integration**, not a person selected, created, or deliberately shaped by a Pillar. Human emotion, Volition, and Pillar patterns arise within the same wider Veil metaphysics. Pillars are formed and sustained by recurring human Volition expressed through practice and interpreted through belief; a Gifted's innate emotional states naturally open unusually strong pathways into particular Aspect patterns. The linked Pillar does not need to choose, approve, or consciously recognize the Gifted.
 
 The eight core emotions are:
 
@@ -58,7 +58,7 @@ At the start of each Gifted turn, after ordinary start-of-turn housekeeping and 
 1. the previous **Emotion Window** ends;
 2. if no dominant competing emotion interferes, the Gifted may establish any eligible linked emotion at no action cost;
 3. the Gifted may instead leave Active Emotion unset, allowing the first emotion-requiring Gifted technique to establish one at no extra action cost;
-4. if a dominant competing emotion exists, it becomes Active by default unless the Gifted spends 1 Attack Unit from the upcoming turn and succeeds on an Emotional Transition check;
+4. if a dominant competing emotion exists, it becomes Active by default unless the Gifted spends one **General Tempo Action (24 AP)** from the upcoming turn and succeeds on an Emotional Transition check;
 5. Low Gifted normally re-establishes an uninterrupted Anchor;
 6. Medium Gifted conduits immediately re-express when the new Active Emotion is established.
 
@@ -105,7 +105,7 @@ A naturally strong matching emotion may establish Heightened intensity without a
 
 From Evoked:
 
-- cost: **1 Attack Unit**;
+- cost: **1 General Tempo Action (24 AP)**;
 - check: `d20 + Awareness + Emotional Discipline Training + Resonance` vs **DC 12** benchmark;
 - success: become Heightened for the current Emotion Window;
 - failure: remain Evoked;
@@ -113,7 +113,7 @@ From Evoked:
 
 ### Emotional Overload
 
-A Heightened Gifted may spend **1 Attack Unit** to become Overwhelming.
+A Heightened Gifted may spend **1 General Tempo Action (24 AP)** to become Overwhelming.
 
 No second emotional check is required merely to enter Overwhelming.
 
@@ -154,8 +154,8 @@ When a dominant emotion persists:
 
 | Interference | Cost / DC |
 |---|---|
-| Heightened dominant emotion | 1 Attack Unit, DC 12 |
-| Overwhelming dominant emotion | 1 Attack Unit, DC 15 |
+| Heightened dominant emotion | one **General Tempo Action (24 AP)**, DC 12 |
+| Overwhelming dominant emotion | one **General Tempo Action (24 AP)**, DC 15 |
 | particularly severe/direct conflict | GM may increase roughly +2–3 |
 
 Check:
@@ -243,7 +243,7 @@ Changing Grade is Reconduction.
 
 Reconduction changes a conduit's anchor, form, or Grade.
 
-- cost: **1 Attack Unit**;
+- cost: **1 General Tempo Action (24 AP)**;
 - levels 1–3: **3 Spent VP**;
 - levels 4–5: **2 Spent VP**;
 - then commit/release any VP difference required by the new Grade.
@@ -254,10 +254,10 @@ Automatic emotional retuning is not Reconduction.
 
 | Level | Medium Gifted foundation |
 |---:|---|
-| 1 | **1 conduit**; Grades I–III available; Reconduction costs 1 AU + 3 Spent VP |
+| 1 | **1 conduit**; Grades I–III available; Reconduction costs 1 General Tempo Action (24 AP) + 3 Spent VP |
 | 2 | No additional universal conduit slot is added; expression growth is primarily technique/Form content |
 | 3 | **2 conduits** |
-| 4 | +1 Ability; Reconduction cost becomes 1 AU + **2 Spent VP** |
+| 4 | +1 Ability; Reconduction cost becomes 1 General Tempo Action (24 AP) + **2 Spent VP** |
 | 5 | **3 conduits** |
 
 ### Conduit Pulse and cadence
@@ -271,7 +271,7 @@ Persistent expressions use the universal cadence framework:
 - Pulse;
 - Spend.
 
-A full technique-scale instance of damage, healing, Vigor restoration, strong control, or equivalent major output must not be an unrestricted per-Attack-Unit Rider.
+A full technique-scale instance of damage, healing, Vigor restoration, strong control, or equivalent major output must not be an unrestricted per-action Rider.
 
 ## Low Gifted — Anchored Embodiment
 
@@ -304,7 +304,7 @@ Outside combat, the Gifted may settle into one emotion at a time for the corresp
 
 To voluntarily change Anchor:
 
-- spend **1 Attack Unit**;
+- spend **1 General Tempo Action (24 AP)**;
 - genuinely evoke another linked emotion;
 - no roll if no competing dominant emotion interferes;
 - new emotion becomes Active and the new Anchor;
@@ -327,7 +327,7 @@ Ordinary physical actions remain available regardless.
 |---:|---|
 | 1 | **Anchored Embodiment** |
 | 2 | **Instinctive Expression** — Embodied Expression may integrate with eligible attacks, Guard, Dodge, movement, grapples/shoves, interception, touch, etc.; no free actions |
-| 3 | **Settled Emotion** — if Anchor persisted from previous turn, Deepen Emotion may be attempted with no AU cost; successful settled Heightening persists while the same Anchor remains uninterrupted |
+| 3 | **Settled Emotion** — if Anchor persisted from previous turn, Deepen Emotion may be attempted with no General Tempo AP cost; successful settled Heightening persists while the same Anchor remains uninterrupted |
 | 4 | **Emotional Center + Ability Increase** — +1 Ability; +2 on Emotional Transition checks specifically to preserve/reclaim the Anchor |
 | 5 | **Deep Embodiment** — a stable Heightened Anchor gains an authored Aspect-specific Deep Embodiment rider |
 
@@ -361,4 +361,4 @@ The current foundation supersedes:
 - Medium Conduit Form expressions and Grade scaling;
 - Low Embodied and Deep Embodiment expressions;
 - Aspect-specific Instability Profiles;
-- persistent Rider/Pulse numbers against maximum Physical Tempo.
+- persistent Rider/Pulse numbers against the maximum applicable Physical or Projection Tempo.

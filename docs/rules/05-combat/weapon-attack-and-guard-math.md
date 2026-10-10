@@ -17,7 +17,7 @@ d20
 
 One d20 resolves the attack. The two Abilities represent different physical demands of delivering the weapon accurately; they are not separate rolls.
 
-Training improves attack quality. Physical Tempo determines attack quantity.
+Training improves attack quality. Turn AP and the Focus-based **Physical Action cost** determine how many ordinary physical attacks fit into a turn; derived Physical Tempo is the maximum pure-physical count.
 
 ## Current weapon attack pairings
 
@@ -77,7 +77,7 @@ Guard Defense =
 
 An attack must **beat** Guard Defense to hit.
 
-Guard remains limited by Guard capacity from Physical Tempo and equipment.
+Guard remains limited by Guard capacity, whose base value equals derived Physical Tempo, plus applicable equipment modifiers.
 
 ## Current Guard pairings
 

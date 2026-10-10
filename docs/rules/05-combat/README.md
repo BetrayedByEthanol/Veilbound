@@ -5,7 +5,11 @@ This directory contains the currently promoted native Veilbound combat foundatio
 ## Canonical files
 
 - [Initiative and Round/Turn Procedure](initiative-and-round-structure.md)
-- [Action Categories and Physical Tempo](action-categories-and-physical-tempo.md)
+- [Turn Action Points and Tempo](action-categories-and-physical-tempo.md)
+- [Movement Foundation](movement-foundation.md)
+- [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md)
+- [Traversal Foundation](traversal-foundation.md)
+- [Universal Maneuvers](universal-maneuvers.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
@@ -17,14 +21,13 @@ Durability, Dying, and wound-repair rules live under [../06-vigor-wounds-death/]
 
 The current canonical combat foundation still requires Veilbound-native rules for:
 
-- detailed Reaction declaration and competing-trigger priority;
-- detailed Interception declaration/priority refinements;
-- broader turn-declaration rules beyond the locked timing skeleton;
-- full movement/reach/engagement rules;
-- the general opportunity-attack procedure;
+- Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
+- weapon-specific Prone posture restrictions beyond the locked baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
+- final weapon-family Reach assignments beyond the adjacent baseline;
+- exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
 - cover/concealment/surprise as complete procedures;
-- grapple, shove, feint, trip, disarm, charge, and other universal maneuvers as complete procedures;
+- grapple-specific Disarm/limb control, cooperative multi-creature Grapples, feint, disarm, charge, and other universal maneuvers beyond the locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, and Throw v0 foundations;
 - physical-hazard values/procedures;
 - conditions;
 - encounter building and NPC/creature construction.

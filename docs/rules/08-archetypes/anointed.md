@@ -29,7 +29,7 @@ A Pillar surge does not require prior Pillar weakness and does not require a cri
 
 The locked general pattern is:
 
-> **successful practice → adoption → cultural reinforcement → concentrated collective commitment/celebration → Pillar surge**
+> **successful practice → adoption → cultural reinforcement → synchronized collective Volition/commitment → Pillar surge**
 
 Important contributors may include:
 
@@ -40,6 +40,8 @@ Important contributors may include:
 - visible successful results;
 - synchronized celebration, rite, victory, harvest, unveiling, or similar event;
 - explicit prayer or thanks, although formal religion is not mandatory.
+
+The concentration that produces a surge is collective Volition coherently expressing the Pillar pattern; prayer can help coordinate that Volition but is not a separate fuel.
 
 Priests may help cultivate these conditions but cannot simply perform a ritual and manufacture an Anointed.
 
@@ -269,7 +271,7 @@ Normal range, line-of-effect, perception, contact, targeting, and delivery rules
 
 Current baseline:
 
-- establish/change Vessel: **1 Attack Unit**;
+- establish/change Vessel: one **General Tempo Action (24 AP)**;
 - release: free;
 - establishing Investment: **0 VP**;
 - normally one primary Invested Vessel.
@@ -302,7 +304,7 @@ Gain +1 Ability.
 
 Current retained structure:
 
-> once per turn, change Invested Vessel without paying the normal 1 Attack Unit.
+> once per turn, change Invested Vessel without paying the normal 24 AP General Tempo cost.
 
 Eligibility/range/delivery still apply.
 
@@ -340,7 +342,7 @@ The Embodied Signature is:
 
 It may be suppressed or resumed at the start of the Anointed's turn without spending an action.
 
-Full technique-scale damage/healing/Vigor restoration cannot trigger freely on every Attack Unit.
+Full technique-scale damage/healing/Vigor restoration cannot trigger freely on every AP-based physical action.
 
 ### Level 2 — Living Instrument
 
@@ -378,7 +380,7 @@ Gain +1 Ability.
 
 Current retained structure:
 
-> once per turn, when spending an Attack Unit on an eligible ordinary physical action, activate one compatible 1-Attack-Unit `[Embodiment]` technique as part of that same Attack Unit, paying normal VP.
+> once per turn, when paying the **Physical Action** AP cost for an eligible ordinary physical action, activate one compatible `[Embodiment]` technique whose normal action cost is one Physical Action as part of that same action, paying normal VP.
 
 Guardrails:
 
