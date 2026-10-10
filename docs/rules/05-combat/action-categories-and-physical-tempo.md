@@ -45,7 +45,7 @@ Tempo-scale actions use one of three AP cost classes.
 
 ### Physical Action
 
-A **Physical Action** is ordinary physical combat activity whose cadence should follow embodied physical tempo, including an ordinary weapon attack and other actions explicitly authored with the Physical Action cost.
+A **Physical Action** is ordinary physical combat activity whose cadence should follow embodied physical tempo, including an ordinary weapon attack and other actions explicitly authored with the Physical Action cost. [Aim v0](aim-v0.md) is a separately paid Physical Action preparing one specified future ranged attack; it does **not** fire, grant a bonus attack, change Physical Tempo, or pay for the later attack.
 
 ### Projection Action
 
