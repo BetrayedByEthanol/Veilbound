@@ -1,6 +1,6 @@
 # Universal Maneuvers
 
-> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, and **Drive/Drag v0** foundations. Other universal maneuvers remain future work unless separately promoted.
+> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, **Drive/Drag v0**, and **Throw v0** foundations. Other universal maneuvers remain future work unless separately promoted.
 
 ## Shove v0
 
@@ -230,7 +230,7 @@ Shove v0 does not define:
 - special shield-size Shove bonuses;
 - size-category modifiers or impossibility thresholds;
 - weapon bind or hook procedures;
-- Disarm, Feint, Charge, or other universal maneuvers beyond the locked Grapple v0 and Trip/Takedown v0 foundations;
+- Disarm, Feint, Charge, or other universal maneuvers beyond the locked maneuver foundations;
 - Catch Grip and falling damage.
 
 Those remain explicit later design work.
@@ -796,6 +796,110 @@ Takedown does not inherently:
 
 Displacement belongs to **Throw** or another forced-movement procedure. Damage from a collision, edge, falling surface, or similar hazard requires the applicable later collision/hazard procedures.
 
+## Throw v0
+
+**Throw** is the Controller-only Grapple escalation used to convert Control into **forced displacement of the Controlled creature**.
+
+Throw is distinct from Takedown:
+
+- **Takedown** changes the Controlled creature's posture while preserving the Grapple;
+- **Throw** displaces the Controlled creature and ends the Grapple once that displacement begins.
+
+Attempting a Throw costs **one Physical Action** and requires:
+
+- an existing Controller/Controlled Grappling State;
+- a physically plausible way to redirect, lift, rotate, lever, or otherwise cast the Controlled creature out of the shared Grapple square;
+- a declared Throw direction that can accept at least the first square of displacement under the known battlefield state.
+
+### Physical scale and plausibility
+
+Relative size, mass, anatomy, leverage, footing, support, and current body position matter to whether a Throw is physically possible.
+
+Throw v0 does **not** yet assign exact numerical modifiers or universal size/mass thresholds. Those belong to a later shared physical-scale calibration that can also serve Shove, Grapple, Drive/Drag, Trip/Takedown, Pin, and related maneuvers.
+
+For v0:
+
+- roughly comparable creatures use the ordinary Grapple Contest with no special size/mass modifier;
+- a noticeable unfavorable size or mass difference may still permit the Throw when the fiction provides sufficient leverage or another plausible method;
+- an overwhelming physical-scale mismatch can make an ordinary Throw impossible unless equipment, terrain, supernatural capability, unusual anatomy, or another explicit effect makes it plausible;
+- Strength, Agility, or Training bonuses do not by themselves make a physically impossible Throw possible.
+
+### Declare direction
+
+Before the Grapple Contest, the Controller chooses **one of the 8 adjacent grid directions** as the Throw direction.
+
+That direction is fixed for this Throw. The Controller cannot wait for the contest result before choosing it.
+
+At declaration and again immediately before the contest, the first square in that direction must be physically enterable by the Controlled creature.
+
+- another creature, solid obstruction, or impassable geometry can make that direction illegal;
+- lack of ground support does **not** by itself make a position illegal if the creature can physically be thrown into that space;
+- vertical throws, arcing trajectories, and other non-grid trajectories remain later work.
+
+If the first displacement square becomes illegal before the contest resolves, the Throw cannot proceed under the normal action re-check rules.
+
+### Throw Contest
+
+Make the normal **Grapple Contest**.
+
+If both participants roll, calculate:
+
+```text
+Throw Margin =
+Controller Grapple Contest total
+- Controlled creature Grapple Contest total
+```
+
+Resolve the result:
+
+| Result | Throw outcome |
+|---|---|
+| Controlled creature wins | no displacement; any Pin dependent on the former Control ends; Control degrades to **Neutral** |
+| exact tie | no displacement; existing Control remains |
+| Controller wins by **1–4** | forcibly displace the Controlled creature **1 square** in the declared direction |
+| Controller wins by **5–9** | forcibly displace the Controlled creature **1 square** in the declared direction and make it **Prone** if Prone is meaningful at the resulting position |
+| Controller wins by **10+** | forcibly displace the Controlled creature **2 squares** in the declared direction and make it **Prone** if Prone is meaningful at the resulting position |
+
+If the Controlled creature is unable to contest and the Controller therefore wins automatically under the normal Grapple rule, treat that automatic win as the **10+ Throw tier**, subject to the Throw still being physically plausible.
+
+### Resolving Throw displacement
+
+Throw displacement is **forced movement**.
+
+- the Controller remains in the former shared Grapple square;
+- the Controlled creature spends no MP;
+- the thrown creature does **not** create the general Movement Opportunity merely because Throw moves it;
+- the Controller does not receive a built-in advance;
+- once the thrown creature leaves the shared Grapple square, the Grappling State ends immediately;
+- any dependent Pin and Control end with that Grappling State.
+
+Resolve a 2-square Throw along the declared direction one square at a time.
+
+- if both squares can be physically entered, complete both squares;
+- if the first square is legal but the second is blocked by a creature, solid obstruction, or impassable geometry, the thrown creature stops in the first square;
+- stopping early because the second square is blocked does not remove the **Prone** result of the 10+ tier when Prone is meaningful there;
+- Throw v0 causes no collision, crushing, impact, or chain-displacement damage from the obstruction.
+
+An unsupported position does not stop the authored Throw displacement merely because there is no floor there. After the Throw displacement resolves, if the creature lacks support, begin the applicable falling, traversal-disruption, or physical-hazard procedure.
+
+If Prone is not physically meaningful at the resulting position—for example because the target is falling or otherwise unsupported—do not apply Prone there. Any later landing or impact uses the applicable hazard procedure rather than an assumed Throw result.
+
+### Throw result boundary
+
+Throw v0 does **not** inherently:
+
+- deal damage;
+- grant a free attack;
+- move the Controller;
+- preserve the Grappling State after successful displacement;
+- move another creature struck or blocked by the thrown creature;
+- calculate collision or falling damage;
+- define exact size/mass modifiers or impossibility thresholds;
+- define vertical or complex Throw trajectories.
+
+Those remain later physical-scale, collision, falling, hazard, creature, and maneuver calibration.
+
+
 ## Pin
 
 A **Pin** is a stronger position established from existing Control. It remains part of the same Grappling State rather than creating a separate grapple.
@@ -986,7 +1090,6 @@ Dedicated rules for cooperative dogpiles, multiple creatures restraining one tar
 
 Grapple v0 does not yet define:
 
-- Throw procedures beyond the locked Takedown v0;
 - Grapple-specific Disarm procedures;
 - detailed limb-control or weapon-control actions;
 - a catalogue of Pin configurations;
