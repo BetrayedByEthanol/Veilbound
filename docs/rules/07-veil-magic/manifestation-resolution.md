@@ -57,16 +57,20 @@ On a successful attack, the intended target point is the impact point.
 
 On an **ordinary miss not already stopped by Cover or a successful physical Guard**, determine a **Miss Impact Point** rather than discarding the projectile:
 
-1. Calculate the **Miss Margin**:
+1. Determine **Scatter Defense** from the defense that actually resolved the shot:
+   - **No applicable Cover Difficulty:** use that actual defense unchanged.
+   - **Partial cover, and the attack is an ordinary miss** (`A <= B` under [Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location)): use **Base Defense `B`**, the actual selected defense **excluding effective Cover Difficulty `C`**, rather than final Cover-adjusted Defense `D = B + C`.
+   - **Cover-hit band** (`B < A <= D`), physically illegal direct shot, or successful projectile Guard: this ordinary-miss scatter procedure **does not apply**. Resolve the actual cover/Guard impact or illegality first.
+2. Calculate the **Miss Margin**:
+   ```text
+   Miss Margin = max(0, Scatter Defense - Attack Total)
    ```
-   Miss Margin = max(0, Defense - Attack Total)
-   ```
-   A natural 1 is still an automatic miss. If its Attack Total would otherwise beat the Defense, use Miss Margin 0.
-2. Calculate scatter distance:
+   Keep all other modifiers that actually contributed to Base Defense, including any separately declared **Aim against Range**; remove **only effective Cover Difficulty** when this is an ordinary miss. A natural 1 is still an automatic miss. If its Attack Total would otherwise beat **Scatter Defense**, use Miss Margin 0.
+3. Calculate scatter distance:
    ```
    Scatter Distance = 1 + floor(Miss Margin / 5)
    ```
-3. Roll **1d8** for direction from the intended impact point:
+4. Roll **1d8** for direction from the intended impact point:
    - 1 — north
    - 2 — northeast
    - 3 — east
@@ -75,7 +79,9 @@ On an **ordinary miss not already stopped by Cover or a successful physical Guar
    - 6 — southwest
    - 7 — west
    - 8 — northwest
-4. Move the impact point that many squares in the rolled direction. That square is the **Miss Impact Point**.
+5. Move the impact point that many squares in the rolled direction. That square is the **Miss Impact Point**.
+
+**Cover scatter example:** With `B = 10`, `C = 8`, and `A = 5`, the shot is an **ordinary miss** (`A <= B`), not a cover impact. Use `Scatter Defense = B = 10`: **Miss Margin = 5** and **Scatter Distance = 2 squares**. Using final `D = 18` here would incorrectly inflate Miss Margin to 13 and scatter to 3 squares.
 5. Resolve the projectile's area from that point.
 
 This uses the actual static Ranged Defense or active Ranged Dodge that defeated the attack.
