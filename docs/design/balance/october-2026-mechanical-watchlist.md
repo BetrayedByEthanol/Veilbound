@@ -254,9 +254,9 @@ Calibrate against:
 - Low/Medium/High Focus costs (20/24/30 AP), particularly low levels requiring Aim across turns;
 - extreme/long range, especially active Ranged Dodge where Range Difficulty applies;
 - heavy-crossbow Full Action shots prepared in previous turns and Interception triggers that may never occur;
-- future numerical partial cover, shooting into melee and *legal* Called Shot difficulty, without granting free obstruction bypass or friendly-fire immunity.
+- the **already-canonical +2/+4/+6/+8 partial Cover Difficulty** from [Cover and Line of Fire v0](../../rules/05-combat/cover-and-line-of-fire-v0.md), including Aim's mitigation against cover and its interaction with active Ranged Dodge and the cover-hit window; **future** shooting-into-melee and *legal* Called Shot difficulty once independently authored, without granting free obstruction bypass or friendly-fire immunity.
 
-Do not assign new numerical cover or shooting-into-melee modifiers as part of this watch. Called Shot's legacy full-`Attack action` phrasing still requires native Turn-AP migration and does not become canonical through Aim.
+Use the **locked +2/+4/+6/+8 Cover Difficulty ladder** when assessing Aim; this watch does not invent additional cover tiers or modifiers. Do not assign numeric **shooting-into-melee** or **Called Shot** difficulty until those systems are separately authored. Called Shot's legacy full-`Attack action` phrasing still requires native Turn-AP migration and does not become canonical through Aim.
 
 ## Cover and Line of Fire v0 — geometric gate and numeric ladder
 
