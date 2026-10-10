@@ -16,6 +16,8 @@ Standalone attacks use the **same round defense resources** as attacks inside At
 
 Repeated incoming attacks do not automatically reduce defense. Only repeated chosen Dodges create Dodge Pressure.
 
+When attacks are declared as a [Feint Combination](feint-combination-v0.md), assign Guard, Dodge, or Take Hit to its opener and follow-up **separately and before either roll**. The opener is a real, full-damage strike at -2 Attack, so Take Hit is a genuine damage risk. Successful Guard or Dodge against the opener changes only the linked follow-up's already-committed accuracy modifier (+4); otherwise that follow-up takes -2. No additional Guard use or Dodge Pressure is imposed by Feint itself.
+
 ## Take Hit
 
 Against melee, Take Hit means the attack lands unless the attacker rolls a natural 1.
