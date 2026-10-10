@@ -35,6 +35,20 @@ Declare Rapid Advance before any MP is spent/reserved this turn. Choose the head
 
 Rapid Advance consumes **no Turn AP**, including when it ends early because the creature voluntarily stops or an obstacle makes further straight-line movement impossible. Becoming Prone suspends Rapid Advance, subject to the [Prone suspension and Standing procedure](#prone-during-rapid-advance-or-charge).
 
+### Rapid Advance with Drive / Drag
+
+The existing [Drive / Drag v0](universal-maneuvers.md#drive--drag-v0) remains a legal **separate Physical Action** for a Controller while Rapid Advance is active, provided its Grapple, contest, locomotion, and pair-movement prerequisites are met. Drive / Drag's default freedom to change direction applies **only when no stricter active movement mode governs the Controller**:
+
+- **Rapid Advance's fixed heading takes precedence.** Every Drive / Drag step moving the shared Grapple square counts as the Controller's **voluntary movement** and must follow the heading already chosen for Rapid Advance. Starting or ending the Drive / Drag Movement Segment, a failed contest, or a Movement Interception does **not** clear or change the heading.
+- The Controller spends MP from its existing **Rapid Advance total current-turn allowance** (`floor(3 × M / 2)`), not a new or second pool. MP spent earlier that turn remains spent. The Controlled creature spends no MP, as normal.
+- **Drive / Drag's slow pair-movement step costs are unchanged**: on ordinary ground, **4 MP orthogonally or 6 MP diagonally**, plus applicable flat surcharges. Rapid Advance increases the total allowance but does not discount Drive / Drag step costs or grant a free Grapple Contest.
+- The Controller must pay the normal **one Physical Action** for Drive / Drag, resolve its one Grapple Contest, obey its single-segment limit and third-party Movement Opportunities, and pay another action/contest for another Drive / Drag segment. If the contested action fails, its AP is spent normally; the Rapid Advance allowance and heading remain unchanged.
+- Prone suspends the Rapid Advance allowance under its usual rule: it cannot fund Crawling or Prone Drive / Drag; only the 4-MP Stand exception applies until Standing.
+
+**Example:** A Controller activates Rapid Advance with 18 MP and an eastward heading, then wins Drive / Drag. With 0 MP previously spent and clear ordinary terrain, it can drive the pair **four orthogonal squares east** for 16 MP, leaving 2 MP. It cannot turn north, change heading after the contest, or move four squares and then claim a fresh movement pool.
+
+**Charge is not a Drive / Drag action.** Charge's fast approach cannot move an intact shared Grapple pair by itself, nor can the Controller insert Drive / Drag during that approach; doing so would be an intervening Physical Action prohibited by Charge. An **AP-free aborted Charge converted to Rapid Advance** may subsequently use Drive / Drag, retaining the original heading, MP spent, and all normal Drive / Drag costs.
+
 ## Charge: committed approach plus one melee attack
 
 A Charge is an **attack-linked movement maneuver**, not a free attack added to Rapid Advance or Sprint. It costs **one normal Focus-priced Physical Action** for its culminating melee attack and provides a current-turn allowance of **2 x M** (24 MP unimpaired). Its attack causes **normal weapon damage** on a hit and gets **no universal Charge accuracy or damage bonus**.
@@ -45,7 +59,7 @@ A Charge is an **attack-linked movement maneuver**, not a free attack added to R
 2. Reserve in the sense of **keeping available**, but **do not yet spend**, enough current unspent Turn AP to pay **one Physical Action** when commitment occurs; those AP cannot be spent on another action during the ongoing Charge approach.
 3. Begin the Charge movement segment. **At least 3 actual grid steps** must be completed along the Charge heading before any culminating Charge attack can begin, whether those steps are orthogonal or diagonal. A movement impairment, obstacle, or failed reach check never waives the minimum.
 
-Charge movement and the culminating attack must occur **in order**, with no separate action deliberately inserted by the charging creature between starting its approach and beginning its Charge attack. **Standing to recover from Prone under the explicit suspension procedure is permitted and does not by itself count as an intervening action that cancels the approach; it still resets the Charge's three-step run-up.** Existing Movement Opportunities, enemy Interceptions, and nested responses continue to resolve at their normal step/attack timing. If a Movement Interception ends a movement segment, Charge can resume **only in the original heading** and only if it remains physically legal. A forced displacement does not count toward the Charge's three voluntary steps.
+Charge movement and the culminating attack must occur **in order**, with no separate action deliberately inserted by the charging creature between starting its approach and beginning its Charge attack. **Drive / Drag cannot occur during Charge's movement approach** and Charge does not authorize carrying a shared Grapple pair without the separately paid Drive / Drag maneuver. **Standing to recover from Prone under the explicit suspension procedure is permitted and does not by itself count as an intervening action that cancels the approach; it still resets the Charge's three-step run-up.** Existing Movement Opportunities, enemy Interceptions, and nested responses continue to resolve at their normal step/attack timing. If a Movement Interception ends a movement segment, Charge can resume **only in the original heading** and only if it remains physically legal. A forced displacement does not count toward the Charge's three voluntary steps.
 
 ### Exactly when AP becomes committed
 
@@ -106,6 +120,9 @@ The Charge attack is **one ordinary paid melee attack**, not a free extra attack
 | Charge is interrupted by Prone before its attack begins | Charge MP is suspended, original heading retained; after Standing **three new steps** are required before attacking; existing AP commitment stays as it was |
 | Tentative Charge has spent 16 MP, then spends 4 MP to Stand | Total spend reaches **20 MP** but **no Charge AP is due merely from Standing**. Aborting converts to Rapid Advance with 0 MP available; a subsequent completed Charge step requires AP if it exceeds the Rapid cutoff |
 | Charge attacker becomes Prone during attack's response window | Apply normal attack legality/Interrupt, not movement suspension; AP already committed |
+| Rapid Advance Controller uses Drive / Drag east on clear ground | Same 18-MP total allowance, east-only heading, one separate paid Physical Action and normal contest; four orthogonal pair steps cost 16 MP, leaving 2 MP |
+| Controller wants to turn while driving during Rapid Advance | No: Drive / Drag's ordinary turning freedom does not override the active Rapid Advance heading |
+| Controller aborts tentative Charge to Rapid Advance, then uses Drive / Drag | Permitted if the Grapple is legal; same original heading, already-spent MP and ordinary paid Drive / Drag contest |
 
 ## Deferred and calibration watch
 
