@@ -12,6 +12,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Universal Maneuvers](universal-maneuvers.md)
 - [Disarm v0](disarm-v0.md)
 - [Limb / Weapon-Hand Control v0](limb-control-v0.md)
+- [Feint Combination v0](feint-combination-v0.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
@@ -29,7 +30,7 @@ The current canonical combat foundation still requires Veilbound-native rules fo
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
 - cover/concealment/surprise as complete procedures;
-- weapon-to-weapon binds outside Grapple, advanced/multi-limb control and non-humanoid anatomy, authored Disarm-capable weapon traits/techniques, cooperative multi-creature Grapples, Feint, Charge, and other universal maneuvers beyond locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, Throw v0, Disarm v0, and Secure Limb v0;
+- weapon-to-weapon binds outside Grapple, advanced/multi-limb control and non-humanoid anatomy, authored Disarm-capable weapon traits/techniques, cooperative multi-creature Grapples, Charge, and other universal maneuvers beyond locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, Throw v0, Disarm v0, Secure Limb v0, and Feint Combination v0;
 - physical-hazard values/procedures;
 - conditions;
 - encounter building and NPC/creature construction.

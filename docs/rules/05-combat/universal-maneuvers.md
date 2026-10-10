@@ -1,6 +1,6 @@
 # Universal Maneuvers
 
-> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, **Drive/Drag v0**, **Throw v0**, and [**Disarm v0**](disarm-v0.md) foundations, plus the [**Secure Limb v0**](limb-control-v0.md) Grapple rider. Other universal maneuvers remain future work unless separately promoted.
+> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, **Drive/Drag v0**, **Throw v0**, and [**Disarm v0**](disarm-v0.md) foundations, plus the [**Secure Limb v0**](limb-control-v0.md) Grapple rider. [**Feint Combination v0**](feint-combination-v0.md) is separately locked as a linked, two-attack melee maneuver. Other universal maneuvers remain future work unless separately promoted.
 
 ## Shove v0
 
@@ -230,7 +230,7 @@ Shove v0 does not define:
 - special shield-size Shove bonuses;
 - size-category modifiers or impossibility thresholds;
 - persistent weapon-bind, hook-control, and weapon-control procedures beyond the one-off contact methods allowed by Trip and [Disarm v0](disarm-v0.md);
-- Feint, Charge, or other universal maneuvers beyond the locked maneuver foundations;
+- Charge or other universal maneuvers beyond the locked maneuver foundations; [Feint Combination v0](feint-combination-v0.md) is now separately defined and does not change Shove's contest;
 - Catch Grip and falling damage.
 
 Those remain explicit later design work.

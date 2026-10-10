@@ -180,6 +180,8 @@ Before the first attack roll:
 - commit the required Turn AP, granted attacks, and declared attack profiles/choices immediately;
 - the defender assigns Take Hit, Dodge, or Guard to each incoming attack with those declared profiles/choices known before any attack roll in that sequence resolves.
 
+A declared [Feint Combination](feint-combination-v0.md) may link two consecutive, separately paid melee attacks as part of this same sequence. Both attack profiles and the conditional **-2/+4/-2 accuracy rule** are fully committed before the defender assigns defenses; calculating the second attack's already-declared modifier from the first attack's outcome is **not** permission to change profiles, add attacks, or reopen defense choices afterward.
+
 Then resolve the attacks in their declared order. **Each individual attack is a separate trigger occurrence.** Immediately before that attack's roll:
 
 1. treat that attack as the current triggering action;
