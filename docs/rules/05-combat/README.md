@@ -15,6 +15,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Feint Combination v0](feint-combination-v0.md)
 - [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md)
 - [Aim v0](aim-v0.md)
+- [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
@@ -31,7 +32,7 @@ The current canonical combat foundation still requires Veilbound-native rules fo
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
-- **cover/line-of-fire, shooting into melee/friendly-fire, and concealment/surprise** as complete procedures; Aim v0 supplies only conditional mitigation of an *already-authored* applicable shot difficulty;
+- **shooting into melee/intervening creatures/friendly fire, and concealment/surprise** as complete procedures; [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md) now defines solid obstruction, partial-cover tiers, attack-defense application, and cover impact; Aim v0 mitigates only its separately declared difficulty source;
 - **Called Shot** Turn-AP migration, difficulty/wound/Interrupt integration; weapon-to-weapon binds outside Grapple, advanced/multi-limb control and non-humanoid anatomy, authored Disarm-capable weapon traits/techniques, cooperative multi-creature Grapples, and other universal maneuvers beyond locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, Throw v0, Disarm v0, Secure Limb v0, Feint Combination v0, Charge v0 and Aim v0;
 - physical-hazard values/procedures;
 - conditions;
