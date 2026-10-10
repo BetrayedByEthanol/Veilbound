@@ -1,6 +1,6 @@
 # Universal Maneuvers
 
-> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, **Drive/Drag v0**, and **Throw v0** foundations. Other universal maneuvers remain future work unless separately promoted.
+> Canonical Veilbound universal physical maneuvers. This page contains the locked **Shove v0**, **Grapple v0**, **Trip/Takedown v0**, **Drive/Drag v0**, **Throw v0**, and [**Disarm v0**](disarm-v0.md) foundations. Other universal maneuvers remain future work unless separately promoted.
 
 ## Shove v0
 
@@ -230,7 +230,7 @@ Shove v0 does not define:
 - special shield-size Shove bonuses;
 - size-category modifiers or impossibility thresholds;
 - weapon bind or hook procedures;
-- Disarm, Feint, Charge, or other universal maneuvers beyond the locked maneuver foundations;
+- Feint, Charge, or other universal maneuvers beyond the locked maneuver foundations;
 - Catch Grip and falling damage.
 
 Those remain explicit later design work.
@@ -512,7 +512,7 @@ A Controller does not automatically:
 - knock the target Prone;
 - Pin the target;
 - drag the target;
-- disarm the target;
+- disarm the target (see [Disarm v0](disarm-v0.md));
 - prevent all attacks or magic;
 - make attacks against the target automatically hit.
 
@@ -1090,7 +1090,6 @@ Dedicated rules for cooperative dogpiles, multiple creatures restraining one tar
 
 Grapple v0 does not yet define:
 
-- Grapple-specific Disarm procedures;
 - detailed limb-control or weapon-control actions;
 - a catalogue of Pin configurations;
 - Pin-specific numerical bonuses to Escape, Reverse Control, or Intervention;
