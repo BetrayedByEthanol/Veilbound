@@ -81,6 +81,19 @@ Riposte is a possible follow-up to a successful Guard where the relevant setup p
 
 Intercept uses Guard to protect another character rather than creating a separate defensive subsystem.
 
+## Guard instrument lost after defense assignment
+
+A defender can lose its declared Guard instrument between assigning defenses and resolving an attack, for example through a legal [Disarm](disarm-v0.md) Interception. Handle this at **the attack's normal response/resolution time**; do not reopen the Attack Sequence or let the defender reassign already committed defenses after seeing attack results.
+
+- If a **different Guard-capable instrument** is still ready, physically usable, and legal against that attack, the committed **Guard** may use that instrument. The defense remains Guard; use its current legal Guard Defense.
+- If **no legal Guard instrument** remains, the already-assigned Guard falls back to **Dodge**, provided the defender is physically capable of Dodging at that moment. Determine Dodge Defense and advance Dodge Pressure exactly as for a Dodge actually chosen then.
+- If neither Guard nor Dodge is legal, the fallback is **Take Hit**, using the normal melee or ranged Take Hit procedure as appropriate.
+- Guard capacity previously committed to the assigned Guard **remains spent** even when the instrument is lost. It is not spent again on a replacement legal Guard. The switch to Dodge does not commit another Guard use, but it does incur the ordinary Dodge Pressure. No earlier defense in the Attack Sequence is rerolled or reassigned.
+
+These fallbacks apply only when the assigned defense has become **physically illegal** before its attack resolves; a defender cannot switch merely because a Guard roll would be unfavorable. They also apply to an assigned Guard against a standalone attack if its instrument becomes illegal during nested responses.
+
+Losing the Guard instrument does **not** itself spend the Reaction or erase Opportunity Capacity; the defender's ability to make a particular Opportunity Attack depends separately on having a legal melee method and current Reach.
+
 ## Natural 1
 
 A natural 1 on an attack is an **automatic miss**.
