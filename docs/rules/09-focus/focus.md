@@ -89,7 +89,7 @@ Physical Tempo and Projection Tempo are derived from that shared pool and the re
 4. **Medium Focus favors timing and routing.** Its active inward effects are temporary and usually compete with outward effects for VP.
 5. **High Focus favors projected choice.** Its complexity comes from a larger outward toolkit and VP allocation.
 6. **No arbitrary martial ability vocabulary.** Veil advancement may explain greater speed, strength, reflexes, or durability, but it enhances universal combat actions rather than inventing unexplained special sword moves.
-7. **Ordinary techniques remain ordinary.** Feints, ripostes, grapples, shoves, and similar actions belong to the core combat rules; training and Veil development change effectiveness, not fundamental permission to attempt them.
+7. **Ordinary techniques follow their canonical action requirements.** Grapples, shoves, ripostes, and Feint are core combat procedures, not class-exclusive abilities. However, [Feint Combination v0](../05-combat/feint-combination-v0.md#low-level-access-deliberate-training-and-tempo-gate) requires two consecutive paid Physical Actions in the same Attack Sequence. A character without sufficient Turn AP cannot perform it, and a granted bonus attack does not replace either paid action. At the current progression the minimum levels are Low Focus 3 (40 AP), Medium Focus 4 (48 AP), and High Focus 6 (60 AP). This deliberately represents combat timing and coordination not yet mastered at lower levels. No separate Training rank, feat, or class permission is required; all other maneuvers retain their individual prerequisites and costs.
 
 ## Related systems
 
