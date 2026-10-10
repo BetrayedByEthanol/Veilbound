@@ -176,6 +176,8 @@ A manifested **creature** or independently acting creature-like agent may use th
 
 An animated manifested hand, vine-creature, chain-creature, or similar agent therefore uses Grapple v0 only if the technique actually gives it such a creature-like Grapple profile.
 
+If such an agent actually becomes **Controller** in a legal Grappling State, the locked [Secure Limb v0](../05-combat/limb-control-v0.md) rider applies normally **when its authored creature-like profile also provides the action, physically usable controlling limbs/anatomy, reach, and maintained contact required by that maneuver**. Resolve its Secure Limb and Break Limb Control through the ordinary Grapple Contest and the same AP/timing framework. This does **not** give an inert manifested object Grappling State, assume missing anatomy or action economy for a Manifestation, or bypass the existing [Grapple v0](../05-combat/universal-maneuvers.md#grapple-v0) prerequisites.
+
 ### Manifested objects
 
 An inert or non-creature manifested object—such as ordinary conjured chains, binding vines, bands, or a fixed restraint—does **not** automatically enter Grappling State and does not roll a Grapple Contest merely because it restrains physically.
@@ -231,7 +233,7 @@ This page locks the **mapping principle and delivery families**, not every physi
 
 Still to be completed in the combat/hazard rules:
 
-- detailed Grapple layers beyond the locked foundations, including limb control and cooperative restraint;
+- advanced Grapple/control extensions beyond locked Grapple v0 and [Secure Limb v0](../05-combat/limb-control-v0.md), including cooperative multi-creature restraint, multi-limb and leg control, unusual-anatomy exceptions, and persistent weapon-to-weapon binds outside Grapple;
 - a universal physical restraint model for inert manifested objects such as chains, vines, bands, cages, or other non-creature restraints;
 - final shield and cover handling against broad physical phenomena;
 - general movement/reaction timing that may allow actual movement before an area resolves;
