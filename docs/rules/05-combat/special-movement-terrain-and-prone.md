@@ -293,7 +293,7 @@ A Prone creature:
 - may normally move by **Crawling**;
 - may spend MP to **Stand**.
 
-**Sprint exception:** Prone applies the general [becoming unable to Sprint after Sprint is active](#becoming-unable-to-sprint-after-sprint-is-active) rule. The suspended Sprint pool cannot fund Crawl or Cautious Crawl. Prone explicitly allows **4 MP from that suspended Sprint pool only to Stand**. If the creature cannot pay the 4 MP Stand cost, it cannot voluntarily move using that suspended Sprint allowance while Prone.
+**Active fast-movement modes while Prone:** When Prone starts after a mode's activation, suspend the remaining **Sprint, Rapid Advance, or Charge** allowance. This does **not** grant a normal/Crawl MP pool: **none of those suspended allowances can fund Crawl or Cautious Crawl**. The only permitted expenditure from the suspended mode while Prone is **4 MP to Stand**, following normal Standing timing, Opportunity, and interruption rules. If less than 4 MP remains, the suspended pool cannot fund Standing. On successful Standing, the original heading and remaining allowance resume if still legal. Sprint follows [its existing suspension rule](#becoming-unable-to-sprint-after-sprint-is-active); Rapid Advance and Charge follow [their explicit suspension, Charge restart and AP-retention procedure](rapid-advance-and-charge-v0.md#prone-during-rapid-advance-or-charge).
 
 ### Dropping Prone
 
@@ -454,7 +454,7 @@ The 4 MP Stand cost is committed when Standing begins. If Standing is later Inte
 
 Any movement after Standing is completed begins a **new movement segment**.
 
-If a creature was knocked Prone after activating Sprint, its remaining Sprint allowance is suspended under the general cannot-Sprint rule except for paying the 4 MP Stand cost. If it Stands and still has Sprint MP remaining, the Prone prohibition ends and it may resume Sprint as a new movement segment under the existing Sprint Heading unless another rule or the battlefield state prevents it.
+If a creature becomes Prone after activating **Sprint, Rapid Advance, or Charge**, its remaining allowance becomes suspended and may fund **only the 4-MP Stand cost**, not Crawling or ordinary walking. Successful Standing resumes the same fixed heading and remaining allowance, with the 4 MP still spent, in a new movement segment. Charge interrupted **during its movement approach** resets its three-step run-up and retains its already-committed or tentative AP status. Becoming Prone **during the Charge attack response window** instead follows ordinary attack-legality and Interruption rules; the attack does not return to Charge movement. See [Charge/Rapid Advance suspension](rapid-advance-and-charge-v0.md#prone-during-rapid-advance-or-charge).
 
 ### Standing Opportunity
 
