@@ -17,19 +17,19 @@ An Attack Sequence may include other ordinary attacks before or after the pair. 
 
 ## Low-level access: deliberate training-and-tempo gate
 
-The Feint Combination is **not available at low level when the character lacks the Turn AP to commit two Physical Actions**. This is intentional for v0.
+The Feint Combination is available **at any level** when the attacker has enough **current unspent Turn AP**, after applying explicit Turn AP modifiers, to commit **two paid Physical Actions** in its declared Attack Sequence. **There is no separate minimum character level.** Requiring this much available combat tempo is intentional for v0.
 
-In the fiction, the character **has not yet developed the trained timing, follow-through, and combat tempo needed to execute this skilled two-strike deception**. This explanation does not create an additional Training rank, feat, class, or equipment prerequisite. Gaining enough Turn AP is the mechanical representation of growing competence, regardless of Focus.
+In the fiction, a character who **normally lacks the necessary Turn AP** has not yet developed the consistent trained timing, follow-through, and combat tempo to execute this skilled two-strike deception. An explicit Turn AP increase can nevertheless grant the necessary tempo earlier, enabling the combination temporarily or exceptionally. This explanation creates **no additional minimum level, Training rank, feat, class, or equipment prerequisite**.
 
-Using the current [Turn AP progression](action-categories-and-physical-tempo.md#turn-action-points):
+Under the **unmodified** [level-based Turn AP progression](action-categories-and-physical-tempo.md#turn-action-points), these are the first **baseline** levels with enough AP at the start of the turn (before other AP expenditures):
 
-| Focus | One Physical Action | Total Feint AP | First level with enough Turn AP |
+| Focus | One Physical Action | Total Feint AP | First baseline level without modifiers |
 |---|---:|---:|---:|
 | Low — Embodiment | 20 AP | **40 AP** | **Level 3** (42 Turn AP) |
 | Medium — Routing | 24 AP | **48 AP** | **Level 4** (48 Turn AP) |
 | High — Projection | 30 AP | **60 AP** | **Level 6** (60 Turn AP) |
 
-A creature below its applicable threshold cannot declare a Feint Combination, even if an unrelated effect grants an attack without AP cost; a later **explicitly authored exception** may say otherwise. Levels above the threshold still require enough unspent AP **at declaration time**.
+**Eligibility depends on current unspent Turn AP, not the listed baseline level.** A lower-level creature with an explicit Turn AP modifier may declare the combination as soon as it can commit both paid Physical Actions. Conversely, a creature at or above the listed baseline level cannot declare it if earlier spending or an AP reduction leaves insufficient unspent AP. An unrelated granted attack without AP cost **cannot substitute** for either paid strike; an explicit future Feint-specific exception may override that paid-strike requirement.
 
 ## Declare openly before defenses
 
