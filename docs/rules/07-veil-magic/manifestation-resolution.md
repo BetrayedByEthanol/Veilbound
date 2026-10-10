@@ -51,11 +51,11 @@ If a Manifestation creates a projectile but a different physical launcher is act
 
 ### Projectile-delivered areas
 
-If a projectile carries an area effect, resolve the projectile's delivery first and then resolve the area from the resulting impact point.
+If a projectile carries an area effect, resolve the projectile's delivery first and then resolve the area from the resulting impact point. **[Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location) takes precedence over normal random miss scatter** when a legal ranged attack falls into the cover-hit window: the projectile strikes the **real interposing cover surface**, and any surface-triggered burst/cloud/explosion originates from that impact point. Resolve the area against the actual barrier and intervening geometry; a cover impact does not cancel the carried area by default. Full solid blockage makes an ordinary direct targeted shot against the concealed creature **illegal**, not a scatter shot through a wall.
 
 On a successful attack, the intended target point is the impact point.
 
-On a missed attack, determine a **Miss Impact Point** rather than discarding the projectile:
+On an **ordinary miss not already stopped by Cover or a successful physical Guard**, determine a **Miss Impact Point** rather than discarding the projectile:
 
 1. Calculate the **Miss Margin**:
    ```
@@ -96,7 +96,7 @@ A technique may explicitly state that being Guarded causes the projectile to dis
 
 A technique may explicitly replace this scatter rule with a different authored miss-placement procedure when its projectile behaves differently.
 
-Physical interception by a wall, shield, cover, or other solid obstruction remains governed by the applicable physical/cover rule. Scatter does not allow a projectile to pass through an obstruction it could not physically cross.
+Physical interception by a wall, shield, cover, or other solid obstruction remains governed by [Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md). Scatter does not allow a projectile to pass through an obstruction it could not physically cross. **Cover hits and legal instrument-Guard impacts are not ordinary misses for purposes of this random scatter procedure.**
 
 The area does **not** grant a second generic Dodge after the projectile has established where the effect occurs. A near miss can therefore still catch the original target if the resulting area reaches that target's space.
 
