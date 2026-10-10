@@ -80,11 +80,11 @@ On an **ordinary miss not already stopped by Cover or a successful physical Guar
    - 7 — west
    - 8 — northwest
 5. Move the impact point that many squares in the rolled direction. That square is the **Miss Impact Point**.
+6. Resolve the projectile's area from that point.
 
 **Cover scatter example:** With `B = 10`, `C = 8`, and `A = 5`, the shot is an **ordinary miss** (`A <= B`), not a cover impact. Use `Scatter Defense = B = 10`: **Miss Margin = 5** and **Scatter Distance = 2 squares**. Using final `D = 18` here would incorrectly inflate Miss Margin to 13 and scatter to 3 squares.
-5. Resolve the projectile's area from that point.
 
-This uses the actual static Ranged Defense or active Ranged Dodge that defeated the attack.
+Scatter Defense derives from the **actual defense selected for the shot**—static Ranged Defense or active Ranged Dodge where applicable—but excludes the effective **Cover Difficulty** for ordinary misses. A cover hit, a successful projectile Guard, or a physically illegal direct shot does **not** use this scatter procedure.
 
 ### Successful Guard against an area projectile
 
