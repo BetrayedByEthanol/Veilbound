@@ -90,6 +90,10 @@ This gives +0 / +1 / +2 / +3 / +4 / +5 at Tempo 1 / 2 / 3 / 4 / 5 / 6.
 
 Explicit **Size/Position** modifiers that say they apply to active ranged defense are added to Ranged Dodge after this formula. In particular, the locked [Prone ranged-profile rule](special-movement-terrain-and-prone.md#ranged-attacks-against-a-prone-target) can grant +2 Position Defense to both static Ranged Defense and active Ranged Dodge.
 
+## Aim v0 — precision preparation
+
+[Aim v0](aim-v0.md) is a **separate Focus-priced Physical Action** before a specific ranged attack. Declare its **one target, attack profile, and particular difficulty source/objective** when preparing. The eventual eligible shot mitigates **min(4, positive applicable selected difficulty)**; no generic +4 Attack bonus, no damage or magical rider improvement, and no new Interrupt or Interception timing. A positive Range Difficulty is an existing eligible source; future numeric partial-cover, shooting-into-melee, and legal Called Shot difficulty require their **own authored rules**. Apply mitigation only to the selected source in whatever static or active Ranged Defense formula actually contains it. **Aim does not insert Cover into active Ranged Dodge**, change inherent evasion, or permit an otherwise physically blocked shot. The Aim expires on use/break or at the start of the shooter's **second subsequent turn**. See its dedicated preparation, cancellation, and Attack Sequence/Interception rules.
+
 ## Bow and crossbow range bands
 
 | Range | Squares | Approx. distance | Difficulty modifier |
@@ -113,6 +117,8 @@ This trigger has a specific stronger consequence: if the resulting Opportunity A
 That hit-to-Interrupt clause belongs to this trigger specifically. A generic Opportunity Attack does not automatically Interrupt its provoking action.
 
 ## Heavy crossbow timing
+
+A retained [Aim v0](aim-v0.md#attacks-timing-and-interception) prepared on a previous turn may apply to a legal heavy-crossbow attack, but Aim never converts the shot or its reload out of their Full Action requirements. It does not bundle Aim and firing in one Full Action.
 
 Firing a heavy crossbow is a **Full Action**.
 

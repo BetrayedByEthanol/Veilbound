@@ -180,6 +180,8 @@ Before the first attack roll:
 - commit the required Turn AP, granted attacks, and declared attack profiles/choices immediately;
 - the defender assigns Take Hit, Dodge, or Guard to each incoming attack with those declared profiles/choices known before any attack roll in that sequence resolves.
 
+A previously prepared [Aim v0](aim-v0.md#attacks-timing-and-interception) is **not itself an Attack Sequence**. When its specified ranged attack joins an ordinary sequence, commit all that target's attacks and identify the **single aimed shot** to the defender before assigning defenses or rolling; Aim cannot transfer to another target/profile/objective after observing results. Preparation consumed its own Physical Action AP earlier; the aimed attack still pays its normal separate action cost.
+
 A [Charge v0](rapid-advance-and-charge-v0.md#attack-sequence-and-interception-timing) may start with a declared intended target, attack profile, and straight-line movement **before** the attack's AP becomes committed or defenses are assigned. Only the culminating attack has this limited deferred-commitment exception. Once the approach ends in an actual attack, finalize its legal target, commit any outstanding AP and all other ordinary attacks against that same target, and assign defenses to the **whole** Attack Sequence before the first attack roll. Charge never reopens an already-resolved sequence against that target.
 
 A declared [Feint Combination](feint-combination-v0.md) may link two consecutive, separately paid melee attacks as part of this same sequence. Both attack profiles and the conditional **-2/+4/-2 accuracy rule** are fully committed before the defender assigns defenses; calculating the second attack's already-declared modifier from the first attack's outcome is **not** permission to change profiles, add attacks, or reopen defense choices afterward.
@@ -303,6 +305,8 @@ On the reserving creature's turn:
 3. commit the required action capacity or reserved MP immediately.
 
 Other costs such as VP are paid at the action/effect's normal resolution timing unless its own rule says otherwise.
+
+An Interception reservation is **atomic**. [Aim v0](aim-v0.md#attacks-timing-and-interception) and the later attack are **two separate actions**: a single reservation cannot package Aim plus an Attack. A previously completed Aim can improve an otherwise legal separately reserved ranged attack if the target/profile/objective, remaining duration, and applicable difficulty source remain valid. Interception still resolves **before** its triggering event, creates no line of fire through solid cover, and grants no automatic Interrupt.
 
 An Interception reservation is **atomic**:
 

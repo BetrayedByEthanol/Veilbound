@@ -68,3 +68,5 @@ The following material is not one undifferentiated "Ready" bucket.
 The legacy Called Shot statement that it consumes an entire "Attack action regardless of normal attack count" is superseded.
 
 Called Shot remains an unresolved maneuver and must receive an explicit **Turn AP or Full Action cost** during the maneuver/weapon pass.
+
+[Aim v0](../rules/05-combat/aim-v0.md) is now canonical as a **different** separately paid Physical Action: declaring a target and body-part objective does not make a Called Shot legal, grant a wound, or provide an Interrupt. Called Shot difficulty and wound qualification still need native rules, as do **cover/line of fire** and **shooting into melee / intervening creatures / friendly fire**. The locked Aim v0 mitigation of up to 4 applies to those sources only when their numeric difficulties have been independently authored.

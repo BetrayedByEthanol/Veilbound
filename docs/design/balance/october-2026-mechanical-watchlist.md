@@ -239,3 +239,21 @@ The shared Turn AP system now separates physical and projected action efficiency
 At mature cadence, High / Medium / Low Focus derive approximately 4/5/6 maximum pure-physical actions and 6/5/4 maximum pure-projection actions from the same 120-AP turn pool. Mixed turns simply pay each action's relevant AP cost.
 
 Continue watching authored techniques for repeatability problems. Projection Tempo is a maximum throughput measure, not universal permission to repeat every technique. Full-strength damage, healing, control, Vigor restoration, Composite Casting, and persistent Riders must still be calibrated against their authored cadence and VP costs.
+
+
+## Aim v0 — precision mitigation and effect delivery
+
+**Status: LOCKED PROCEDURE / +4 MAXIMUM CALIBRATION WATCH**
+
+[Aim v0](../../rules/05-combat/aim-v0.md) costs one Focus-priced Physical Action and commits target, attack profile and one chosen objective/difficulty source. A later specific ranged shot mitigates up to **4 points of one positive applicable shot-difficulty modifier** (not a universal +4 Attack or increased effect strength). The procedure, timing, and one-use limits are canonical; the **4-point cap** is a provisional playtest magnitude.
+
+Calibrate against:
+
+- two separately paid ordinary bow attacks versus one Aim + bow shot, including one-hit probability and sustained damage;
+- high-value status/mark/anti-regeneration/disrupting ammunition where delivery chance matters more than HP output;
+- Low/Medium/High Focus costs (20/24/30 AP), particularly low levels requiring Aim across turns;
+- extreme/long range, especially active Ranged Dodge where Range Difficulty applies;
+- heavy-crossbow Full Action shots prepared in previous turns and Interception triggers that may never occur;
+- future numerical partial cover, shooting into melee and *legal* Called Shot difficulty, without granting free obstruction bypass or friendly-fire immunity.
+
+Do not assign new numerical cover or shooting-into-melee modifiers as part of this watch. Called Shot's legacy full-`Attack action` phrasing still requires native Turn-AP migration and does not become canonical through Aim.
