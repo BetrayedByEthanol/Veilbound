@@ -36,6 +36,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Universal Maneuvers](05-combat/universal-maneuvers.md)
 - [Disarm v0](05-combat/disarm-v0.md)
 - [Limb / Weapon-Hand Control v0](05-combat/limb-control-v0.md)
+- [Feint Combination v0](05-combat/feint-combination-v0.md)
 - [Weapon Attack, Guard, and Physical Contribution](05-combat/weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
 - [Weapons and Armor](05-combat/weapons-and-armor.md)
