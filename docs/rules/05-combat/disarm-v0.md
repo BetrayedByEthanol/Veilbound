@@ -70,7 +70,7 @@ d20
 
 The **+6 Grip Retention** is the baseline advantage of securing an item already held. It applies **once per item**, not per hand, and does not stack with Shove's Hold Ground, Guard Defense, or an invented two-handed bonus. Holding with two hands matters to **physical eligibility**, but does not automatically add another numeric retention bonus.
 
-At equal Ability, Training, and other modifiers, a valid attempt succeeds **22.75%** of the time. This is a game-balance target, not a real-world disarm frequency. Bonuses from specific authored equipment/techniques may modify Disarm Pressure or Grip Resistance; **there is no generic +2 from having a weapon hook, proximity, Grapple Control, or Pin**. Future weapon-bind and secured-limb techniques may grant a **single, non-stacking positional advantage**, with exact values defined in those later rules rather than inferred here.
+At equal Ability, Training, and other modifiers, a valid attempt succeeds **22.75%** of the time. This is a game-balance target, not a real-world disarm frequency. Bonuses from specific authored equipment/techniques may modify Disarm Pressure or Grip Resistance; **there is no generic +2 from having a weapon hook, proximity, Grapple Control, or Pin**. A successful [Secure Limb v0](limb-control-v0.md#disarm-synergy-secured-weapon-hand-advantage) grants its specifically defined **+4 non-stacking positional Disarm bonus** against an item held by that controlled limb. Later weapon-bind techniques may define their own non-stacking positional advantages; none arise merely from an ordinary weapon hook.
 
 | Contest result | Consequence |
 |---|---|
@@ -95,11 +95,11 @@ Against the **other participant of the same Grappling State**, use **Grapple Dis
 - only the **Controller** may declare it. A Neutral participant must Gain Control and a Controlled participant must Reverse Control first;
 - it costs **one Physical Action**, names a specific item held by the Controlled creature, and uses the **same Disarm Contest**, including +6 Grip Retention;
 - no new Close-Contact Opportunity occurs **between the Grapple partners**, because they already share close bodily measure;
-- Grapple Control **grants permission**, not an automatic numeric bonus, weapon-hand restraint, free limb, or assured release;
+- Grapple Control **grants permission**, not an automatic numeric bonus, weapon-hand restraint, free limb, or assured release. A valid [Secured Limb](limb-control-v0.md) can grant +4 Disarm Pressure against the specifically controlled item's grip;
 - the Controller must have an eligible free-hand, suitable implement, or other physically valid contact method, accounting for limbs already committed to Grapple/Pin;
 - after success, tie, or failure, the existing Grappling State, Controller/Controlled position, and independently maintained Pin remain unchanged.
 
-A Pin matters only through the body parts it actually restrains. A Controller cannot claim a limb is required to maintain Pin and simultaneously use that same limb for an incompatible Disarm. Persistent **secured weapon-hand or limb control** is separate future rules content, not a free consequence of Grapple.
+A Pin matters only through the body parts it actually restrains. A Controller cannot claim a limb is required to maintain Pin and simultaneously use that same limb for an incompatible Disarm. Persistent **secured weapon-hand or limb control** uses [Secure Limb v0](limb-control-v0.md), which requires its own Physical Action and successful Grapple Contest; it is not a free consequence of Grapple.
 
 The Controlled or Neutral participant cannot evade these restrictions by calling its attempt an ordinary Disarm against its current Grapple partner. Ordinary Disarm against someone **outside** the current Grapple remains physically possible only if the actor truly has the free limbs/reach required.
 
@@ -146,4 +146,4 @@ A legal Disarm resolving during an Interception or other valid response window c
 
 ## Deliberately deferred
 
-This v0 does not define persistent limb/weapon control, formal weapon-bind states, catch-and-seize in the same action, remote theft, forceful strap removal, special shield/two-hand retention values, creature size/anatomy exceptions, a universal unarmed Guard profile, or specific equipment-based Disarm bonuses. Weapon-control and Limb Control systems may authorize additional methods or bonuses later; they must explicitly state what they change.
+Persistent weapon-hand control **within Grapple** is defined in [Secure Limb v0](limb-control-v0.md); this Disarm procedure does not itself establish that control. This v0 does not define persistent **weapon-to-weapon** bind states outside Grapple, catch-and-seize in the same action, remote theft, forceful strap removal, special shield/two-hand retention values, creature size/anatomy exceptions, a universal unarmed Guard profile, or specific equipment-based Disarm bonuses. The [Secure Limb](limb-control-v0.md) rider authorizes its specific +4 Disarm advantage only after a successful additional Grapple action; future external weapon-bind techniques must explicitly define any further permitted methods or bonuses.

@@ -83,7 +83,7 @@ Intercept uses Guard to protect another character rather than creating a separat
 
 ## Guard instrument lost after defense assignment
 
-A defender can lose its declared Guard instrument between assigning defenses and resolving an attack, for example through a legal [Disarm](disarm-v0.md) Interception. Handle this at **the attack's normal response/resolution time**; do not reopen the Attack Sequence or let the defender reassign already committed defenses after seeing attack results.
+A defender can lose its declared Guard instrument **or the physical ability to use it** between assigning defenses and resolving an attack, for example through a legal [Disarm](disarm-v0.md) Interception or [Secure Limb](limb-control-v0.md) restraining the arm required for Guard. The weapon need not be dropped: a held weapon may become unusable when its operating limb is Secured. Handle this at **the attack's normal response/resolution time**; do not reopen the Attack Sequence or let the defender reassign already committed defenses after seeing attack results.
 
 - If a **different Guard-capable instrument** is still ready, physically usable, and legal against that attack, the committed **Guard** may use that instrument. The defense remains Guard; use its current legal Guard Defense.
 - If **no legal Guard instrument** remains, the already-assigned Guard falls back to **Dodge**, provided the defender is physically capable of Dodging at that moment. Determine Dodge Defense and advance Dodge Pressure exactly as for a Dodge actually chosen then.
