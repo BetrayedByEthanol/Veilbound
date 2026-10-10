@@ -339,10 +339,10 @@ Against an incoming attack, the defender chooses one of only **three core respon
 
 | Rule / concept | Status | Audit finding |
 |---|---|---|
-| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
+| Action economy | **LOCKED FOUNDATION** | Turn AP, Focus-based Physical/Projection/General costs, Full Actions, Reactions, Interception, Opportunity Response, ordinary Movement Points, Rapid Advance, Charge, Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement now have native Veilbound procedures. Other specialized movement/action content remains later work. |
 | Attack action and weapon attacks | **PROVISIONAL / REQUIRES NATIVE MATH** | Universal physical Attack remains a core action. A two-ability attack formula is favored conceptually, but exact ability pairings, training contribution and attack-quality thresholds are not yet locked. |
 | Initiative | **LOCKED NATIVE SYSTEM** | Initiative, ties, late entry, round refresh, and turn timing are defined in the canonical Initiative and Round/Turn Procedure. |
-| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Sprint, terrain surcharges, movement impairments, allied-square transit, Prone/Crawl/Stand, the authored Standing Opportunity, and the Climb/Swim Traversal Foundation are defined. Exact Climb/Swim speeds, Catch Grip, falling/water hazards, Charge, jumping, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
+| Movement, reach and opportunity attacks | **LOCKED FOUNDATION / SOME SPECIAL MODES PENDING** | Native 12-MP grid movement, orthogonal/diagonal costs, split movement, segments, Cautious Movement, occupancy, blocked corners, adjacent Melee Reach, threatened space, Movement Opportunities, Movement Interception, Rapid Advance, Charge v0, Sprint, terrain surcharges, movement impairments, allied-square transit, Prone/Crawl/Stand, the authored Standing Opportunity, and the Climb/Swim Traversal Foundation are defined. Rapid Advance locks 1.5× impaired normal MP (floor) at 0 AP with fixed heading; Charge locks 2× impaired MP with fixed heading, minimum 3 steps and one paid melee attack. Neither applies a Dodge penalty or universal attack/damage bonus. Mounted/momentum Charge extensions, exact Climb/Swim speeds, Catch Grip, falling/water hazards, jumping, squeezing, size exceptions, flight, and final weapon Reach assignments remain pending. |
 | Damage / durability | **PARTLY LOCKED, PARTLY MISSING** | Damage normally reduces physical HP. Vigor is a regenerative reserve rather than temporary HP; some supernatural effects may target Vigor directly. Resistance/immunity categories still need native definitions. |
 | Conditions: frightened, stunned, blinded, prone, paralyzed, charmed, etc. | **PARTLY NATIVE / MOSTLY UNRESOLVED** | **Prone v0 is now a LOCKED native condition foundation.** It defines Crawl/Stand/Sprint restrictions, -2 melee attacks made while Prone, +2 melee attacks against Prone from a non-Prone attacker, physically feasible Guard/Dodge, +2 ranged Position Defense from 3+ squares when the reduced profile materially applies, ordinary bow incompatibility with standard Prone firing, and the Standing Opportunity. Weapon-specific posture exceptions and the other named conditions still require later work. |
 | Exhaustion | **INHERITED FROM 5e** | Used as a capstone cost, but version/effects are not specified. |
@@ -1055,7 +1055,7 @@ Current baseline bow/crossbow range bands are:
 | Long | 31–60 | 46.5–90 m | +5 |
 | Extreme | 61–120 | 91.5–180 m | +8 |
 
-These bands are calibrated against the locked baseline movement of 6 orthogonal squares (12 MP). Sprint is now locked at three times the impaired normal Movement Allowance—36 MP / 18 orthogonal squares for an unimpaired ordinary creature—so the range bands should be retested against that faster closing speed. Charge remains unresolved. Short-range Blink assumptions in the roughly 20–30 square range likewise remain technique calibration rather than movement-foundation canon. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
+These bands are calibrated against the locked baseline movement of 6 orthogonal squares (12 MP). Sprint is locked at three times impaired normal Movement Allowance (36 MP), Rapid Advance at 1.5 times (18 MP), and Charge at twice (24 MP with a paid attack), so the range bands should be retested against these faster closing speeds. Specialized momentum/impact Charge variants remain unresolved. Short-range Blink assumptions in the roughly 20–30 square range likewise remain technique calibration rather than movement-foundation canon. Specific ranged weapons may later gain different maximum ranges without changing the universal band modifiers.
 
 ### Archer battlefield identity
 
@@ -4284,7 +4284,7 @@ The existing threatened-ranged rule is a specific stronger trigger: firing a bow
 
 Still unresolved:
 
-- Charge, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
+- specialized mounted/momentum Charge variants beyond locked Rapid Advance and Charge v0, exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver traits or modifiers for deliberate Disrupting Interception;
 - complete surprise/unaware rules;
@@ -4367,7 +4367,7 @@ When a Movement Interception completes at least one legal movement step during a
 
 ## Still deferred
 
-- Charge and other attack-linked movement maneuvers;
+- specialized charge variants beyond the locked universal Charge v0, and other attack-linked movement maneuvers;
 - extra movement purchased directly with Turn AP;
 - exact Climb/Swim MP costs, Catch Grip, falling/water hazards, and jumping;
 - squeezing;
@@ -4389,6 +4389,10 @@ Canonical procedure lives in:
 
 - `docs/rules/05-combat/special-movement-terrain-and-prone.md`
 - `docs/rules/05-combat/movement-foundation.md`
+
+## Rapid Advance and Charge v0
+
+**LOCKED** in `docs/rules/05-combat/rapid-advance-and-charge-v0.md`. With impaired normal Movement Allowance **M**, Rapid Advance replaces it with **floor(1.5 × M)** (18 MP unimpaired) at 0 AP, and Charge replaces it with **2 × M** (24 MP unimpaired) with one normal Focus-priced Physical Action for the ending melee strike. Both require starting before spending/reserving MP, keep one heading through movement segments, disallow Cautious Movement and new Movement Interception reservations, and follow normal terrain, Reach and Opportunity rules. Neither mode reduces Dodge or increases Dodge Pressure. Charge has a three-completed-step minimum, permits retargeting a legal enemy within the originally declared attack profile's Reach before defense assignment, and treats the movement portion separately from the normal attack Interception window. A tentative Charge ending within the Rapid Advance allowance without initiating an attack spends only actual MP and converts to Rapid Advance. Completing a step beyond the Rapid allowance or beginning the attack commits one Physical Action AP; interruption after commitment never refunds that AP. Remaining Charge MP is lost when the Charge attack ends. Momentum damage, mounted Charge, and Brace-specific responses remain later work.
 
 ## Sprint
 
@@ -4433,7 +4437,7 @@ Impaired normal Movement Allowance =
 12 MP - explicit impairment
 ```
 
-Sprint then triples the impaired normal allowance, making the impairment proportionally meaningful at running speed. A serious effect may explicitly prohibit Sprint.
+Rapid Advance and Charge also scale from the impaired normal allowance using their respective 1.5× (floor) and 2× multipliers. Sprint then triples that allowance, making impairments proportionally meaningful at increased speed. A serious effect may explicitly prohibit Sprint.
 
 If a cannot-Sprint effect applies after Sprint is already active, the remaining Sprint pool is **suspended**, not lost or converted to ordinary movement. The current Sprint movement segment ends and Sprint Heading is retained. Suspended Sprint MP cannot be spent unless a rule explicitly permits a specific expenditure. If the prohibition ends before turn cleanup, Sprint may resume as a new movement segment under the same heading with whatever MP remains after any numeric impairment recalculation; if the prohibition persists through cleanup, the unused pool is lost. Prone uses this rule and uniquely permits 4 suspended Sprint MP to pay its Stand cost.
 
@@ -4453,7 +4457,7 @@ The existing **+2 MP** allied-square surcharge remains flat and is applied after
 
 Prone v0 now defines both movement and baseline combat posture.
 
-A Prone creature cannot use ordinary walking movement or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the general active-Sprint prohibition rule suspends the remaining Sprint allowance: it cannot fund Crawl or Cautious Crawl and may be spent only on the explicit 4 MP Stand exception until the creature is standing again.
+A Prone creature cannot use ordinary walking movement, Rapid Advance, Charge, or Sprint. It may normally Crawl or Stand. If Sprint had already replaced its Movement Allowance before it became Prone, the general active-Sprint prohibition rule suspends the remaining Sprint allowance: it cannot fund Crawl or Cautious Crawl and may be spent only on the explicit 4 MP Stand exception until the creature is standing again.
 
 Voluntarily dropping Prone costs **0 MP / 0 Turn AP** and does not by itself end the current movement segment.
 
@@ -4490,7 +4494,7 @@ If a creature was knocked Prone after Sprint was activated, the remaining Sprint
 ## Explicitly unresolved
 
 - weapon-specific Prone posture restrictions beyond the baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
-- Charge;
+- mounted/impact Charge extensions beyond universal Charge v0;
 - exact Climb/Swim MP costs, Catch Grip, jumping/falling, and detailed water hazards;
 - squeezing;
 - size exceptions;
