@@ -287,7 +287,7 @@ For each trigger occurrence:
    - an optional Reaction whose trigger is satisfied;
    - the first Opportunity Attack by spending the creature's available Reaction to activate Opportunity Response; or
    - a later Opportunity Attack from an already-active Opportunity Response with remaining Opportunity Capacity;
-   - **Reactive Protective Intervene** against a declared attack on another creature, spending that creature's available **Reaction** before the attack roll when [Protective Intervene v0](protective-intervene-v0.md) permits.
+   - **Reactive Protective Intervene** against a declared attack on another creature, spending the **protector's available Reaction** before the attack roll when [Protective Intervene v0](protective-intervene-v0.md) permits.
 6. **Resolve spontaneous same-trigger responses.** These responses resolve in Initiative order among their users. If one response creates a new trigger, resolve that nested response window before returning to the older response.
 7. **Resume the original event.** After all responses finish, re-check legality once more and resolve the original action/event if it remains legal.
 
