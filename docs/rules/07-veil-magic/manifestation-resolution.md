@@ -57,7 +57,9 @@ If a projectile carries an area effect, resolve the projectile's delivery first 
 
 **Cover-only lane (no Living Screen):** The [Cover and Line of Fire v0 cover-hit window](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location) **takes precedence over normal random miss scatter only for cover-only shots**. A legal cover-only shot that falls in `B < A <= B+C` strikes the **real interposing cover surface**, and any surface-triggered burst/cloud/explosion originates there. **Do not reapply this numerical cover-hit window to a mixed living-screen shot**, whose primary face allocation exclusively selects any cover impact. Resolve the area against the actual barrier and intervening geometry; a cover impact does not cancel the carried area by default. Full solid blockage makes an ordinary direct targeted shot against the concealed creature **illegal**, not a scatter shot through a wall.
 
-On a successful attack, the intended target point is the impact point.
+**Protective Intervene impact:** If an otherwise successful projectile attack is protected by [Protective Intervene v0](../05-combat/protective-intervene-v0.md), a successful **Shield Guard** places the real projectile impact at the **protector's shield**, and a **Body Take Hit** places it at the **protector's body/position**. The carried area's origin follows that impact point; it does **not** remain at the initially declared ward's location and is **not cancelled** merely because the ward avoided the direct hit. An attack that misses, hits cover, or selects a Living Screen collision normally is **not redirected by Intervene**. Use the normal original primary Attack total for any later ordinary-miss scatter.
+
+On a successful attack **without a separate protective interception or other actual impact relocation**, the intended target point is the impact point.
 
 On an **ordinary miss not already stopped by Cover or a successful physical Guard**, determine a **Miss Impact Point** rather than discarding the projectile:
 
