@@ -254,9 +254,9 @@ Calibrate against:
 - Low/Medium/High Focus costs (20/24/30 AP), particularly low levels requiring Aim across turns;
 - extreme/long range, especially active Ranged Dodge where Range Difficulty applies;
 - heavy-crossbow Full Action shots prepared in previous turns and Interception triggers that may never occur;
-- the **already-canonical +2/+4/+6/+8 partial Cover Difficulty** from [Cover and Line of Fire v0](../../rules/05-combat/cover-and-line-of-fire-v0.md), including Aim's mitigation against cover and its interaction with active Ranged Dodge and the cover-hit window; **future** shooting-into-melee and *legal* Called Shot difficulty once independently authored, without granting free obstruction bypass or friendly-fire immunity.
+- the **already-canonical +2/+4/+6/+8 partial Cover Difficulty** from [Cover and Line of Fire v0](../../rules/05-combat/cover-and-line-of-fire-v0.md), including Aim's mitigation against cover and its interaction with active Ranged Dodge and the cover-hit window; the **now-authored [Unified Firing Lane v0](../../rules/05-combat/unified-firing-lane-v0.md)** for actual intervening creatures, whose Living Screen numeric tiers remain playtest-sensitive; *legal* Called Shot difficulty once independently authored, without granting free obstruction bypass or friendly-fire immunity.
 
-Use the **locked +2/+4/+6/+8 Cover Difficulty ladder** when assessing Aim; this watch does not invent additional cover tiers or modifiers. Do not assign numeric **shooting-into-melee** or **Called Shot** difficulty until those systems are separately authored. Called Shot's legacy full-`Attack action` phrasing still requires native Turn-AP migration and does not become canonical through Aim.
+Use the **locked +2/+4/+6/+8 Cover Difficulty ladder** when assessing Aim; this watch does not invent additional cover tiers or modifiers. Do not assign an automatic numeric penalty for **mere melee engagement** or an unauthored **Called Shot** difficulty. Actual Living Screens now use the separate provisional numeric v0 ladder. Called Shot's legacy full-`Attack action` phrasing still requires native Turn-AP migration and does not become canonical through Aim.
 
 ## Cover and Line of Fire v0 — geometric gate and numeric ladder
 
@@ -273,4 +273,12 @@ Playtest:
 - whether existing natural-20 / Strong Hit/Critical confirmation interacts cleanly with cover-hit classification;
 - whether Aim's +4 cap effectively negating Half Cover is too strong at ordinary action cost.
 
-**Not yet authored:** shooting into melee/intervening creatures/friendly fire, concealment, special barrier durability/penetration/ricochet, and universal area-cover mitigation. Do not supply arbitrary numeric modifiers from imagined cover percentages.
+**Not yet authored:** special projectile penetration/ricochet, barrier durability, concealment, universal area-cover mitigation, final Called Shot location effects, and exact protective body-intervention timing/cost. Ordinary mixed creature-screen shots now follow [Unified Firing Lane v0](../../rules/05-combat/unified-firing-lane-v0.md), not a missing universal friendly-fire procedure. Do not supply arbitrary numeric modifiers from imagined cover percentages.
+
+## Unified Firing Lane v0 — mixed screens and conditional collateral accuracy
+
+**Status: LOCKED PROCEDURAL BASELINE / NUMERIC AND RESPONSE CALIBRATION WATCH**
+
+[Unified Firing Lane v0](../../rules/05-combat/unified-firing-lane-v0.md) introduces **one highest effective obstruction `P`** rather than stacked creature/cover difficulty, while allocating the residual physical Cover value to **upper missed d20 faces**, allied screens from **natural 2 upward**, and enemy screens **downward beneath the cover band**, nearest first within each side. On a missed primary roll whose allocated face selects one creature, **one conditional second accuracy check** tests that creature's own predeclared legal defense. Natural 1 does not collide. A mixed shot **supersedes** the cover-only hit-band allocation; cover-only Cover v0 stays intact. Aim targets only one positive source and may shrink its miss band without changing another source that sets `P`.
+
+Playtest: the +2/+4/+6/+8 living-screen exposure ladder, face exhaustion in crowded lanes, allied/enemy ordering, warning/awareness and conditional Dodge/Guard resource expenditure, primary natural-20 and secondary natural-20/critical treatment, strong attack bonuses versus accidental-hit exposure, highly accurate shots with few miss faces, projectile-area scatter and surface impacts, geometry changes from legal movement, and whether an optional **Careful Shot** mode would add meaningful agency. Deliberate protective **Take Hit** needs its own authored legal trigger, cost and timing; a Dodge is personal avoidance, **not** protective Intervene.

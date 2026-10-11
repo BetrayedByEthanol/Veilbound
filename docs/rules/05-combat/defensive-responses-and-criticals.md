@@ -85,6 +85,8 @@ Riposte is a possible follow-up to a successful Guard where the relevant setup p
 
 Intercept uses Guard to protect another character rather than creating a separate defensive subsystem.
 
+**Unified Firing Lane incidental threats:** Under [Unified Firing Lane v0](unified-firing-lane-v0.md), a physically exposed intervening creature may **predeclare** its **own** legal ranged Take Hit, Dodge, or projectile-capable Guard response before the attack roll. Only the creature actually selected by the primary miss face resolves that conditional defense and consumes corresponding Guard capacity or Dodge Pressure; do not allow retroactive choice after the miss, free active defense without awareness, or repeated capacity expenditure on every possible screen. **Personal Dodge is not an Intercept protecting someone else.** The separate protective-intervention methods are legal Shield Guard/Intercept and intentionally Take Hit **only when independently authorized with valid timing**; this note does not give a free body-block action. Intended-target defensive commitments remain governed by the ordinary sequence rules.
+
 ## Guard instrument lost after defense assignment
 
 A defender can lose its declared Guard instrument **or the physical ability to use it** between assigning defenses and resolving an attack, for example through a legal [Disarm](disarm-v0.md) Interception or [Secure Limb](limb-control-v0.md) restraining the arm required for Guard. The weapon need not be dropped: a held weapon may become unusable when its operating limb is Secured. Handle this at **the attack's normal response/resolution time**; do not reopen the Attack Sequence or let the defender reassign already committed defenses after seeing attack results.

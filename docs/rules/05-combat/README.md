@@ -16,6 +16,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md)
 - [Aim v0](aim-v0.md)
 - [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md)
+- [Unified Firing Lane v0 — Living Screens](unified-firing-lane-v0.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
@@ -32,7 +33,7 @@ The current canonical combat foundation still requires Veilbound-native rules fo
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
-- **shooting into melee/intervening creatures/friendly fire, and concealment/surprise** as complete procedures; [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md) now defines solid obstruction, partial-cover tiers, attack-defense application, and cover impact; Aim v0 mitigates only its separately declared difficulty source;
+- **advanced shooting-into-melee / living-screen calibration, protective Take Hit/Intercept authorization, Called Shot, and concealment/surprise** as complete procedures; [Unified Firing Lane v0](unified-firing-lane-v0.md) now locks the ordinary projectile **highest-obstruction / allocated miss spectrum / conditional collateral roll** baseline; [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md) retains cover-only impact rules; Aim v0 mitigates only its separately declared difficulty source;
 - **Called Shot** Turn-AP migration, difficulty/wound/Interrupt integration; weapon-to-weapon binds outside Grapple, advanced/multi-limb control and non-humanoid anatomy, authored Disarm-capable weapon traits/techniques, cooperative multi-creature Grapples, and other universal maneuvers beyond locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, Throw v0, Disarm v0, Secure Limb v0, Feint Combination v0, Charge v0 and Aim v0;
 - physical-hazard values/procedures;
 - conditions;

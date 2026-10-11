@@ -51,21 +51,28 @@ If a Manifestation creates a projectile but a different physical launcher is act
 
 ### Projectile-delivered areas
 
-If a projectile carries an area effect, resolve the projectile's delivery first and then resolve the area from the resulting impact point. **[Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location) takes precedence over normal random miss scatter** when a legal ranged attack falls into the cover-hit window: the projectile strikes the **real interposing cover surface**, and any surface-triggered burst/cloud/explosion originates from that impact point. Resolve the area against the actual barrier and intervening geometry; a cover impact does not cancel the carried area by default. Full solid blockage makes an ordinary direct targeted shot against the concealed creature **illegal**, not a scatter shot through a wall.
+If a projectile carries an area effect, resolve the projectile's delivery first and then resolve the area from the resulting impact point.
+
+**Mixed living-screen lane:** When a projectile is shot past **actual intervening creatures**, [Unified Firing Lane v0](../05-combat/unified-firing-lane-v0.md#resolve-the-primary-and-conditional-secondary-roll) **supersedes the Cover-only cover-hit band**. The primary d20 assigns the missed shot's destination: an allocated **cover face** impacts the real barrier, an allocated creature face allows **one conditional secondary accuracy check** against that creature, and a successful incidental hit or Guard impacts the creature/instrument. A failed secondary check against passive Defense or Dodge is an **ordinary miss** (no further creature check); resolve its scatter with the **original primary Attack total**, never the secondary total, and exclude the unified obstruction `P` from Scatter Defense. An unallocated miss stopped by the intended target's legal projectile Guard impacts that instrument rather than scattering.
+
+**Cover-only lane (no Living Screen):** The [Cover and Line of Fire v0 cover-hit window](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location) **takes precedence over normal random miss scatter only for cover-only shots**. A legal cover-only shot that falls in `B < A <= B+C` strikes the **real interposing cover surface**, and any surface-triggered burst/cloud/explosion originates there. **Do not reapply this numerical cover-hit window to a mixed living-screen shot**, whose primary face allocation exclusively selects any cover impact. Resolve the area against the actual barrier and intervening geometry; a cover impact does not cancel the carried area by default. Full solid blockage makes an ordinary direct targeted shot against the concealed creature **illegal**, not a scatter shot through a wall.
 
 On a successful attack, the intended target point is the impact point.
 
 On an **ordinary miss not already stopped by Cover or a successful physical Guard**, determine a **Miss Impact Point** rather than discarding the projectile:
 
 1. Determine **Scatter Defense** from the defense that actually resolved the shot:
-   - **No applicable Cover Difficulty:** use that actual defense unchanged.
-   - **Partial cover, and the attack is an ordinary miss** (`A <= B`, or an automatic natural-1 miss regardless of its numerical total, under [Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location)): use **Base Defense `B`**, the actual selected defense **excluding effective Cover Difficulty `C`**, rather than final Cover-adjusted Defense `D = B + C`.
-   - **Cover-hit band** (`B < A <= D`), physically illegal direct shot, or successful projectile Guard: this ordinary-miss scatter procedure **does not apply**. Resolve the actual cover/Guard impact or illegality first.
+   - **No effective Cover or unified obstruction:** use that actual defense unchanged.
+   - **Mixed living-screen lane with an ordinary miss**, including a primary unallocated miss **not intercepted by a legal projectile Guard** or a creature-face collision that failed its conditional secondary check **without being stopped by a collateral Guard**: use [Unified Firing Lane v0](../05-combat/unified-firing-lane-v0.md)'s intended-target **Base Defense `B` excluding the effective highest obstruction `P`**. Use the **original primary Attack total `A_primary`** for Miss Margin even if a failed collateral check produced a different secondary total `A_secondary`; that second roll tests **only** the accidental creature collision. The cover and living-screen impact destinations are resolved first; neither a cover face nor successful incidental creature hit uses random scatter.
+   - **Partial cover without living screens, and the attack is an ordinary miss** (`A <= B`, or an automatic natural-1 miss regardless of its numerical total, under [Cover and Line of Fire v0](../05-combat/cover-and-line-of-fire-v0.md#cover-hit-window-one-roll-decides-impact-location)): use **Base Defense `B`**, the actual selected defense **excluding effective Cover Difficulty `C`**, rather than final Cover-adjusted Defense `D = B + C`.
+   - **Cover-only cover-hit band** (`B < A <= B+C`), a **mixed-lane allocated cover face**, physically illegal direct shot, or successful projectile Guard: this ordinary-miss scatter procedure **does not apply**. Resolve the actual cover/Guard impact or illegality first.
 2. Calculate the **Miss Margin**:
    ```text
-   Miss Margin = max(0, Scatter Defense - Attack Total)
+   Miss Margin = max(0, Scatter Defense - A_primary)
    ```
-   Keep all other modifiers that actually contributed to Base Defense, including any separately declared **Aim against Range**; remove **only effective Cover Difficulty** when this is an ordinary miss. A natural 1 is still an automatic miss. If its Attack Total would otherwise beat **Scatter Defense**, use Miss Margin 0.
+   **`A_primary` is the original attack total against the intended target**, including its original primary d20 and applicable modifiers. On a mixed-lane creature face where the secondary accuracy roll fails against the accidental creature's passive Defense or Dodge, **ignore `A_secondary` entirely for scatter**. Scatter distance and direction are still measured from the **original intended impact point**, not from the intervening creature's space. A successful collateral Guard instead supplies a real instrument impact point and does not scatter.
+
+   Keep all other modifiers that actually contributed to Base Defense, including any separately declared **Aim against Range**; remove **only effective Cover Difficulty `C`** for cover-only shots or **effective unified obstruction `P`** for mixed living-screen shots when this is an ordinary miss. A natural 1 on the **primary attack** is still an automatic miss. If its primary Attack Total would otherwise beat **Scatter Defense**, use Miss Margin 0.
 3. Calculate scatter distance:
    ```
    Scatter Distance = 1 + floor(Miss Margin / 5)
@@ -82,9 +89,11 @@ On an **ordinary miss not already stopped by Cover or a successful physical Guar
 5. Move the impact point that many squares in the rolled direction. That square is the **Miss Impact Point**.
 6. Resolve the projectile's area from that point.
 
-**Cover scatter example:** With `B = 10`, `C = 8`, and `A = 5`, the shot is an **ordinary miss** (`A <= B`), not a cover impact. Use `Scatter Defense = B = 10`: **Miss Margin = 5** and **Scatter Distance = 2 squares**. Using final `D = 18` here would incorrectly inflate Miss Margin to 13 and scatter to 3 squares.
+**Cover-only scatter example:** With `B = 10`, `C = 8`, and `A_primary = 5`, the shot is an **ordinary miss** (`A_primary <= B`), not a cover impact. Use `Scatter Defense = B = 10`: **Miss Margin = 5** and **Scatter Distance = 2 squares**. Using final `D = 18` here would incorrectly inflate Miss Margin to 13 and scatter to 3 squares.
 
-Scatter Defense derives from the **actual defense selected for the shot**—static Ranged Defense or active Ranged Dodge where applicable—but excludes the effective **Cover Difficulty** for ordinary misses. A cover hit, a successful projectile Guard, or a physically illegal direct shot does **not** use this scatter procedure.
+**Mixed-lane failed-collateral example:** With `B = 16`, `P = 6`, and primary `d20 + 6` natural **2**, the initial `A_primary = 8` selects an allied screen. A collateral natural **15** produces `A_secondary = 21`, but if the ally's Defense is **25** this conditional accuracy check fails. The area uses the **primary** margin `max(0, 16 - 8) = 8`, scatter **2 squares** from the original intended point, **not** a margin of 0 and scatter 1 from the secondary total.
+
+Scatter Defense derives from the **actual defense selected for the shot**—static Ranged Defense or active Ranged Dodge where applicable—but excludes effective **Cover Difficulty** (cover-only) or unified **highest obstruction `P`** (mixed creature/cover lanes) for ordinary misses. A cover hit, a successful projectile Guard, or a physically illegal direct shot does **not** use this scatter procedure.
 
 ### Successful Guard against an area projectile
 
