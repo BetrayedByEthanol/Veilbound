@@ -239,7 +239,7 @@ A hazard may instead define a trigger such as:
 - once every stated number of rounds;
 - another explicitly authored event.
 
-This is only a timing rule. [Physical Hazards v0](physical-hazards-v0.md) offers a **PROVISIONAL** falling, Catch Grip, landing and contact procedure; collision/crushing, fire, environmental damage, hazardous terrain, and numeric values remain future calibration/authoring work.
+This is only a timing rule. [Falling v0](physical-hazards-v0.md#falling-state-and-timing--locked) is now **LOCKED**, including the ordinary-event timing default and optional GM-adjudicated Extended Falling. Other collision/crushing, fire, environmental damage, hazardous terrain, and specialized hazard values remain future calibration/authoring work.
 
 ## Sustained and persistent effects
 
@@ -436,9 +436,9 @@ Round End
 
 The following remain deliberately unresolved or only minimally integrated here:
 
-- specialized Charge variants beyond locked [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md), exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other still-undefined special movement modes;
+- specialized Charge variants beyond locked [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md), exact Climb/Swim MP costs, jumping, special falling/flight variants beyond locked [Falling v0](physical-hazards-v0.md), detailed water hazards, squeezing, size exceptions, and other still-undefined special movement modes;
 - weapon-family Reach assignments beyond the ordinary adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - complete surprise/unaware rules;
-- numeric hazard values, finalization of [Physical Hazards v0](physical-hazards-v0.md) (currently **PROVISIONAL**), and specialized collision/crushing procedures;
+- numerical playtesting/variants beyond locked [Falling v0](physical-hazards-v0.md), plus the still **PROVISIONAL** shared Impact Event and specialized collision/crushing procedures;
 - conditions.

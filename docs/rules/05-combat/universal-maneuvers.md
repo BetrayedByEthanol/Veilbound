@@ -143,9 +143,9 @@ If a solid obstruction, another creature, or another effect completely prevents 
 - the attacker does not enter the defender's square;
 - no automatic damage or Prone result occurs.
 
-Collision, crushing, chain displacement, and damaging impact are **not** automatically caused by a blocked Shove. The **PROVISIONAL** [Physical Hazards v0](physical-hazards-v0.md) proposal preserves this boundary while outlining a shared impact framework for separately authored hazards.
+Collision, crushing, chain displacement, and damaging impact are **not** automatically caused by a blocked Shove. The **LOCKED** [Falling v0](physical-hazards-v0.md) procedure preserves this boundary. Its broader collision-impact framework remains provisional for separately authored hazards.
 
-A missing floor or other unsupported destination is not automatically a blocked destination. If the Shove carries the target beyond support, resolve the resulting falling, Traversal Disruption, Catch Grip, or other hazard under the applicable rules; [Physical Hazards v0](physical-hazards-v0.md) proposes a **PROVISIONAL** support-loss/Catch Grip sequence without changing Shove displacement.
+A missing floor or other unsupported destination is not automatically a blocked destination. If the Shove carries the target beyond support, resolve the resulting falling, Traversal Disruption, Catch Grip, or other hazard under the applicable rules; The **LOCKED** [Falling v0](physical-hazards-v0.md) support-loss/Catch Grip sequence applies without changing Shove displacement.
 
 ## Terrain and force generation
 
@@ -231,7 +231,7 @@ Shove v0 does not define:
 - size-category modifiers or impossibility thresholds;
 - persistent weapon-bind, hook-control, and weapon-control procedures beyond the one-off contact methods allowed by Trip and [Disarm v0](disarm-v0.md);
 - other universal maneuvers beyond the locked maneuver foundations; [Feint Combination v0](feint-combination-v0.md) and [Charge v0](rapid-advance-and-charge-v0.md) are separately defined and do not change Shove's contest;
-- finalization of the **PROVISIONAL** [Catch Grip and falling](physical-hazards-v0.md) procedure and numerical falling damage.
+- specialized falling, gravity, landing and impact calibration beyond locked [Catch Grip and Falling v0](physical-hazards-v0.md).
 
 Those remain explicit later design work.
 
@@ -882,7 +882,7 @@ Resolve a 2-square Throw along the declared direction one square at a time.
 - stopping early because the second square is blocked does not remove the **Prone** result of the 10+ tier when Prone is meaningful there;
 - Throw v0 causes no collision, crushing, impact, or chain-displacement damage from the obstruction.
 
-An unsupported position does not stop the authored Throw displacement merely because there is no floor there. After the Throw displacement resolves, if the creature lacks support, begin the applicable falling, traversal-disruption, or physical-hazard procedure. See the **PROVISIONAL** [Physical Hazards v0](physical-hazards-v0.md) proposal; it does not allow retroactive Catch Grip at a support no longer reachable after Throw displacement.
+An unsupported position does not stop the authored Throw displacement merely because there is no floor there. After the Throw displacement resolves, if the creature lacks support, begin the applicable falling, traversal-disruption, or physical-hazard procedure. See **LOCKED** [Falling v0](physical-hazards-v0.md); it does not allow retroactive Catch Grip at a support no longer reachable after Throw displacement.
 
 If Prone is not physically meaningful at the resulting position—for example because the target is falling or otherwise unsupported—do not apply Prone there. Any later landing or impact uses the applicable hazard procedure rather than an assumed Throw result.
 
