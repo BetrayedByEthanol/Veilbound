@@ -176,6 +176,8 @@ Examples include being shoved, dragged, knocked back, or displaced by an externa
 
 A specific rule may explicitly make forced movement provoke.
 
+The **PROVISIONAL** [Physical Hazards v0](physical-hazards-v0.md) proposal handles actual loss of support after an already-authored forced displacement without granting extra MP, movement Opportunities, or maneuver damage.
+
 ## Teleportation and non-traversal movement
 
 Teleportation, Blink, phasing, or another effect that relocates a creature without traversing the intervening squares does not create Movement Opportunities merely from the skipped threatened squares.
@@ -235,8 +237,8 @@ The following are intentionally not defined by Movement Foundation:
 - specialized charge variants beyond locked [Charge v0](rapid-advance-and-charge-v0.md), and other attack-linked movement maneuvers;
 - extra movement purchased directly through Turn AP;
 - exact Climb/Swim MP costs and speed calibration;
-- Catch Grip, falling, and detailed water-hazard procedures;
-- jumping and falling;
+- final approval and numerical calibration of proposed [Falling and Catch Grip v0](physical-hazards-v0.md), plus detailed water-hazard procedures;
+- jumping, long-fall timing, and midair movement;
 - squeezing;
 - size-based occupancy/reach exceptions;
 - flight and other special movement modes;
