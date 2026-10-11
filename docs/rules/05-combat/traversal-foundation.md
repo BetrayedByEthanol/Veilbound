@@ -1,6 +1,6 @@
 # Traversal Foundation
 
-> Canonical Veilbound foundation for climbing and swimming as traversal rather than ordinary ground movement. This page defines capability adjudication, Traversal State and Traversal Segments, climbing support requirements, combat action legality, defensive movement, Opportunities, and disruption. Exact Climb/Swim MP costs, fixed capability thresholds, falling damage, drowning/breathing, currents/waves, armor-specific traversal effects, and detailed underwater weapon rules remain later work. [Physical Hazards v0](physical-hazards-v0.md) now **LOCKS** the one-Reaction emergency Catch Grip and falling baseline; the Traversal foundation remains authoritative for Hold Support and Swimming Disruption.
+> Canonical Veilbound foundation for climbing and swimming as traversal rather than ordinary ground movement. This page defines capability adjudication, Traversal State and Traversal Segments, climbing support requirements, combat action legality, defensive movement, Opportunities, and disruption. Exact Climb/Swim MP costs, fixed capability thresholds, specialized falling profiles beyond the locked standard Falling v0 baseline, drowning/breathing, currents/waves, armor-specific traversal effects, and detailed underwater weapon rules remain later work. [Physical Hazards v0](physical-hazards-v0.md) now **LOCKS** the one-Reaction emergency Catch Grip and falling baseline; the Traversal foundation remains authoritative for Hold Support and Swimming Disruption.
 
 ## Ground movement remains the baseline
 
