@@ -1,6 +1,6 @@
-# Physical Hazards v0 — Locked Falling and Catch Grip; Provisional Collision Framework
+# Physical Hazards v0 — Locked Falling and Minor Displacement Boundaries; Provisional Collision Framework
 
-> **FALLING v0 — LOCKED.** Loss of support, ordinary/extended fall timing, emergency Catch Grip, Landing Control, and the standard-gravity hard-surface falling-damage profile below are canonical. The numerical values are **locked v0 playtest baselines**, not claimed to be permanently calibrated. The shared framework for other collisions and crushing remains **PROVISIONAL**, and specialized impact profiles remain **DEFERRED**. Existing locked movement, maneuvers, defense, and injury rules remain authoritative.
+> **FALLING v0 and Minor Displacement/Collision Boundary v0 — LOCKED.** Loss of support, ordinary/extended fall timing, emergency Catch Grip, Landing Control, the standard-gravity hard-surface falling-damage profile, and the non-damaging ordinary Shove/Throw collision boundary below are canonical. Falling damage numbers are **locked v0 playtest baselines**. The shared impact model for other collisions and crushing remains **PROVISIONAL**; specialized impact profiles remain **DEFERRED**. Existing locked movement, maneuvers, defense, and injury rules remain authoritative.
 
 See [Movement Foundation](movement-foundation.md), [Traversal Foundation](traversal-foundation.md), [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md), [Universal Maneuvers](universal-maneuvers.md), [Initiative and Round/Turn Procedure](initiative-and-round-structure.md), [Core Resolution](../01-core-resolution/core-resolution.md), [Weapons and Armor](weapons-and-armor.md), [HP and Vigor](../06-vigor-wounds-death/hp-and-vigor.md), and [Dying and Wounds](../06-vigor-wounds-death/dying-and-wounds.md).
 
@@ -161,6 +161,19 @@ This profile is independent of a creature's level: **Max HP = 10 + Vitality**. V
 
 At very high heights or unusual physics, this standard profile is a provisional physical approximation and may require specialized hazard authoring. **There is no locked universal terminal-velocity cap, mass modifier, or deep-water profile**. Do not derive one from this height table.
 
+## Minor Displacement and Collision Boundary v0 — LOCKED
+
+Ordinary **Shove** and **Throw** are tactical displacement and posture-control maneuvers, not generic impact attacks. Their normal one- or two-square displacement (1.5–3 m) represents stumbling, loss of balance, tumbling, or forced repositioning **without inherent collision HP damage**. Merely contacting a wall, creature, or other obstruction does not turn that displacement into a damaging collision.
+
+- **Shove:** Keep its one-square displacement, built-in advance, and existing terrain-dependent Stability Check. Shove does **not** automatically cause Prone or damage. Stable, secure footing requires no routine Stability Check.
+- **Throw:** Keep its existing margin-dependent displacement and **Prone** outcomes. Neither a one-square nor two-square Throw gains impact damage; do not cancel an already-authored Prone tier merely because no damage occurs.
+- **Blocked geometry:** A fully blocked Shove causes no displacement, built-in advance, automatic Prone, or automatic damage. A two-square Throw with a legal first square and blocked second square stops in the first square with its applicable Prone outcome and no automatic collision, crushing, or chain displacement.
+- **Stumbling versus Falling:** A balance loss or tumble onto supported ground is not by itself a gravity fall of one or more 1.5 m increments; do not roll Falling v0 dice for horizontal movement, ordinary contact, or becoming Prone. **Catch Grip** is for emergency re-establishment of support during actual threatened/lost support, not a compulsory Reaction to recover from every stumble.
+- **Actual loss of support:** Resolve all maneuver-authorized horizontal displacement first. If the resulting position is unsupported, apply the locked [Falling v0](#falling-state-and-timing--locked) procedure using **vertical distance actually fallen**, not horizontal squares traveled. No retroactive catch of a passed ledge.
+- **Longer or more energetic displacement:** Crossing **three or more squares is not automatically damaging**, nor is two squares an immunity threshold. A separately authored high-energy effect may cause real collision damage even over a short distance, but only if its effect expressly provides a forceful-impact/hazard consequence and actual contact is possible. The required impact-damage profile is not established by ordinary Shove/Throw's square count or contest margin.
+
+**This lock is a boundary, not a new collision damage subsystem.** It introduces no extra damage die, free attack, knockback speed, chain displacement, new Stability check, or automatic Reaction. Specialized damaging collisions, crushing, and structural impacts remain future work.
+
 ## Shared Impact Event — PROVISIONAL
 
 An **Impact Event** is meaningful physical contact produced by relative motion. The **standard falling profile above is locked**; extending this shared framework to high-speed knockback, moving obstacles, falling objects, and separately authored collision-capable techniques remains **PROVISIONAL**.
@@ -202,6 +215,10 @@ This benchmark does not describe body orientation, soft landing surfaces, armor,
 | Event | Required v0 boundary |
 |---|---|
 | Routine movement over normal ground | No hazard check |
+| Ordinary one-square Shove on secure ground | Reposition only; no automatic Stability Check, Prone, or collision damage |
+| One-/two-square Throw into an open supported position | Apply authored Throw displacement/Prone tier; no additional collision or falling damage |
+| Character stumbles or lands Prone on secure ground | Resolve ordinary posture/balance consequences, not Falling v0 vertical-height damage |
+| A magical force propels target rapidly into nearby stone | Potential impact only if separately authored as forceful collision; square count alone is not a damage rule |
 | Shove into an unsupported square | Existing Shove contest/displacement first; then loss of support and any eligible Catch Grip |
 | Two-square Throw over balcony | Existing full displacement first; no retroactive catch of a now-unreachable earlier ledge |
 | Throw's second square blocked by wall/creature | Existing stop in first square and Prone result remain; **no automatic collision damage** |
@@ -234,10 +251,11 @@ This benchmark does not describe body orientation, soft landing surfaces, armor,
 | Uncontrolled landing Prone; successful control at ≤3 m may avoid it with secure footing | **LOCKED Falling v0** |
 | Standard-gravity hard-surface impact: 1d4/started 1.5 m (from ≥1.5 m), half Armor floor | **LOCKED v0 playtest baseline; numerical rebalance by future explicit revision only** |
 | Landing DC examples, specific cushions, unusual falling motion/height/physics | **GM adjudication / DEFERRED calibration** |
+| Ordinary Shove/Throw minor displacement, blocked contact, and stumble-versus-fall distinction | **LOCKED Minor Displacement/Collision Boundary v0** |
 | Shared Impact Event for other kinds of impacts | **PROVISIONAL** |
 | Horizontal collision-capable maneuvers, victim avoidance, chain movement, structural damage, sustained crushing | **DEFERRED** |
 | Detailed Jumping movement, precise long-fall timer, flight, underwater/buoyancy hazards | **DEFERRED** |
 
 **Future calibration questions:** Validate 6 m and 12 m incapacitation/death outcomes against fixed Max HP, test whether half Armor and -1d4 Landing Control are sufficient, and author surface/collision/crushing and gravity variants without reopening locked combat foundations.
 
-**Falling v0 is LOCKED as a playable baseline.** Other Impact Event branches remain provisional/deferred. Future numerical changes must explicitly revise the v0 baseline rather than silently overriding it.
+**Falling v0 and the Minor Displacement/Collision Boundary v0 are LOCKED.** Other Impact Event branches remain provisional/deferred. Future numerical changes must explicitly revise the v0 baseline rather than silently overriding it.

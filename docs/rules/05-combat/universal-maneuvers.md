@@ -107,7 +107,7 @@ The Shove's built-in advance does **not** create a Movement Opportunity from the
 
 Other enemies may still gain ordinary Movement Opportunities if the attacker's built-in advance actually causes the attacker to leave squares they threaten under the normal [Movement Opportunity](movement-foundation.md#movement-opportunities) rules.
 
-A Shove does not inherently deal damage and does not inherently make the target Prone.
+A Shove does not inherently deal damage and does not inherently make the target Prone. A one-square Shove represents stumbling or forced repositioning, not a damaging collision or vertical fall; see the **LOCKED** [Minor Displacement/Collision Boundary v0](physical-hazards-v0.md#minor-displacement-and-collision-boundary-v0--locked).
 
 ### Shove against a Grapple partner
 
@@ -880,7 +880,7 @@ Resolve a 2-square Throw along the declared direction one square at a time.
 - if both squares can be physically entered, complete both squares;
 - if the first square is legal but the second is blocked by a creature, solid obstruction, or impassable geometry, the thrown creature stops in the first square;
 - stopping early because the second square is blocked does not remove the **Prone** result of the 10+ tier when Prone is meaningful there;
-- Throw v0 causes no collision, crushing, impact, or chain-displacement damage from the obstruction.
+- Throw v0 causes no collision, crushing, impact, or chain-displacement damage from the obstruction. Its ordinary one- or two-square displacement follows the **LOCKED** [Minor Displacement/Collision Boundary v0](physical-hazards-v0.md#minor-displacement-and-collision-boundary-v0--locked), without removing a separately earned Prone result.
 
 An unsupported position does not stop the authored Throw displacement merely because there is no floor there. After the Throw displacement resolves, if the creature lacks support, begin the applicable falling, traversal-disruption, or physical-hazard procedure. See **LOCKED** [Falling v0](physical-hazards-v0.md); it does not allow retroactive Catch Grip at a support no longer reachable after Throw displacement.
 
