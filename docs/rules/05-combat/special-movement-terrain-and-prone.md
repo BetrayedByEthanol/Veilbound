@@ -477,8 +477,8 @@ Still unresolved:
 
 - specialized mounted/momentum variants beyond locked [Charge v0](rapid-advance-and-charge-v0.md), and other attack-linked movement maneuvers;
 - exact Climb/Swim MP costs and traversal speed calibration;
-- Catch Grip, falling, and detailed water hazards;
-- jumping and falling;
+- final lock and numerical calibration of proposed [Falling and Catch Grip v0](physical-hazards-v0.md), plus detailed water hazards;
+- jumping, prolonged falling and midair movement;
 - squeezing;
 - size-based occupancy and Reach exceptions;
 - flight and other special movement modes;
