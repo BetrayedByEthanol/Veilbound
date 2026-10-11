@@ -89,7 +89,9 @@ On an **ordinary miss not already stopped by Cover or a successful physical Guar
 5. Move the impact point that many squares in the rolled direction. That square is the **Miss Impact Point**.
 6. Resolve the projectile's area from that point.
 
-**Cover scatter example:** With `B = 10`, `C = 8`, and `A = 5`, the shot is an **ordinary miss** (`A <= B`), not a cover impact. Use `Scatter Defense = B = 10`: **Miss Margin = 5** and **Scatter Distance = 2 squares**. Using final `D = 18` here would incorrectly inflate Miss Margin to 13 and scatter to 3 squares.
+**Cover-only scatter example:** With `B = 10`, `C = 8`, and `A_primary = 5`, the shot is an **ordinary miss** (`A_primary <= B`), not a cover impact. Use `Scatter Defense = B = 10`: **Miss Margin = 5** and **Scatter Distance = 2 squares**. Using final `D = 18` here would incorrectly inflate Miss Margin to 13 and scatter to 3 squares.
+
+**Mixed-lane failed-collateral example:** With `B = 16`, `P = 6`, and primary `d20 + 6` natural **2**, the initial `A_primary = 8` selects an allied screen. A collateral natural **15** produces `A_secondary = 21`, but if the ally's Defense is **25** this conditional accuracy check fails. The area uses the **primary** margin `max(0, 16 - 8) = 8`, scatter **2 squares** from the original intended point, **not** a margin of 0 and scatter 1 from the secondary total.
 
 Scatter Defense derives from the **actual defense selected for the shot**—static Ranged Defense or active Ranged Dodge where applicable—but excludes effective **Cover Difficulty** (cover-only) or unified **highest obstruction `P`** (mixed creature/cover lanes) for ordinary misses. A cover hit, a successful projectile Guard, or a physically illegal direct shot does **not** use this scatter procedure.
 
