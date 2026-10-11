@@ -239,7 +239,7 @@ A hazard may instead define a trigger such as:
 - once every stated number of rounds;
 - another explicitly authored event.
 
-This is only a timing rule. Falling, collision, fire, environmental damage, hazardous terrain, and related values remain future physical-hazard work.
+This is only a timing rule. [Physical Hazards v0](physical-hazards-v0.md) offers a **PROVISIONAL** falling, Catch Grip, landing and contact procedure; collision/crushing, fire, environmental damage, hazardous terrain, and numeric values remain future calibration/authoring work.
 
 ## Sustained and persistent effects
 
@@ -440,5 +440,5 @@ The following remain deliberately unresolved or only minimally integrated here:
 - weapon-family Reach assignments beyond the ordinary adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - complete surprise/unaware rules;
-- hazard values and physical-hazard procedures;
+- numeric hazard values, finalization of [Physical Hazards v0](physical-hazards-v0.md) (currently **PROVISIONAL**), and specialized collision/crushing procedures;
 - conditions.
