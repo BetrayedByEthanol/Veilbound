@@ -9,6 +9,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Movement Foundation](movement-foundation.md)
 - [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md)
 - [Traversal Foundation](traversal-foundation.md)
+- [Physical Hazards v0 — Falling, Catch Grip, and Impact (PROVISIONAL)](physical-hazards-v0.md)
 - [Universal Maneuvers](universal-maneuvers.md)
 - [Disarm v0](disarm-v0.md)
 - [Limb / Weapon-Hand Control v0](limb-control-v0.md)
@@ -29,14 +30,14 @@ Durability, Dying, and wound-repair rules live under [../06-vigor-wounds-death/]
 
 The current canonical combat foundation still requires Veilbound-native rules for:
 
-- mounted/impact Charge variants beyond locked [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md), exact Climb/Swim MP costs, Catch Grip, jumping/falling, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
+- mounted/impact Charge variants beyond locked [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md), exact Climb/Swim MP costs, final lock/calibration for proposed [Falling and Catch Grip v0](physical-hazards-v0.md), jumping, detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
 - weapon-specific Prone posture restrictions beyond the locked baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
 - Strong Hit / Critical Hit extra damage;
 - **advanced living-screen and protection calibration, Prepared Protective Stance, Called Shot, and concealment/surprise** as complete procedures; [Unified Firing Lane v0](unified-firing-lane-v0.md) locks ordinary shooting past intervening creatures; [Protective Intervene v0](protective-intervene-v0.md) now authorizes **Reactive one-Reaction** and **Prepared reserved-MP** Shield Guard/Body Take Hit against one otherwise successful attack; [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md) retains cover-only hit windows; Aim v0 mitigates only its separately declared difficulty source;
 - **Called Shot** Turn-AP migration, difficulty/wound/Interrupt integration; weapon-to-weapon binds outside Grapple, advanced/multi-limb control and non-humanoid anatomy, authored Disarm-capable weapon traits/techniques, cooperative multi-creature Grapples, and other universal maneuvers beyond locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, Throw v0, Disarm v0, Secure Limb v0, Feint Combination v0, Charge v0 and Aim v0;
-- physical-hazard values/procedures;
+- hazard damage/Armor values, horizontal collision/crushing and structural-impact procedures, and numerical calibration of provisional [Physical Hazards v0](physical-hazards-v0.md);
 - conditions;
 - encounter building and NPC/creature construction.
 
