@@ -99,6 +99,10 @@ A projectile that lands in the cover-hit band **strikes the exposed, physically 
 
 For **non-projectile pointed rays/beams** or unusual ranged phenomena, the same line-of-fire and Cover Difficulty model may affect an applicable **aimed attack roll**, but a "cover hit" represents contact with the **barrier** only where that phenomenon actually collides or is obstructed. The attack's authored physical propagation controls whether the beam terminates, scorches, reflects, or passes through. A barrier cannot be treated as a universal defense against unrelated area effects, non-ballistic hazards, or **Direct Veil Intrusion** merely because Cover exists.
 
+## Combined living screens and physical cover
+
+The one-roll `B < A <= B+C` **cover-hit window above remains canonical for cover-only shots**. For a **legal direct projectile shot with one or more physically intervening creatures**, [Unified Firing Lane v0](unified-firing-lane-v0.md) instead uses the **single highest effective obstruction `P = max(C, L_1, ... L_n)`** and allocates failed primary die faces: **effective Cover `C` occupies the highest failed faces even when `L_i > C`**; allies occupy the lowest remaining faces starting at natural 2, and enemies fill downward beneath cover. This mixed-lane allocation **supersedes the cover-hit band only for those shots**, not the full-blockage legality gate, barrier/surface effects, or any cover-only attack. A creature result requires one conditional secondary accuracy check against its own Defense. Do not stack Living Screen and Cover numerically, resolve the same projectile against every screen, or turn the Cover-only one-roll procedure into a universal second roll.
+
 ## Aim and precision: not mandatory Called Shots
 
 [Aim v0](aim-v0.md) can declare **the chosen Cover Difficulty source** and mitigate **up to 4** of its positive value for **one** subsequent eligible shot. Do not combine Aim against Range and Cover for the same shot; they remain distinct selectable sources. For example:
@@ -129,11 +133,11 @@ Aim does not grant hidden-target detection, let a weapon fire through solid wall
 
 ## Deferred boundaries
 
-- **Shooting into melee, intervening creatures, and friendly fire:** do not equate an interposing ally/enemy with a wall or automatically assign a generic penalty merely for an engaged target. Actual rules for creature interception and stray-hit outcomes require a separate v0.
+- **Shooting into melee, intervening creatures, and friendly fire:** the ordinary mixed-lane projectile procedure is now [Unified Firing Lane v0](unified-firing-lane-v0.md); mere engagement creates no modifier. Living Screen numbers, deliberate protective Take Hit timing, extreme crowding, special trajectories, and other extensions remain playtest/deferred work.
 - **Concealment, invisibility, smoke, darkness, and unseen targets:** sight and target acquisition are not ordinary physical cover. A target behind smoke may be hard to find without any solid obstruction. This subsystem must be authored separately.
 - **Ballistic arc, projectile penetration, ricochet, and barrier durability/destruction:** physical special-case behavior requires authored weapon/object traits rather than generic cover-hit damage or second cover rolls.
 - **Physical defense against area effects:** walls and barriers block an area only where a particular phenomenon and actual geometry allow it. No universal area-save or "Cover cancels area" rule is added.
 - **Called Shot, weapon profiles, precision techniques:** no invented Called Shot AP cost, location difficulty, wounds, or on-hit Interrupt is introduced here.
 - **Playtesting:** verify Cover Difficulty +2/+4/+6/+8, interaction with active high-Tempo Dodge, Aim's four-point cap, and whether the cover-hit window is too punishing for high-value on-hit ammunition.
 
-**LOCKED v0:** Physical line-of-fire gate; directional Cover +2/+4/+6/+8; **one Attack roll**; Cover Difficulty contributes to static Ranged Defense, active Ranged Dodge, and legal projectile Guard (not extra capacity); no second percentage cover roll, disadvantage, or mandatory Called Shot; cover-hit band `B < A <= B+C` after eligible Aim; real cover impact supersedes normal projectile-area scatter; solid blockage prohibits direct targeting. Numerical ladder is playtest-sensitive.
+**LOCKED v0 (cover-only shots; mixed living screens use the linked exception above):** Physical line-of-fire gate; directional Cover +2/+4/+6/+8; **one Attack roll**; Cover Difficulty contributes to static Ranged Defense, active Ranged Dodge, and legal projectile Guard (not extra capacity); no second percentage cover roll, disadvantage, or mandatory Called Shot; cover-hit band `B < A <= B+C` after eligible Aim; real cover impact supersedes normal projectile-area scatter; solid blockage prohibits direct targeting. Numerical ladder is playtest-sensitive.
