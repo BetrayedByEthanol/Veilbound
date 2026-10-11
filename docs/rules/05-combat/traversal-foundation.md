@@ -1,6 +1,6 @@
 # Traversal Foundation
 
-> Canonical Veilbound foundation for climbing and swimming as traversal rather than ordinary ground movement. This page defines capability adjudication, Traversal State and Traversal Segments, climbing support requirements, combat action legality, defensive movement, Opportunities, and disruption. Exact Climb/Swim MP costs, fixed capability thresholds, falling damage, drowning/breathing, currents/waves, armor-specific traversal effects, and detailed underwater weapon rules remain later work. [Physical Hazards v0](physical-hazards-v0.md) proposes a **PROVISIONAL** Catch Grip procedure; it is not a locked or numerically calibrated replacement for this foundation.
+> Canonical Veilbound foundation for climbing and swimming as traversal rather than ordinary ground movement. This page defines capability adjudication, Traversal State and Traversal Segments, climbing support requirements, combat action legality, defensive movement, Opportunities, and disruption. Exact Climb/Swim MP costs, fixed capability thresholds, falling damage, drowning/breathing, currents/waves, armor-specific traversal effects, and detailed underwater weapon rules remain later work. [Physical Hazards v0](physical-hazards-v0.md) now **LOCKS** the one-Reaction emergency Catch Grip and falling baseline; the Traversal foundation remains authoritative for Hold Support and Swimming Disruption.
 
 ## Ground movement remains the baseline
 
@@ -239,9 +239,9 @@ If a climbing creature still satisfies **Hold Support** after the disrupting eve
 
 If it no longer satisfies Hold Support or is displaced away from usable support, it begins to fall **unless another valid support is immediately established**.
 
-A reachable ledge, rope, hold, piece of equipment, or other support may make such re-establishment possible. [Physical Hazards v0](physical-hazards-v0.md#catch-grip-v0--emergency-support-recovery) proposes a **PROVISIONAL** one-Reaction emergency Catch Grip when existing Hold Support has actually been lost; retaining sufficient Hold Support or an already effective safety line does not require that emergency response. Exact calibration and final lock remain open.
+A reachable ledge, rope, hold, piece of equipment, or other support may make such re-establishment possible. The **LOCKED** [Catch Grip v0](physical-hazards-v0.md#catch-grip-v0--emergency-support-recovery) uses one Reaction for an eligible emergency attempt after losing support. Retaining sufficient Hold Support or relying on an already effective safety line does not require Catch Grip. Exact situational DCs and specialized equipment/physics remain calibration content.
 
-The provisional fall and contact sequence is in [Physical Hazards v0](physical-hazards-v0.md); falling damage, Armor interaction, collisions, and numerical outcomes remain deferred.
+[Falling v0](physical-hazards-v0.md) now locks ordinary fall/landing damage and Impact Armor playtest values; nonstandard contact and collision/crushing outcomes remain deferred.
 
 ### Swimming Disruption
 
@@ -258,8 +258,8 @@ This foundation deliberately does **not** define:
 - fixed Strength/Agility/Vitality thresholds for routes;
 - fixed Training thresholds for routes;
 - character-creation rules determining starting Climbing/Swimming competence;
-- final approval and numerical calibration of the **PROVISIONAL** [Catch Grip v0](physical-hazards-v0.md#catch-grip-v0--emergency-support-recovery) procedure;
-- calibrated falling damage, landing benefits, long-fall timing, and fully authored collision/crushing rules;
+- situational DC calibration and special-case extensions of the **LOCKED** [Catch Grip v0](physical-hazards-v0.md#catch-grip-v0--emergency-support-recovery) procedure;
+- specialized fall/landing damage beyond locked [Falling v0](physical-hazards-v0.md), exact exceptional-fall timing, and fully authored collision/crushing rules;
 - drowning, breath-holding, buoyancy, currents, waves, and other water hazards;
 - armor-specific climbing/swimming effects;
 - detailed underwater weapon behavior;
