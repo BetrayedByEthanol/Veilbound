@@ -1,6 +1,6 @@
 # Special Movement, Terrain, and Prone
 
-> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement and combat consequences of Prone. Climbing and swimming foundations are defined separately in [Traversal Foundation](traversal-foundation.md). [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md) are now locked as straight-heading walking modes; traversal speed calibration, jumping/falling, squeezing, size exceptions, flight, and weapon-specific Prone handling beyond the baseline remain later work.
+> Canonical extension to [Movement Foundation](movement-foundation.md). This page locks Sprint, terrain step costs, movement-allowance impairments, allied-square transit requirements, and the movement and combat consequences of Prone. Climbing and swimming foundations are defined separately in [Traversal Foundation](traversal-foundation.md). [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md) are now locked as straight-heading walking modes; traversal speed calibration, jumping and specialized falling beyond locked [Falling v0](physical-hazards-v0.md), squeezing, size exceptions, flight, and weapon-specific Prone handling beyond the baseline remain later work.
 
 ## Calculation order
 
@@ -477,8 +477,8 @@ Still unresolved:
 
 - specialized mounted/momentum variants beyond locked [Charge v0](rapid-advance-and-charge-v0.md), and other attack-linked movement maneuvers;
 - exact Climb/Swim MP costs and traversal speed calibration;
-- final lock and numerical calibration of proposed [Falling and Catch Grip v0](physical-hazards-v0.md), plus detailed water hazards;
-- jumping, prolonged falling and midair movement;
+- playtest calibration and specialized physics beyond locked [Falling and Catch Grip v0](physical-hazards-v0.md), plus detailed water hazards;
+- jumping, precise extended-fall timing and special midair movement;
 - squeezing;
 - size-based occupancy and Reach exceptions;
 - flight and other special movement modes;
