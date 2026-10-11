@@ -124,6 +124,8 @@ A natural 20 creates a critical opportunity.
 - The initial natural 20 is automatically a **Critical Hit**.
 - Roll once more only to determine whether another natural 20 upgrades it to a **Devastating Critical**.
 
+**Protective Intervene natural-20 confirmation:** Under [Protective Intervene v0](protective-intervene-v0.md#natural-20-with-protective-intervene--one-confirmation), the ward's originally assigned defense is **not automatically confirmed before the protective method is applied**. A legal activated **Shield Guard** uses **one confirmation against the protector's Shield Guard Defense instead of the ward's assigned Defense** (even if the ward chose Dodge, Guard, or Take Hit); an activated **Body Take Hit** uses the **ward's ordinary single confirmation or Take Hit critical/upgrade procedure**, and then transfers the determined hit severity to the protector. An unusable or otherwise ineligible protective method leaves the ward's ordinary natural-20 procedure unchanged. **Never confirm both the ward and protector for the same initial natural 20.**
+
 There is no separate Critical Defense statistic.
 
 Guard does not cancel criticals by special rule; a stronger defense simply makes confirmation harder.
