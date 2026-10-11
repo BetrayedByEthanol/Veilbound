@@ -269,7 +269,7 @@ A **Reaction** is a once-per-round timing resource that allows an effect or rule
 - a Reaction may respond to another Reaction, an Interception, an Opportunity Attack, or another interrupting effect if its own trigger is satisfied;
 - the Reaction resource itself does nothing without a rule/effect that defines a trigger and consequence.
 
-Guard and Dodge remain defensive responses and do **not** spend the Reaction.
+Guard and Dodge remain defensive responses and do **not** spend the Reaction. **[Protective Intervene v0](protective-intervene-v0.md)** separately authorizes **Reactive Intervene** as a spontaneous **one-Reaction** commitment to protect another creature against a declared attack; the underlying successful Shield Guard spends ordinary Guard capacity, while a deliberate Body Take Hit spends none. This does **not** make ordinary personal Guard/Dodge cost Reactions.
 
 ### Response windows and nested responses
 
@@ -281,12 +281,13 @@ For each trigger occurrence:
 
 1. **Release matching Interceptions.** For each creature, identify at most one reserved Interception that releases from that trigger occurrence. If several of that creature's reservations have the same qualifying trigger, the earliest-declared matching reservation releases and the others remain reserved for later qualifying occurrences.
 2. **Resolve released Interceptions first.** Released Interceptions resolve in Initiative order among their users. A released Movement Interception remains a live committed movement pool while waiting in this queue and remains subject to current mobility limits before its resolution begins.
-3. **Resolve nested triggers immediately.** If an Interception creates a new trigger, open a nested response window before that Interception finishes. A valid Reaction, Opportunity Attack, or further Interception may respond to that new trigger under the normal rules. A Movement Interception suspended by this nested window remains live and subject to mobility changes until it resumes and fully finishes.
+3. **Resolve nested triggers immediately.** If an Interception creates a new trigger, open a nested response window before that Interception finishes. A valid Reaction, Opportunity Attack, or further Interception may respond to that new trigger under the normal rules. A Movement Interception suspended by this nested window remains live and subject to mobility changes until it resumes and fully finishes. [Prepared Protective Intervene](protective-intervene-v0.md#prepared-intervene--reserved-movement-interception) is still **one atomic Movement Interception**; it may establish a position and carry **one conditional defensive response**, not a separately reserved AP action.
 4. **Re-check the original event.** After all released Interceptions and their nested responses resolve, determine whether the original triggering action/event is still legal and relevant. If it has been cancelled or made impossible, it does not proceed to spontaneous responses unless a rule's trigger remains satisfied independently of the cancelled event.
 5. **Collect spontaneous responses to the original event.** If the original event remains legal/relevant, eligible creatures may declare either:
    - an optional Reaction whose trigger is satisfied;
    - the first Opportunity Attack by spending the creature's available Reaction to activate Opportunity Response; or
-   - a later Opportunity Attack from an already-active Opportunity Response with remaining Opportunity Capacity.
+   - a later Opportunity Attack from an already-active Opportunity Response with remaining Opportunity Capacity;
+   - **Reactive Protective Intervene** against a declared attack on another creature, spending the **protector's available Reaction** before the attack roll when [Protective Intervene v0](protective-intervene-v0.md) permits.
 6. **Resolve spontaneous same-trigger responses.** These responses resolve in Initiative order among their users. If one response creates a new trigger, resolve that nested response window before returning to the older response.
 7. **Resume the original event.** After all responses finish, re-check legality once more and resolve the original action/event if it remains legal.
 
@@ -314,7 +315,7 @@ An Interception reservation is **atomic**:
 - one action/effect that is inherently a **Full Action and otherwise eligible for Interception**, which requires and commits the reserving creature's entire Turn AP allotment; or
 - one **Movement Interception**, committing a chosen amount of the creature's remaining MP.
 
-A Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception. Full Action status alone does not grant reservation eligibility; specific rules may prohibit it, as Sprint does. A Movement Interception reserves movement only and follows the route/timing rules in [Movement Foundation](movement-foundation.md).
+A Full Action reservation cannot be used to bundle several ordinary AP-based actions into one Interception. Full Action status alone does not grant reservation eligibility; specific rules may prohibit it, as Sprint does. A Movement Interception reserves movement only and follows the route/timing rules in [Movement Foundation](movement-foundation.md). **[Protective Intervene v0](protective-intervene-v0.md)** explicitly permits one **conditional Shield Guard or Body Take Hit protective response** after successfully completing at least one legal reserved movement step into a protective position; it remains **one Movement Interception**, not an MP+AP or MP+Reaction action package.
 
 A single trigger occurrence can release **at most one reserved Interception from the same creature**.
 
