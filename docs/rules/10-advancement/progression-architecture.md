@@ -67,6 +67,16 @@ Ability advancement is defined in [Abilities and Training](../02-character-creat
 - increase one ability of the player's choice by +1;
 - normal permanent natural cap +5.
 
+## Training advancement — B04 v0
+
+The **separation between Weapon Development and Learned Disciplines**, the **one point per directly invested +1** rule, the **melee-only half-transfer**, and the **single-family refinement restriction** are B04 design decisions. Numerical schedules and +5 maximums remain **provisional playtest baselines**:
+
+- [Weapon Training](../05-combat/weapon-training-and-refinements-v0.md#provisional-v0-weapon-development-schedule): +2 maximum and 2 points at creation; +1 point at levels **4, 8, 12, 16, 20**, with +3/+4/+5 gates at levels 4/8/12 respectively.
+- [Learned Disciplines](../02-character-creation/abilities-and-training.md#learned-discipline-progression--provisional-v0): 8 starting points and one additional point at **every even level 2–20**; +3/+4/+5 gates at levels 4/8/12 respectively.
+- Character advancement does not require a player to broaden into an unwanted skill: points may be **saved** for eligible directly invested ranks or **future authored single-category refinements**. **No refinement effects are yet authored.**
+
+These awards are separate from the existing universal Ability increases. A level-1 character can use the authored starter allocation even while later-level refinement catalog and balance remain open.
+
 ## Not yet canonical
 
 The audit does not yet provide complete native rules for:

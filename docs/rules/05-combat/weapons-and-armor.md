@@ -1,6 +1,6 @@
 # Weapons and Armor
 
-> Canonical current playtest baseline. Weapon attack pairings and Physical Contribution are defined in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md). Reach/Brace, final armor Coverage, and rune-capacity numbers remain unresolved.
+> Canonical current playtest baseline. Weapon attack pairings and Physical Contribution are defined in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md); Training families in [Weapon Training v0](weapon-training-and-refinements-v0.md). **Provisional** item prices, armor set composition and starter loadouts are in [Equipment Economy v0](../11-equipment/economy-and-starter-equipment-v0.md). Reach/Brace, final armor Coverage, and rune-capacity numbers remain unresolved.
 
 ## Weapon damage
 
@@ -35,6 +35,7 @@ See [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-ma
 | Weapon | Hands | Damage | Pen | Physical contribution | Trauma | Baseline identity |
 |---|---|---:|---:|---|---|---|
 | Dagger | 1 | 2 + d4 | 0 | Light | Cut / Pierce | Concealable; poor against armor; strong gap/called-shot tool |
+| Parrying dagger | 1 | 2 + d4 | 0 | Light | Cut / Pierce | **Inherits ordinary dagger Attack, damage, Penetration, Physical Contribution, trauma, and weapon Guard profile.** Its extra off-hand Guard/Riposte benefits apply only under the [defensive off-hand rules](off-hand-and-ranged-combat.md#defensive-off-hands-and-shields). |
 | Rapier | 1 | 2 + d6 | 2 | Light | Pierce | Precision weapon; moderate armor interaction |
 | Sword | 1 | 3 + d6 | 2 | Light | Cut / Pierce | General-purpose one-handed baseline |
 | Spear | 1 or 2* | 3 + d6 | 3 | Full | Pierce | Reach/penetration-oriented |
@@ -114,6 +115,8 @@ Dodge Defense =
 If Agility is 0 or negative, use the actual modifier. Armor never raises a poor Agility value to the cap.
 
 The cap does not normally apply to weapon attacks or every Agility-based check.
+
+Full armor configurations are rated as **complete protective sets**; necessary underlayers are included, and wearing two configurations together does **not** add their Armor Ratings. See the [provisional economy and armor price table](../11-equipment/economy-and-starter-equipment-v0.md#armor-prices). No additional starting Armor cap or mundane-armor casting penalty is introduced.
 
 ## Rune capacity
 

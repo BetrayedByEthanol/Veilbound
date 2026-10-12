@@ -14,7 +14,7 @@ A defensive off-hand grants **+1 Guard capacity**. Its type determines any addit
 | Large shield | +1 | +3 | May Guard normal projectiles; mobility/cumbersomeness drawback still to be finalized |
 | Two-handed melee weapon | — | +1 | Leverage already reflected in weapon profile |
 
-Shield size increases Guard Defense rather than Guard count.
+Shield size increases Guard Defense rather than Guard count. A shield or buckler does **not** require separately purchased Shield Training: its eligible Guard uses the effective Training of a legal **one-handed melee weapon currently wielded in the other hand**, otherwise +0 Weapon Training. This does not stack with an additional weapon's Training; the shield's listed Guard Defense bonus and +1 Guard capacity remain unchanged. See [Weapon Training v0](weapon-training-and-refinements-v0.md#attack-guard-and-shield-handling).
 
 Ordinary weapons do not normally Guard arrows or crossbow bolts.
 

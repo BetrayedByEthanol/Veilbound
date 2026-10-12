@@ -20,6 +20,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Unified Firing Lane v0 — Living Screens](unified-firing-lane-v0.md)
 - [Protective Intervene v0 — Reactive and Prepared Protection](protective-intervene-v0.md)
 - [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md)
+- [Weapon Training and Category-Specific Refinements v0](weapon-training-and-refinements-v0.md)
 - [Defensive Responses and Criticals](defensive-responses-and-criticals.md)
 - [Weapons and Armor](weapons-and-armor.md)
 - [Off-Hand and Ranged Combat](off-hand-and-ranged-combat.md)
