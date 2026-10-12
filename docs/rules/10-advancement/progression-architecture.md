@@ -77,12 +77,18 @@ The **separation between Weapon Development and Learned Disciplines**, the **one
 
 These awards are separate from the existing universal Ability increases. A level-1 character can use the authored starter allocation even while later-level refinement catalog and balance remain open.
 
+## Talents — B07 early-level playtest
+
+The [B07 Talent Framework](talents-framework-v0.md) defines player-selected **Talents** as separate from Archetype Features, Pillar/Universal Veil Techniques, Weapon Style Refinements, and Learned Discipline Refinements. The [level-1–5 catalogue](talents-level-1-5-v0.md) supplies **32 provisional playtest entries**, favoring physical/combat options while retaining spellcasting, Archetype and noncombat selection. No magical item creation or potion manufacture is in this MVP.
+
+The structural design direction is **Low Focus receives more selections than Medium, which receives more than High**. The current **provisional** level-1–5 award schedule is **High: 1 and 5; Medium: 1, 3 and 5; Low: 1, 2, 3 and 5**. These Talent selections are separate from both B04 Training budgets and Ability increases. The longer-level schedule (6–20), retraining and final numerical Talent balance are **not locked**. Do not import D&D feats.
+
 ## Not yet canonical
 
 The audit does not yet provide complete native rules for:
 
 - XP or milestone level gain;
-- feats;
+- complete level 6–20 Talent progression and final Talent balance;
 - general multiclassing;
 - how VP, Focus, technique progression, and innate archetype traits combine under multiclassing;
 - complete mechanics for every specialization;

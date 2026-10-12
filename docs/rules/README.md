@@ -76,6 +76,8 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 ### 10 — Advancement
 
 - [Advancement Architecture](10-advancement/progression-architecture.md)
+- [Talents — B07 MVP Framework v0](10-advancement/talents-framework-v0.md)
+- [Talents — Level 1–5 Catalogue v0](10-advancement/talents-level-1-5-v0.md)
 
 ### 11 — Equipment
 

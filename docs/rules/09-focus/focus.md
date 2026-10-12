@@ -31,7 +31,7 @@ These developments do **not** create special mundane martial techniques.
 
 If a mundane action is physically possible, it belongs to the core combat system and can be attempted by anyone under the appropriate rules. Advancement may make a character faster, stronger, or harder to kill, but it does not create unexplained permission-only moves.
 
-Low Focus is intended to support substantial build-time choice while keeping turn-by-turn play comparatively direct and dice-forward.
+Low Focus is intended to support substantial build-time choice while keeping turn-by-turn play comparatively direct and dice-forward. The [B07 Talent Framework](../10-advancement/talents-framework-v0.md) therefore proposes **more Talent selections for Low Focus than Medium, and more for Medium than High**. This is a **provisional award schedule**, not a ban on Low-Focus magical Talents or High-Focus physical ones; an individual active Talent remains legal when it has the required timing and cost.
 
 ## Medium Focus — Routing
 
@@ -61,7 +61,7 @@ Medium Focus should have:
 
 ## High Focus — Projection
 
-High Focus concentrates advancement on outward Veil manipulation and leaves the largest share of growing Veil integration freely available for deliberate allocation as VP.
+High Focus concentrates advancement on outward Veil manipulation and leaves the largest share of growing Veil integration freely available for deliberate allocation as VP. High Focus receives **fewer provisional Talent choices**, balanced against its normal projected-magic options, but is not barred from martial, knowledge or utility Talents.
 
 High-Focus characters should receive broader and stronger projected options, with their principal combat complexity coming from **selection** rather than numerous passive martial improvements.
 
