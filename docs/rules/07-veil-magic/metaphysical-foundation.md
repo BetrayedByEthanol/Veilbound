@@ -203,8 +203,10 @@ Therefore:
 - an emotion can be genuinely linked to a Pillar Aspect;
 - that link can exist from birth;
 - the Pillar does not need to choose or approve the Gifted;
-- emotion remains the actual access mechanism;
+- emotion remains the actual access mechanism **for those linked-Aspect techniques and emotion-dependent Gifted expressions**, not for independent Universal Veil procedures;
 - changing regional Pillar influence does not retroactively mean the Pillar authored the Gifted's personality or emotions.
+
+**Universal Veil operations** such as [Veil Inspection and Translocation](universal-veil-fundamentals.md) manipulate common Veil structures without a particular Pillar/Aspect pattern as their access identity. Gifted are eligible for these independently of their eight emotional links; such operations do **not** require evoking a corresponding emotion or establishing Active Emotion merely because the user is Gifted. Their individual acquisition, costs and any authored compatibility with Gifted-specific features remain separate design work.
 
 Current Gifted rules that reference Resonance use the universal internal-coherence state defined above.
 
