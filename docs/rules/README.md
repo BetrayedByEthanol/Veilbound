@@ -19,7 +19,8 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 ### 02 — Character creation
 
 - [Character Creation Foundation](02-character-creation/character-creation-foundation.md)
-- [Abilities and Training](02-character-creation/abilities-and-training.md)
+- [Abilities and Training — B04 Learned Disciplines and starting allocation](02-character-creation/abilities-and-training.md)
+- [Weapon Training and Style Refinements v0](05-combat/weapon-training-and-refinements-v0.md)
 
 ### 04 — Non-combat
 
@@ -45,6 +46,10 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Weapon Attack, Guard, and Physical Contribution](05-combat/weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
 - [Weapons and Armor](05-combat/weapons-and-armor.md)
+
+### 11 — Equipment
+
+- [Equipment Economy and Starter Equipment v0 — provisional prices and starting loadouts](11-equipment/economy-and-starter-equipment-v0.md)
 - [Off-Hand and Ranged Combat](05-combat/off-hand-and-ranged-combat.md)
 
 ### 06 — Vigor, wounds and death
