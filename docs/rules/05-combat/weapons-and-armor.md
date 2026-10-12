@@ -1,6 +1,6 @@
 # Weapons and Armor
 
-> Canonical current playtest baseline. Weapon attack pairings and Physical Contribution are defined in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md). Reach/Brace, final armor Coverage, and rune-capacity numbers remain unresolved.
+> Canonical current playtest baseline. Weapon attack pairings and Physical Contribution are defined in [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-math.md); Training families in [Weapon Training v0](weapon-training-and-refinements-v0.md). **Provisional** item prices, armor set composition and starter loadouts are in [Equipment Economy v0](../11-equipment/economy-and-starter-equipment-v0.md). Reach/Brace, final armor Coverage, and rune-capacity numbers remain unresolved.
 
 ## Weapon damage
 
@@ -114,6 +114,8 @@ Dodge Defense =
 If Agility is 0 or negative, use the actual modifier. Armor never raises a poor Agility value to the cap.
 
 The cap does not normally apply to weapon attacks or every Agility-based check.
+
+Full armor configurations are rated as **complete protective sets**; necessary underlayers are included, and wearing two configurations together does **not** add their Armor Ratings. See the [provisional economy and armor price table](../11-equipment/economy-and-starter-equipment-v0.md#armor-prices). No additional starting Armor cap or mundane-armor casting penalty is introduced.
 
 ## Rune capacity
 
