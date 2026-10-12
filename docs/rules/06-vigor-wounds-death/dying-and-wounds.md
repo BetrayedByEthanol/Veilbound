@@ -1,6 +1,6 @@
 # Dying and Wounds
 
-> Canonical current framework extracted from Core Rules Audit v34. Some wound severity thresholds and individual injury effects remain calibration items.
+> Canonical current wound framework. **0-HP overkill severity and default Repair Requirements now have deterministic v0 playtest values**; exceptional injury outcomes and individual injury effects remain calibration items.
 
 ## When wounds occur
 
