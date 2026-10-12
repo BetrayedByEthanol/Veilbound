@@ -92,4 +92,4 @@ Ordinary hits do not normally create persistent wounds. A wound occurs only when
 2. a Devastating Critical occurs; or
 3. the target reaches 0 HP.
 
-The detailed wound tables and some severity thresholds remain calibration content and should not be treated as fully finalized merely because the trigger framework is locked.
+The [0-HP wound severity v0 bands](dying-and-wounds.md#wound-severity) now provide deterministic playtest thresholds, while detailed injury-specific effects and exceptional severity outcomes still require calibration. The trigger framework itself is unchanged.
