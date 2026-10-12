@@ -28,26 +28,15 @@ Training is narrow and situationally paired with the relevant Ability.
 
 ## Social interaction
 
-Ordinary social execution generally uses **Presence** plus a relevant narrow Training where one applies.
+Ordinary social outcomes depend primarily on the **player's chosen approach, intent, dialogue or summary of the intended argument, the NPC's interests and the situation**. When uncertainty requires a roll, usually use **Presence with situational modifiers**; Intellect, Awareness or another Ability may apply for a genuinely different approach. **Do not add a universal Negotiation, Persuasion, Interrogation, Command or other social skill bonus.**
 
-Possible Trainings include:
-
-- Oratory;
-- Negotiation;
-- Interrogation;
-- cultural Etiquette;
-- Command;
-- Acting;
-- Disguise;
-- profession- or culture-specific fields.
-
-There is deliberately no mandatory generic **Persuasion**, **Deception**, or equivalent umbrella skill.
+A **genuinely narrow learned discipline** may matter for the part it actually covers—e.g. a culture's court etiquette, formal rhetorical performance, institutional diplomatic protocol, or knowledge of local law—not automatically for every conversation. The legacy catalogue labels Oratory, Negotiation, Interrogation and Command are not universal skill bonuses. Refer to [Abilities and Training](../02-character-creation/abilities-and-training.md#social-perception-and-investigation-boundary).
 
 ### Player approach and character ability
 
 The player chooses the approach.
 
-The character's Presence and Training determine how effectively the character carries it out.
+The character's relevant Ability and circumstances determine how effectively the character carries it out; only a **specifically relevant narrow learned practice** contributes Training.
 
 A player is not required to personally deliver an eloquent speech to benefit from a high-Presence character.
 
@@ -136,7 +125,7 @@ For example:
 
 ## Common narrow Trainings
 
-The locked current catalogue includes:
+The following **existing examples** remain valid when narrowly scoped; some legacy social labels require explicit task-specific interpretation under [B04](../02-character-creation/abilities-and-training.md#social-perception-and-investigation-boundary):
 
 - Climbing
 - Swimming
@@ -173,7 +162,7 @@ The locked current catalogue includes:
 - Religion & Cults
 - profession-specific Trades
 
-This is not a closed list. Custom narrow Trainings and knowledge fields are explicitly allowed.
+This is not a closed list. Custom narrow Trainings and knowledge fields are explicitly allowed. **Background familiarity** with a hometown, people or lived work is not a purchased Training and should generally supply ordinary known facts without a roll. Broad Survival does not supersede Tracking, Hunting, Navigation, Herbalism or other authored disciplines.
 
 ## Non-combat systems not yet implemented
 
