@@ -22,6 +22,8 @@ These are **provisional** playtest anchors, not binding wages for every region, 
 
 Prices are for ordinary **complete wearable protective configurations**, including needed textile underlayers and mail components where appropriate. **Layered ratings never add**: wearing chain beneath plate does not sum Armor 4 and Armor 6. Keep existing armor/Agility-cap/Guard/coverage rules.
 
+**Starting purchase eligibility:** The first two rows—**Ordinary clothing / light robes (Armor 0, 1 sp)** and **Heavy padded / battle robes (Armor 3, 15 sp)**—are **market-price references only and cannot be selected or purchased with the level-1 starting budget as armor**. Normal clothing, including robe-style clothing if desired, is **assumed worn for free as appearance only** (Armor 0; no enchanted/rune properties); 1 sp is the later replacement-market price, not a starter expenditure. Heavy padded/battle robes keep their Armor 3 profile for later acquisition, but are **unavailable at ordinary character creation**. **All other armor rows (Leather through Full knightly harness) are legal starter armor selections** subject to price, budget and availability; no Armor Rating cap is imposed.
+
 | Armor configuration | Existing Armor | Price (sp) |
 |---|---:|---:|
 | Ordinary clothing / light robes | 0 | 1 |
@@ -35,7 +37,7 @@ Prices are for ordinary **complete wearable protective configurations**, includi
 | Plate armor | 6 | 350 |
 | Full knightly harness | 7 | 1,100 |
 
-A full knightly harness is a costly **fitted system** of plate, mail at gaps, padding and required components, not a single chest plate or a stack of independently rated items. Early heavier armor may simply provide better protection; **do not invent spellcasting penalties, extra armor limits or new encumbrance modifiers** to make lighter armor competitive. Rune/weaving advantages belong to later enchantment rules. Ordinary robes remain wearable clothing but are not an offered **starter armor selection**; heavy padded/battle robes retain their canonical Armor 3 profile but are likewise omitted from the recommended starter catalog. Prices for both remain as market references.
+A full knightly harness is a costly **fitted system** of plate, mail at gaps, padding and required components, not a single chest plate or a stack of independently rated items. Early heavier armor may simply provide better protection; **do not invent spellcasting penalties, extra armor limits or new encumbrance modifiers** to make lighter armor competitive. Rune/weaving advantages belong to later enchantment rules. Both robe rows above are **excluded from starter armor purchases**, not merely absent from example loadouts. Their prices are provided for post-creation market reference.
 
 ## Weapon prices
 
@@ -68,13 +70,13 @@ The costs reflect **manufacturing, fitting and market availability**, not a dire
 | General artisan's toolkit | 12 |
 | Specialized professional toolkit | 20 |
 
-A **standard adventuring pack (8 sp)** contains a bedroll, waterskin, simple fire-starting materials, basic travel rations and a modest length of ordinary rope. This is a **starter supply bundle**, not an exhaustive survival/encumbrance system. The bundle includes no armor, weapons, ammunition or professional toolkit. Ordinary personal clothing is presumed worn and has no protective Armor benefit; its 1-sp price is for replacement clothing bought separately.
+A **standard adventuring pack (8 sp)** contains a bedroll, waterskin, simple fire-starting materials, basic travel rations and a modest length of ordinary rope. This is a **starter supply bundle**, not an exhaustive survival/encumbrance system. The bundle includes no armor, weapons, ammunition or professional toolkit. Ordinary personal clothing (including cosmetic robes) is presumed worn at creation at no equipment-budget cost and has no protective Armor benefit; the listed 1-sp value is for **replacement clothing after creation**.
 
 For MVP, track **one arrow or bolt expended per shot fired**; the listed bundle prices are for 20 pieces of matching ammunition. Recovery, exceptional ammunition, encumbrance, durability, prices of individual pack contents and detailed crafting remain **deferred**, so no undocumented recovery or degradation bonuses apply. Toolkits enable work for which proper tools are required; **no automatic numerical Training bonus** is granted merely by owning them.
 
 ## Starting wealth and purchasing
 
-**Provisional starting equipment budget: 150 sp (15 gp) total per level-1 character.** This is the **value of starting possessions** obtained through savings, previous service, patrons or background, not necessarily coins given in addition to free equipment. Purchase weapons, armor, shields, ammunition, kits and ordinary supplies from the v0 price list; subtract each item from the same 150-sp budget. Unspent value may be carried as ordinary coins. The standard adventuring pack is **not free** when selected.
+**Provisional starting equipment budget: 150 sp (15 gp) total per level-1 character.** This is the **value of starting possessions** obtained through savings, previous service, patrons or background, not necessarily coins given in addition to free equipment. Purchase weapons, **eligible starting armor only (Leather through Full knightly harness)**, shields, ammunition, kits and ordinary supplies from the v0 price list; subtract each item from the same 150-sp budget. **The two robe/clothing rows are not purchasable starting armor, even though their market values are listed.** Unspent value may be carried as ordinary coins. The standard adventuring pack is **not free** when selected.
 
 There is **no independent starting Armor cap**, no default Arcane/Veil armor penalty, no Archetype or Focus requirement for a listed loadout, and no mandatory starting combat role. Plate (350 sp) and full harness (1,100 sp) exceed the ordinary starting budget by price, not by level restriction. Expensive equipment may also require a suitable seller and fitting; prices alone do not guarantee immediate local availability.
 
@@ -97,7 +99,7 @@ These are **optional examples**, not classes, mutually exclusive packages, or ex
 | Healer (light) | Leather 25, mace 16, shield 16, medical kit 15, pack 8 | 80 | 70 |
 | Heavy fighter | Brigandine 95, greatsword 42, pack 8 | 145 | 5 |
 
-An armored healer and lightly armored healer may share **the same Archetype, Focus and healing capabilities**. The difference lies in starting purchases. Players are not required to buy every suggested item or spend the entire budget. A robed visual appearance is possible as ordinary clothing over a suitable protective configuration; unenchanted robes are not sold here as a recommended substitute for Armor.
+An armored healer and lightly armored healer may share **the same Archetype, Focus and healing capabilities**. The difference lies in starting purchases. Players are not required to buy every suggested item or spend the entire budget. A robed visual appearance is available through the free, purely cosmetic clothing assumption, worn over a suitable protective configuration if desired; it is **not a purchased starter armor option**. Heavy padded/battle robes are unavailable as ordinary starting armor despite having a later-market price.
 
 ## B04/B07 watchlist
 
