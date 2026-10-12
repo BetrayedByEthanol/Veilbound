@@ -8,6 +8,8 @@ Veilbound uses technique tiers **0 through 9**.
 
 Tier 0 is available whenever the character has access to the relevant technique.
 
+**Universal Veil Fundamentals** are a **Pillar/Aspect-independent magical category**, not an extra Pillar or Aspect. See [Universal Veil Fundamentals](universal-veil-fundamentals.md) and [Veil Translocation](veil-translocation-foundation.md). The universal tier ceiling below applies to authored **tiered** Universal procedures as well as Pillar techniques; it does **not** automatically grant a Universal technique to a character merely because its tier is accessible. Ordinary common procedures and ritual prerequisites must be specified by their own entries.
+
 Maximum normal technique tier is universal across Focus:
 
 | Character level | Maximum normal technique tier |
@@ -91,4 +93,4 @@ These are descriptors and permissions, not automatic bonuses.
 - **Cadence** — declares each persistent output as Continuous, Rider, Pulse, Spend or another explicitly bounded cadence.
 - **Action cost** — when activated during ordinary turn economy, states whether the technique uses a Physical Action cost, Projection Action cost, General Tempo Action cost, Full Action, Reaction, or another explicitly authored timing/cost. Outward tempo-scale [Projection] techniques normally use the character's Projection Action cost unless a technique says otherwise.
 
-Archetype-specific rules may add narrower qualifiers, but should not duplicate an existing universal concept without a mechanical reason.
+Archetype-specific rules may add narrower qualifiers, but should not duplicate an existing universal concept without a mechanical reason. **Universal Veil** classification does not by itself authorize a Priest-specific Consecration, Scholar Composite formula, Gifted Conduit or Anointed Authority. Each such interaction requires its own explicit compatibility. Universal procedures' specific action, cost, acquisition and effect records are still deferred.

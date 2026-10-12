@@ -184,7 +184,7 @@ Teleportation, Blink, phasing, or another effect that relocates a creature witho
 
 The activation of such an effect may still create an Opportunity if that effect or another rule explicitly says so.
 
-Reaction-based Blink, next-turn AP Debt, and any desperation Overdraw rule are technique/action-economy content rather than part of this baseline movement lock.
+The [Universal Veil Translocation foundation](../07-veil-magic/veil-translocation-foundation.md#blink--clear-spatial-path-visualization-and-whole-body-arrival) now **locks** Blink's destination visualization, unobstructed direct spatial path (open bars permit it; solid glass blocks it), whole-body arrival clearance and preserved movement velocity. These are **magical eligibility conditions**, not ordinary movement through skipped grid squares. Reaction activation, VP cost, next-turn AP Debt, and any desperation Overdraw rule remain **unresolved technique/action-economy content**, not automatic benefits.
 
 ## Movement Interception
 

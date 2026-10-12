@@ -173,13 +173,11 @@ Universal Resonance is **not automatically added** to those Priest mechanics.
 
 ## Scholar: technical access without Pillar approval
 
-A Scholar does not receive a technique because a Pillar likes, recognizes, selects, or consciously grants power to the Scholar.
+A Scholar does not receive a **Pillar technique** because a Pillar likes, recognizes, selects, or consciously grants power to the Scholar.
 
-Pillars are stable emergent patterns within the Veil. Their Aspects provide real metaphysical structures that can be studied.
+For **Pillar techniques**, Pillars are stable emergent patterns within the Veil. Their Aspects provide real metaphysical structures that can be studied. A Scholar learns technical methods that reproduce, enter, route, or shape Volition according to **those Aspect patterns**.
 
-A Scholar learns technical methods that reproduce, enter, route, or shape Volition according to those Aspect patterns.
-
-The technique therefore retains its real Pillar/Aspect identity even though the Scholar does not require:
+A **Pillar technique therefore retains its real Pillar/Aspect identity**, even though the Scholar does not require:
 
 - worship;
 - personal approval;
@@ -188,7 +186,9 @@ The technique therefore retains its real Pillar/Aspect identity even though the 
 - an Anointed-style permanent bond;
 - a Gifted emotional access link.
 
-A Pillar remains metaphysically relevant because the Aspect pattern exists and is reinforced within the Veil, not because the Scholar must obtain permission from it.
+**This Pillar/Aspect identity requirement applies only to Pillar techniques.** [Universal Veil operations](universal-veil-fundamentals.md) instead manipulate common Veil structures or spatial relationships, **without an individual Pillar/Aspect identity**. Their identity is their **Universal family** (initially Veil Inspection or Veil Translocation), consistent with the `universalFamily` technique schema field rather than `aspectId`. All four Archetypes are eligible to develop such operations; Scholar access does not convert a Universal procedure into a Pillar technique.
+
+For Pillar techniques, the relevant Pillar remains metaphysically significant because its Aspect pattern exists and is reinforced within the Veil, **not** because the Scholar needs the Pillar's permission. **Universal procedure acquisition, known counts, preparation and individual costs remain unauthored**; Scholar's individually learned Pillar repertoire and special Composite Casting compatibility are not automatically extended to Universal procedures.
 
 ## Gifted: natural Veil phenomenon
 
@@ -203,8 +203,10 @@ Therefore:
 - an emotion can be genuinely linked to a Pillar Aspect;
 - that link can exist from birth;
 - the Pillar does not need to choose or approve the Gifted;
-- emotion remains the actual access mechanism;
+- emotion remains the actual access mechanism **for those linked-Aspect techniques and emotion-dependent Gifted expressions**, not for independent Universal Veil procedures;
 - changing regional Pillar influence does not retroactively mean the Pillar authored the Gifted's personality or emotions.
+
+**Universal Veil operations** such as [Veil Inspection and Translocation](universal-veil-fundamentals.md) manipulate common Veil structures without a particular Pillar/Aspect pattern as their access identity. Gifted are eligible for these independently of their eight emotional links; such operations do **not** require evoking a corresponding emotion or establishing Active Emotion merely because the user is Gifted. Their individual acquisition, costs and any authored compatibility with Gifted-specific features remain separate design work.
 
 Current Gifted rules that reference Resonance use the universal internal-coherence state defined above.
 

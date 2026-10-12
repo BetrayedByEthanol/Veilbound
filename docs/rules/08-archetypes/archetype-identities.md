@@ -54,14 +54,14 @@ This distinguishes Priest motivation from the Anointed Mission model.
 
 ## Scholar
 
-A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond. Scholar techniques use real Pillar/Aspect patterns without requiring the Pillar's approval, recognition, favor, or personal relationship.
+A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond. **Scholar Pillar techniques** use real Pillar/Aspect patterns without requiring the Pillar's approval, recognition, favor, or personal relationship. **Universal Veil procedures** are a separate, Pillar/Aspect-independent category available in principle to Scholars and the other Archetypes; they use a Universal family identity instead of a Pillar/Aspect identity.
 
 Core access identity:
 
-- may potentially learn techniques from **any Pillar or Aspect**;
-- every technique is learned individually;
-- techniques retain their actual Pillar/Aspect identity;
-- normal techniques use their standard Veil Control scaling and costs;
+- may potentially learn **Pillar techniques** from **any Pillar or Aspect**;
+- learns each **Pillar technique** individually rather than receiving a whole Aspect catalogue automatically;
+- **Pillar techniques retain** their actual Pillar/Aspect identity; **Universal Veil techniques/procedures instead use their Universal family identity** (e.g. Veil Inspection or Veil Translocation);
+- normal techniques use their authored Veil Control scaling and costs; **Universal eligibility alone does not grant a technique, preparation slot, discount or special Archetype compatibility**;
 - the Scholar does not receive a generic innate amplification simply for being a Scholar.
 
 Scholar strength comes from:
@@ -73,7 +73,7 @@ Scholar strength comes from:
 - cross-Pillar repertoire;
 - deliberately configurable breadth.
 
-A Scholar is the Archetype most able to reshape their learned problem coverage over time.
+A Scholar is the Archetype most able to reshape their learned problem coverage over time. Advanced **Universal** procedure acquisition and known/procedure counts remain **unauthored**, so the Pillar technique learning model above must **not** be silently extended to them. See [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-is-not-free-mastery).
 
 ## Gifted
 
@@ -97,11 +97,11 @@ Core access identity:
 - no Pillar appears more than once among the eight links;
 - no required distribution exists among External, Internal, and Transform;
 - the Gifted has access to the full technique catalogue of each linked Aspect up to the universal character-level tier limit;
-- Gifted do not use Priest-style daily preparation and do not individually learn techniques like Scholars.
+- Gifted do not use Priest-style daily preparation and do not individually learn **linked-Aspect techniques** like Scholars learn Pillar techniques individually.
 
-Emotion is the actual access mechanism.
+**Emotion is the actual access mechanism for techniques belonging to the Gifted's eight linked Aspects.** The Gifted must genuinely evoke the relevant linked emotion, whether naturally or deliberately, to use those techniques. Outward theatrical performance is not required; memory, focus, concentration, or another genuine internal route is sufficient if it produces the emotion.
 
-The Gifted must genuinely evoke the linked emotion, whether naturally or deliberately. Outward theatrical performance is not required; memory, focus, concentration, or another genuine internal route is sufficient if it produces the emotion.
+**Universal Veil Inspection and Translocation** are outside those eight Aspect catalogues. They require **no matching emotion or Active Emotion merely to use them**; eligibility does not automatically confer learning, free use, or Gifted emotion-based enhancements. See [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-is-not-free-mastery).
 
 ### Gifted breadth boundary
 
@@ -140,6 +140,10 @@ A Priest deliberately cultivates the chosen Pillar's presence.
 An Anointed pursues the Mission imprinted by the surge. Doing so may strengthen the Pillar as a consequence, but strengthening the Pillar is not automatically the Anointed's primary motive.
 
 Universal **Resonance** remains a separate character state for every Archetype. It measures internal coherence of Volition rather than Pillar loyalty, learned skill, emotional intensity, or Mission compliance.
+
+## Universal Veil fundamentals — shared outside Pillar access
+
+All four Archetypes are eligible for [Universal Veil Inspection and Translocation](../07-veil-magic/universal-veil-fundamentals.md). These operations are **not Pillar/Aspect techniques**, are **not a fourth Aspect or seventeenth Pillar**, and do not modify a Priest's selected Pillar, a Scholar's individual Pillar repertoire, the Gifted's fixed eight links, or the Anointed's one bonded Aspect. Eligibility alone does not grant mastery, remove technique or ritual prerequisites, or grant special interaction with Archetype-specific features. Detailed acquisition and cost rules remain deferred.
 
 ## Archetype comparison
 
