@@ -24,6 +24,7 @@ Training improves attack quality. The applicable bonus is the weapon family's **
 | Weapon | Attack Ability A | Attack Ability B |
 |---|---|---|
 | Dagger | Agility | Precision |
+| Parrying dagger | Agility | Precision |
 | Rapier | Agility | Precision |
 | Sword | Strength | Agility |
 | Spear | Agility | Precision |
@@ -84,6 +85,7 @@ Use the effective Weapon Training of the **weapon actually used to Guard**, adde
 | Guard instrument | Guard Ability A | Guard Ability B | Base weapon Guard bonus |
 |---|---|---|---:|
 | Dagger | Agility | Precision | +0 |
+| Parrying dagger | Agility | Precision | +0 |
 | Rapier | Agility | Precision | +0 |
 | Sword | Strength | Agility | +0 |
 | Spear | Strength | Agility | +0 |
@@ -101,7 +103,7 @@ Future weapon traits may distinguish weapons that are particularly good or poor 
 Existing equipment/trait modifiers remain separate:
 
 - two-handed **melee** weapon: +1 Guard Defense from leverage;
-- parrying dagger used as the defensive off-hand: +1 melee Guard Defense;
+- parrying dagger used as the defensive off-hand: +1 melee Guard Defense (not a universal bonus when used in the main hand; its normal weapon Guard base is +0);
 - buckler/shield/large-shield bonuses use their existing equipment values.
 
 ### Bows and crossbows
@@ -137,6 +139,7 @@ Full contribution uses the actual Strength modifier, including negative Strength
 | Weapon | Physical Contribution |
 |---|---|
 | Dagger | Light |
+| Parrying dagger | Light |
 | Rapier | Light |
 | Sword | Light |
 | Spear | Full |
