@@ -31,9 +31,11 @@ Each link:
 
 There is no required External/Internal/Transform distribution.
 
-Gifted do not use Priest-style daily preparation and do not individually learn techniques like Scholars.
+Gifted do not use Priest-style daily preparation and do not individually learn **linked-Aspect techniques** like Scholars learn Pillar techniques individually.
 
-Emotion is the access mechanism. The emotion must be genuinely evoked, but no theatrical outward performance is required.
+**Emotion is the access mechanism for the Gifted's eight linked-Aspect catalogues and their emotion-dependent Archetype features.** To activate a **linked-Aspect technique**, the Gifted must genuinely evoke its matching emotion; no theatrical outward performance is required.
+
+**Universal Veil procedures are a separate Pillar/Aspect-independent category.** A Gifted may qualify to use [Veil Inspection or Veil Translocation](../07-veil-magic/universal-veil-fundamentals.md) **without selecting an emotion-to-Aspect link, evoking a matching emotion, or establishing an Active Emotion for that operation**. Universal eligibility does not automatically grant knowledge, free casting, VP discounts, or the right to apply Gifted emotion-based Amplification, Projected Surge, Conduit or Embodiment effects. Those interactions require **explicitly authored compatibility**. Acquisition, costs and timing of individual Universal procedures remain deferred; the linked-Aspect catalogue rule must not be extended to them.
 
 Any Gifted formula that references **Resonance** uses the universal internal-coherence state defined in [Metaphysical Foundation](../07-veil-magic/metaphysical-foundation.md#universal-resonance) and resolved by [Universal Resonance and Direct Veil Magic](../07-veil-magic/resonance-and-intrusion.md), not a Pillar-relationship score.
 
@@ -57,7 +59,7 @@ At the start of each Gifted turn, after ordinary start-of-turn housekeeping and 
 
 1. the previous **Emotion Window** ends;
 2. if no dominant competing emotion interferes, the Gifted may establish any eligible linked emotion at no action cost;
-3. the Gifted may instead leave Active Emotion unset, allowing the first emotion-requiring Gifted technique to establish one at no extra action cost;
+3. the Gifted may instead leave Active Emotion unset, allowing the first **emotion-requiring linked-Aspect technique** to establish one at no extra action cost; a Universal procedure never establishes Active Emotion by default;
 4. if a dominant competing emotion exists, it becomes Active by default unless the Gifted spends one **General Tempo Action (24 AP)** from the upcoming turn and succeeds on an Emotional Transition check;
 5. Low Gifted normally re-establishes an uninterrupted Anchor;
 6. Medium Gifted conduits immediately re-express when the new Active Emotion is established.
@@ -164,7 +166,7 @@ Check:
 d20 + Awareness + Emotional Discipline Training + Resonance
 ```
 
-Failure leaves the dominant link available for that turn. Ordinary physical actions remain available.
+Failure leaves the dominant link available for that turn. Ordinary physical actions and separately eligible **Universal Veil operations** remain available, subject to each operation's own requirements and action/VP costs. A Universal operation does not change the Active Emotion, restart the Emotion Window or override a dominant emotion merely by being used.
 
 ## High Gifted — Projection and intensity
 
