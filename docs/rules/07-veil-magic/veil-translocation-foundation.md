@@ -14,6 +14,10 @@
 
 These are not additional Pillars or Aspect expressions. **One-time portal** means **one activation / temporary connection**, not a portal that permits only one creature to pass.
 
+**Relocation does not erase momentum.** Blink, Object Translocation, Personal Teleportation and passage through portals preserve a subject's existing movement/velocity rather than supplying free acceleration, braking or changed direction. The exact reference-frame mapping for geographically separated endpoints is deferred.
+
+**The direct clear-path rule is specific to Blink.** More advanced teleportation may have differently authored path requirements, but cannot automatically materialize a subject inside solid matter or another creature. Merely placing an effect in this family does not grant unrestricted through-wall teleportation.
+
 **High-level** is a design requirement for temporary portal creation and permanent-anchor construction. The **exact tier**, VP/material quantities, casting/activation time, size, distance, duration, maintenance, and any group contribution procedures remain **unassigned**, not implicitly Tier 9.
 
 ## Blink — clear spatial path, visualization and whole-body arrival
@@ -52,6 +56,8 @@ Under the [Movement Foundation](../05-combat/movement-foundation.md#teleportatio
 
 Object Translocation follows the same general integrity principle: an item must have a valid destination volume. Simply calling an effect `Translocation` does not permit overlapping solid matter.
 
+Object Translocation preserves the item's pre-existing velocity; it does not by itself stop a flying projectile or turn a moving object into a stationary one at its destination.
+
 **An unattended object is not equivalent to a held, worn, restrained or otherwise protected object.** Item theft, teleporting an opponent's weapon from their grip, moving an unwilling creature, or materializing matter within living tissue require authored permissions and the applicable existing Imposition/Intrusion/attended-item protections. No automatic disarm or lethal bypass is granted by Universal access.
 
 Mass limits, object dimensions, range, transported load, destination visualization, reference-frame issues over long distances, and special containment remain individual spell work.
@@ -61,7 +67,7 @@ Mass limits, object dimensions, range, transported load, destination visualizati
 **All portals are spherical.** An active connection has a sphere at the origin and a corresponding sphere at the destination; these are the spatial endpoints of the **same link**, not two unrelated spells.
 
 - **Traverse, do not Blink.** A traveler or item physically **enters a hemisphere** of one active sphere and **exits the opposite corresponding hemisphere** of the connected sphere. The entry side determines the matching opposing exit side; the sphere is **not a flat doorway** or a blade-edged planar aperture.
-- **Opening:** portal activation **expands** the spherical boundary from its center to its intended size.
+- **Opening:** portal activation **expands** the spherical boundary from its center to its intended size. Merely expanding around a stationary subject does **not** automatically transport that subject; portal traversal requires a valid crossing of the active boundary.
 - **Closing:** portal deactivation **contracts** the spherical boundary toward its center until the link disappears.
 - **No severing by closure:** the expansion or contraction of a portal **cannot guillotine a limb, slice an item, split a body, or deliberately create a cutting edge**. An ongoing traversal must resolve with the subject **whole** on one side or the other; the precise complete-versus-return procedure and timing will be specified in portal operational rules.
 - **Clear endpoint volumes:** opening cannot use expansion to cut through or forcibly intersect solid matter or creatures. An occupied, blocked or otherwise invalid endpoint must not materialize the sphere inside an obstacle; whether it pauses, opens only to a safe size or fails is an **unresolved operational detail**.
