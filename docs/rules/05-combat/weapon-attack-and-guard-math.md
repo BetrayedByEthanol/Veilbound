@@ -190,7 +190,7 @@ Physical Contribution modifies damage, not Penetration, unless a specific weapon
 This page does not resolve:
 
 - technique-specific magical delivery assignments beyond the locked Direct Veil and Manifestation procedures;
-- Strong Hit / Critical Hit bonus damage;
+- Strong Hit / Critical Hit damage bonuses, now using the [v0 playtest critical-damage baseline](defensive-responses-and-criticals.md#strong-hit-critical-hit-and-devastating-critical-damage--v0-playtest-baseline), are not final balance calibration;
 - Reach and Brace;
 - complete thrown-weapon ranges/profiles;
 - weapon-specific Guard traits beyond the existing current equipment modifiers;
