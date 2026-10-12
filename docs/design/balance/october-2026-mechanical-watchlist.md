@@ -124,15 +124,15 @@ Dual wield currently uses **Light** and **Medium** weapon-handling classes, but 
 
 Do not assign the dual-wield classes until the weapon-family, handedness, Reach, and related identity pass is far enough along to make the classifications meaningful. Consider renaming the Physical Contribution category during that pass to remove the terminology collision.
 
-## Open wound calibration — 0 HP overkill
+## Wound calibration — 0-HP crossing and overkill v0
 
-**Status: OPEN / VERIFY WITH DAMAGE SIMULATION**
+**Status: V0 PLAYTEST BASELINE AUTHORED / VERIFY WITH DAMAGE AND RECOVERY SIMULATION**
 
-Every 0-HP event creates a wound, and the current ladder allows Serious, Severe, Critical, Catastrophic, Irreparable, and Fatal outcomes.
+The **0-HP wound trigger applies only when a damaging event first drops a character from positive HP to 0 or below**. Subsequent hits or Dying ticks while already at nonpositive HP do **not** retrigger another 0-HP wound. A separately qualifying Called Shot or Devastating Critical may still trigger one; overlapping triggers from the **same hit** ordinarily produce **one wound**, using the highest applicable minimum severity.
 
-Exact **overkill thresholds** for mapping a normal 0-HP event into Serious / Severe / Critical / Catastrophic severity remain unresolved. Calibrate these only after ordinary weapon damage, armor, Physical Tempo, and defensive progression have been simulated together.
+The [canonical v0 overkill bands](../../rules/06-vigor-wounds-death/dying-and-wounds.md#wound-severity) are **defined**, not an open threshold-design gap. Set `M = Maximum HP`, `O = max(0, -HP after the crossing event)`; use **Serious** for `O < ceil(M/3)`, **Severe** for `ceil(M/3) ≤ O < ceil(2M/3)`, and **Critical** for `ceil(2M/3) ≤ O < M`. At `O ≥ M`, the existing **HP ≤ -Maximum HP** death threshold applies. Default repair requirements are **10 / 20 / 30 Vigor**, respectively, unless a more specific authored injury overrides them. The ordinary 0-HP bands do **not** automatically assign Catastrophic, Irreparable, or Fatal injuries. Existing event-specific physical destruction and Devastating Critical severity rules remain authoritative.
 
-Irreparable and Fatal outcomes should continue to depend on the actual physical injury/location and circumstances rather than being produced solely by crossing a numeric HP threshold.
+**What remains open is calibration of these v0 values**, not whether a threshold exists: simulate normal and critical weapon damage against Armor and defense progression; examine first-crossing severity frequencies, Devastating Critical interactions, fixed Max HP, and recovery time/Repair Progress at levels 1–3. Rebalance the v0 bands or repair values only through an explicit canonical revision.
 
 ## Veil Control and HP damage
 
