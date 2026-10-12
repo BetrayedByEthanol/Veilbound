@@ -35,6 +35,7 @@ See [Weapon Attack, Guard, and Physical Contribution](weapon-attack-and-guard-ma
 | Weapon | Hands | Damage | Pen | Physical contribution | Trauma | Baseline identity |
 |---|---|---:|---:|---|---|---|
 | Dagger | 1 | 2 + d4 | 0 | Light | Cut / Pierce | Concealable; poor against armor; strong gap/called-shot tool |
+| Parrying dagger | 1 | 2 + d4 | 0 | Light | Cut / Pierce | **Inherits ordinary dagger Attack, damage, Penetration, Physical Contribution, trauma, and weapon Guard profile.** Its extra off-hand Guard/Riposte benefits apply only under the [defensive off-hand rules](off-hand-and-ranged-combat.md#defensive-off-hands-and-shields). |
 | Rapier | 1 | 2 + d6 | 2 | Light | Pierce | Precision weapon; moderate armor interaction |
 | Sword | 1 | 3 + d6 | 2 | Light | Cut / Pierce | General-purpose one-handed baseline |
 | Spear | 1 or 2* | 3 + d6 | 3 | Full | Pierce | Reach/penetration-oriented |
