@@ -54,14 +54,14 @@ This distinguishes Priest motivation from the Anointed Mission model.
 
 ## Scholar
 
-A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond. Scholar techniques use real Pillar/Aspect patterns without requiring the Pillar's approval, recognition, favor, or personal relationship.
+A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond. **Scholar Pillar techniques** use real Pillar/Aspect patterns without requiring the Pillar's approval, recognition, favor, or personal relationship. **Universal Veil procedures** are a separate, Pillar/Aspect-independent category available in principle to Scholars and the other Archetypes; they use a Universal family identity instead of a Pillar/Aspect identity.
 
 Core access identity:
 
-- may potentially learn techniques from **any Pillar or Aspect**;
-- every technique is learned individually;
-- techniques retain their actual Pillar/Aspect identity;
-- normal techniques use their standard Veil Control scaling and costs;
+- may potentially learn **Pillar techniques** from **any Pillar or Aspect**;
+- learns each **Pillar technique** individually rather than receiving a whole Aspect catalogue automatically;
+- **Pillar techniques retain** their actual Pillar/Aspect identity; **Universal Veil techniques/procedures instead use their Universal family identity** (e.g. Veil Inspection or Veil Translocation);
+- normal techniques use their authored Veil Control scaling and costs; **Universal eligibility alone does not grant a technique, preparation slot, discount or special Archetype compatibility**;
 - the Scholar does not receive a generic innate amplification simply for being a Scholar.
 
 Scholar strength comes from:
@@ -73,7 +73,7 @@ Scholar strength comes from:
 - cross-Pillar repertoire;
 - deliberately configurable breadth.
 
-A Scholar is the Archetype most able to reshape their learned problem coverage over time.
+A Scholar is the Archetype most able to reshape their learned problem coverage over time. Advanced **Universal** procedure acquisition and known/procedure counts remain **unauthored**, so the Pillar technique learning model above must **not** be silently extended to them. See [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-is-not-free-mastery).
 
 ## Gifted
 
