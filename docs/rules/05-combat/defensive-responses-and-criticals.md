@@ -132,4 +132,22 @@ There is no separate Critical Defense statistic.
 
 Guard does not cancel criticals by special rule; a stronger defense simply makes confirmation harder.
 
-The exact extra damage granted by Strong Hit and Critical Hit remains a calibration item and is not defined here.
+## Strong Hit, Critical Hit, and Devastating Critical damage — v0 playtest baseline
+
+The existing [natural-20 confirmation](#natural-20-and-confirmation) determines **hit severity first**. For an eligible **direct-hit HP-damaging Attack** that uses this procedure, apply the following **additional dice to its single primary direct-hit damage packet**, before Armor:
+
+| Confirmed outcome | Additional direct-hit damage | Other consequence |
+|---|---|---|
+| Ordinary Hit | None | Ordinary hit procedure |
+| **Strong Hit** | **+1d4** | No wound merely from being Strong |
+| **Critical Hit** | **+2d4** | No wound merely from being Critical |
+| **Devastating Critical** | **+2d4** (same as Critical, not another +2d4) | Existing **at least Critical wound** trigger |
+
+These are **v0 playtest damage values**, not a general critical-damage multiplier or finalized balance claim.
+
+- Add the dice **once** to the normal direct-hit damage total. Apply the weapon's fixed base, normal damage die, Physical Contribution, Penetration, and Armor exactly as already authored. **Do not double base damage, Physical Contribution or Penetration, and subtract Effective Armor only once** after adding the bonus dice.
+- Do not grant the bonus separately to each target, area effect, scatter impact, recurring pulse, delayed or ongoing damage, or secondary rider. A non-damaging effect, or one without a qualifying direct-hit HP-damage packet, does **not** acquire HP damage merely from a natural 20. A technique that does not use this natural-20 Attack procedure does not inherit these bonuses.
+- The existing [0-HP wound trigger](../06-vigor-wounds-death/dying-and-wounds.md#when-wounds-occur) still applies to any hit that reaches 0 HP; a **Strong Hit or Critical Hit alone creates no wound**, and a Devastating Critical still triggers its already-authored wound even when HP stays above 0. When multiple wound triggers arise from the **same hit**, use [the single-event severity rule](../06-vigor-wounds-death/dying-and-wounds.md#wound-severity) rather than automatically adding wounds.
+- Natural-20 confirmation remains **one confirmation roll only** and retains the [Protective Intervene](protective-intervene-v0.md#natural-20-with-protective-intervene--one-confirmation) substitution rules. This section changes **damage only**, not attack timing or defender selection.
+
+**Worked example:** A sword deals `3 + d6 + Light Physical Contribution` with Penetration 2. With Strength +4, the contribution is +2. Against Armor 5, Effective Armor is 3. If the normal d6 rolls 4, an ordinary hit inflicts **6 HP**; a Strong Hit with a bonus d4 roll of 3 inflicts **9 HP**; a Critical Hit with bonus d4 rolls of 2 and 4 inflicts **12 HP**. A Devastating Critical uses the same 12 HP result on those dice and separately invokes its wound trigger.
