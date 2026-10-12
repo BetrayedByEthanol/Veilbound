@@ -172,13 +172,13 @@ See [Turn Action Points and Tempo](../05-combat/action-categories-and-physical-t
 
 ## Step 8 — Buy starting equipment
 
-Every level-1 character receives **150 sp (15 gp) of starting possessions** under [Equipment Economy and Starting Loadouts v0](../11-equipment/economy-and-starter-equipment-v0.md) (**provisional numerical baseline**). Spend that single budget on ordinary listed weapons, armor, shields, ammunition, professional kits and supplies, or retain unspent coins.
+Every level-1 character receives **150 sp (15 gp) of starting possessions** under [Equipment Economy and Starting Loadouts v0](../11-equipment/economy-and-starter-equipment-v0.md) (**provisional numerical baseline**). Spend that single budget on ordinary listed weapons, **eligible starter armor (Leather through Full knightly harness, subject to budget)**, shields, ammunition, professional kits and supplies, or retain unspent coins. **The clothing/light-robes and heavy-padded/battle-robes price rows are market references, not legal starting armor purchases.**
 
 - **10 copper = 1 silver; 10 silver = 1 gold** for consistent game accounting.
 - **Combat playstyle shopping lists** are **optional examples**, not Archetype/Focus packages or free equipment. Mix categories freely to create an armored healer, lighter healer, ranged defender, and so on.
 - Prices represent usable mundane equipment. A fitted armor configuration includes necessary underlayers, **without Armor Rating stacking**.
 - No separate starting Armor cap or mundane-armor spellcasting restriction. Armor 6 plate and Armor 7 full harness exceed the ordinary 150-sp budget **by price**, not by level rule.
-- Ordinary clothing can be worn, but nonprotective robes and padded/battle robes are **not default starter armor selections**; the latter retain their existing Armor 3 rules for later availability.
+- Ordinary clothing (including cosmetic robes) is **assumed worn for free** at creation, granting Armor 0 and no rune properties. **Neither ordinary clothing/light robes nor heavy padded/battle robes may be purchased or chosen as starting armor**, despite their listed future market prices. Heavy padded/battle robes retain their Armor 3 rules for later acquisition.
 - Standard adventuring packs, professional kits and ammunition are priced. **Arrows/bolts are tracked per fired shot** under the v0 supply baseline. No unlisted equipment bonus is implied by a tool.
 - Exceptional inherited or patron-provided equipment over budget needs explicit campaign agreement; no automatic privilege from social background.
 
