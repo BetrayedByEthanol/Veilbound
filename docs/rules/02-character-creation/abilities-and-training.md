@@ -65,16 +65,22 @@ The previous general Training catalogue stopped at +4; this **provisional B04 ex
 
 **Learned Disciplines** use a separate budget from Weapon Training. They can be useful in or out of combat, but they **do not** automatically modify weapon Attack/Guard or direct Veil attack rolls. A discipline includes the **ordinary techniques and supporting knowledge intrinsic to that trade**: Medicine includes medical anatomy and standard diagnosis; Smithing includes everyday relevant materials and forge practice. Do not require five microscopic sub-disciplines merely to practice one profession.
 
-Organize the catalogue into **four descriptive families** for character-creation guidance; the families are **not** separate permanent progression pools:
+Organize the catalogue into **four descriptive families** for character-creation guidance. For the standard **4 / 2 / 2 starting allocation**, each listed discipline belongs to **exactly one family** below; its points may count toward that family's primary or secondary allocation, **never both**. The families are **not** separate permanent advancement pools.
 
-| Family | Example narrow disciplines |
+### Complete starting-family assignment
+
+| Family | Canonical disciplines assigned to this family |
 |---|---|
-| Physical and Fieldcraft | Climbing, Swimming, Acrobatics, Riding, Tracking, Hunting, Navigation, narrow wilderness fieldcraft |
-| Professional and Technical | Medicine, Herbalism, Alchemy, Lockwork, Trapwork, Engineering, Smithing, Carpentry, Tailoring, other defined trades |
-| Scholarly | Veil Theory, Veil Practice, Pillar Lore, regional/era History, regional Law, historical Religion & Cults |
-| Cultural and Specialized | A specific culture's Etiquette, heraldry, institutional practice, studied local Politics, Acting/performance, languages or other bounded specialties |
+| **Physical and Fieldcraft** | Climbing; Swimming; Acrobatics; Riding; Throwing; Navigation; Tracking; Hunting; Survival (**bounded fieldcraft**) |
+| **Professional and Technical** | Lockwork; Sleight of Hand; Trapwork; Smithing; Carpentry; Tailoring; Engineering; Medicine; Herbalism; Alchemy; profession-specific Trades |
+| **Scholarly** | Veil Theory; Veil Practice; Pillar Lore; regional/era History; regional Law; Religion & Cults |
+| **Cultural and Specialized** | Disguise; Acting; cultural Etiquette; regional Politics; Emotional Discipline; Oratory*; Negotiation*; Interrogation*; Command* |
 
-Custom narrow disciplines and knowledge fields remain allowed. A skill's **scope must be meaningful**: a whole profession should not be arbitrarily fragmented, but one broad `Survival` skill must not replace Tracking, Hunting, Navigation, Herbalism and every other expedition discipline. If retained, Survival is **fieldcraft for shelter, exposure and practical camp conditions**, not an all-purpose wilderness bonus. Knowledge fields should cover meaningful eras/regions/institutions, not individual conversations or one village's gossip.
+**The starred labels are legacy broad social entries, not general-purpose purchasable bonuses.** A player may spend points under **Cultural and Specialized** on one of them only after naming a **bounded trainable practice** (for example, formal oratory, diplomatic protocol, interviewing methods or military command procedure) rather than buying a universal social modifier. This family assignment does not relax the [social interaction boundary](#social-perception-and-investigation-boundary).
+
+**Custom narrow Trainings** remain allowed. Before allocating points, the player and GM identify **one fixed primary family** for each new discipline from its actual learned subject or practice. A custom discipline counts toward **only that family** throughout starting allocation; it cannot be reclassified between primary and secondary points to meet the 4 / 2 / 2 split. The character may instead use the already-authored **unrestricted eight-point specialization alternative**. A discipline's learned subject can be used with different Abilities without changing its family.
+
+Examples of newly scoped disciplines: a defined heraldic tradition or language falls under **Cultural and Specialized**; a specific historical research field under **Scholarly**; a particular learned craft under **Professional and Technical**. A skill's **scope must be meaningful**: a whole profession should not be arbitrarily fragmented, but one broad `Survival` skill must not replace Tracking, Hunting, Navigation, Herbalism and every other expedition discipline. If retained, Survival is **fieldcraft for shelter, exposure and practical camp conditions**, not an all-purpose wilderness bonus. Knowledge fields should cover meaningful eras/regions/institutions, not individual conversations or one village's gossip.
 
 ### Social, perception and investigation boundary
 
@@ -110,12 +116,9 @@ A **Discipline Refinement** is a future, **individually authored benefit linked 
 
 ## Current discipline catalogue and boundaries
 
-The earlier canonical examples remain useful when read with their **narrow scopes**, not as mandatory umbrella skills:
+Use the [complete starting-family assignment](#complete-starting-family-assignment) above as the **single authoritative mapping** of the existing discipline catalogue for character creation. All previously listed disciplines are assigned there, including **Throwing (Physical and Fieldcraft)**, **Sleight of Hand (Professional and Technical)**, and **Disguise and Emotional Discipline (Cultural and Specialized)**.
 
-- **Physical and field:** Climbing, Swimming, Acrobatics, Riding, Throwing, Navigation, Tracking, Hunting, bounded Survival.
-- **Technical and trades:** Lockwork, Sleight of Hand, Trapwork, Smithing, Carpentry, Tailoring, Engineering, Medicine, Herbalism, Alchemy and profession-specific Trades.
-- **Scholarly and special expertise:** Veil Theory, Veil Practice, Pillar Lore, regional/era History, regional Law, regional Politics, Religion & Cults, culture-specific Etiquette, Disguise, Acting, Emotional Discipline.
-- **Legacy contextual labels under review:** Oratory, Negotiation, Interrogation, Command. Use only if defined as a **specific trainable professional/cultural practice**, never as a blanket bonus for ordinary social interaction.
+The legacy contextual labels **Oratory, Negotiation, Interrogation and Command** are classified under Cultural and Specialized only once their specific trainable practices are named. They never act as blanket modifiers for ordinary social interactions.
 
 **Emotional Discipline** is the learned practice used by Gifted rules that explicitly test trained regulation, deepening or stability of emotion.
 
