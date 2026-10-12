@@ -4,7 +4,7 @@
 
 ## Current character framework
 
-A player character is defined by these major mechanical layers. **B04 resolves starting Training and equipment purchases at v0**; other creation gaps below remain.
+A player character is defined by these major mechanical layers. **B04 resolves starting Training and equipment purchases at v0; B07 adds a separate provisional starting Talent selection**. Other creation gaps below remain.
 
 1. **Archetype** — Priest, Scholar, Gifted, or Anointed.
 2. **Focus** — High, Medium, or Low.
@@ -12,9 +12,10 @@ A player character is defined by these major mechanical layers. **B04 resolves s
 4. **Trainings** — independent [Weapon Training](../05-combat/weapon-training-and-refinements-v0.md) and [Learned Disciplines](abilities-and-training.md#training-structure--b04) budgets; provisional maximum +5 after advancement.
 5. **Resonance** — the universal -3 to +3 state describing internal coherence of Volition; new player characters normally begin at **0**.
 6. **Archetype-specific access choices** — such as a Priest's chosen Pillar and Pillar Accord, a Scholar's learned techniques, a Gifted's emotion-to-Aspect links, or an Anointed's bonded Aspect/Mission/Birth Imprint.
-7. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
-8. **Equipment** — [150-sp v0 starting purchasing](../11-equipment/economy-and-starter-equipment-v0.md) from provisional armor, weapon, kit and ammunition prices.
-9. **Background/origin/social starting position** — currently missing as a complete subsystem.
+7. **Talents** — one **provisional level-1 Talent choice** under the [B07 Talent Framework](../10-advancement/talents-framework-v0.md), selected from actual eligible [level 1–5 entries](../10-advancement/talents-level-1-5-v0.md); this is separate from both Training point budgets and may instead be saved.
+8. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
+9. **Equipment** — [150-sp v0 starting purchasing](../11-equipment/economy-and-starter-equipment-v0.md) from provisional armor, weapon, kit and ammunition prices.
+10. **Background/origin/social starting position** — currently missing as a complete subsystem.
 
 ## Step 1 — Choose Archetype
 
