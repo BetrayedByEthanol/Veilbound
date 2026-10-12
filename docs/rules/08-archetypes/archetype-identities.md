@@ -141,6 +141,10 @@ An Anointed pursues the Mission imprinted by the surge. Doing so may strengthen 
 
 Universal **Resonance** remains a separate character state for every Archetype. It measures internal coherence of Volition rather than Pillar loyalty, learned skill, emotional intensity, or Mission compliance.
 
+## Universal Veil fundamentals — shared outside Pillar access
+
+All four Archetypes are eligible for [Universal Veil Inspection and Translocation](../07-veil-magic/universal-veil-fundamentals.md). These operations are **not Pillar/Aspect techniques**, are **not a fourth Aspect or seventeenth Pillar**, and do not modify a Priest's selected Pillar, a Scholar's individual Pillar repertoire, the Gifted's fixed eight links, or the Anointed's one bonded Aspect. Eligibility alone does not grant mastery, remove technique or ritual prerequisites, or grant special interaction with Archetype-specific features. Detailed acquisition and cost rules remain deferred.
+
 ## Archetype comparison
 
 The current archetype balance model is:
