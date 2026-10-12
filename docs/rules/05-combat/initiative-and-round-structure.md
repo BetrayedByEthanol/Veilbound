@@ -120,6 +120,8 @@ Turn AP is a **turn resource**, not a round resource. Also determine the charact
 
 A Full Action may be declared only while the character's entire Turn AP allotment remains available and consumes that entire allotment.
 
+**Blink next-turn AP Debt:** after establishing the usual Turn AP allotment and derived Tempo, immediately pay any outstanding **successful Reactive Blink** Projection Action AP Debt **before ordinary voluntary AP use**. This is a precommitted spend from the turn's AP, not a change to base Turn AP, derived Guard or Opportunity capacity. An **invalid** Reactive Blink has no AP Debt. See [Blink v0](../07-veil-magic/blink-v0.md#ap-debt-payment); exceptional AP shortages remain a calibration edge case.
+
 Also establish the creature's ordinary **12 MP Movement Allowance** under [Movement Foundation](movement-foundation.md). Movement Points are separate from Turn AP.
 
 ### 5. Start-of-turn choices
@@ -186,7 +188,7 @@ A [Charge v0](rapid-advance-and-charge-v0.md#attack-sequence-and-interception-ti
 
 A declared [Feint Combination](feint-combination-v0.md) may link two consecutive, separately paid melee attacks as part of this same sequence. Both attack profiles and the conditional **-2/+4/-2 accuracy rule** are fully committed before the defender assigns defenses; calculating the second attack's already-declared modifier from the first attack's outcome is **not** permission to change profiles, add attacks, or reopen defense choices afterward.
 
-Then resolve the attacks in their declared order. **Each individual attack is a separate trigger occurrence.** Immediately before that attack's roll:
+Then resolve the attacks in their declared order. **Each individual attack is a separate trigger occurrence.** **A target's successful Reactive Blink may create a [Blink-follow window](../07-veil-magic/blink-v0.md#blink-follow-reaction-pursuit-of-a-suspended-attack--locked) for its attacker while that attack remains unresolved. Follow occurs before treating the original attack as impossible; it does not reopen committed profiles, earlier attack results or defense assignments.** Immediately before that attack's roll:
 
 1. treat that attack as the current triggering action;
 2. open and resolve its response window under the normal response procedure;
@@ -292,6 +294,8 @@ For each trigger occurrence:
 7. **Resume the original event.** After all responses finish, re-check legality once more and resolve the original action/event if it remains legal.
 
 Once a Reaction, Opportunity Attack, or released Interception is declared, its relevant capacity is committed. It may still resolve if the original action is later cancelled, provided the responding action/effect itself remains legal.
+
+**Blink-follow is a specific post-relocation nested response trigger.** If a target Blink resolves successfully **while an attack against that target is suspended**, the attacker with an available Reaction may attempt their own legal Reactive Blink **after the target's destination is established and before the suspended attack's final legality check**. The already committed attack is not marked lost until this follow window completes. An invalid follow costs the Reaction but **no VP or AP Debt**. The full conditions and preservation of existing Attack Sequence declarations are in [Blink v0](../07-veil-magic/blink-v0.md#blink-follow-reaction-pursuit-of-a-suspended-attack--locked). No other teleportation ability automatically inherits this response trigger.
 
 A creature with an active Opportunity Response does not need another Reaction to make later Opportunity Attacks; those later attacks still must be explicitly declared in Step 5 when a new qualifying Opportunity occurs.
 
