@@ -61,6 +61,8 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Manifestation Resolution](07-veil-magic/manifestation-resolution.md)
 - [Volition Points](07-veil-magic/volition-points.md)
 - [Technique Tiers and Expression Metadata](07-veil-magic/technique-tiers-and-expression.md)
+- [Universal Veil Fundamentals — Inspection and shared access](07-veil-magic/universal-veil-fundamentals.md)
+- [Veil Translocation — Blink and spherical portals](07-veil-magic/veil-translocation-foundation.md)
 
 ### 08 — Archetypes
 
