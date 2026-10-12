@@ -47,9 +47,6 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
 - [Weapons and Armor](05-combat/weapons-and-armor.md)
 
-### 11 — Equipment
-
-- [Equipment Economy and Starter Equipment v0 — provisional prices and starting loadouts](11-equipment/economy-and-starter-equipment-v0.md)
 - [Off-Hand and Ranged Combat](05-combat/off-hand-and-ranged-combat.md)
 
 ### 06 — Vigor, wounds and death
@@ -77,6 +74,10 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 ### 10 — Advancement
 
 - [Advancement Architecture](10-advancement/progression-architecture.md)
+
+### 11 — Equipment
+
+- [Equipment Economy and Starter Equipment v0 — provisional prices and starting loadouts](11-equipment/economy-and-starter-equipment-v0.md)
 
 ### 14 — GM rules
 
