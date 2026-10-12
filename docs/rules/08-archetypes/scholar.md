@@ -6,17 +6,19 @@
 
 A Scholar accesses the Veil through **learned technical methods** rather than prayer, emotion-linked instinct, or a permanent Anointed bond.
 
-A Scholar does **not** require a Pillar's approval, recognition, favor, or personal relationship. Pillar Aspects are real stable patterns within the Veil; Scholar methods reproduce, enter, route, or shape Volition according to those patterns. The Pillar remains metaphysically relevant because the pattern exists, not because it consciously grants permission.
+A Scholar does **not** require a Pillar's approval, recognition, favor, or personal relationship. Pillar Aspects are real stable patterns within the Veil; when using a **Pillar technique**, Scholar methods reproduce, enter, route, or shape Volition according to those patterns. The Pillar remains metaphysically relevant to **that Pillar technique** because the pattern exists, not because it consciously grants permission. **Universal Veil operations** instead work with common Veil structures or spatial relationships and require **no Pillar/Aspect identity**.
 
-- A Scholar may potentially learn techniques from **any Pillar or Aspect**.
-- Every technique is learned individually.
-- Techniques retain their real Pillar/Aspect identity; Scholars do not learn abstract setting-free buffs.
+- A Scholar may potentially learn **Pillar techniques** from **any Pillar or Aspect**.
+- Every **Pillar technique** is learned individually; Scholars do not automatically gain an entire Pillar/Aspect catalogue.
+- **Pillar techniques retain their real Pillar/Aspect identity** and do not become abstract setting-free buffs. **Universal Veil techniques/procedures instead use the appropriate Universal family identity**, such as Veil Inspection or Veil Translocation, and must remain within that family's authored scope.
 - Ordinary learned techniques resolve at their normal listed effectiveness, VP cost, action requirement, and Veil Control scaling.
 - Scholars do not suffer a generalist penalty.
 - Scholars receive no automatic Priest Pillar Accord amplification, Gifted emotional amplification, or Anointed Aspect Authority.
 - Scholar strength is **configurable breadth**: selection, combination, preparation, technical shaping, and deliberate cross-Pillar repertoire.
 
 The final catalogue/repertoire calibration must preserve Scholar as the archetype with the strongest **player-configurable problem coverage over time**, even though Gifted may possess a large fixed catalogue.
+
+**Universal Veil eligibility is shared by all four Archetypes**, not a Scholar-exclusive spell list. Universal procedures are separate from Scholar's individually learned **Pillar** repertoire; **how advanced Universal procedures are acquired, counted and prepared is deferred**. Do not automatically grant them, charge them against Pillar-only known-technique counts, or treat them as Composite Casting components without explicit authored compatibility. See [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-is-not-free-mastery).
 
 ## High Scholar — Projection through synthesis
 
