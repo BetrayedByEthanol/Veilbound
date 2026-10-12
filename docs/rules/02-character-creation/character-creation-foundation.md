@@ -85,7 +85,7 @@ See [Universal Resonance and Direct Veil Magic](../07-veil-magic/resonance-and-i
 
 ### Priest
 
-Choose one Pillar. Priest access is constrained to that Pillar's three Aspects and its Prepared Prayer structure.
+Choose one Pillar. **Pillar-technique** access is constrained to that Pillar's three Aspects and its Prepared Prayer structure. This restriction does **not** exclude the separate [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md) open in principle to all four Archetypes; Universal procedures have their own later-authored acquisition/cost rules.
 
 The Priest also uses the separate **Pillar Accord** state defined in the Priest foundation. Pillar Accord is not universal Resonance.
 
@@ -95,7 +95,7 @@ Exact starting Prepared Prayer counts remain provisional.
 
 ### Scholar
 
-Choose individually learned techniques from allowed Pillars/Aspects.
+Choose individually learned **Pillar/Aspect** techniques from allowed Pillars/Aspects. [Universal Veil operations](../07-veil-magic/universal-veil-fundamentals.md) are a separate family and their eventual known/procedure counts remain unresolved.
 
 Exact starting repertoire counts remain provisional.
 
@@ -117,7 +117,7 @@ Define:
 - a broad lifelong Mission;
 - a Birth Imprint shaped by the surge that created the bond.
 
-Exact Signature/Authority packages remain Aspect-specific content work.
+Exact Signature/Authority packages remain Aspect-specific content work. The Anointed's bonded-Aspect limit applies to bonded techniques and Authority; it does not rule out separate Universal Veil magic with later-authored prerequisites.
 
 ## Step 7 — Calculate derived durability/resources
 
