@@ -4,16 +4,16 @@
 
 ## Current character framework
 
-A player character is currently defined by these major mechanical layers:
+A player character is defined by these major mechanical layers. **B04 resolves starting Training and equipment purchases at v0**; other creation gaps below remain.
 
 1. **Archetype** — Priest, Scholar, Gifted, or Anointed.
 2. **Focus** — High, Medium, or Low.
 3. **Nine Abilities** — Strength, Agility, Precision, Intellect, Awareness, Presence, Vitality, Veil Affinity, Veil Control.
-4. **Trainings** — narrow learned expertise using the +0 to +4 training scale.
+4. **Trainings** — independent [Weapon Training](../05-combat/weapon-training-and-refinements-v0.md) and [Learned Disciplines](abilities-and-training.md#training-structure--b04) budgets; provisional maximum +5 after advancement.
 5. **Resonance** — the universal -3 to +3 state describing internal coherence of Volition; new player characters normally begin at **0**.
 6. **Archetype-specific access choices** — such as a Priest's chosen Pillar and Pillar Accord, a Scholar's learned techniques, a Gifted's emotion-to-Aspect links, or an Anointed's bonded Aspect/Mission/Birth Imprint.
 7. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
-8. **Equipment** — currently only partially defined.
+8. **Equipment** — [150-sp v0 starting purchasing](../11-equipment/economy-and-starter-equipment-v0.md) from provisional armor, weapon, kit and ammunition prices.
 9. **Background/origin/social starting position** — currently missing as a complete subsystem.
 
 ## Step 1 — Choose Archetype
@@ -59,13 +59,15 @@ Spend **28 ability points** using the cumulative costs:
 
 The normal creation cap is **+4**.
 
-## Step 4 — Choose Trainings
+## Step 4 — Choose Trainings and background familiarities
 
-The training engine is defined, but the audit does **not** yet define a final number of starting Training selections/points.
+**B04 v0 allocations (numbers provisional; structure agreed):**
 
-Until that allocation rule exists, a complete rules-legal level-1 character cannot be finalized solely from the canonical rules.
+1. **Weapon Training:** receive **2 Weapon Development Points**; one point buys +1 direct rank in a [weapon family](../05-combat/weapon-training-and-refinements-v0.md#weapon-families), starting cap +2. Melee half-transfer applies only between melee categories; Bows and Crossbows remain independent. Shields use the equipped one-handed melee weapon's effective Training for legal shield Guard rather than requiring Shield Training.
+2. **Learned Disciplines:** receive **8 points**, one for each +1 directly invested rank (starting cap +2). The **standard guided split** is **4 primary-family / 2 different secondary-family / 2 flexible**, but a coherent deliberately specialized character may use an unrestricted allocation with the **same budget and cap**.
+3. **Background familiarities:** establish **two or three** normal contextual familiarities. They provide lived knowledge and context, **not Training bonuses, secrets, or guaranteed contacts**.
 
-Do not import 5e proficiency counts or background proficiencies to fill this gap.
+Use [Abilities and Training](abilities-and-training.md#training-structure--b04) for four descriptive Learned Discipline families and the narrow-skill/social-resolution boundaries. General Presence/Awareness/Intellect checks remain available without buying umbrella Persuasion, Search or Perception skills. Both development tracks are independent of Archetype and Focus. Complete high-level refinements and final point calibration are still later advancement content, not level-1 blockers.
 
 ## Step 5 — Set Resonance
 
@@ -168,21 +170,19 @@ Guard Capacity equals Physical Tempo unless modified by equipment or another exp
 
 See [Turn Action Points and Tempo](../05-combat/action-categories-and-physical-tempo.md).
 
-## Step 8 — Equipment
+## Step 8 — Buy starting equipment
 
-Core weapon and armor baselines exist, but the complete equipment system does not.
+Every level-1 character receives **150 sp (15 gp) of starting possessions** under [Equipment Economy and Starting Loadouts v0](../11-equipment/economy-and-starter-equipment-v0.md) (**provisional numerical baseline**). Spend that single budget on ordinary listed weapons, armor, shields, ammunition, professional kits and supplies, or retain unspent coins.
 
-Currently unresolved:
+- **10 copper = 1 silver; 10 silver = 1 gold** for consistent game accounting.
+- **Combat playstyle shopping lists** are **optional examples**, not Archetype/Focus packages or free equipment. Mix categories freely to create an armored healer, lighter healer, ranged defender, and so on.
+- Prices represent usable mundane equipment. A fitted armor configuration includes necessary underlayers, **without Armor Rating stacking**.
+- No separate starting Armor cap or mundane-armor spellcasting restriction. Armor 6 plate and Armor 7 full harness exceed the ordinary 150-sp budget **by price**, not by level rule.
+- Ordinary clothing can be worn, but nonprotective robes and padded/battle robes are **not default starter armor selections**; the latter retain their existing Armor 3 rules for later availability.
+- Standard adventuring packs, professional kits and ammunition are priced. **Arrows/bolts are tracked per fired shot** under the v0 supply baseline. No unlisted equipment bonus is implied by a tool.
+- Exceptional inherited or patron-provided equipment over budget needs explicit campaign agreement; no automatic privilege from social background.
 
-- final starting packages;
-- full adventuring gear;
-- currency/economy;
-- prices and availability;
-- ammunition/supply procedure;
-- encumbrance/carrying capacity;
-- complete rune/magic-item system.
-
-Do not treat a 5e equipment package or gold table as canonical Veilbound equipment.
+**Deferred:** regional economies, discount/salvage systems, full adventuring catalogue, detailed ammunition recovery, numeric encumbrance, equipment wear/durability, equipment runes and enchanted items. Do **not** fill those with 5e defaults.
 
 ## Character-creation systems still missing
 
@@ -190,11 +190,10 @@ The audit explicitly leaves these areas incomplete:
 
 - background/origin mechanics;
 - social origin and starting contacts;
-- starting Training allocation;
-- complete starting equipment packages;
+- final numerical calibration of v0 Training/starting equipment and later Weapon/Discipline Refinement content;
 - complete native defense/save mapping, including non-spell hazards and spell defenses;
 - some spell-derived formulas;
 - final repertoire/preparation counts for several Archetypes;
 - a final shared procedure for every remaining derived sheet value.
 
-This means the **character framework is substantially defined**, but character creation is not yet a closed end-to-end rules procedure.
+The **B04 Training and mundane starter-equipment steps are executable at level 1 using v0 values**. Other character creation gaps (notably Archetype starting access/repertoire and later advancement/content) still prevent this from being a fully closed end-to-end procedure.
