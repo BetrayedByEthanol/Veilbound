@@ -157,7 +157,7 @@ Determine whether the landing is possible before rolling. Being unconscious, com
 
 Examples: a 3 m fall with successful Landing Control rolls **1d4** before Armor; an uncontrolled 6 m fall in Armor 5 rolls **4d4 - 2**, minimum zero. Impact Armor for Armor 6 is 3. A failed Landing Control does not add damage dice.
 
-This profile is independent of a creature's level: **Max HP = 10 + Vitality**. Vigor is not a damage shield. Reaching 0 HP invokes the established wound/Dying framework; death remains at **HP ≤ −Max HP**. Falling is not a weapon attack and receives no natural-20 critical/Devastating Critical by default. No new wound trigger is added for landing hard.
+This profile is independent of a creature's level: **Max HP = 10 + Vitality**. Vigor is not a damage shield. A fall that **first drops HP from positive to 0 or below** invokes the established crossing-only wound trigger and Dying procedure; later damage while already at nonpositive HP does not generate another 0-HP wound. Death remains at **HP ≤ −Max HP**. Falling is not a weapon attack and receives no natural-20 critical/Devastating Critical by default. No new wound trigger is added for landing hard.
 
 At very high heights or unusual physics, this standard profile is a provisional physical approximation and may require specialized hazard authoring. **There is no locked universal terminal-velocity cap, mass modifier, or deep-water profile**. Do not derive one from this height table.
 
@@ -192,7 +192,7 @@ A collision and a **sustained crush** are distinct. Crushing is ongoing compress
 - Use **HP** for damaging physical impacts. **Vigor is regenerative reserve**, not an additional HP shield or generic falling-damage pool.
 - Standard hard-surface falling uses **floor(Armor / 2)** once, as locked above. Armor/coverage/bypass handling for **other impact types** requires separately authored hazard profiles; not every physical phenomenon is a standard blunt fall.
 - Ordinary environmental impacts are not Attacks and do not roll natural-20 critical confirmations.
-- Existing wound triggers remain: qualifying Called Shot, Devastating Critical, or reaching **0 HP**. This page adds no separate wound-on-fall trigger.
+- Existing wound triggers remain: qualifying Called Shot, Devastating Critical, or a damaging event **first dropping HP from positive to 0 or below**. Damage to a creature already at nonpositive HP does **not** generate another 0-HP wound; existing separate Called Shot and Devastating Critical triggers remain eligible. This page adds no separate wound-on-fall trigger.
 - Where a harmful impact creates a wound by an existing trigger, use the established **Crush** trauma family for ordinary blunt contact unless the actual impact is a separately authored piercing/cutting hazard.
 - Damage dice, penetration, structural/object durability, and Armor interactions for **nonstandard impacts, crushing and collision** remain **DEFERRED**; do not silently reuse weapon profiles or treat ordinary Shove/Throw as damaging impacts.
 

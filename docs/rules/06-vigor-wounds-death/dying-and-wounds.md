@@ -1,6 +1,6 @@
 # Dying and Wounds
 
-> Canonical current framework extracted from Core Rules Audit v34. Some wound severity thresholds and individual injury effects remain calibration items.
+> Canonical current wound framework. **0-HP overkill severity and default Repair Requirements now have deterministic v0 playtest values**; exceptional injury outcomes and individual injury effects remain calibration items.
 
 ## When wounds occur
 
@@ -10,7 +10,7 @@ A wound occurs only when:
 
 1. a **Called Shot** successfully qualifies for a wound;
 2. a **Devastating Critical** occurs; or
-3. the target reaches **0 HP**.
+3. the target **first drops from positive HP to 0 HP or below** through a damaging event.
 
 The exact Called Shot action cost and procedure remain unresolved. The legacy statement that a Called Shot consumes an entire **Attack action** is superseded by the shared Turn AP architecture and must be re-authored as an explicit AP or Full Action cost during the maneuver/weapon pass. Called Shots should continue to carry substantial location difficulty.
 
@@ -40,7 +40,7 @@ Weapon trauma type determines the relevant injury family.
 
 ## Wound severity
 
-Severity is determined by the event that caused the wound rather than by a second random roll.
+Severity is determined by the event that caused the wound rather than by a second random roll. A single damaging event with more than one qualifying wound trigger produces **one wound for that event**, using the **highest applicable minimum severity**, unless a separate explicitly authored effect creates an additional wound. Its actual location and trauma family still follow the relevant attack/hazard procedure.
 
 The canonical wound ladder is:
 
@@ -54,8 +54,16 @@ The canonical wound ladder is:
 Event guidance:
 
 - **Called Shot:** normally Serious if it qualifies; exceptional results may upgrade to Severe, Critical, Catastrophic, or become Irreparable where the attack physically severs or destroys a structure.
-- **0 HP:** normally Serious, Severe, or Critical depending on how far the attack carries the target below zero and the resulting injury. Exact overkill thresholds remain unresolved.
-- **Devastating Critical:** at least Critical; sufficiently destructive results may become Catastrophic or Irreparable, and may be Fatal when the weapon, location, and circumstances physically destroy a vital structure.
+- **0 HP:** use the following **deterministic v0 playtest severity bands** for the first damaging event that takes HP from positive to 0 or below. Measure the **HP immediately after that event**, including all damage bonuses and Armor, **before** later Dying losses or regeneration. Define `O = max(0, -HP after damage)` and `M = Maximum HP`:
+  - **Serious** when `0 ≤ O < ceil(M / 3)`.
+  - **Severe** when `ceil(M / 3) ≤ O < ceil(2 × M / 3)`.
+  - **Critical** when `ceil(2 × M / 3) ≤ O < M`.
+  - At `O ≥ M` the character has reached **HP ≤ -Maximum HP** and is **dead** under the existing death threshold; do not create an additional repairable wound as an alternative to death.
+  - **Examples:** Maximum HP 10: at HP **0 to -3**, Serious; **-4 to -6**, Severe; **-7 to -9**, Critical; **-10 or below**, dead. Maximum HP 12: **0 to -3**, Serious; **-4 to -7**, Severe; **-8 to -11**, Critical; **-12 or below**, dead.
+  - This determines the **default severity for HP overkill**, not an automatic amputation, precise organ injury, or extraordinary trauma location. A separately qualified **Devastating Critical** sets a minimum of Critical, even if the 0-HP band would be lower. Existing physically established Irreparable/Fatal destruction remains authoritative.
+- **Devastating Critical:** at least Critical; sufficiently destructive results may become Catastrophic or Irreparable, and may be Fatal when the weapon, location, and circumstances physically destroy a vital structure. A Devastating Critical that also reaches 0 HP **does not automatically create a second wound**; use the stronger applicable severity and any independently established physical consequences.
+
+**Additional wound timing boundary:** Already being at 0 HP or below does **not** create another new *0-HP-triggered* wound on each subsequent hit or Dying tick. Further HP loss still approaches the normal death threshold; a new separately qualifying Called Shot, Devastating Critical, or explicitly authored additional injury can still create its own wound.
 
 ## Repair requirement
 
@@ -63,12 +71,14 @@ Wound repair cost represents bodily trauma and does not scale with level.
 
 | Severity | Baseline repair requirement |
 |---|---:|
-| Serious | ~10 Vigor |
-| Severe | ~20 Vigor |
-| Critical | ~30 Vigor |
+| Serious | **10 Vigor** (default) |
+| Severe | **20 Vigor** (default) |
+| Critical | **30 Vigor** (default) |
 | Catastrophic | 40+ Vigor |
 | Irreparable | Cannot be naturally reconstructed |
 | Fatal | Immediate death; no natural repair |
+
+For an injury without a more specific authored requirement, use the **exact 10 / 20 / 30 Vigor v0 defaults** above; do not require the GM to invent a number at the 0-HP trigger. A more specific listed or authored injury requirement takes precedence. The numerical defaults remain **playtest calibration values** and do not define new ongoing penalties for unspecified injury details.
 
 A wound's repair requirement may exceed the character's current or even maximum Vigor. Repair is **incremental and cumulative**, not a lump-sum payment.
 

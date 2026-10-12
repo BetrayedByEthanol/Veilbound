@@ -30,15 +30,17 @@ Ranged attacks use the separate ranged-defense rules because an undefended proje
 Dodge Defense = 10 + Agility + Awareness - Dodge Pressure
 ```
 
-Dodge Pressure is **-2 for each previous Dodge chosen in the same round**:
+**Dodge Pressure is a nonnegative penalty** that increases by **+2 for each previous Dodge chosen in the same round**. Subtract the current pressure **once** in melee and ranged Dodge formulas:
 
-| Dodge this round | Dodge Pressure |
+| Dodge this round | Dodge Pressure (subtracted from Defense) |
 |---:|---:|
 | 1st | 0 |
-| 2nd | -2 |
-| 3rd | -4 |
-| 4th | -6 |
-| Each later Dodge | another -2 |
+| 2nd | 2 |
+| 3rd | 4 |
+| 4th | 6 |
+| Each later Dodge | another +2 |
+
+**Regression example:** Agility +2 and Awareness +1 give melee Dodge Defense **13 / 11 / 9 / 7** for the first four Dodges in the same round. Ranged Dodge subtracts the same 0 / 2 / 4 / 6 pressure from its own formula. Never both store a negative Dodge Pressure and subtract it; that would make repeated Dodges improve Defense.
 
 Only choosing Dodge increments Dodge Pressure. Taking Hit or using Guard does not.
 
@@ -130,4 +132,22 @@ There is no separate Critical Defense statistic.
 
 Guard does not cancel criticals by special rule; a stronger defense simply makes confirmation harder.
 
-The exact extra damage granted by Strong Hit and Critical Hit remains a calibration item and is not defined here.
+## Strong Hit, Critical Hit, and Devastating Critical damage — v0 playtest baseline
+
+The existing [natural-20 confirmation](#natural-20-and-confirmation) determines **hit severity first**. For an eligible **direct-hit HP-damaging Attack** that uses this procedure, apply the following **additional dice to its single primary direct-hit damage packet**, before Armor:
+
+| Confirmed outcome | Additional direct-hit damage | Other consequence |
+|---|---|---|
+| Ordinary Hit | None | Ordinary hit procedure |
+| **Strong Hit** | **+1d4** | No wound merely from being Strong |
+| **Critical Hit** | **+2d4** | No wound merely from being Critical |
+| **Devastating Critical** | **+2d4** (same as Critical, not another +2d4) | Existing **at least Critical wound** trigger |
+
+These are **v0 playtest damage values**, not a general critical-damage multiplier or finalized balance claim.
+
+- Add the dice **once** to the normal direct-hit damage total. Apply the weapon's fixed base, normal damage die, Physical Contribution, Penetration, and Armor exactly as already authored. **Do not double base damage, Physical Contribution or Penetration, and subtract Effective Armor only once** after adding the bonus dice.
+- Do not grant the bonus separately to each target, area effect, scatter impact, recurring pulse, delayed or ongoing damage, or secondary rider. A non-damaging effect, or one without a qualifying direct-hit HP-damage packet, does **not** acquire HP damage merely from a natural 20. A technique that does not use this natural-20 Attack procedure does not inherit these bonuses.
+- The existing [0-HP wound trigger](../06-vigor-wounds-death/dying-and-wounds.md#when-wounds-occur) applies **only when a damaging hit first drops the target from positive HP to 0 HP or below**. Subsequent hits against a target already at nonpositive HP do **not** retrigger the 0-HP wound. A **Strong Hit or Critical Hit alone creates no wound**, while a Devastating Critical still triggers its separately qualified wound even when HP remains positive or was already nonpositive. When multiple wound triggers arise from the **same hit**, use [the single-event severity rule](../06-vigor-wounds-death/dying-and-wounds.md#wound-severity) rather than automatically adding wounds.
+- Natural-20 confirmation remains **one confirmation roll only** and retains the [Protective Intervene](protective-intervene-v0.md#natural-20-with-protective-intervene--one-confirmation) substitution rules. This section changes **damage only**, not attack timing or defender selection.
+
+**Worked example:** A sword deals `3 + d6 + Light Physical Contribution` with Penetration 2. With Strength +4, the contribution is +2. Against Armor 5, Effective Armor is 3. If the normal d6 rolls 4, an ordinary hit inflicts **6 HP**; a Strong Hit with a bonus d4 roll of 3 inflicts **9 HP**; a Critical Hit with bonus d4 rolls of 2 and 4 inflicts **12 HP**. A Devastating Critical uses the same 12 HP result on those dice and separately invokes its wound trigger.

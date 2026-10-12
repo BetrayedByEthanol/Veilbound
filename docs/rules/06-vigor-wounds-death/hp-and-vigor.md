@@ -90,6 +90,8 @@ Ordinary hits do not normally create persistent wounds. A wound occurs only when
 
 1. a Called Shot successfully qualifies for a wound;
 2. a Devastating Critical occurs; or
-3. the target reaches 0 HP.
+3. a damaging event **first drops the target from positive HP to 0 HP or below**.
 
-The detailed wound tables and some severity thresholds remain calibration content and should not be treated as fully finalized merely because the trigger framework is locked.
+Already being at 0 HP or below does **not** cause another 0-HP-triggered wound from subsequent damage or a Dying tick. A separately qualifying Called Shot or Devastating Critical may still create a wound. When the **same hit** meets more than one wound trigger, it ordinarily produces **one wound**, not one per trigger; see [Dying and Wounds](dying-and-wounds.md#when-wounds-occur).
+
+The [0-HP wound severity v0 bands](dying-and-wounds.md#wound-severity) provide deterministic playtest thresholds, while detailed injury-specific effects and exceptional severity outcomes still require calibration. The three categories of wound triggers remain; this summary uses the same explicit **positive-to-nonpositive crossing requirement** as the detailed procedure.
