@@ -60,7 +60,7 @@ For each legal weapon Attack or weapon Guard, insert **one effective Weapon Trai
 
 **Shields and bucklers do not have a separate Training category or point tax.** When Guarding with a held shield or buckler, use the effective Weapon Training of **one currently wielded, legal one-handed melee weapon in the other hand**, if any. Its Training applies to the shield Guard formula; retain the shield's existing Guard Defense bonus, +1 Guard capacity and projectile eligibility. If there is no such wielded weapon, use **+0 Weapon Training** for shield Guard. Do not add both a shield and sword Training, use a stowed weapon's rank, or borrow a two-handed weapon's Training while holding a shield. Weapon Guard still uses the weapon's own category Training and normal projectile restrictions.
 
-Parrying daggers are Small Blades with their already-authored off-hand Guard/Riposte equipment benefits; they are not shields and their bonuses do not stack as a second Training.
+Parrying daggers are **Small Blades** and **inherit the ordinary dagger's complete weapon profile**, including Agility + Precision Attack/Guard pairings, 2 + d4 damage, Penetration 0, Light Physical Contribution, Cut/Pierce trauma and base weapon Guard bonus +0. Their already-authored defensive off-hand Guard/Riposte equipment benefits apply **only when used as that off-hand**; they are not shields, and their bonuses do not stack as a second Training. See [Weapons and Armor](weapons-and-armor.md#mundane-weapon-baseline), [Weapon Attack and Guard Math](weapon-attack-and-guard-math.md) and [Off-Hand and Ranged Combat](off-hand-and-ranged-combat.md#defensive-off-hands-and-shields).
 
 ## Category-specific Weapon Style Refinements
 
