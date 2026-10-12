@@ -30,15 +30,17 @@ Ranged attacks use the separate ranged-defense rules because an undefended proje
 Dodge Defense = 10 + Agility + Awareness - Dodge Pressure
 ```
 
-Dodge Pressure is **-2 for each previous Dodge chosen in the same round**:
+**Dodge Pressure is a nonnegative penalty** that increases by **+2 for each previous Dodge chosen in the same round**. Subtract the current pressure **once** in melee and ranged Dodge formulas:
 
-| Dodge this round | Dodge Pressure |
+| Dodge this round | Dodge Pressure (subtracted from Defense) |
 |---:|---:|
 | 1st | 0 |
-| 2nd | -2 |
-| 3rd | -4 |
-| 4th | -6 |
-| Each later Dodge | another -2 |
+| 2nd | 2 |
+| 3rd | 4 |
+| 4th | 6 |
+| Each later Dodge | another +2 |
+
+**Regression example:** Agility +2 and Awareness +1 give melee Dodge Defense **13 / 11 / 9 / 7** for the first four Dodges in the same round. Ranged Dodge subtracts the same 0 / 2 / 4 / 6 pressure from its own formula. Never both store a negative Dodge Pressure and subtract it; that would make repeated Dodges improve Defense.
 
 Only choosing Dodge increments Dodge Pressure. Taking Hit or using Guard does not.
 
