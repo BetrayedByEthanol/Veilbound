@@ -1,0 +1,101 @@
+# Veil Translocation — Spatial Foundation
+
+> **LOCKED design foundation (B05).** This page defines what Veil Translocation can mean, Blink clearance and momentum, and spherical temporary/permanent portals. Exact spell levels, ranges, costs, actions, construction quantities, precise failure timing, and combat maneuvers are **DEFERRED** to individual techniques and ritual rules. See [Universal Veil Fundamentals](universal-veil-fundamentals.md).
+
+## Five Universal Veil Translocation applications
+
+| Application | Outcome | Access boundary |
+|---|---|---|
+| **Blink** | Instantly move the user to a visualized, valid nearby position without occupying the intervening squares | Obstruction/path, destination and momentum restrictions below |
+| **Object Translocation** | Relocate an item without opening a traversable gateway | Object protections, destination clearance, mass/distance and action/cost to be authored |
+| **Personal Teleportation** | Relocate a traveler (possibly with accompanying subjects) without a traversable gateway | Valid destination, transported load and eligibility to be authored |
+| **Temporary / one-time portal** | Open a finite-lived **spherical** passage to a **known destination**; a party may pass during that activation | **High-level** Universal magic; no pair of permanently prepared stations required |
+| **Permanent portal** | Reusable spherical spatial link between **two independently prepared locations** | Both sites require **high-level magical preparation** and **very rare materials** |
+
+These are not additional Pillars or Aspect expressions. **One-time portal** means **one activation / temporary connection**, not a portal that permits only one creature to pass.
+
+**High-level** is a design requirement for temporary portal creation and permanent-anchor construction. The **exact tier**, VP/material quantities, casting/activation time, size, distance, duration, maintenance, and any group contribution procedures remain **unassigned**, not implicitly Tier 9.
+
+## Blink — clear spatial path, visualization and whole-body arrival
+
+Blink is instantaneous relocation. It is **not** a tiny spherical portal and creates no traversable gateway.
+
+**All of the following are required:**
+
+1. **Mental visualization.** The user must be able to form a clear mental picture of **their own complete arrival position** at the intended destination. Merely knowing an address or guessing where empty space might be is insufficient. Seeing through a transparent barrier does **not** waive the path requirement.
+2. **Direct unobstructed spatial path.** At least one direct continuous open path connects origin and destination. It cannot pass through **solid matter** (including **glass**, a wall, a closed solid door, or a solid creature). The opening does **not** need to be large enough to physically fit the traveler: the character does not travel through the intervening squares.
+3. **Whole-subject destination clearance.** The user's entire body and carried/worn equipment must occupy a valid arrival volume, with no intersection with a creature, wall, object or other solid material. A traveler cannot Blink inside a person or solid object; Blink does not displace or cut what is already there.
+4. **Magical interference.** A Veil ward or other **explicitly authored anti-Translocation barrier** may obstruct an otherwise open path.
+
+**Ordinary iron bars, grilles and latticework do not block Blink when a direct unobstructed opening passes between them.** A narrow slit or other opening can also satisfy the path condition if the destination is sufficiently visualizable and has full arrival clearance. Transparent **solid glass blocks**, even if the destination is clearly visible. A bent, indirect duct is **not** a single unobstructed direct path. No generic minimum opening width equal to the character's size is imposed.
+
+**World consequence — locked:** conventional barred prison cells cannot reliably contain a Blink-capable prisoner. Prisons intended for such prisoners favor **continuous windowless walls and solid doors without a direct open escape line**, or expressly authored anti-Translocation wards. Do not assume a window, keyhole or grille is secure solely because a body cannot physically pass through it.
+
+**No telefragging / path tunneling:** Blink cannot pass through solid barriers, overlap another person, teleport material into living tissue, or transport only a selected part of a continuous body. The exact resolution and expenditure of an **invalid attempted Blink** are future technique rules; it grants no automatic relocation to a nearby legal square.
+
+### Momentum — LOCKED
+
+**Blink changes position only. It preserves the traveler's velocity: both speed and direction, relative to the same local physical reference frame.** Changing facing or arrival position does not rotate, erase or amplify pre-existing momentum.
+
+Consequences:
+
+- Blinking **just after beginning a fall** retains the small downward speed acquired so far; safe landing may still be possible.
+- Blinking **just before hitting the ground** retains high downward speed, so a collision after arrival can still be devastating.
+- A moving, sprinting, thrown or falling traveler continues with the same movement vector on arrival until ordinary forces or later valid actions change it.
+- A Blink by itself does not supply a new attack, a free direction change, automatic landing, damage immunity or cancellation of collision/falling hazards.
+
+Under the [Movement Foundation](../05-combat/movement-foundation.md#teleportation-and-non-traversal-movement), skipped threatened squares cause **no ordinary Movement Opportunities**. An authored Blink activation or other effect may still have its own trigger/opportunity rules.
+
+**DEFERRED (not silently implemented):** Blink range, line/source specifics beyond the clear-path rule, action or Reaction availability, VP cost, next-turn AP Debt, Overdraw, collision timing under unusual conditions, and whether a failed attempt spends resources.
+
+## Objects and protected targets
+
+Object Translocation follows the same general integrity principle: an item must have a valid destination volume. Simply calling an effect `Translocation` does not permit overlapping solid matter.
+
+**An unattended object is not equivalent to a held, worn, restrained or otherwise protected object.** Item theft, teleporting an opponent's weapon from their grip, moving an unwilling creature, or materializing matter within living tissue require authored permissions and the applicable existing Imposition/Intrusion/attended-item protections. No automatic disarm or lethal bypass is granted by Universal access.
+
+Mass limits, object dimensions, range, transported load, destination visualization, reference-frame issues over long distances, and special containment remain individual spell work.
+
+## Portals — spherical paired endpoints
+
+**All portals are spherical.** An active connection has a sphere at the origin and a corresponding sphere at the destination; these are the spatial endpoints of the **same link**, not two unrelated spells.
+
+- **Traverse, do not Blink.** A traveler or item physically **enters a hemisphere** of one active sphere and **exits the opposite corresponding hemisphere** of the connected sphere. The entry side determines the matching opposing exit side; the sphere is **not a flat doorway** or a blade-edged planar aperture.
+- **Opening:** portal activation **expands** the spherical boundary from its center to its intended size.
+- **Closing:** portal deactivation **contracts** the spherical boundary toward its center until the link disappears.
+- **No severing by closure:** the expansion or contraction of a portal **cannot guillotine a limb, slice an item, split a body, or deliberately create a cutting edge**. An ongoing traversal must resolve with the subject **whole** on one side or the other; the precise complete-versus-return procedure and timing will be specified in portal operational rules.
+- **Clear endpoint volumes:** opening cannot use expansion to cut through or forcibly intersect solid matter or creatures. An occupied, blocked or otherwise invalid endpoint must not materialize the sphere inside an obstacle; whether it pauses, opens only to a safe size or fails is an **unresolved operational detail**.
+- **Sizing:** a portal's traversable geometry must accommodate the subject's passage. **Unlike Blink**, portal transit is not enabled through an arbitrarily narrow line between bars.
+
+**Momentum is not reset** by crossing a portal. Velocity persists through the connection relative to the endpoint orientations. Exact orientation mapping when portals point in different directions, and how differing local reference frames affect long-distance transit, are **to be authored**; travel is not a free velocity-cancellation mechanism.
+
+Closure is not an instant-kill or dismemberment tactic, **including if an operator deliberately shuts the portal while someone is crossing**. The complete safe-resolution algorithm and exceptional disruptions require future implementation, but the integrity prohibition is locked.
+
+### Temporary / one-time spherical portals
+
+- A sufficiently advanced Universal Veil practitioner may create a **temporary sphere-to-sphere connection to a known location** without first constructing a **permanent prepared endpoint pair**.
+- A **known destination** requires meaningful established knowledge of the location; exact thresholds (personally visited, magically surveyed, reliable records, etc.) are **not yet locked**.
+- The destination must permit a valid, unobstructed sphere; the caster cannot use portal emergence inside a person or wall as an attack.
+- A temporary portal can transport a **party or multiple objects** while open; it does not become permanent merely by repeated use.
+- Tier, casting/maintenance VP, size, travel distance, transport capacity, maximum duration and interruption are **deferred**. It remains **high-level** capability, not an automatic basic party spell.
+
+### Permanent portal connections
+
+- Both ends are **prepared physical locations** with **high-level magical procedures and very rare material components** invested at each site.
+- The persistent preparation creates a reusable link between those **two prepared locations**; ordinary activation and deactivation expand and contract the linked spheres.
+- **Preparing permanent anchors** is distinct from **later activating an already-established link**. Exact operator qualification and activation cost are deferred; no permanent master mage is automatically required at the gate on every activation.
+- The preparation's rarity and expense are intentional world constraints. Portal networks can matter strategically, but **their cost, security, throughput, maintenance and operating governance remain future content**.
+- Destroying, sabotaging or suppressing one endpoint must **not** bypass the no-severing integrity principle. Failure resolution and the side on which a traveler arrives remain to be authored.
+
+## Relationship to magical defense and character advancement
+
+- No specific Pillar/Aspect is required merely to qualify to learn Universal Translocation; each of the four Archetypes has a legitimate route once advanced access rules are authored.
+- Blink/teleportation are not automatically reactions, free movement, general evasion or independent attacks.
+- Each executable Translocation spell or ritual must author tier, eligibility, timing, range, transported subject, targeting, VP/cost, interruption/failure, physical-hazard interaction and available defenses.
+- **Talents and Pillar Technique catalogue design follow this locked foundation.** Neither is silently authored here.
+
+## Status
+
+**LOCKED:** Universal categorization, five application types, Blink visualization and open direct path, transparent solid glass blocking Blink, bars/openings allowing Blink, valid non-intersecting arrival, velocity preservation, spherical portals, opposing hemisphere traversal, expanding/contracting activation, no dismemberment, high-level temporary group portals to known destinations, high-level permanent portals requiring **two** prepared material-intensive sites.
+
+**DEFERRED:** numerical tiers, costs and ranges; precise detection and destination-knowledge thresholds; who may activate prepared portals; Blink Reaction/AP Debt; contested item translocation; portal radius and safety/failure algorithm; portal reference-frame calibration.
