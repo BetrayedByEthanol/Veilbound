@@ -97,11 +97,11 @@ Core access identity:
 - no Pillar appears more than once among the eight links;
 - no required distribution exists among External, Internal, and Transform;
 - the Gifted has access to the full technique catalogue of each linked Aspect up to the universal character-level tier limit;
-- Gifted do not use Priest-style daily preparation and do not individually learn techniques like Scholars.
+- Gifted do not use Priest-style daily preparation and do not individually learn **linked-Aspect techniques** like Scholars learn Pillar techniques individually.
 
-Emotion is the actual access mechanism.
+**Emotion is the actual access mechanism for techniques belonging to the Gifted's eight linked Aspects.** The Gifted must genuinely evoke the relevant linked emotion, whether naturally or deliberately, to use those techniques. Outward theatrical performance is not required; memory, focus, concentration, or another genuine internal route is sufficient if it produces the emotion.
 
-The Gifted must genuinely evoke the linked emotion, whether naturally or deliberately. Outward theatrical performance is not required; memory, focus, concentration, or another genuine internal route is sufficient if it produces the emotion.
+**Universal Veil Inspection and Translocation** are outside those eight Aspect catalogues. They require **no matching emotion or Active Emotion merely to use them**; eligibility does not automatically confer learning, free use, or Gifted emotion-based enhancements. See [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-is-not-free-mastery).
 
 ### Gifted breadth boundary
 
