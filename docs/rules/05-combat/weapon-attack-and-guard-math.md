@@ -17,7 +17,7 @@ d20
 
 One d20 resolves the attack. The two Abilities represent different physical demands of delivering the weapon accurately; they are not separate rolls.
 
-Training improves attack quality. Turn AP and the Focus-based **Physical Action cost** determine how many ordinary physical attacks fit into a turn; derived Physical Tempo is the maximum pure-physical count.
+Training improves attack quality. The applicable bonus is the weapon family's **effective Weapon Training** (including legal melee-only half-transfer) defined in [Weapon Training and Style Refinements v0](weapon-training-and-refinements-v0.md); it is added **once**. Turn AP and the Focus-based **Physical Action cost** determine how many ordinary physical attacks fit into a turn; derived Physical Tempo is the maximum pure-physical count.
 
 ## Current weapon attack pairings
 
@@ -58,7 +58,7 @@ d20
 
 This changes only the attack Ability pairing.
 
-It does **not** grant a thrown mode, range, or special property to a weapon that cannot otherwise be thrown.
+It does **not** grant a thrown mode, range, or special property to a weapon that cannot otherwise be thrown. The melee-only half-transfer in [Weapon Training v0](weapon-training-and-refinements-v0.md) does **not** grant Training bonuses for thrown attacks; a future legal thrown-weapon profile must define which Training, if any, applies.
 
 The weapon keeps its normal physical-contribution class unless a specific thrown profile says otherwise.
 
@@ -77,7 +77,7 @@ Guard Defense =
 
 An attack must **beat** Guard Defense to hit.
 
-Guard remains limited by Guard capacity, whose base value equals derived Physical Tempo, plus applicable equipment modifiers.
+Use the effective Weapon Training of the **weapon actually used to Guard**, added once. For a held shield or buckler, use the effective Weapon Training of one legal **one-handed melee weapon wielded in the other hand**, or +0 if none; this is **not** a separate Shield Training purchase and does not stack another weapon bonus. See [Weapon Training and Style Refinements v0](weapon-training-and-refinements-v0.md#attack-guard-and-shield-handling). Guard remains limited by Guard capacity, whose base value equals derived Physical Tempo, plus applicable equipment modifiers.
 
 ## Current Guard pairings
 
@@ -194,5 +194,5 @@ This page does not resolve:
 - Reach and Brace;
 - complete thrown-weapon ranges/profiles;
 - weapon-specific Guard traits beyond the existing current equipment modifiers;
-- the exact Training taxonomy for individual weapon families;
+- future thrown-weapon Training mapping and weapon families beyond the [current authored v0 taxonomy](weapon-training-and-refinements-v0.md);
 - a destructive emergency-block rule for normally non-Guard equipment.
