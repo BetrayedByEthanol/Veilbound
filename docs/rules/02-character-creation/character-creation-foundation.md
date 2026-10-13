@@ -12,10 +12,11 @@ A player character is defined by these major mechanical layers. **B04 resolves s
 4. **Trainings** — independent [Weapon Training](../05-combat/weapon-training-and-refinements-v0.md) and [Learned Disciplines](abilities-and-training.md#training-structure--b04) budgets; provisional maximum +5 after advancement.
 5. **Resonance** — the universal -3 to +3 state describing internal coherence of Volition; new player characters normally begin at **0**.
 6. **Archetype-specific access choices** — such as a Priest's chosen Pillar and Pillar Accord, a Scholar's learned techniques, a Gifted's emotion-to-Aspect links, or an Anointed's bonded Aspect/Mission/Birth Imprint.
-7. **Talents** — one **provisional level-1 Talent choice** under the [B07 Talent Framework](../10-advancement/talents-framework-v0.md), selected from actual eligible [level 1–5 entries](../10-advancement/talents-level-1-5-v0.md); this is separate from both Training point budgets and may instead be saved.
-8. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
-9. **Equipment** — [150-sp v0 starting purchasing](../11-equipment/economy-and-starter-equipment-v0.md) from provisional armor, weapon, kit and ammunition prices.
-10. **Background/origin/social starting position** — currently missing as a complete subsystem.
+7. **Universal Veil** — automatically know [Veil Inspection v0](../07-veil-magic/veil-inspection-v0.md) at **level 1**. [Blink v0](../07-veil-magic/blink-v0.md) unlocks automatically at **level 3**. Neither consumes a Talent, Training or Archetype technique slot.
+8. **Talents** — one **provisional level-1 Talent choice** under the [B07 Talent Framework](../10-advancement/talents-framework-v0.md), selected from actual eligible [level 1–5 entries](../10-advancement/talents-level-1-5-v0.md); this is separate from both Training point budgets and may instead be saved.
+9. **Derived resources and combat values** — HP, Vigor, VP, Physical Tempo, and other values whose rules are already defined.
+10. **Equipment** — [150-sp v0 starting purchasing](../11-equipment/economy-and-starter-equipment-v0.md) from provisional armor, weapon, kit and ammunition prices.
+11. **Background/origin/social starting position** — currently missing as a complete subsystem.
 
 ## Step 1 — Choose Archetype
 
@@ -86,7 +87,7 @@ See [Universal Resonance and Direct Veil Magic](../07-veil-magic/resonance-and-i
 
 ### Priest
 
-Choose one Pillar. **Pillar-technique** access is constrained to that Pillar's three Aspects and its Prepared Prayer structure. This restriction does **not** exclude the separate [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md) open in principle to all four Archetypes; Universal procedures have their own later-authored acquisition/cost rules.
+Choose one Pillar. **Pillar-technique** access is constrained to that Pillar's three Aspects and its Prepared Prayer structure. This does **not** exclude [Universal Veil](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked): all four Archetypes automatically know **Inspection at level 1** and **Blink at level 3** without using Prepared Prayer capacity; normal procedure VP/action limits apply.
 
 The Priest also uses the separate **Pillar Accord** state defined in the Priest foundation. Pillar Accord is not universal Resonance.
 
@@ -96,7 +97,7 @@ Exact starting Prepared Prayer counts remain provisional.
 
 ### Scholar
 
-Choose individually learned **Pillar/Aspect** techniques from allowed Pillars/Aspects. [Universal Veil operations](../07-veil-magic/universal-veil-fundamentals.md) are a separate family and their eventual known/procedure counts remain unresolved.
+Choose individually learned **Pillar/Aspect** techniques from allowed Pillars/Aspects. [Universal Veil operations](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked) are a separate automatically level-unlocked family (**Inspection 1, Blink 3**) and do **not** consume the Scholar's individually learned Pillar-technique capacity.
 
 Exact starting repertoire counts remain provisional.
 
@@ -118,7 +119,7 @@ Define:
 - a broad lifelong Mission;
 - a Birth Imprint shaped by the surge that created the bond.
 
-Exact Signature/Authority packages remain Aspect-specific content work. The Anointed's bonded-Aspect limit applies to bonded techniques and Authority; it does not rule out separate Universal Veil magic with later-authored prerequisites.
+Exact Signature/Authority packages remain Aspect-specific content work. The Anointed's bonded-Aspect limit applies to bonded techniques and Authority; **Inspection at level 1 and Blink at level 3** unlock automatically as Universal procedures, with the same costs and restrictions as for all other Archetypes.
 
 ## Step 7 — Calculate derived durability/resources
 
