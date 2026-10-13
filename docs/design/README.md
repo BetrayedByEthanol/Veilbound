@@ -20,3 +20,4 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 - [October 2026 Review Follow-ups](october-2026-review-followups.md) — post-Turn-AP review classifications, lore clarifications, legacy-migration boundaries, and stale terminology cleanup.
 - [Veilbound Development Roadmap and Level 1–3 MVP Readiness](veilbound-roadmap-and-mvp-readiness.md) — current 17-area progress table, B01–B07 blocker register, P01–P05 provisional watchlist, D01–D05 deferments and pilot MVP exit test; update only against merged canon.
+- [16-Pillar / 48-Aspect Mechanical Coverage and Compatibility Audit](16-pillar-48-aspect-coverage-compatibility-audit.md) — historical 48×8 Gifted rating matrix, inferred mechanical coverage, legal eight-Pillar alternatives, and B05 selection gates; **selection is not locked**.
