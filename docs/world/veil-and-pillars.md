@@ -85,7 +85,7 @@ The current Pillars are:
 Every Pillar has three Aspects:
 
 - **External** — expressing the Pillar outward through forces, phenomena, interactions or influence on the world.
-- **Internal** — operating **within a subject's** bodily, mental or metaphysical condition. The subject may be the caster, an ally, an enemy or another valid recipient; Internal is **not** restricted to self-targeting.
+- **Internal** — operating **within a subject's** physical, bodily, mental or metaphysical condition. The subject may be the caster, an ally, an enemy or another valid recipient; Internal is **not** restricted to self-targeting.
 - **Transform** — changing a subject's state, properties, composition, form or nature. A transformation need not be permanent.
 
 The categories describe the metaphysical *operation of an Aspect*, **not** offense/defense/utility roles, target requirements, magical delivery, Focus, or individual technique-expression tags. An Internal Aspect can have a High-Focus [Projection] technique targeting someone else. An effect entering an unwilling creature's protected internal self still follows the relevant Intrusion rules; External does not automatically mean Manifestation.
