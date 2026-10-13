@@ -60,6 +60,120 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 | **Fire Forge / Alchemy Transmutation / Arts Creation / Earth Bounty** | Distinguish object-workmanship, conversion, artistic expression and resource fertility; do not grant unauthored magical crafting or rune rules. |
 | **Death Spirit/Plague / Life Restoration/Nature** | Clarify living-versus-dead, disease/suppression, regeneration, fatal injury and resurrection boundaries before authoring cross-domain effects. |
 
+## 48-Aspect identity, expression category and boundary review — PROVISIONAL
+
+### Canonical taxonomy versus this review
+
+[The Veil and the Pillars](../world/veil-and-pillars.md#three-aspects-per-pillar) explicitly establishes **three metaphysical Aspect categories per Pillar**:
+
+| Canonical Aspect category | Canonical meaning | Not automatically equivalent to |
+|---|---|---|
+| **External** | Project/express the Pillar outward into creatures, objects or the environment. | Offense, **[Projection]** eligibility, a specific range, or the High Focus. |
+| **Internal** | Express the Pillar inward through self-enhancement, self-protection or internal change. | Defense only, the **Inward** technique tag, a mandatory self-target, or the Low Focus. |
+| **Transform** | Change, create, destroy, convert or fundamentally alter something through the Pillar. | Utility only, free crafting, or unrestricted alteration of living tissue or external matter. |
+
+**These are lore/metaphysical domain categories, not mechanical combat-role categories.** The separate [technique-expression metadata](../rules/07-veil-magic/technique-tiers-and-expression.md#universal-technique-expression-metadata) assigns **[Projection], Inward, [Embodiment], Consecration, Devotional Rite, Conduit Form compatibility and Cadence** to authored *individual techniques*, not automatically to entire Aspect types. Likewise the [Archetype identity rules](../rules/08-archetypes/archetype-identities.md#archetype-comparison) expressly say offense, defense, control, support and utility arise from build and technique choices rather than being fixed Archetype combat roles.
+
+**Evidence limit:** current canonical files confirm **16 Pillars, three category definitions and 48 named Aspects**, but do **not independently enumerate which *named* Aspect has which category**. The old compatibility matrix provides *names and S/P/— emotion ratings*, **not** category assignments or complete domain/boundary prose. The October review record calls legacy Aspect identities and boundary rulings **potential migrations**, but does not reproduce full original individual-boundary source text. Therefore **no named Aspect's exact category or proposed exclusion below is promoted to canon by this review**.
+
+**Interpretation rule for the next table:** **E? / I? / T? = proposed External / Internal / Transform mapping, unverified**; the question mark is intentional, **not** a compatibility rating. Each Pillar is given a **candidate one-of-each arrangement for evaluation**, not a proof of its original naming-order mapping. **All 48 domain and boundary clauses are explicitly editorial hypotheses** informed by the names and scattered historical examples. A boundary clause flags what a mechanic **must not be assumed to include automatically**; it is **not** a final ban on a carefully authored, justified effect. No attack, defense, healing or skill bonus is created here.
+
+### All 48 named Aspects — distinct identities and exclusion tests
+
+| Aspect (established name) | Working category (UNVERIFIED) | Distinctive identity to investigate (PROPOSED) | Boundary / neighboring overlap to resolve before authoring (PROPOSED) |
+|---|:---:|---|---|
+| **Order–Law** | **E?** | Binding and communicating articulated rules or limits governing conduct or interaction. | Not universal moral truth, guaranteed obedience, or Priest authority; distinguish externally imposed limits from Secrets deception. |
+| **Order–Constancy** | **I?** | Maintaining the practitioner's chosen pattern, state, or commitment through change. | Not general invulnerability, timeless stasis, or system-wide environmental control; compare Stability. |
+| **Order–Stability** | **T?** | Restoring or reinforcing an arrangement against disruption and drift. | Not permission to freeze arbitrary targets, negate any spell, or duplicate Earth structural fortification without an authored distinction. |
+| **Liberty–Defiance** | **E?** | Outward opposition to imposed constraints, coercion, or domination. | Not automatic ward-breaking, unconditional dispelling, or hostile control in the name of freedom. |
+| **Liberty–Autonomy** | **I?** | Preserving one's agency and capacity for deliberate self-direction. | Not blanket immunity to Intrusion or the power to decide for another creature. |
+| **Liberty–Exploration** | **T?** | Opening new pathways or changing practical access to experiences and places. | Not free Blink, Scrying, unlimited traversal or magical relocation; T placement especially uncertain. |
+| **Life–Restoration** | **E?** | Rebuilding injured or impaired living function through recovery. | Not automatic resurrection, limb replacement, irreparable reconstruction, or unbounded HP/Vigor restoration. |
+| **Life–Preservation** | **I?** | Keeping living processes intact and preventing deterioration. | Not the same as immediately repairing damage; no automatic suppression of death or unlimited healing. |
+| **Life–Nature** | **T?** | Developing, reshaping, or sustaining biological growth and ecological interaction. | Not ownership of all natural elements; differentiate Earth Bounty, Water Flow and invasive bodily Intrusion. |
+| **Death–Plague** | **E?** | The spread and outward consequences of disease and decay. | Not guaranteed infection, bypass of living-body Intrusion, or a universal damage-over-time permission. |
+| **Death–Mastery** | **I?** | The practitioner's relationship to mortality, pain, endings and deathly endurance. | Name ambiguous: not automatically control of corpses/spirits, resurrection, immortality or dominion over living minds. |
+| **Death–Spirit** | **T?** | Transitions and lingering traces between life, death and posthumous states. | Metaphysics of souls/dead communication remains undecided; not automatic resurrection, summoning or definitive afterlife access. |
+| **Fire–Conflagration** | **E?** | Outward combustion, ignition and destructive spreading flame. | Not every form of heat, thermal protection, forging or unlimited environmental damage. |
+| **Fire–Warmth** | **I?** | Maintaining useful temperature and the practitioner's thermal resilience. | Not a generic healing school or control of all fires; compare Life Preservation and Conflagration. |
+| **Fire–Forge** | **T?** | Purposeful reshaping and joining of materials through heat and work. | Not any substance conversion, permanent enchantment, or free fabricated inventory; compare Alchemy Transmutation. |
+| **Water–Flow** | **E?** | Movement, pressure, current and redistribution of water. | Not free humanoid movement, airborne flight, time flow or every liquid/medium without scope. |
+| **Water–Calm** | **I?** | Stillness, composure, or stabilization associated with water. | Not forced sleep, emotional mind control, unlimited psychic defense or a universal social bonus. |
+| **Water–Medium** | **T?** | Water as a carrier, solvent, reservoir, interface or transmission environment. | Name/category unusually uncertain: clarify physical vs mystical medium before granting remote sensing, transport or communications. |
+| **Earth–Quake** | **E?** | Outward disturbance of ground, stone and terrain stability. | Not undodgeable automatic earthquake damage, unlimited building collapse or freely bypassing collision/hazard rules. |
+| **Earth–Fortification** | **I?** | Reinforcing physical protection and structural integrity of a held position or self. | Not a free extra Guard, Intervene, armor stack or equivalence to Order Stability. |
+| **Earth–Bounty** | **T?** | Altering soil/resources to improve sustenance, fertility or material yield. | Not instant wealth, living tissue healing, or unbounded material creation; compare Life Nature. |
+| **Skywinds–Gale** | **E?** | Outward wind pressure, gust and air-current force. | Not Lightning discharge, infinite forced-movement damage or automatic interception. |
+| **Skywinds–Swiftness** | **I?** | Agility and speed supported by control of air and movement. | Not free Turn AP, extra Dodge/Reaction, or Blink-equivalent relocation. |
+| **Skywinds–Sky** | **T?** | Changing access to or interaction with sky, altitude and open air. | T placement weak: requires flight, fall and environment rules; not unrestricted levitation/oxygen/weather control. |
+| **Lightning–Strike** | **E?** | Directed electrical discharge and momentary high-intensity impact. | Not automatic paralysis, simultaneous full HP and Vigor packets, or bypass of ranged defense. |
+| **Lightning–Reflexes** | **I?** | Heightened responsiveness, sensation and rapid physical reactions. | Not automatic Dodge, unlimited Reactions or stacking Tempo without explicit cadence. |
+| **Lightning–Charge** | **T?** | Accumulation, transfer, storage or alteration of electrical potential. | Not VP generation, limitless batteries or every possible energetic conversion. |
+| **Kinship–Guardian** | **E?** | Protection extended to someone through a genuine protective relationship. | Not unrestricted protective Dodge, free Intervene or immunity for the group. |
+| **Kinship–Sacrifice** | **I?** | Deliberately accepting personal cost to safeguard or enable another. | Not forcibly transferring another's wounds/resources or free VP/Vigor/HP conversion. |
+| **Kinship–Unity** | **T?** | Creating or deepening cooperative links among consenting participants. | Not mind control, merger of identities, compulsory trust or a universal stacking party aura. |
+| **Strength–Power** | **E?** | Force exerted into the world through a character's physical presence. | Not automatic creation of ranged kinetic blasts or internal bodily damage; distinguish Earth Quake. |
+| **Strength–Endurance** | **I?** | The capacity to withstand strain, trauma and attrition. | Not generic wound repair, indefinite action economy or invulnerability. |
+| **Strength–Training** | **T?** | Changing developed capacity through repeated disciplined practice. | Not bypassing ability caps, instant proficiency ranks or replacing Weapon/Learned Discipline progression. |
+| **Fortune–Manipulation** | **E?** | Intentionally nudging contingent circumstances to favor a desired course. | Low-confidence category: not retroactive GM fiat or unlimited rerolls; distinguish Luck and Charm. |
+| **Fortune–Charm** | **I?** | A personal auspicious tendency or favorable social impression. | Low-confidence category: not magical forced affection, automatic Persuasion or universal advantage. |
+| **Fortune–Luck** | **T?** | Modifying the distribution or interpretation of chance and uncertainty. | Low-confidence category: do not imply guaranteed results, invisible dice replacement or unbounded probability rewrites. |
+| **Mind–Psionics** | **E?** | Outward expression of disciplined mental influence or contact. | Intrusion rules apply when altering protected interior thoughts; not generic telekinesis, telepathy or domination without authored scope. |
+| **Mind–Memory** | **I?** | Retention, recall, integration and integrity of remembered experience. | Not omniscience, archival access to unknown events or rewriting another mind without Intrusion. |
+| **Mind–Insight** | **T?** | Transformation of observations and cognitive patterns into understanding. | Low-confidence T: not automatic mind-reading, prophecy or guaranteed truth; compare Secrets Deception and ordinary Investigation. |
+| **Alchemy–Concoctions** | **E?** | Prepared combinations producing external reactions or applied effects. | Not fully authored consumable crafting, infinite potions, or a license to bypass equipment costs. |
+| **Alchemy–Elixirs** | **I?** | Ingested or internalized formulations that alter the user. | Not generic Life Restoration or immunity to toxicity, limits and VP/resource costs. |
+| **Alchemy–Transmutation** | **T?** | Changing material composition, properties or form through an alchemical pattern. | Not unrestricted matter creation, permanent wealth or Fire Forge craftsmanship by default. |
+| **Arts–Performance** | **E?** | Outward expressive act connecting performer, audience and cultural form. | Not forced persuasion, universal enchantment or authority over everyone's emotions. |
+| **Arts–Inspiration** | **I?** | Cultivated inward imagination and creative drive. | Not a blanket bonus to all checks, supernatural talent acquisition or compulsive emotion transfer. |
+| **Arts–Creation** | **T?** | Transforming ideas and materials into expressive works. | Not universal item crafting, artifact production, or Alchemy/Forge substitution. |
+| **Secrets–Deception** | **E?** | Deliberate misdirection through controlled presentation or false signals. | Not unbounded mind rewriting, guaranteed lies or automatic denial of all investigations. |
+| **Secrets–Shadow** | **I?** | Concealment of presence or identity using darkness and obscurity. | Not always-on invisibility, physical intangibility or Blink/teleportation. |
+| **Secrets–Hallucination** | **T?** | Altering experienced appearances, sensory models or apparent situations. | Distinguish external Manifestation illusion from protected internal-perception Intrusion; not arbitrary memory modification. |
+
+### Which category placements particularly need primary-source verification?
+
+| Pillar / proposed mapping | Uncertainty |
+|---|---|
+| **Order: Law E? / Constancy I? / Stability T?** | Constancy and Stability overlap strongly; externally enforced law versus state stabilization requires a domain distinction, not merely different target types. |
+| **Liberty: Defiance E? / Autonomy I? / Exploration T?** | Exploration seems naturally outward/mobile, so placing it in Transform is a **working hypothesis only**; external movement is not automatically Translocation. |
+| **Death: Plague E? / Mastery I? / Spirit T?** | Mastery does not specify *what* is mastered. Death/Spirit needs independent lore on lingering dead, communication and reversible death before any transform model is approved. |
+| **Water: Flow E? / Calm I? / Medium T?** | Water/Medium is semantically ambiguous and the assigned category has **low confidence**; explicitly define medium's meaning before writing magic. |
+| **Skywinds: Gale E? / Swiftness I? / Sky T?** | Sky could denote outward atmospheric conditions, open-space access or aerial identity; current flight rules are incomplete. |
+| **Kinship: Guardian E? / Sacrifice I? / Unity T?** | Unity's transformative role is possible, but interpersonal relation changes must be distinguished from coercion and generic party buffs. |
+| **Strength: Power E? / Endurance I? / Training T?** | Training may be an internal persistent process, while Power may refer to self-amplification rather than projection; assignments are not source-verified. |
+| **Fortune: Manipulation E? / Charm I? / Luck T?** | The three candidate types overlap substantially; no category assignment is safe from the Aspect names alone. Mechanical dice manipulation needs unusually strict bounded authoring. |
+| **Mind: Psionics E? / Memory I? / Insight T?** | Insight may be an inward process and Memory may involve transformation; distinguish knowing, recalling and directly altering another mind. |
+| **Secrets: Deception E? / Shadow I? / Hallucination T?** | Hallucination may affect an external apparent image or an internal protected perception; this *delivery choice* changes Direct Veil legality and must be specified per technique. |
+
+**No mapping change is proposed as canonical in this PR.** Confirm historical per-Aspect original descriptions or explicitly lock a deliberate reassignment in a separate canon decision; do not mechanically infer the category from its row index or tactical function. If the original source has another mapping, the source-verified assignment takes precedence over this table.
+
+### Five concrete boundary regression questions for technique authoring
+
+1. **Healing vs prevention:** What specifically separates **Life–Restoration**, **Life–Preservation**, **Kinship–Sacrifice** and **Alchemy–Elixirs**? Which, if any, directly adds **HP**, **Repair Progress**, prevents **Dying**, or changes a condition, and with what VP/action/cadence costs? The names alone confer none of those.
+2. **Mental effects vs appearances:** Does a **Mind–Psionics** or **Secrets–Hallucination** technique act *inside* a protected mind (therefore [Intrusion](../rules/07-veil-magic/resonance-and-intrusion.md)) or create an external stimulus/phenomenon (therefore the appropriate Manifestation/environmental pathway)? Naming an effect illusion does not bypass internal resistance.
+3. **Defense ownership:** Does **Earth–Fortification**, **Order–Stability** or **Kinship–Guardian** alter Armor, Guard, the incoming attack, a battlefield obstacle, or an actual [Protective Intervene](../rules/05-combat/protective-intervene-v0.md) resource? A defensive lore label grants **none** of those for free.
+4. **Change vs creation:** Does **Fire–Forge**, **Alchemy–Transmutation**, **Arts–Creation** or **Earth–Bounty** work pre-existing materials, convert compositions, produce culturally meaningful objects, or improve growth? Avoid granting unlimited goods, magic items, wealth or crafting skips through vocabulary.
+5. **Freedom vs movement:** Does **Liberty–Autonomy**, **Liberty–Defiance**, **Liberty–Exploration**, **Skywinds–Swiftness** or **Lightning–Reflexes** protect choice, resist coercion, cross terrain, change ordinary MP costs or affect reactions? Do not grant [Blink](../rules/07-veil-magic/blink-v0.md), unlimited Turn AP, or free teleportation by analogy.
+
+### Per-Aspect acceptance card before any category or technique is locked
+
+For each of the 48 Aspects, carry these fields into a later source-verified/canonical content record:
+
+| Field | Required authoring decision |
+|---|---|
+| **Identity** | A short *positive* definition of its pattern, meaningful choices and volition; not merely a damage type. |
+| **Category** | **Source-supported External / Internal / Transform assignment**, or explicitly noted unresolved; no automatic assumption from technique tag. |
+| **Distinctiveness** | At least one credible contrasting case versus both sibling Aspects in the same Pillar. |
+| **Neighbor boundary** | At least one plausible overlap with another Pillar and a bounded difference (including any permitted exceptional crossover). |
+| **Positive expression examples** | Representative effects consistent with the identity, without treating examples as already executable techniques. |
+| **Negative examples** | Things the name alone **does not authorize** (not necessarily permanently impossible). |
+| **Expression metadata** | The actual authored technique, *not the Aspect*, decides Projection/Inward/Embodiment, recipient, cadence, Direct Veil/Manifestation pathway, VP/Turn AP, targeting/defense and tier. |
+| **Archetype proof** | Legal use by one-Pillar Priest, configurable Scholar, one-emotion Gifted (plus Conduit/Embodiment where relevant), and one-Aspect Anointed Signature/Authority; no implied free capacity. |
+| **Migration status** | Mark `CANONICAL`, `SOURCE-VERIFIED HISTORICAL`, `PROPOSED` or `UNRESOLVED` **per field**, not on an entire multi-claim paragraph. |
+
+**Exit condition of this design review:** an editorial hypothesis is **not** a canonical identity assignment until an authoritative original mapping is located and reconciled or a subsequent specific decision locks it. The existing 48×8 **Gifted S/P/— values stay exactly unchanged**; tactical authoring should follow the confirmed identity rather than dictate it.
+
 ## Exact Gifted compatibility matrix — all 48 Aspects
 
 The **S/P/— cells below are transcribed from the archived LOCKED v2 compatibility matrix**, not newly invented. They remain subject to migration into current structured records. **S** = Strong, **P** = Plausible with a coherent interpretation at creation, **—** = no default link. After a valid link is chosen, **S and P have identical mechanical power**; P is not a penalty. **AT/DF/HE/CT/MV/KN/SO/CR tags are this audit's noncanonical hypotheses only.**
@@ -212,14 +326,14 @@ A set of legal Pillars is **necessary but not sufficient** for a usable level-1�
 
 - **No authored complete 48-Aspect technique catalogue** exists in current source. Therefore **none** of the role tags certify actual MVP mechanical coverage.
 - Archived 48×8 matrix is marked locked in the audit and conceptually retained in current Gifted rules, but **has not yet been migrated to canonical machine-readable records**. This audit does **not** promote it by itself.
-- **Three Aspects per Pillar** is canonical; the precise **External / Internal / Transform mapping of each named Aspect** must be verified during migration and should **not** be inferred solely from row order here.
+- **Three Aspects per Pillar** is canonical; the **48-Aspect identity and boundary review above now contains explicit *candidate* E?/I?/T? mappings and per-name overlap/exclusion questions**, but precise named-Aspect category mapping and boundaries still require original source verification or a **separate locking decision**. Do **not** infer the canon from row order or the proposed table.
 - Word overlap does **not** justify importing D&D spells. Particularly **Death/Mastery**, **Water/Medium**, **Fortune/Manipulation/Luck**, and broad **Arts/Creation** need explicit domain boundaries before mechanical authoring.
 - **Eight is the mathematical minimum**, not automatically the best number for campaign scope; **nine or ten** is a content decision, not a compatibility requirement.
 - **Gifted S and P are equal mechanically after creation.** Do not introduce extra VP, a disadvantage, level delay or per-cast approval for P links.
 
 ## Audit decision summary
 
-**SUPPORTED AND READY TO USE AS DESIGN INPUT:** all 16 Pillars, all 48 exact Aspect names, eight Gifted emotions and the historical compatibility table, two **verified** eight-Pillar Strong-only legal assignments, and a framework for evaluating actual authored mechanics.
+**SUPPORTED AND READY TO USE AS DESIGN INPUT:** all 16 Pillars, all 48 exact Aspect names, eight Gifted emotions and the historical compatibility table, two **verified** eight-Pillar Strong-only legal assignments, and a framework for evaluating authored mechanics. The new **48-name category/identity/boundary table is explicitly *PROPOSED*, not source-verified canon**.
 
 **PROVISIONAL RECOMMENDATION:** compare the historical eight against the role-diverse eight, begin Fire + Mind prototypes with Life close behind, and choose based on playable content and pilot scope. **No Pillar or Aspect has been locked into or excluded from the MVP by this audit.**
 
