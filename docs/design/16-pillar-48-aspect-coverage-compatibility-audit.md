@@ -1,6 +1,6 @@
 # B05 — 16-Pillar / 48-Aspect Mechanical Coverage and Gifted Compatibility Audit
 
-> **HISTORICAL DESIGN AUDIT — PR #59, 13 October 2026. MVP selection NOT LOCKED.** This record preserves the original provisional E?/I?/T? mappings and 48-Aspect boundary *hypotheses* as an audit trail. A later B05 decision canonized [all 48 Aspect identities, categories and boundaries](../world/aspect-identities-and-boundaries.md). **For identity/category use that canonical reference, not the provisional table below.** The unchanged 48×8 Gifted compatibility matrix, mechanical coverage hypotheses and proposed eight-Pillar MVP candidate sets remain useful here. Neither this audit nor the lore canonicalization creates executable techniques or selects MVP Pillars.
+> **HISTORICAL DESIGN AUDIT — PR #59, 13 October 2026.** The original A/B MVP selection proposals below are historical; the subsequent [eight-Pillar MVP authoring selection and coverage validation](b05-eight-pillar-mvp-selection-and-coverage.md) selects **Fire, Life, Earth, Liberty, Mind, Kinship, Secrets, Arts** as the scoped level-1–3 production roster, **without claiming playable technique/Focus readiness**. This record preserves the original provisional E?/I?/T? mappings and 48-Aspect boundary *hypotheses* as an audit trail. A later B05 decision canonized [all 48 Aspect identities, categories and boundaries](../world/aspect-identities-and-boundaries.md). **For identity/category use that canonical reference, not the provisional table below.** The unchanged 48×8 Gifted compatibility matrix, mechanical coverage hypotheses and proposed eight-Pillar MVP candidate sets remain useful here. Neither this audit nor the lore canonicalization creates executable techniques or selects MVP Pillars.
 
 ## Source-of-truth and confidence
 
@@ -246,7 +246,7 @@ The **S/P/— cells below are transcribed from the archived LOCKED v2 compatibil
 
 **Interpretation:** Disgust has **only five Strong** aspect options; Joy, Fear and Surprise have considerably more. Pillar-distinctness, not simple per-emotion counts, is the actual build constraint. **Do not lock a selection solely on how many S cells it offers**, and do not discourage P choices: the latter are fully legal with one interpretation at creation.
 
-## Constraint-satisfying candidate sets — both use exactly eight distinct Pillars
+## Historical PR #59 candidates A and B — both use exactly eight distinct Pillars
 
 ### A. Historical Gifted stress-test set — VERIFIED LEGAL, NOT NECESSARILY BEST MVP CONTENT
 
@@ -290,7 +290,11 @@ Retain Fire, Life, Earth, Liberty, Mind, Alchemy, and **replace Lightning + Stre
 - It tests **different adjudication paths**: physical damage, wound repair, defensive actions, movement, mental Intrusion, item/craft boundaries and ordinary social/perception interaction. This is more valuable for the first MVP than a second speed/burst-focused Pillar *if* these hypotheses survive actual technique authoring.
 - It sacrifices **Lightning's overt kinetic/electrical action** and **Strength's direct martial enhancement**, which should remain first-class expansion candidates, not be declared redundant or removed from the world.
 
-### Selection sensitivity
+### Updated selection: Candidate C (Arts replaces Alchemy)
+
+**Current authoring scope:** [B05 eight-Pillar MVP authoring selection and coverage validation](b05-eight-pillar-mvp-selection-and-coverage.md) selects **Fire, Life, Earth, Liberty, Mind, Kinship, Secrets, Arts**. Re-running the exact locked matrix gives **278 Strong-only one-to-one emotion-to-Pillar matchings**, versus **202 for A** and **188 for B**. The canonical Arts identities add performance, inspiration and limited art transformation; Alchemy's recipe/reagent-based expressions remain valuable but are a higher-cost implementation dependency while full crafting is deferred. One verified Strong-only assignment is **Joy→Arts/Inspiration, Sadness→Life/Restoration, Anger→Fire/Conflagration, Fear→Earth/Fortification, Surprise→Secrets/Hallucination, Disgust→Liberty/Defiance, Trust→Kinship/Guardian, Anticipation→Mind/Insight**. The 48 × 8 matrix itself is unchanged. **Selection is locked as an authoring scope only; all playable-spell/Focus/encounter gates remain open.** See the linked decision for detailed capability and regression matrices.
+
+### Historical selection sensitivity (PR #59 comparison)
 
 1. **For front-line action / reactive defense priority:** use the historical eight-Pillar set; Lightning + Strength have clearer mechanical synergy with weapons, reactive defense and Focus differentiation.
 2. **For mixed social / exploration / intrigue MVP:** investigate the role-diverse set first; Kinship + Secrets deserve meaningful mechanics rather than being decorative labels.
@@ -311,13 +315,13 @@ A set of legal Pillars is **necessary but not sufficient** for a usable level-1�
 
 **Minimum content is not necessarily 24 spell names.** A full eight-Pillar / 24-Aspect roster is a reasonable *content-development target* if every chosen Priest Pillar is to be unrestricted; however, the real acceptance test is that *every permitted MVP character build* has a meaningful authored technique/Signature/feature loop at levels 1–3, that it can afford and use. It may take multiple techniques and expression variants per Aspect; raw counts are not sufficient.
 
-## Practical prototype recommendation and lock gates
+## Prototype plan and gameplay-readiness lock gates
 
-**Do not lock the eight Pillars yet.** The data supports a defensible **candidate B (Fire, Life, Earth, Liberty, Mind, Alchemy, Kinship, Secrets)** and a meaningful alternative **candidate A (historical Fire, Lightning, Earth, Life, Liberty, Mind, Alchemy, Strength)**. Choose based on pilot-adventure identity after short content prototypes.
+**Selection outcome (subsequent B05 decision):** the eight-Pillar **authoring roster** is [Candidate C](b05-eight-pillar-mvp-selection-and-coverage.md): **Fire, Life, Earth, Liberty, Mind, Kinship, Secrets, Arts**. The PR #59 preference for B and alternative A remain historical comparisons; the **MVP itself is not declared playable** until its later gates pass.
 
 **Prototype first:** **Fire + Mind** as deliberately different mechanical domains: Fire tests external Manifestation/physical harm/area/Forge boundaries, while Mind tests protected internal targets, Intrusion, cognitive information and non-damage outputs. **Add Life immediately in the first content expansion** to test healing and wound repair before claiming a combat MVP. This order is a **proposal**, not a rule.
 
-**Selection may be locked only after:**
+**Full playable-roster validation (still required after the scoped selection):**
 1. Validated canonical-compatibility migration, with **16×3×8 row/column integrity** and legal distinct-Pillar example assignments.
 2. At least one **fully specified level-1/2** technique or authored expression for each planned early-play Aspect, plus multiple test cases where role overlap would otherwise be ambiguous.
 3. For chosen Priest Pillars, viable one-Pillar sample loadouts; for Gifted, three-Focus eight-link samples with **real** techniques/Conduits/Embodiments; for Scholar, worthwhile modular selection; for Anointed, playable Signature/Authority example(s).
@@ -337,6 +341,6 @@ A set of legal Pillars is **necessary but not sufficient** for a usable level-1�
 
 **CURRENT SOURCE HIERARCHY:** all 16 Pillars and 48 exact Aspect names plus their **author-approved category/identity/boundary definitions** are canonical in the [world reference](../world/aspect-identities-and-boundaries.md). The PR #59 table above is **historical/provisional**, not current canon. Eight Gifted emotions, the exact unchanged compatibility table, two **verified** eight-Pillar Strong-only legal assignments and a method for evaluating authored mechanics remain valid design input.
 
-**PROVISIONAL RECOMMENDATION:** compare the historical eight against the role-diverse eight, begin Fire + Mind prototypes with Life close behind, and choose based on playable content and pilot scope. **No Pillar or Aspect has been locked into or excluded from the MVP by this audit.**
+**CURRENT AUTHORING SELECTION:** [Candidate C](b05-eight-pillar-mvp-selection-and-coverage.md), **Fire, Life, Earth, Liberty, Mind, Kinship, Secrets, Arts**, selected as the level 1–3 MVP **content-production scope** after canonical identity review and Strong-only compatibility validation. A and B above remain historical alternatives. **This does not mean techniques, 12 build combinations, prepared repertoires, Signature/Conduit/Embodiment expressions, encounter coverage or final playtest balance are validated**.
 
-**NEXT WORK:** select prototype domains and author level-1/2 techniques and three-Focus expression tests using the **canonical Aspect boundaries**. The lore classification milestone is complete, but B05 MVP technique content is not. The existing [Roadmap and MVP Readiness](veilbound-roadmap-and-mvp-readiness.md) B04/B05 blockers remain open until the technique, creation and encounter content exists.
+**NEXT WORK:** author a **Fire + Mind + Life** tier-1/2 prototype, then expand through the selected **Earth, Liberty, Kinship, Secrets and Arts** domains, and test all three Focus expressions using the **canonical Aspect boundaries**. The lore classification milestone is complete, but B05 MVP technique content is not. The existing [Roadmap and MVP Readiness](veilbound-roadmap-and-mvp-readiness.md) B04/B05 blockers remain open until the technique, creation and encounter content exists.
