@@ -163,7 +163,7 @@ The boundaries below say what an Aspect **does not automatically authorize**. Th
 
 The 48 names and this category/domain table are canonical; **no spells or numbers are created here**. Future entries must separately author tier, action/Turn AP, VP, targets, defense and delivery, persistence/cadence, scaling, Archetype and Focus eligibility, and concrete effect. Cheat Death is a historical locked framework but lacks an executable current technique family. Water/Medium's two-source investment direction does not yet define who supplies access/VP or how costs, capacity and release are calculated. Flying combat remains deferred. Mind control beyond fully altering memory is not automatically assigned to an Aspect.
 
-Keep the **48 × 8 Gifted emotion compatibility matrix unchanged**: eight links across eight distinct Pillars, no category quota, and Strong/Plausible mechanically identical after character creation. The **eight-Pillar level 1–3 MVP set remains unselected**; this lore canonicalization does not close the playable-technique or starting-repertoire blocker.
+Keep the **48 × 8 Gifted emotion compatibility matrix unchanged**: eight links across eight distinct Pillars, no category quota, and Strong/Plausible mechanically identical after character creation. A subsequent [eight-Pillar level 1–3 MVP authoring selection](../design/b05-eight-pillar-mvp-selection-and-coverage.md) scopes which domains to implement first; it does **not** remove the other Pillars from the setting, change the Gifted compatibility matrix or close the playable-technique/starting-repertoire blocker.
 
 ## Sources and supersession
 
