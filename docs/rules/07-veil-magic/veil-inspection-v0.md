@@ -1,6 +1,6 @@
 # Veil Inspection v0 — Held-Item Examination
 
-> **LOCKED B05 basic Inspection design; numerical +2 and 2 VP remain playtest calibration values.** This is the first executable **Universal Veil Inspection** operation. It reads **observable magical patterns on one item held by the caster**, independently of Pillar/Aspect access. It does **not** replace the separately deferred **Veil Analysis** procedure for subtle, dormant or concealed effects. See [Universal Veil Fundamentals](universal-veil-fundamentals.md), [Core Resolution](../01-core-resolution/core-resolution.md) and [Volition Points](volition-points.md). **Universal procedure acquisition and technique-tier mapping remain deferred**: being eligible to learn Universal magic is not automatic knowledge of every operation.
+> **LOCKED B05 basic Inspection design; numerical +2 and 2 VP remain playtest calibration values.** This is the first executable **Universal Veil Inspection** operation. It reads **observable magical patterns on one item held by the caster**, independently of Pillar/Aspect access. It does **not** replace the separately deferred **Veil Analysis** procedure for subtle, dormant or concealed effects. See [Universal Veil Fundamentals](universal-veil-fundamentals.md), [Core Resolution](../01-core-resolution/core-resolution.md) and [Volition Points](volition-points.md). **Acquisition is automatic at character level 1 for all Archetypes and Focus choices** under [Universal Veil Fundamentals](universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked); **numeric tier classification is unassigned**. Automatic access is not automatic success, free VP or an exemption from Full Action/item restrictions.
 
 ## Profile
 
@@ -8,6 +8,8 @@
 |---|---|
 | Family | Universal Veil — Inspection |
 | Operation | Basic held-item examination, **not** Veil Analysis |
+| Acquisition | **Automatically known at character level 1**; no Talent, separate Training, Pillar technique slot, or individual study required |
+| Tier classification | **Unassigned**; the level-1 acquisition gate is sufficient for Basic Inspection |
 | Action | **One Full Action** on the caster's own turn; **not** a Reaction or freely reservable Interception |
 | VP cost | **Base 2 Spent VP**, paid only when the examination completes; use independently applicable VP-cost reductions |
 | Range / eligible subject | **Touch — one item physically held in the caster's hand throughout the Full Action** |
@@ -96,6 +98,8 @@ Analysis should eventually distinguish **detecting that a hidden pattern exists*
 | Item is visible on a table, not in the caster's hand | Ineligible; cannot begin a legal Inspection |
 | Item is held through ordinary gloves | Eligible; bare skin unnecessary |
 | Caster has 2 Available VP, no modifier | May complete basic Inspection for **2 Spent VP** |
+| Level 1 character of any Archetype/Focus | **Knows Basic Inspection automatically**, subject to Full Action/held-item/VP requirements |
+| Low Focus at level 1 with Veil Affinity +0 and 2 Available VP | **Can perform one 2-VP Inspection** if all other requirements pass; VP cost is not waived |
 | Caster has 1 Available VP and unused TAL-M03 during their own turn | Can declare discounted Inspection for **1 Spent VP** |
 | Item is taken away by an Interception before the examination completes | Full Action remains spent; **0 VP**, no Inspection information |
 | Item's visible pattern raises a legitimate theoretical question | **+2 to one relevant Veil Theory check**, as part of this completed Full Action |
@@ -106,4 +110,4 @@ Analysis should eventually distinguish **detecting that a hidden pattern exists*
 
 **LOCKED B05 basic Inspection design:** one physically held item; ordinary gloves allowed; **Full Action**, **base 2 VP**, only paid on completion (effective cost honors legal Talent discounts); basic observation of magical presence and discernible **Pillar/Aspect signatures** without a roll; bounded **+2 to one relevant Veil Theory interpretation check in the same Full Action**; **no** automatic concealed effects, curse functionality or all-item identification; Veil Analysis separate and deferred.
 
-**STILL DEFERRED:** formal Universal procedure acquisition/tier; Veil Analysis profile including concealment mechanics; examining larger structures, non-held objects, remote magic and beings; magical item/enchantment system and creation/economy. These are not silently granted by Basic Inspection.
+**STILL DEFERRED:** optional Inspection numeric technique-tier classification; Veil Analysis executable profile and minimum-level gate including concealment mechanics; examining larger structures, non-held objects, remote magic and beings; magical item/enchantment system and creation/economy. These are not silently granted by Basic Inspection.
