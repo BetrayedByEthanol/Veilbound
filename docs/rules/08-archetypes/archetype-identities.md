@@ -61,7 +61,7 @@ Core access identity:
 - may potentially learn **Pillar techniques** from **any Pillar or Aspect**;
 - learns each **Pillar technique** individually rather than receiving a whole Aspect catalogue automatically;
 - **Pillar techniques retain** their actual Pillar/Aspect identity; **Universal Veil techniques/procedures instead use their Universal family identity** (e.g. Veil Inspection or Veil Translocation);
-- normal techniques use their authored Veil Control scaling and costs; **Universal eligibility alone does not grant a technique, preparation slot, discount or special Archetype compatibility**;
+- normal techniques use their authored Veil Control scaling and costs; **authored Universal procedures unlock automatically at their minimum character levels without granting extra preparation slots, VP discounts or special Archetype compatibility**;
 - the Scholar does not receive a generic innate amplification simply for being a Scholar.
 
 Scholar strength comes from:
@@ -73,7 +73,7 @@ Scholar strength comes from:
 - cross-Pillar repertoire;
 - deliberately configurable breadth.
 
-A Scholar is the Archetype most able to reshape their learned problem coverage over time. Advanced **Universal** procedure acquisition and known/procedure counts remain **unauthored**, so the Pillar technique learning model above must **not** be silently extended to them. See [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-is-not-free-mastery).
+A Scholar is the Archetype most able to reshape their learned **Pillar** problem coverage over time. Universal procedures follow the **shared automatic level-based acquisition** model: **Inspection at level 1** and **Blink at level 3** are known by all Archetypes, without consuming learned Pillar-technique counts. Advanced Universal procedures only join that progression when executable profiles and minimum levels are authored; do **not** silently transfer the Scholar Pillar learning model or Composite Casting privileges to them. See [Universal Veil acquisition](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked).
 
 ## Gifted
 
@@ -101,7 +101,7 @@ Core access identity:
 
 **Emotion is the actual access mechanism for techniques belonging to the Gifted's eight linked Aspects.** The Gifted must genuinely evoke the relevant linked emotion, whether naturally or deliberately, to use those techniques. Outward theatrical performance is not required; memory, focus, concentration, or another genuine internal route is sufficient if it produces the emotion.
 
-**Universal Veil Inspection and Translocation** are outside those eight Aspect catalogues. They require **no matching emotion or Active Emotion merely to use them**; eligibility does not automatically confer learning, free use, or Gifted emotion-based enhancements. See [Universal Veil Fundamentals](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-is-not-free-mastery).
+**Universal Veil Inspection and Translocation** are outside the eight linked Aspect catalogues. A Gifted **automatically knows Inspection at level 1 and Blink at level 3**, requiring **no matching emotion, Active Emotion, linked-Aspect allocation or individual learning**. This does **not** confer free activation, extra VP or Gifted emotion-based enhancements; explicit authoring is required for any such interaction. See [Universal Veil acquisition](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked).
 
 ### Gifted breadth boundary
 
@@ -143,7 +143,7 @@ Universal **Resonance** remains a separate character state for every Archetype. 
 
 ## Universal Veil fundamentals — shared outside Pillar access
 
-All four Archetypes are eligible for [Universal Veil Inspection and Translocation](../07-veil-magic/universal-veil-fundamentals.md). These operations are **not Pillar/Aspect techniques**, are **not a fourth Aspect or seventeenth Pillar**, and do not modify a Priest's selected Pillar, a Scholar's individual Pillar repertoire, the Gifted's fixed eight links, or the Anointed's one bonded Aspect. Eligibility alone does not grant mastery, remove technique or ritual prerequisites, or grant special interaction with Archetype-specific features. Detailed acquisition and cost rules remain deferred.
+All four Archetypes **automatically gain [Veil Inspection v0](../07-veil-magic/veil-inspection-v0.md) at level 1 and [Blink v0](../07-veil-magic/blink-v0.md) at level 3** under [Universal Veil acquisition](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked), independent of Focus. These are **not Pillar/Aspect techniques**, a fourth Aspect or a seventeenth Pillar, and do not change Priest selected-Pillar access, Scholar individually learned Pillar techniques, the Gifted's eight links or an Anointed bond. **Knowing a procedure does not remove its VP, action, contact, spatial, protection or other use prerequisites**, create special Archetype compatibility or unlock unauthored Veil Analysis, Scrying, advanced Translocation or portals. Further Universal procedures follow automatic acquisition only once their executable profiles and minimum character levels are authored.
 
 ## Archetype comparison
 
