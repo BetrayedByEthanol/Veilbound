@@ -1,6 +1,6 @@
 # Universal Veil Fundamentals — Foundation
 
-> **LOCKED design foundation (B05).** Veilbound includes **Universal Veil magic**, separate from Pillar/Aspect techniques. This document locks its scope, shared accessibility, and the **Veil Inspection** family. Individual spell profiles, numeric tiers/costs, and advancement/acquisition details are **NOT YET AUTHORED**; do not fill them by importing D&D spells. [Veil Translocation](veil-translocation-foundation.md) contains its separate spatial rules.
+> **LOCKED design foundation (B05).** Veilbound includes **Universal Veil magic**, separate from Pillar/Aspect techniques. This document locks its scope, shared accessibility, and the **Veil Inspection** family. **[Blink v0](blink-v0.md) now supplies an individually authored Translocation cost/action/failure profile**, but Universal learning/acquisition and Blink's tier remain deferred. Other individual operation profiles are **NOT YET AUTHORED**; do not fill them by importing D&D spells. [Veil Translocation](veil-translocation-foundation.md) contains the spatial foundation.
 
 ## Where Universal Veil magic fits
 
@@ -24,7 +24,7 @@ All **four Archetypes — Priest, Scholar, Gifted and Anointed — are eligible*
 - **Gifted:** Universal operations require no extra emotion-to-Aspect link and do not require evoking an arbitrarily assigned linked emotion merely to satisfy Pillar access.
 - **Anointed:** Universal operations are not limited to the bonded Aspect; they do not become part of the Anointed's Birth Imprint, Signature or Aspect Authority by default.
 
-**Eligibility alone does not provide a finished spell, bypass a technique-tier limit, grant an unlimited free action, or remove authored costs.** Common/basic procedures may be broadly accessible, while advanced spells and rituals may require tier, study, resources, time, equipment or other prerequisites. Exact knowledge, preparation, learning, VP, action and tier rules remain B05 follow-up work. **Do not count Universal procedures against Pillar-specific known/prepared/bonded catalogues by default; their own acquisition rules must be authored before play.**
+**Eligibility alone does not automatically grant a procedure, bypass a technique-tier limit, grant unlimited free actions or remove authored costs.** Common/basic procedures may be broadly accessible, while advanced spells and rituals may require tier, study, resources, time, equipment or other prerequisites. **Blink has a [locked operational profile](blink-v0.md), not a locked learning path or tier**; its price is not permission to cast it without acquiring it. Exact knowledge, preparation, learning and tier rules remain B05 follow-up work. **Do not count Universal procedures against Pillar-specific known/prepared/bonded catalogues by default; their own acquisition rules must be authored before play.**
 
 **Focus** changes normal VP and Turn AP resources, not who is eligible for these operations. A Universal operation does not automatically become a Priest Consecration, Scholar Composite component, Gifted Conduit, or Anointed Authority effect; such interactions require **explicit authored compatibility**.
 
@@ -68,5 +68,6 @@ A complete Universal operation must eventually specify:
 ## Status and work order
 
 - **LOCKED:** two-family Universal architecture, Pillar/Aspect independence, access eligibility for all four Archetypes, inspection's information-versus-interpretation boundaries, and continued application of normal resistance/protection.
-- **DEFERRED:** executable spell/ritual records, ranges, numeric tiers, costs, inspection detection precision, acquisition/advancement, and specialized interactions with Archetype features.
+- **LOCKED ADDITION:** [Blink v0](blink-v0.md) has executable timing/VP/visualization/failure/counter-follow rules, without automatically granting its acquisition or tier.
+- **DEFERRED:** remaining spell/ritual records and their ranges/costs/tiers, **Blink's learning/tier**, inspection detection precision, Universal acquisition/advancement and specialized interactions with Archetype features.
 - **SEQUENCE:** settle this foundation and [Translocation](veil-translocation-foundation.md) **before** designing the general Talent catalogue and the detailed Pillar/Universal technique catalogues.

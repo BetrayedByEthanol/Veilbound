@@ -63,6 +63,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Technique Tiers and Expression Metadata](07-veil-magic/technique-tiers-and-expression.md)
 - [Universal Veil Fundamentals — Inspection and shared access](07-veil-magic/universal-veil-fundamentals.md)
 - [Veil Translocation — Blink and spherical portals](07-veil-magic/veil-translocation-foundation.md)
+- [Blink v0 — live-view relocation, Reaction and counter-Blink](07-veil-magic/blink-v0.md)
 
 ### 08 — Archetypes
 

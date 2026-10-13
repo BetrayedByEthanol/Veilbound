@@ -1,12 +1,12 @@
 # Veil Translocation — Spatial Foundation
 
-> **LOCKED design foundation (B05).** This page defines what Veil Translocation can mean, Blink clearance and momentum, and spherical temporary/permanent portals. Exact spell levels, ranges, costs, actions, construction quantities, precise failure timing, and combat maneuvers are **DEFERRED** to individual techniques and ritual rules. See [Universal Veil Fundamentals](universal-veil-fundamentals.md).
+> **LOCKED design foundation (B05).** This page defines the shared spatial principles of Veil Translocation. **[Blink v0](blink-v0.md) now LOCKS Blink's live-view requirement, normal/Reactive action costs, **10 VP base** with eligible discounts, failed-attempt behavior and nested Blink-follow.** Exact ranges/costs/actions for other Translocation operations and portal construction quantities remain **DEFERRED**. See [Universal Veil Fundamentals](universal-veil-fundamentals.md).
 
 ## Five Universal Veil Translocation applications
 
 | Application | Outcome | Access boundary |
 |---|---|---|
-| **Blink** | Instantly move the user to a visualized, valid nearby position without occupying the intervening squares | Obstruction/path, destination and momentum restrictions below |
+| **Blink** | Instantly relocate the user to a live-visualized, spatially reachable valid position without occupying the intervening squares | No fixed distance; live viewpoint, direct unobstructed straight path, destination/momentum rules and [Blink v0](blink-v0.md) |
 | **Object Translocation** | Relocate an item without opening a traversable gateway | Object protections, destination clearance, mass/distance and action/cost to be authored |
 | **Personal Teleportation** | Relocate a traveler (possibly with accompanying subjects) without a traversable gateway | Valid destination, transported load and eligibility to be authored |
 | **Temporary / one-time portal** | Open a finite-lived **spherical** passage to a **known destination**; a party may pass during that activation | **High-level** Universal magic; no pair of permanently prepared stations required |
@@ -26,7 +26,7 @@ Blink is instantaneous relocation. It is **not** a tiny spherical portal and cre
 
 **All of the following are required:**
 
-1. **Mental visualization.** The user must be able to form a clear mental picture of **their own complete arrival position** at the intended destination. Merely knowing an address or guessing where empty space might be is insufficient. Seeing through a transparent barrier does **not** waive the path requirement.
+1. **Live-view visualization.** The user must accurately reconstruct **their own complete arrival position and the scene from that perspective using live visual information** (direct present observations or an independently available live Scrying viewpoint). Memories, old recordings, maps, descriptions, or simply recognizing a landmark are not enough by themselves. The scene must support the actual arrival pose rather than an imagined alternative view. Even a live view through a transparent solid barrier does **not** waive the separate straight-path restriction. See [Blink v0](blink-v0.md#live-view-arrival-visualization--locked).
 2. **Direct unobstructed spatial path.** At least one direct continuous open path connects origin and destination. It cannot pass through **solid matter** (including **glass**, a wall, a closed solid door, or a solid creature). The opening does **not** need to be large enough to physically fit the traveler: the character does not travel through the intervening squares.
 3. **Whole-subject destination clearance.** The user's entire body and carried/worn equipment must occupy a valid arrival volume, with no intersection with a creature, wall, object or other solid material. A traveler cannot Blink inside a person or solid object; Blink does not displace or cut what is already there.
 4. **Magical interference.** A Veil ward or other **explicitly authored anti-Translocation barrier** may obstruct an otherwise open path.
@@ -35,7 +35,7 @@ Blink is instantaneous relocation. It is **not** a tiny spherical portal and cre
 
 **World consequence — locked:** conventional barred prison cells cannot reliably contain a Blink-capable prisoner. Prisons intended for such prisoners favor **continuous windowless walls and solid doors without a direct open escape line**, or expressly authored anti-Translocation wards. Do not assume a window, keyhole or grille is secure solely because a body cannot physically pass through it.
 
-**No telefragging / path tunneling:** Blink cannot pass through solid barriers, overlap another person, teleport material into living tissue, or transport only a selected part of a continuous body. The exact resolution and expenditure of an **invalid attempted Blink** are future technique rules; it grants no automatic relocation to a nearby legal square.
+**No telefragging / path tunneling:** Blink cannot pass through solid barriers, overlap another person, teleport material into living tissue, or transport only a selected part of a continuous body. An [invalid attempted Blink](blink-v0.md#normal-on-turn-blink) grants **no relocation and spends no VP**, but the normal-action AP or reactive Reaction remains spent; invalid Reactive Blink incurs **no next-turn AP Debt**. There is no automatic relocation to a nearby legal square.
 
 ### Momentum — LOCKED
 
@@ -50,7 +50,7 @@ Consequences:
 
 Under the [Movement Foundation](../05-combat/movement-foundation.md#teleportation-and-non-traversal-movement), skipped threatened squares cause **no ordinary Movement Opportunities**. An authored Blink activation or other effect may still have its own trigger/opportunity rules.
 
-**DEFERRED (not silently implemented):** Blink range, line/source specifics beyond the clear-path rule, action or Reaction availability, VP cost, next-turn AP Debt, Overdraw, collision timing under unusual conditions, and whether a failed attempt spends resources.
+**Blink's own operational rules are now LOCKED in [Blink v0](blink-v0.md):** **no fixed numeric range**, live arrival viewpoint (potentially using separately authored Scrying), straight unobstructed spatial line, **one Projection Action or one Reaction**, **10 Spent VP base cost, modified by any legally applicable discount and paid only on successful completion**, next-turn Projection Action **AP Debt only after a successful Reactive Blink**, and **failed attempts consume AP/Reaction but zero VP**. The [Blink-follow](blink-v0.md#blink-follow-reaction-pursuit-of-a-suspended-attack--locked) window permits an attacker with unused Reaction to follow before a suspended committed attack is re-evaluated. **Still deferred:** acquisition/tier, separately authored Scrying and wards, exceptional AP-shortfall resolution, unusual collision/reference frames and any Overdraw mechanism; nothing here grants Overdraw.
 
 ## Objects and protected targets
 
@@ -96,12 +96,12 @@ Closure is not an instant-kill or dismemberment tactic, **including if an operat
 ## Relationship to magical defense and character advancement
 
 - No specific Pillar/Aspect is required merely to qualify to learn Universal Translocation; each of the four Archetypes has a legitimate route once advanced access rules are authored.
-- Blink/teleportation are not automatically reactions, free movement, general evasion or independent attacks.
+- **Blink specifically** permits a Reactive activation and counter-Blink pursuit under [Blink v0](blink-v0.md); this permission does **not** extend automatically to other Teleportation, Object Translocation or Portal procedures. None grants a free Attack, automatic Dodge or guaranteed Interrupt.
 - Each executable Translocation spell or ritual must author tier, eligibility, timing, range, transported subject, targeting, VP/cost, interruption/failure, physical-hazard interaction and available defenses.
 - **Talents and Pillar Technique catalogue design follow this locked foundation.** Neither is silently authored here.
 
 ## Status
 
-**LOCKED:** Universal categorization, five application types, Blink visualization and open direct path, transparent solid glass blocking Blink, bars/openings allowing Blink, valid non-intersecting arrival, velocity preservation, spherical portals, opposing hemisphere traversal, expanding/contracting activation, no dismemberment, high-level temporary group portals to known destinations, high-level permanent portals requiring **two** prepared material-intensive sites.
+**LOCKED:** Universal categorization and five application types; **Blink's live-view visualization, no fixed distance, open straight path, glass blocking/bars permitting, safe non-intersecting arrival, velocity conservation, Action/Reaction cost, **10 VP base (effective cost after legal discounts) on success**, no-VP failed attempt with lost AP/Reaction, successful-Reaction next-turn AP Debt, and Blink-follow counterplay** per [Blink v0](blink-v0.md); spherical portals, opposing hemisphere traversal, expanding/contracting activation, no dismemberment, high-level temporary group portals to known destinations, and high-level permanent portals requiring **two** prepared material-intensive sites.
 
-**DEFERRED:** numerical tiers, costs and ranges; precise detection and destination-knowledge thresholds; who may activate prepared portals; Blink Reaction/AP Debt; contested item translocation; portal radius and safety/failure algorithm; portal reference-frame calibration.
+**DEFERRED:** Universal operation learning/tier assignments (including Blink acquisition), ranges and costs of *other* Translocation operations, separately authored Scrying, precise advanced-teleport destination knowledge, portal activation qualifications, contested item translocation, portal radius/safety and reference-frame calibration, and exceptional Blink AP-shortfall cases.
