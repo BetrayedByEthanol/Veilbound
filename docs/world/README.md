@@ -5,6 +5,7 @@ Canonical setting and lore reference belongs here.
 ## Current promoted material
 
 - [The Veil and the Pillars](veil-and-pillars.md)
+- [Canonical Aspect Identities and Boundaries](aspect-identities-and-boundaries.md) — all 48 named Aspects, External/Internal/Transform assignments, defining operations, exclusions and cross-Pillar distinctions; no automatic spell mechanics.
 
 ## Planned areas
 

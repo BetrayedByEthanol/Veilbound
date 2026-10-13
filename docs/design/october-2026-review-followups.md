@@ -35,8 +35,8 @@ The following material is not one undifferentiated "Ready" bucket.
 
 ### Ready or close to ready
 
-- **48 Aspect identities** — ready to migrate where they do not conflict with current structured Aspect work.
-- **Aspect boundary rulings** — ready as content-authoring guidance, subject to consistency with current metaphysics.
+- **48 Aspect identities** — **migrated to canonical lore** in [Aspect Identities and Boundaries](../world/aspect-identities-and-boundaries.md) by an explicit B05 author decision; machine-readable `content/aspects/` migration remains separate.
+- **Aspect boundary rulings** — positive/negative metaphysical domains are **canonical lore** in the same reference. Their technique-level costs, permissions and mechanics remain to be authored.
 - **Cultural unity across Pillars** — ready as setting lore.
 - **Setting texture, places, institutions, and cultural examples** — suitable for migration as **provisional lore**, after checking for contradictions with current Pillar metaphysics.
 - **Base Archetype rarity** — already substantially canonical: Priest ~1/100, Scholar ~1/1,000, Gifted ~1/100,000, Anointed ~1/1,000,000.
@@ -50,7 +50,7 @@ The following material is not one undifferentiated "Ready" bucket.
 
 ### Deliberate decisions still required
 
-- resurrection;
+- **executable resurrection mechanics** — Life/Restoration may exceptionally restore the dead, but rarity, quest/material requirements, effect limits, costs and resolution remain to be authored;
 - what ends or breaks sustained effects;
 - allied-Pillar access and legacy Divine Sense concepts for Priests;
 - armor limitations by Focus;
