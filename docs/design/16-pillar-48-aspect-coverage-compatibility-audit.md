@@ -62,15 +62,17 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 
 ## Archived PR #59 48-Aspect identity and category hypotheses — SUPERSEDED BY CANON
 
-### Canonical taxonomy versus this review
+### Current canonical taxonomy (PR #59 assignments below are historical)
 
-[The Veil and the Pillars](../world/veil-and-pillars.md#three-aspects-per-pillar) explicitly establishes **three metaphysical Aspect categories per Pillar**:
+The **current** [Veil and Pillars taxonomy](../world/veil-and-pillars.md#three-aspects-per-pillar) and [canonical 48-Aspect reference](../world/aspect-identities-and-boundaries.md#reading-the-categories) supersede PR #59's earlier self-oriented wording. The following table states **current canon**, not the historical working definitions:
 
-| Canonical Aspect category | Canonical meaning | Not automatically equivalent to |
+| Canonical Aspect category | Current canonical meaning | Not automatically equivalent to |
 |---|---|---|
-| **External** | Project/express the Pillar outward into creatures, objects or the environment. | Offense, **[Projection]** eligibility, a specific range, or the High Focus. |
-| **Internal** | Express the Pillar inward through self-enhancement, self-protection or internal change. | Defense only, the **Inward** technique tag, a mandatory self-target, or the Low Focus. |
-| **Transform** | Change, create, destroy, convert or fundamentally alter something through the Pillar. | Utility only, free crafting, or unrestricted alteration of living tissue or external matter. |
+| **External** | Expressing a Pillar outward through phenomena, forces, interactions or influence on the world. | Offense, **[Projection]** eligibility, a specific range, or High Focus. |
+| **Internal** | Operating within **any valid subject's** physical, bodily, mental or metaphysical condition, including the caster, an ally, an enemy or a valid object/structure. | Self-only enhancement, defense only, the **Inward** technique tag, or Low Focus. High-Focus projected techniques can target another subject's interior. |
+| **Transform** | Changing properties, state, composition, form, configuration or nature; the change may be temporary or lasting. | Utility only, automatic crafting, or unrestricted alteration of creatures or matter. |
+
+**Historical note:** In PR #59, the Internal wording emphasized *the self* and the category assignments below were E?/I?/T? hypotheses. Both are superseded by the later B05 decisions. The archived wording and guesses must **not** be interpreted as alternative canonical definitions.
 
 **These are lore/metaphysical domain categories, not mechanical combat-role categories.** The separate [technique-expression metadata](../rules/07-veil-magic/technique-tiers-and-expression.md#universal-technique-expression-metadata) assigns **[Projection], Inward, [Embodiment], Consecration, Devotional Rite, Conduit Form compatibility and Cadence** to authored *individual techniques*, not automatically to entire Aspect types. Likewise the [Archetype identity rules](../rules/08-archetypes/archetype-identities.md#archetype-comparison) expressly say offense, defense, control, support and utility arise from build and technique choices rather than being fixed Archetype combat roles.
 
@@ -146,7 +148,7 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 | **Mind: Psionics E? / Memory I? / Insight T?** | Insight may be an inward process and Memory may involve transformation; distinguish knowing, recalling and directly altering another mind. |
 | **Secrets: Deception E? / Shadow I? / Hallucination T?** | Hallucination may affect an external apparent image or an internal protected perception; this *delivery choice* changes Direct Veil legality and must be specified per technique. |
 
-**No mapping change is proposed as canonical in this PR.** Confirm historical per-Aspect original descriptions or explicitly lock a deliberate reassignment in a separate canon decision; do not mechanically infer the category from its row index or tactical function. If the original source has another mapping, the source-verified assignment takes precedence over this table.
+**Historical PR #59 conclusion (superseded):** The original audit did not promote any individual category mapping. Subsequent B05 author decisions **did** lock the assignments in the [canonical 48-Aspect reference](../world/aspect-identities-and-boundaries.md). Do not infer the current mapping from this historical E?/I?/T? table, row order or speculative original-source assignments.
 
 ### Five concrete boundary regression questions for technique authoring
 
@@ -158,12 +160,12 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 
 ### Historical per-Aspect acceptance card (lore fields now canonical; techniques remain unauthored)
 
-For each of the 48 Aspects, carry these fields into a later source-verified/canonical content record:
+For each of the 48 Aspects, this was PR #59's acceptance checklist. **Identity, category, and domain boundaries have since been canonized**; executable techniques and structured content records still require authoring:
 
 | Field | Required authoring decision |
 |---|---|
 | **Identity** | A short *positive* definition of its pattern, meaningful choices and volition; not merely a damage type. |
-| **Category** | **Source-supported External / Internal / Transform assignment**, or explicitly noted unresolved; no automatic assumption from technique tag. |
+| **Category** | Historical acceptance gate: source-supported or explicitly author-approved External / Internal / Transform assignment; **now completed in the canonical reference**. No assumption from technique tags. |
 | **Distinctiveness** | At least one credible contrasting case versus both sibling Aspects in the same Pillar. |
 | **Neighbor boundary** | At least one plausible overlap with another Pillar and a bounded difference (including any permitted exceptional crossover). |
 | **Positive expression examples** | Representative effects consistent with the identity, without treating examples as already executable techniques. |
