@@ -5,7 +5,7 @@
 ## Reading the categories
 
 - **External (E):** expresses a Pillar outward through phenomena, forces, interactions or influence upon the world. External does **not** automatically mean offense or technique-level [Projection].
-- **Internal (I):** operates within **a subject's** bodily, mental or metaphysical condition. The subject can be the caster, an ally, an enemy or another valid subject. Internal is **not** limited to self-targeting or the technique-level Inward descriptor; a High-Focus projection can affect another subject internally.
+- **Internal (I):** operates within **a subject's** physical, bodily, mental or metaphysical condition. The subject can be the caster, an ally, an enemy or another valid subject (including an object or structure when its interior/properties are a valid target). Internal is **not** limited to self-targeting or the technique-level Inward descriptor; a High-Focus projection can affect another subject internally.
 - **Transform (T):** changes properties, state, composition, form, configuration or nature. The transformation need not be permanent and is not restricted to utility effects.
 
 Each Pillar possesses **one of each category**. Categories describe a characteristic **metaphysical operation**, not a mandatory role or the only eligible target/expression. A technique's projection tag, focus compatibility, action/Turn AP, VP, delivery (Intrusion/Imposition/Manifestation), target, resistance, scaling and cadence must be **separately authored**. For example, a projected Internal effect on an unwilling creature's protected mind or body may be Intrusion. A manifested phenomenon remains a separate delivery decision.
