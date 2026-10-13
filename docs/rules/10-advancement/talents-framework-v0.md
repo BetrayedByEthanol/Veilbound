@@ -7,7 +7,7 @@
 A **Talent** is one player-selected character development, distinct from:
 - **Archetype Features:** automatic identity/progression features of Priest, Scholar, Gifted or Anointed;
 - **Pillar/Aspect Techniques:** authored expressions with their own magical access, tier and cost;
-- **Universal Veil Procedures:** Pillar-independent Inspection/Translocation with separately authored access and cost;
+- **Universal Veil Procedures:** Pillar-independent Inspection/Translocation with **automatic acquisition at each authored minimum character level** ([Basic Inspection level 1, Blink level 3](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked)); action, VP and use requirements stay procedure-specific; these unlocks do **not** consume Talent selections;
 - **Weapon Style Refinements:** one nominated weapon family, bought with Weapon Development Points;
 - **Discipline Refinements:** a specific Learned Discipline, bought with Discipline Development Points.
 

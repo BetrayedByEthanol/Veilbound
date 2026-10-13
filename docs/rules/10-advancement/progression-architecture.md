@@ -77,6 +77,10 @@ The **separation between Weapon Development and Learned Disciplines**, the **one
 
 These awards are separate from the existing universal Ability increases. A level-1 character can use the authored starter allocation even while later-level refinement catalog and balance remain open.
 
+## Universal Veil acquisition — B05 locked
+
+All four Archetypes and all Focus choices **automatically acquire authored Universal Veil procedures at their explicit minimum character levels**, without Talent selections, training purchases, known Pillar-technique counts, Prepared Prayer slots or other Archetype-specific technique capacity. [Veil Inspection v0](../07-veil-magic/veil-inspection-v0.md) is known at **level 1** and [Blink v0](../07-veil-magic/blink-v0.md) at **level 3**, under the [Universal Veil acquisition foundation](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked). Unlocking does **not** add Available VP, erase the full technique action/target/path requirements or guarantee a character can fund the technique immediately. Future Universal procedures require **authored executable profiles and level gates** before they join this automatic progression. Veil Analysis, Scrying and more advanced Translocation remain **unauthored** and confer no level-up benefits yet. Blink and Inspection's optional numeric technique-tier classifications remain unassigned; don't impose a fabricated tier or separate learning gate.
+
 ## Talents — B07 early-level playtest
 
 The [B07 Talent Framework](talents-framework-v0.md) defines player-selected **Talents** as separate from Archetype Features, Pillar/Universal Veil Techniques, Weapon Style Refinements, and Learned Discipline Refinements. The [level-1–5 catalogue](talents-level-1-5-v0.md) supplies **32 provisional playtest entries**, favoring physical/combat options while retaining spellcasting, Archetype and noncombat selection. No magical item creation or potion manufacture is in this MVP.

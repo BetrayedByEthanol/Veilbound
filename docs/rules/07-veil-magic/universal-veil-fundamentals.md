@@ -1,6 +1,6 @@
 # Universal Veil Fundamentals — Foundation
 
-> **LOCKED design foundation (B05).** Veilbound includes **Universal Veil magic**, separate from Pillar/Aspect techniques. This document locks its scope and shared eligibility. **[Veil Inspection v0](veil-inspection-v0.md)** now defines the executable **held-item** basic examination; **[Blink v0](blink-v0.md)** defines the executable Translocation activation profile. Universal learning/acquisition and technique tiers remain deferred, as do **advanced Veil Analysis** and other individual operation profiles. Do not fill gaps by importing D&D spells. [Veil Translocation](veil-translocation-foundation.md) contains the spatial foundation.
+> **LOCKED B05 foundation and acquisition.** Universal Veil operations are Pillar/Aspect-independent. Every Archetype and Focus automatically gains **[Veil Inspection v0](veil-inspection-v0.md) at level 1** and **[Blink v0](blink-v0.md) at level 3**, without spending Talents or technique slots; normal costs and effect restrictions still apply. Their optional tier classifications remain unassigned. **Veil Analysis, Scrying and other unauthored operations are not unlocked.** See [Veil Translocation](veil-translocation-foundation.md) for spatial foundations.
 
 ## Where Universal Veil magic fits
 
@@ -15,16 +15,27 @@ The Veil is the underlying source and medium of magic. Pillars and their Aspects
 
 These are the **initial two shared families**, not an exhaustive future catalogue. New families require a deliberate decision that their subject is truly universal, rather than an existing Pillar/Aspect expression.
 
-### Universal eligibility is not free mastery
+### Universal eligibility and automatic acquisition — LOCKED
 
 All **four Archetypes — Priest, Scholar, Gifted and Anointed — are eligible** to access and develop Universal Veil magic **without changing their Pillar/Aspect choices**:
 
 - **Priest:** Universal Veil operations do not have to belong to the Priest's selected Pillar and do not consume a Prepared Prayer slot merely by being universal.
-- **Scholar:** Universal Veil operations are distinct from individually learned **Pillar** techniques; the exact method of learning advanced Universal procedures is deferred, and a Scholar is not automatically granted every one.
+- **Scholar:** Universal Veil operations remain distinct from individually learned **Pillar** techniques; the authored Universal procedures unlock automatically at their character-level gates, without occupying known Pillar-technique slots.
 - **Gifted:** Universal operations require no extra emotion-to-Aspect link and do not require evoking an arbitrarily assigned linked emotion merely to satisfy Pillar access.
 - **Anointed:** Universal operations are not limited to the bonded Aspect; they do not become part of the Anointed's Birth Imprint, Signature or Aspect Authority by default.
 
-**Eligibility alone does not automatically grant a procedure, bypass a technique-tier limit, grant unlimited free actions or remove authored costs.** Common/basic procedures may be broadly accessible, while advanced spells and rituals may require tier, study, resources, time, equipment or other prerequisites. **[Blink](blink-v0.md) and [basic held-item Inspection](veil-inspection-v0.md) have locked operational profiles, not locked learning paths or tiers**; their prices are not permission to cast them without acquiring them. Exact knowledge, preparation, learning and tier rules remain B05 follow-up work. **Do not count Universal procedures against Pillar-specific known/prepared/bonded catalogues by default; their own acquisition rules must be authored before play.**
+**Universal acquisition is automatic at the procedure's authored minimum character level.** On reaching that level (including when a character is initially created at or above it), the character knows the complete authored procedure and can attempt it. This applies equally to **Priests, Scholars, Gifted and Anointed**, and **High, Medium and Low Focus**. No individually purchased knowledge, separate Training, practice requirement, Talent selection, Prepared Prayer slot, Scholar known-technique slot, Gifted emotion/Aspect link, Anointed bond or any other Archetype-specific technique capacity is consumed. An unlocked procedure remains known at later levels unless another explicit rule removes access.
+
+| Universal procedure | Minimum character level | Acquisition |
+|---|---:|---|
+| **[Veil Inspection v0](veil-inspection-v0.md)** | **1** | Automatic at character creation |
+| **[Blink v0](blink-v0.md)** | **3** | Automatic when reaching level 3 |
+
+**Level is the only acquisition gate for these two operations, not a waiver of casting requirements.** The user must still meet the authored **effective Available VP cost**, Full Action/Projection AP or Reaction timing, item contact, spatial viewpoint and path, safe destination and other relevant protections. Access grants no extra VP or free cast. At level 3, for example, **Low Focus with Veil Affinity +0 has Max VP 6**, so Blink is known but unaffordable at its normal **10 VP base cost**.
+
+**Future Universal operations follow this same automatic level-based acquisition** once they have **both an executable profile and an explicit minimum character level**, unless a later rule expressly creates a deliberate exception. **Veil Analysis, Scrying, Object Translocation, Personal Teleportation and temporary/permanent portals remain unauthored and have no playable automatic unlock or assumed level gate.** High-level operations may impose extensive materials, site preparation, VP, time and other **use prerequisites** without requiring a separate technique purchase.
+
+**Technique tiers:** the [universal ceiling](technique-tiers-and-expression.md#universal-technique-tiers) still applies to a Universal operation if its **own authored record assigns a tier**. Inspection and Blink have **level gates but no assigned tier**; do not invent an additional tier, learning or preparation barrier for either. Future tiered operations must satisfy any actually assigned tier restrictions alongside their authored activation conditions. A character does not gain every imaginable or incomplete Universal spell merely by leveling up.
 
 **Focus** changes normal VP and Turn AP resources, not who is eligible for these operations. A Universal operation does not automatically become a Priest Consecration, Scholar Composite component, Gifted Conduit, or Anointed Authority effect; such interactions require **explicit authored compatibility**.
 
@@ -45,7 +56,7 @@ Universal operations follow the existing [Direct Veil interaction rules](resonan
 
 An item's **Pillar/Aspect signature describes the magical pattern present in the item**. It is **not** a reading of its current owner's beliefs or the item's supposed moral alignment. Multiple signatures, generic/unattributed effects and deliberately obscured patterns are possible; recognition is not guaranteed when a structure conceals or lacks a readable signature.
 
-**Basic held-item Inspection is now an authored operation** under [Veil Inspection v0](veil-inspection-v0.md): **one physically held item**, **Full Action**, **base 2 Spent VP**, automatic detection of actually observable magic and readable Pillar/Aspect signatures, and **+2 to one relevant Veil Theory interpretation check made during the same completed examination**. This is a common *Universal* operation, not a mandatory Talent, Priest-exclusive Prayer, generic Perception bonus, omniscient detect-magic aura, or automatic identification of hidden functions. Its actual acquisition/tier remains deferred; **more advanced Veil Analysis** for concealed/dormant effects is **a separate unauthored procedure**. Do not treat this foundation as permission to inspect distant objects, other creatures or whole rooms.
+**Basic held-item Inspection is now an authored operation** under [Veil Inspection v0](veil-inspection-v0.md): **one physically held item**, **Full Action**, **base 2 Spent VP**, automatic detection of actually observable magic and readable Pillar/Aspect signatures, and **+2 to one relevant Veil Theory interpretation check made during the same completed examination**. This is a common *Universal* operation, not a mandatory Talent, Priest-exclusive Prayer, generic Perception bonus, omniscient detect-magic aura, or automatic identification of hidden functions. Its acquisition is **automatic at character level 1** (tier classification still unassigned); **more advanced Veil Analysis** for concealed/dormant effects is **a separate unauthored procedure**. Do not treat this foundation as permission to inspect distant objects, other creatures or whole rooms.
 
 **Veil Theory** may be relevant when interpreting the *meaning* of a magical pattern; **Veil Practice** may be relevant for an authored hands-on manipulation. Neither is an automatic bonus to every inspection, Direct Veil Pressure or spell attack.
 
@@ -68,6 +79,6 @@ A complete Universal operation must eventually specify:
 ## Status and work order
 
 - **LOCKED:** two-family Universal architecture, Pillar/Aspect independence, access eligibility for all four Archetypes, inspection's information-versus-interpretation boundaries, and continued application of normal resistance/protection.
-- **LOCKED ADDITIONS:** [Blink v0](blink-v0.md) has executable timing/VP/visualization/failure/counter-follow rules, and [Veil Inspection v0](veil-inspection-v0.md) has a held-item Full-Action/2-VP/observable-signature/+2 Veil Theory profile. Neither automatically grants its acquisition or tier.
-- **DEFERRED:** **Veil Analysis** (concealed/dormant magic, function reconstruction and concealment), remaining operation records and their ranges/costs/tiers, **Blink and Inspection learning/tier**, broader Inspection targets, Universal acquisition/advancement and specialized interactions with Archetype features.
-- **SEQUENCE:** settle this foundation and [Translocation](veil-translocation-foundation.md) **before** designing the general Talent catalogue and the detailed Pillar/Universal technique catalogues.
+- **LOCKED ADDITIONS:** [Veil Inspection v0](veil-inspection-v0.md) and [Blink v0](blink-v0.md) have executable profiles and are **automatically known at levels 1 and 3 respectively** to all four Archetypes/Focuses. No separate learning, Talent, preparation or technique slot is required for these two procedures.
+- **DEFERRED:** separate **Veil Analysis**, Scrying, other Translocation profiles and their minimum levels; optional tier classification of Blink/Inspection; broader Inspection targets, special Archetype interactions and advanced operation-specific activation requirements.
+- **SEQUENCE:** write each new Universal operation and its explicit level requirement before it automatically unlocks. Talents and Pillar techniques retain their separate selection systems.

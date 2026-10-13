@@ -1,6 +1,6 @@
 # Blink v0 — Live-View Translocation and Reactive Pursuit
 
-> **LOCKED B05 Blink operational design.** Blink is an authored Universal Veil **Translocation** procedure, not a Pillar/Aspect technique, physical movement step, portal, or automatic Dodge. This page owns its cost, timing, live-view condition, attempted-failure consequences and Blink-follow counterplay. The [Translocation spatial foundation](veil-translocation-foundation.md) remains authoritative for open straight-line paths, safe arrival, momentum, bars/glass and no telefragging. **Universal procedure acquisition, tier assignment and learning/preparation route remain deferred:** this profile is not automatically known by everyone eligible to use Universal magic.
+> **LOCKED B05 Blink operational design.** Blink is an authored Universal Veil **Translocation** procedure, not a Pillar/Aspect technique, physical movement step, portal, or automatic Dodge. This page owns its cost, timing, live-view condition, attempted-failure consequences and Blink-follow counterplay. The [Translocation spatial foundation](veil-translocation-foundation.md) remains authoritative for open straight-line paths, safe arrival, momentum, bars/glass and no telefragging. **Acquisition is automatic at character level 3 for all four Archetypes and all Focus choices**, under [Universal Veil Fundamentals](universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked). This grants access to the authored procedure, not the ability to bypass its VP, timing, spatial or other use requirements. Numeric technique-tier classification remains unassigned.
 
 ## Profile
 
@@ -15,7 +15,8 @@
 | Movement | Instant position change, **no traversal** of skipped squares; no MP spent or gained |
 | Momentum | Current velocity **and direction preserved** |
 | Failed attempted Blink | **No VP spent**, but the committed normal-action AP **or Reaction is lost**; **no AP Debt** for an invalid Reactive Blink |
-| Acquisition/tier | Not yet authored; eligibility for Universal magic does not grant Blink automatically |
+| Acquisition | **Automatically known at character level 3**, all Archetypes and Focus choices, without technique slots, Talent choices or separate study |
+| Tier classification | **Unassigned**; the authored level-3 gate is the acquisition requirement, not a hidden additional tier gate |
 
 **Effective VP cost and availability:** Blink's **base Spent VP cost is 10**. At declaration, apply only cost reductions **actually eligible for this activation** and commit the choice to use each such limited benefit, before testing available VP:
 
@@ -112,6 +113,9 @@ This special follow window is available for an individually suspended standalone
 | Reactive Blink is declared after Interceptions, but a later nested response invalidates the Blink | **Reaction remains spent**; **0 VP, no debt** without completed relocation |
 | Reactive Blink fails to find a legal destination | Lose Reaction, spend **0 VP**, **no AP Debt** |
 | Normal Blink fails | Lose prepaid Projection Action AP, spend **0 VP** |
+| Level 2 character meets all spatial conditions and has sufficient VP from another source | **Cannot Blink yet**; minimum acquisition level is 3 |
+| Level 3 Low Focus with Veil Affinity +0 (Max VP 6) | **Knows Blink automatically**, but cannot pay the ordinary effective cost of **10 VP**; no free activation |
+| Level 3 character has sufficient VP and valid timing/geometry | May attempt Blink under the full profile without purchasing, preparing or learning an individual Universal technique |
 | Normal on-turn Blink with unused **TAL-M03** and **9 Available VP** | **Legal to declare**; Frugal Technique is committed; if successful, spend **9 VP** and normal Projection Action AP |
 | Normal on-turn Blink with **9 Available VP** but no applicable discount | **Cannot declare**; no action/AP or VP is committed |
 | Reactive Blink during **another creature's turn**, with **TAL-M03** and **9 Available VP** | **Cannot declare**: Frugal Technique's own-turn condition does not apply, so cost is **10** |
@@ -124,4 +128,4 @@ This special follow window is available for an individually suspended standalone
 
 **LOCKED:** live perspective rather than remembered destination; no fixed distance; straight open path including barred openings and exclusion of glass; whole-body clearance; velocity conservation; normal Projection Action / reactive Reaction, **10 VP base cost with independently applicable cost modifiers (including on-turn TAL-M03)** paid only on completed relocation; reactive AP Debt on success only; invalid attempt costs committed AP/Reaction but **no VP**; Blink-follow counterplay before suspended attack's final legality re-check.
 
-**STILL DEFERRED:** Universal learning/preparation and exact technique-tier eligibility; Scrying acquisition, action and VP mechanics; complex AP-reduction/debt edge cases; exceptionally complicated physically moving camera viewpoints and vehicle reference-frame calibration; explicit anti-Translocation wards. This page does not authorize free or otherwise unauthored Scrying, nor turn Blink into higher-level Personal Teleportation.
+**STILL DEFERRED:** optional numeric Blink technique-tier classification; Scrying's executable profile, automatic minimum-level gate, action and VP mechanics; complex AP-reduction/debt edge cases; exceptionally complicated physically moving camera viewpoints and vehicle reference-frame calibration; explicit anti-Translocation wards. This page does not authorize free or otherwise unauthored Scrying, nor turn Blink into higher-level Personal Teleportation.
