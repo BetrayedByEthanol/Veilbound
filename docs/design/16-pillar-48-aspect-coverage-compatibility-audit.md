@@ -1,6 +1,6 @@
 # B05 — 16-Pillar / 48-Aspect Mechanical Coverage and Gifted Compatibility Audit
 
-> **DESIGN ANALYSIS — 13 October 2026. Selection NOT LOCKED.** This audit evaluates existing content for the **level 1–3 tabletop MVP**. It changes **no canonical mechanics, Aspect names, Gifted links, spell availability or MVP selection**. The exact historical 48×8 matrix is transcribed for inspection; all proposed role tags, coverage judgments and candidate sets are **design hypotheses** requiring authored effects and playtesting.
+> **HISTORICAL DESIGN AUDIT — PR #59, 13 October 2026. MVP selection NOT LOCKED.** This record preserves the original provisional E?/I?/T? mappings and 48-Aspect boundary *hypotheses* as an audit trail. A later B05 decision canonized [all 48 Aspect identities, categories and boundaries](../world/aspect-identities-and-boundaries.md). **For identity/category use that canonical reference, not the provisional table below.** The unchanged 48×8 Gifted compatibility matrix, mechanical coverage hypotheses and proposed eight-Pillar MVP candidate sets remain useful here. Neither this audit nor the lore canonicalization creates executable techniques or selects MVP Pillars.
 
 ## Source-of-truth and confidence
 
@@ -60,7 +60,7 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 | **Fire Forge / Alchemy Transmutation / Arts Creation / Earth Bounty** | Distinguish object-workmanship, conversion, artistic expression and resource fertility; do not grant unauthored magical crafting or rune rules. |
 | **Death Spirit/Plague / Life Restoration/Nature** | Clarify living-versus-dead, disease/suppression, regeneration, fatal injury and resurrection boundaries before authoring cross-domain effects. |
 
-## 48-Aspect identity, expression category and boundary review — PROVISIONAL
+## Archived PR #59 48-Aspect identity and category hypotheses — SUPERSEDED BY CANON
 
 ### Canonical taxonomy versus this review
 
@@ -74,7 +74,7 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 
 **These are lore/metaphysical domain categories, not mechanical combat-role categories.** The separate [technique-expression metadata](../rules/07-veil-magic/technique-tiers-and-expression.md#universal-technique-expression-metadata) assigns **[Projection], Inward, [Embodiment], Consecration, Devotional Rite, Conduit Form compatibility and Cadence** to authored *individual techniques*, not automatically to entire Aspect types. Likewise the [Archetype identity rules](../rules/08-archetypes/archetype-identities.md#archetype-comparison) expressly say offense, defense, control, support and utility arise from build and technique choices rather than being fixed Archetype combat roles.
 
-**Evidence limit:** current canonical files confirm **16 Pillars, three category definitions and 48 named Aspects**, but do **not independently enumerate which *named* Aspect has which category**. The old compatibility matrix provides *names and S/P/— emotion ratings*, **not** category assignments or complete domain/boundary prose. The October review record calls legacy Aspect identities and boundary rulings **potential migrations**, but does not reproduce full original individual-boundary source text. Therefore **no named Aspect's exact category or proposed exclusion below is promoted to canon by this review**.
+**Historical evidence limit (as of PR #59):** canonical files at the time confirmed **16 Pillars, three category definitions and 48 named Aspects**, but did not assign categories per name. The compatibility matrix contains *names and S/P/— ratings*, not complete category/boundary prose. **This limitation was subsequently resolved by explicit author decisions**, not by discovering the original source mapping; see the [canonical 48-Aspect reference](../world/aspect-identities-and-boundaries.md). The table below is retained as **historical comparison material**, not the current classification.
 
 **Interpretation rule for the next table:** **E? / I? / T? = proposed External / Internal / Transform mapping, unverified**; the question mark is intentional, **not** a compatibility rating. Each Pillar is given a **candidate one-of-each arrangement for evaluation**, not a proof of its original naming-order mapping. **All 48 domain and boundary clauses are explicitly editorial hypotheses** informed by the names and scattered historical examples. A boundary clause flags what a mechanic **must not be assumed to include automatically**; it is **not** a final ban on a carefully authored, justified effect. No attack, defense, healing or skill bonus is created here.
 
@@ -131,7 +131,7 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 | **Secrets–Shadow** | **I?** | Concealment of presence or identity using darkness and obscurity. | Not always-on invisibility, physical intangibility or Blink/teleportation. |
 | **Secrets–Hallucination** | **T?** | Altering experienced appearances, sensory models or apparent situations. | Distinguish external Manifestation illusion from protected internal-perception Intrusion; not arbitrary memory modification. |
 
-### Which category placements particularly need primary-source verification?
+### Historical primary-source classification uncertainties (resolved by later author decisions)
 
 | Pillar / proposed mapping | Uncertainty |
 |---|---|
@@ -156,7 +156,7 @@ Proposed authoring tags describe **a likely way to test an Aspect**, not a manda
 4. **Change vs creation:** Does **Fire–Forge**, **Alchemy–Transmutation**, **Arts–Creation** or **Earth–Bounty** work pre-existing materials, convert compositions, produce culturally meaningful objects, or improve growth? Avoid granting unlimited goods, magic items, wealth or crafting skips through vocabulary.
 5. **Freedom vs movement:** Does **Liberty–Autonomy**, **Liberty–Defiance**, **Liberty–Exploration**, **Skywinds–Swiftness** or **Lightning–Reflexes** protect choice, resist coercion, cross terrain, change ordinary MP costs or affect reactions? Do not grant [Blink](../rules/07-veil-magic/blink-v0.md), unlimited Turn AP, or free teleportation by analogy.
 
-### Per-Aspect acceptance card before any category or technique is locked
+### Historical per-Aspect acceptance card (lore fields now canonical; techniques remain unauthored)
 
 For each of the 48 Aspects, carry these fields into a later source-verified/canonical content record:
 
@@ -172,7 +172,7 @@ For each of the 48 Aspects, carry these fields into a later source-verified/cano
 | **Archetype proof** | Legal use by one-Pillar Priest, configurable Scholar, one-emotion Gifted (plus Conduit/Embodiment where relevant), and one-Aspect Anointed Signature/Authority; no implied free capacity. |
 | **Migration status** | Mark `CANONICAL`, `SOURCE-VERIFIED HISTORICAL`, `PROPOSED` or `UNRESOLVED` **per field**, not on an entire multi-claim paragraph. |
 
-**Exit condition of this design review:** an editorial hypothesis is **not** a canonical identity assignment until an authoritative original mapping is located and reconciled or a subsequent specific decision locks it. The existing 48×8 **Gifted S/P/— values stay exactly unchanged**; tactical authoring should follow the confirmed identity rather than dictate it.
+**B05 lore exit:** the second permitted route has now occurred: **explicit author decisions** fixed identities and categories in the [canonical reference](../world/aspect-identities-and-boundaries.md). This does **not** satisfy individual technique or MVP-content acceptance. The 48×8 **Gifted S/P/— values remain exactly unchanged**; tactical authoring follows established identity rather than redefining it.
 
 ## Exact Gifted compatibility matrix — all 48 Aspects
 
@@ -326,15 +326,15 @@ A set of legal Pillars is **necessary but not sufficient** for a usable level-1�
 
 - **No authored complete 48-Aspect technique catalogue** exists in current source. Therefore **none** of the role tags certify actual MVP mechanical coverage.
 - Archived 48×8 matrix is marked locked in the audit and conceptually retained in current Gifted rules, but **has not yet been migrated to canonical machine-readable records**. This audit does **not** promote it by itself.
-- **Three Aspects per Pillar** is canonical; the **48-Aspect identity and boundary review above now contains explicit *candidate* E?/I?/T? mappings and per-name overlap/exclusion questions**, but precise named-Aspect category mapping and boundaries still require original source verification or a **separate locking decision**. Do **not** infer the canon from row order or the proposed table.
-- Word overlap does **not** justify importing D&D spells. Particularly **Death/Mastery**, **Water/Medium**, **Fortune/Manipulation/Luck**, and broad **Arts/Creation** need explicit domain boundaries before mechanical authoring.
+- **Three Aspects per Pillar and all 48 named identities/categories/boundaries are now canonical** in the [world reference](../world/aspect-identities-and-boundaries.md), established by subsequent author decision rather than assumed row order. The E?/I?/T? rows above are **superseded historical candidates**. Their speculative exclusions must not override the newer author-approved domains.
+- Word overlap does **not** justify importing D&D spells. The domains and boundaries for **Death/Mastery**, **Water/Medium**, **Fortune/Manipulation/Luck** and **Arts/Creation** are now documented canonically; **their concrete technique effects, interactions, costs and access** still require authoring.
 - **Eight is the mathematical minimum**, not automatically the best number for campaign scope; **nine or ten** is a content decision, not a compatibility requirement.
 - **Gifted S and P are equal mechanically after creation.** Do not introduce extra VP, a disadvantage, level delay or per-cast approval for P links.
 
 ## Audit decision summary
 
-**SUPPORTED AND READY TO USE AS DESIGN INPUT:** all 16 Pillars, all 48 exact Aspect names, eight Gifted emotions and the historical compatibility table, two **verified** eight-Pillar Strong-only legal assignments, and a framework for evaluating authored mechanics. The new **48-name category/identity/boundary table is explicitly *PROPOSED*, not source-verified canon**.
+**CURRENT SOURCE HIERARCHY:** all 16 Pillars and 48 exact Aspect names plus their **author-approved category/identity/boundary definitions** are canonical in the [world reference](../world/aspect-identities-and-boundaries.md). The PR #59 table above is **historical/provisional**, not current canon. Eight Gifted emotions, the exact unchanged compatibility table, two **verified** eight-Pillar Strong-only legal assignments and a method for evaluating authored mechanics remain valid design input.
 
 **PROVISIONAL RECOMMENDATION:** compare the historical eight against the role-diverse eight, begin Fire + Mind prototypes with Life close behind, and choose based on playable content and pilot scope. **No Pillar or Aspect has been locked into or excluded from the MVP by this audit.**
 
-**NEXT WORK:** decide the first two prototype domains and the authored technique schema, then write real level-1/2 techniques and three-Focus expression tests. The existing [Roadmap and MVP Readiness](veilbound-roadmap-and-mvp-readiness.md) B04/B05 blockers remain open until the technique, creation and encounter content exists.
+**NEXT WORK:** select prototype domains and author level-1/2 techniques and three-Focus expression tests using the **canonical Aspect boundaries**. The lore classification milestone is complete, but B05 MVP technique content is not. The existing [Roadmap and MVP Readiness](veilbound-roadmap-and-mvp-readiness.md) B04/B05 blockers remain open until the technique, creation and encounter content exists.
