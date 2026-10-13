@@ -54,7 +54,7 @@ Each selected Pillar brings one External, one Internal and one Transform Aspect.
 
 The counts below are **one-to-one emotion-to-Pillar Strong-only matchings**: each of the eight emotions can be placed on a different selected Pillar with at least one **S-rated Aspect**. They deliberately do not multiply by the number of different S-rated Aspects in a Pillar, and they do not prove techniques exist.
 
-| Candidate | Roster relative to common six (Fire, Life, Earth, Liberty, Mind, plus ...) | Strong-only perfect matchings | Assessment |
+| Candidate | Eight-Pillar roster (five Pillars shared across all candidates) | Strong-only perfect matchings | Assessment |
 |---|---|---:|---|
 | **A — historical** | Fire, Life, Earth, Liberty, Mind, **Alchemy, Lightning, Strength** | **202** | Rich martial/speed coverage; thinner direct teamwork, stealth, and social domains. |
 | **B — prior preferred** | Fire, Life, Earth, Liberty, Mind, **Alchemy, Kinship, Secrets** | **188** | Strong broad domains; Alchemy imposes reagent/preparation/secondary-effect authoring that depends on deferred crafting/economy decisions. |
@@ -77,7 +77,7 @@ The counts below are **one-to-one emotion-to-Pillar Strong-only matchings**: eac
 
 All **eight emotions**, **eight distinct Pillars**, and **eight distinct Aspects** are represented. This sample has **2 External / 3 Internal / 3 Transform**, incidentally; the Gifted rules **do not require a category distribution**. Other legal S/P-linked constructions remain available once their selected Aspects have executable expressions.
 
-**Constraint sensitivity:** in C, **Disgust has only two S-compatible Pillars**, **Fire/Warmth** and **Liberty/Defiance**. This is **not** a mechanical disadvantage: P links are permitted with a creation-time interpretation and are equally effective after linking. Tests should include at least one P-based alternative rather than making Strong a hidden requirement.
+**Constraint sensitivity:** in C, **Disgust has only two S-compatible Pillars**, **Fire/Warmth** and **Liberty/Defiance**. This is **not** a mechanical disadvantage: P links are permitted with a creation-time interpretation and are equally effective after linking. For an explicit legal P-linked alternative to the example above, replace **Surprise / Secrets–Hallucination (S)** with **Surprise / Secrets–Shadow (P)**, keeping the other seven links unchanged; this requires an appropriate coherent creation-time interpretation, not any later casting penalty. Tests should include a P-linked build rather than making Strong a hidden requirement.
 
 ## Archetype × Focus feasibility and hard gates
 
