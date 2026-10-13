@@ -19,3 +19,4 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 - [Core Rules Audit v34](audits/Veilbound_Core_Rules_Audit_v34.md) — historical audit/backlog; canonical rule files supersede resolved audit findings.
 
 - [October 2026 Review Follow-ups](october-2026-review-followups.md) — post-Turn-AP review classifications, lore clarifications, legacy-migration boundaries, and stale terminology cleanup.
+- [Veilbound Development Roadmap and Level 1–3 MVP Readiness](veilbound-roadmap-and-mvp-readiness.md) — current 17-area progress table, B01–B07 blocker register, P01–P05 provisional watchlist, D01–D05 deferments and pilot MVP exit test; update only against merged canon.

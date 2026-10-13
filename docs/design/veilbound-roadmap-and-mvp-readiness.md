@@ -1,0 +1,106 @@
+# Veilbound — Development Roadmap and Level 1–3 MVP Readiness
+
+> **Design status review — 13 October 2026, after merged PR #57 (B05 automatic Universal Veil acquisition).** This is a **progress tracker and prioritization analysis**, **not** a rules authority. For executable rules use [Canonical Rules](../rules/README.md), not this document, the historical [Core Rules Audit v34](audits/Veilbound_Core_Rules_Audit_v34.md), or past roadmap estimates. The 17 rows retain the existing development-roadmap area taxonomy; progress describes **rule readiness**, not percentage of content, automated implementation, balance, or playtest completion.
+
+## What changed in this checkpoint
+
+- **PR #57 merged:** [Universal Veil Fundamentals](../rules/07-veil-magic/universal-veil-fundamentals.md) now grants **Basic Veil Inspection automatically at character level 1** and **Blink automatically at level 3** to **Priest, Scholar, Gifted, and Anointed**, independent of Focus. No Talent, Learned Discipline, Prepared Prayer slot, Scholar Pillar-technique slot, Gifted emotion link or Anointed bond is spent on acquisition. The level gate does **not** provide free VP, actions or special Archetype compatibility. The Archetype and metaphysical guides are synchronized.
+- **PR #56 already merged:** [Veil Inspection v0](../rules/07-veil-magic/veil-inspection-v0.md) is a **Full Action**, **base 2 Spent VP**, one **physically held item**, observable magical presence and discernible **Pillar/Aspect signatures**, plus **+2 to one relevant Veil Theory interpretation check** during the examination. Concealed/dormant effects, full enchantment function, and **Veil Analysis** remain separate/not executable.
+- **PR #55 already merged:** [Blink v0](../rules/07-veil-magic/blink-v0.md) is a **base 10 VP** Universal Translocation operation with normal Focus-priced Projection Action, valid Reactive Blink with next-own-turn AP debt, live arrival view, straight unobstructed path, safe arrival, no fixed range and constrained counter-Blink. Its cost respects legal reductions such as on-turn **Frugal Technique**; failed attempts expend committed AP/Reaction but no VP.
+- The previous first three MVP combat blockers have **authored deterministic v0 rules**: [Dodge Pressure](../rules/05-combat/defensive-responses-and-criticals.md#dodge) is a nonnegative penalty subtracted once; [Strong/Critical damage](../rules/05-combat/defensive-responses-and-criticals.md#strong-hit-critical-hit-and-devastating-critical-damage--v0-playtest-baseline) adds v0 dice; and [0-HP wound severity](../rules/06-vigor-wounds-death/dying-and-wounds.md#wound-severity) uses deterministic overkill bands. **The procedures are closed as definition blockers; numerical calibration and simulation remain open.**
+- **B07 is an overloaded label across previous work:** the merged **B07 Talents v0** work is **not** the same as **MVP blocker B07 — a complete level-1-to-3 advancement path**. Keep those scopes separate rather than declaring the advancement blocker done because the Talent catalogue exists.
+
+## Development roadmap — 17 areas
+
+| Area | Current progress / readiness | What is still missing | Why it matters |
+|---|---|---|---|
+| **1. Character creation** | **Advanced foundation; not end-to-end MVP complete.** Ability allocation, Weapon/Learned Discipline budgets, starter equipment prices/loadouts, resource formulas, level-1 Talent choice, and **automatic Inspection L1 / Blink L3** are authored. | Finalize MVP-specific Priest initial Accord and Prepared Prayer choice/count; Scholar starting Pillar repertoire/count; playable Gifted/Anointed technique/Signature choices; concrete level-1 sheet and background/starting choices; check all **12 Archetype × Focus** builds. | Players must complete a legal character without GM invention or importing 5e defaults. |
+| **2. Core resolution** | **Native baseline in place.** Passive, active, safe-time Take 10/20, difficulty modifiers, relevant Ability/Training. | Non-combat natural-1/20 policy, helping/group tasks and specialized opposed/extended checks where needed. | Routine adjudication is functional, but some edge cases and cooperative actions remain GM-dependent. |
+| **3. Native attack/defense math** | **Advanced, v0 executable.** Weapon Attack/Guard/Dodge/Take Hit, Dodge Pressure sign, critical confirmation and **Strong/Critical/Devastating bonus-dice v0** exist. | Weapon family traits and precise identity (Reach/Brace/handling), some attack-profile edge cases, damage calibration. | Attack outcomes can be rolled, but weapon differentiation and expected lethality remain unsettled. |
+| **4. Combat procedure** | **Advanced, mostly native and integrated.** Initiative, Turn AP, response windows, Reactions/Interceptions, weapon sequences, Guard/Dodge, maneuver suite, Aim, cover, living screens and Protective Intervene. | Conditions, Called Shot, specialized Disrupting Interceptions, some nonhumanoid/complex maneuver rules, final detailed profile pass. | A representative combat encounter is structurally possible; a complete general-purpose combat reference is not yet finished. |
+| **5. Combat movement & physical hazards** | **Advanced core.** Grid movement, Sprint/Charge, Interception movement, prone, traversal foundation, basic falling/Catch Grip/minor displacement. | Exact Climb/Swim MP, water hazards, hazardous horizontal collision/crushing, squeezing/size/flight and unusual-physics extensions. | These matter for adventure variety but many specialized cases can be excluded from the first MVP encounter pack. |
+| **6. Combat calibration** | **V0 values authored, not empirically verified.** Strong/Critical dice, wound severity/repair bands, defenses, Armor, regeneration and VP costs now have testable procedures. | Monte Carlo/hand-sim level 1–3 scenarios, Focus survivability, weapon parity, armor pricing, spell vs martial contribution, healing availability. | Mechanically defined does **not** equal balanced or playtested. |
+| **7. Techniques / magic content** | **Shared Universal foundation now executable and acquired:** Inspection **L1**, Blink **L3**; VP, Direct Veil, Manifestation and tier scaffolding exist. | Representative **level 1–3 Pillar/Aspect techniques** with real actions, costs, targeting, duration, rolls, effects and defenses; distinct Archetype access/repertoire; **Veil Analysis and Scrying** (not MVP prerequisites unless used in the MVP scenario). | **Largest remaining gameplay-content bottleneck**: access to a spell system is not equivalent to enough spells to play each Archetype. |
+| **8. Archetype numbers/content** | **Distinct 4 × 3 identity/foundation is established; universal access synchronized.** Several core mechanical identities exist. | Level 1–3 usable feature/package assignments for all twelve builds, finalized MVP starting choices and repertoire counts, playable examples and verification of basic options. | The game should feel different across Priest, Scholar, Gifted and Anointed, not only in theory. |
+| **9. Advancement** | **Architecture locked** (Foundation 1–5, Specialization 6–15, Mastery 16–20); Ability/Training schedules and **32 B07 level-1–5 Talents** have provisional v0 entries; Universal unlock gates included. | **One complete level 1 → 2 → 3 progression walkthrough** per representative build; any missing feature award/choice, technique access, VP/Tempo and Talent interactions; XP/milestone awarding baseline. | A short MVP campaign must actually permit leveling, not only constructing first-level characters. |
+| **10. Equipment & economy** | **Mundane starter v0** (150 sp budget, example kits, weapon/armor prices, ammunition) exists. | Weapon Reach/Brace/handling classes, armor Coverage/rune-space, final price/balance pass, magical equipment statistics/availability. | Enough mundane choices exist for initial loadouts; advanced gear diversity and economic balance are provisional. |
+| **11. Crafting** | **Mostly missing**, beyond ordinary trade/discipline adjudication. | Crafting recipes, item/ritual economy, magical enchantment/rune framework, production rules. | Out of strict first-session MVP unless the chosen adventure requires crafting. |
+| **12. Exploration** | **Basic support** through movement/traversal, core checks, field disciplines and hazards. | Complete travel cadence, environmental exposure, resource/route systems, water/flight specialties. | Short exploratory scenes can be adjudicated, but a wilderness campaign engine is not complete. |
+| **13. Extended non-combat** | **Basic social, investigation and knowledge checks usable.** No universal Persuasion/Perception/Stealth Training shortcuts. | Formal opposed stealth/detection, investigation progress and deeper social/intrigue resolution if required by the test adventure. | Enables non-combat scenes with GM rulings, but not yet a robust campaign-wide subsystem. |
+| **14. GM engine & encounters** | **Core adjudication guide exists.** Difficulty setting, automatic knowledge and pressure-based checks are usable. | **Playable enemy/NPC stat blocks**, encounter templates, level-appropriate threat/difficulty expectations, noncombat NPC baselines and a test adventure. | **Hard MVP blocker:** a session cannot be reproducibly tested without opponents and encounter content. |
+| **15. World content** | **Metaphysical foundation established**: Volition, Pillars/Aspects, Resonance, Archetype identities. | Selected 48-Aspect/cultural/lore migration, regions/factions/NPCs and adventure-specific setting material; resolve contradictions before promotion. | The rules can be tested with a small setting slice; a complete campaign atlas is deferred. |
+| **16. Structured toolbox data** | **Initial JSON schemas and repository layout** exist for rules/archetypes/items/techniques/etc. | Populate canonical machine-readable records, validate IDs and cross-references, build actual rules-engine/content loading tests. | Useful for future tooling, but not a prerequisite to paper/prose MVP sessions. |
+| **17. PWA / tooling** | **Minimal web scaffold** exists (app, manifest, service worker and icons). | Usable searchable/cross-linked content UI, character builder, campaign tooling and full data integration. | Valuable as later product work; **do not treat as a blocker for a tabletop MVP**. |
+
+**Interpretation:** the **combat rules foundation** is much closer to a playable baseline than the **full game**. The remaining first-playtest bottleneck is **authored character/technique/encounter content plus verification of level 1–3 progression**, not the shared Universal acquisition rule.
+
+## Level 1–3 tabletop MVP — target and exit criteria
+
+**Target:** a **3–5 session** short adventure, levels **1–3**, able to exercise **all twelve Archetype × Focus combinations** through valid example builds and representative encounter/noncombat tests. This does **not** require every combination to be played through an entire campaign, but it does require each to be **constructible and capable of meaningful contribution**, with representative coverage in actual playtest.
+
+**MVP exit test:**
+
+1. **Create:** independently build a legal character for each of **4 Archetypes × 3 Focuses** from current instructions, with explicit starting gear, costs, available techniques/features and derived stats.
+2. **Act:** each representative character has usable attacks/defenses, meaningful noncombat choices and, where their identity relies on magic, an **authored playable Pillar/Aspect or Archetype technique set**, not only Inspection/Blink.
+3. **Resolve:** run combat with turn economy, defense, critical damage, wounds, Dying, basic movement/terrain, cover and protective intervention, using fixed native rules rather than defaulting to D&D.
+4. **Advance:** take the representative builds from **level 1 to 2 to 3**, applying all changes in attributes/resources, action/Guard/Tempo, Talent eligibility and spell/technique repertoire. **Blink unlocks at level 3**, but Low Focus may still be unable to pay its base 10 VP; the unlock is **not free VP**.
+5. **Challenge:** run several prebuilt enemies, 1–3 encounter types, a short exploratory problem and at least one social/investigation interaction using the authored check engine. Benchmark challenge and healing/recovery plausibility.
+6. **Observe:** record unclear interactions, time spent resolving turns, combat length, survivability, Focus tradeoffs, technique affordability and outcomes. Mark v0 balances provisional until the test evidence exists.
+
+**Excluded from the tabletop MVP by default:** Veil Analysis/Scrying, long-range/advanced translocation and portals; levels 4–20 Specialization/Mastery; full magical crafting/runes; campaign-scale faction and travel simulations; comprehensive bestiary; production PWA or automated character builder. Include one only if the chosen pilot adventure actually requires it.
+
+## MVP blocker register (B01–B07)
+
+The **Bxx IDs here are the October MVP blocker IDs**; they are not the same identifiers as development-area labels such as **B07 Talents MVP**.
+
+| ID | Original blocker | Status as of 13 Oct 2026 | Remaining exit work |
+|---|---|---|---|
+| **B01** | Dodge Pressure sign contradiction | **CLOSED — rule fixed.** Store nonnegative penalty and subtract once, including melee/ranged. | Retain regression and playtest repeated-Dodge outcomes under P02. |
+| **B02** | Strong/Critical damage undefined | **CLOSED AS DEFINITION — v0 values.** Strong **+1d4**, Critical **+2d4**, Devastating **+2d4 + wound trigger** for eligible direct-hit HP attacks. | Simulate and calibrate; these are provisional numbers, not final balance. |
+| **B03** | HP-overkill wound severity nondeterministic | **CLOSED AS DEFINITION — v0 bands.** First positive-to-nonpositive HP crossing uses Serious / Severe / Critical deterministic overkill thresholds; default repair requirements **10 / 20 / 30 Vigor**. | Test overkill, damage distribution, recovery and Devastating Critical interaction; adjust only by explicit rule change. |
+| **B04** | Character creation not executable | **PARTIALLY CLOSED / still MVP blocking.** Starting Abilities, Training/weapon-shield mapping, mundane equipment budget and Universal Inspection L1 are authored. | End-to-end character sheet and reliable Archetype/Focus-specific initial choices; resolve remaining starting Accord, Prepared Prayer/repertoire, Signature and feature gaps; demonstrate twelve valid builds. |
+| **B05** | Archetype starting access and technique content | **PARTIALLY CLOSED / still MVP blocking.** Pillar-independent **Inspection L1** and **Blink L3** profiles/acquisition now authored for all Archetypes/Focuses. | Author enough level 1–3 **Pillar/Aspect and Archetype-specific** abilities to make caster identities playable. State actual repertoire/preparation and minimum-level use, cost, target, effect, defenses; verify interaction with Talents. Advanced Veil Analysis/Scrying can remain deferred. |
+| **B06** | NPC/enemy and encounter content absent | **OPEN — MVP blocking.** Core combat and GM check procedures exist, but no reviewed level 1–3 enemy/encounter pack is established in canonical rules. | Produce a small diverse bestiary/stat-block sample, at least 1–3 encounter templates, GM use notes, challenge/damage benchmarks and pilot scenario. |
+| **B07** | End-to-end level 1–3 progression incomplete | **PARTIALLY CLOSED / still MVP blocking.** Level/Focus/Turn AP/VP/Training chassis, B07 32-Talent catalogue and new Universal unlock gates exist. | Demonstrate actual **level 1 → 2 → 3** advancement, full Archetype feature/repertoire awards, Talent/VP/Tempo interactions, and a milestone/XP decision for the pilot. |
+
+**Current strict MVP blocker outcome:** **B01–B03 definition blockers closed**; **B04, B05 and B07 partially resolved**, **B06 open**. **No claim of an end-to-end playtest-ready twelve-build MVP yet.** B02/B03 retain numerical balance watch status, not a return to “undefined.”
+
+## Playtest-provisional register (P01–P05)
+
+| ID | Provisional area | Rule status and test focus |
+|---|---|---|
+| **P01** | Core resolution | Existing passive/active difficulty engine is playable; test group/help and noncombat contested/extended ambiguity where scenes require it. |
+| **P02** | Combat baselines | Test weapon balance/identities, Shield/Guard/Dodge/Intervention, **+1d4/+2d4** critical values, offensive/defensive tempo, and armor at levels 1–3. |
+| **P03** | HP, Vigor, Dying, wounds | Test fixed HP, Vigor recovery, the **10/20/30** wound-repair requirements, overkill frequency, stabilization and level-1 healing access. |
+| **P04** | Priest Accord, Miracle/Destiny, VP/magic | Test Accord starting value/cadence, Miracle Debt, Destiny, Focus VP affordability (including Blink L3), talent discount interaction and authored technique effectiveness. |
+| **P05** | Social, investigation, stealth, traversal | The basic engine is usable with situational GM judgment. Identify which missing specialized procedures must actually be added for the pilot, rather than inventing a universal skill. |
+
+## Explicitly deferred outside strict MVP (D01–D05)
+
+| ID | Area deferred | Boundary |
+|---|---|---|
+| **D01** | Advanced collisions/crushing/special hazards | Preserve already locked falling, Catch Grip, and minor non-damaging displacement; defer heavy collision, large falls and unusual environments. |
+| **D02** | Advanced combat subsystems | Called Shot and specialized weapon binds, advanced complex Grapples, mounted/large-scale combat, full conditions, detailed Reach/Brace variants where not needed for pilot. |
+| **D03** | Formal social/faction/campaign systems | Extended intrigue, reputation and faction progress clocks, complex social contests and broad travel/logistics. |
+| **D04** | Levels 4–20, Specialization, Mastery and multiclassing | Architecture exists, but no claim of complete playable high-level mechanics or 36 finished specializations. |
+| **D05** | Crafting, advanced economy, full bestiary, PWA | The **small MVP encounter pack (B06)** is required; the **comprehensive bestiary** is deferred, along with magical crafting/enchantments and production software tooling. |
+
+## Recommended implementation sequence — updated
+
+| Order | Work package | Completion artifact / acceptance test | Depends on |
+|---:|---|---|---|
+| **1** | **B04/B05 playable character slice** | One level-1 playable character per Archetype, at least one representative Focus each, with exact starting choices, actual authored **Pillar/Aspect or signature techniques** and legally executable actions; extend to all 12 configurations. | Starting sheet, Archetype features/repertoire, initial techniques. |
+| **2** | **B05 level 1–3 magic catalogue** | Small representative set of techniques for intended build roles, each with action/VP, eligible subject, range, Veil Control, defense, duration and bounded output; confirm each class can contribute beyond common Inspection/Blink. | Technique tiers and Archetype restrictions. |
+| **3** | **B06 encounter/test adventure pack** | Reviewed enemy stat blocks and 1–3 combats, plus exploration/social scenes, ready to run without inventing enemy rules in play. | Enough weapon/magic content to build representative opponents and party. |
+| **4** | **B07 level-up walkthrough** | Record per-build choices and derived values through **L1→L2→L3**, including Training/Talents/VP/Tempo/Guard and universal procedure gates. | B04/B05 usable builds. |
+| **5** | **Playtest + P02–P04 calibration** | Run benchmark encounters; record lethality, recovery, length, resource costs, practical build differences; fix observed failures. | Character slice, enemy pack and progression. |
+| **6** | **Broader system expansion after MVP** | Veil Analysis, Scrying, further Translocation, extended noncombat/conditions, level 4–20 content, crafting/economy, structured rule data and PWA. | Evidence from first sessions and additional scope decisions. |
+
+**Recommended next design task:** author the **level 1–3 Pillar/Aspect/Archetype-specific technique slice and starting repertoire choices** needed to close B04/B05. The automatic Universal unlocks can remain as-is. **Veil Analysis and Scrying are worthwhile B05 expansions but should not displace the gameplay-content blocker for the short MVP unless the first adventure demands them.**
+
+## Scope and status discipline
+
+- **LOCKED** means the authored procedure or structural choice exists in current canonical rules, **not** that every related content record or number is complete.
+- **V0 / PROVISIONAL** means an executable playtest baseline exists, with explicit calibration work still open.
+- **MISSING / OPEN** means do not treat unimplemented content as automatically granted or import D&D/5e mechanics to conceal the absence.
+- Track future changed statuses against **merged PRs and canonical rule files**. Historical audits can remain as history; they are not a competing live progress tracker.
