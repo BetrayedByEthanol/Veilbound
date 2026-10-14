@@ -121,6 +121,7 @@ For **VC +0**, the following refer to **Primary Vigor damage on a successful hit
 | A level-1 Throwing +2 user throws flame | `d20+Agility+Precision+2`; **no Small Blades**, Veil Practice or VC attack bonus; 1 Focus-priced Projection Action and **2 Spent VP** |
 | Thrown Flame targets at 1, 2, or 3 squares | **Range Difficulty = +0** for static Defense and active Dodge; never apply the bow/crossbow Close −2 band; 4+ squares is out of range |
 | A flame projectile hits Fire-Resistant target | Fire HP minus explicit Fire Resistance; Vigor packet applies independently |
+| A flame projectile deals **6 Fire HP**, target has two independent authored Fire Resistances **2 and 3** (no Stone Skin) | Apply **max(2,3) = 3** resistance **once**, for **3 Fire HP taken**, not 1; independent Vigor still resolves normally |
 | A selected Reserved sword hits three times | The defined on-hit fire/Vigor packets apply **three** times, with no per-hit VP or magic AP |
 | The wielder legally drops the reserved sword | The channel ends and its **4×T Committed VP** becomes Available; no free reaction timing |
 | Spontaneous bow shot with Conjure Flame | One normal paid ranged attack; **2×T VP spent on launch** even on miss; 0 extra Projection AP |
@@ -139,7 +140,7 @@ For **VC +0**, the following refer to **Primary Vigor damage on a successful hit
 
 ## Deliberately deferred
 
-- Final VC-per-X-level coefficients **by profile and contribution**, numeric VP/damage/range tuning beyond this level-1–3 playtest baseline, resistance granting/stacking mechanics, and any automatic Burning/Ignition spread techniques.
+- Final VC-per-X-level coefficients **by profile and contribution**, numeric VP/damage/range tuning beyond this level-1–3 playtest baseline, **future resistance-granting techniques and expressly authored stacking exceptions**, and any automatic Burning/Ignition spread techniques. **Resistance stacking itself is already executable:** per [Elemental HP Damage and Resistance v0](elemental-damage-resistance-v0.md#elemental-hp-resolution), apply **only the highest applicable resistance source once per Fire HP packet**, even when Stone Skin is not active; do not sum or apply overlapping resistance sources in succession.
 - Independent enchanted gem/Rider sources, weapon-reserve specializations, conversion-item economy, permanent investment, mixed-aspect crafting, ammo pickup/recovery beyond existing combat baseline.
 - Automatic technique access/repertoire counts, cross-Archetype compatibility, Veil Arrow acquisition/execution and any separate fire-control terrain effect.
 
