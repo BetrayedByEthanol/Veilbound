@@ -54,17 +54,22 @@ Stone Skin applies to **HP damage packets**, never to Vigor. An eligible packet 
 
 **Application order:**
 
-1. Resolve normal attack, any declared Take Hit / Dodge / Guard, cover and Strong / Critical / Devastating Critical determination **before** damage mitigation. An attack that misses or is fully blocked does not trigger on-hit damage packets.
-2. For a successful **physical HP packet**, include ordinary weapon/attack and any eligible Strong/Critical bonus dice **once** in that packet; then compute **Effective Armor = max(Armor − Penetration, 0)** and subtract it once. **Then** subtract the highest applicable physical HP resistance (including Stone Skin if it is the highest), floor resulting HP damage at 0. Penetration does **not** reduce Stone Skin's R.
-3. For an **independent Fire or Electrical HP packet**, apply its **highest applicable typed resistance once**, floor at 0. Do **not** apply ordinary Armor to an elemental-only packet or subtract Stone Skin again because the same hit also had a physical carrier packet.
-4. Preserve independent **Vigor packets** unchanged by Stone Skin even if the corresponding Fire or physical HP packet becomes 0. Determine 0-HP and Devastating Critical wounds under the normal wound rules; Stone Skin is not a blanket prevention of an independent Devastating Critical wound trigger.
-5. Other damaging conditions, terrain/hazard rules, special armor bypass and protections keep their own authored restrictions. Do not invent Electrical or physical types for effects lacking them.
+1. **Resolve the damage source's own procedure first.** For an attack, determine its hit/miss, Take Hit / Dodge / Guard, cover and any Strong / Critical / Devastating Critical bonus dice before mitigating the resulting HP packets. For a hazard, follow that **hazard's authored damage generation and mitigation order** first (e.g. Landing Control and Impact Armor for a standard fall). A missed/fully blocked attack does not create its normal hit-triggered damage packets.
+2. **Physical HP packets:** Apply **only the Armor/mitigation formula specifically authorized by their source**, then subtract the **one highest eligible physical HP resistance** (including Stone Skin if highest) from the resulting nonnegative packet and floor final HP damage at 0. For an **ordinary weapon attack**, use its usual **Effective Armor = max(Armor − Penetration, 0)**, applied once, followed by resistance; Penetration reduces effective **weapon Armor**, **not Stone Skin**. This weapon equation is **not** a universal Armor formula for every physical hit.
+3. **Physical hazards retain their specialized mitigation.** For a standard [hard-surface fall](../05-combat/physical-hazards-v0.md#falling-damage-v0--standard-impact), resolve any Landing Control dice reduction and applicable surface/equipment adjustments, then use the locked **Impact Armor = floor(normal Armor / 2)** **once** against the one **Crush-type physical HP packet**. **Only after that** subtract the highest applicable Crush/Physical HP resistance (Stone Skin qualifies) once. **Do not substitute full normal Armor**, introduce ordinary weapon Penetration, or apply Armor twice. For other hazards with authored Armor/bypass procedures, use those specific procedures before eligible typed resistance. Hazards with no authored damage or typing do not gain one here.
+4. For an **independent Fire or Electrical HP packet**, apply its **highest applicable typed resistance once**, floor at 0. Do **not** apply ordinary weapon Armor to an elemental-only packet or subtract Stone Skin twice because the same hit also had a physical carrier packet.
+5. Preserve independent **Vigor packets** unchanged by Stone Skin even if the corresponding Fire or physical HP packet becomes 0. Determine 0-HP and Devastating Critical wounds under the normal wound rules; Stone Skin is not a blanket prevention of an independent Devastating Critical wound trigger. Apply the hazard's separately authored post-contact posture/Prone, fall state and wound consequences **even when eligible resistance reduces falling HP damage to zero**. Do not invent Electrical or physical types for effects lacking them.
 
 **Examples:**
 
 | Situation | Result |
 |---|---|
-| Ordinary 10 Physical HP, Armor 5, Penetration 3, Stone Skin R2 | Effective Armor 2, then R2 → **6 HP taken** |
+| Ordinary weapon attack: 10 Physical HP, Armor 5, Penetration 3, Stone Skin R2 | Weapon Effective Armor 2, then R2 → **6 HP taken** |
+| Ordinary weapon attack: 10 Physical HP, Armor 5, Penetration 0, Stone Skin R2 | Weapon Effective Armor 5, then R2 → **3 HP taken** |
+| Standard fall: 10 Crush HP rolled, normal Armor 5, Stone Skin R2, no other adjustment | Locked falling Impact Armor **floor(5/2)=2**, then R2 → **6 HP taken**; **not** 3 HP from ordinary weapon Armor |
+| Same standard fall, normal Armor 5, no eligible physical resistance | Impact Armor **2** → **8 HP taken**, unchanged locked Falling baseline |
+| Same standard fall, native Physical/Crush R4 and Stone Skin R2 | Impact Armor **2**, then **max(4,2)=4** resistance → **4 HP taken**; not cumulative R6 |
+| Small standard fall whose resulting Crush HP packet is reduced to 0 by Stone Skin | **0 HP taken**, but the locked falling **Prone/landing consequences still apply** |
 | Mundane Fire 6 HP, Stone Skin R2 | **4 Fire HP taken** |
 | Conjure Flame Fire 6 HP, Stone Skin R2 | **4 Fire HP taken**; exact same result as mundane Fire |
 | Native Fire Resistance 3 plus Stone Skin Fire R2 versus Fire 6 HP | **max(3,2) = 3 resistance**, so **3 Fire HP taken**; not Resistance 5 |
@@ -133,7 +138,11 @@ If the Reaction cast is valid and resolves before the triggering hit/hazard dama
 | Level 3 High / Medium / Low Focus, Veil Affinity +0 | Max VP **18/12/6**, Reserve **6/4/2** |
 | VC −1, +0, +2, +4, +8 | R **2, 2, 2, 3, 4**, snapshotted on successful activation |
 | Fire from wildfire and Fire from Conjure Flame, same Fire HP packet value | **Same Stone Skin resistance**; magical/mundane provenance irrelevant |
-| Incoming Physical 10, Armor 5, Penetration 3, Stone Skin R2 | Effective Armor **2**, final **6 HP** |
+| Incoming ordinary weapon Physical 10, Armor 5, Penetration 3, Stone Skin R2 | Weapon Effective Armor **2**, final **6 HP** |
+| Standard hard-surface fall rolls **10 Crush HP**, Armor **5**, Stone Skin R2 | **Impact Armor = floor(5/2) = 2** first; then R2 → **6 HP lost**, not 3 |
+| Same standard fall with Armor 5, no resistance | **8 HP** (locked Impact Armor formula unchanged) |
+| Same fall with additional independent Physical R4 and Stone Skin R2 | Impact Armor **2**, then highest resistance **4** → **4 HP**; do not sum R |
+| Falling HP damage reduced to zero by Stone Skin | **Prone/landing state is still determined** by Falling v0, not automatically negated |
 | Native Fire Resistance 3 and Stone Skin Fire R2 | Effective resistance **3**, not 5 |
 | Native physical resistance R4, Stone Skin R2, Armor 5 vs Penetration 3 and Physical HP 10 | Effective Armor **2**, resistance **4**, final **4 HP** |
 | Physical 7 HP, Fire 2 HP, Vigor 3, effective Armor 3, Stone Skin R2 | **2 Physical HP**, **0 Fire HP**, **3 Vigor** |
