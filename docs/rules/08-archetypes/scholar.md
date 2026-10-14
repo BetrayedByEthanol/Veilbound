@@ -50,6 +50,8 @@ The Primary resolves at full normal strength.
 
 The Secondary is incorporated into the Primary rather than resolving as a second independent technique.
 
+**Interaction with [Technique Structure v0](../07-veil-magic/technique-structure-v0.md#8-existing-high-scholar-composite-casting-and-future-contribution-interfaces):** Composite Casting is **already the authorization** to select a compatible known technique's **Secondary contribution** as part of this Primary. An explicitly authored **Composite-compatible Secondary profile** provides its stated reduced output **instead of** (not in addition to, or halved again by) the approximate default below. If no such compatible Secondary values are authored, the default below still applies to an otherwise compatible known technique; the existence of a Secondary cell for item-only or environmental use does **not** itself grant composite eligibility.
+
 By default it contributes:
 
 - approximately half of normal scalable numerical output; and
@@ -72,7 +74,7 @@ Use the slower action requirement of the two components:
 - Projection Action + Full Action → **1 Full Action**;
 - Full Action + Full Action → **1 Full Action**.
 
-Ordinary single-technique casting remains fully competent and is often the more resource-efficient choice.
+Ordinary single-technique casting remains fully competent and is often the more resource-efficient choice. **Do not pay two separate Focus-priced spell activation actions:** the composite costs the single slower action stated above. Its Secondary's reduced output does not reduce either component's **full VP cost**. Composite Casting does **not** by itself authorize a second separately reserved enchantment on one weapon; that is a later specialized use.
 
 ### Level 2 — Expanded Repertoire
 
@@ -113,7 +115,7 @@ When Composite Casting, choose one Secondary emphasis.
 
 Examples include knockback, regeneration suppression, concealment, restraint, interruption, or terrain alteration.
 
-The purpose is to construct the **right answer**, not simply stack raw output.
+The purpose is to construct the **right answer**, not simply stack raw output. Explicit authored Secondary output defines the baseline for synthesis; **Numerical/Property Emphasis still applies** and may be supplied by separately authored variants or by this feature's existing defaults. Do **not** apply a second automatic half-strength reduction simply because the contribution is already written as Secondary.
 
 ### High Scholar boundary
 

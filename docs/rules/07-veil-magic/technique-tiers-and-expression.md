@@ -1,6 +1,6 @@
 # Technique Tiers and Expression Metadata
 
-> Canonical extraction from Core Rules Audit v34.
+> Canonical extraction from Core Rules Audit v34. For the subsequent **single-spell activation default, Primary/Secondary/Rider contributions, technique-specific profiles and Reserve rules**, see [Technique Structure v0](technique-structure-v0.md). This page remains authoritative for tier ceilings, numeric Veil Control constraints, expression tags and cadence.
 
 ## Universal technique tiers
 
@@ -69,7 +69,7 @@ A technique may separately deal Vigor damage if authored to disrupt regenerative
 Any sustained, persistent, attached, embodied, invested, consecrated, routed or similar effect that can interact repeatedly with ordinary actions must declare an **Expression Cadence** for each output.
 
 - **Continuous** — a static or persistent property. It does not multiply merely because a character can spend more Turn AP and normally remains active while the effect remains valid.
-- **Rider** — a modest effect that may apply to each eligible action, attack, Guard, movement or other listed event. Rider values must be calibrated against the maximum eligible Physical or Projection Tempo capable of triggering them.
+- **Rider** — a modest effect that may apply to each eligible action, attack, Guard, movement or other listed event. Rider values must be calibrated against the maximum eligible Physical or Projection Tempo capable of triggering them. **This is Rider cadence, not the distinct Rider contribution value** of [Technique Structure v0](technique-structure-v0.md#2-contribution-definitions-and-eligibility). An authored Reserved Weapon effect may trigger on each eligible successful hit without a hit count limit, but that does not waive Rider-cadence power constraints.
 - **Pulse** — a stronger finite effect with an explicit refresh unit such as once per turn, round, Emotion Window or another authored interval.
 - **Spend** — a stronger repeatable output that requires an explicit additional cost each time it is used, such as VP, Vigor, Destiny or another listed resource.
 
@@ -91,6 +91,6 @@ These are descriptors and permissions, not automatic bonuses.
 - **Conduit Form compatibility** — defines which Medium-Gifted conduit forms may express the technique or Aspect package.
 - **Investment compatibility** — defines which Vessel categories a Medium Anointed may validly invest for that interaction.
 - **Cadence** — declares each persistent output as Continuous, Rider, Pulse, Spend or another explicitly bounded cadence.
-- **Action cost** — when activated during ordinary turn economy, states whether the technique uses a Physical Action cost, Projection Action cost, General Tempo Action cost, Full Action, Reaction, or another explicitly authored timing/cost. Outward tempo-scale [Projection] techniques normally use the character's Projection Action cost unless a technique says otherwise.
+- **Action cost** — when activated during ordinary turn economy, states whether the technique uses a Physical Action cost, Projection Action cost, General Tempo Action cost, Full Action, Reaction, or another explicitly authored timing/cost. **Ordinary single-spell activation defaults to one Focus-priced Projection Action (High 20 / Medium 24 / Low 30 AP)** under [Technique Structure v0](technique-structure-v0.md#4-activation-and-turn-ap--ordinary-single-spell), including activation of an authored Reserve; the individual technique may explicitly override this default. Using that AP category does **not** automatically confer the **[Projection]** expression tag.
 
 Archetype-specific rules may add narrower qualifiers, but should not duplicate an existing universal concept without a mechanical reason. **Universal Veil** classification does not by itself authorize a Priest-specific Consecration, Scholar Composite formula, Gifted Conduit or Anointed Authority. Each such interaction requires its own explicit compatibility. Author an individual Universal operation's action, effective cost, minimum character level, effect and (if tiered) tier in its own profile. **Blink v0 and Veil Inspection v0 have authored action, cost, effect and automatic acquisition levels**; other operations, including advanced Analysis and Scrying, remain deferred.
