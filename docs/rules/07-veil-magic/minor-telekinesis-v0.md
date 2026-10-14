@@ -75,7 +75,7 @@ There are **three distinct situations**:
 
 ### B. Creature already obstructing the object's path — no Reaction
 
-When the object's declared movement physically reaches a creature **already occupying its path**, that creature can resist the contact **without spending a Reaction or Guard**. This is not a proactive interception; the crate itself is moving into the creature's occupied space.
+When the object's declared movement physically reaches a creature **already occupying its path**, that creature can resist the contact **without spending a Reaction or Guard**. This is not a proactive interception; the crate itself is moving into the creature's occupied space. **The push-aside/Prone consequence requires an object and contact geometry physically capable of pushing the creature** (for example, a solid crate); a soft, tiny or flexible item that cannot meaningfully shove the creature stops at the obstruction without granting free body displacement or Prone. This does not add a new damage or weight threshold.
 
 1. Before the object's movement can overlap the creature, that creature makes **one `d20 + Strength` check** against the Force DC.
 2. **Success:** the creature withstands the movement; **the object stops** at the obstruction, without forcibly entering the creature's space.
