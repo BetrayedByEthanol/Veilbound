@@ -43,7 +43,7 @@ If the character is **not Dying** and has both lost HP and one or more repairabl
 
 Each point used either way consumes 1 Vigor unless another rule changes that conversion.
 
-This allocation may be split in any proportion during the Regeneration Step. Unspent throughput is lost when that step ends.
+This allocation may be split in any proportion during the Regeneration Step. Unspent throughput is lost when that step ends. **An expressly authored external instant heal is distinct from this regeneration allocation:** [Basic Heal v0](../07-veil-magic/basic-heal-v0.md) directly restores modest HP and Vigor, and while a target is Dying converts its own small HP component into direct Repair Progress under that technique's exact limits; it grants no extra Regeneration Step.
 
 Dying characters do **not** use this free allocation order; they use the stricter survival/wound-repair procedure in [Dying and Wounds](dying-and-wounds.md).
 
@@ -81,7 +81,7 @@ Unless an effect explicitly says it reduces or prevents **Vigor Recovery**, anti
 In particular:
 
 - **regeneration suppression** stops or alters the Regeneration Step and related HP/wound-repair use of Vigor;
-- **blocking external Vigor restoration** stops Vigor supplied by another creature, technique, item, or other external source;
+- **blocking external Vigor restoration** stops Vigor supplied by another creature, technique, item, or other external source, **including Basic Heal's Vigor packet**; it does not automatically negate that technique's separately authored minor HP healing or direct Repair Progress unless the restriction specifically blocks those as well;
 - neither automatically prevents the character's own elapsed-time Vigor Recovery.
 
 ## Wound triggers
