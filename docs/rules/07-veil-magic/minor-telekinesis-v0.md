@@ -1,0 +1,154 @@
+# Minor Telekinesis v0 — Mind / Psionics
+
+> **Executable B05 technique; approved v0 mechanical design, numerical calibration provisional.** Minor Telekinesis moves **one inanimate physical object** along a short physical route using external psychic force (**Imposition**). It is primarily a utility/repositioning technique, not a free damage attack, infinite levitation, universal Disarm, or direct creature-control spell. Use the established [Technique Structure](technique-structure-v0.md), [Direct Veil and Imposition resolution](resonance-and-intrusion.md#imposition), [grid movement and forced movement](../05-combat/movement-foundation.md), [round/response structure](../05-combat/initiative-and-round-structure.md), and [physical hazards](../05-combat/physical-hazards-v0.md). Authored publication does **not** grant automatic technique knowledge or Aspect access.
+
+## Identity and limits
+
+| Field | Minor Telekinesis v0 |
+|---|---|
+| Pillar / canonical Aspect | **Mind / Psionics**, canonical **External** Aspect |
+| Base Tier / access | **1**; requires valid access to this particular technique |
+| Used Tier | Choose **T ≥ 1** at declaration within the universal ceiling (levels 1–2: T1; level 3: up to T2) |
+| Exact profile key | **`Single Object`**; one independent inanimate object per instance, not a creature/area/held swarm |
+| Components | **Hands:** one functioning available hand |
+| Expression / interaction | One [Projection] direct **Imposition** onto an object from outside, **not** Intrusion or Manifestation |
+| Duration | **Instant** (one discrete displacement at cast resolution); no sustained levitation, tether, Reserve, or repeated control |
+| Primary activation | One normal **Projection Action**: High **20 AP**, Medium **24 AP**, Low **30 AP** |
+| Primary VP | **2 × T Spent VP**, for the completed valid attempt (including subsequently resisted or physically stopped movement) |
+| Initial targeting range | **0–20 squares** (up to **30 m**), measured from caster to initial object position |
+| Object displacement | **Up to 6 orthogonal-square equivalents = 9 m** along **one declared traversable route** per cast; this is a movement distance, not the initial targeting range |
+| Vertical ceiling | **No raising the object above the caster's elevation at declaration.** Movement may be horizontal, down, or up to that ceiling; the caster's later movement/jump does not increase the ceiling |
+| Primary / Secondary output VC | **VC = max(0, caster's Veil Control)**, evaluated for this application; custom scalar, **not** standard VC × level |
+| Force DC | **`6 + VC`**; eligible physical opposition uses **`d20 + Strength ≥ Force DC`** |
+| Damage | **No direct HP/Vigor packet** and no generic impact/collision damage, extra attacks, or automatic chain pushes |
+
+**Range versus distance:** An object must be **in casting range when the effect is declared/legally resolved**, and the caster must have a legal magical/physical route to reach the object. The **6-square displacement is additional to the initial range**; there is no ongoing range tether on an Instant effect. A declared object route must be continuous and physically traversable; no teleporting through walls, closed doors, solid obstacles or occupied material simply because magic supplied the motion.
+
+**Grid distance:** Use the existing **1.5 m square** and normal step proportions for an object's declared path: each orthogonal or vertical 1.5 m segment consumes **1 square-equivalent**, and a diagonal consumes **1.5 square-equivalents** (the equivalent of 12 normal MP). This counts the object's route, **not** a free MP allowance for its caster or anyone pushed aside. No object path may exceed the six-square-equivalent budget. The object must have physical clearance along the full swept route, not only at its destination.
+
+**Elevation reference:** Compare the elevation of the object's **movement/placement reference point** (normally its support/base position) with the caster's **standing/location elevation** when declaring. Do not raise the object reference above that ceiling. An object initially above the caster may be **lowered** toward the ceiling but cannot be raised further or kept floating higher through repeated casts. Unsupported objects are subject to ordinary gravity after the instance resolves; changing the caster's height after declaration cannot raise the cap.
+
+## Authored `Single Object` contribution values
+
+| Profile | Contribution | Maximum object volume | Maximum object mass | Maximum single dimension | Authorization |
+|---|---|---|---|---|---|
+| **`Single Object`** | **Primary** | **`(10 + VC) × T` dm³** | **`(10 + VC) × T` kg** | **1.5 m** | Normal independently cast technique |
+| **`Single Object`** | **Secondary** | **`(5 + VC) × T` dm³** | **`(5 + VC) × T` kg** | **1.5 m** | Only with an explicitly eligible compatible source, including legal High Scholar Composite Casting |
+| **`Single Object`** | **Rider** | **Not authored** | **Not authored** | — | No independent Rider contribution or recurring event |
+
+**All three object eligibility limits apply simultaneously:** mass **and** occupied volume **and** every external dimension must be within the authored numbers. Volume means the object's **occupied physical envelope**, not merely the amount of solid material inside a hollow structure. An object's assembled/attached larger structure cannot be treated as one arbitrarily small detachable “part” unless it has actually been detached; this spell does not cut, unlock, snap fasteners, or break fixed supports.
+
+`VC` in these scalar and Force DC formulas is **nonnegative**; if actual Veil Control is negative, use 0 for `VC` here, but use the **raw signed Veil Control** for any contested Direct Veil Pressure. `T` belongs to this component's own chosen Used Tier. The volume and mass formulas scale by Tier; the fixed **1.5 m** maximum dimension, **20-square** initial range, **6-square** displacement, **height ceiling**, and **Force DC** do **not** gain an extra Tier multiplier.
+
+**Secondary/composition:** The explicit Secondary limits are eligible for a compatible High Scholar composite **only when both known techniques choose the exact `Single Object` key**. The existing Scholar feature still governs prepared formulas at levels 1–2, selected Primary delivery/target/range, full VP cost for both components, and a **single slower combined action**. The authored Secondary output is **not halved again**. This smaller contribution neither selects an additional object, creates a second independent path or action, nor makes non-object spells eligible by similarity of wording. An independently usable Rider has **not** been authored.
+
+## Legal object manipulation and ordinary physics
+
+Minor Telekinesis moves an inanimate object **as one complete object**, without remote tool use, free fine manipulation, a separately launched projectile, or a created object. Ordinary unsecured mundane objects within all limits can be lifted, retrieved, placed, or slid, provided the complete movement is possible within the route, elevation and size restrictions.
+
+- **Unattended and loose:** An ordinary inanimate object not currently attended by an unwilling creature has **no intrinsic Direct Veil Resistance**. No attack roll or physical opposition check is made if no actual opposing creature/obstacle intervenes.
+- **Held, worn, carried or wielded:** A creature currently attending the object supplies **normal Imposition resistance first**, unless it knowingly waives it. Success of that magical defense stops the attempt; do not attempt the Strength check. A caster cannot label the same held object “unattended” to bypass this defense.
+- **Attached, bolted, locked, embedded or structurally fixed:** The spell does **not** automatically tear attachments, unlock mechanisms, shatter masonry, sever ropes/chains, overcome anchoring force, or separate an object from a larger structure. A free-to-move item and one actually fixed in place are not interchangeable merely because their individual mass fits.
+- **Against living creatures:** Does **not** directly target, lift, restrain or reposition a creature as the `Single Object`. **A real physical object can nevertheless be physically obstructed by a creature along its path**, triggering the separate bodily-obstruction rule below. Moving someone's worn equipment is not a free loophole for moving that person.
+- **After resolution:** The object stays where its new physical support allows or else falls in accordance with the established [Falling and Physical Hazards](../05-combat/physical-hazards-v0.md). The caster cannot hold it stationary in air after the Instant cast or gain more movement by calling the effect a sustained spell.
+- **Non-damage baseline:** This spell provides **no authored damaging collision/impact profile** and cannot be treated as an ordinary telekinetic weapon attack. A genuine separate **loss of support** (e.g. an object or displaced creature goes over an edge) follows existing Falling procedures, without invented collision damage. A future damaging Telekinetic Projectile/Force Push and detailed object-collision damage require their own technique/physics authoring.
+
+## Opposing movement — Force DC and Reaction timing
+
+```text
+Force DC = 6 + max(0, caster's Veil Control)
+Eligible physical opposition: d20 + Strength >= Force DC
+```
+
+A check **equal to or above** the Force DC succeeds. This is an ordinary physical **Strength check**, **not** a requirement to possess a +6 Strength modifier, **not** a second Veil contest, and **not** a check to determine an unattended object's eligibility. Use the ordinary [Core Resolution](../01-core-resolution/core-resolution.md) convention for any explicitly applicable check modifier; do not add a hidden Training or magical resistance value.
+
+There are **three distinct situations**:
+
+### A. Already holding the object — existing grip, no Reaction
+
+1. The caster declares the object, physical movement route, and cost. Resolve **normal attended-object Imposition resistance** first.
+2. If the holder's Direct Veil Resistance defeats the Imposition, the object **does not move**. There is **no** follow-up physical check and **no Reaction** spent by the holder.
+3. If Imposition succeeds (or resistance is knowingly waived), the holder may try to maintain its already-existing grip. Roll **`d20 + Strength ≥ Force DC`**, **without spending a Reaction**.
+4. **Success:** the grip holds, the object's displacement stops; **failure:** the object is pulled free and follows its declared traversable path (if still legal).
+
+**Basic Heal's beneficial-Intrusion consent shortcut does not apply:** this is **Imposition**, and an unwilling holder has the standard **Direct Veil Resistance**, without an Intrusion Barrier. The physical check is a **separate grip test after magical success**, not an alternative magical defense or a refund of a spent spell.
+
+### B. Creature already obstructing the object's path — no Reaction
+
+When the object's declared movement physically reaches a creature **already occupying its path**, that creature can resist the contact **without spending a Reaction or Guard**. This is not a proactive interception; the crate itself is moving into the creature's occupied space.
+
+1. Before the object's movement can overlap the creature, that creature makes **one `d20 + Strength` check** against the Force DC.
+2. **Success:** the creature withstands the movement; **the object stops** at the obstruction, without forcibly entering the creature's space.
+3. **Failure:** the creature is **pushed aside by up to one adjacent square** if a physically possible legal square outside the object's declared swept path exists. The **caster chooses among legal adjacent positions**; no extra chain displacement, forced movement beyond that necessary to clear the route, automatic damage, or automatic Prone is granted when the push-aside succeeds.
+4. **If no legal aside position exists**, the creature is **knocked Prone in its existing occupied space**. **Prone does not erase occupancy:** the object **stops** if the prone creature still blocks the physical route.
+5. If the obstruction was cleared, the object may continue its **remaining already-declared route** within the same six-square limit. No bonus movement is granted by winning the physical contest.
+
+This is **forced movement**, so the general Movement Opportunity rule is not triggered. If actual forced displacement leaves a creature **without support**, apply existing [Falling v0](../05-combat/physical-hazards-v0.md#falling-state-and-timing--locked), not invented horizontal collision damage. A creature physically blocking the route does not become magically “attending the object” retroactively just from being in its way.
+
+### C. Newly grabbing a passing object — one Reaction
+
+A creature **not previously holding or bodily blocking** the object may **actively grab it** when the object's declared route passes within physical reach.
+
+- **Trigger and eligibility:** The creature can perceive the passing object, has at least one functioning available hand, has an unspent Reaction, and the moving object becomes physically reachable. The response must be declared during the **normal Reaction window before the object leaves reach**; it does not grant movement to get there.
+- **Cost:** **one Reaction** is committed whether the physical attempt succeeds or fails. This is **not** the same as an existing holder resisting, nor is it the free body-obstruction check.
+- **Contest:** Make **one `d20 + Strength` check** against the Force DC. **Success:** it is grabbed and movement stops. **Failure:** no new grip is obtained, and the object continues if its path remains legal.
+- **Limit:** **One Grab Object Reaction by a given creature per casting**. No repeat grab attempts on the same instant movement from extra reach intersections, and grabbing midflight does not retroactively grant an attended-object Imposition defense to undo the already valid cast.
+- **Timing:** Uses existing [Reaction / response windows](../05-combat/initiative-and-round-structure.md#reactions-responses-interception-and-interruption). This profile gives a reactive **grab**, not a general attack, Guard, teleport, or permission to leave one's position.
+
+**Order of resistance:** If an item was held **when cast**, first resolve the **magical Imposition contest**, then physical **existing-grip** check if the spell proceeds. Once an object actually moves, a **pre-existing physical path blocker** uses its free body-obstruction check on contact; a **new active grab** requires the one-Reaction response. A physical check that stops the movement **ends the remaining displacement**, not the entire cast retroactively. An object does not acquire a fresh magical resistance contest merely because somebody grabs or blocks it during the same instant effect.
+
+## Cast sequence and payment
+
+1. **Declare** technique knowledge, Used Tier, `Single Object` profile and contribution authorization, one functioning hand, one eligible object, a **continuous intended movement route** within 6 square-equivalents, one legal target within **20 squares**, and the caster's declaration-time elevation ceiling. Confirm object mass/volume/dimensions and any known physical attachments/obstacles. These conditions are subject to normal revalidation after responses.
+2. **Pay/commit the Projection Action AP** on declaration under the normal round procedure; if the attempt is Interrupted **before** it can legally apply the effect, AP stays spent but no VP is spent for a magical application that never occurred (ordinary technique convention).
+3. **On valid magical application**, spend **2 × T Spent VP** for standalone Primary (or the full costs of authorized composite components), **even if the object remains held after resistance or the moving object is physically stopped**. Resolve any **initial attended-object Direct Veil contest** before the object starts moving:
+   - **Direct Veil Pressure:** `d20 + raw Veil Control + Precision + Veil Integration Bonus + explicit modifiers`. The technique's **v0 Shaping Ability is Precision**.
+   - **Attending creature's Direct Veil Resistance:** `10 + Strength + Vitality + Veil Integration Bonus + Resonance + explicit modifiers`. This technique's **v0 defensive Ability pair is Strength + Vitality**. Tie resists. No Intrusion Barrier is added; natural 20 does not automatically overcome sufficient resistance.
+   - The attending creature may knowingly waive resistance to the declared telekinetic motion; no other creature automatically waives it. For multiple unwilling attending creatures use the **highest applicable Direct Veil Resistance**, as in universal rules.
+4. If the initial Imposition legally succeeds, **resolve any existing-grip Force check** (no Reaction) and then move the object along its **already declared legal route**. Pause at each actual obstruction / eligible Grab Object Reaction as defined above and re-check physical clearance after relevant responses. Apply remaining distance and the height ceiling throughout.
+5. **End the instance immediately** when the object reaches the declared endpoint, is stopped, cannot continue on the route, or exhausts the allowed displacement. Resume ordinary gravity/support consequences. Nothing remains Committed, maintained or available to retarget without a new cast.
+
+The spell grants **one object movement attempt**, not a separate object attack, autonomous object turns, extra physical actions, or a way to walk creatures around the battlefield using their gear. A declared route is not retroactively redrawn when an opponent stops the object. Forced movement of a path blocker follows existing displacement and Falling rules and does **not** become a normal creature MP movement segment.
+
+## Level 1–3 and interaction regression cases
+
+At levels **1–2** use **T1**; at level **3** T2 is available. The limits below are all simultaneous; `VC` is nonnegative output scaling.
+
+| Level | Used Tier | VC | Primary mass / volume | Secondary mass / volume | Force DC |
+|---:|---:|---:|---|---|---:|
+| 1 | 1 | +0 | **10 kg / 10 dm³** | **5 kg / 5 dm³** | **6** |
+| 1 | 1 | +2 | **12 kg / 12 dm³** | **7 kg / 7 dm³** | **8** |
+| 2 | 1 | +2 | **12 kg / 12 dm³** | **7 kg / 7 dm³** | **8** |
+| 3 | 2 | +2 | **24 kg / 24 dm³** | **14 kg / 14 dm³** | **8** |
+| 3 | 2 | +4 | **28 kg / 28 dm³** | **18 kg / 18 dm³** | **10** |
+
+| Case | Expected v0 adjudication |
+|---|---|
+| Unattended, loose 5 kg / 5 dm³ cup-shaped object 20 squares away, T1, VC 0 | Legal if all dimensions fit, route to initial target exists; spend one Projection Action + 2 VP; move up to 6 square-equivalents with **no initial Imposition roll** |
+| Object 22 squares away | Invalid targeting range; no telekinetic movement |
+| Object below caster's position | May raise **only up to caster's declaration-time elevation**; 6-square movement budget still applies |
+| Caster on level ground tries to levitate a ground object 2 m above own elevation | Illegal upward destination; spell cannot grant sustained hovering |
+| T1 VC +2, object 13 kg | Invalid for Primary: **mass > 12 kg**, even if volume fits |
+| T1 VC +2, hollow 20 dm³ object of only 1 kg | Invalid for Primary: **volume > 12 dm³**, even if mass fits |
+| 1.6 m long object below mass and volume caps | Invalid: **maximum dimension > 1.5 m** |
+| Object bolted to floor, otherwise under caps | Cannot detach/break its bolts by assuming mass eligibility |
+| Enemy holds sword, ordinary Imposition contest succeeds | Holder then receives **one free `d20 + Strength ≥ 6 + VC`** grip check; no Reaction |
+| Held-object Imposition contest resists | Object does not move; no physical grip check; spent VP for the valid resisted attempt |
+| Crate encounters creature already blocking path; Strength succeeds | **No Reaction**; crate stops before overlapping creature |
+| Crate encounters creature blocking path; Strength fails; legal side square exists | **No Reaction**; caster chooses one legal adjacent aside square; crate continues remaining route if clear, no generic damage |
+| Crate encounters creature blocking path; Strength fails; no side square exists | Creature **Prone**, still occupies space; crate stops if physical passage remains blocked |
+| Opponent steps aside normally before declared telekinetic route reaches them | No obstruction check at that point |
+| Creature adjacent to route uses one Reaction to grab passing object | Strength check against Force DC; success stops object, failure lets it continue; one attempt per cast |
+| Creature already blocking the path also tries to claim Grab Object Reaction retroactively | Free body-blocking check applies; no additional free second resistance under a relabeled grab |
+| Object falls from an unsupported endpoint | Use established Falling/loss-of-support procedures; no invented telekinetic collision dice |
+| A compatible High Scholar composite uses `Single Object` as Secondary | Matching **exact** profile, full VP for both known components, one slower action, authored Secondary capacity once; no independent second target/path |
+| Attempt to apply an unauthored Minor Telekinesis Rider | No Rider value or activation was authored; cannot apply |
+| VP/AP at L1–3 High / Medium / Low | One Projection Action costs 20/24/30 AP; T1=2 Spent VP, T2=4; no extra MP, Reaction or attack AP for caster |
+
+**Balance watch (not a redefinition):** Physical blocking has a **low DC** by design. At VC +0, DC 6; Strength +0 stops movement on 6–20 (**75%**). At VC +2, DC 8; Strength +1 succeeds on 7–20 (**70%**). At VC +4, DC 10; Strength +4 succeeds on 6–20 (**75%**). This makes unattended manipulation reliable while creature interference remains plausible. Tier increases mass/volume, **not** Force DC or distance; higher-tier efficiency and the consequences of moving physical objects near hazards remain playtest observations.
+
+## Scope and future work
+
+- **LOCKED v0 mechanics:** one inanimate object; exact `Single Object` profile; independent mass **and** volume **and** dimension caps; 20-square targeting / 6-square movement split; caster-elevation ceiling; one instant movement; `6 + max(0, VC)` Force DC; pre-existing grip/path obstruction costs **no Reaction**; a newly initiated grab costs **one Reaction**; successful blocking stops motion; failed body blocking pushes aside if legal else causes Prone, with obstruction still physically present.
+- **Provisional calibration:** mass/volume, Force DC, tier scaling, AP/VP affordability, selected contested Abilities (Precision vs Strength + Vitality), and physical path/push-aside effectiveness in sample encounters.
+- **Not granted:** direct creature targeting, precise remote machinery manipulation, damaging projectile, generic collision damage, multiple-object handling, permanent telekinetic hold, sustained levitation, free Rider, free Disarm/reaction, unauthorized item enchantment, extended reach or new Archetype repertoire. Each requires its own explicit technique, feature or rule.
