@@ -151,7 +151,7 @@ This bonus is locked for both **Imposition** and **Intrusion**.
 
 **Imposition** and **Intrusion** use the same underlying direct-magic contest.
 
-The difference is that Intrusion crosses the protected internal boundary of a living target and therefore adds the **Intrusion Barrier**. Imposition acts directly on the target from outside and does not receive that barrier.
+The difference is that Intrusion crosses the protected internal boundary of a living target and **may activate an Intrusion Barrier when the actual effect is harmful or consciously resisted**. Imposition acts directly on the target from outside and does not receive that barrier. **A genuinely beneficial, unopposed Intrusion does not trigger a resistance contest merely because it operates inside the living target**, including when the recipient is unconscious. See [Intrusion Barrier](#intrusion-barrier).
 
 ## Direct Veil Pressure
 
@@ -262,59 +262,55 @@ Examples:
 
 **Intrusion** is magic that crosses into, originates within, overlaps, or directly alters the protected internal self of a living target.
 
-Examples include mind control, forced sleep, direct perception or memory alteration, internal bodily transformation, and attempts to create or manifest matter inside living tissue.
+Examples include mind control, forced sleep, direct perception or memory alteration, internal bodily transformation, and attempts to create or manifest matter inside living tissue. **Beneficial bodily restoration also counts as Intrusion** when it directly changes the recipient's internal bodily state; calling healing `Projection` describes expression, not an exemption from the interaction type.
 
 A Manifestation does not bypass this rule. If the attempted manifestation originates inside or overlaps a living target, resolve it as an Intrusion.
 
-Intrusion uses the same shared contest, but its resistance is:
+**Classification and resistance are separate questions.** First establish the **actual complete effect on the recipient** and whether it is genuinely beneficial or harmful, then whether the recipient **consciously resists** or **knowingly waives** resistance. The caster's label, intent, claim of good intentions, or use of a beneficial-looking disguise **does not** turn a harmful effect into beneficial Intrusion.
+
+For an Intrusion that **requires a resistance contest**, use the existing shared pressure roll and resistance base:
 
 ```
 Intrusion Resistance =
 Direct Veil Resistance
-+ Intrusion Barrier
++ applicable Intrusion Barrier
 ```
 
-The acting roll remains **Direct Veil Pressure**.
+No separate attack roll, physical ranged defense or ordinary Throwing check is added. **Where the rules waive/omit the resistance contest altogether, no Direct Veil Pressure roll is required**, and neither the base Direct Veil Resistance nor the barrier must be beaten. Legal range, target, resource cost and an effect-specific ward or immunity still apply.
 
 ## Intrusion Barrier
 
-The protected internal self supplies a large additional barrier.
+The barrier protects against **harmful intrusion and deliberately resisted intrusion**, not against every unopposed helpful change.
 
-| Target state toward this Intrusion | Intrusion Barrier |
-|---|---:|
-| **Unwilling / not knowingly consenting** | **+8** |
-| **Genuinely deceived into accepting the magical contact** | **+4** |
-| **Knowingly and willingly opens to the actual effect** | **Resistance may be waived entirely** |
+| Actual interaction with target | Intrusion Barrier | Resolution |
+|---|---:|---|
+| **Genuinely beneficial and not consciously resisted**, including an unconscious recipient | **None; no resistance contest** | Apply the legal effect normally, subject to specific protection and target limits |
+| **Beneficial but consciously resisted** | **+8** | Direct Veil Pressure must exceed **Direct Veil Resistance + 8** |
+| **Harmful/hostile and unwilling, unaware, asleep or unconscious** | **+8** | Direct Veil Pressure must exceed **Direct Veil Resistance + 8**; lack of awareness is not consent |
+| **Harmful effect deceptively presented as benign and genuinely accepted** | **+4** | Direct Veil Pressure must exceed **Direct Veil Resistance + 4**; this is not a complete waiver |
+| **Actual specific effect knowingly accepted**, including knowingly accepted harmful risks | **Waived; no resistance contest** | Only that **understood** effect is accepted; subsequent/hidden different effects are not covered |
 
-### Full barrier
+**Meaning of +0/none:** The beneficial-unopposed row **does not** mean “roll versus base Direct Veil Resistance without +8.” It means **no Intrusion contest**. For contested rows, use **raw** Veil Control in Direct Veil Pressure and the technique's authored Shaping and defensive Abilities; a technique's separate `max(0, VC)` healing/damage formula never replaces the Pressure formula.
 
-The **+8** barrier is the default.
+### Harmful or actively resisted Intrusion
 
-Being surprised, distracted, restrained, asleep, unconscious, or unaware of the caster does not by itself reduce the barrier.
+An actual harmful or hostile internal effect receives the **full +8 barrier** when not knowingly accepted. This protection remains in place even if the recipient is **surprised, distracted, restrained, unaware, asleep, unconscious or otherwise unable to make a conscious choice**. These conditions are not informed consent and cannot be used to force harmful Intrusion through defenselessly.
 
-A target does not become easier to rewrite merely because they failed to notice the attempt.
+A conscious creature may **deliberately resist a genuinely beneficial Intrusion**. For such a refusal, apply the full **+8** barrier and the shared Direct Veil contest. A character who merely **does not know** that a genuinely beneficial effect is occurring is **not** thereby actively resisting it; absent actual harm, an expressed refusal or an applicable protective restriction, beneficial restorative magic does not require a check. An unconscious recipient does **not** need to have granted prior consent to routine genuinely beneficial restoration.
+
+An authored **ward, suppression, specific immunity or other protective restriction** can still block healing or require its own resolution; the absence of a resistance contest does **not** waive these separate protections. If the effect mixes helpful and harmful elements or substantially changes the target in a harmful way, it is **not** eligible for the unopposed-benefit shortcut merely because part of it restores HP.
 
 ### Deceived acceptance
 
-Use the **+4** barrier only when the target has genuinely accepted the magical interaction but was materially deceived about what that interaction would actually do.
+The **+4** case applies only when the recipient **genuinely accepted the apparent contact or alteration**, but its **actual harmful nature or a materially different harmful component** was concealed or misrepresented. It is a **reduced barrier**, not automatic success. The base Direct Veil Resistance and all applicable Resonance, Veil Integration and technique modifiers still apply.
 
-Example:
+Telling a recipient that an effect is **harmful**, causing the recipient to refuse it, **does not count as deceived acceptance**; use **+8**. Likewise, stealth, disguise of the caster, distraction or surprising a victim **does not** count as deceived acceptance. A knowingly accepted truly beneficial effect needs neither deception rules nor a resistance contest.
 
-> A caster truthfully presents a spell as entering the target's memories to inspect a curse, but falsely conceals that the actual purpose is to alter those memories.
+### Knowingly waiving resistance
 
-Merely casting secretly, distracting the target, disguising the casting, or attacking from surprise does not count as deceived acceptance.
+A conscious target can knowingly waive resistance to a **specific accurately understood** Intrusion, including an effect with meaningful risks. No contest is required for the actual understood effect. Consent does **not** open a persistent general vulnerability or waive resistance for a later change of target, purpose or concealed hostile component.
 
-The target still receives all other parts of Intrusion Resistance, including defensive Abilities, Veil Integration Bonus, Resonance, and applicable modifiers.
-
-### Willingly opening resistance
-
-A target that understands the actual effect may consciously open its internal boundary and **waive Intrusion Resistance** to that effect.
-
-This is normally how willing internal buffs, healing, or transformations are accepted.
-
-Waiving resistance applies only to the effect the target knowingly accepts. It does not create a general period of vulnerability to unrelated Intrusions.
-
-If consent was obtained through a materially false description of the effect, use **Deceived Acceptance** instead.
+A genuinely beneficial Intrusion may also apply **without express consent** where the recipient is unable to decide and not actively resisting; this is the default for routine emergency healing of unconscious allies. It **does not** imply that unconscious creatures accept harmful magic or that a caster may describe a hostile effect as beneficial to avoid resistance.
 
 ## Natural d20 results
 
@@ -333,11 +329,12 @@ When attacker and defender have equal non-barrier modifiers, equal Veil Integrat
 | Effect / target state | Attacker success |
 |---|---:|
 | **Imposition** | **50%** |
-| **Intrusion: unwilling (+8 barrier)** | **10%** |
-| **Intrusion: deceived acceptance (+4 barrier)** | **30%** |
-| **Knowingly willing and resistance waived** | no resistance contest |
+| **Intrusion: harmful/unwilling or beneficial/consciously resisted (+8 barrier)** | **10%** |
+| **Intrusion: harmful effect genuinely accepted under deception (+4 barrier)** | **30%** |
+| **Genuinely beneficial and unopposed (including unconscious)** | **no resistance contest** |
+| **Knowingly accepts the actual effect; resistance waived** | **no resistance contest** |
 
-Against an unwilling Resonance-0 target, the attacker needs approximately **+8 total advantage** in the non-barrier parts of the contest merely to reach an even 50% success chance.
+Against a **resisting or harmful/unwilling** Resonance-0 target, the attacker needs approximately **+8 total advantage** in the non-barrier parts of the contest merely to reach an even 50% success chance.
 
 Level alone cannot provide that full gap: Veil Integration Bonus ranges only from +0 to +4.
 
