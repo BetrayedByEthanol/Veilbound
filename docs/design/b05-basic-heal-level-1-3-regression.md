@@ -45,16 +45,31 @@ Set target level 1, Vitality +1, **Low Focus** (natural throughput `1+3=4`), **H
 | Third normal Regeneration Step | −4 | 0 | 8/10 | Without Vigor, Dying loses 1 HP |
 | Fourth normal Regeneration Step | −5 | 0 | 8/10 | Continues Dying |
 
-A second spell or other support may still be necessary. A spell on **9/10 wound progress at HP 0** contributes +1 Repair Progress, then spends remaining +1 HP to bring HP to **+1** if no other block exists. With HP −3, the same event brings HP only to −2; the target stays Dying.
+A second spell or other support may still be necessary. **When this is the only recovery-blocking wound**, a cast at **9/10 progress and HP 0** contributes +1 Repair Progress, then uses its remaining +1 HP to reach **HP +1**. With HP −3 it reaches −2, still Dying. **With additional unfinished wounds, the spare HP-equivalent point is lost instead of overflowing into HP or another wound.**
 
 **No repair bypass:** an Irreparable active wound gets no ordinary direct Repair Progress and blocks use of Basic Heal HP to bypass the wound. Vigor restoration remains eligible unless an effect blocks external Vigor restoration.
+
+## Multi-wound and profile compatibility test
+
+| Test | Expected |
+|---|---|
+| Dying at HP 0, wound A 9/10, B 3/20; Primary selects A | A finishes; **B remains unfinished**, so unused 1 HP point is lost; target remains HP 0 and Dying |
+| Dying at HP −3, wounds A 9/10, B 19/20; select B | B finishes; **A still blocks**, so unused point lost; HP remains −3 |
+| Two wounds with no selection | **Oldest unfinished repairable wound** receives Basic Heal progress, no multi-wound spill |
+| Normal Dying Regen step with two unfinished wounds | After cancelling survival loss, spend throughput and Vigor on **oldest unfinished wound**, then next if completion leaves throughput; **HP only after all blocking wounds complete** |
+| Basic Heal `Self` Secondary with another spell's `Self` Primary | Exact match can make composite possible if effects compatible and Scholar feature permits; only caster targeted, pay both full VP costs |
+| Basic Heal `Single Target` chosen with `Self`-only Primary | **Invalid exact-profile mismatch**; choose Basic Heal's `Self` profile instead |
+| `Self` Rider contribution attempted without independent authorization | **Invalid**; shared profile is necessary but not sufficient for a free Rider trigger |
 
 ## Intrusion matrix and resisted cast check
 
 | Actual situation | Contest and expected outcome |
 |---|---|
 | Conscious beneficiary, does not resist | **No Direct Veil contest**; valid restorative effect succeeds |
-| Unconscious beneficiary / Dying ally | **No Direct Veil contest**; prior express consent not required for genuinely beneficial healing |
+| Unconscious beneficiary / Dying ally **without applicable prior refusal** | **No Direct Veil contest**; prior express consent is not required |
+| Ally expressly refused this healing type before becoming unconscious | Refusal **continues within its stated scope**; use **+8** Intrusion Barrier, despite unconsciousness |
+| Ally refused one earlier specific cast, now over | Refusal limited to that cast **expired**; normal unopposed beneficial healing does not roll |
+| Ally withdrew a broad refusal before becoming unconscious | No continuing refusal; genuine unopposed healing does not roll |
 | Conscious target expressly refuses genuine healing | **+8** barrier and shared Direct Veil contest |
 | Harmful Intrusion against unconscious target | **+8** barrier; unconsciousness never waives intrinsic harmful protection |
 | Harmful Intrusion falsely passed off as benign, accepted in actual deception | **+4** barrier, not complete waiver |
@@ -66,11 +81,11 @@ At equal non-barrier modifiers, equal integration, Resonance 0, the **+8** conte
 
 ## Acceptance checks and scope
 
-- [x] Same `Single Target` identifier for Primary/Secondary, no invented area or weapon profile.
-- [x] Dying HP component becomes +2/+1 direct repair; Rider contributes **0** repair without an independently authorized effect.
+- [x] Two exact supported identifiers `Single Target` and `Self` with the same authored values; self-only compositions match **`Self`**, never a merely similar recipient description; no invented area or weapon profile.
+- [x] Dying HP component becomes +2/+1 direct repair; Rider contributes **0** repair without an independently authorized effect. With multiple wounds, Basic Heal chooses an identified wound, defaults to oldest, and leftover HP cannot bypass **another unfinished blocking wound**.
 - [x] Only **once** do ordinary HP/Vigor caps and the target's chosen legal defenses apply.
 - [x] No additional Regeneration Step, advance VP recovery, cross-Archetype automatic knowledge, double-halving Secondary, or per-hit/per-action full Rider healing.
-- [x] New Intrusion protection does **not** allow harmful magic against an unaware/unconscious victim without +8, except expressly knowing waiver or the narrowly defined genuine deception case.
+- [x] New Intrusion protection does **not** allow harmful magic against an unaware/unconscious victim without +8, except expressly knowing waiver or the narrowly defined genuine deception case. **Prior express refusal survives unconsciousness for its stated scope**; no refusal is inferred from unawareness alone.
 - [x] Resisted cast uses **raw Veil Control in Pressure**, **nonnegative VC** only for numeric restoration scaling.
 - [x] Tier-2 VP efficiency and unusually strong level-1 Vigor replenishment remain **provisional balance watch**, not blocking ambiguity in the authored procedures.
 
