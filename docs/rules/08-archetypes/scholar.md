@@ -30,7 +30,7 @@ The final catalogue/repertoire calibration must preserve Scholar as the archetyp
 
 High Scholar begins with a comparatively broad learned repertoire. Exact techniques-known counts remain provisional.
 
-A High Scholar may use **Composite Casting** with one known Primary Technique and one compatible known Secondary Technique.
+A High Scholar may use **Composite Casting** with one known Primary Technique and one compatible known Secondary Technique. **The caster selects which known technique is Primary and which is Secondary**, and both must expose the **same exact authored profile identifier** for the chosen execution. Similar descriptions (e.g. `Thrown Projectile` versus `Ammunition Shot`) are not sufficient. Both must be otherwise compatible; a matching label does not waive an express ban such as a second Reserved Weapon enchantment.
 
 At levels 1–2, the exact Primary + Secondary pairing must be prepared as a **composite formula**.
 
@@ -66,7 +66,7 @@ Composite VP Cost =
 full Primary VP cost + full Secondary VP cost
 ```
 
-There is no default discount. Composite Casting provides **action compression**, not VP efficiency.
+There is no default discount. Composite Casting provides **action compression**, not VP efficiency. If both components expressly support the same integrated **`Ammunition Shot`** profile, the paid bow Physical Action/heavy-crossbow Full Action supplies the host action, the attachment adds **0 extra Projection AP**, and **both full technique VP costs** still apply; there is only **one** attack/projectile. Other mixed action categories require an express authored compatibility ruling; do not treat an integrated attachment as a free independent attack.
 
 Use the slower action requirement of the two components:
 

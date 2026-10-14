@@ -34,7 +34,7 @@ VP has three states:
 
 Releasing a sustained or committed effect has no action cost unless the effect explicitly says otherwise. Its Committed VP immediately returns to Available VP because it was never Spent.
 
-Under [Technique Structure v0](technique-structure-v0.md#6-reserved-weapon-baseline-and-channel-break), a caster-maintained **Reserved Weapon enchantment** ends immediately when its wielder is successfully Disarmed of that weapon; **all VP committed to that enchantment return to Available VP**. This is loss of a channel, not an additional VP expense. Previously Spent VP and action costs are not refunded, and an independent item-supplied Rider is not erased by this rule.
+Under [Technique Structure v0](technique-structure-v0.md#6-reserved-weapon-baseline-and-channel-break), a caster-maintained **Reserved Weapon enchantment** ends immediately when its wielder is successfully Disarmed of that weapon **or legally drops/hands away the weapon**; **all VP committed to that enchantment return to Available VP**. A voluntary drop uses ordinary own-turn zero-action timing, not an out-of-turn interrupt. This is loss of a channel, not an additional VP expense. Previously Spent VP and action costs are not refunded, and an independent item-supplied Rider is not erased by this rule.
 
 ## Zero-action timing
 

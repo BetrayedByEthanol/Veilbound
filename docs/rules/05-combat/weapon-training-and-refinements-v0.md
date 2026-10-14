@@ -17,7 +17,7 @@ A weapon uses one **Weapon Training family**, not a separate Training for every 
 | Bows | Bow |
 | Crossbows | Heavy crossbow |
 
-New weapon variants should be assigned to a family when authored; that assignment does not silently define Reach, dual-wield handling class, new firing modes or other weapon statistics. **Throwing** remains the separately defined narrow Learned Discipline where an existing rule calls for it. A weapon's ordinary melee Training does not automatically grant a bonus to throwing it or authorize a thrown profile; the exact Training mapping for future thrown-weapon profiles remains to be authored.
+New weapon variants should be assigned to a family when authored; that assignment does not silently define Reach, dual-wield handling class, new firing modes or other weapon statistics. **Throwing** remains the separately defined narrow Learned Discipline where an existing rule calls for it. [Conjure Flame v0 — Thrown Flame](../07-veil-magic/conjure-flame-v0.md#a-thrown-flame--thrown-projectile) explicitly uses the **Throwing Learned Discipline** with the universal thrown attack formula. This does **not** newly define an eligible thrown-knife profile, transfer **Small Blades** Training into throwing, or authorize Throwing as a global bonus to other magic. A weapon's ordinary melee Training does not automatically grant a bonus to throwing it or authorize a thrown profile; the exact Training mapping for future thrown-weapon profiles remains to be authored.
 
 ## Investment and effective ranks
 

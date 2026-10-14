@@ -124,6 +124,8 @@ This trigger has a specific stronger consequence: if the resulting Opportunity A
 
 That hit-to-Interrupt clause belongs to this trigger specifically. A generic Opportunity Attack does not automatically Interrupt its provoking action.
 
+**Magically enhanced shots:** The [Prepared and Spontaneous Ammunition v0](prepared-and-spontaneous-ammunition-v0.md) rules allow authored `Ammunition Shot` enhancements to ride on an otherwise legal ordinary arrow/bolt attack for **0 additional spell AP**; **the underlying attack's Physical Action or Full Action is still paid**, with VP charged as authored. Prepared projectiles are time limited and do not refresh on VP recovery. No additional ranged Attack or skipped Reload is granted.
+
 ## Heavy crossbow timing
 
 A retained [Aim v0](aim-v0.md#attacks-timing-and-interception) prepared on a previous turn may apply to a legal heavy-crossbow attack, but Aim never converts the shot or its reload out of their Full Action requirements. It does not bundle Aim and firing in one Full Action.
