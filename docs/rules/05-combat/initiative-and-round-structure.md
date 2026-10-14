@@ -271,7 +271,7 @@ A **Reaction** is a once-per-round timing resource that allows an effect or rule
 - a Reaction may respond to another Reaction, an Interception, an Opportunity Attack, or another interrupting effect if its own trigger is satisfied;
 - the Reaction resource itself does nothing without a rule/effect that defines a trigger and consequence.
 
-Guard and Dodge remain defensive responses and do **not** spend the Reaction. **[Protective Intervene v0](protective-intervene-v0.md)** separately authorizes **Reactive Intervene** as a spontaneous **one-Reaction** commitment to protect another creature against a declared attack; the underlying successful Shield Guard spends ordinary Guard capacity, while a deliberate Body Take Hit spends none. This does **not** make ordinary personal Guard/Dodge cost Reactions.
+Guard and Dodge remain defensive responses and do **not** spend the Reaction. **[Stone Skin v0](../07-veil-magic/stone-skin-v0.md#b-reactive-activation--no-ap-debt)** independently authorizes one **Reaction** to establish sustained self-only protection before a declared incoming attack roll or perceptible imminent damaging hazard; it charges **no Turn AP and no next-turn AP Debt**, but must satisfy its one-third-Max-VP Committed Reserve. The standing protection uses no additional Reactions. **[Protective Intervene v0](protective-intervene-v0.md)** separately authorizes **Reactive Intervene** as a spontaneous **one-Reaction** commitment to protect another creature against a declared attack; the underlying successful Shield Guard spends ordinary Guard capacity, while a deliberate Body Take Hit spends none. This does **not** make ordinary personal Guard/Dodge cost Reactions.
 
 ### Response windows and nested responses
 
