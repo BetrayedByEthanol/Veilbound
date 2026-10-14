@@ -174,6 +174,7 @@ At levels **1–2** use **T1**; at level **3** T2 is available. The limits below
 | Target is **10 squares east, 10 north and 10 above**, unobstructed | 3-axis diagonal cost **20**; within numeric 20-square range |
 | Object motion **4 squares horizontal and 4 vertical at once**, elevation ceiling satisfied | 3D grid cost **6**, using entire movement allowance; legal if swept route is clear |
 | Object motion **2 east, 2 north and 2 vertically at once**, elevation ceiling satisfied | 3-axis diagonal cost **4**, leaving 2 square-equivalents |
+| Object motion with offsets **3, 2, 1** in one straight segment, ceiling satisfied | 3D grid cost **4.5**; keep the half-square remainder, **do not round down** to 4 |
 | Object movement bends: **2 horizontal + 2 vertical simultaneously, then 2 more horizontal** | Sum segment costs **3 + 2 = 5**; budget legal if actual route and height are legal |
 | Object first moves 4 horizontal, **then** 4 vertical | 3D **segment sum 8**, exceeding movement budget even though direct net diagonal would cost 6; **illegal** |
 | Object only 8 squares away but **around an opaque corner**, visible only after following a bent corridor | **Illegal initial target:** no direct sight or straight magical line, regardless of shorter numeric direct distance or a traversable curved route |
