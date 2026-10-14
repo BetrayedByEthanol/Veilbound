@@ -86,7 +86,7 @@ Each point of regeneration throughput allocated to wound repair consumes **1 Vig
 
 When accumulated Repair Progress reaches the wound's Repair Requirement, that wound is repaired. A character may therefore naturally repair a large wound over multiple Vigor-recovery cycles even when the wound's total requirement exceeds Max Vigor.
 
-External healing, reconstruction, or medical rules may add Repair Progress, substitute another resource, accelerate recovery, or bypass part of this procedure when they explicitly say so.
+External healing, reconstruction, or medical rules may add Repair Progress, substitute another resource, accelerate recovery, or bypass part of this procedure when they explicitly say so. [Basic Heal v0](../07-veil-magic/basic-heal-v0.md#dying-recipient-convert-the-hp-component-to-repair-progress) is one such **narrowly authored exception**: while a target is Dying, its otherwise-small HP component directly adds **+2 Primary or +1 Secondary Repair Progress** toward the current active repairable wound without spending the patient's Vigor/throughput. Surplus HP points can restore actual HP **only after completing that wound and with no other blocking unfinished active wound**. This does **not** grant instant natural regeneration or repair Irreparable wounds.
 
 **Irreparable** wounds do not accumulate ordinary natural Repair Progress toward reconstruction; they require an explicit effect capable of reconstructing the lost structure. **Fatal** wounds use no repair track because death has already occurred.
 
@@ -137,6 +137,6 @@ Resolve this procedure during the character's Regeneration Step. If no Vigor is 
 6. once accumulated Repair Progress reaches the Wound Repair Requirement, the wound is repaired; remaining throughput in that regeneration step may then restore HP;
 7. once HP rises above 0, the character can regain consciousness unless another effect prevents it.
 
-Medicine can stabilize, stop bleeding, immobilize injuries, and otherwise suppress ongoing consequences without necessarily restoring HP or completing supernatural tissue reconstruction.
+Medicine can stabilize, stop bleeding, immobilize injuries, and otherwise suppress ongoing consequences without necessarily restoring HP or completing supernatural tissue reconstruction. **Successful [Basic Heal v0](../07-veil-magic/basic-heal-v0.md) on an unconscious, genuinely beneficially treated Dying target does not require an Intrusion contest merely because the target cannot give active consent**. It supplies independent Vigor and small direct Repair Progress but does not alter the ordering of subsequent natural Dying regeneration steps.
 
 See [Initiative and Round/Turn Procedure](../05-combat/initiative-and-round-structure.md) for the exact turn timing.
