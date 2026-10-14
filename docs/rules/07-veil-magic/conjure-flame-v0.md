@@ -107,7 +107,7 @@ For **VC +0**, the following refer to **Primary Vigor damage on a successful hit
 | Level | Normal max Used Tier | Thrown `2+ceil(d8×T/3)` range / mean | Reserved `1+ceil(d6×T/4)` range / mean | Ammunition `1+ceil(d4×T/5)` range / mean |
 |---:|---:|---:|---:|---:|
 | **1–2** | **1** | **3–5 / 3.875** | **2–3 / 2.333** | **2 / 2.000** |
-| **3** | **2** | **3–8 / 5.375** | **2–4 / 2.833** | **2–3 / 2.250** |
+| **3** | **2** | **3–8 / 5.375** | **2–4 / 3.000** | **2–3 / 2.500** |
 
 **Caution:** Low Focus at Level 1 with Veil Affinity +0 has Max VP 2, so can afford a Tier-1 **Thrown Flame** but cannot establish the Tier-1 **4 Committed VP** Reserved Weapon enchantment. This is a VP-capacity consequence, not a new Focus prohibition. Do not treat all profiles as affordable to all characters at every level.
 
