@@ -230,7 +230,7 @@ A magical enchantment, Embodiment, Signature, rider, or other effect attached to
 
 Magic does not replace the normal melee attack roll merely because the weapon or rider is supernatural.
 
-See [Technique Structure v0](technique-structure-v0.md#6-reserved-weapon-baseline-and-channel-break) for caster-maintained Reserved Weapon effects (one Primary enchantment per selected weapon, no inherent hit limit, Disarm breaking the channel and returning Committed VP), and for **independent magical-item Rider contributions** which need not be funded by the wielder's VP. Fire-type HP damage and a separate Vigor-burning property are independent packets; Fire resistance does not automatically negate the Vigor damage. Technique-specific resistance and timing rules still apply.
+See [Technique Structure v0](technique-structure-v0.md#6-reserved-weapon-baseline-and-channel-break) for caster-maintained Reserved Weapon effects (one Primary enchantment per selected weapon, no inherent hit limit, Disarm breaking the channel and returning Committed VP), and for **independent magical-item Rider contributions** which need not be funded by the wielder's VP. Fire-type HP damage and a separate Vigor-burning property are independent packets; Fire resistance does not automatically negate the Vigor damage. For explicit elemental HP packets, use [Elemental HP Damage and Resistance v0](elemental-damage-resistance-v0.md), not a second subtraction of ordinary physical Armor. For the first executable technique, see [Conjure Flame v0](conjure-flame-v0.md). Technique-specific resistance and timing rules still apply.
 
 ## Classification examples
 
