@@ -284,8 +284,8 @@ The barrier protects against **harmful intrusion and deliberately resisted intru
 
 | Actual interaction with target | Intrusion Barrier | Resolution |
 |---|---:|---|
-| **Genuinely beneficial and not consciously resisted**, including an unconscious recipient | **None; no resistance contest** | Apply the legal effect normally, subject to specific protection and target limits |
-| **Beneficial but consciously resisted** | **+8** | Direct Veil Pressure must exceed **Direct Veil Resistance + 8** |
+| **Genuinely beneficial and not consciously resisted**, including an unconscious recipient **with no applicable prior refusal** | **None; no resistance contest** | Apply the legal effect normally, subject to specific protection and target limits |
+| **Beneficial but consciously resisted, or covered by a still-effective prior express refusal** | **+8** | Direct Veil Pressure must exceed **Direct Veil Resistance + 8** |
 | **Harmful/hostile and unwilling, unaware, asleep or unconscious** | **+8** | Direct Veil Pressure must exceed **Direct Veil Resistance + 8**; lack of awareness is not consent |
 | **Harmful effect deceptively presented as benign and genuinely accepted** | **+4** | Direct Veil Pressure must exceed **Direct Veil Resistance + 4**; this is not a complete waiver |
 | **Actual specific effect knowingly accepted**, including knowingly accepted harmful risks | **Waived; no resistance contest** | Only that **understood** effect is accepted; subsequent/hidden different effects are not covered |
@@ -296,7 +296,9 @@ The barrier protects against **harmful intrusion and deliberately resisted intru
 
 An actual harmful or hostile internal effect receives the **full +8 barrier** when not knowingly accepted. This protection remains in place even if the recipient is **surprised, distracted, restrained, unaware, asleep, unconscious or otherwise unable to make a conscious choice**. These conditions are not informed consent and cannot be used to force harmful Intrusion through defenselessly.
 
-A conscious creature may **deliberately resist a genuinely beneficial Intrusion**. For such a refusal, apply the full **+8** barrier and the shared Direct Veil contest. A character who merely **does not know** that a genuinely beneficial effect is occurring is **not** thereby actively resisting it; absent actual harm, an expressed refusal or an applicable protective restriction, beneficial restorative magic does not require a check. An unconscious recipient does **not** need to have granted prior consent to routine genuinely beneficial restoration.
+A conscious creature may **deliberately resist a genuinely beneficial Intrusion**. For such a refusal, apply the full **+8** barrier and the shared Direct Veil contest. **A prior express refusal remains an effective conscious decision while the creature is unconscious, asleep or otherwise unable to repeat it**. Its scope must be respected: a refusal limited to **one specified casting/attempt** ends when that attempt ends; a refusal naming a **type of effect, healer, treatment, or period** covers only what was actually refused and lasts until its stated condition expires or the recipient **consciously withdraws or replaces** it. An express refusal with no stated end lasts until expressly withdrawn; mere unconsciousness is **not** withdrawal. For any later cast within that refusal's still-effective scope, use **+8 Intrusion Barrier**, even while unconscious. **No new refusal** is inferred from lack of awareness, an inability to communicate, or a recipient who was simply never asked.
+
+An unopposed genuinely beneficial effect on a recipient who **has not refused that effect** requires **no contest**, including when the recipient is unconscious. A creature that merely **does not know** beneficial magic is occurring is **not** thereby resisting it. This default does **not** override an existing refusal or an applicable authored ward/protection.
 
 An authored **ward, suppression, specific immunity or other protective restriction** can still block healing or require its own resolution; the absence of a resistance contest does **not** waive these separate protections. If the effect mixes helpful and harmful elements or substantially changes the target in a harmful way, it is **not** eligible for the unopposed-benefit shortcut merely because part of it restores HP.
 
@@ -310,7 +312,7 @@ Telling a recipient that an effect is **harmful**, causing the recipient to refu
 
 A conscious target can knowingly waive resistance to a **specific accurately understood** Intrusion, including an effect with meaningful risks. No contest is required for the actual understood effect. Consent does **not** open a persistent general vulnerability or waive resistance for a later change of target, purpose or concealed hostile component.
 
-A genuinely beneficial Intrusion may also apply **without express consent** where the recipient is unable to decide and not actively resisting; this is the default for routine emergency healing of unconscious allies. It **does not** imply that unconscious creatures accept harmful magic or that a caster may describe a hostile effect as beneficial to avoid resistance.
+A genuinely beneficial Intrusion may also apply **without prior express consent** where the recipient is unable to decide and **has no still-effective expressed refusal** covering the particular effect; this is the default for routine emergency healing of unconscious allies. It **does not** imply that unconscious creatures accept harmful magic or that a caster may describe a hostile effect as beneficial to avoid resistance.
 
 ## Natural d20 results
 
@@ -331,7 +333,8 @@ When attacker and defender have equal non-barrier modifiers, equal Veil Integrat
 | **Imposition** | **50%** |
 | **Intrusion: harmful/unwilling or beneficial/consciously resisted (+8 barrier)** | **10%** |
 | **Intrusion: harmful effect genuinely accepted under deception (+4 barrier)** | **30%** |
-| **Genuinely beneficial and unopposed (including unconscious)** | **no resistance contest** |
+| **Genuinely beneficial and unopposed (including unconscious, with no active prior refusal)** | **no resistance contest** |
+| **Genuinely beneficial but covered by a still-effective prior express refusal (including unconscious)** | **+8 Intrusion Barrier contest** |
 | **Knowingly accepts the actual effect; resistance waived** | **no resistance contest** |
 
 Against a **resisting or harmful/unwilling** Resonance-0 target, the attacker needs approximately **+8 total advantage** in the non-barrier parts of the contest merely to reach an even 50% success chance.
