@@ -2,7 +2,7 @@
 
 > **Executable level 1–3 B05 technique; cost and DCs are locked as provisional v0 playtest values.** This touch-only **escape / exploration** technique weakens **one mundane physical restraint** rather than granting automatic escape. The canonical **Liberty / Defiance** Aspect is **Transform**; that metaphysical class does not itself select the technique's **direct Imposition** delivery. **Actual technique access still follows each Archetype.** The verified Strong Gifted configuration links **Disgust → Liberty / Defiance**, but that example does not grant every Gifted this particular link.
 
-See [Aspect identities](../../world/aspect-identities-and-boundaries.md), [Technique Structure](technique-structure-v0.md), [Direct Veil Imposition](resonance-and-intrusion.md#imposition), [Core Resolution](../01-core-resolution/core-resolution.md), [Full Actions](../05-combat/action-categories-and-physical-tempo.md#full-action), [Initiative and Round](../05-combat/initiative-and-round-structure.md), and [Volition Points](volition-points.md).
+See [Aspect identities](../../world/aspect-identities-and-boundaries.md), [Technique Structure](technique-structure-v0.md), [Direct Veil Imposition](resonance-and-intrusion.md#imposition), [Core Resolution](../01-core-resolution/core-resolution.md), [Full Actions](../05-combat/action-categories-and-physical-tempo.md#full-action), [Physical Action AP costs](../05-combat/action-categories-and-physical-tempo.md#focus-action-costs), [Initiative and Round](../05-combat/initiative-and-round-structure.md), and [Volition Points](volition-points.md).
 
 ## Identity and profile
 
@@ -20,7 +20,7 @@ See [Aspect identities](../../world/aspect-identities-and-boundaries.md), [Techn
 | Activation | **One Full Action on the caster's own turn**, requiring and consuming the entire Turn AP allotment; **not** a Reaction, free Interception or attack |
 | VP cost | **Base 2 Spent VP**; at declaration compute and **lock the effective ordinary Spent VP cost** after any expressly eligible discount (e.g. **TAL-M03 — Frugal Technique** reduces it to **1 VP** on a qualifying own-turn cast). Pay that locked cost at valid application; no Committed VP |
 | Duration | **1 minute (60 seconds) outside initiative**; in structured combat, **expires at Round Begin of the tenth subsequent round** after successful casting (casting round = R; expire at Round Begin R+10). **Technique-specific combat anchor only**, not a universal round-length conversion; no upkeep |
-| Primary | Lowers the **DC of an otherwise legal physical Strength check to break the restraint**, using the material table and formula below |
+| Primary | Lowers the **DC of an otherwise legal physical Strength check to break the restraint**, using the material table and formula below; **an actual break attempt costs one separate Physical Action in combat** |
 | Contributions | **Primary only**; no Secondary, Rider contribution, or standalone High Scholar composite authorization |
 | Damage / other effects | **None**; no HP/Vigor damage, free escape, unlocking, Disarm, release, extra action, object destruction or involuntary movement |
 
@@ -77,14 +77,32 @@ Examples assuming the original break DC and a viable Strength attempt:
 | Heavy metal chain | 18 | −3 | **15** — no worse than 18 |
 | Metal shackles | 18 | +12 | **0** — trivial only if physically breakable |
 
-This spell does not itself roll Strength. **A later break attempt** is an ordinary legal physical action/check using:
+## Physical break attempt — action and resolution
+
+**Weaken Restraints does not itself break, untie, unlock or remove anything.** An actual break attempt is a **separate physical action** taken by the caster, the bound creature, or an eligible helper physically able to exert the necessary force on the selected binding. **No free hand is needed to cast the technique**, but that does **not** waive the leverage, limb, contact, reach or other physical feasibility required to break the restraint.
+
+**During initiative:** A legal attempt to break **one** physically reachable restraint costs **one Physical Action**, using the attempting creature's normal Focus rate from [Turn AP and Tempo](../05-combat/action-categories-and-physical-tempo.md#focus-action-costs):
+
+| Breaker's Focus | One Physical Action |
+|---|---:|
+| **High** | **30 Turn AP** |
+| **Medium** | **24 Turn AP** |
+| **Low** | **20 Turn AP** |
+
+Declare the specific restraint and physical method; verify the creature can actually perform it and has sufficient remaining Turn AP; spend **one Physical Action**; resolve **one** applicable Strength check using the restraint's **currently effective** break DC. **A failed attempt still consumes the action**, provides **no partial DC reduction or accumulating damage**, and does not automatically create a free retry. If a later attempt remains physically feasible and the character has enough Turn AP, they may pay **another Physical Action** for another check before the temporary weakening expires. Success **physically breaks the selected restraint**, removing only the constraint that that physical break genuinely releases. Other separate restraints, an independently maintained Grapple/Pin, magical effects and conditions do not end automatically. This rule does **not** grant an out-of-turn Reaction, Interception or Opportunity response to break restraints.
+
+**A break attempt against an eligible mundane restraint has this same one-Physical-Action cost whether or not Weaken Restraints is currently active**; the magic alters the **break DC**, not the action economy. The character may attempt a physically feasible, unweakened break without casting magic first. This is a **specific physical-restraint break procedure**, not a universal AP cost for destroying arbitrary objects, attacking structures, opening locks or escaping an actively maintained Grappling State by its separately authored [Grapple Escape](../05-combat/universal-maneuvers.md#escape) contest. Attempting a physical break also does not automatically require the restrained creature to be the spellcaster.
+
+**Check resolution:**
 
 ```text
 d20 + Strength + actually applicable Training/situational modifiers
-  ≥ Adjusted Break DC
+  ≥ Current Break DC
 ```
 
-Use the ordinary action or time needed by the physical break attempt; **the Full Action used to cast is not also a free break attempt**. If the physical break is impossible from the creature's current position, a lowered DC does not magically give them the required leverage or ability to attempt it. Under pressure use an active roll; outside pressure, apply ordinary safe-time/Take 10/Take 20 and no-roll rules when their prerequisites actually hold.
+A successful equal-or-higher result breaks the physical restraint. If the weakened effect has ended before this attempt resolves, use the **ordinary unweakened** break DC; do not preserve a benefit from an expired effect. When the physical break is trivial and unquestionably feasible, [Core Resolution](../01-core-resolution/core-resolution.md#when-to-roll) may remove the **roll**, but not the **Physical Action/AP cost** in initiative. If a break is physically impossible from that position, lowering the DC does not grant leverage or an attempt.
+
+**Outside initiative:** The GM determines the fictional elapsed time for a physically feasible break attempt using Core Resolution's routine, pressure and safe-time procedures (including Take 10/Take 20 where independently eligible). **No fixed combat AP is paid outside initiative**, and the Full Action that initially activated the technique is never also a free break attempt. Account for that elapsed time against the one-minute weakening timer. This procedure does not authorize infinite zero-time retries or guarantee that breaking a mechanically impossible restraint becomes possible solely because its DC is low.
 
 ## Timing, duration, and application
 
@@ -109,7 +127,7 @@ Use the ordinary action or time needed by the physical break attempt; **the Full
 
 | Test | Required result |
 |---|---|
-| High, Medium or Low Focus caster | **Full Action**, all currently available Turn AP; **2 Spent VP**; no per-Focus Projection Action substitute |
+| High, Medium or Low Focus caster | **Full Action**, all currently available Turn AP; **base 2 Spent VP**; no per-Focus Projection Action substitute |
 | Level 1 with Veil Affinity +0 | Max VP High **6**, Medium **4**, Low **2**; **all can pay 2 VP** from full Available pool |
 | Character has hands tied behind back and wrists contact mundane cuffs | Valid **without a free hand** if conscious and otherwise capable of a legal Full Action |
 | Character immobilized so cannot take actions | **Not a valid cast**, even if touching the restraint |
@@ -123,6 +141,16 @@ Use the ordinary action or time needed by the physical break attempt; **the Full
 | Two unwilling creatures holding same restraint | **One** highest Direct Veil Resistance contest; no per-holder magical rolls |
 | Unattended mundane restraint | **No Direct Veil Resistance** by default |
 | Magic succeeds on tied/worn restraint | Temporary **break DC** reduction; no free untying, automatic break or additional escape check |
+| High/Medium/Low breaker attempts one physically legal break **during initiative** | Pay **one Physical Action**: High **30 AP**, Medium **24 AP**, Low **20 AP**, then **one** Strength check versus current break DC |
+| Caster completes Weaken Restraints as Full Action on own turn | **No remaining Turn AP** for a break attempt that same turn; breaking later requires its **own paid Physical Action** |
+| Another creature breaks a restraint weakened by the caster | **Breaker** pays their own one Physical Action, using **their** Focus/AP and Strength; **no extra spell VP** |
+| Unweakened mundane restraint, ordinary physical break is feasible | Same **one Physical Action** without casting; original DC applies |
+| First break roll fails, breaker has enough AP for a second attempt | First action is **spent** and did not progress DC; may spend **another Physical Action** for another check |
+| A weakened binding is trivially easy to break physically | **No roll** only when Core Resolution allows; **still pay one Physical Action** under initiative |
+| Weaken Restraints expires between declaration and resolution of break | Check uses the **currently effective, unweakened DC** at break resolution; spent Physical Action not refunded |
+| Creature is still pinned by another creature after shackles break | Shackles' physical restriction ends; **Grapple/Pin remains** under its own rules |
+| Creature lacks a physically feasible breaking method | **No legal Physical Action break declaration**; low DC does not supply missing leverage |
+| Outside initiative, a feasible break can be attempted | **GM determines elapsed time**, normal safe-time Core Resolution applies; no combat AP or zero-time unlimited checks |
 | Heavy metal original DC18, VC+2 | Adjusted DC **10** |
 | Rope original DC14, VC+2 | Adjusted DC **8** |
 | Web original DC12, VC+2 | Adjusted DC **6** |
@@ -157,4 +185,4 @@ Use the ordinary action or time needed by the physical break attempt; **the Full
 
 ## Design status
 
-**v0 design locked:** Liberty / Defiance Tier-1 **`Touched Object` Primary**; touch **without free hand**, nonmagical restraint only, **Full Action**, **base 2 Spent VP** (lock an eligible discount at declaration, verify affordability again at application, spend exactly locked cost), **one-minute temporary reduction** (60 seconds outside initiative; expire at **Round Begin R+10** for a combat cast) using material **12/10/8 − signed VC** with **`min(original DC, …)`** so it cannot worsen breakability; attended-object Imposition resistance using Strength + Vitality and highest applicable non-waived defense; actual physical breaking remains separate. **No Secondary/Rider and no Tier multiplier**. Numbers, one-minute throughput and suitability for Low-Focus escape play are **provisional pending playtest**. B05's full eight-Pillar repertoire remains incomplete.
+**v0 design locked:** Liberty / Defiance Tier-1 **`Touched Object` Primary**; touch **without free hand**, nonmagical restraint only, **Full Action**, **base 2 Spent VP** (lock an eligible discount at declaration, verify affordability again at application, spend exactly locked cost), **one-minute temporary reduction** (60 seconds outside initiative; expire at **Round Begin R+10** for a combat cast) using material **12/10/8 − signed VC** with **`min(original DC, …)`** so it cannot worsen breakability; attended-object Imposition resistance using Strength + Vitality and highest applicable non-waived defense; actual physical breaking **in initiative costs a separate Physical Action (High 30 / Medium 24 / Low 20 AP) and one Strength check**, while **out-of-initiative elapsed time is GM-adjudicated**. **No Secondary/Rider and no Tier multiplier**. Numbers, one-minute throughput and suitability for Low-Focus escape play are **provisional pending playtest**. B05's full eight-Pillar repertoire remains incomplete.
