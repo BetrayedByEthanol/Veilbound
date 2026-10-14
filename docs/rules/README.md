@@ -67,6 +67,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Conjure Flame v0 — Fire / Conflagration](07-veil-magic/conjure-flame-v0.md)
 - [Basic Heal v0 — Life / Restoration](07-veil-magic/basic-heal-v0.md)
 - [Minor Telekinesis v0 — Mind / Psionics](07-veil-magic/minor-telekinesis-v0.md)
+- [Stone Skin v0 — Earth / Fortification](07-veil-magic/stone-skin-v0.md)
 - [Universal Veil Fundamentals — automatic level-based acquisition (Inspection 1, Blink 3)](07-veil-magic/universal-veil-fundamentals.md)
 - [Veil Inspection v0 — held-item examination](07-veil-magic/veil-inspection-v0.md)
 - [Veil Translocation — Blink and spherical portals](07-veil-magic/veil-translocation-foundation.md)
