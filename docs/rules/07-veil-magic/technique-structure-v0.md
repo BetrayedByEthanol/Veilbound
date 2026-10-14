@@ -189,6 +189,8 @@ The **Rider contribution** does not itself authorize a gem or other independent 
 | Minor Telekinesis on held object | Normal attended-object **Imposition contest first**, then already holding creature's **free Strength check** vs **6+VC**; no Reaction for that grip |
 | Minor Telekinesis moving crate against pre-existing bodily blocker | **Free Strength check**, success stops crate; failure shifts blocker one legal adjacent square, otherwise Prone (crate stops if still physically blocked); no automatic impact HP damage |
 | Minor Telekinesis active grab of passing object | **Reaction + Strength check** vs **6+VC**, only when physically reachable; no new magical resistance contest |
+| Minor Telekinesis with insufficient Available VP at declaration | Standalone **2×T effective cost**, or **aggregate full component costs** for a legal composite, must be Available before any action AP or response window; an underfunded attempt **cannot be declared** |
+| Minor Telekinesis loses Available VP between declaration and resolution | **Recheck the locked effective total before magical application**: if now short, the action capacity is lost, **no VP spent and no Imposition/Force check/object displacement**; a funded resisted or physically stopped cast **still spends VP** |
 | Minor Telekinesis Composite Secondary | Requires exact shared **`Single Object`** key and compatible host; authored Secondary size/mass applies once, not second movement/target or an unapproved Rider |
 
 ## Status and next content work
