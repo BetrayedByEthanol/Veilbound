@@ -13,11 +13,11 @@
 | Components | **Hands or Held**: a functioning available hand for a free-thrown manifestation, or the held weapon/launcher carrying a weapon/ammunition effect; requires the ability to perform the chosen action. No free-hand requirement on top of an otherwise legal two-handed bow shot. |
 | Interaction | Thrown flame = independently manifested physical projectile; weapon/ammunition = ordinary weapon/carrier with magical on-hit packets |
 | Damage | Separately authored **Fire HP** and **Vigor burn** packets; Fire Resistance affects only Fire HP by default |
-| Veil Control v0 | **V = max(0, Veil Control)** in each authored formula; **custom output coefficient**, **not** Standard VC × Character Level. Applied **once on each eligible hit**. |
+| Veil Control v0 | **VC = max(0, Veil Control)** in each authored formula; **custom output coefficient**, **not** Standard VC × Character Level. Applied **once on each eligible hit**, with ammunition snapshots as defined below. |
 | Durations | Thrown: immediate; Reserved Weapon: while channel valid; Ammunition Shot: one fired projectile |
 | Extra status | **No automatic Ignite, Burning, area damage, flame spread, damage over time, lighting radius, or free attack** |
 
-**Damage expression key:** For all profiles below, `F n` means **n Fire-type HP damage** and `V <expression>` means a **separate Vigor-damage packet**. Roll the shown die afresh **per actual eligible hit**; `ceil(dN × T / X)` rounds that single rolled-die fraction upward. `VC` below denotes **max(0, character's Veil Control)**, including when the score is negative. Each packet is nonnegative. **Do not multiply this VC term by level or add the full standard VC packet again.** A future balance pass may author **VC per X character levels**, independently by **profile × contribution**, but no such multiplier applies in this v0.
+**Damage expression key:** For all profiles below, `F n` means **n Fire-type HP damage** and `V <expression>` means a **separate Vigor-damage packet**. Roll the shown die afresh **per actual eligible hit**; `ceil(dN × T / X)` rounds that single rolled-die fraction upward. `VC` is always **max(0, the applicable caster's Veil Control)**: **Thrown Flame** uses the caster at activation; **Reserved Weapon** uses the channel-maintaining caster at each eligible hit; **spontaneous Ammunition Shot** uses the caster/shooter at launch; **prepared Ammunition Shot** uses the **preparer's VC captured at successful preparation completion**, independently of the eventual shooter. Each packet is nonnegative. **Do not multiply this VC term by level or add the full standard VC packet again.** A future balance pass may author **VC per X character levels**, independently by **profile × contribution**, but no such multiplier applies in this v0.
 
 ## Profile identifiers and contribution values
 
@@ -46,11 +46,14 @@
 |---|---|
 | Primary activation | **One Projection Action**: High **20 AP**, Medium **24 AP**, Low **30 AP** |
 | VP | **2 × T Spent VP** per throw |
-| Range / target | **3 squares (4.5 m)**; one unobstructed, legal physical projectile path to one target, subject to cover/defenses |
+| Range / target | **1–3 squares (up to 4.5 m)**; one legal physical projectile path to one target, subject to cover/defenses |
+| Range Difficulty | **+0 at 1, 2, or 3 squares** in both static Ranged Defense and active ranged Dodge; a target beyond 3 squares is **out of range**, not a longer-range shot |
 | Attack | **d20 + Agility + Precision + Throwing Learned Discipline + applicable shot modifiers** |
 | Defense | Normal manifested-projectile **ranged** defense (static defense, Dodge, eligible projectile Guard and cover); **not** a Direct Veil Resistance attack |
 | Damage on qualifying hit | Primary `F 2; V 2 + ceil(d8×T/3) + VC`; use other authored contribution only when legal |
 | Miss/blocked delivery | No hit-triggered Fire HP or Vigor damage |
+
+**Range resolution:** Thrown Flame has its **own explicit +0 Range Difficulty at every legal distance (1–3 squares)**. Do **not** import the **−2 Close** band from the separate bow/crossbow range table. Add applicable cover, position, Dodge Pressure and other normal shot/defense modifiers independently. A target beyond three squares is illegal regardless of bow/crossbow range bands.
 
 **Throwing** is the existing **Learned Discipline**, specifically authorized as applicable here, using the same two-Ability thrown procedure as an otherwise legal thrown knife. **Small Blades Weapon Training, Veil Practice and Veil Control never add to this attack roll** unless a different explicit rule says so. The attack roll is part of the paid spell activation, **not another Physical Action**. No Strength bonus is added to these technique-authored damage packets.
 
@@ -77,16 +80,16 @@ The magical packet applies on **every qualifying successful hit** by **the selec
 **Integrated spontaneous casting:** When the caster makes an otherwise legal **bow or crossbow shot using one physical arrow or bolt**, the caster may choose Conjure Flame's Primary Ammunition Shot as a **0-additional-AP attachment** to that shot.
 
 - Pay the normal **Physical Action** for a bow shot or **Full Action** for the heavy crossbow shot and obey ordinary range, Accuracy/Training, Aim, cover, Opportunity, Attack Sequence and reload restrictions.
-- Declare Conjure Flame, Used Tier, the actual physical projectile and VP cost **before the Attack Sequence's first roll**. Ensure sufficient Available VP for all declared magical shots; **spend 2 × T VP when that projectile launches**, before its roll. A launched miss still costs VP; **pre-launch interruption costs the committed attack AP but not unspent spell VP**, per [ammunition timing](../05-combat/prepared-and-spontaneous-ammunition-v0.md#integrated-on-shot-activation-0-additional-ap).
+- Declare Conjure Flame, Used Tier, the actual physical projectile and VP cost **before the Attack Sequence's first roll**. Ensure sufficient Available VP for all declared magical shots; **spend 2 × T VP when that projectile launches**, before its roll. **Lock the spontaneous effect's VC to the caster/shooter's max(0, VC) at launch**, not a later attack/impact value. A launched miss still costs VP; **pre-launch interruption costs the committed attack AP but not unspent spell VP**, per [ammunition timing](../05-combat/prepared-and-spontaneous-ammunition-v0.md#integrated-on-shot-activation-0-additional-ap).
 - On a successful hit, add **`F 1; V 1 + ceil(d4×T/5) + VC`** (Primary) as separate on-hit packets **alongside the normal arrow/bolt physical damage**. Physical Armor/Penetration applies to the native shot; Fire Resistance applies to the Fire HP packet, and Vigor burn is separate.
 - This is **one shot** and one ordinary Attack; it creates **no second spell attack, second ammunition item, bonus shot or independent Fire critical damage dice**. Strong/Critical extra HP dice apply once to the arrow/bolt's normal primary physical HP packet.
 
 **Prepared physical ammunition:** [Prepared Ammunition v0](../05-combat/prepared-and-spontaneous-ammunition-v0.md#prepared-physical-ammunition--provisional-playtest-procedure) also authorizes the same **Primary** effect to be applied in advance:
 
 - **10 uninterrupted minutes** for a batch of **1–20 physical arrows/bolts**; commit to one Used Tier T for that batch.
-- Spend **1 × T VP per projectile** at successful completion (a **50% VP discount** relative to spontaneous Primary, not a Secondary power downgrade). Tier/output are fixed then.
+- Spend **1 × T VP per projectile** at successful completion (a **50% VP discount** relative to spontaneous Primary, not a Secondary power downgrade). At **successful preparation completion**, record **the preparer's max(0, Veil Control)** as **stored VC** on every arrow/bolt of that batch along with its **Used Tier T**. This numeric VC snapshot and Tier are fixed for the life of each enchantment, **even if the preparer later improves/loses VC or the ammunition changes hands**. **Only the damage die is rolled on a future eligible hit**; no damage dice are rolled at preparation.
 - Enchantment expires **24 hours after completion** or on firing, whichever comes first. VP recovery after preparation does **not** erase it or refund its cost. Prepared projectiles can be carried by another user; their paid-for effect does not require a reservation.
-- When fired, **no additional spell AP or VP** is charged for the prepaid effect, but the ordinary bow/crossbow shot still costs its native action and one physical ammunition item. A miss consumes the attached effect.
+- When fired, **no additional spell AP or VP** is charged for the prepaid effect, but the ordinary bow/crossbow shot still costs its native action and one physical ammunition item. **Attack/accuracy use the actual shooter's stats; the stored spell effect uses the recorded preparer's VC, never the shooter's VC**. Do not recalculate the stored VC at firing or impact. A miss consumes the attached effect.
 
 **One major enchantment per physical projectile.** A prepared Conjure Flame arrow cannot receive another major spontaneous/prepared enchantment under v0. More elaborate stacking is deferred. **Veil Arrow** (historical Ethereal Arrow) is a future Universal candidate, **not an automatically granted, executable ammunition source** in this PR.
 
@@ -116,12 +119,16 @@ For **VC +0**, the following refer to **Primary Vigor damage on a successful hit
 | Case | Expected |
 |---|---|
 | A level-1 Throwing +2 user throws flame | `d20+Agility+Precision+2`; **no Small Blades**, Veil Practice or VC attack bonus; 1 Focus-priced Projection Action and **2 Spent VP** |
+| Thrown Flame targets at 1, 2, or 3 squares | **Range Difficulty = +0** for static Defense and active Dodge; never apply the bow/crossbow Close −2 band; 4+ squares is out of range |
 | A flame projectile hits Fire-Resistant target | Fire HP minus explicit Fire Resistance; Vigor packet applies independently |
 | A selected Reserved sword hits three times | The defined on-hit fire/Vigor packets apply **three** times, with no per-hit VP or magic AP |
 | The wielder legally drops the reserved sword | The channel ends and its **4×T Committed VP** becomes Available; no free reaction timing |
 | Spontaneous bow shot with Conjure Flame | One normal paid ranged attack; **2×T VP spent on launch** even on miss; 0 extra Projection AP |
 | Heavy crossbow shot with Conjure Flame | **Full Action** still required; enchantment never waives its reload Full Action |
 | Physical arrow prepared for Tier 2 | 10-minute preparation; **2 Spent VP** per arrow; effect expires in 24 hours; hit uses Tier 2 values |
+| VC +3 caster prepares Tier-1 arrow; VC +0 archer fires it | On a successful hit, **Primary Ammunition Vigor = 1 + ceil(d4×1/5) + 3 = 5**, not 2; archer's normal accuracy still applies |
+| VC +0 caster prepares Tier-1 arrow; VC +4 archer fires it | On a successful hit, **Primary Ammunition Vigor = 2**, not 6; the shooter does not improve the prepared effect |
+| Preparer's VC changes after preparing an arrow | The arrow keeps its **recorded VC**; its damage die is still rolled on the eventual qualifying hit |
 | Scholar combines two matching `Thrown Projectile` techniques | Chooses Primary/Secondary; full VP for both; one slower composite action; selected Secondary value once |
 | Scholar combines `Thrown Projectile` and `Ammunition Shot` | **Invalid** — exact profile mismatch |
 | Scholar combines two `Ammunition Shot` techniques | One paid physical shot if the combined rules support it; full VP for **each** component; no bonus shot or second roll |
