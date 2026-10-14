@@ -47,7 +47,7 @@ Primary and Secondary are **different authored effect strengths**, not a VP disc
    - **Direct Veil Pressure = `d20 + raw Veil Control + Intellect + Veil Integration Bonus + explicit modifiers`.** Target base resistance = **`10 + Vitality + Awareness + target Veil Integration Bonus + Resonance + explicit modifiers`**, then add the applicable barrier. **Tie resists.** A natural 20 does not auto-succeed.
 4. On **successful, permitted** application, roll the authored Vigor restoration and allocate the HP component using the Dying rule below. Apply relevant caps. The Vigor component restores reserve **directly**; it does not purchase extra HP/regeneration/Repair Progress at the moment of casting.
 
-A conscious creature may decline a supposedly helpful effect and resist it. A still-effective express refusal remains operative through unconsciousness for its stated scope and uses the **+8** barrier; a refusal limited to an earlier completed cast does not persist. A corpse is not a legal recipient. A **genuinely beneficial and unopposed** spell does not require prior signed/express consent when its recipient is unconscious. A specific ward, curse, applicable healing immunity or external-healing block still operates independently of whether an Intrusion contest was waived. A caster's claim that an objectively hostile modification is beneficial does not bypass the barrier.
+A conscious creature may decline a supposedly helpful effect and resist it. A still-effective express refusal remains operative through unconsciousness for its stated scope and uses the **+8** barrier; a refusal limited to an earlier completed cast does not persist. A corpse is not a legal recipient. A **genuinely beneficial and unopposed** spell does not require prior signed/express consent when its recipient is unconscious **provided no still-effective refusal covers that healing**. A specific ward, curse, applicable healing immunity or external-healing block still operates independently of whether an Intrusion contest was waived. A caster's claim that an objectively hostile modification is beneficial does not bypass the barrier.
 
 ## Normal recipient: minor HP and large Vigor replenishment
 
@@ -100,18 +100,25 @@ At **Veil Affinity +0**, full VP pool and no other spending, the maximum number 
 | Situation | Expected v0 result |
 |---|---|
 | Conscious willing ally accepts healing | No Direct Veil contest, spend **2×T VP**, apply capped HP + Vigor |
-| Unconscious genuinely beneficial target at −3 HP, 0 Vigor, Serious wound 0/10; T1, VC +2 | No Intrusion contest; **2/10 Repair**, **7–9 Vigor**, **HP remains −3**; no extra regen tick |
+| Unconscious genuinely beneficial target at −3 HP, 0 Vigor, Serious wound 0/10; T1, VC +2, no prior refusal | No Intrusion contest; **2/10 Repair**, **7–9 Vigor**, **HP remains −3**; no extra regen tick |
 | Same target deliberately resists while conscious | Roll **d20 + raw VC + Intellect + Veil Integration** against **10 + Vitality + Awareness + target Integration + Resonance +8**; tie resists; pay VP even on failure |
+| Beneficiary refused this healing type, then became unconscious | An applicable still-effective refusal invokes **+8 Intrusion Barrier**; the target's unconsciousness does not withdraw it |
+| Target refused only a completed earlier casting | That refusal's scope has expired; a genuinely beneficial and now-unopposed cast on the unconscious target has **no contest** |
 | Equal non-barrier stats, harmful/unwilling or beneficial/resisted | +8 Intrusion Barrier, **10%** success in standard unmodified comparison; no automatic natural-20 success |
 | Actual hostile effect deceptively accepted as benign | +4 barrier, base resistance still applies; mislabeling or concealment by itself never grants free healing-style bypass |
 | Target with a ward specifically blocking external restoration | Ward applies independently even when beneficial Intrusion has no contest |
-| Dying target HP 0, wound at 9/10, Primary | +1 Repair finishes wound and remaining +1 restores **HP 1**; recovery only if no other block |
-| Dying target HP −3, wound 9/10, Primary | +1 Repair and +1 HP yields **HP −2**, still Dying; Vigor restores separately |
+| Dying target HP 0, sole recovery-blocking wound at 9/10, Primary | +1 Repair finishes wound and remaining +1 restores **HP 1**; no other block exists |
+| Dying target HP −3, sole wound 9/10, Primary | +1 Repair and +1 HP yields **HP −2**, still Dying; Vigor restores separately |
+| Dying target HP 0, wounds A 9/10 and B 3/20 | +1 Repair completes A; leftover 1 HP-equivalent is **lost** while B remains unfinished; HP remains **0** |
+| Multiple unfinished wounds, no selection | Apply direct Basic Heal repair to **oldest unfinished repairable** wound, no multi-wound progress spill |
 | Dying target with 0 Vigor receives VC +2 T1 Primary | Restore 7–9 Vigor, but **no instant regeneration**; natural Dying survival/repair next normal Step |
 | Dying target with Irreparable active wound | No ordinary Repair Progress and no wound-bypassing HP recovery; separately eligible Vigor still restores |
 | Non-Dying wounded target | Up to **2 HP + rolled Vigor**; **0** direct wound progress |
 | An ally at full Max HP and Max Vigor | Spell cannot exceed caps; valid cast still spends VP |
 | One legal High Scholar **`Single Target`** composite | One Primary and authored Secondary **once**, both full VP costs and one slower action; neither extra target nor doubled healing proc |
+| Self-only spell with Basic Heal as High Scholar Secondary | Both techniques select **exact `Self`** profile, caster only; full VP for both and one slower action; Basic Heal's **authored Secondary** once |
+| Self-only Primary but Basic Heal selected as `Single Target` | **Invalid exact-profile mismatch**; selecting Basic Heal's supported `Self` key can make it compatible |
+| Basic Heal `Self` Rider without an authorized host/feature | Not independently triggered merely by having a matching profile; must be expressly authorized |
 | Mismatched profile or unapproved Rider application | No composite/standalone Rider use merely because a table cell exists |
 
 ## Deferred / calibration watch
