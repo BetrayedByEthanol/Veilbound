@@ -184,6 +184,9 @@ This is a **structural test**, not a published level-1 spell or approval of its 
 | Fire resistance eliminates Fire HP component | Does **not** automatically eliminate the independent Vigor-burning packet if the delivery hit/trigger was valid |
 | Cast under an environmental Secondary restriction | The spell may still stand alone; effect uses Secondary, and AP/VP change **only if the environment explicitly says so** |
 | **High Scholar composite flaming rock** | **Composite Casting already permits one known compatible Primary + Secondary** (exact pair prepared at levels 1–2; level 3+ known compatible pair at cast time). Primary rock owns delivery; pay both full VP costs and one slower component action. An authored composite-compatible Secondary output replaces, **not compounds**, the Scholar's approximate-half fallback. Conjure Flame numbers remain non-executable. |
+| High Scholar, known compatible Secondary without bespoke output | Existing Scholar fallback applies: approximately half numerical output plus one diminished compatible defining property; do not declare Composite Casting universally deferred. |
+| High Scholar, authored composite-compatible Secondary output | Use explicit Secondary numerical/property contribution once, **not** another automatic 50% reduction; full VP paid for both components and one slower action. |
+| High Scholar, level 5 emphasis | Numerical or Property Emphasis still modifies the Secondary under Scholar rules; an authored compatible emphasis variant may define exact values. No silent double-halving. |
 | One-Aspect healing or stone-skin technique | May author a single recipient or self profile; no requirement to invent three attack deliveries or Rider values |
 
 ## Status and next content work
