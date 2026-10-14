@@ -176,6 +176,8 @@ Examples include being shoved, dragged, knocked back, or displaced by an externa
 
 A specific rule may explicitly make forced movement provoke.
 
+**Minor Telekinesis:** [the authored `Single Object` Imposition](../07-veil-magic/minor-telekinesis-v0.md#opposing-movement--force-dc-and-reaction-timing) may push aside a creature already physically blocking the moving object. This is **up to one adjacent square of forced displacement** on the creature's failed free Strength check, with the caster selecting a legal square outside the object's route; if no aside is legal the creature is knocked **Prone** but remains an obstacle if still occupying the route. General movement Opportunities are not triggered; an eligible active grab of a passing object separately costs a Reaction. It creates no general creature-targeting, chain displacement or automatic horizontal collision damage.
+
 The **LOCKED** [Falling v0](physical-hazards-v0.md) procedure handles loss of support after authored forced displacement, without granting extra MP, movement Opportunities, or maneuver damage. The shared non-falling collision framework remains provisional.
 
 ## Teleportation and non-traversal movement
