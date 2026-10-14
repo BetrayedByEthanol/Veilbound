@@ -107,7 +107,7 @@ If the Reaction cast is valid and resolves before the triggering hit/hazard dama
 
 ## High Scholar Composite — Stone Skin Primary + Basic Heal Secondary
 
-**Authorized on-turn combination:** A **High Scholar** who knows both techniques, meets the existing **prepared pair at levels 1–2 / Formula Fluency at level 3+** restrictions, and legally selects the identical exact **`Self`** profile may use Stone Skin as **Primary** with [Basic Heal v0](basic-heal-v0.md) as **Secondary**. This particular pair is authored compatible **only when declared as a normal on-turn Projection Action**. It does **not** grant reactive composite casting, an extra reaction-based heal or a Stone Skin Secondary in reverse order.
+**Authorized on-turn combination:** A **High Scholar** who knows both techniques, meets the existing **prepared pair at levels 1–2 / Formula Fluency at level 3+** restrictions, and legally selects the identical exact **`Self`** profile may use Stone Skin as **Primary** with [Basic Heal v0](basic-heal-v0.md) as **Secondary**. **The composite must satisfy both components' requirements**, including Basic Heal's **one functioning available hand** even though standalone Stone Skin has no material/hand components. This particular pair is authored compatible **only when declared as a normal on-turn Projection Action**. It does **not** grant reactive composite casting, an extra reaction-based heal or a Stone Skin Secondary in reverse order.
 
 - The entire composition consumes **one Projection Action**, High **20 AP** (the current High Scholar Focus), not two actions. No additional AP debt or trigger response arises from Basic Heal.
 - Pay **both full component prices**: Stone Skin **`ceil(Max VP / 3)` Committed VP**, and Basic Heal **`2 × T_heal` Spent VP**, with only discounts specifically applicable to their respective components. Before declaration and again at legal resolution, require **Available VP ≥ the entire effective combined requirement**; no partially funded combination or post-declaration downgrading.
@@ -145,7 +145,7 @@ If the Reaction cast is valid and resolves before the triggering hit/hazard dama
 | Caster falls unconscious | Stone Skin terminates immediately; Committed VP return |
 | Caster voluntarily releases on own turn | Ends at legal own-turn decision point, 0 action cost; VP return |
 | Reactive Stone Skin tries to add Basic Heal Secondary | **Illegal**; reactive mode does **not** authorize Composite or healing |
-| Legal High Scholar `Self` composite, Stone Skin Primary + Basic Heal Secondary, both T1 | One High **20-AP** Projection Action; Reserve **ceil(Max VP/3)** plus Spend **2 VP**, heal once |
+| Legal High Scholar `Self` composite, Stone Skin Primary + Basic Heal Secondary, both T1 | Requires **one functioning available hand** for Basic Heal; one High **20-AP** Projection Action; Reserve **ceil(Max VP/3)** plus Spend **2 VP**, heal once |
 | Level-1 High Scholar Max VP 6 composite, starts 6 Available | At activation **2 Committed / 2 Spent / 2 Available**, heal once |
 | Same composite maintains Stone Skin several rounds | Basic Heal's Secondary **never repeats**; ending Stone Skin returns only Committed VP |
 | Stone Skin technique known but no Archetype authorization to use it | No cast; document does not grant automatic repertoire |
