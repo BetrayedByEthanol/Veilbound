@@ -141,6 +141,9 @@ Determine whether the landing is possible before rolling. Being unconscious, com
 
    \`Falling HP Damage = max(0, falling dice total - floor(Armor / 2))\`
 
+
+   **Interaction with authored HP resistance:** The locked Impact Armor result is the **post-Armor Crush-type physical HP packet** before any independently authored typed damage resistance. If [Stone Skin v0](../07-veil-magic/stone-skin-v0.md#resistance-value-and-damage-resolution) or another protection supplies eligible **Crush/Physical HP resistance**, subtract **only the highest applicable resistance once**, **after Impact Armor but before HP loss**. Example: **10** falling damage, **normal Armor 5** → **Impact Armor 2**, then **Stone Skin R2** → **6 HP lost**, not 3. **If no resistance applies, the locked falling formula is unchanged**. Never replace Impact Armor with full ordinary Armor, import weapon Penetration, or count Armor twice. Damage reduced to zero does **not** erase Prone or other independently authored falling consequences.
+
 6. Apply HP loss, any ensuing Dying/wound trigger, and posture using the existing HP, Wounds, and Traversal rules. Damage reduction to zero does **not** automatically avoid Prone.
 
 | Height | Dice before control | Average roll |
