@@ -42,7 +42,7 @@ A profile declares its actual **delivery or recipient**, supported contribution 
 - **Conjure Flame / Thrown flame:** a small ball of flame manifested outside the target, thrown using the native manifested-projectile attack procedure.
 - **Conjure Flame / Reserved Weapon:** a temporary magical enhancement maintained on **one selected wielded weapon**.
 - **Conjure Flame / Projectile:** fire effect attached to a physical arrow or bolt, with the ordinary projectile attack delivering it.
-- **Life / Restoration:** may simply author a *single recipient* profile; no invented weapon or area profile.
+- **Life / Restoration:** [Basic Heal v0](basic-heal-v0.md) authors two exact **`Single Target`** and **`Self`** profiles (same authored outputs, differing legal recipients), with distinct Primary/Secondary/Rider contributions and **direct HP/Vigor restoration**; it does not require invented weapon or area profiles.
 - **Earth / Fortification (stone skin):** could author a *self-only* profile, if that particular technique is deliberately limited to self.
 
 These are **examples of profile design**, not a mandatory profile list. **Conjure Flame v0** now explicitly authors `Thrown Projectile`, `Weapon Enchantment`, and `Ammunition Shot` identifiers in [its executable entry](conjure-flame-v0.md); other techniques may use different exact identifiers. A given Aspect may support different profile families. Specify which combination(s) of profile, contribution and resource handling are legal; do not assume the cross-product is available.
@@ -178,10 +178,14 @@ The **Rider contribution** does not itself authorize a gem or other independent 
 | High Scholar, known compatible Secondary without bespoke output | Existing Scholar fallback applies: approximately half numerical output plus one diminished compatible defining property; do not declare Composite Casting universally deferred. |
 | High Scholar, authored composite-compatible Secondary output | Use explicit Secondary numerical/property contribution once, **not** another automatic 50% reduction; full VP paid for both components and one slower action. |
 | High Scholar, level 5 emphasis | Numerical or Property Emphasis still modifies the Secondary under Scholar rules; an authored compatible emphasis variant may define exact values. No silent double-halving. |
-| One-Aspect healing or stone-skin technique | May author a single recipient or self profile; no requirement to invent three attack deliveries or Rider values |
+| One-Aspect healing or stone-skin technique | [Basic Heal v0](basic-heal-v0.md) authors **both** `Single Target` and `Self` keys with the same outputs; a self-only stone-skin may match its **`Self`** Secondary, but not `Single Target`. This does not independently authorize a free Rider. |
+| Basic Heal, genuinely beneficial on unconscious Dying ally **with no still-effective prior refusal** | **No Intrusion contest**; instant Vigor restoration plus **HP-component → direct Repair Progress** while an active repairable wound remains; no free regeneration step |
+| Basic Heal on unconscious ally with an effective prior express refusal | Apply **+8 Intrusion Barrier** on an otherwise legal healing attempt, not automatic acceptance |
+| Basic Heal HP overflow with multiple unfinished wounds | Choose one target wound, default oldest; leftover HP points are **lost** if any blocking wound remains; no progress spills to a second wound |
+| Basic Heal, consciously resisted by a conscious creature | **Intrusion contest with +8 barrier** and Basic Heal's authored **Intellect vs Vitality + Awareness** Ability pair; a failed contest still spends attempted spell VP |
 
 ## Status and next content work
 
-**Structure v0 is merged and the first authored Fire technique is now proposed.** B05 still lacks a *sufficient executable Pillar technique catalogue*, starting prayers/repertoires, Gifted Conduits and Embodiments, Anointed Signatures, and the complete twelve Archetype × Focus playable builds. The eight selected [MVP Pillars](../../design/b05-eight-pillar-mvp-selection-and-coverage.md) remain Fire, Life, Earth, Liberty, Mind, Kinship, Secrets and Arts.
+**Structure v0 and Conjure Flame v0 are merged; Basic Heal v0 is now proposed as the second Pillar technique.** B05 still lacks a *sufficient executable Pillar technique catalogue*, starting prayers/repertoires, Gifted Conduits and Embodiments, Anointed Signatures, and the complete twelve Archetype × Focus playable builds. The eight selected [MVP Pillars](../../design/b05-eight-pillar-mvp-selection-and-coverage.md) remain Fire, Life, Earth, Liberty, Mind, Kinship, Secrets and Arts.
 
-**Next:** playtest the proposed [Conjure Flame v0](conjure-flame-v0.md), then test the same template using **Life / Restoration** (HP/Vigor/Repair Progress) and **Mind / Psionics** (Imposition and physical force). Damage values and item/specialized usage permissions remain **provisional**.
+**Next:** review and playtest [Basic Heal v0](basic-heal-v0.md) (HP/Vigor/Repair Progress and beneficial Intrusion), then author **Mind / Psionics** (Imposition and physical force). Numerical values and item/specialized usage permissions remain **provisional**.

@@ -86,7 +86,7 @@ Each point of regeneration throughput allocated to wound repair consumes **1 Vig
 
 When accumulated Repair Progress reaches the wound's Repair Requirement, that wound is repaired. A character may therefore naturally repair a large wound over multiple Vigor-recovery cycles even when the wound's total requirement exceeds Max Vigor.
 
-External healing, reconstruction, or medical rules may add Repair Progress, substitute another resource, accelerate recovery, or bypass part of this procedure when they explicitly say so.
+External healing, reconstruction, or medical rules may add Repair Progress, substitute another resource, accelerate recovery, or bypass part of this procedure when they explicitly say so. [Basic Heal v0](../07-veil-magic/basic-heal-v0.md#dying-recipient-convert-the-hp-component-to-repair-progress) is one such **narrowly authored exception**: while a target is Dying, its otherwise-small HP component directly adds **+2 Primary or +1 Secondary Repair Progress** toward **one selected unfinished repairable wound** without spending the patient's Vigor/throughput. That technique chooses an **identified wound**, otherwise the **oldest unfinished** as a default, and **does not spill excess progress to other wounds**. Surplus HP points can restore actual HP **only after completing that selected wound and when no other unfinished or irreparable recovery-blocking wound remains**. This does **not** grant instant natural regeneration or repair Irreparable wounds.
 
 **Irreparable** wounds do not accumulate ordinary natural Repair Progress toward reconstruction; they require an explicit effect capable of reconstructing the lost structure. **Fatal** wounds use no repair track because death has already occurred.
 
@@ -127,16 +127,18 @@ A Dying or unconscious character retains its Initiative position and normal turn
 
 While Dying and still possessing Vigor, regeneration throughput is first available for survival and wound repair rather than ordinary HP recovery.
 
-Resolve this procedure during the character's Regeneration Step. If no Vigor is available, the regeneration allocation cannot cancel the Dying loss or repair the wound unless another rule explicitly provides an alternative resource or conversion.
+Resolve this procedure during the character's Regeneration Step. If no Vigor is available, the regeneration allocation cannot cancel the Dying loss or repair wounds unless another rule explicitly provides an alternative resource or conversion.
+
+**Multiple-wound recovery block and selection — v0:** For a Dying creature, **all wounds with incomplete Repair Requirements count as recovery-blocking**, including unfinished earlier wounds and subsequent wounds caused while Dying. **Irreparable/unreconstructed wounds cannot receive normal progress and continue to block ordinary wound-dependent recovery**. During a normal Dying Regeneration Step, spend the wound-repair portion of throughput on the **oldest unfinished repairable wound first**, using recorded wound order for ties. After one is repaired, the remaining eligible throughput may advance the next oldest unfinished repairable wound in the same step, with each progress point still consuming one Vigor. **Do not assign natural HP recovery until every recovery-blocking wound is completed**; if an irreparable blocking injury remains, ordinary wound-dependent HP recovery is unavailable. A separate expressly authored external technique may override this, but merely calling a spell healing does not. This extends the formerly singular “active wound” language deterministically when multiple wounds coexist, without changing a **non-Dying** character's ability to allocate regen freely.
 
 1. determine available regeneration throughput;
 2. spend 1 point to cancel the default -1 HP Dying loss for that round, if possible and desired;
 3. apply the default Dying loss if it was not cancelled;
-4. use remaining throughput to spend Vigor and add cumulative Repair Progress to the active wound;
+4. use remaining throughput to spend Vigor and add cumulative Repair Progress to the **oldest unfinished repairable wound**, then the next oldest if the first is completed and throughput/Vigor remain;
 5. prevent, offset, or medically control additional bleeding or similar ongoing losses where the relevant rules permit;
-6. once accumulated Repair Progress reaches the Wound Repair Requirement, the wound is repaired; remaining throughput in that regeneration step may then restore HP;
+6. once accumulated Repair Progress reaches a wound's Repair Requirement, that wound is repaired; **continue repair on other unfinished recovery-blocking wounds before any natural HP restoration**. Only after all blocking wounds are repaired, and no Irreparable block remains, may remaining throughput in that regeneration step restore HP;
 7. once HP rises above 0, the character can regain consciousness unless another effect prevents it.
 
-Medicine can stabilize, stop bleeding, immobilize injuries, and otherwise suppress ongoing consequences without necessarily restoring HP or completing supernatural tissue reconstruction.
+Medicine can stabilize, stop bleeding, immobilize injuries, and otherwise suppress ongoing consequences without necessarily restoring HP or completing supernatural tissue reconstruction. **A successful [Basic Heal v0](../07-veil-magic/basic-heal-v0.md) on an unconscious, genuinely beneficially treated Dying target requires no Intrusion contest if the target has no still-effective prior refusal covering the healing**; otherwise the **+8 resistance contest** still applies. It supplies independent Vigor and small direct Repair Progress but does not alter the ordering of subsequent natural Dying regeneration steps.
 
 See [Initiative and Round/Turn Procedure](../05-combat/initiative-and-round-structure.md) for the exact turn timing.

@@ -241,7 +241,7 @@ Examples include:
 - creating water inside a target's lungs;
 - manifesting matter inside or overlapping living tissue.
 
-Intrusion receives the strongest form of magical resistance.
+Intrusion receives the strongest form of magical resistance **when the actual effect is harmful or consciously resisted**. **Genuinely beneficial and unopposed Intrusion (including ordinary emergency restoration of an unconscious recipient) resolves without a Direct Veil contest** unless another authored protection applies. **Harmful Intrusion remains protected even if the victim is asleep or unconscious; a benevolent label or disguise cannot waive its barrier.**
 
 Its native resolution procedure is locked in [Universal Resonance and Direct Veil Magic](resonance-and-intrusion.md).
 
@@ -277,7 +277,7 @@ Its locked delivery mapping is defined in [Manifestation Resolution](manifestati
 
 This does **not** create a generic area-effect Dodge: an area occupying a character's position applies its authored physical consequence unless actual movement, a suitable barrier/shield, resistance, immunity, armor, or another applicable rule changes that outcome.
 
-A supposed Manifestation that originates **inside or overlapping a living target** is an **Intrusion** and must overcome Intrusion resistance. Calling an effect a Manifestation cannot bypass the protected internal boundary.
+A supposed Manifestation that originates **inside or overlapping a living target** is an **Intrusion**, and uses the **applicable** [Intrusion resistance procedure](resonance-and-intrusion.md#intrusion-barrier). Harmful or consciously resisted Intrusion still faces the Intrusion Barrier; genuinely beneficial and unopposed restoration may not need a contest. Calling a hostile effect a Manifestation cannot bypass the protected internal boundary.
 
 ## Locked separation of concepts
 
