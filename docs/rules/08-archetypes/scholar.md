@@ -1,6 +1,6 @@
 # Scholar Foundation
 
-> Canonical extraction from Core Rules Audit v34. Structural level 1–5 rules are promoted here. Repertoire counts and technique-specific numeric values remain provisional where the audit says they are not calibrated.
+> Canonical extraction from Core Rules Audit v34. Structural level 1–5 rules are promoted here. **Level-1–3 repertoire and formula/preparation capacity now have explicit v0 playtest numbers**; broader technique-specific numeric values and post-L3 counts remain provisional where not authored. See [B04/B05 starting repertoires](../../design/b04-b05-priest-scholar-starting-repertoires-v0.md).
 
 ## Archetype identity
 
@@ -20,6 +20,20 @@ The final catalogue/repertoire calibration must preserve Scholar as the archetyp
 
 **Universal Veil acquisition is automatic for all four Archetypes**, not a Scholar-exclusive learned spell list: Scholars **know [Veil Inspection v0](../07-veil-magic/veil-inspection-v0.md) at character level 1 and [Blink v0](../07-veil-magic/blink-v0.md) at character level 3** under [Universal Veil acquisition](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked). These procedures **do not consume Scholar individually learned Pillar-technique counts, Prepared Techniques or a Talent**, and cannot automatically become Composite Casting components without explicit compatibility. **Automatic knowledge is not free activation:** retain each procedure's VP, timing, spatial/subject and other eligibility restrictions. Advanced Universal procedures have **no usable automatic unlock until their own profiles and level gates are authored**; do not apply the Scholar's individually learned Pillar-technique rule to them.
 
+## L1–3 individually learned repertoire — all Scholar Focuses
+
+| Scholar Focus | Distinct **known** Pillar techniques L1 | L2 | L3 | Additional preparation / active limit |
+|---|---:|---:|---:|---|
+| **High** | **5** | **6** | **6** | **1** prepared legal Composite Formula at L1, **2** at L2; **none required at L3** under Formula Fluency |
+| **Medium** | **4** | **5** | **5** | No general prepared-spell limit; max **1 active eligible Inward Boost** at L1–3 |
+| **Low** | **3** | **4** | **4** | **2 / 3 / 3 Prepared Techniques** out of known; max **1 active eligible Embodiment** at L1–3 |
+
+**Starting known techniques are individually selected from actually authored Pillar/Aspect techniques** at the permitted character-level tier (L1–2 Tier 1, L3 Tier 2 ceiling). Scholar cross-Pillar knowledge is permitted; **no entire Aspect catalogue or unauthored technique is automatically learned**. Every distinct technique occupies **one known slot** regardless of its number of profiles, Used Tiers or permitted applications. [Expanded Repertoire Talent](../10-advancement/talents-level-1-5-v0.md#tal-s01--expanded-repertoire) grants **one extra known** technique when genuinely eligible, **not** an extra prepared spell or composite formula. If an eligible actual technique is unavailable, unused capacity stays empty until an independent later learning grant/retraining permits filling; it cannot create a new spell.
+
+At **level 2**, **each Scholar Focus learns +1 eligible individual Pillar technique** and High's formula cap becomes **2** while Low's prepared subset cap becomes **3**. **Level 3 awards no additional known or prepared count**: High instead gains Formula Fluency, Medium Efficient Routing/Overrouting and Low Deep Embodiment. The Tier-2 level ceiling at L3 permits only a technique's **expressly authored Tier-2 mode**, not automatic knowledge of new Tier-2 spells. Universal Veil Inspection L1 and Blink L3 are **known separately and use no Scholar known/prepared/formula slot**.
+
+**Technical preparation:** High L1–2 can replace their prepared legal formula list, and Low L1–3 can replace the prepared known-technique subset, after **10 uninterrupted minutes of technical study/practice at most once per six elapsed in-world hours**. The initial chosen set at L1 creation is free. Level-up adds capacity immediately but its newly eligible formula or Low prepared subset entry must be selected in the next legal preparation. Preparation **does not grant knowledge**, regenerate VP, waive equipment/activation requirements or create an Active Embodiment. Medium has no general preparation step for ordinary known-spell casting. At L3, High has **no prepared-formula list requirement** because Formula Fluency removes it.
+
 ## High Scholar — Projection through synthesis
 
 **Core identity:** broad technical caster and situational synthesist.
@@ -28,11 +42,11 @@ The final catalogue/repertoire calibration must preserve Scholar as the archetyp
 
 ### Levels 1–2 — Technical Repertoire and Prepared Composite Formulae
 
-High Scholar begins with a comparatively broad learned repertoire. Exact techniques-known counts remain provisional.
+High Scholar starts at **5 individually known Pillar techniques at L1**, expands to **6 at L2**, remains **6 at L3**, and can cast any otherwise legal known Primary as normal. At levels 1–2, its prepared **Composite Formula capacity is 1 at L1 and 2 at L2**. A formula records the **ordered Primary and Secondary known-technique identities, exact shared eligible profile key and compatible host/delivery mode**; reversing roles or changing the key requires a different formula if independently legal. Formulas grant no extra technique knowledge, an extra casting action, permission for unsupported Secondary/Rider combinations or VP discounts.
 
 A High Scholar may use **Composite Casting** with one known Primary Technique and one compatible known Secondary Technique. **The caster selects which known technique is Primary and which is Secondary**, and both must expose the **same exact authored profile identifier** for the chosen execution. Similar descriptions (e.g. `Thrown Projectile` versus `Ammunition Shot`) are not sufficient. Both must be otherwise compatible; a matching label does not waive an express ban such as a second Reserved Weapon enchantment.
 
-At levels 1–2, the exact Primary + Secondary pairing must be prepared as a **composite formula**.
+At levels 1–2, the exact Primary + Secondary pairing must be prepared as a **composite formula** within the **1/2-slot limit**. If no two known techniques form an actually authorized combination, formula capacity may remain empty; it is not a guarantee of an invented composite.
 
 #### Primary Technique
 
@@ -78,7 +92,7 @@ Ordinary single-technique casting remains fully competent and is often the more 
 
 ### Level 2 — Expanded Repertoire
 
-Increase the learned toolbox. Exact counts remain provisional.
+Learn **one additional authored eligible individual Pillar technique**: High known **5→6**, and increase prepared composite-formula capacity **1→2**. The extra formula is chosen at the next legal technical preparation; no separate magic activation occurs.
 
 This is breadth, not a generic damage/healing/potency bonus.
 
@@ -183,7 +197,7 @@ Overrouting pushes an Inward Boost beyond ordinary output by drawing capability 
 | Level | Foundation feature |
 |---:|---|
 | 1 | **Veil Routing** — max 1 active Inward Boost; reroute costs 3 Spent VP |
-| 2 | **Technical Repertoire** — broaden learned technical options; counts provisional |
+| 2 | **Technical Repertoire** — learn one eligible additional Pillar technique (**4→5 known**); no new general prepared spell limit |
 | 3 | **Efficient Routing + Overrouting** — reroute becomes 2 Spent VP; Overrouting enters mature loop |
 | 4 | **Dual Routing + Ability Increase** — max 2 active Inward Boosts; +1 Ability |
 | 5 | **Matrix Reconfiguration** — one rerouting payment may replace both active Boosts at once; Overroute surcharges still apply |
@@ -211,12 +225,12 @@ The Low Scholar remains fully capable of ordinary combat without magic.
 Low Scholar techniques exist in three layers:
 
 1. **Known Techniques** — all learned techniques.
-2. **Prepared Techniques** — a limited ready subset; exact counts remain provisional.
+2. **Prepared Techniques** — at L1 choose **up to 2** from the **3 known** techniques; at L2/L3 choose **up to 3** from **4 known**; only these prepared techniques may be activated under Low Scholar's Prepared Arsenal, including their outward legal profiles. Preparation does not waive technique action or VP requirements.
 3. **Active Embodiments** — the much smaller set of prepared inward/equipment techniques currently sustained.
 
 ### Embodiments and switching
 
-An Embodiment is a prepared inward or equipment-focused technique affecting the Scholar or immediately used equipment.
+An Embodiment is a prepared inward or equipment-focused technique affecting the Scholar or immediately used equipment, **only when the individual technique/feature expressly authors compatible Low Scholar Embodiment permission**. A self-targeted [Projection] spell, a general sustained Reserve, or an ordinary `Weapon Enchantment` profile is **not automatically** a Low Scholar Embodiment for switching, Intensification or special Focus bonuses.
 
 The Low Scholar does **not** gain Medium-style rerouting.
 
@@ -243,7 +257,7 @@ Low Focus does not prohibit outward techniques. Prepared outward effects use the
 | Level | Foundation feature |
 |---:|---|
 | 1 | **Prepared Arsenal** — limited prepared loadout; max 1 Active Embodiment |
-| 2 | **Field Preparation** — broaden learned repertoire and prepared loadout; counts provisional |
+| 2 | **Field Preparation** — learn one eligible individual Pillar technique (**3→4 known**), increase prepared-technique cap **2→3**; choose newly prepared subset on next legal technical preparation |
 | 3 | **Deep Embodiment** — compatible Active Embodiments may be **Intensified** by paying technique-defined additional VP |
 | 4 | **Dual Embodiment + Ability Increase** — max 2 Active Embodiments; +1 Ability |
 | 5 | **Entrenched Configuration** — if an Embodiment has remained unchanged since the start of the previous turn, its next Intensification costs 1 VP less, minimum 1 unless explicitly allowed to reach 0 |
@@ -268,8 +282,6 @@ Its preferred escalation is to Intensify a good prepared choice rather than repe
 
 The following remain outside the locked structural foundation:
 
-- exact techniques-known progression;
-- exact prepared-technique counts;
-- exact prepared composite-formula counts at High levels 1–2;
+- final balance of **authored provisional L1–3 known counts (5/4/3 → 6/5/4)**, Low **2/3/3 prepared** and High **1/2 prepared formulas**;
 - technique-specific Intensification costs/effects;
 - numerical Composite Casting burst calibration once High Projection Tempo supports multiple Projection Actions.
