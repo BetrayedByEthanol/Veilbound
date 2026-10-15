@@ -70,6 +70,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Stone Skin v0 — Earth / Fortification](07-veil-magic/stone-skin-v0.md)
 - [Weaken Restraints v0 — Liberty / Defiance](07-veil-magic/weaken-restraints-v0.md)
 - [Protective Ward v0 — Kinship / Guardian](07-veil-magic/protective-ward-v0.md)
+- [Phantom Sound v0 — Secrets / Hallucination](07-veil-magic/phantom-sound-v0.md)
 - [Universal Veil Fundamentals — automatic level-based acquisition (Inspection 1, Blink 3)](07-veil-magic/universal-veil-fundamentals.md)
 - [Veil Inspection v0 — held-item examination](07-veil-magic/veil-inspection-v0.md)
 - [Veil Translocation — Blink and spherical portals](07-veil-magic/veil-translocation-foundation.md)
