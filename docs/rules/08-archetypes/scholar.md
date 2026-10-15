@@ -164,6 +164,8 @@ Representative channels include:
 - Senses;
 - Regeneration.
 
+An authored **self-targeted [Projection] technique or Continuous Reserve does not automatically become an Inward Boost** with rerouting permission. The learned technique must expressly support an **Inward** configuration, channel and compatible replacement conditions; otherwise it remains eligible only for its ordinary authorized casting profile.
+
 Two limits apply simultaneously:
 
 1. the Medium Scholar has a maximum number of active Inward Boosts;
