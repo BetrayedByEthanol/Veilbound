@@ -71,6 +71,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Weaken Restraints v0 — Liberty / Defiance](07-veil-magic/weaken-restraints-v0.md)
 - [Protective Ward v0 — Kinship / Guardian](07-veil-magic/protective-ward-v0.md)
 - [Phantom Sound v0 — Secrets / Hallucination](07-veil-magic/phantom-sound-v0.md)
+- [Spark of Inspiration v0 — Arts / Inspiration](07-veil-magic/spark-of-inspiration-v0.md)
 - [Universal Veil Fundamentals — automatic level-based acquisition (Inspection 1, Blink 3)](07-veil-magic/universal-veil-fundamentals.md)
 - [Veil Inspection v0 — held-item examination](07-veil-magic/veil-inspection-v0.md)
 - [Veil Translocation — Blink and spherical portals](07-veil-magic/veil-translocation-foundation.md)
