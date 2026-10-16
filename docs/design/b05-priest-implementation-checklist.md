@@ -35,7 +35,7 @@
 | [x] | Open Invocation of **unprepared, chosen-Pillar, normal-tier** technique; ordinary price **plus separate +1 Spent VP**, never discounted | AUTHORED v0 — [Priest](../rules/08-archetypes/priest.md#level-1--high-liturgy--open-invocation) |
 | [x] | At L1–4 Open Invocation requires **Full Action consuming entire available Turn AP**; at L5+ ordinary technique action; illegal/interrupted attempts respect VP timing | AUTHORED v0; [Guided Regeneration](../rules/07-veil-magic/guided-regeneration-v0.md) has regression cases for fixed/maintained modes |
 | [x] | L3 Open Prayer reserves one **existing** prepared slot and fills it once; **not** a free extra slot, no Invocation surcharge | AUTHORED — [Priest](../rules/08-archetypes/priest.md#level-3--open-prayer) |
-| [ ] | Compare at least **two useful L1 preparations** against mixed exploration/attrition/combat; ensure omitting an option matters | **NOT VERIFIED** — four merged Life Tier-1 techniques after PR #76, five if Woodland Rapport merges; breadth is not the same as verified preparation tradeoffs |
+| [ ] | Compare at least **two useful L1 preparations** against mixed exploration/attrition/combat; ensure omitting an option matters | **NOT VERIFIED** — five merged Life Tier-1 techniques after PR #77; breadth alone does not verify preparation tradeoffs |
 | [ ] | Test Prepared vs Open Invocation vs Open Prayer at L1 and L3, including low VP, interruption, costs, and all-Turn-AP Full Action restriction | NOT VERIFIED end-to-end; individual procedure regression examples exist |
 | [ ] | Test positive Accord expanding preparation without eliminating selection pressure; test +1 surcharge as real but not prohibitive emergency flexibility | NOT VERIFIED — balance calibration |
 
