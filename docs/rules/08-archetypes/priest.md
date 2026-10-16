@@ -196,6 +196,8 @@ Possible authored targets include self, ally, weapon, shield, armor, carried obj
 
 Consecrations remain actual Pillar/Aspect techniques.
 
+**Authored v0 example:** [Guided Regeneration](../07-veil-magic/guided-regeneration-v0.md#medium-priest--maintained-consecration-only) is Consecration-compatible **only in its 2-Committed-VP maintained mode**. Its 2-Spent-VP one-minute cast is not a Consecration; reassignment keeps the existing instance rather than creating new regeneration.
+
 ### Level 1 — Consecrated Ministry
 
 At levels 1–3, maintain maximum **1 Active Consecration**.
@@ -264,6 +266,8 @@ Low Priest emphasizes persistent self/equipment expressions and selective Active
 ### Devotional Rites
 
 A **Devotional Rite** is a prepared sustained inward or immediately worn/wielded expression of the chosen Pillar anchored to the Priest or their own equipment.
+
+**Authored v0 example:** [Guided Regeneration's maintained `Self` profile](../07-veil-magic/guided-regeneration-v0.md#b-maintained-reserve--2-committed-vp) is Devotional Rite-compatible; if prepared and designated as Chosen Devotion, its **2 Committed VP -> 1 Committed VP** under the existing discount. Its one-minute **Spent VP** mode is not a Devotional Rite. No Exaltation property is authored for it yet.
 
 ### Level 1 — Chosen Devotion
 
