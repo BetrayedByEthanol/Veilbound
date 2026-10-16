@@ -9,7 +9,7 @@
 - **MISSING**: Required technique/property/test has not been authored; a framework or candidate name does not supply it.
 - **VERIFIED**: A complete legal character sheet and relevant L1→L3 action/resource test have actually been demonstrated. **None of the three Priest Focuses currently meets this test.**
 
-**Priest state: framework and starting counts AUTHORED v0; High can use prepared and Open Invocation rules; Medium has one maintained Life Consecration; Low has one maintained Life Devotional Rite; no certified L1→L3 Priest Focus build.** Keep B04/B05/B07 open until those builds and meaningful alternatives are demonstrated.
+**Priest state: framework and starting counts AUTHORED v0; High has prepared/Open Invocation rules. In merged canon Medium has one Life Consecration and Low one Life Devotional Rite; this current Vital Shelter PR authors a **second distinct maintained Life Consecration and an alternative `Self` Rite for review**, not yet merged/verified. No certified L1→L3 Priest Focus build.** Keep B04/B05/B07 open until those builds and meaningful alternatives are demonstrated.
 
 ## P0 — Shared Priest core (merged canon)
 
@@ -47,7 +47,7 @@
 | [x] | Reassign **same** maintained blessing for **24 AP General Tempo Action**, subject to target constraints and no refresh | AUTHORED — [Priest](../rules/08-archetypes/priest.md#level-1--consecrated-ministry) |
 | [x] | **Guided Regeneration maintained** `Single Target` or `Self` is an eligible Consecration: **2 Committed VP**, +1 throughput in existing steps | AUTHORED in merged PR #73; **fixed 2 Spent/one-minute mode is not Consecration** |
 | [x] | L3 Intercession framework: **Reaction + 2 Spent VP** (provisional); Guided Regeneration trigger extends +1 to another eligible recipient's **one imminent Regeneration Step** | AUTHORED v0, not a second step/continuous second recipient |
-| [ ] | Author **another functionally different transferable sustained blessing**, candidate **Vital Shelter** (finite cumulative **Vigor**-damage budget, no refresh on reassignment), not another copy of Guided Regeneration | MISSING; candidate is **not canon** |
+| [ ] | Merge another functionally different transferable blessing: **[Vital Shelter v0](../rules/07-veil-magic/vital-shelter-v0.md)** (finite cumulative Vigor-damage budget, no refresh on Reassign/Intercession) | **AUTHORED IN CURRENT PR BRANCH**, pending Codex Review/merge; **not yet merged canon** |
 | [ ] | Compare protection vs recovery as **two distinct preparation/Consecration selections**; check transferring one effect does not change its identity | NOT VERIFIED |
 | [ ] | Run L3 Intercession affordability and timing with an active Consecration and another recipient; assess whether **2 Spent VP for +1 throughput** is worthwhile | NOT VERIFIED; cost is provisional |
 | [ ] | Confirm at least one full L1→L3 Medium Priest combat+exploration loop without assuming a second simultaneous Consecration before L4 | NOT VERIFIED |
@@ -60,7 +60,7 @@
 | [x] | **Guided Regeneration maintained `Self`** is a valid Rite; normal **2 Committed → 1 Committed VP** when Chosen, +1 regeneration throughput | AUTHORED in merged PR #73; the **Spent** one-minute version is **not** a Rite |
 | [x] | Low retains ordinary Active Prayer casting when prepared and affordable; Rite commitment competes with scarce VP | AUTHORED — [Priest](../rules/08-archetypes/priest.md#active-prayers) |
 | [x] | L3 **Exaltation** structure requires a related **authored secondary property** and additional VP | AUTHORED framework — no compatible Guided Regeneration Exaltation property yet |
-| [ ] | Author **at least one alternative affordable self/equipment Devotional Rite** to test meaningful L1 selection; a self-compatible Preservation expression is a **candidate**, not automatic | MISSING |
+| [ ] | Merge **[Vital Shelter](../rules/07-veil-magic/vital-shelter-v0.md#low-priest--maintained-self-devotional-rite)** as an alternative affordable maintained `Self` Devotional Rite, Chosen cost **1 Committed + 1 Spent VP** | **AUTHORED IN CURRENT PR BRANCH**, pending review/merge; low VA0 L1 ends with **0 Available** |
 | [ ] | Author Guided Regeneration's **specific L3 Exaltation property**, distinct from a mere throughput number bonus; price for Low-Focus VP pool | MISSING |
 | [ ] | Test maintain/release/recast, Dying/unconsciousness, available VP for Basic Heal, and L3 Exaltation while Rite active | NOT VERIFIED end-to-end; Guided Regeneration includes individual regression examples |
 | [ ] | Demonstrate viable L1→L3 Low Priest preparations with at least **two different Rite decisions**, rather than making the only eligible Rite mandatory | NOT VERIFIED |
@@ -73,7 +73,7 @@ The working **Life pilot is a design target**, not a quota that creates spells, 
 |---|---|---|
 | T1 Restoration | **Basic Heal** — instant HP/Vigor restoration | **AUTHORED**, merged PR #64 |
 | T1 Restoration | **Guided Regeneration** — +1 throughput; fixed 2 Spent / 1 minute **or** maintained 2 Committed | **AUTHORED**, merged PR #73 |
-| T1 Preservation | **Vital Shelter** — finite Vigor-damage protection; budget needs comparison against repeated Conjure Flame and Basic Heal | **MISSING**, next profile |
+| T1 Preservation | **[Vital Shelter v0](../rules/07-veil-magic/vital-shelter-v0.md)** — finite Vigor-damage protection, maintained recast watch **VS-01**, High Scholar Secondary with Basic Heal/Stone Skin **VS-02** | **AUTHORED IN CURRENT PR BRANCH**, pending review/merge, numbers provisional; Conflagration is a specialized Vigor-burn stress test rather than universal baseline |
 | T1 Preservation | **Venom Endurance** — limited poison protection; numeric effects depend on poison procedures | **MISSING** |
 | T1 Nature | **Gentle Growth** — modest growth of existing vegetation | **MISSING** |
 | T1 Nature | **Woodland Rapport** — improve the disposition of a small ordinarily neutral animal, not compel obedience | **MISSING** |
@@ -82,7 +82,7 @@ The working **Life pilot is a design target**, not a quota that creates spells, 
 | T2 Nature | **Instinctive Communion** — bounded animal communication beyond improving disposition | **MISSING** |
 | T3 Nature (candidate) | **Entangling Growth** — distinct battlefield-control Miracle candidate, with vegetation/defense boundaries | **MISSING** |
 
-**Current pilot authoring: T1 = 2 of 6 design candidates; T2 = 0 of 3; T3 = 0 of 1.** Two authored Life techniques are from the **same Aspect (Restoration)**. Coverage of Life / Preservation and Life / Nature is **0 techniques each**. **Animal Companion** is a separately deferred future idea, **not** Tier-1 Woodland Rapport or a hidden MVP prerequisite.
+**Current merged Life pilot: T1 = 2 of 6 design candidates; the Vital Shelter branch proposes a third, yielding 3/6 if merged. T2 = 0 of 3; T3 = 0 of 1.** Merged Life techniques remain in **Restoration**; this proposed Preservation entry expands Life Aspect coverage from 1 to 2 if merged. Life / Nature still has **0 techniques**. **Animal Companion** is a separately deferred future idea, **not** Tier-1 Woodland Rapport or a hidden MVP prerequisite.
 
 **Miracles:** The Tier-1 catalogue alone does not demonstrate an authored **distinct Tier-2 Life Miracle** for levels 1–2, or a **distinct Tier-3 Life Miracle** for level 3. Higher-Used-Tier interpretations of existing spells require explicit legality and affordability checks; never call a named future technique executable.
 
@@ -91,8 +91,8 @@ The working **Life pilot is a design target**, not a quota that creates spells, 
 | Scenario | What to observe | Status |
 |---|---|---|
 | **L1 High**, initial Accord +1, 4 prepared capacity, 6 Max VP at VA 0 | Different useful preparations; prepared Basic Heal vs unprepared Full Action +1 Spent invocation; +1 throughput mode choice | **NOT VERIFIED** as a full build |
-| **L1 Medium**, initial Accord +1, 3 prepared capacity, 4 Max VP at VA 0 | One active maintained Consecration, 24 AP transfer, other prepared prayer; compare two blessing identities once Vital Shelter exists | **PARTIAL PROFILE**, not full build |
-| **L1 Low**, initial Accord +1, 2 prepared capacity, 2 Max VP at VA 0 | Chosen `Self` Guided Regeneration 1 Committed leaving 1 Available; cannot cast 2-Spent Basic Heal without releasing Rite or obtaining VP | **PARTIAL PROFILE**, not full build |
+| **L1 Medium**, initial Accord +1, 3 prepared capacity, 4 Max VP at VA 0 | Guided Regeneration (2 Committed) versus **proposed Vital Shelter** (2 Committed + 1 Spent, leaving 1 Available); 24-AP transfer retains finite budget | **TWO LIFE OPTIONS ON PR BRANCH**, still no certified build or balance evidence |
+| **L1 Low**, initial Accord +1, 2 prepared capacity, 2 Max VP at VA 0 | Chosen `Self` Guided Regeneration **1 Committed, 1 Available** versus proposed Chosen Vital Shelter **1 Committed + 1 Spent, 0 Available**; no 2-Spent Basic Heal while either remains under insufficient Available | **ALTERNATIVE RITE ON PR BRANCH**, but not certified or tested |
 | **L3 High** | L3 Open Prayer vs normal preparation and Open Invocation Full Action, legitimate T2 accesses, Miracle check | **NOT VERIFIED** |
 | **L3 Medium** | Consecration Intercession cost/range/trigger, normal target regeneration, no duplicated pulse/refill | **PARTIAL PROFILE**, not full build |
 | **L3 Low** | An actually authored Exaltation while Chosen Devotion active, action/VP vs martial Tempo and regeneration | **MISSING secondary property** |
@@ -103,7 +103,7 @@ The working **Life pilot is a design target**, not a quota that creates spells, 
 
 ## Immediate order of work
 
-1. **Vital Shelter v0**: author finite Vigor protective budget, mixed HP/Vigor interaction, duration or maintained mode, Medium Consecration, no-refresh, costing against Conjure Flame and Basic Heal. Consider a separately legal affordable `Self` Rite profile only if it meaningfully supports Low's choices.
+1. **Finish review and merge [Vital Shelter v0](../rules/07-veil-magic/vital-shelter-v0.md)**: provisional Primary **8+VC**, Secondary **4+floor(VC/2)**, fixed **2 Spent**, maintained **2 Committed +1 Spent**; test **VS-01** repeated new casts and **VS-02** Basic Heal/Stone Skin High Scholar composites. Establish ordinary/moderate Vigor-damage benchmarks first; **Conflagration is a specialist stress test**, not the standard damage spell. Do not mark the checklist complete before merge and legal build tests.
 2. **Complete Tier-1 Life breadth** (Preservation and Nature), and **explicit Low Rite alternative plus L3 Guided Regeneration Exaltation**.
 3. **Author representative T2 Life options** for Miracle Petition, then a distinctive T3 candidate or legally authored higher-Used-Tier output, and verify real affordability.
 4. **Run High / Medium / Low Priest L1→L3 builds and mixed-scenario tests**; tune the already-authored PR #72 counts, Accord and Open Invocation surcharge using evidence.
