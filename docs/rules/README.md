@@ -46,6 +46,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Weapon Attack, Guard, and Physical Contribution](05-combat/weapon-attack-and-guard-math.md)
 - [Defensive Responses and Criticals](05-combat/defensive-responses-and-criticals.md)
 - [Weapons and Armor](05-combat/weapons-and-armor.md)
+- [Mundane Toxins v0 — 11 biological/chemical families, resistance and hazard timing](05-combat/mundane-toxins-v0.md)
 
 - [Off-Hand and Ranged Combat](05-combat/off-hand-and-ranged-combat.md)
 - [Prepared and Spontaneous Ammunition v0](05-combat/prepared-and-spontaneous-ammunition-v0.md)
@@ -54,7 +55,6 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 
 - [HP and Vigor](06-vigor-wounds-death/hp-and-vigor.md)
 - [Dying and Wounds](06-vigor-wounds-death/dying-and-wounds.md)
-- [Mundane Toxins v0 — 11 biological/chemical families, resistance and hazard timing](05-combat/mundane-toxins-v0.md)
 
 ### 07 — Veil and magic
 
