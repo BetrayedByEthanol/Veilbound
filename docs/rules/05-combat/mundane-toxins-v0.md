@@ -173,7 +173,7 @@ The profile's Reduced effect generally halves the **number of finite damaging/im
 | ID | Scenario | Required baseline / watch |
 |---|---|---|
 | TX-01 | Repeated identical/other lower-grade exposure while active | **Ignored**: no stacking, added tick, refreshed duration or second resistance. Revisit accumulation after playtest |
-| TX-02 | Three HP ticks across initiative→exploration→initiative | **Exactly three distinct toxin packets**, mandatory order and real injury/Dying triggers, **zero toxin-granted regeneration** during exploration; real turns remain canonical. Track mode-dependent recovery until globally authored |
+| TX-02 | Three **Reduced TX-HM** HP ticks across initiative→exploration→initiative | **Exactly three distinct toxin packets**, mandatory order and real injury/Dying triggers, **zero toxin-granted regeneration** during exploration; real turns remain canonical. Track mode-dependent recovery until globally authored |
 | TX-03 | Two different families, same grade | **First instance stays**; new one ignored. Watch whether mixed families later deserve independent concurrent slots |
 | TX-04 | DC12 tie on `d20+Vitality` | **Reduced** result; no full immunity; natural 1/20 not automatic |
 | TX-05 | One-point repeated HP tick after natural success | **Halve count**, round up; do not erase the 1-HP unit or halve twice |
@@ -181,7 +181,6 @@ The profile's Reduced effect generally halves the **number of finite damaging/im
 | TX-07 | −2 Dodge versus −1 Agility | Only **Dodge Defense** drops; no other Agility-derived effect and no additional Dodge Pressure |
 | TX-08 | Toxin delivery against Guard/Armor | **No injection without actual breach**; no automatic poison effect on fully stopped attack |
 | TX-09 | HP injury plus natural regeneration | Repairing 1 missing HP costs 1 Vigor if actual regeneration occurs; toxin stays active until its own expiry |
-| TX-19 | TX-CA throughput penalty versus interval duration | **4 Full / 2 Reduced short intervals**, applying −1 only to any real Step 2 occurring in-window; no guaranteed penalized Step2 count, no extra exploration regeneration, expiry after 24/12 seconds even with zero Step2 events |
 | TX-10 | Vigor-losing nephrotoxin vs Vital Shelter | Only genuine **direct Vigor packets** qualify; none of other toxin penalties or recovery suppression qualify |
 | TX-11 | Hepatotoxin near existing 6-hour Vigor Recovery boundary | Convert recipient's **independent pending Recovery** alongside TX-HE expiry; apply at mapped Round Begin or immediate q=0 transition, mark checkpoint consumed once. Preserve deadline order and do **not reset cadence or create a recovery** |
 | TX-12 | Treatment and Restoration boundary | Ordinary healing repairs injury but never automatically purges toxin; Veil negation only from an **actually authored** appropriate technique |
@@ -191,5 +190,6 @@ The profile's Reduced effect generally halves the **number of finite damaging/im
 | TX-16 | Long-term conditions and ordinary hour decisions | **600-round per-hour Round Begin** surrogate in initiative, conservative `floor(s/6)` entry and `6×max(0,n−1)` exit conversion; **no repeated hourly resistance save**, no free Vigor Recovery |
 | TX-17 | Repeated long-duration time-mode conversions | Conservative rounding never postpones hourly pulses/expiry; distinguish from unchanged short-clock remainder |
 | TX-18 | TX-HE pending genuine Recovery in initiative | Map expiry and independently scheduled recipient Vigor Recovery at Round Begin; test 1s/37s, same-boundary priority, new exposure mid-combat, no duplicate Recovery on transition or early/cadence exploitation |
+| TX-19 | TX-CA throughput penalty versus interval duration | **4 Full / 2 Reduced short intervals**, applying −1 only to any real Step 2 occurring in-window; no guaranteed penalized Step2 count, no extra exploration regeneration, expiry after 24/12 seconds even with zero Step2 events |
 
 **Status:** Shared mundane toxin hazard procedure and eleven distinct representative profiles **AUTHORED v0 in this PR; numerical balancing remains provisional**. This does **not** count as a new Pillar technique, an authored Venom Endurance, a tested character build or a complete Alchemy/Death/Plague system.
