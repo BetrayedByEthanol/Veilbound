@@ -15,6 +15,7 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [Mundane Toxins v0](../rules/05-combat/mundane-toxins-v0.md) — current PR adds 11 mundane toxin profiles and provisional natural resistance, one-instance nonstacking and exploration clocks. **Not** an authored Venom Endurance, Death/Plague spell, alchemy recipe or world source.
 - [October 2026 Mechanical Watchlist](balance/october-2026-mechanical-watchlist.md) — balance and subsystem findings intentionally being monitored rather than treated as current defects.
 - [Core Rules Audit v34](audits/Veilbound_Core_Rules_Audit_v34.md) — historical audit/backlog; canonical rule files supersede resolved audit findings.
 
