@@ -203,7 +203,7 @@ Possible authored targets include self, ally, weapon, shield, armor, carried obj
 
 Consecrations remain actual Pillar/Aspect techniques.
 
-**Authored v0 example:** [Guided Regeneration](../07-veil-magic/guided-regeneration-v0.md#medium-priest--maintained-consecration-only) is Consecration-compatible **only in its 2-Committed-VP maintained mode**. Its 2-Spent-VP one-minute cast is not a Consecration; reassignment keeps the existing instance rather than creating new regeneration.
+**Authored v0 examples:** [Guided Regeneration](../07-veil-magic/guided-regeneration-v0.md#medium-priest--maintained-consecration-only) is Consecration-compatible **only in its 2-Committed-VP maintained mode** (+1 to existing Regeneration Steps). [Vital Shelter](../07-veil-magic/vital-shelter-v0.md#medium-priest--maintained-consecration-only) is a distinct **Life / Preservation** Consecration **only in its maintained Primary mode** (**2 Committed + 1 Spent VP**, finite direct-Vigor prevention budget). Their 2-Spent/one-minute fixed versions are not Consecrations. **Reassignment preserves the same existing effect and, for Vital Shelter, its already depleted budget**; neither refreshes output. These author different prevention-versus-recovery choices without granting more than the usual one Active Consecration at L1–3.
 
 ### Level 1 — Consecrated Ministry
 
@@ -274,11 +274,15 @@ Low Priest emphasizes persistent self/equipment expressions and selective Active
 
 A **Devotional Rite** is a prepared sustained inward or immediately worn/wielded expression of the chosen Pillar anchored to the Priest or their own equipment.
 
-**Authored v0 example:** [Guided Regeneration's maintained `Self` profile](../07-veil-magic/guided-regeneration-v0.md#b-maintained-reserve--2-committed-vp) is Devotional Rite-compatible; if prepared and designated as Chosen Devotion, its **2 Committed VP -> 1 Committed VP** under the existing discount. Its one-minute **Spent VP** mode is not a Devotional Rite. No Exaltation property is authored for it yet.
+**Active Devotional Rite limit:** A Low Priest may maintain **at most 1 Active Devotional Rite at levels 1–3**, increasing to **at most 2 from level 4** through **Twofold Devotion**. Count **all** currently active Devotional Rites toward this cap, whether **Chosen** or **non-Chosen** and regardless of their technique names, recipient/profile, action cost, available VP, or commitment discount. **Chosen Devotion is a designation of one prepared Rite, not an additional active slot or an automatic second reservation.** A non-Chosen prepared Rite remains activatable at its **normal, undiscounted** cost when a Rite slot is available; it does not inherit the Chosen commitment discount. Gaining another Prepared Prayer at level 2 does **not** increase this active-Rite limit.
+
+**Capacity at declaration and application:** If the limit is already occupied, declaring another Rite is **illegal**, even with sufficient Available VP; do not spend AP/VP or open a response window. The Priest may end a prior Rite at a legal own-turn decision point under ordinary zero-action release timing, then declare a **fresh** paid activation if AP/VP and all other conditions permit. No automatic replacement, simultaneous overlap, out-of-turn free release, budget refresh, or discounted non-Chosen activation follows. Ending the Chosen Rite **does not change which prepared Rite is designated Chosen** until the next permitted prayer preparation. This limit applies to **Devotional Rites**; it does not automatically prohibit a separate non-Rite prayer/technique that is otherwise legal and payable.
+
+**Authored v0 examples:** [Guided Regeneration's maintained `Self` profile](../07-veil-magic/guided-regeneration-v0.md#b-maintained-reserve--2-committed-vp) is Devotional Rite-compatible; its Chosen Devotion discount reduces **2→1 Committed VP**, with no ordinary Spent VP. [Vital Shelter's maintained `Self` Primary](../07-veil-magic/vital-shelter-v0.md#low-priest--maintained-self-devotional-rite) is an **alternative** Rite: **2 Committed + 1 Spent**, discounted as Chosen to **1 Committed + 1 Spent** (full 2 Available required at VA0 L1). Neither fixed **2-Spent VP** version is a Rite. **No authored Exaltation property** is provided for either technique by these v0 profiles.
 
 ### Level 1 — Chosen Devotion
 
-During preparation, designate one prepared Devotional Rite as the **Chosen Devotion**.
+During preparation, designate one prepared Devotional Rite as the **Chosen Devotion**. This designation uses the ordinary **Active Devotional Rite cap** when maintained; it never grants a second slot at levels 1–3.
 
 It:
 
@@ -305,7 +309,7 @@ A rough 1–3 Spent VP range is an early calibration benchmark only; each Rite d
 Gain:
 
 - +1 Ability;
-- maximum **2 Active Devotional Rites**.
+- increase the **maximum Active Devotional Rites from 1 to 2**.
 
 Only one remains Chosen unless a later rule says otherwise.
 
