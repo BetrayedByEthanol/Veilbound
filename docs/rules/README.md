@@ -68,6 +68,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Basic Heal v0 — Life / Restoration](07-veil-magic/basic-heal-v0.md)
 - [Guided Regeneration v0 — Life / Restoration; fixed Spent or maintained Committed](07-veil-magic/guided-regeneration-v0.md)
 - [Vital Shelter v0 — Life / Preservation; finite Vigor protection; fixed or maintained; explicit Scholar Secondary](07-veil-magic/vital-shelter-v0.md)
+- [Gentle Growth v0 — Life / Nature; one-minute development of existing rooted vegetation](07-veil-magic/gentle-growth-v0.md)
 - [Minor Telekinesis v0 — Mind / Psionics](07-veil-magic/minor-telekinesis-v0.md)
 - [Stone Skin v0 — Earth / Fortification](07-veil-magic/stone-skin-v0.md)
 - [Weaken Restraints v0 — Liberty / Defiance](07-veil-magic/weaken-restraints-v0.md)
