@@ -54,6 +54,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 
 - [HP and Vigor](06-vigor-wounds-death/hp-and-vigor.md)
 - [Dying and Wounds](06-vigor-wounds-death/dying-and-wounds.md)
+- [Mundane Toxins v0 — 11 biological/chemical families, resistance and hazard timing](05-combat/mundane-toxins-v0.md)
 
 ### 07 — Veil and magic
 
