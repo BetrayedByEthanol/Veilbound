@@ -14,7 +14,15 @@ At equal level before Pillar Accord modifiers:
 
 > **High Priest Prepared Prayer capacity > Medium Priest capacity > Low Priest capacity**
 
-Exact base counts remain provisional.
+**Level-1–3 v0 preparation counts** are now provisionally authored; see [B04/B05 starting repertoires](../../design/b04-b05-priest-scholar-starting-repertoires-v0.md) for complete numeric tests and open balance watches.
+
+| Focus | Base Prepared Prayers L1 | Base L2 | Base L3 |
+|---|---:|---:|---:|
+| **High** | **3** | **4** | **4** |
+| **Medium** | **2** | **3** | **3** |
+| **Low** | **1** | **2** | **2** |
+
+**All values are capacity, not granted spells.** Only distinct actually authored eligible chosen-Pillar techniques can fill these slots; High > Medium > Low before Accord, and each level's normal tier ceiling and technique prerequisites apply. The two automatic Universal procedures do not consume slots.
 
 ## Pillar Accord
 
@@ -36,17 +44,17 @@ Doubt alone is not automatically dissonance. Sustained action or a sincerely cha
 
 Universal Resonance and Pillar Accord may therefore move independently.
 
-Exact Pillar Accord adjudication cadence remains provisional.
+**Starting Accord for an ordinary L1 Priest is +1 (Stable)**, while starting Universal Resonance remains **0**. A different start requires a deliberate campaign/story creation exception. **Accord change/Advance cadence remains provisional** and is not reset by preparing prayers, resting, or the passage of six hours.
 
 ### Prepared access
 
-Positive Pillar Accord adds Prepared Prayer capacity:
+**Effective Prepared Prayer capacity = max(1, base Prepared Prayers for Focus and level + current Pillar Accord + any explicitly applicable base-capacity modifier).**
 
-- +1 Pillar Accord → +1 prepared technique;
-- +2 Pillar Accord → +2;
-- +3 Pillar Accord → +3.
+Thus +1/+2/+3 Accord adds +1/+2/+3 slots respectively, while −1/−2/−3 reduces capacity, **floor 1**. E.g. with ordinary starting Accord +1: High **4/5/5**, Medium **3/4/4**, Low **2/3/3** at L1/L2/L3. An actual [Expanded Liturgy Talent](../10-advancement/talents-level-1-5-v0.md#tal-p01--expanded-liturgy) adds **+1 to base capacity** (not Accord). The floor never conjures a technique where the selected Pillar lacks an authored one.
 
-Negative Pillar Accord reduces prepared access, but the exact minimum floor remains provisional.
+**Preparation window:** create the first list freely at character creation. Thereafter, replace/fill it through **10 uninterrupted minutes of deliberate prayer/preparation**, **at most once per six elapsed in-world hours**. Repreparation does not restore VP, reset Accord, repay Miracle Debt or re-activate a sustained technique. Empty slots may remain empty when the catalogue is sparse; do not duplicate one technique as two independent prayers or use cross-Pillar effects. An increase in capacity creates empty slots until the next permitted preparation; a decrease **immediately** requires the player to suspend excess prepared entries at the time of change (no retroactive effect-target choices), with sustained already-activated spells following their own end rules. Suspended entries may be reselected only through ordinary preparation.
+
+**Preparation is a readiness list, not technique knowledge, casting, or recharging.** A Priest still uses only their **chosen Pillar's authored eligible techniques**, except independent Universal procedures; Open Invocation and Miracle Petition are separate permissions. See the [starting repertoire authoring tests](../../design/b04-b05-priest-scholar-starting-repertoires-v0.md#priest-starting-state-daily-prayer-capacity-and-recalculation).
 
 ### Why Accord affects capacity
 
@@ -143,25 +151,24 @@ High Priest uses three access layers:
 
 Open Invocation:
 
-- pays normal technique VP;
-- adds an **Invocation Surcharge**;
-- at levels 1–4 requires at least a **Full Action**.
+- requires an **authored, eligible, chosen-Pillar, normal-tier technique** not currently Prepared; all technique/profile/target requirements remain;
+- pays the **full normal technique VP** plus **1 additional Spent VP Invocation Surcharge**, separate from ordinary Spent or Committed VP and **not reducible** by Frugal Technique or similar ordinary-component discounts;
+- requires **Available VP for the technique and surcharge together** at legal declaration and application;
+- **levels 1–4: one Full Action**, including when the underlying profile would otherwise be a shorter Projection Action; **level 5+:** the technique's normal action while still paying +1 Spent VP;
+- spends the surcharge **with** ordinary technique VP at valid magical application (or at the legally authorized actual projectile launch before its roll). Illegal declaration costs nothing; an otherwise legally committed invocation invalidated/interrupted before application **loses the Full Action** but spends **0 technique VP and 0 surcharge VP**. Once applied, resistance, miss or later lack of usefulness returns neither ordinary Spent VP nor surcharge;
+- cannot create a free weapon attack, prepared-ammunition batch, new action/reaction, second enchantment, out-of-Pillar access, missing spell, Miracle Petition, or Tier-2 access at L1–2. A legal ammunition integration still needs its paid physical attack and must satisfy the Full Action and its own timing.
 
-The exact surcharge remains provisional.
+This **+1 surcharge is a provisional L1–3 playtest value**. Example: an otherwise unprepared **2-Spent-VP** spell costs **3 Available VP** plus Full Action; a legal **4-Committed-VP** Reserve requires **5 Available VP** total, keeping **4 Committed** and **1 Spent** after application.
 
 Long-lived inward/Embodiment configurations should generally require preparation rather than becoming casual spontaneous High-Focus setup.
 
 ### Level 2 — Expanded Liturgy
 
-Increase Prepared Prayer capacity. Exact count remains provisional.
+Increase **base Prepared Prayer capacity by +1** at level 2: High **3→4**, Medium **2→3**, Low **1→2**. Effective capacity continues to include Accord and applicable modifiers; new slots can be filled at the next legal prayer preparation.
 
 ### Level 3 — Open Prayer
 
-During daily preparation, one Prepared Prayer slot may be left unspecified.
-
-On first use, choose any eligible chosen-Pillar technique within normal tier. It fills that slot and remains Prepared for the rest of the preparation cycle.
-
-The slot does not repeatedly change techniques during the same cycle.
+During ordinary legal preparation, **one slot inside current effective Prepared Prayer capacity** may be left unspecified (not an extra slot). On its first later **legal use**, choose any eligible authored **chosen-Pillar** technique within normal accessible tier; it permanently fills that reserved slot until the next preparation. **No Open Invocation surcharge** is charged for this special filling, but the technique pays its normal legal VP/action/profile costs. The slot cannot repeatedly change techniques; an Accord decrease that removes the reserved slot suspends it before any later use.
 
 ### Level 4 — Expanded Liturgy + Ability Increase
 
@@ -217,7 +224,7 @@ The Consecration:
 
 ### Level 2 — Expanded Ministry
 
-Increase Prepared Prayer capacity. Exact count remains provisional.
+Increase **base Prepared Prayer capacity by +1** at level 2 (Medium **2→3**), applying current Accord and explicit modifiers. Fill any new entry on the next ordinary prayer preparation.
 
 ### Level 3 — Intercession
 
@@ -283,7 +290,7 @@ It:
 
 ### Level 2 — Devotional Repertoire
 
-Increase Prepared Prayer capacity. Exact count remains provisional.
+Increase **base Prepared Prayer capacity by +1** at level 2 (Low **1→2**), applying current Accord and explicit modifiers. Fill any new entry on the next ordinary prayer preparation.
 
 ### Level 3 — Exaltation
 
@@ -348,9 +355,7 @@ The current foundation supersedes:
 
 ## Calibration still unresolved
 
-- exact base Prepared Prayer counts;
-- negative Pillar Accord preparation floor;
-- exact Open Invocation surcharge;
+- final balance of provisional L1–3 **base Prepared Prayer counts, Accord +1 start, negative-Accord floor, and Open Invocation +1 Spent VP surcharge** (now executable v0, not missing);
 - final Miracle Petition numerical calibration/frequency behavior;
 - exact Intercession cost/ranges;
 - technique-specific Exaltation costs;
