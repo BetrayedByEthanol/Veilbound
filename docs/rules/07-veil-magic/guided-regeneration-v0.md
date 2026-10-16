@@ -10,6 +10,7 @@
 | Base Tier / current executable Used Tier | **Tier 1 only**. Higher Used-Tier effects are **not authored**; L3 Tier-2 ceiling or a Miracle Petition does not invent an upcast. |
 | Access | Chosen-Pillar **Prepared Prayer** for Priest; individually known for Scholar; Gifted/Anointed require their ordinary real Aspect access. No automatic acquisition from this document. |
 | Exact recipient profiles | `Single Target`: one eligible **living creature** (including caster); `Self`: **caster only**, 0 range. These are exact identifiers, not implicit composite permissions. |
+| Components — **both profiles, both modes** | **None**: no free hand, speech/verbal utterance, gesture/somatic movement, focus, holy symbol, material, tool, or implement required. This does **not** waive action capacity, awareness, targeting, VP, Intrusion or applicable magical-suppression restrictions. |
 | Contribution | **Primary only**; no Secondary or Rider contribution, no independent repeating Rider |
 | Interaction | **Beneficial bodily Intrusion**. `Single Target` is [Projection]; `Self` is explicitly **Inward, [Embodiment], Regeneration channel** and may be used as a Devotional Rite in maintained mode. |
 | Ordinary activation | **One Projection Action** on caster's own turn: High **20 AP**, Medium **24 AP**, Low **30 AP**, for **either** mode. **High Priest Open Invocation** overrides this with a **Full Action at levels 1–4** and the normal action at level 5+, with a **separate +1 Spent VP surcharge**. |
@@ -20,6 +21,10 @@
 | VC / Tier / Accord effect scaling | **No numerical scaling** in v0. Neither positive Veil Control nor Pillar Accord multiplies recurring throughput or changes conversion. |
 | Stacking / instance cap | **No stacking** between applications or modes. **One active Guided Regeneration instance per caster**; one recipient receives at most **+1** total from Guided Regeneration even from different casters. |
 | Additional capabilities | **None**: no extra Vigor/HP, immediate repair, free healing, additional step, temporary HP, regeneration efficiency, automatic stabilization or resurrection |
+
+### Casting components — explicit profile coverage
+
+Both exact profiles (`Single Target`, `Self`) may be activated in **either** the fixed-duration Spent-VP mode or the maintained Committed-VP mode **without components**. Occupied or immobilized hands, inability to speak, or the absence of an implement **alone** do not invalidate a declaration. Physical restraint or another condition that independently prohibits the requisite **Projection Action / Open Invocation Full Action**, conscious casting, or legal magical targeting still prevents use normally; this technique does not grant any exception to those general conditions. This is a **technique-specific authoring choice**, not a universal rule removing components from other Restoration techniques (for example, [Basic Heal](basic-heal-v0.md) requires one functioning available hand).
 
 ### Range and recipient acquisition
 
@@ -100,6 +105,9 @@ If the new recipient has a relevant Intrusion refusal, resolve the technique's o
 | Case | Expected result |
 |---|---|
 | VA +0 L1 High / Medium / Low normal fixed cast | **20 / 24 / 30 AP**, **2 Spent VP** in all cases; expiry after one minute; no refundable commitment |
+| `Single Target` or `Self`, fixed or maintained, with both hands occupied | **No components**; hand occupancy does not prohibit casting by itself; normal action, VP and recipient targeting restrictions still apply |
+| `Single Target` or `Self`, fixed or maintained, while silenced or physically restrained | **No verbal, somatic or implement component**; silencing/restraint alone does not block the technique, but a condition actually removing the required action capacity or targeting prevents casting |
+| Caster is unconscious or cannot perform the requisite action | **Cannot activate a new cast**, regardless of missing components; an already active effect follows its separately authored duration/maintenance rules |
 | VA +0 L1 High / Medium / Low ordinary maintained cast | **20 / 24 / 30 AP**, **2 Committed VP**, no *ordinary* Spent VP or Invocation Surcharge for a prepared/known technique; ordinary release refunds the still-committed 2 |
 | L1 High Priest Open Invocation: unprepared fixed mode, VA +0 | **Full Action consumes all 30 L1 Turn AP**, not 20; **3 Available VP** needed; **2 ordinary Spent + 1 separate Spent surcharge** at valid application; none Committed |
 | L1 High Priest Open Invocation: unprepared maintained mode, VA +0 | **Full Action consumes all 30 L1 Turn AP**, not 20; **3 Available VP** needed; on successful application **2 Committed + 1 separate Spent surcharge**; releasing returns **2 Committed**, not the Spent surcharge |
