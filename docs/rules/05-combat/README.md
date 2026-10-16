@@ -10,6 +10,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md)
 - [Traversal Foundation](traversal-foundation.md)
 - [Physical Hazards v0 — Falling, Catch Grip and Minor Displacement (LOCKED); other impacts (PROVISIONAL)](physical-hazards-v0.md)
+- [Mundane Toxins v0 — exposure, 11 toxin families, natural resistance and nonstacking](mundane-toxins-v0.md)
 - [Universal Maneuvers](universal-maneuvers.md)
 - [Disarm v0](disarm-v0.md)
 - [Limb / Weapon-Hand Control v0](limb-control-v0.md)
