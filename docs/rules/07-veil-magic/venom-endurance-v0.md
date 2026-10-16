@@ -122,8 +122,8 @@ On successful application, the spell can bind to **one already-active, eligible 
 | VE-R23 | Two attempted simultaneous Venom Endurance effects on one recipient | Second conflicting active declaration is **illegal** until first lawfully ends; cannot stack or replace to refresh for free |
 | VE-R24 | L1 Low Priest VA0, 2 Available VP, already using a 1-Committed Chosen Devotion | Cannot pay **2 Spent VP** for this Prayer; maintaining a Rite does not discount or grant Venom Endurance |
 | VE-R25 | L1 High Priest Open Invocation of unprepared Venom Endurance without discount | Requires **Full Action +3 Available VP** = 2 ordinary +1 surcharge; chosen mode uses normal output, no reactive interception window |
-| VE-R27 | L3 High Priest, 2 Available VP, TAL-M03 unused and legally declared, Open Invocation of unprepared Venom Endurance | **Legal Full Action** with locked **1 ordinary +1 separate surcharge = 2 Spent VP** at valid application; talent use consumed on legal declaration even if interrupted, but no VP spent before application. Without a legal discount the same 2-Available attempt is unaffordable |
 | VE-R26 | Toxin is Veil-origin Death/Plague or un-authored Serious+ | **No coverage by either mode**, no general poison immunity; future compatibility deferred |
+| VE-R27 | L3 High Priest, 2 Available VP, TAL-M03 unused and legally declared, Open Invocation of unprepared Venom Endurance | **Legal Full Action** with locked **1 ordinary +1 separate surcharge = 2 Spent VP** at valid application; talent use consumed on legal declaration even if interrupted, but no VP spent before application. Without a legal discount the same 2-Available attempt is unaffordable |
 
 ## Calibration / deferred scope
 
