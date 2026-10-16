@@ -35,9 +35,11 @@ The caster chooses one mode at declaration. Modes change **resource handling and
 
 ### A. Fixed-duration cast — 2 Spent VP
 
-- **2 Available VP -> Spent VP** at a legally attempted magical application, including if an actual Intrusion resistance contest defeats it; if an interruption/target loss prevents any attempted application, spend no VP, but committed AP remain lost.
+- The **base** fixed-mode price is **2 Spent VP**. Apply only an otherwise eligible **ordinary Spent-VP discount** at declaration (e.g. [TAL-M03 — Frugal Technique](../10-advancement/talents-level-1-5-v0.md#tal-m03--frugal-technique), minimum 1 VP), and **lock the effective price before responses**. Check that Available VP covers this **locked** cost at declaration and again at application. Move **exactly the locked effective price** from Available to Spent on every legally attempted magical application, including a contested application that is resisted. If interruption/target loss prevents any magical application, pay no VP but committed AP remain lost. A legally declared TAL-M03 use is consumed immediately on declaration even if a later interruption prevents spending VP; it is not restored on a failed or resisted attempt.
 - The successful effect lasts **up to 60 elapsed seconds outside initiative**, or expires **at Round Begin R+10** if activated during combat round R (before anyone takes a turn in that new round). Earlier removal, target death, or magical dispelling can end it.
-- Transitioning into initiative from elapsed time outside it **does not reset** remaining duration. Use completed elapsed seconds and at most **floor(remaining seconds / 6)** full further rounds, conservatively ending no later than the corresponding Round Begin. Transitioning out similarly keeps the remaining shorter elapsed duration; never restart a full minute by leaving/re-entering combat. Where an exact time boundary is already known, use the earlier boundary.
+- **Exploration → initiative (technique-local conservative conversion):** With **s whole elapsed-time seconds remaining**, set **q = floor(s / 6)** and discard the remainder (any fractional second is also rounded down). If **q = 0**, expire immediately at transition; otherwise, if the first initiative round is **R**, expire **Round Begin R+q**. Example: **37 seconds** remaining → **q=6**, expires **Round Begin R+6**, not R+7.
+- **Initiative → exploration (technique-local conservative conversion):** If initiative ends during round **C** with a scheduled expiry at **Round Begin E**, count **n = max(0, E−C)** future Round Begin boundaries, including the expiry boundary. The current partial round earns no remaining-time credit. Set the exact out-of-combat countdown to **s = 6 × max(0, n−1) whole seconds**. If **s = 0**, expire immediately. Example: **E=C+4** → **n=4** → **18 seconds**, not an uncertain 24. An instance already expired at Round Begin E cannot be converted.
+- **Repeated transitions:** Apply those floor conversions to **remaining** time only; never restart a full minute or ten-round window, bank a discarded remainder, or gain extra duration by crossing the boundary again. These conservative conversions may **shorten** the effect, but never intentionally extend it. The factor of six is **local to this technique**, not a global initiative-round duration. While staying in one timing mode, the original **60 seconds** or **R+10** expiry remains exact in that mode.
 - Once successfully applied, the effect is **independent of a caster-held VP channel**: the caster moving away, becoming unconscious or dying does not itself remove it; recipient death still ends the effect. Releasing/dismissing the fixed-duration effect **never refunds Spent VP**.
 - **Not** an Active Consecration or a Devotional Rite. Cannot be Reassigned as one; does not receive the Chosen Devotion commitment reduction or Exaltation.
 - Its fixed duration is **not a new regeneration cadence**. Ten rounds do not necessarily give ten useful Regeneration Steps: the recipient must have an actual step while the effect is live.
@@ -57,11 +59,12 @@ Both modes can be voluntarily dismissed at a normal **own-turn zero-action decis
 At the **recipient's normal Regeneration Step** (before start-of-turn hazards), if the effect is active and the step is allowed, calculate:
 
 ```text
-Ordinary throughput = max(recipient Vitality, 0) + recipient Focus Rate
-Guided throughput   = ordinary throughput + 1
+Baseline throughput = max(recipient Vitality, 0) + recipient Focus Rate
+Otherwise applicable throughput = baseline + other eligible throughput modifiers
+Guided throughput = otherwise applicable throughput + 1 (if not already benefiting from Guided Regeneration)
 ```
 
-High / Medium / Low recipient Focus Rates remain **1 / 2 / 3**. **Recipient** statistics, not caster statistics, control throughput. Only **one** point is added irrespective of the number of active copies, profiles or creators.
+High / Medium / Low recipient Focus Rates remain **1 / 2 / 3**. **Recipient** statistics, not caster statistics, control throughput. **Preserve all otherwise applicable bonuses and reductions**, including the separate **+1 from [TAL-C02 — Enhanced Regeneration](../10-advancement/talents-level-1-5-v0.md#tal-c02--enhanced-regeneration)**. For example, **Vitality +1, High Focus** supplies baseline **2**; TAL-C02 makes it **3**, and Guided Regeneration makes it **4**. The restriction applies **only to additional Guided Regeneration copies**, not independent throughput modifiers. Each modifier and any suppression still obeys its own specific rules; this formula does not override regeneration suppression or create a new global modifier priority.
 
 - Each point actually used still consumes **1 recipient Vigor** for **1 HP restored** or **1 Repair Progress** under the existing rule. The extra point itself restores nothing and adds no Vigor.
 - A **non-Dying** recipient may split eligible throughput between HP and repairable wounds by the existing player-controlled allocation. Unused throughput is lost at that step, not stored.
@@ -84,10 +87,10 @@ If the new recipient has a relevant Intrusion refusal, resolve the technique's o
 
 ## Activation and termination procedure
 
-1. **Declare:** Confirm the technique is legitimately known or prepared; choose one exact recipient profile **and one exclusive payment mode**; validate the recipient, range/sight/path, AP, mode-specific VP, instance cap, and legal action timing. Apply only specifically eligible cost modifiers. Insufficient available resources make the declaration illegal without opening a response window. Record a mode-specific price before responses.
+1. **Declare:** Confirm the technique is legitimately known or prepared; choose one exact recipient profile **and one exclusive payment mode**; validate the recipient, range/sight/path, AP, mode-specific VP, instance cap, and legal action timing. For fixed mode, apply only specifically eligible **ordinary Spent-VP** discounts and **lock the effective price** (normally 2, or 1 with an eligible one-VP discount) before responses. For maintained mode, the normal commitment is 2, except the actual Low Priest Chosen Devotion discount to 1. Insufficient Available VP for the **locked price** makes the declaration illegal without opening a response window. An eligible **TAL-M03** use is consumed on legal declaration, even if application later fails.
 2. **Commit AP and resolve responses:** Pay one Focus-priced Projection Action (High **20**, Medium **24**, Low **30**), then process ordinary Interceptions/Reactions, interruption and recipient changes. This action does **not** grant a free self-recovery Step or a Reactive cast.
-3. **Recheck:** At actual application after responses, recheck eligibility, caster capability, the recipient still living, range/path (unless `Self`), VP and non-stacking/instance rules. If the spell was interrupted or the application became illegal before it could be attempted, no VP become Spent/Committed and paid AP remain lost.
-4. **Beneficial Intrusion:** An unopposed genuinely beneficial application succeeds without a contest, including an unconscious beneficiary without applicable prior refusal. If the beneficiary actively resists or has a surviving refusal, use the authored Direct Veil contest (+8 barrier); for **fixed-duration** mode spend its 2 VP when making that otherwise legal contested application, **even if resisted**. For maintained mode, no VP remain Committed if resisted. Both consume their already-paid AP.
+3. **Recheck:** At actual application after responses, recheck eligibility, caster capability, the recipient still living, range/path (unless `Self`), **Available VP against the previously locked effective price** and non-stacking/instance rules. If the spell was interrupted or the application became illegal before it could be attempted, no VP become Spent/Committed and paid AP remain lost (any legally selected TAL-M03 use remains consumed).
+4. **Beneficial Intrusion:** An unopposed genuinely beneficial application succeeds without a contest, including an unconscious beneficiary without applicable prior refusal. If the beneficiary actively resists or has a surviving refusal, use the authored Direct Veil contest (+8 barrier). For **fixed-duration mode**, spend **exactly its previously locked effective Spent-VP price** (normally 2; **1 if legally discounted**) upon a legal magical application **whether unopposed or resisted**. For **maintained mode**, establish only its locked VP commitment on success; a resisted application creates no ongoing commitment. Both consume their already-paid AP.
 5. **Establish:** If successful, either (A) register the fixed-duration expiry and no VP channel, or (B) lock the effective maintained VP commitment and its caster/recipient endpoints. The +1 applies solely to future normal recipient Regeneration Steps until the instance actually ends. Subsequent legal release, death, suppression, replacement and duration expiry follow the selected mode above.
 
 ## Worked examples and regression cases
@@ -97,7 +100,8 @@ If the new recipient has a relevant Intrusion refusal, resolve the technique's o
 | VA +0 L1 High / Medium / Low normal fixed cast | **20 / 24 / 30 AP**, **2 Spent VP** in all cases; expiry after one minute; no refundable commitment |
 | VA +0 L1 High / Medium / Low ordinary maintained cast | **20 / 24 / 30 AP**, **2 Committed VP**, not Spent; one continuous instance, ordinary release refunds the still-committed 2 |
 | VA +0 L1 Low Priest selects maintained `Self` as Chosen Devotion | **1 Committed VP**, not 1 Spent; other **1 Available VP** remains. Fixed mode stays **2 Spent** |
-| Recipient Vitality +1: High / Medium / Low normal throughput | **2 / 3 / 4**; active Guided Regeneration yields **3 / 4 / 5** |
+| Recipient Vitality +1: High / Medium / Low baseline throughput, no other modifiers | **2 / 3 / 4**; active Guided Regeneration yields **3 / 4 / 5** |
+| Recipient Vitality +1, High Focus and TAL-C02 Enhanced Regeneration | Baseline **2** + TAL-C02 **1** + Guided Regeneration **1** = **4** throughput; two Guided copies still give only **4** |
 | Recipient missing HP 5; Vigor 1; throughput otherwise 2 | Can spend **at most 1 Vigor** to restore **at most 1 HP**; +1 creates no free energy |
 | Non-Dying recipient has both HP loss and unfinished repairable wound | Player may allocate the additional throughput to **HP or Repair Progress**, spending Vigor at ordinary 1:1 |
 | Dying recipient with two unfinished wounds | Use survival cancellation and **oldest unfinished repairable wound first**; no HP before all blockers are cleared |
@@ -105,7 +109,11 @@ If the new recipient has a relevant Intrusion refusal, resolve the technique's o
 | Recipient at 0 Vigor or fully suppressed | **0** extra HP/repair; no independent tick or free conversion |
 | Spell cast after recipient's Regeneration Step this turn | **No retroactive +1**; earliest benefit next normal Step |
 | Fixed spell activated in round R | Expires **Round Begin R+10** at latest; cannot supply throughput in round R+10 |
-| Fixed spell cast out of initiative, then initiative begins | Remaining real-time duration only, conservatively converted; never gains a new 10-round lease |
+| Fixed spell cast out of initiative, then initiative begins | **37 whole seconds** remaining → **floor(37/6)=6**; if first round R, expiry **Round Begin R+6**; 1 second discarded |
+| Fixed spell leaves initiative mid-round C with expiry Round Begin E=C+4 | Count **n=4** future boundaries, then **6×(4−1)=18 whole seconds** remaining in exploration; no credit for partial round C |
+| Fixed spell leaves initiative with only E=C+1 remaining | **n=1**, conversion gives **0 seconds**, expires at transition |
+| Fixed spell enters initiative with only 5 seconds left | **floor(5/6)=0**, expires immediately, not one extra round |
+| Fixed spell exits and re-enters initiative | Each transition floors **remaining** time; never extends/restarts original duration |
 | Maintained caster knocked unconscious | Committed VP remain and benefit may assist Dying; no free reactivation |
 | Maintained caster dies | Maintained pattern ends, reservation releases; no resurrection |
 | Fixed-mode caster dies | Fixed spell remains for its unexpired term while recipient lives, absent dispelling |
@@ -118,7 +126,9 @@ If the new recipient has a relevant Intrusion refusal, resolve the technique's o
 | Intercession beneficiary already has Guided Regeneration | No additive throughput; spent VP/Reaction do not grant second effect |
 | Candidate tries to upcast at level 3 | **No enhanced T2 profile authorized** by v0; T2 ceiling alone does not scale throughput |
 | Positive Priest Accord or high Veil Control | Still **exactly +1**; no per-round multiplicative bonus |
-| Talent discounts 1 ordinary Spent VP | Only an expressly applicable Spent discount can affect the fixed mode; cannot reduce the 2 VP maintained commitment or Chosen Devotion's separate math |
+| TAL-M03 discounts an eligible fixed cast; target resists | Lock **1 Spent VP** at legal declaration, consume the TAL-M03 use then, and spend **exactly 1 VP** upon valid resisted Intrusion; 20/24/30 activation AP is still lost |
+| TAL-M03 declared on fixed cast; interruption prevents application | Talent use consumed on legal declaration; **0 Spent VP** if no application can occur; paid AP lost |
+| Talent discounts 1 ordinary Spent VP | Only an expressly applicable Spent discount can affect fixed mode's **locked effective price**; it cannot reduce 2-VP maintained commitment or Chosen Devotion's separate math |
 | Technique is merely known by a Scholar | No automatic Medium Scholar reroute, Low Scholar Active Embodiment, or composite pairing solely from matching labels |
 | Outside initiative for 6 hours | **No invented Regeneration Steps**; existing Vigor Recovery timing remains unchanged |
 
