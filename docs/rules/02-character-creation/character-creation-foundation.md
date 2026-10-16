@@ -91,15 +91,13 @@ Choose one Pillar. **Pillar-technique** access is constrained to that Pillar's t
 
 The Priest also uses the separate **Pillar Accord** state defined in the Priest foundation. Pillar Accord is not universal Resonance.
 
-The exact starting Pillar Accord value remains unresolved.
-
-Exact starting Prepared Prayer counts remain provisional.
+**L1 v0:** Start at **Pillar Accord +1 (Stable)**, separate from Universal Resonance 0. **Base Prepared Prayer capacities** at L1 are **High 3, Medium 2, Low 1**; Accord +1 yields actual **High 4, Medium 3, Low 2**, before an explicitly eligible capacity Talent. Slots may remain empty when only one chosen-Pillar spell is authored; **do not invent additional techniques**. Effective capacity has a **minimum of one** after signed Accord, and preparation follows the authored **10-minute / once-per-six-elapsed-hours** procedure. High L1 Open Invocation permits an otherwise eligible **unprepared chosen-Pillar Tier-1** technique with **one Full Action + normal VP +1 separate Spent VP surcharge**. Its surcharge never becomes a Talent-discounted 0-VP tax. Detailed rules: [Priest Foundation](../08-archetypes/priest.md#prepared-access) and [Priest/Scholar repertoire v0](../../design/b04-b05-priest-scholar-starting-repertoires-v0.md).
 
 ### Scholar
 
 Choose individually learned **Pillar/Aspect** techniques from allowed Pillars/Aspects. [Universal Veil operations](../07-veil-magic/universal-veil-fundamentals.md#universal-eligibility-and-automatic-acquisition--locked) are a separate automatically level-unlocked family (**Inspection 1, Blink 3**) and do **not** consume the Scholar's individually learned Pillar-technique capacity.
 
-Exact starting repertoire counts remain provisional.
+**L1 v0 distinct known Pillar techniques:** **High 5 / Medium 4 / Low 3**, selected individually from actually authored eligible techniques and potentially across Pillars. **High:** prepare up to **1 legal Composite Formula** from known compatible technique pairs (a formula is **not** a new known technique). **Medium:** no general prepared-technique cap; the **one Active Inward Boost** at L1 still requires explicitly compatible authored Inward profiles. **Low:** prepare **up to 2 of 3 known** techniques as its ready subset; an Active Embodiment additionally requires explicit compatible expression. A technique is one known/ready choice regardless of number of authored profiles. Normal Universal Inspection/Blink slots are separate. Technical High-formula/Low-prepared setup is **10 minutes, at most once per six elapsed hours** after the creation-time initial set. See [Scholar Foundation](../08-archetypes/scholar.md#l13-individually-learned-repertoire--all-scholar-focuses) and [Priest/Scholar repertoire v0](../../design/b04-b05-priest-scholar-starting-repertoires-v0.md).
 
 ### Gifted
 
@@ -195,7 +193,7 @@ The audit explicitly leaves these areas incomplete:
 - final numerical calibration of v0 Training/starting equipment and later Weapon/Discipline Refinement content;
 - complete native defense/save mapping, including non-spell hazards and spell defenses;
 - some spell-derived formulas;
-- final repertoire/preparation counts for several Archetypes;
+- **repertoire-count balance** and **focus-specific compatible expressions** remain unresolved, even though Priest and Scholar **L1–3 v0 counts and preparation rules are now authored**;
 - a final shared procedure for every remaining derived sheet value.
 
-The **B04 Training and mundane starter-equipment steps are executable at level 1 using v0 values**. Other character creation gaps (notably Archetype starting access/repertoire and later advancement/content) still prevent this from being a fully closed end-to-end procedure.
+The **B04 Training, mundane starter-equipment and Priest/Scholar repertoire quantity** steps are executable at level 1 using v0 values. Character creation still cannot be certified end-to-end across all twelve builds: Priest Consecrations/Devotions, Scholar Inward Boost/Embodiment profiles, Gifted Focus expressions and Anointed Signature/Authority packages need individually authored content. Do not count available prayer/known-technique slots as playable Focus effects.
