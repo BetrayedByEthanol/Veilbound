@@ -36,12 +36,12 @@
 
 ## 2. Initial bestiary register
 
-The [machine-readable 14-entry seed](../../content/creatures/b06-initial-bestiary-v0.json) is validated against the [standalone bestiary-index JSON Schema](../../schemas/b06-bestiary-index-v0.schema.json). **Only B06-EN-01 already has a complete separately authored attack-capable fixture.** All listed non-Sentry abilities are **capability *candidates*** and do not count as usable attacks until individual source and numeric rules are published.
+The [machine-readable 14-entry seed](../../content/creatures/b06-initial-bestiary-v0.json) is validated against the [standalone bestiary-index JSON Schema](../../schemas/b06-bestiary-index-v0.schema.json). **B06-EN-01 Sentry and B06-EN-02 Ordinary Human Soldier now each have an executable benchmark attack profile.** The Soldier uses explicitly **provisional B06-local non-Focus Physical Action and regeneration defaults**, not a player Archetype. The remaining **12 entries are non-executable concepts**; names or capability labels alone grant nothing.
 
 | ID | Creature | MVP window | First useful role / status |
 |---|---|---|---|
 | **EN-01** | **Firebound Sentry** | B06-A | **Already executable** in [original PR #84 fixture](../../content/creatures/b06-firebound-sentry.v0.json): sword and maintained Conjure Flame; linked to this taxonomy |
-| **EN-02** | Ordinary Human Soldier | B06-A | First non-Archetype **mundane weapon**/Armor/Guard comparison; NPC AP and derived numbers require an independently authored baseline |
+| **EN-02** | **Ordinary Human Soldier** | B06-A | **Executable v0 test fixture**: [sword/shield/brigandine](../../content/creatures/b06-ordinary-human-soldier.v0.json), VP0, Physical Action24, Turn AP42, Guard18; see the explicit [non-Focus NPC template proposal](b06-ordinary-human-soldier-template-v0.md) |
 | **EN-03** | Hunter of the Woods | B06-A | First **natural bite/horn** and real biological toxin-delivery source; large creature combat math pending |
 | **EN-04** | Veil-touched Dire Giant Spider | B06-A | Aggressive **Veil-altered beast**; precise alteration and any venom/web effect pending |
 | **EN-05** | Goblin | B06 later | Inward-only high-Vigor/regen physiology, non-playable MVP |
@@ -55,7 +55,7 @@ The [machine-readable 14-entry seed](../../content/creatures/b06-initial-bestiar
 | **EN-13** | Pillar Surge Manifestation | Post-MVP | **Non-sentient** pattern-formed entity, source/anchor/dispersal, optional physical form |
 | **EN-14** | Independent Posthumous Spirit | Post-MVP | Nonphysical fleeting presence, not currently an ordinary combat target |
 
-B06-A should initially build/verify the **ordinary soldier** and **Hunter** after reviewing this schema update. EN-04 can follow once its unique innate alteration is selected. This does **not** mean all four initial rows are complete or balanced.
+B06-A should **Codex-review and test the now-authored ordinary soldier**, then author the **Hunter** with a real biological natural attack and venom source. EN-04 can follow once its exact Veil alteration is chosen. This does **not** mean all four initial rows are complete or balanced.
 
 ## 3. Schema changes and backward compatibility
 
@@ -73,10 +73,10 @@ B06-A should initially build/verify the **ordinary soldier** and **Hunter** afte
 |---|---|---|
 | Creature taxonomy | Independently record species, physiology, cognition, Veil origin, physical presence and player-access scope | **Authored design v0** |
 | Executable Firebound Sentry migration | Same weapons, source/typed packets, AP/VP/defense values; linked to initial index | **Metadata-only extension; regression required** |
-| Human soldier | No Archetype, no personal learned spells; exact lawful physical action/defense statistics and perhaps separately paid item effects | **CONCEPT; not yet executable** |
+| Human soldier | No Archetype or independent spell use; [24-AP non-Focus B06-local action proposal](b06-ordinary-human-soldier-template-v0.md), 0 VP, HP/Vigor and existing shield/sword/brigandine derived values | **EXECUTABLE v0 BENCHMARK FIXTURE; proposed NPC defaults pending review and opposed combat** |
 | Hunter of the Woods | Body-scale rule or local documented constraint, bite/horn/other AP, real source-linked venom profile, post-armor piercing injection gate and limits | **CONCEPT; not yet executable** |
 | Veil-touched spider | Exact actual alteration rather than automatic "spider magic" | **CONCEPT; not yet executable** |
 | Undead, dragons, manifestations and spirits | Creature-specific metaphysics plus physical target and resource constraints | **Deferred; no innate immunity package** |
 | B06-A completed encounter pack | Fully opposed combat traces against both [Low Life Priest builds](b05-life-low-priest-l3-build-exaltation-verification-v0.md), natural responses, actual end-to-end damage/VP/Vigor/provenance | **OPEN; 0/12 Focus certification unchanged** |
 
-**Next implementation PR after review:** develop EN-02 Ordinary Human Soldier with a **source-backed non-Archetype NPC action/tempo budget**, and EN-03 Hunter with independently authored natural attack and toxin material delivery. Build one actual opposed attack sequence against each verified Life Low Priest. Do not silently infer an NPC Focus, venom coating, full dragon flight or undead poison immunity.
+**Next implementation after review:** resolve the **provisional EN-02 non-Focus tempo/regen defaults**, author EN-03 Hunter with natural attack and actual toxin material source/delivery, and execute the first actual opposed soldier/sentry versus both verified Life Low Priest builds. Do not silently infer NPC Focus, venom coating, dragon flight or undead poison immunity.
