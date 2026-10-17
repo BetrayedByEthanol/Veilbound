@@ -654,6 +654,7 @@
         "attack_roll",
         "range_class",
         "weapon_or_source",
+        "source_class",
         "primary_hp_packet",
         "additional_packets",
         "required_active_effect",
@@ -828,7 +829,7 @@
             "environment",
             "other"
           ],
-          "description": "Classification only; a separately authored legal source and action/resolution still required."
+          "description": "Required source category on EVERY executable attack. Natural, innate, breath, environment and other origins additionally require source_authority_ref and resolution_rule_ref. A missing category is invalid, even for rolled attacks with a non-null HP packet."
         },
         "resolution_kind": {
           "enum": [
