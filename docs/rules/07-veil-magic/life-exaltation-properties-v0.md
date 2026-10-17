@@ -43,7 +43,7 @@ After the **first later event causing actual HP loss**, complete all normal dama
 |---|---|
 | Identity | **Life / Preservation**, Level-3 Low Priest Exaltation |
 | Pattern | Temporarily **convert some of a finite protective budget** to a new, bounded form of bodily protection |
-| Host | Any **self-targeted maintained Chosen Life/Preservation Rite** with an **actual finite numeric budget preventing incoming direct Vigor-damage packets** and at least **2 unspent points**. **Vital Shelter Primary** currently qualifies |
+| Host | Any **self-targeted maintained Chosen Life/Preservation Rite** with an **actual finite numeric budget preventing incoming direct Vigor-damage packets**. Must have **at least 2 unspent budget points at Exaltation activation**; after arming it may stay pending while the valid host has **1 point remaining**, but can prevent 0 HP at payout. **Vital Shelter Primary** currently qualifies |
 | Activation | One legal **own-turn decision point in initiative**, while conscious and at positive HP; expressly **0 additional AP, no Reaction** |
 | Price | **1 Spent VP** at Exaltation activation, independent of the **actual host's existing locked Committed VP and any already Spent establishment cost**. Vital Shelter as Chosen currently uses 1 Committed + 1 Spent to establish the host; other compatible hosts use their own prices |
 | Trigger | First subsequent **single incoming hit/hazard event with positive aggregate HP damage** after each separate HP packet receives its ordinary mitigation; all HP packets belonging to that one event are **one** Exaltation trigger |
