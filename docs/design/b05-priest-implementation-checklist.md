@@ -114,7 +114,7 @@ These remain **unchecked** after PR #82. The [build verification](b05-life-low-p
 
 | Check | B06 acceptance test | Evidence needed |
 |---|---|---|
-| [ ] | **One reviewed Level-1–3 enemy stat-block baseline** suitable for the two Level-3 Life Low Priest fixtures | Actual HP/Vigor/Armor, attacks, Training, Initiative, ability modifiers, legal delivery/equipment and GM behavior; no invented generic enemy powers |
+| [ ] | **One reviewed Level-1–3 enemy stat-block baseline** suitable for the two Level-3 Life Low Priest fixtures | **FIRST REVIEW CANDIDATE:** [B06-EN-01 Firebound Sentry](../../content/creatures/b06-firebound-sentry.v0.json) using [schema v0](../../schemas/b06-enemy-benchmark-v0.schema.json), with legal sword and Conjure Flame packets. **Unreviewed**; no source-grounded toxin, complete encounter/GM-roll trace or accepted B06 pack yet |
 | [ ] | **B06-1: physical attrition** — both L3 Life Low Priest variants face a comparable physical threat | Hit/Guard/Dodge rolls, first own-turn preparation, real Regeneration Step, Held opportunity, TAL-C10, damage/wound and VP/Vigor round ledger |
 | [ ] | **B06-2: mixed HP/Vigor/elemental packets** — compare the same threats against both Rites | Independently mitigated typed HP, actual residual types, finite Vital Interposition 2:1 budget vs Vigor prevention, host ending/refund, attack and Reaction timing |
 | [ ] | **B06-3: toxin-bearing attack** — test true puncture or separately established delivery, resistance and optional Venom Endurance | Source-grounded mundane toxin, after-prevention Piercing HP, genuine exposure, resisted Full/Reduced result, nonstack timing and TX/VE regression cases |
