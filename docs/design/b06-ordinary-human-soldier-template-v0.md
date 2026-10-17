@@ -70,7 +70,7 @@ Any combat *variation* becomes executable only when every derived field, chosen 
 ## 4. B06 completion boundaries and next steps
 
 - [x] Add schema-valid [B06-EN-02 standalone fixture](../../content/creatures/b06-ordinary-human-soldier.v0.json), `source_class: mundane_weapon`, actual weapon Attack/Shield Guard, 0 VP and non-projector resources.
-- [x] Update the [14-entry initial bestiary](../../content/creatures/b06-initial-bestiary-v0.json) to mark **two** executable test fixtures (Sentry and Soldier), retaining thirteen? **No:** there are now **12 still-non-executable entries**; no other design concept is promoted.
+- [x] Update the [14-entry initial bestiary](../../content/creatures/b06-initial-bestiary-v0.json) to mark **two** executable test fixtures (Sentry and Soldier), there are **12 still-non-executable entries**; no other design concept is promoted.
 - [ ] Codex-review the **24-AP neutral Physical Action and +0 non-Focus regeneration rate** as the intentionally proposed narrow B06 NPC defaults; do not treat them as preexisting canonical Focus values.
 - [ ] Complete the first genuinely opposed Level-3 Life Low Priest encounters with source-grounded initiative, defense assignment, Attack rolls, physical damage, actual Regeneration and Vigor ledgers.
 - [ ] Develop **B06-EN-03 Hunter of the Woods** using independently authored natural weapons, large-body effects and real TX biological delivery; never automatically copy the human soldier's action or repair defaults onto a beast.
