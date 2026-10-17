@@ -64,12 +64,14 @@ This is a direct-hit HP-damaging physical Attack and uses applicable natural-20/
 | Field | Rule |
 |---|---|
 | Primary activation | **One Projection Action**: High **20 AP**, Medium **24 AP**, Low **30 AP** |
-| VP | **4 × T Committed VP**, returned when the channel ends |
+| VP | Base **4 × T Committed VP**, returned when the channel ends; Low Priest Chosen Devotion discounts the qualifying Reserved Weapon mode by **1 Committed VP (minimum 1)**, otherwise no discount |
 | Target | **One weapon the caster currently wields**; explicitly identify it on activation |
 | Duration | **While the weapon channel and VP reservation remain valid**; no hit count, expiration clock or upkeep VP |
 | Attack/defense | **Ordinary weapon attack and defense**, with its normal Physical Action/AP or authored attack timing |
 | Damage per eligible successful hit | Weapon's own physical packet + Primary `F 2; V 1 + ceil(d6×T/4) + VC` |
 | Extra per-hit cost | **0 VP, 0 spell AP**; underlying weapon attacks still cost their usual AP |
+
+**Low Priest Devotional Rite:** When this technique is Prepared and the caster is a Low Priest, this Reserved Weapon mode **automatically qualifies** as one Devotional Rite while the target remains **the weapon currently wielded by that Priest**, because its channel is maintained by Committed VP. The shared [one-Rite cap at L1–3 / two at L4+](../08-archetypes/priest.md#devotional-rites) is checked at declaration and application even if the Priest calls the activation an ordinary weapon spell. If designated **Chosen Devotion during preparation**, reduce the **4 × Used Tier Committed VP** by exactly **1**, minimum 1; no change to damage, action, attack cadence, disarm/drop ending, or other cost. **L1 Low Priest with VA0** has **Max VP 2** and cannot afford T1 base 4 or Chosen 3; **L2 VA0 Max VP 4** may afford Chosen T1 **3 Committed VP** with one VP left Available. No Exaltation property or additional enchantment is supplied by this rule. Thrown Flame and Ammunition Shot lack an ongoing Committed reservation and **never** qualify as Rites.
 
 The magical packet applies on **every qualifying successful hit** by **the selected enchanted weapon**, including an otherwise eligible hit whose ordinary physical HP damage is absorbed by Armor. A different weapon, unenchanted off-hand attack, replaced projectile or mere possession of the enchanted sword does not inherit it. The v0 **Rider cadence** is **each eligible successful weapon hit**, and the numbers remain subject to multi-attack Tempo balancing.
 
@@ -123,6 +125,10 @@ For **VC +0**, the following refer to **Primary Vigor damage on a successful hit
 | A flame projectile hits Fire-Resistant target | Fire HP minus explicit Fire Resistance; Vigor packet applies independently |
 | A flame projectile deals **6 Fire HP**, target has two independent authored Fire Resistances **2 and 3** (no Stone Skin) | Apply **max(2,3) = 3** resistance **once**, for **3 Fire HP taken**, not 1; independent Vigor still resolves normally |
 | A selected Reserved sword hits three times | The defined on-hit fire/Vigor packets apply **three** times, with no per-hit VP or magic AP |
+| L1 Low Priest VA0 prepares Conjure Flame as Chosen Devotion, T1 `Weapon Enchantment` | Max VP **2**; base **4 Committed**, Chosen **3**. **Illegal**, unaffordable; no AP or VP committed |
+| L2 Low Priest VA0, Prepared Chosen `Weapon Enchantment`, T1, no other Active Rite | Max VP **4**; **3 Committed VP** from 4 leaves **1 Available**. Full ordinary Low Projection AP still required; effect ends on disarm/drop and does not grant a free weapon attack |
+| Low Priest with one Active Rite at L3 attempts T1 Reserved Weapon Conjure Flame | **Illegal** under shared cap, even if 4 Available VP can pay the base non-Chosen reservation; cannot bypass by calling it a normal spell |
+| Low Priest uses Conjure Flame `Thrown Projectile` or `Ammunition Shot` | **Not Devotional Rites**, because no positive ongoing Committed VP reserve; remain separate legal Prepared Prayer modes, subject to ordinary access/AP/VP |
 | The wielder legally drops the reserved sword | The channel ends and its **4×T Committed VP** becomes Available; no free reaction timing |
 | Spontaneous bow shot with Conjure Flame | One normal paid ranged attack; **2×T VP spent on launch** even on miss; 0 extra Projection AP |
 | Heavy crossbow shot with Conjure Flame | **Full Action** still required; enchantment never waives its reload Full Action |
