@@ -296,12 +296,20 @@
           "minimum": 1
         },
         "physical_action_ap": {
-          "type": "integer",
-          "minimum": 1
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "null when no generic Physical Action price is authored; any executable creature attack must still declare and justify its own actual AP/action cost."
         },
         "projection_action_ap": {
-          "type": "integer",
-          "minimum": 1
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "null means no personal executable Projection Action authorization (e.g. ordinary uninvoking human or noncasting creature). Never infer a Focus or castable technique from this field."
         },
         "movement_points": {
           "type": "integer",
@@ -312,8 +320,12 @@
           "minimum": 0
         },
         "natural_regeneration_throughput": {
-          "type": "integer",
-          "minimum": 0
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "null when natural biological regeneration is inapplicable/unauthored; 0 is an authored zero-throughput state, not a universal undead rule."
         },
         "reaction_capacity": {
           "type": "integer",
@@ -673,7 +685,10 @@
           "minimum": 0
         },
         "attack_roll": {
-          "type": "object",
+          "type": [
+            "object",
+            "null"
+          ],
           "additionalProperties": false,
           "required": [
             "ability_a",
@@ -703,7 +718,7 @@
               "type": "integer"
             }
           },
-          "description": "Current B06 v0 executable attack profile uses sourced ordinary Attack roll; undefined natural/breath resolution cannot be inferred from this template."
+          "description": "null only when a separately authored non-weapon resolution explicitly does not use an attack roll; include source_authority_ref and resolution_rule_ref."
         },
         "range_class": {
           "enum": [
@@ -715,7 +730,15 @@
           "type": "string"
         },
         "primary_hp_packet": {
-          "$ref": "#/$defs/packet"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/packet"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "null only for independently authored no-primary-HP resolutions; do not fabricate an attack or critical packet for a supernatural or non-damaging effect."
         },
         "additional_packets": {
           "type": "array",
@@ -854,8 +877,51 @@
               ]
             }
           }
+        },
+        "resolution_rule_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Authoritative resolution rule for an unusual bite, breath, incorporeal effect or unrolled application; absent on existing standard weapon Attack profiles."
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "attack_roll": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "attack_roll"
+            ]
+          },
+          "then": {
+            "required": [
+              "source_authority_ref",
+              "resolution_rule_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primary_hp_packet": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "primary_hp_packet"
+            ]
+          },
+          "then": {
+            "required": [
+              "source_authority_ref",
+              "resolution_rule_ref"
+            ]
+          }
+        }
+      ]
     },
     "creatureProfile": {
       "type": "object",
