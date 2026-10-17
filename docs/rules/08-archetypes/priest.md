@@ -319,11 +319,11 @@ Increase **base Prepared Prayer capacity by +1** at level 2 (Low **1→2**), app
 
 ### Level 3 — Exaltation
 
-Spend additional VP so the **single specifically identified active Chosen Rite instance** temporarily expresses a related authored secondary property of the same Pillar/Aspect. Other active Rite instances, including another activation of the same prepared technique, cannot anchor Exaltation.
+Spend additional VP so the **single specifically identified active Chosen Rite instance** temporarily expresses a compatible **authored Exaltation property** of the same Pillar/Aspect. Other active Rite instances, including another activation of the same prepared technique, cannot anchor Exaltation. A property is a **distinct secondary supernatural behavior**, not a second cast or the separately defined capitalized **Secondary technique contribution**; Exaltation is not merely a generic numerical bonus.
 
-Exaltation is not merely a generic numerical bonus.
+**Universal execution:** Follow the [Low Priest Exaltation Framework v0](low-priest-exaltation-framework-v0.md): one pending property on the unique active Chosen instance, actual host capability predicates, property-defined timing/AP/Reaction, payment of actual authored Spent VP, host-bound expiry, and no universal preparation-time property lock or free spell composition. The rough **1–3 Spent VP** early calibration benchmark is **not** a global price rule. **Automatic Rite eligibility does not automatically grant an Exaltation, Secondary contribution, or Living Liturgy compatibility.**
 
-A rough 1–3 Spent VP range is an early calibration benchmark only; a separately authored compatible Exaltation property must define its real effect, trigger and cost. **Automatic Rite eligibility does not automatically grant a Secondary contribution, Exaltation property, or Living Liturgy compatibility.**
+**Executable first Life options (numerical v0 provisional):** [EX-LR-01 Held Renewal](../07-veil-magic/life-exaltation-properties-v0.md#ex-lr-01--held-renewal) for an actually self-anchored **Chosen maintained Guided Regeneration**; and [EX-LP-01 Vital Interposition](../07-veil-magic/life-exaltation-properties-v0.md#ex-lp-01--vital-interposition) for a **Chosen maintained self Vital Shelter** with remaining finite protection budget. Both cost **1 Spent VP** at their specified legal activation and grant no additional Prayer, Rite slot, recipient or independently cast spell. Earth/Fire [structural compatibility probes](../../design/b05-exaltation-cross-pillar-design-tests.md) remain **non-executable**.
 
 ### Level 4 — Twofold Devotion + Ability Increase
 
@@ -344,7 +344,7 @@ Rules:
 - no second Prepared Prayer is activated;
 - pay the normal listed Exaltation cost;
 - no generic VP discount;
-- cross-Aspect property must be explicitly authored as compatible;
+- cross-Aspect property must be explicitly authored as compatible with the **specific active host capability**; same Pillar alone is insufficient;
 - no separate target, action, full technique payload, or independent duration unless explicitly authored;
 - only one Living Liturgy cross-Aspect expression at a time unless expanded later.
 
