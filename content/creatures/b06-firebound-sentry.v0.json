@@ -1,0 +1,281 @@
+{
+  "schema_version": "b06-enemy-v0",
+  "id": "B06-EN-01",
+  "name": "Firebound Sentry — Level-3 Low Priest Fire benchmark foe",
+  "status": "EXECUTABLE_TEST_FIXTURE",
+  "benchmark_level": 3,
+  "rules_basis": [
+    "docs/rules/05-combat/weapons-and-armor.md",
+    "docs/rules/05-combat/weapon-attack-and-guard-math.md",
+    "docs/rules/05-combat/defensive-responses-and-criticals.md",
+    "docs/rules/05-combat/initiative-and-round-structure.md",
+    "docs/rules/05-combat/weapon-training-and-refinements-v0.md",
+    "docs/rules/07-veil-magic/conjure-flame-v0.md",
+    "docs/rules/08-archetypes/priest.md",
+    "docs/rules/11-equipment/economy-and-starter-equipment-v0.md",
+    "docs/design/b05-life-low-priest-l3-build-exaltation-verification-v0.md"
+  ],
+  "identity": {
+    "type": "player_rules_derived_opponent",
+    "archetype": "Priest",
+    "focus": "Low",
+    "pillar": "Fire",
+    "focus_feature_notes": "Explicit test character with Fire/Conflagration Chosen Conjure Flame Reserved Weapon. Start Accord +1, one of up to 3 legal Prepared Prayers populated. It has NO authored Fire Exaltation; none may be improvised. Built on the legal physical chassis of the merged PR #82 Restorative Vanguard but uses Fire instead of Life."
+  },
+  "abilities": {
+    "strength": 2,
+    "agility": 3,
+    "precision": 0,
+    "intelligence": 0,
+    "awareness": 1,
+    "presence": -2,
+    "vitality": 2,
+    "veil_affinity": 0,
+    "veil_control": 0
+  },
+  "progression": {
+    "weapon_training": {
+      "One-Handed Swords": 2
+    },
+    "learned_disciplines": {
+      "Veil Theory": 2,
+      "Fire Pillar Lore": 2,
+      "Medicine": 2,
+      "Acrobatics": 2,
+      "Survival": 1
+    },
+    "talents": [
+      "TAL-C02 Enhanced Regeneration (L1)",
+      "TAL-C05 Guard Reserve (L2)",
+      "TAL-C10 Emergency Regeneration (L3)"
+    ],
+    "prepared_techniques": [
+      "Conjure Flame — Fire/Conflagration"
+    ],
+    "chosen_devotion": "Conjure Flame — Weapon Enchantment, one identified actively wielded sword"
+  },
+  "defenses": {
+    "hp_max": 12,
+    "vigor_max": 36,
+    "armor": 3,
+    "armor_name": "Leather",
+    "dodge_agility_cap": 4,
+    "dodge_base": 14,
+    "guard_instrument": "Sword",
+    "guard_base": 17,
+    "guard_capacity": 3,
+    "initiative_bonus": 4,
+    "resistance_notes": "No Fire Resistance, magical ward or toxin immunity is granted by clothing, Priest Focus or Conjure Flame. Apply ordinary Armor only to physical HP packets."
+  },
+  "resources": {
+    "turn_ap": 42,
+    "physical_action_ap": 20,
+    "projection_action_ap": 30,
+    "movement_points": 12,
+    "max_vp": 6,
+    "natural_regeneration_throughput": 6,
+    "reaction_capacity": 1,
+    "start_states": [
+      {
+        "id": "cold_start",
+        "available_vp": 6,
+        "committed_vp": 0,
+        "spent_vp": 0,
+        "hp": 12,
+        "vigor": 36,
+        "active_effects": [],
+        "condition": "No active magic; Conjure Flame requires one 30-AP Projection Action and commits 3 VP before the enhanced hit profile is legal."
+      },
+      {
+        "id": "prepared_start",
+        "available_vp": 3,
+        "committed_vp": 3,
+        "spent_vp": 0,
+        "hp": 12,
+        "vigor": 36,
+        "active_effects": [
+          "B06-FIRE-RESERVE-01"
+        ],
+        "condition": "The sentry legally established Tier-1 Chosen Reserved Weapon BEFORE combat; sword remains actually wielded; does not receive free recovery after payment."
+      }
+    ]
+  },
+  "equipment": [
+    {
+      "name": "Leather armor",
+      "cost_sp": 25,
+      "equipped": true
+    },
+    {
+      "name": "Sword",
+      "cost_sp": 22,
+      "equipped": true
+    },
+    {
+      "name": "Basic medical kit",
+      "cost_sp": 15,
+      "equipped": false
+    },
+    {
+      "name": "Standard adventuring pack",
+      "cost_sp": 8,
+      "equipped": false
+    }
+  ],
+  "effects": [
+    {
+      "id": "B06-FIRE-RESERVE-01",
+      "source_technique": "Conjure Flame — Fire/Conflagration",
+      "profile": "Weapon Enchantment Primary; one Chosen Devotion Rite instance",
+      "used_tier": 1,
+      "activation_ap": 30,
+      "effective_committed_vp": 3,
+      "establishment_spent_vp": 0,
+      "required_anchor": "The sentry must continuously actually wield the selected sword; one active Chosen self/equipment Rite at level 3.",
+      "ending_condition": "Immediate end when sword is no longer actually wielded (disarmed/dropped/sheath/stow/handoff), or legal channel release; refund exactly 3 Committed VP if still reserved. Redrawing never restores the effect."
+    }
+  ],
+  "attack_profiles": [
+    {
+      "id": "B06-AT-01",
+      "name": "Ordinary sword thrust",
+      "action_class": "physical",
+      "ap": 20,
+      "attack_roll": {
+        "ability_a": "Strength",
+        "ability_b": "Agility",
+        "training_family": "One-Handed Swords",
+        "effective_training": 2,
+        "situational_bonus": 0,
+        "total_bonus": 7
+      },
+      "range_class": "melee",
+      "weapon_or_source": "One-handed sword",
+      "primary_hp_packet": {
+        "kind": "hp",
+        "damage_type": "Piercing",
+        "fixed_base": 3,
+        "die": "d6",
+        "strength_contribution": "light",
+        "armor_penetration": 2,
+        "mitigation": "physical_armor_after_penetration",
+        "source": "Sword 1H; Strength +2 => Light +1 (3+d6+1)"
+      },
+      "additional_packets": [],
+      "required_active_effect": null,
+      "requires_effect_inactive": "B06-FIRE-RESERVE-01",
+      "toxin_delivery": null,
+      "critical_notes": "Natural 20 follows existing confirmation; Strong +1d4, Critical +2d4, Devastating +2d4 and its separately authored wound trigger on the ONE primary sword HP packet before armor. No automatically poisoned weapon.",
+      "legality_refs": [
+        "docs/rules/05-combat/weapons-and-armor.md",
+        "docs/rules/05-combat/defensive-responses-and-criticals.md"
+      ]
+    },
+    {
+      "id": "B06-AT-02",
+      "name": "Conjure Flame enchanted sword thrust (T1 Primary)",
+      "action_class": "physical",
+      "ap": 20,
+      "attack_roll": {
+        "ability_a": "Strength",
+        "ability_b": "Agility",
+        "training_family": "One-Handed Swords",
+        "effective_training": 2,
+        "situational_bonus": 0,
+        "total_bonus": 7
+      },
+      "range_class": "melee",
+      "weapon_or_source": "Same sword, carrying existing B06-FIRE-RESERVE-01",
+      "primary_hp_packet": {
+        "kind": "hp",
+        "damage_type": "Piercing",
+        "fixed_base": 3,
+        "die": "d6",
+        "strength_contribution": "light",
+        "armor_penetration": 2,
+        "mitigation": "physical_armor_after_penetration",
+        "source": "Sword 1H; Strength +2 => Light +1 (3+d6+1)"
+      },
+      "additional_packets": [
+        {
+          "kind": "hp",
+          "damage_type": "Fire",
+          "fixed_base": 2,
+          "die": null,
+          "strength_contribution": "none",
+          "armor_penetration": null,
+          "mitigation": "fire_resistance",
+          "source": "Conjure Flame Tier-1 Weapon Enchantment Primary; Fire HP2 (NO physical Armor)"
+        },
+        {
+          "kind": "vigor",
+          "damage_type": "Direct Vigor",
+          "fixed_base": 1,
+          "die": null,
+          "strength_contribution": "none",
+          "armor_penetration": null,
+          "mitigation": "none",
+          "source": "Conjure Flame Tier-1 Weapon Enchantment Primary; Vigor=1+ceil(d6×1/4)+VC(0)",
+          "extra_formula": {
+            "operator": "ceil_div_dice",
+            "die": "d6",
+            "multiplier": 1,
+            "divisor": 4,
+            "vc_bonus": 0
+          }
+        }
+      ],
+      "required_active_effect": "B06-FIRE-RESERVE-01",
+      "requires_effect_inactive": null,
+      "toxin_delivery": null,
+      "critical_notes": "One weapon hit and one natural-20 confirmation; bonus critical dice only on physical sword HP (never duplicated on Fire HP or Vigor). Fire packet and Vigor packet occur only on a successful weapon hit. No automatic Burning/Ignite or extra attack.",
+      "legality_refs": [
+        "docs/rules/07-veil-magic/conjure-flame-v0.md",
+        "docs/rules/05-combat/defensive-responses-and-criticals.md"
+      ]
+    }
+  ],
+  "tactics": {
+    "action_policy": [
+      "Cold start, Round 1: if permitted, cast Tier-1 Conjure Flame on the sword as the designated Chosen Rite using 30 of 42 Turn AP; the 12 remaining AP cannot pay the 20-AP sword attack. Do not grant a free simultaneous swing.",
+      "On later turns with the Reserve active: a legal Low Focus turn may contain at most two 20-AP physical sword attacks (40/42 AP), committed as ONE Attack Sequence per target BEFORE either attack is rolled.",
+      "Prepared start: B06-AT-02 may be used on the first real turn if the sword remained actually wielded and the Reservation still exists. No automatic Exaltation attaches to this Fire Rite.",
+      "If the sword ceases to be wielded, B06-AT-02 is illegal immediately. B06-AT-01 is legal only when the sword is again legally wielded; no free draw/switch or channel revival.",
+      "Defensive TAL-C10 is available if the sentry can legally react and pay it; scenario policy may explicitly freeze that decision for a controlled comparison but must record the omission."
+    ],
+    "defense_policy": [
+      "Record each declared incoming Attack Sequence and per-attack Guard/Dodge/Take Hit decisions before rolls; Guard uses sword Defense 17 and at most 3 uses per round.",
+      "Dodge starts at Defense 14 and accumulates ordinary +2 Dodge Pressure for each previously chosen Dodge during that round.",
+      "Refresh one Reaction, Guard capacity and Dodge Pressure only at actual Round Begin; no free defense refresh from spellcasting."
+    ],
+    "scenario_constraints": [
+      "Physical sword HP damage = 3+d6+floor(STR2/2)=4+d6 before target Armor; effective Armor=max(target Armor−Pen2,0); never double-count contribution.",
+      "Tier-1 Fire Enchantment: on successful weapon hit Fire HP2 minus explicit Fire Resistance only; Vigor 1+ceil(d6/4) = 2 or 3 direct Vigor (absent authored ward); no automatic toxin exposure.",
+      "Use normal targeted defender's Guard/Dodge/Take Hit, critical confirmation, wound/0HP procedure. Profile is NOT an arbitrary guaranteed hit or fixed HP-after-mitigation packet.",
+      "No Third attack: Low Level3 Turn AP42 and Physical Attack20 supports exactly two, not three.",
+      "Only one current legal Conjure Flame profile per sword; weapon enchant cannot be cast from a non-Fire known repertoire or attach Fire Rider to a mundane attack without the Reserved Weapon."
+    ]
+  },
+  "validation": {
+    "formula_checks": [
+      "28 Ability points: STR2 5 + AGI3 7 + PRE0 2 + INT0 2 + AWA1 3 + PRES−2 0 + VIT2 5 + VA0 2 + VC0 2 = 28.",
+      "Level3: HP12, Max Vigor36, Low Max VP6, Turn AP42; Physical20, Projection30; Initiative=AGI3+AWA1=+4.",
+      "Sword Attack=STR2+AGI3+One-Handed Swords Training2=+7; Sword Guard=10+STR2+AGI3+Training2=17.",
+      "Leather Armor3 / Dodge Agility cap4 => Dodge=10+AGI3+AWA1=14. Guard capacity Low physical tempo2+TAL-C05 1=3.",
+      "Level3 natural regeneration without Life Guided: Vitality2 + Low Focus3 + TAL-C02 1=6.",
+      "Normal sword damage 4+d6 Piercing before Armor, Pen2. Spell-augmented: +2 Fire HP and 1+ceil(d6/4) direct Vigor.",
+      "At T1 Reserved Weapon: 4 Committed base; Low Priest Chosen discount −1 => exactly 3 Committed; at full Max VP6 leave Available3.",
+      "Cold casting consumes Projection30 of42 =>12 left, cannot fund Physical20 same turn. Pre-armed Reserve charges no extra AP/VP per actual weapon hit.",
+      "Level3 physical tempo2 ⇒ 2*20=40 <=42; 3*20=60>42.",
+      "Total level1 starter gear costs:25+22+15+8=70 sp <=150 sp."
+    ],
+    "known_exclusions": [
+      "Not a certified Fire/Low Priest full MVP build; this is a source-backed B06 opponent fixture.",
+      "No Fire Exaltation authored: Level-3 Exaltation cannot activate merely from Conjure Flame Reserve.",
+      "Neither toxin application nor weapon coating is authorized by B06-AT-01 or B06-AT-02.",
+      "Enemy hit points and damage are NOT post-mitigation script fixtures: all attacks require actual native opposed resolution.",
+      "NPC tactics are benchmark policy only; they create no free Reactions, AP, VP, physical traits, or spell casts."
+    ],
+    "certification_status": "B06 schema/attack-profile fixture only; pending reproducible opposed encounter traces and Codex Review. No B06 encounter pack or Priest Focus certified."
+  }
+}

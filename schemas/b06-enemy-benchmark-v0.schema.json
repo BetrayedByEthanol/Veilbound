@@ -1,0 +1,765 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:veilbound:schema:b06-benchmark-enemy-v0",
+  "title": "Veilbound B06 Enemy Benchmark Fixture v0",
+  "description": "Design/test-only enemy stat block. Constrains data shape; formulas, authorized spell access, and rules legality still require canonical audit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "status",
+    "benchmark_level",
+    "rules_basis",
+    "identity",
+    "abilities",
+    "progression",
+    "defenses",
+    "resources",
+    "equipment",
+    "effects",
+    "attack_profiles",
+    "tactics",
+    "validation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "b06-enemy-v0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^B06-EN-[0-9]{2}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "DESIGN_FIXTURE_ONLY",
+        "EXECUTABLE_TEST_FIXTURE",
+        "CANONICAL_CONTENT"
+      ]
+    },
+    "benchmark_level": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "rules_basis": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "archetype",
+        "focus",
+        "pillar",
+        "focus_feature_notes"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "player_rules_derived_opponent",
+            "authored_creature"
+          ]
+        },
+        "archetype": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "focus": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pillar": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "focus_feature_notes": {
+          "type": "string"
+        }
+      }
+    },
+    "abilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strength",
+        "agility",
+        "precision",
+        "intelligence",
+        "awareness",
+        "presence",
+        "vitality",
+        "veil_affinity",
+        "veil_control"
+      ],
+      "properties": {
+        "strength": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "agility": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "precision": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "intelligence": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "awareness": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "presence": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "vitality": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "veil_affinity": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "veil_control": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        }
+      }
+    },
+    "progression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "weapon_training",
+        "learned_disciplines",
+        "talents",
+        "prepared_techniques",
+        "chosen_devotion"
+      ],
+      "properties": {
+        "weapon_training": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          }
+        },
+        "learned_disciplines": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          }
+        },
+        "talents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "prepared_techniques": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "chosen_devotion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "defenses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hp_max",
+        "vigor_max",
+        "armor",
+        "armor_name",
+        "dodge_agility_cap",
+        "dodge_base",
+        "guard_instrument",
+        "guard_base",
+        "guard_capacity",
+        "initiative_bonus",
+        "resistance_notes"
+      ],
+      "properties": {
+        "hp_max": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "vigor_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "armor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "armor_name": {
+          "type": "string"
+        },
+        "dodge_agility_cap": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "dodge_base": {
+          "type": "integer"
+        },
+        "guard_instrument": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "guard_base": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "guard_capacity": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "initiative_bonus": {
+          "type": "integer"
+        },
+        "resistance_notes": {
+          "type": "string"
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "turn_ap",
+        "physical_action_ap",
+        "projection_action_ap",
+        "movement_points",
+        "max_vp",
+        "natural_regeneration_throughput",
+        "reaction_capacity",
+        "start_states"
+      ],
+      "properties": {
+        "turn_ap": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "physical_action_ap": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "projection_action_ap": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "movement_points": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_vp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "natural_regeneration_throughput": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reaction_capacity": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "start_states": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "available_vp",
+              "committed_vp",
+              "spent_vp",
+              "hp",
+              "vigor",
+              "active_effects",
+              "condition"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "available_vp": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "committed_vp": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "spent_vp": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "hp": {
+                "type": "integer"
+              },
+              "vigor": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "active_effects": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "condition": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "equipment": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "cost_sp",
+          "equipped"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "cost_sp": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "equipped": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "effects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source_technique",
+          "profile",
+          "used_tier",
+          "activation_ap",
+          "effective_committed_vp",
+          "establishment_spent_vp",
+          "required_anchor",
+          "ending_condition"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source_technique": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          },
+          "used_tier": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "activation_ap": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "effective_committed_vp": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "establishment_spent_vp": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "required_anchor": {
+            "type": "string"
+          },
+          "ending_condition": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "attack_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/attack"
+      }
+    },
+    "tactics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_policy",
+        "defense_policy",
+        "scenario_constraints"
+      ],
+      "properties": {
+        "action_policy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "defense_policy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scenario_constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "formula_checks",
+        "known_exclusions",
+        "certification_status"
+      ],
+      "properties": {
+        "formula_checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "known_exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "certification_status": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "packet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "damage_type",
+        "fixed_base",
+        "die",
+        "strength_contribution",
+        "armor_penetration",
+        "mitigation",
+        "source"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "hp",
+            "vigor"
+          ]
+        },
+        "damage_type": {
+          "type": "string"
+        },
+        "fixed_base": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "die": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "d4",
+            "d6",
+            "d8",
+            "d10",
+            "d12",
+            "d20",
+            null
+          ]
+        },
+        "strength_contribution": {
+          "enum": [
+            "none",
+            "light",
+            "full"
+          ]
+        },
+        "armor_penetration": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "mitigation": {
+          "enum": [
+            "physical_armor_after_penetration",
+            "fire_resistance",
+            "none"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "extra_formula": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "operator",
+            "die",
+            "multiplier",
+            "divisor",
+            "vc_bonus"
+          ],
+          "properties": {
+            "operator": {
+              "const": "ceil_div_dice"
+            },
+            "die": {
+              "enum": [
+                "d4",
+                "d6",
+                "d8"
+              ]
+            },
+            "multiplier": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "divisor": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "vc_bonus": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "attack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "action_class",
+        "ap",
+        "attack_roll",
+        "range_class",
+        "weapon_or_source",
+        "primary_hp_packet",
+        "additional_packets",
+        "required_active_effect",
+        "requires_effect_inactive",
+        "toxin_delivery",
+        "critical_notes",
+        "legality_refs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "action_class": {
+          "enum": [
+            "physical",
+            "projection",
+            "full",
+            "reaction"
+          ]
+        },
+        "ap": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "attack_roll": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ability_a",
+            "ability_b",
+            "training_family",
+            "effective_training",
+            "situational_bonus",
+            "total_bonus"
+          ],
+          "properties": {
+            "ability_a": {
+              "type": "string"
+            },
+            "ability_b": {
+              "type": "string"
+            },
+            "training_family": {
+              "type": "string"
+            },
+            "effective_training": {
+              "type": "integer"
+            },
+            "situational_bonus": {
+              "type": "integer"
+            },
+            "total_bonus": {
+              "type": "integer"
+            }
+          }
+        },
+        "range_class": {
+          "enum": [
+            "melee",
+            "ranged"
+          ]
+        },
+        "weapon_or_source": {
+          "type": "string"
+        },
+        "primary_hp_packet": {
+          "$ref": "#/$defs/packet"
+        },
+        "additional_packets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/packet"
+          }
+        },
+        "required_active_effect": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requires_effect_inactive": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "toxin_delivery": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "profile_id",
+            "route",
+            "explicit_source",
+            "requires_surviving_puncture"
+          ],
+          "properties": {
+            "profile_id": {
+              "type": "string"
+            },
+            "route": {
+              "enum": [
+                "injection",
+                "contact",
+                "ingestion",
+                "inhalation"
+              ]
+            },
+            "explicit_source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "requires_surviving_puncture": {
+              "type": "boolean"
+            }
+          }
+        },
+        "critical_notes": {
+          "type": "string"
+        },
+        "legality_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

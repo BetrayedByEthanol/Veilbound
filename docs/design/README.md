@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B06 Enemy Benchmark Schema and First Attack Profiles v0](b06-enemy-benchmark-schema-and-attack-profiles-v0.md) — **review candidate**: one reusable [enemy fixture JSON Schema](../../schemas/b06-enemy-benchmark-v0.schema.json), [Level-3 Firebound Sentry](../../content/creatures/b06-firebound-sentry.v0.json) and two executable **normal versus maintained Conjure Flame sword** attack profiles. Toxin-bearing source, complete opposed encounters and balance results remain **OPEN**.
+
 - [Mundane Toxins v0](../rules/05-combat/mundane-toxins-v0.md) — **merged in PR #78**: eleven ordinary toxin profiles with provisional natural resistance, one-instance nonstacking and exploration clocks. This hazard catalogue is **not itself a Pillar technique**; the separate [Venom Endurance v0](../rules/07-veil-magic/venom-endurance-v0.md) Life / Preservation protection technique is **authored and merged in PR #79**. Neither document supplies a magical Death/Plague toxin, alchemy recipe, world source or tested build.
 - [October 2026 Mechanical Watchlist](balance/october-2026-mechanical-watchlist.md) — balance and subsystem findings intentionally being monitored rather than treated as current defects.
 - [Core Rules Audit v34](audits/Veilbound_Core_Rules_Audit_v34.md) — historical audit/backlog; canonical rule files supersede resolved audit findings.
