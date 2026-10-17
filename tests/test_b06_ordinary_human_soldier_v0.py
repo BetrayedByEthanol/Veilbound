@@ -84,6 +84,11 @@ class OrdinaryHumanSoldierTests(unittest.TestCase):
         packet = p["primary_hp_packet"]
         self.assertEqual((packet["fixed_base"], packet["die"]), (3, "d6"))
         self.assertEqual(packet["strength_contribution"], "light")
+        self.assertIn("floor(max(Strength,0)/2)", packet["source"])
+        self.assertNotIn("floor(max(Strength +2,0)/2)", packet["source"])
+        light_contribution = max(a["strength"], 0) // 2
+        self.assertEqual(light_contribution, 1)
+        self.assertEqual(packet["fixed_base"] + light_contribution, 4)
         self.assertEqual(packet["armor_penetration"], 2)
         self.assertEqual(packet["damage_type"], "Piercing")
         self.assertEqual(packet["mitigation"], "physical_armor_after_penetration")
