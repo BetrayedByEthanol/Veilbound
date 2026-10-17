@@ -177,12 +177,30 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
         self.assertIn("null", resources["projection_action_ap"]["type"])
         self.assertIn("null", resources["natural_regeneration_throughput"]["type"])
         attack = self.creature_schema["$defs"]["attack"]
-        self.assertIn("null", attack["attack_roll"]["type"])
+        self.assertIn("null", attack["properties"]["attack_roll"]["type"])
+        self.assertIn("source_class", attack["required"])
         self.assertTrue(any(
             {"source_authority_ref", "resolution_rule_ref"}.issubset(set(branch["then"]["required"]))
             and "natural_weapon" in branch["if"].get("properties", {}).get("source_class", {}).get("enum", [])
             for branch in attack["allOf"]
         ))
+
+
+    def test_attack_requires_source_class_even_when_rolled_and_hp_damaging(self):
+        """A rolled, non-null-HP natural attack must not evade its source contract."""
+        attack = self.creature_schema["$defs"]["attack"]
+        self.assertIn("source_class", attack["required"])
+        self.assertIn("natural_weapon", attack["properties"]["source_class"]["enum"])
+        self.assertTrue(any(
+            {"source_authority_ref", "resolution_rule_ref"}.issubset(
+                set(branch["then"]["required"])
+            )
+            and "natural_weapon" in branch["if"].get("properties", {})
+                .get("source_class", {}).get("enum", [])
+            for branch in attack["allOf"]
+        ))
+        self.assertTrue(all("source_class" in p for p in self.sentry["attack_profiles"]))
+
 
 
 if __name__ == "__main__":
