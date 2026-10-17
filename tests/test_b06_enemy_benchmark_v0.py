@@ -124,8 +124,8 @@ class FireboundSentryFixtureTests(unittest.TestCase):
         f = self.foe
         self.assertTrue(all(p["toxin_delivery"] is None for p in f["attack_profiles"]))
         self.assertTrue(any("No Fire Exaltation" in s for s in f["validation"]["known_exclusions"]))
-        self.assertTrue(any("does not authorize" in s for s in f["validation"]["known_exclusions"]
-                            if "Neither toxin" in s))
+        self.assertTrue(any("nor weapon coating is authorized" in s
+                            for s in f["validation"]["known_exclusions"]))
 
 
 if __name__ == "__main__":
