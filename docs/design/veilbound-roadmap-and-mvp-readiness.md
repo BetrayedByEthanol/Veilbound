@@ -68,7 +68,7 @@
 5. **Challenge:** run several prebuilt enemies, 1–3 encounter types, a short exploratory problem and at least one social/investigation interaction using the authored check engine. Benchmark challenge and healing/recovery plausibility.
 6. **Observe:** record unclear interactions, time spent resolving turns, combat length, survivability, Focus tradeoffs, technique affordability and outcomes. Mark v0 balances provisional until the test evidence exists.
 
-### Current MVP execution checklist (after merged PRs #78/#79; universal Rite eligibility PR #80 under review)
+### Current MVP execution checklist (after merged PRs #78–#80; two Life Exaltation profiles under review)
 
 These boxes concern **verified end-to-end MVP acceptance**, **not** whether a prerequisite rule has been authored. See the [Priest-specific implementation checklist](b05-priest-implementation-checklist.md) for High/Medium/Low acceptance cases.
 
@@ -89,7 +89,7 @@ These boxes concern **verified end-to-end MVP acceptance**, **not** whether a pr
 
 The **Bxx IDs here are the October MVP blocker IDs**; they are not the same identifiers as development-area labels such as **B07 Talents MVP**.
 
-| ID | Original blocker | Status as of 17 Oct 2026 (merged PRs #78/#79; universal Rite eligibility change under review) | Remaining exit work |
+| ID | Original blocker | Status as of 17 Oct 2026 (merged PRs #78–#80; Exaltation framework/properties under review) | Remaining exit work |
 |---|---|---|---|
 | **B01** | Dodge Pressure sign contradiction | **CLOSED — rule fixed.** Store nonnegative penalty and subtract once, including melee/ranged. | Retain regression and playtest repeated-Dodge outcomes under P02. |
 | **B02** | Strong/Critical damage undefined | **CLOSED AS DEFINITION — v0 values.** Strong **+1d4**, Critical **+2d4**, Devastating **+2d4 + wound trigger** for eligible direct-hit HP attacks. | Simulate and calibrate; these are provisional numbers, not final balance. |
@@ -132,7 +132,7 @@ The **Bxx IDs here are the October MVP blocker IDs**; they are not the same iden
 | **5** | **Playtest + P02–P04 calibration** | Run benchmark encounters; record lethality, recovery, length, resource costs, practical build differences; fix observed failures. | Character slice, enemy pack and progression. |
 | **6** | **Broader system expansion after MVP** | Veil Analysis, Scrying, further Translocation, extended noncombat/conditions, level 4–20 content, crafting/economy, structured rule data and PWA. | Evidence from first sessions and additional scope decisions. |
 
-**Recommended next design task:** Codex Review the **universal Low Priest Devotional Rite eligibility** change (self/equipped-item maintained reservation; Stone Skin and Conjure Flame hosts) and test **VE-01–08** from merged **[Venom Endurance v0](../rules/07-veil-magic/venom-endurance-v0.md)** against merged PR #78 toxin foundation (**TX-01–19**): valid real-material exposure, ignored nonstack attempts, one preventive application, finite post-exposure suppression, no fake healing or extra Regeneration/Recovery, short/long-clock transitions, and separated physical injury. Then design **reusable Life/Restoration L3 Exaltation properties compatible with Guided Regeneration**, distinct named T2/T3 Life Miracles, certify Priest/Scholar/Gifted/Anointed L1–3 builds and author the B06 encounter pack. Keep GG-01–04, WR-01–06, Vital Shelter VS-01/02/03 and toxin numerical calibration open. Death/Plague Veil toxins, real source species, extraction/alchemy recipes, advanced Veil Analysis/Scrying and non-MVP systems remain deferred.
+**Recommended next design task:** Codex Review the **universal Level-3 Exaltation framework**, its executable **Held Renewal / Vital Interposition** properties and **non-executable Earth/Fire compatibility probes**; specifically check post-hit versus pre-hit restoration, finite Vigor-budget conversion, actual Spent/Committed VP ledgers, host expiry, initiative windows and cross-Aspect boundaries. Then test **VE-01–08** from merged **[Venom Endurance v0](../rules/07-veil-magic/venom-endurance-v0.md)** against merged PR #78 toxin foundation (**TX-01–19**): valid real-material exposure, ignored nonstack attempts, one preventive application, finite post-exposure suppression, no fake healing or extra Regeneration/Recovery, short/long-clock transitions, and separated physical injury. Then **playtest the two already authored Life L3 Exaltations**, design distinct named T2/T3 Life Miracles, certify Priest/Scholar/Gifted/Anointed L1–3 builds and author the B06 encounter pack. Keep GG-01–04, WR-01–06, Vital Shelter VS-01/02/03 and toxin numerical calibration open. Death/Plague Veil toxins, real source species, extraction/alchemy recipes, advanced Veil Analysis/Scrying and non-MVP systems remain deferred.
 
 ## Scope and status discipline
 
