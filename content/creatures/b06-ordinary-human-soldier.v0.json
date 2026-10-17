@@ -1,0 +1,207 @@
+{
+  "schema_version": "b06-enemy-v0",
+  "id": "B06-EN-02",
+  "name": "Ordinary Human Soldier — Level-3-equivalent non-Archetype benchmark",
+  "status": "EXECUTABLE_TEST_FIXTURE",
+  "benchmark_level": 3,
+  "rules_basis": [
+    "docs/design/b06-ordinary-human-soldier-template-v0.md",
+    "docs/rules/05-combat/action-categories-and-physical-tempo.md",
+    "docs/rules/05-combat/initiative-and-round-structure.md",
+    "docs/rules/05-combat/weapon-attack-and-guard-math.md",
+    "docs/rules/05-combat/weapon-training-and-refinements-v0.md",
+    "docs/rules/05-combat/defensive-responses-and-criticals.md",
+    "docs/rules/05-combat/off-hand-and-ranged-combat.md",
+    "docs/rules/05-combat/weapons-and-armor.md",
+    "docs/rules/06-vigor-wounds-death/hp-and-vigor.md",
+    "docs/rules/11-equipment/economy-and-starter-equipment-v0.md"
+  ],
+  "identity": {
+    "type": "ordinary_non_archetype_humanoid",
+    "archetype": null,
+    "focus": null,
+    "pillar": null,
+    "focus_feature_notes": "No Archetype, no Focus, no Prepared techniques, no Universal Veil invocations and no independent magical actions. B06 local provisional non-Archetype AP/regen defaults are explained by its design record; 'benchmark_level' is a calibration scale, not NPC character progression."
+  },
+  "creature_profile": {
+    "family": "ordinary_humanoid",
+    "species_or_kind": "Human",
+    "body_state": "living",
+    "cognition": "sapient",
+    "veil_relationship": [
+      "ordinary_no_independent_invocation"
+    ],
+    "physical_presence": "corporeal",
+    "mvp_player_option": "human_only",
+    "pillar_affinities": [],
+    "physiology_notes": [
+      "Ordinary living human; physical HP/Vigor resource rules apply at benchmark level 3.",
+      "No independent Veil invocation, regardless of Veil Affinity/Control scores; personal VP pool is 0 in this non-Archetype benchmark."
+    ],
+    "behavior_notes": [
+      "Disciplined shield-and-sword defender is one possible profession, not an archetypal personality or cultural template.",
+      "Can elect ordinary Guard, Dodge, Take Hit or authorized mundane actions; no free combat Talents."
+    ]
+  },
+  "bestiary_ref": "B06-EN-02",
+  "abilities": {
+    "strength": 2,
+    "agility": 2,
+    "precision": 0,
+    "intelligence": 0,
+    "awareness": 1,
+    "presence": 0,
+    "vitality": 2,
+    "veil_affinity": 0,
+    "veil_control": 0
+  },
+  "defenses": {
+    "hp_max": 12,
+    "vigor_max": 36,
+    "armor": 5,
+    "armor_name": "Brigandine",
+    "dodge_agility_cap": 2,
+    "dodge_base": 13,
+    "guard_instrument": "Shield (held opposite sword; shield bonus +2)",
+    "guard_base": 18,
+    "guard_capacity": 2,
+    "initiative_bonus": 3,
+    "resistance_notes": "Ordinary mortal. No special resistance, magic immunity, species defenses, toxin immunity or added Armor stacking. Shield Guard qualifies against normal projectiles under authored shield restrictions."
+  },
+  "resources": {
+    "turn_ap": 42,
+    "physical_action_ap": 24,
+    "projection_action_ap": null,
+    "movement_points": 12,
+    "max_vp": 0,
+    "natural_regeneration_throughput": 2,
+    "reaction_capacity": 1,
+    "start_states": [
+      {
+        "id": "ordinary_start",
+        "available_vp": 0,
+        "committed_vp": 0,
+        "spent_vp": 0,
+        "hp": 12,
+        "vigor": 36,
+        "active_effects": [],
+        "condition": "Sword in dominant hand, shield in other hand; brigandine worn; full HP/Vigor; no magical item effects or previously readied action. Applies only if encounter begins uninjured and properly equipped."
+      }
+    ]
+  },
+  "equipment": [
+    {
+      "name": "Brigandine",
+      "cost_sp": 95,
+      "equipped": true
+    },
+    {
+      "name": "Sword",
+      "cost_sp": 22,
+      "equipped": true
+    },
+    {
+      "name": "Shield",
+      "cost_sp": 16,
+      "equipped": true
+    },
+    {
+      "name": "Standard adventuring pack",
+      "cost_sp": 8,
+      "equipped": false
+    }
+  ],
+  "effects": [],
+  "attack_profiles": [
+    {
+      "id": "B06-AT-03",
+      "name": "Ordinary human soldier sword thrust",
+      "action_class": "physical",
+      "ap": 24,
+      "attack_roll": {
+        "ability_a": "Strength",
+        "ability_b": "Agility",
+        "training_family": "One-Handed Swords",
+        "effective_training": 2,
+        "situational_bonus": 0,
+        "total_bonus": 6
+      },
+      "range_class": "melee",
+      "weapon_or_source": "One-handed sword, held opposite a shield; no magical item or channel",
+      "primary_hp_packet": {
+        "kind": "hp",
+        "damage_type": "Piercing",
+        "fixed_base": 3,
+        "die": "d6",
+        "strength_contribution": "light",
+        "armor_penetration": 2,
+        "mitigation": "physical_armor_after_penetration",
+        "source": "Canonical sword: fixed3 + d6 + floor(max(Strength +2,0)/2)=1 Light contribution; 4+d6 raw Piercing HP, Penetration2"
+      },
+      "additional_packets": [],
+      "required_active_effect": null,
+      "requires_effect_inactive": null,
+      "toxin_delivery": null,
+      "critical_notes": "One normal weapon Attack/defense sequence and existing natural-20 confirmation: Strong +1d4; Critical +2d4; Devastating +2d4 and separately qualified wound trigger. Extra HP dice add once to the primary Piercing packet before Armor; no poison, Fire or Vigor packet.",
+      "legality_refs": [
+        "docs/rules/05-combat/weapons-and-armor.md",
+        "docs/rules/05-combat/weapon-attack-and-guard-math.md",
+        "docs/rules/05-combat/defensive-responses-and-criticals.md",
+        "docs/design/b06-ordinary-human-soldier-template-v0.md"
+      ],
+      "source_class": "mundane_weapon",
+      "resolution_kind": "ordinary_weapon_attack",
+      "source_authority_ref": "docs/rules/05-combat/weapons-and-armor.md",
+      "target_geometry": {
+        "kind": "melee_one",
+        "range_rule_ref": "docs/rules/05-combat/weapon-attack-and-guard-math.md",
+        "area_rule_ref": null
+      }
+    }
+  ],
+  "tactics": {
+    "action_policy": [
+      "Each own turn supplies 42 Turn AP at Level-3-equivalent benchmark; mundane Physical Action costs 24 AP by the proposed neutral non-Focus B06 baseline. Maximum one ordinary sword attack per turn (42/24 floor=1); a second attack costs a new 24 AP and is not affordable.",
+      "When attacking the same target during a turn, commit all current legal ordinary attacks before the first roll as one Attack Sequence; do not inspect hit results before choosing profile/defender assignments.",
+      "Any other legal General Tempo action also costs the existing canonical 24 AP. Full Action consumes all 42 Turn AP if wholly available; no Projection Actions or personally invoked Veil techniques are legal.",
+      "Use standard 12 MP movement and ordinary movement limits. No mounted, Reach, special maneuver, multiattack, bonus off-hand strike or automatic magic assumed.",
+      "Use ordinary once-per-own-turn regeneration throughput max(Vitality,0)+0=2, paying 1 Vigor per HP or Repair Progress if eligible. This +0 NPC Focus-rate substitute is a narrow B06 benchmark proposal, not a universal class formula."
+    ],
+    "defense_policy": [
+      "At Round Begin refresh base Physical Tempo1 Guard plus Shield1 =2 Guards, reset Dodge Pressure and one Reaction. Sword Guard Defense16; Shield Guard Defense18. Shield is the declared default Guard instrument if it is still legally equipped.",
+      "First Dodge Defense13; later Dodges this round subtract 2 further pressure per previous chosen Dodge. Guard and Take Hit do not accrue Dodge Pressure.",
+      "Guard, Dodge or Take Hit must be assigned against each attack in a declared sequence before any corresponding attack rolls. Ordinary shield may Guard legal projectiles; sword alone normally cannot.",
+      "Reaction remains one per round, but this fixture has no authored Reaction-only talent/spell granting additional effects."
+    ],
+    "scenario_constraints": [
+      "All nine abilities are explicitly specified, but this is an NPC template, not proof ordinary humans are subject to full player character 28-point buy, Talent schedules or Archetype progression.",
+      "Raw sword hit damage = 3+d6+floor(max(STR2,0)/2)=4+d6 Piercing HP, Pen2; target's effective Armor=max(target Armor−2,0), subtract once. No additional damage packets.",
+      "Sword Attack=d20 + STR2 + AGI2 + directly invested One-Handed Swords Training2 = d20+6. Ordinary weapon criticals obey one confirmation and one primary damage dice addition.",
+      "Sword Guard=10+STR2+AGI2+Training2=16; shield Guard=16+2 equipment bonus=18; shield grants +1 Guard capacity to base1.",
+      "Brigandine Armor5 caps positive AGI Dodge at +2; Dodge=10+2+AWA1=13; Initiative bonus AGI2+AWA1=+3.",
+      "No ability to activate magic merely because Veil Affinity and Veil Control are 0 instead of negative. All VP ledgers are 0; nonexistent purchased magical equipment never grants spells.",
+      "Non-Focus Physical Action24 and +0 Focus-rate regeneration are proposed B06 NPC baselines for review, not yet promoted canonical general rules."
+    ]
+  },
+  "validation": {
+    "formula_checks": [
+      "Ability scores STR2(5), AGI2(5), PRE0(2), INT0(2), AWA1(3), PRES0(2), VIT2(5), VA0(2), VC0(2) total28; NPCs need not universally use player point-buy.",
+      "Level-3-equivalent Turn AP=min(120,30+6*(3−1))=42; non-Focus Physical24 is separately proposed benchmark cost, derived Physical Tempo=floor(42/24)=1.",
+      "Non-Focus baseline no Projection Action, maxVP0; VP sum 0+0+0=0. No spell or Universal Veil eligibility.",
+      "HP=10+VIT2=12; Vigor=(10+VIT2)*3=36. Regeneration throughput=max(VIT2,0)+0 non-Focus benchmark rate=2, one Vigor per HP/Repair Progress.",
+      "One-Handed Sword Training2; sword Attack +2 STR +2 AGI +2 Training=+6; raw Piercing 3+d6+Light contribution1 =4+d6, Pen2.",
+      "Sword Guard 10+STR2+AGI2+Training2=16; Shield Guard16+equipment bonus2=18. Physical Tempo1 plus shield +1 Guard capacity =>2.",
+      "Brigandine Armor5 Agility cap+2; Dodge Defense10+2+Awareness1=13; Initiative +3; one Reaction; Movement12MP.",
+      "Ordinary initial equipment reference cost 95+22+16+8=141sp, within optional 150sp character-creation comparison budget; NPC gear is not universally required to obey player starting wealth.",
+      "General actions 24 AP, one Physical24 -> 18 AP left; cannot pay second 24 AP attack, one current Attack Sequence per target."
+    ],
+    "known_exclusions": [
+      "Not a player-Archetype build; no Focus, Pillar, spells, Universal Inspection/Blink, Preparation, Exaltation, Personal VP or innate supernatural talents.",
+      "Standard B06 neutral non-Focus action price and regeneration rate are proposed design baselines, not globally locked canonical NPC rules; review before treating as a tested and approved encounter opponent.",
+      "No automatic grant of Talent, Weapon Refinement, special Reaction, shield Intervene, armor stacking, poison, magical equipment or biological immunity.",
+      "No extra attacks from shield, natural weapons, supernatural sources or a supposed 'standard NPC bonus'.",
+      "Not a source of encounter difficulty/cr rating or statistical balance by itself; full opposed B06 encounters remain open."
+    ],
+    "certification_status": "B06-EN-02 executable benchmark fixture with narrowly proposed NPC-specific tempo and regeneration baseline, pending Codex review and opposed fight verification. Neither a certified Focus build nor globally canonical NPC rules."
+  }
+}
