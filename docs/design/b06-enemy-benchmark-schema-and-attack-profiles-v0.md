@@ -91,7 +91,8 @@ Vital Interposition is applied **only after the target's legal actual Rite and E
 
 ## 5. Next verification actions
 
-- Parse both JSON files and validate the enemy record against [schema v0](../../schemas/b06-enemy-benchmark-v0.schema.json).
+- Run `python -m unittest discover -s tests -p 'test_b06_enemy_benchmark_v0.py'` to check the checked-in [standard-library regression suite](../../tests/test_b06_enemy_benchmark_v0.py); this checks key structure and rules arithmetic **without introducing a new Python dependency**.
+- Additionally use a Draft 2020-12-compliant JSON Schema validator to fully check [schema v0](../../schemas/b06-enemy-benchmark-v0.schema.json) against the fixture. The stdlib tests do **not** claim to implement the full JSON Schema standard.
 - Check VP invariants (`Available + Committed + Spent = Max VP`), fixed Ability budget, sword Attack/Guard, critical/Armor math and conditional magical packet presence.
 - Validate that no attack carries a `toxin_delivery` object without its actual separately authored delivery source.
 - Next PR: create the three encounter records and event-log contract, resolve at least one **fully opposed** combat trace against each Life Low Priest build, and only then run any larger balance simulation.
