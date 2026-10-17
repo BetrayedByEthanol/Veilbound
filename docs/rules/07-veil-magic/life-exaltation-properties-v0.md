@@ -67,13 +67,17 @@ For a single **mixed physical/elemental HP and direct Vigor-damage event**, firs
 |---|---|
 | L3 Low VA0, VC0, Chosen Vital Shelter | Max VP **6**; host costs **1 Committed + 1 Spent** leaving **4 Available**, with actual **B8** |
 | Arm Vital Interposition on own turn | Pay **1 more Spent**, leave **3 Available**; original **B8** unchanged at arming |
-| B8, next after-mitigation packet HP5 | Prevent **2 HP**, consume **4 of B8**, apply **3 HP**, leaving **B4** |
-| B8, mixed event HP5 + Vigor3, current Vigor positive | HP prevention consumes B4; original shelter then prevents Vigor3 consuming B3; **B1** remains |
-| B3, next HP5 | Prevent **1 HP** for **2 budget**, apply 4 HP, leave **B1** |
+| B8, next hit/event totals HP5 after ordinary packet mitigation | Prevent **2 HP** from the event total, consume **4 of B8**, apply **3 HP**, leaving **B4** |
+| B8, mixed event HP5 + Vigor3, current Vigor positive | HP prevention consumes **4** budget first; normal host then prevents Vigor3 using **3** more; **B1** remains |
+| B8, Conjure Flame-style single hit: physical HP1 + Fire HP2 after separate mitigation | Both HP packets belong to **one** hit. Aggregate HP **3**, prevent **2 HP total** for **4 budget**, apply **1 HP**; B **8→4**. **Neither packet is player-selected** and the effect never fires twice |
+| B8, same mixed-type hit plus independent Vigor3, Current Vigor at least 3 | Prevent **2 of combined 3 HP** (B **8→4**); original host then prevents **3 Vigor** (B **4→1**). One event trigger; normal packet-specific Armor and Fire Resistance already applied |
+| B3, next single-hit event total HP5 | Prevent **1 HP** for **2 budget**, apply **4 HP**, leave **B1** |
 | B1 from earlier Vigor prevention, first HP packet arrives | Spend **0** budget preventing **0 HP**; pending property expires, no bonus capacity |
 | Incoming Vigor only, or HP fully stopped by Armor | Ordinary shelter handles Vigor; pending HP property stays armed while host remains |
 | Another HP hit after the first qualifying HP packet | No further HP diversion until another legal own-turn Exaltation activation |
-| Shelter depleted or released, or Priest exits initiative | Pending property expires, no Spent VP refund; no second Rite or independent protection |
+| Actual host budget exhausted or host released, or Priest exits initiative | Pending property expires; refund only that **actual host instance's** remaining Committed VP if its own termination rule ends it. Original host Spent establishment VP and **1 Spent Exaltation** remain Spent; no second Rite or independent protection |
+| **Hypothetical alternate qualifying Preservation host (accounting fixture only)**: at L3 Low VA0 Max VP6, effective **3 Committed +2 Spent** host with finite B2, then arm EX-LP-01 | Host established: **1 Available +3 Committed +2 Spent**. Exaltation spends the remaining **1 VP**, so **0 Available +3 Committed +3 Spent**. This is a host-ledger test, **not an authored new spell** |
+| Same hypothetical host: HP event total2 uses both budget points and the host's own authored rule ends it at B0 | Prevent **1 HP**, consume B2. **Exactly 3 Committed VP** return to Available (**3 Available /0 Committed /3 Spent**); host's original **2 Spent** and Exaltation **1 Spent** do not refund. Never substitute Vital Shelter's example **1 Committed/1 Spent** |
 
 ## Scope and Level-5 boundary
 
