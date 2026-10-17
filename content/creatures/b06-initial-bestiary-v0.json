@@ -1,0 +1,696 @@
+{
+  "schema_version": "b06-bestiary-index-v0",
+  "status": "DESIGN_ONLY_NOT_CANONICAL_BESTIARY",
+  "source_scope": "Creature/species design directions supplied by user plus canonical Pillar/Aspect and combat boundary references; concept entries are not full executable stat blocks.",
+  "entries": [
+    {
+      "id": "B06-EN-01",
+      "name": "Firebound Sentry",
+      "entry_status": "EXECUTABLE_FIXTURE_EXISTS",
+      "mvp_phase": "B06_A",
+      "rules_basis": [
+        "docs/rules/05-combat/weapons-and-armor.md",
+        "docs/rules/08-archetypes/priest.md",
+        "docs/world/aspect-identities-and-boundaries.md"
+      ],
+      "creature_profile": {
+        "family": "archetype_humanoid",
+        "species_or_kind": "Human",
+        "body_state": "living",
+        "cognition": "sapient",
+        "veil_relationship": [
+          "learned_or_bonded_archetype"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "human_only",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Standard human physiology; Vigor36 and Armor3 in independently authored fixture."
+        ],
+        "behavior_notes": [
+          "Uses authored sword/Conjure Flame tactics."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-FIRE-SWORD",
+          "name": "Sword plus reserved Conjure Flame",
+          "source_class": "learned_veil",
+          "state": "existing_authority_only",
+          "concept": "B06-AT-01/02 existing fully specified one-attack weapon physical and Fire/Vigor packets; no invented fire Exaltation.",
+          "missing_authority": []
+        }
+      ],
+      "open_mechanics": [
+        "Opposed encounter log and difficulty calibration remain open."
+      ],
+      "fixture_path": "content/creatures/b06-firebound-sentry.v0.json",
+      "lore_boundary": "An authored humanoid combatant, not evidence that ordinary humans inherently invoke the Veil."
+    },
+    {
+      "id": "B06-EN-02",
+      "name": "Ordinary Human Soldier",
+      "entry_status": "CONCEPT_ONLY",
+      "mvp_phase": "B06_A",
+      "rules_basis": [
+        "docs/rules/05-combat/weapons-and-armor.md",
+        "docs/rules/07-veil-magic/metaphysical-foundation.md"
+      ],
+      "creature_profile": {
+        "family": "ordinary_humanoid",
+        "species_or_kind": "Human",
+        "body_state": "living",
+        "cognition": "sapient",
+        "veil_relationship": [
+          "ordinary_no_independent_invocation"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "human_only",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Uses Vigor as an ordinary human; no innate spell access."
+        ],
+        "behavior_notes": [
+          "Individual training and culture vary; cannot be assumed to follow one universal tactic."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-SOLDIER-WEAPON",
+          "name": "Ordinary trained weapon strike",
+          "source_class": "mundane_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Use existing sword/mace/spear profiles once Training, Abilities, equipment and legitimate action economy are defined.",
+          "missing_authority": [
+            "Explicit NPC non-Archetype AP/Tempo/Guard/Vigor baseline and exact equipped profile"
+          ]
+        },
+        {
+          "id": "B06-CAP-SOLDIER-MAGIC-ITEM",
+          "name": "Optional acquired magical item",
+          "source_class": "magical_item",
+          "state": "deferred",
+          "concept": "May use an actual authored item's independent effects; item ownership does not make its wielder a Veil invoker.",
+          "missing_authority": [
+            "Individual item stats, activation mode, item-provided source power and VP requirement"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Non-Archetype human Turn AP/Tempo and progression, attack/defense stats and legal talents; no automatic Projection or spell VP.",
+        "No unearned magical item/equipment enchantment."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Ordinary humans have Vigor and a relationship to the Veil but cannot themselves invoke Veil techniques; learned Archetypes are exceptional, not universal."
+    },
+    {
+      "id": "B06-EN-03",
+      "name": "Hunter of the Woods",
+      "entry_status": "CONCEPT_ONLY",
+      "mvp_phase": "B06_A",
+      "rules_basis": [
+        "docs/rules/05-combat/weapons-and-armor.md",
+        "docs/rules/05-combat/mundane-toxins-v0.md"
+      ],
+      "creature_profile": {
+        "family": "natural_beast",
+        "species_or_kind": "Hunter of the Woods",
+        "body_state": "living",
+        "cognition": "animal_like",
+        "veil_relationship": [
+          "ordinary_no_independent_invocation"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Larger and bulkier than a bear; wolf-like head; a horn; venomous bite."
+        ],
+        "behavior_notes": [
+          "Predatory animal instincts; exact intelligence, sociality and hunting tactics await creature authoring."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-HUNTER-BITE",
+          "name": "Venomous bite",
+          "source_class": "natural_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Puncturing bite may deliver a separately selected fictional TX catalogue profile after true surviving puncture; no toxin route from merely naming venom.",
+          "missing_authority": [
+            "Natural bite Attack/Defense/AP, puncture damage, source and selected TX profile; independently authorized venom delivery"
+          ]
+        },
+        {
+          "id": "B06-CAP-HUNTER-HORN",
+          "name": "Horn strike",
+          "source_class": "natural_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "A physical horn attack; does not inherit bite venom.",
+          "missing_authority": [
+            "Natural horn attack roll/AP/damage/trauma"
+          ]
+        },
+        {
+          "id": "B06-CAP-HUNTER-BODY",
+          "name": "Claw or body strike",
+          "source_class": "natural_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Alternative natural physical attack, no free attack sequence.",
+          "missing_authority": [
+            "Actual anatomy and natural attack action profile"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Large body/size rules, reach, attack cadence, bite puncture and toxin source, HP/Vigor, Guard/Dodge limitations."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Not a humanoid, Priest or Gifted; no implied learnable spells, psychic control or attack bonus from its ominous name."
+    },
+    {
+      "id": "B06-EN-04",
+      "name": "Veil-touched Dire Giant Spider",
+      "entry_status": "CONCEPT_ONLY",
+      "mvp_phase": "B06_A",
+      "rules_basis": [
+        "docs/rules/07-veil-magic/metaphysical-foundation.md",
+        "docs/rules/05-combat/mundane-toxins-v0.md",
+        "docs/world/aspect-identities-and-boundaries.md"
+      ],
+      "creature_profile": {
+        "family": "veil_touched_beast",
+        "species_or_kind": "Dire Giant Spider",
+        "body_state": "living",
+        "cognition": "animal_like",
+        "veil_relationship": [
+          "veil_touched"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Unusually large aggressive spider; actual body dimensions, venom, web and armor undecided."
+        ],
+        "behavior_notes": [
+          "Aggressive predatory behavior; no sapient plans assumed."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-SPIDER-BITE",
+          "name": "Spider bite",
+          "source_class": "natural_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Basic physical bite. Whether venom applies is separately authored; no generic spider poison.",
+          "missing_authority": [
+            "Spider bite roll/AP/damage; decision on venom-bearing physiology and specific exposure source"
+          ]
+        },
+        {
+          "id": "B06-CAP-SPIDER-VEIL",
+          "name": "Veil-touched expression",
+          "source_class": "innate_veil",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Specific physiological or supernatural alteration to be selected; the Veil-touched label alone grants nothing.",
+          "missing_authority": [
+            "What changed, associated Pillar if any, paid or limited resource, delivery and defenses"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Nature of Veil alteration; possible web behavior; natural body/action and special effect math."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Veil-touched denotes an origin/alteration, not a free attack, spell list or mandatory magic venom."
+    },
+    {
+      "id": "B06-EN-05",
+      "name": "Goblin — Inward-focused",
+      "entry_status": "CONCEPT_ONLY",
+      "mvp_phase": "B06_LATER",
+      "rules_basis": [
+        "docs/rules/07-veil-magic/metaphysical-foundation.md",
+        "docs/rules/05-combat/weapons-and-armor.md"
+      ],
+      "creature_profile": {
+        "family": "ordinary_humanoid",
+        "species_or_kind": "Goblin",
+        "body_state": "living",
+        "cognition": "sapient",
+        "veil_relationship": [
+          "inward_dominant"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Innate inward-dominant Veil integration; comparatively high Vigor and regeneration, numerical amounts unknown."
+        ],
+        "behavior_notes": [
+          "Individual personality and cultures vary. No universal goblin disposition."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-GOBLIN-MARTIAL",
+          "name": "Physical combat",
+          "source_class": "mundane_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Ordinary or personally trained weapons supported when NPC statistics are authored; no Projection or castable spells.",
+          "missing_authority": [
+            "Species Vigor and regeneration benchmarks",
+            "Weapon Training/AP and equipment"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Inward integration numeric scale; whether any innate non-projective abilities need additional rules."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "No species-level automatic spell Projection or spellcasting; do not imply shared psychology or culture."
+    },
+    {
+      "id": "B06-EN-06",
+      "name": "Orc — Inward-focused",
+      "entry_status": "CONCEPT_ONLY",
+      "mvp_phase": "B06_LATER",
+      "rules_basis": [
+        "docs/rules/07-veil-magic/metaphysical-foundation.md",
+        "docs/rules/05-combat/weapons-and-armor.md"
+      ],
+      "creature_profile": {
+        "family": "ordinary_humanoid",
+        "species_or_kind": "Orc",
+        "body_state": "living",
+        "cognition": "sapient",
+        "veil_relationship": [
+          "inward_dominant"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "High Vigor and regeneration from inward Veil integration; larger forms may have leathery natural skin. Not uniform across individuals."
+        ],
+        "behavior_notes": [
+          "Orc motivations and culture are not determined by biological traits."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-ORC-MARTIAL",
+          "name": "Physical combat",
+          "source_class": "mundane_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Weapon/ordinary physical attacks; no independent Projection or castable spells.",
+          "missing_authority": [
+            "Source-backed non-Archetype action/AP/Training"
+          ]
+        },
+        {
+          "id": "B06-CAP-ORC-SKIN",
+          "name": "Possible natural skin protection",
+          "source_class": "physiology",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Some larger forms may have thick leathery skin; natural Armor is not automatically additive to worn equipment.",
+          "missing_authority": [
+            "Size applicability and Armor stacking/coverage interaction"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Vigor and regeneration quantitative physiology; injury and wound interaction; whether skin Armor is additive or alternative."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Orcs are not inherently aggressive or culturally uniform; innate inward integration is not Priest-style spellcasting."
+    },
+    {
+      "id": "B06-EN-07",
+      "name": "Elf — Outward-focused",
+      "entry_status": "CONCEPT_ONLY",
+      "mvp_phase": "B06_LATER",
+      "rules_basis": [
+        "docs/rules/07-veil-magic/metaphysical-foundation.md",
+        "docs/world/aspect-identities-and-boundaries.md"
+      ],
+      "creature_profile": {
+        "family": "ordinary_humanoid",
+        "species_or_kind": "Elf",
+        "body_state": "living",
+        "cognition": "sapient",
+        "veil_relationship": [
+          "outward_dominant"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Ultra-outward Veil integration; almost no inward reinforcement; extremely limited Vigor and bodily fragility, magnitudes unauthored."
+        ],
+        "behavior_notes": [
+          "Population isolated and driven away by humans in the user's setting direction; neither disposition nor cultural uniformity is inferred."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-ELF-OUTWARD",
+          "name": "Outward Veil expression",
+          "source_class": "innate_veil",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Exceptional outward Veil capability, but no automatic player High Focus, prepared spells or free spellcasting.",
+          "missing_authority": [
+            "Exact outward expression/ability, cost and defense, low-Vigor formula or override"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Numerical almost-zero Vigor floor, physiological survival rules and whether healing/Regeneration differ.",
+        "Specific access mechanism for outward power without importing an entire High Focus progression."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "High outward connection is a physiology/metaphysics direction, not a universal wizard identity; no elf playable MVP."
+    },
+    {
+      "id": "B06-EN-08",
+      "name": "Dwarf — Unresolved",
+      "entry_status": "DEFERRED",
+      "mvp_phase": "POST_MVP",
+      "rules_basis": [
+        "docs/rules/07-veil-magic/metaphysical-foundation.md"
+      ],
+      "creature_profile": {
+        "family": "unknown_species",
+        "species_or_kind": "Dwarf",
+        "body_state": "undetermined",
+        "cognition": "undetermined",
+        "veil_relationship": [
+          "undetermined"
+        ],
+        "physical_presence": "undetermined",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [],
+        "behavior_notes": []
+      },
+      "planned_capabilities": [],
+      "open_mechanics": [
+        "Species physiology, Veil relationship, cognition, environmental adaptation, cultures and combat identity deliberately TBD."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "No implicit short-stature, craft affinity, underground living or fixed demeanor imported from other fantasy settings."
+    },
+    {
+      "id": "B06-EN-09",
+      "name": "Dragon — Non-spellcasting",
+      "entry_status": "DEFERRED",
+      "mvp_phase": "POST_MVP",
+      "rules_basis": [
+        "docs/rules/07-veil-magic/metaphysical-foundation.md",
+        "docs/world/aspect-identities-and-boundaries.md"
+      ],
+      "creature_profile": {
+        "family": "dragon",
+        "species_or_kind": "Dragon",
+        "body_state": "living",
+        "cognition": "animal_like",
+        "veil_relationship": [
+          "innate_pillar_affinity"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Flying, natural weapons and breath attack; size/physiology per dragon variety undecided."
+        ],
+        "behavior_notes": [
+          "Intelligence approximately canine or modestly above; instinctively expresses connected Pillar's principles; not a spellcasting strategist."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-DRAGON-BREATH",
+          "name": "Breath attack",
+          "source_class": "physiology",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "One species-authored breath attack; not necessarily Fire and not an ordinary spell/Projection.",
+          "missing_authority": [
+            "Breath source, Pillar/element if any, area geometry, cooldown/resource, mitigation and defense"
+          ]
+        },
+        {
+          "id": "B06-CAP-DRAGON-FLIGHT",
+          "name": "Flight",
+          "source_class": "physiology",
+          "state": "deferred",
+          "concept": "Dragon can fly in lore; flying combat is outside B06-A.",
+          "missing_authority": [
+            "Flight, airborne movement/position, interruption and range"
+          ]
+        },
+        {
+          "id": "B06-CAP-DRAGON-CLAWS",
+          "name": "Natural weapon attacks",
+          "source_class": "natural_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Bites/claws/tail only where bodily and mechanically authored, not automatic multiple attacks.",
+          "missing_authority": [
+            "Natural attack cadence, size/reach, Armor/Penetration"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Detailed flight, size/scale and breath area mechanics are deferred; Pillar instinct must not grant actual learned Veil spells."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Mostly nonsapient creature's instinctive Pillar alignment does not itself generate voluntary Pillar fuel or Anointed Mission."
+    },
+    {
+      "id": "B06-EN-10",
+      "name": "Raised Skeleton",
+      "entry_status": "CONCEPT_ONLY",
+      "mvp_phase": "B06_LATER",
+      "rules_basis": [
+        "docs/world/aspect-identities-and-boundaries.md",
+        "docs/rules/07-veil-magic/metaphysical-foundation.md"
+      ],
+      "creature_profile": {
+        "family": "raised_undead",
+        "species_or_kind": "Raised Skeleton",
+        "body_state": "corporeal_raised",
+        "cognition": "undetermined",
+        "veil_relationship": [
+          "corporeal_reanimation"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Existing corpse/bones animated into a physical undead; exact Vigor, HP, poison and repair physiology not yet authored."
+        ],
+        "behavior_notes": [
+          "Commands and autonomy depend on the authored animation, not on a universal mindless-undead template."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-SKELETON-WEAPON",
+          "name": "Physical weapon attack",
+          "source_class": "mundane_weapon",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Potential physical attack with wielded weapon if the animation actually supports wielding and AP/Training.",
+          "missing_authority": [
+            "Corporeal undead body action rules, Attack/Defense and damage baseline"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "What sustains animation; HP/Vigor/Dying, wounds/repair, resistance to mundane toxin and physical/Veil defenses."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Death/Mastery reanimates an existing body; this is not an independent Death/Spirit apparition or free resurrection."
+    },
+    {
+      "id": "B06-EN-11",
+      "name": "Turned Vampire",
+      "entry_status": "DEFERRED",
+      "mvp_phase": "POST_MVP",
+      "rules_basis": [
+        "docs/world/aspect-identities-and-boundaries.md",
+        "docs/rules/07-veil-magic/metaphysical-foundation.md"
+      ],
+      "creature_profile": {
+        "family": "turned_undead",
+        "species_or_kind": "Vampire",
+        "body_state": "corporeal_turned",
+        "cognition": "sapient",
+        "veil_relationship": [
+          "undead_transformation"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Transformed individual, not automatically a raised corpse; retained biological functions and durability unresolved."
+        ],
+        "behavior_notes": [
+          "May retain identity and personal history; behavior/culture not predetermined."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-VAMPIRE-INNATE",
+          "name": "Turned nature",
+          "source_class": "undead_animation",
+          "state": "deferred",
+          "concept": "Signature physiological powers and limitations need independent authored rules; no generic hypnosis, regeneration or sunlight weakness.",
+          "missing_authority": [
+            "State/afflictions, physiological costs, attack and transformation mechanics"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Turned-state resource rules, strengths, weaknesses and transformation origin not specified."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Turned undead are distinct from raised undead; no lore-derived immunity package or common moral alignment."
+    },
+    {
+      "id": "B06-EN-12",
+      "name": "Turned Lich",
+      "entry_status": "DEFERRED",
+      "mvp_phase": "POST_MVP",
+      "rules_basis": [
+        "docs/world/aspect-identities-and-boundaries.md",
+        "docs/rules/07-veil-magic/metaphysical-foundation.md"
+      ],
+      "creature_profile": {
+        "family": "turned_undead",
+        "species_or_kind": "Lich",
+        "body_state": "corporeal_turned",
+        "cognition": "sapient",
+        "veil_relationship": [
+          "undead_transformation"
+        ],
+        "physical_presence": "corporeal",
+        "mvp_player_option": "not_playable_mvp",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Turned undead individual; exact physical/Veil durability not specified."
+        ],
+        "behavior_notes": [
+          "Personality, retained knowledge and spell access depend on individual history and authored transformation."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-LICH-CAPABILITY",
+          "name": "Potential learned Veil capabilities",
+          "source_class": "learned_veil",
+          "state": "deferred",
+          "concept": "If a lich knows magic from actual earlier learning, retain only lawfully authored capabilities; undeath alone is not a free full spell repertoire.",
+          "missing_authority": [
+            "Transformation source, retained ability access/VP and physiology"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Turned transformation source and resource continuity, phylactery-like assumptions explicitly not imported."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Do not assume every lich is a conventional wizard or possesses a phylactery."
+    },
+    {
+      "id": "B06-EN-13",
+      "name": "Pillar Surge Manifestation",
+      "entry_status": "DEFERRED",
+      "mvp_phase": "POST_MVP",
+      "rules_basis": [
+        "docs/world/veil-and-pillars.md",
+        "docs/rules/07-veil-magic/metaphysical-foundation.md",
+        "docs/rules/08-archetypes/anointed.md",
+        "docs/world/aspect-identities-and-boundaries.md"
+      ],
+      "creature_profile": {
+        "family": "pillar_manifestation",
+        "species_or_kind": "Veil Manifestation",
+        "body_state": "veil_formed",
+        "cognition": "non_sentient_pattern",
+        "veil_relationship": [
+          "surge_manifestation"
+        ],
+        "physical_presence": "manifested_conditional",
+        "mvp_player_option": "not_applicable",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Coalesced Veil pattern that may be fleeting, anchored, or persistent; corporeality and durability depend on individual authoring."
+        ],
+        "behavior_notes": [
+          "Non-sentient behavior follows the source Pillar/Aspect pattern and event conditions, not orders, judgments or independent morality."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-MANIFESTATION-EXPRESSION",
+          "name": "Pattern-bound expression",
+          "source_class": "surge_manifestation",
+          "state": "deferred",
+          "concept": "Non-sapient effect from a Pillar surge. Not an Anointed, independent spirit, deity, angel or demon.",
+          "missing_authority": [
+            "Surge formation rules; Pillar/Aspect source; trigger/cadence; energy budget; target and manifestation/physical interaction rules"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Formation probability, anchor/sustain/expiry, physical attack eligibility and dissolution mechanics undecided."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Potential consequence of a surge, not guaranteed; original collective volition can create the surge but the nonsapient manifestation does not itself contribute renewed voluntary Pillar fuel."
+    },
+    {
+      "id": "B06-EN-14",
+      "name": "Independent Posthumous Spirit",
+      "entry_status": "DEFERRED",
+      "mvp_phase": "POST_MVP",
+      "rules_basis": [
+        "docs/world/aspect-identities-and-boundaries.md",
+        "docs/world/veil-and-pillars.md"
+      ],
+      "creature_profile": {
+        "family": "spirit",
+        "species_or_kind": "Independent Spirit",
+        "body_state": "nonphysical_spirit",
+        "cognition": "undetermined",
+        "veil_relationship": [
+          "independent_spirit"
+        ],
+        "physical_presence": "nonphysical_no_ordinary_interaction",
+        "mvp_player_option": "not_applicable",
+        "pillar_affinities": [],
+        "physiology_notes": [
+          "Nonphysical fleeting presence in the Veil; not an automatically tangible combat target."
+        ],
+        "behavior_notes": [
+          "Spirit communication/summoning belongs to Death/Spirit, distinct from raised/turned undead."
+        ]
+      },
+      "planned_capabilities": [
+        {
+          "id": "B06-CAP-SPIRIT-APPEAR",
+          "name": "Fleeting summoned appearance",
+          "source_class": "environment",
+          "state": "narrative_only",
+          "concept": "Not physically interacting with ordinary material combat; requires separately authored Death/Spirit interaction mechanics.",
+          "missing_authority": [
+            "Spirit technique and actual summoning permissions"
+          ]
+        }
+      ],
+      "open_mechanics": [
+        "Conditions for spirits, perception and communication, but no B06 ordinary melee attack/targeting."
+      ],
+      "fixture_path": null,
+      "lore_boundary": "Do not convert this entry into an incorporeal melee monster, raised undead body or physical damage target."
+    }
+  ]
+}
