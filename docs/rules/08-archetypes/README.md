@@ -3,6 +3,7 @@
 Veilbound has four base Archetypes:
 
 - [Priest](priest.md)
+  - [Low Priest Exaltation Framework v0](low-priest-exaltation-framework-v0.md) — all-Pillar Level-3 architecture; first authored Life properties
 - [Scholar](scholar.md)
 - [Gifted](gifted.md)
 - [Anointed](anointed.md)
