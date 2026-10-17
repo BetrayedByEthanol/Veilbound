@@ -280,9 +280,25 @@ A **Devotional Rite** is **automatically** any otherwise legal **Prepared chosen
 
 **Executable v0 examples (automatic qualification):** [Guided Regeneration maintained on self](../07-veil-magic/guided-regeneration-v0.md#b-maintained-reserve--2-committed-vp) qualifies: **2→1 Committed VP** if Chosen, without ordinary Spent VP. [Vital Shelter maintained on self](../07-veil-magic/vital-shelter-v0.md#low-priest--maintained-self-devotional-rite) qualifies: base **2 Committed + 1 Spent**, or Chosen **1 Committed + 1 Spent**. Their **fixed 2-Spent-only** modes do not qualify. [Stone Skin `Self`](../07-veil-magic/stone-skin-v0.md) qualifies through its **`ceil(Max VP/3)` Committed** cost and retains its own normal or Reaction activation and consciousness end condition; Chosen discount gives **max(1, ceil(Max VP/3)−1)** Committed. [Conjure Flame `Weapon Enchantment`](../07-veil-magic/conjure-flame-v0.md#b-reserved-weapon--weapon-enchantment) qualifies only while anchored to **the Priest's currently wielded weapon**: base **4×T Committed**, or Chosen **4×T−1 Committed** (minimum 1), and ends on the spell's ordinary disarm/drop/hand-off rules. At L1 Low VA0, Max VP **2**, so even the Chosen T1 weapon reservation **3 VP** is unaffordable; a normal eligible Stone Skin reserve costs **1 VP**, not zero after the Chosen discount. None of these grants an Exaltation property automatically.
 
+### Universal Rite regression cases (definition locks)
+
+| Case | Required outcome |
+|---|---|
+| Low Priest prepares and maintains Guided Regeneration `Self` or legally selects themself with its maintained `Single Target` profile | **Rite**: actual beneficiary self and positive Committed VP; Chosen reduces 2→1 Committed, non-Chosen pays full 2 |
+| Same maintained Guided Regeneration applied to another creature | **Not** a Rite; normal prepared projected blessing only, no Chosen discount or Rite slot |
+| Low Priest casts Guided Regeneration or Vital Shelter in fixed-duration **Spent-only** `Self` mode | **Not** a Rite, even if the fixed effect persists for one minute |
+| Low Priest prepares Stone Skin `Self`; uses its authored Reaction method with vacant Rite slot | **Rite** on successful activation: uses the technique's own Reaction and locked effective Committed VP; universal Rite eligibility does not create another Reaction |
+| Low Priest attempts reactive Stone Skin when the sole L1–3 Active Rite slot is already occupied | **Illegal before Reaction/VP payment**; naming it an ordinary Stone Skin cast does not bypass the slot cap |
+| Low Priest prepares Conjure Flame's maintained `Weapon Enchantment` on a wielded sword | **Rite** when actually wielded; base 4×Used Tier Committed, Chosen reduces by 1 Committed, and original weapon channel-break rule still applies |
+| Low Priest uses Conjure Flame Thrown Flame or an ammunition effect, or targets an item merely carried in storage | **Not** a Rite: no qualifying ongoing Committed channel on current self/held/wielded/worn target |
+| L1 Low Priest VA0 chooses Conjure Flame T1 `Weapon Enchantment` | Max VP 2 cannot fund even **Chosen 3 Committed** (base 4−1); declaration illegal |
+| L1 Low Priest VA0 chooses Stone Skin `Self` | Base ceil(2/3)=1 Committed; Chosen minimum 1, no zero-VP reservation |
+| L4 Low Priest with Twofold Devotion maintains two separately Prepared qualifying Rites | At most **two Active Rites**, even if neither is Chosen; only the designated Chosen one gets commitment discount |
+| Low Priest attempts Exaltation solely because a profile qualifies as a Rite | **No executable extra property** without a separately authored compatible Exaltation; one cannot import a technique's Secondary or Rider automatically |
+
 ### Level 1 — Chosen Devotion
 
-During preparation, designate one **Prepared technique with an eligible recipient/anchor and Committed maintenance mode** as the **Chosen Devotion**, identifying the intended eligible mode/profile; the chosen activation must meet the universal Rite test when actually used. This designation uses the ordinary **Active Devotional Rite cap** when maintained; it never grants a second slot at levels 1–3. If the chosen technique has other nonqualifying modes/targets, those remain ordinary legal casts but do not receive the discount, count as the designated Rite activation, or anchor Exaltation.
+During preparation, designate one **Prepared technique capable of a qualifying self/equipped-item Committed maintenance mode** as the **Chosen Devotion**; the chosen activation must meet the universal Rite test when actually used. The technique may still have other modes/profiles, and those are not locked or removed by the designation. This designation uses the ordinary **Active Devotional Rite cap** when maintained; it never grants a second slot at levels 1–3. If the chosen technique has other nonqualifying modes/targets, those remain ordinary legal casts but do not receive the discount, count as the designated Rite activation, or anchor Exaltation.
 
 It:
 
