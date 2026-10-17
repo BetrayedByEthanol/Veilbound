@@ -68,6 +68,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Conjure Flame v0 — Fire / Conflagration](07-veil-magic/conjure-flame-v0.md)
 - [Basic Heal v0 — Life / Restoration](07-veil-magic/basic-heal-v0.md)
 - [Guided Regeneration v0 — Life / Restoration; fixed Spent or maintained Committed](07-veil-magic/guided-regeneration-v0.md)
+- [Life Exaltation Properties v0 — Held Renewal and Vital Interposition (Low Priest L3)](07-veil-magic/life-exaltation-properties-v0.md)
 - [Vital Shelter v0 — Life / Preservation; finite Vigor protection; fixed or maintained; explicit Scholar Secondary](07-veil-magic/vital-shelter-v0.md)
 - [Venom Endurance v0 — Life / Preservation; bounded mundane-toxin prevention or suppression](07-veil-magic/venom-endurance-v0.md)
 - [Gentle Growth v0 — Life / Nature; one-minute development of existing rooted vegetation](07-veil-magic/gentle-growth-v0.md)
