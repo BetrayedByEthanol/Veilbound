@@ -50,11 +50,16 @@
     {
       "id": "B06-EN-02",
       "name": "Ordinary Human Soldier",
-      "entry_status": "CONCEPT_ONLY",
+      "entry_status": "EXECUTABLE_FIXTURE_EXISTS",
       "mvp_phase": "B06_A",
       "rules_basis": [
+        "docs/design/b06-ordinary-human-soldier-template-v0.md",
+        "docs/rules/05-combat/action-categories-and-physical-tempo.md",
+        "docs/rules/05-combat/weapon-attack-and-guard-math.md",
+        "docs/rules/05-combat/off-hand-and-ranged-combat.md",
         "docs/rules/05-combat/weapons-and-armor.md",
-        "docs/rules/07-veil-magic/metaphysical-foundation.md"
+        "docs/rules/06-vigor-wounds-death/hp-and-vigor.md",
+        "docs/rules/11-equipment/economy-and-starter-equipment-v0.md"
       ],
       "creature_profile": {
         "family": "ordinary_humanoid",
@@ -68,10 +73,12 @@
         "mvp_player_option": "human_only",
         "pillar_affinities": [],
         "physiology_notes": [
-          "Uses Vigor as an ordinary human; no innate spell access."
+          "Ordinary living human; physical HP/Vigor resource rules apply at benchmark level 3.",
+          "No independent Veil invocation, regardless of Veil Affinity/Control scores; personal VP pool is 0 in this non-Archetype benchmark."
         ],
         "behavior_notes": [
-          "Individual training and culture vary; cannot be assumed to follow one universal tactic."
+          "Disciplined shield-and-sword defender is one possible profession, not an archetypal personality or cultural template.",
+          "Can elect ordinary Guard, Dodge, Take Hit or authorized mundane actions; no free combat Talents."
         ]
       },
       "planned_capabilities": [
@@ -79,11 +86,9 @@
           "id": "B06-CAP-SOLDIER-WEAPON",
           "name": "Ordinary trained weapon strike",
           "source_class": "mundane_weapon",
-          "state": "requires_authored_attack_or_effect",
-          "concept": "Use existing sword/mace/spear profiles once Training, Abilities, equipment and legitimate action economy are defined.",
-          "missing_authority": [
-            "Explicit NPC non-Archetype AP/Tempo/Guard/Vigor baseline and exact equipped profile"
-          ]
+          "state": "existing_authority_only",
+          "concept": "B06-AT-03 fully specified ordinary sword thrust (d20+6; 4+d6 Piercing, Pen2) with 24-AP non-Focus B06 benchmark physical cost. Equipment shield/brigandine and derived Guards fixed in executable fixture.",
+          "missing_authority": []
         },
         {
           "id": "B06-CAP-SOLDIER-MAGIC-ITEM",
@@ -97,10 +102,11 @@
         }
       ],
       "open_mechanics": [
-        "Non-Archetype human Turn AP/Tempo and progression, attack/defense stats and legal talents; no automatic Projection or spell VP.",
-        "No unearned magical item/equipment enchantment."
+        "Complete opposed B06 scene against both Life Low Priest fixtures, with GM-resolved defense and actual die rolls, remains untested.",
+        "Non-Focus Physical Action24 and regeneration Focus Rate0 are B06-local proposed defaults for review, not a universally locked NPC system.",
+        "No unearned magical item/equipment enchantment; actual independent magical item mechanics still deferred."
       ],
-      "fixture_path": null,
+      "fixture_path": "content/creatures/b06-ordinary-human-soldier.v0.json",
       "lore_boundary": "Ordinary humans have Vigor and a relationship to the Veil but cannot themselves invoke Veil techniques; learned Archetypes are exceptional, not universal."
     },
     {
