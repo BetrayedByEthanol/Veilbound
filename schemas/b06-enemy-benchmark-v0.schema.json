@@ -920,6 +920,30 @@
               "resolution_rule_ref"
             ]
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "source_class": {
+                "enum": [
+                  "natural_weapon",
+                  "innate_veil",
+                  "breath",
+                  "environment",
+                  "other"
+                ]
+              }
+            },
+            "required": [
+              "source_class"
+            ]
+          },
+          "then": {
+            "required": [
+              "source_authority_ref",
+              "resolution_rule_ref"
+            ]
+          }
         }
       ]
     },
