@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:veilbound:schema:b06-bestiary-index-v0",
+  "title": "B06 Initial Bestiary Design Index v0",
+  "description": "Non-executable taxonomy/lore/design-seed records. Each planned ability carries a separately checked source status; no creature gains a full statblock or attack from this index alone.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "source_scope",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "b06-bestiary-index-v0"
+    },
+    "status": {
+      "const": "DESIGN_ONLY_NOT_CANONICAL_BESTIARY"
+    },
+    "source_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/bestiaryEntry"
+      }
+    }
+  },
+  "$defs": {
+    "creatureProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "species_or_kind",
+        "body_state",
+        "cognition",
+        "veil_relationship",
+        "physical_presence",
+        "mvp_player_option",
+        "pillar_affinities",
+        "physiology_notes",
+        "behavior_notes"
+      ],
+      "properties": {
+        "family": {
+          "enum": [
+            "ordinary_humanoid",
+            "archetype_humanoid",
+            "natural_beast",
+            "veil_touched_beast",
+            "dragon",
+            "raised_undead",
+            "turned_undead",
+            "pillar_manifestation",
+            "spirit",
+            "unknown_species"
+          ]
+        },
+        "species_or_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body_state": {
+          "enum": [
+            "living",
+            "corporeal_raised",
+            "corporeal_turned",
+            "veil_formed",
+            "nonphysical_spirit",
+            "undetermined"
+          ]
+        },
+        "cognition": {
+          "enum": [
+            "sapient",
+            "animal_like",
+            "non_sentient_pattern",
+            "undetermined"
+          ]
+        },
+        "veil_relationship": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "ordinary_no_independent_invocation",
+              "learned_or_bonded_archetype",
+              "outward_dominant",
+              "inward_dominant",
+              "innate_pillar_affinity",
+              "veil_touched",
+              "corporeal_reanimation",
+              "undead_transformation",
+              "surge_manifestation",
+              "independent_spirit",
+              "undetermined"
+            ]
+          }
+        },
+        "physical_presence": {
+          "enum": [
+            "corporeal",
+            "nonphysical_no_ordinary_interaction",
+            "manifested_conditional",
+            "undetermined"
+          ]
+        },
+        "mvp_player_option": {
+          "enum": [
+            "human_only",
+            "not_playable_mvp",
+            "not_applicable"
+          ]
+        },
+        "pillar_affinities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "pillar",
+              "aspect",
+              "origin_status"
+            ],
+            "properties": {
+              "pillar": {
+                "type": "string",
+                "minLength": 1
+              },
+              "aspect": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "origin_status": {
+                "enum": [
+                  "canonical_pillar_identity",
+                  "example_only",
+                  "to_be_authored"
+                ]
+              }
+            }
+          }
+        },
+        "physiology_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "behavior_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "plannedCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "source_class",
+        "state",
+        "concept",
+        "missing_authority"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^B06-CAP-[A-Z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_class": {
+          "enum": [
+            "mundane_weapon",
+            "natural_weapon",
+            "physiology",
+            "innate_veil",
+            "learned_veil",
+            "magical_item",
+            "undead_animation",
+            "surge_manifestation",
+            "environment",
+            "none"
+          ]
+        },
+        "state": {
+          "enum": [
+            "existing_authority_only",
+            "requires_authored_attack_or_effect",
+            "narrative_only",
+            "deferred"
+          ]
+        },
+        "concept": {
+          "type": "string"
+        },
+        "missing_authority": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "bestiaryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "entry_status",
+        "mvp_phase",
+        "rules_basis",
+        "creature_profile",
+        "planned_capabilities",
+        "open_mechanics",
+        "fixture_path",
+        "lore_boundary"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^B06-EN-[0-9]{2}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_status": {
+          "enum": [
+            "EXECUTABLE_FIXTURE_EXISTS",
+            "CONCEPT_ONLY",
+            "DEFERRED"
+          ]
+        },
+        "mvp_phase": {
+          "enum": [
+            "B06_A",
+            "B06_LATER",
+            "POST_MVP"
+          ]
+        },
+        "rules_basis": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "creature_profile": {
+          "$ref": "#/$defs/creatureProfile"
+        },
+        "planned_capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/plannedCapability"
+          }
+        },
+        "open_mechanics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fixture_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lore_boundary": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
