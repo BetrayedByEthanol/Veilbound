@@ -9,7 +9,7 @@
 | Identity | **Life / Restoration**, Level-3 Low Priest Exaltation |
 | Pattern | Defer use of otherwise-unused throughput **from an already real Regeneration Step** |
 | Host | Any **self-targeted maintained Chosen Life/Restoration Rite** actively giving its owner an authored positive modifier to their genuine Regeneration Step throughput. **Guided Regeneration** currently qualifies |
-| Activation | **End of Priest's genuine own-turn Regeneration Step while in initiative**, after all normal allocation and before start-of-turn hazards; **0 additional AP, no Reaction** |
+| Activation | **End of Priest's genuine own-turn Regeneration Step while in initiative**, while **conscious and at positive HP**, after all normal allocation and before start-of-turn hazards; **0 additional AP, no Reaction** |
 | Price | **1 Spent VP** at activation, no separate reservation and no refund |
 | Capacity | Hold **1 or 2 genuinely unused throughput points**, never more than unused actual throughput from that Step |
 | Trigger | **First subsequent actual HP-loss event** on the Priest, resolved after damage, wound and Dying/death checks |
