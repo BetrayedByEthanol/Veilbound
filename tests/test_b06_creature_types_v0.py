@@ -99,7 +99,7 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
         self.assertIn("ordinary_no_independent_invocation", soldier["veil_relationship"])
         self.assertEqual(soldier["family"], "ordinary_humanoid")
         self.assertTrue(any(
-            "non-Focus" in note or "non-Archetype" in note
+            "non-focus" in note.casefold() or "non-archetype" in note.casefold()
             for note in self.entries["B06-EN-02"]["open_mechanics"]
         ))
 
