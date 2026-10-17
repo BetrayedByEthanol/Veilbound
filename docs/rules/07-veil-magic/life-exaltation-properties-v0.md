@@ -45,10 +45,10 @@ After the **first later event causing actual HP loss**, complete all normal dama
 | Pattern | Temporarily **convert some of a finite protective budget** to a new, bounded form of bodily protection |
 | Host | Any **self-targeted maintained Chosen Life/Preservation Rite** with an **actual finite numeric budget preventing incoming direct Vigor-damage packets** and at least **2 unspent points**. **Vital Shelter Primary** currently qualifies |
 | Activation | One legal **own-turn decision point in initiative**, while conscious and at positive HP; expressly **0 additional AP, no Reaction** |
-| Price | **1 Spent VP** immediately, beyond the Chosen host's **1 Committed +1 Spent** establishment price |
-| Trigger | First subsequent **incoming HP-damage packet** that would actually lower the Priest's HP after ordinary defense/armor/resistance |
-| Output | Before HP subtraction, prevent up to **2 HP**, spending **2 Shelter budget points per 1 HP prevented**: `prevented HP = min(2, eligible HP damage, floor(current Shelter budget / 2))` |
-| Duration | Until the start of the Priest's **next own turn**, first qualifying HP packet, initiative exit, end of the exact Chosen Shelter, or depletion of its finite budget |
+| Price | **1 Spent VP** at Exaltation activation, independent of the **actual host's existing locked Committed VP and any already Spent establishment cost**. Vital Shelter as Chosen currently uses 1 Committed + 1 Spent to establish the host; other compatible hosts use their own prices |
+| Trigger | First subsequent **single incoming hit/hazard event with positive aggregate HP damage** after each separate HP packet receives its ordinary mitigation; all HP packets belonging to that one event are **one** Exaltation trigger |
+| Output | **Once per qualifying event**, before HP loss: prevent up to **2 HP** from the **sum of that event's individually mitigated HP packets**, spending **2 actual remaining host prevention-budget points per 1 HP prevented**: `prevented HP = min(2, sum(nonnegative post-mitigation HP packets in event), floor(actual host remaining budget / 2))` |
+| Duration | Until the start of the Priest's **next own turn**, first qualifying HP-damaging event, initiative exit, end of the exact Chosen host, or depletion of its actual finite budget |
 | Frequency | **At most once per Priest own turn**; no stacking, free reroute or renewal of remaining budget |
 
 **Activation.** Require an actually eligible **Chosen self-maintained finite Vigor-prevention budget** active **on the Priest** (currently Vital Shelter Primary), at least 2 remaining budget, one free pending Exaltation slot, a legal own-turn decision point and 1 Available VP. Pay that VP as **Spent on activation**, regardless of whether any HP harm subsequently arrives. This permission to arm the property for 0 additional AP **is specific to this entry**: no ordinary spell activation, off-turn ability or Reaction is created.
