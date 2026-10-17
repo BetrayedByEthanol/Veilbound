@@ -541,7 +541,7 @@
         {
           "id": "B06-CAP-VAMPIRE-INNATE",
           "name": "Turned nature",
-          "source_class": "undead_animation",
+          "source_class": "physiology",
           "state": "deferred",
           "concept": "Signature physiological powers and limitations need independent authored rules; no generic hypnosis, regeneration or sunlight weakness.",
           "missing_authority": [
