@@ -77,6 +77,6 @@ For a mixed HP/Vigor event, after native defensive/mitigation checks, **apply th
 
 ## Scope and Level-5 boundary
 
-These are **two executable Level-3 Life properties** with **provisional 1-Spent VP prices and 2-point limits**. Their required host capabilities are narrow; other future Life Rites may qualify only if a property explicitly names or accurately covers their authored capability. No automatically cast Venom Endurance or other technique is granted.
+These are **two executable Level-3 Life properties** with **provisional 1-Spent VP prices and 2-point limits**. Compatibility is **capability-based, not keyed to these two technique names**: future same-Aspect self-maintained Chosen Rites qualify automatically if their actually authored effects supply the exact throughput-modifier or finite Vigor-prevention-budget host predicate. The two named techniques are the current executable examples. No automatically cast Venom Endurance or other technique is granted.
 
 At Level 3 they cannot cross Aspects. At Level 5, Living Liturgy still needs an **explicitly authorized cross-Aspect host match and all normal stability rules**; none is granted merely because the property shares the Life Pillar. Held Renewal does not work on Vital Shelter (no Regen modifier), and Vital Interposition does not work on Guided Regeneration (no finite shelter budget). The [Earth and Fire probes](../../design/b05-exaltation-cross-pillar-design-tests.md) are NON-EXECUTABLE.
