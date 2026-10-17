@@ -153,10 +153,10 @@ For each technique, fill the common identity; for **each supported profile × co
 | Outcome packets | HP vs Vigor vs healing/repair/control; type; fixed/dice formula; resistance/armor interaction; critical/defense triggers |
 | Scaling | VC formula and **per-target/per-hit allocation**, tier; do not inherit standard VC repeatedly |
 | Persistence | Ending conditions, sustained nature, and **Continuous / Rider cadence / Pulse / Spend** for each recurring output |
-| Compatibility | [Projection], [Embodiment], Inward, Consecration, Devotional Rite, Conduit Form, Investment, Archetype/Focus permissions **only where explicitly authored** |
+| Compatibility | [Projection], [Embodiment], Inward, Consecration, Conduit Form, Investment and Archetype/Focus permissions **only where explicitly authored**, **except Low Priest Devotional Rite qualification is derived automatically** from the Priest rule (actual self or held/wielded/worn-item target **and** positive Committed maintenance); record any special exclusions/termination already authored for the technique |
 | Composition/item hooks | Whether the profile's Secondary is **High Scholar Composite-compatible**, item-only or environment-only; applicable authoring override to Scholar's default half-strength Secondary; separate future conversion/item Rider hooks, no implicit permissions |
 
-**Technique authoring is incomplete** if its intended use lacks a legal target, effect, VP/AP price, applicable resolution, defensive interaction or persistence/trigger definition. An Aspect identity and this template alone never grant a character a castable technique.
+**A profile needs no bespoke `Devotional Rite` permission flag.** A Low Priest uses the [automatic Priest Rite test](../08-archetypes/priest.md#devotional-rites) on the actual selected target and reservation mode. This does **not** imply other Archetype features, composite pairing, Exaltation properties or altered on-hit output. **Technique authoring is incomplete** if its intended use lacks a legal target, effect, VP/AP price, applicable resolution, defensive interaction or persistence/trigger definition. An Aspect identity and this template alone never grant a character a castable technique.
 
 ## 10. Executable worked example — Conjure Flame v0
 
