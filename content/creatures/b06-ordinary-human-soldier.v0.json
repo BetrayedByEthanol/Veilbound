@@ -136,7 +136,7 @@
         "strength_contribution": "light",
         "armor_penetration": 2,
         "mitigation": "physical_armor_after_penetration",
-        "source": "Canonical sword: fixed3 + d6 + floor(max(Strength +2,0)/2)=1 Light contribution; 4+d6 raw Piercing HP, Penetration2"
+        "source": "Canonical sword: fixed3 + d6 + floor(max(Strength,0)/2)=1 Light contribution; 4+d6 raw Piercing HP, Penetration2"
       },
       "additional_packets": [],
       "required_active_effect": null,
