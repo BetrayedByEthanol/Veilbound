@@ -4,6 +4,8 @@
 
 ## 1. Data contract
 
+**Post-PR #84 schema extension (current review):** The original Firebound Sentry and its exact `B06-AT-01/02` physical/magical packet math are preserved. The shared [enemy schema](../../schemas/b06-enemy-benchmark-v0.schema.json) now permits non-Archetype creatures with explicit `creature_profile` metadata and optional player-style progression. An independent [14-entry provisional bestiary](../../content/creatures/b06-initial-bestiary-v0.json) carries non-executable attack *concepts* separately; see [Creature Types and Initial Bestiary v0](b06-creature-types-and-initial-bestiary-v0.md). Natural venom, non-Archetype action costs, breath geometry, undead resource interactions and Veil Manifestation effects **remain unauthored**. Existing combat/Focus rules are unchanged.
+
 The [JSON Schema](../../schemas/b06-enemy-benchmark-v0.schema.json) declares a reusable `B06-EN-xx` test-opponent record: source references; archetype/Focus if derived from a character; all nine Abilities; Training, Talents and Prepared techniques; HP/Vigor/Armor/Guard/Dodge; Initiative, Turn AP, movement, real VP ledger, start states and maintained effects; an array of typed attack profiles; bounded tactics; and audit caveats.
 
 Each attack profile contains:
