@@ -172,5 +172,18 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
         self.assertIn("creature_profile", conditional["else"]["required"])
 
 
+    def test_nonprojectors_and_innate_attacks_require_explicit_authority(self):
+        resources = self.creature_schema["properties"]["resources"]["properties"]
+        self.assertIn("null", resources["projection_action_ap"]["type"])
+        self.assertIn("null", resources["natural_regeneration_throughput"]["type"])
+        attack = self.creature_schema["$defs"]["attack"]
+        self.assertIn("null", attack["attack_roll"]["type"])
+        self.assertTrue(any(
+            {"source_authority_ref", "resolution_rule_ref"}.issubset(set(branch["then"]["required"]))
+            and "natural_weapon" in branch["if"].get("properties", {}).get("source_class", {}).get("enum", [])
+            for branch in attack["allOf"]
+        ))
+
+
 if __name__ == "__main__":
     unittest.main()
