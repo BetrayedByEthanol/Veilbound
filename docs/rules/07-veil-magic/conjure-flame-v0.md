@@ -64,7 +64,7 @@ This is a direct-hit HP-damaging physical Attack and uses applicable natural-20/
 | Field | Rule |
 |---|---|
 | Primary activation | **One Projection Action**: High **20 AP**, Medium **24 AP**, Low **30 AP** |
-| VP | Base **4 × T Committed VP**, returned when the channel ends; Low Priest Chosen Devotion discounts the qualifying Reserved Weapon mode by **1 Committed VP (minimum 1)**, otherwise no discount |
+| VP | Base **4 × T Committed VP**; qualifying Low Priest Chosen Devotion instead commits **max(1, 4×T−1) VP**. Lock the **effective Committed VP amount** at application. When the channel ends, return **only that actually Committed amount** to Available VP; do not refund the undiscounted base cost |
 | Target | **One weapon the caster currently wields**; explicitly identify it on activation |
 | Duration | **While the weapon channel and VP reservation remain valid**; no hit count, expiration clock or upkeep VP |
 | Attack/defense | **Ordinary weapon attack and defense**, with its normal Physical Action/AP or authored attack timing |
@@ -75,7 +75,7 @@ This is a direct-hit HP-damaging physical Attack and uses applicable natural-20/
 
 The magical packet applies on **every qualifying successful hit** by **the selected enchanted weapon**, including an otherwise eligible hit whose ordinary physical HP damage is absorbed by Armor. A different weapon, unenchanted off-hand attack, replaced projectile or mere possession of the enchanted sword does not inherit it. The v0 **Rider cadence** is **each eligible successful weapon hit**, and the numbers remain subject to multi-attack Tempo balancing.
 
-**Channel termination:** successful [Disarm](../05-combat/disarm-v0.md), or **voluntarily dropping/handing away the selected weapon** at a legal own-turn zero-action decision point, breaks the channel immediately and **returns all Committed VP to Available**. A chosen drop is free under normal [zero-action timing](volition-points.md#zero-action-timing), **not** a free interrupt. Recovering the weapon does not reactivate it. The weapon's independent item effects do not vanish solely because this wielder-maintained Reserve ended. One wielder-maintained Primary reserved enchantment per weapon remains the default; no secondary simultaneous Reserve is authorized.
+**Channel termination:** successful [Disarm](../05-combat/disarm-v0.md), or **voluntarily dropping/handing away the selected weapon** at a legal own-turn zero-action decision point, breaks the channel immediately and **returns only this instance's locked, actually Committed VP to Available** (base **4×T**, or **max(1, 4×T−1)** for a qualifying Chosen Devotion); no VP can be created by refunding an undiscounted price that was never committed. A chosen drop is free under normal [zero-action timing](volition-points.md#zero-action-timing), **not** a free interrupt. Recovering the weapon does not reactivate it. The weapon's independent item effects do not vanish solely because this wielder-maintained Reserve ended. One wielder-maintained Primary reserved enchantment per weapon remains the default; no secondary simultaneous Reserve is authorized.
 
 ## C. Enchanted arrow/bolt — `Ammunition Shot`
 
@@ -127,9 +127,10 @@ For **VC +0**, the following refer to **Primary Vigor damage on a successful hit
 | A selected Reserved sword hits three times | The defined on-hit fire/Vigor packets apply **three** times, with no per-hit VP or magic AP |
 | L1 Low Priest VA0 prepares Conjure Flame as Chosen Devotion, T1 `Weapon Enchantment` | Max VP **2**; base **4 Committed**, Chosen **3**. **Illegal**, unaffordable; no AP or VP committed |
 | L2 Low Priest VA0, Prepared Chosen `Weapon Enchantment`, T1, no other Active Rite | Max VP **4**; **3 Committed VP** from 4 leaves **1 Available**. Full ordinary Low Projection AP still required; effect ends on disarm/drop and does not grant a free weapon attack |
+| Same L2 Low Priest drops the T1 Chosen enchanted weapon while 1 VP remains Available | Channel ends, **exactly 3 Committed VP return**: Available **1→4**, Committed **3→0**; never return base 4 and create a fifth VP |
 | Low Priest with one Active Rite at L3 attempts T1 Reserved Weapon Conjure Flame | **Illegal** under shared cap, even if 4 Available VP can pay the base non-Chosen reservation; cannot bypass by calling it a normal spell |
 | Low Priest uses Conjure Flame `Thrown Projectile` or `Ammunition Shot` | **Not Devotional Rites**, because no positive ongoing Committed VP reserve; remain separate legal Prepared Prayer modes, subject to ordinary access/AP/VP |
-| The wielder legally drops the reserved sword | The channel ends and its **4×T Committed VP** becomes Available; no free reaction timing |
+| The wielder legally drops the reserved sword | The channel ends and refunds **only the effective VP still Committed by that instance**: ordinary Reserved Weapon **4×T**, or qualifying Low Priest Chosen **max(1, 4×T−1)**. No free reaction timing or refund of a never-committed VP discount |
 | Spontaneous bow shot with Conjure Flame | One normal paid ranged attack; **2×T VP spent on launch** even on miss; 0 extra Projection AP |
 | Heavy crossbow shot with Conjure Flame | **Full Action** still required; enchantment never waives its reload Full Action |
 | Physical arrow prepared for Tier 2 | 10-minute preparation; **2 Spent VP** per arrow; effect expires in 24 hours; hit uses Tier 2 values |
