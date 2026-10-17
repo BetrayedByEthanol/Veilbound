@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:veilbound:schema:b06-benchmark-enemy-v0",
-  "title": "Veilbound B06 Enemy Benchmark Fixture v0",
-  "description": "Design/test-only enemy stat block. Constrains data shape; formulas, authorized spell access, and rules legality still require canonical audit.",
+  "title": "Veilbound B06 Enemy / Creature Benchmark Fixture v0",
+  "description": "Design/test-only executable combatant schema. Nonhuman, non-archetype, beast, undead, dragon and Pillar-manifested creatures are permitted when each mechanic has independent authored authority. Draft bestiary concepts use the separate B06 bestiary-index schema and may not pretend to possess executable attack math.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -14,7 +14,6 @@
     "rules_basis",
     "identity",
     "abilities",
-    "progression",
     "defenses",
     "resources",
     "equipment",
@@ -70,7 +69,12 @@
         "type": {
           "enum": [
             "player_rules_derived_opponent",
-            "authored_creature"
+            "ordinary_non_archetype_humanoid",
+            "authored_creature",
+            "raised_undead",
+            "turned_undead",
+            "pillar_manifestation",
+            "nonphysical_spirit"
           ]
         },
         "archetype": {
@@ -205,7 +209,8 @@
             "null"
           ]
         }
-      }
+      },
+      "description": "Mandatory for player-rules-derived opponents. Optional for independently authored creature/NPC combatants; no empty or invented Priest/Scholar/Gifted/Anointed progression is needed for beasts or ordinary non-Archetype humans."
     },
     "defenses": {
       "type": "object",
@@ -366,7 +371,8 @@
             }
           }
         }
-      }
+      },
+      "description": "Executable creature must have authored HP/Vigor/AP/VP including VP=0 and 0 projection when unavailable. No automatic player Focus AP or Regeneration formula for non-Archetype creatures."
     },
     "equipment": {
       "type": "array",
@@ -448,7 +454,8 @@
       "minItems": 1,
       "items": {
         "$ref": "#/$defs/attack"
-      }
+      },
+      "description": "Only fully sourced executable attack and ability profiles. Unauthored breath, bite, venom, stinger, non-physical contact or natural action math belongs in bestiary planned_capabilities, not this list."
     },
     "tactics": {
       "type": "object",
@@ -504,6 +511,17 @@
           "type": "string"
         }
       }
+    },
+    "bestiary_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^B06-EN-[0-9]{2}$",
+      "description": "Optional link to the provisional bestiary entry; absent in legacy fixtures."
+    },
+    "creature_profile": {
+      "$ref": "#/$defs/creatureProfile"
     }
   },
   "$defs": {
@@ -684,7 +702,8 @@
             "total_bonus": {
               "type": "integer"
             }
-          }
+          },
+          "description": "Current B06 v0 executable attack profile uses sourced ordinary Attack roll; undefined natural/breath resolution cannot be inferred from this template."
         },
         "range_class": {
           "enum": [
@@ -746,8 +765,25 @@
             },
             "requires_surviving_puncture": {
               "type": "boolean"
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Must identify a separately authored physical source capable of the route, not just the toxin catalogue."
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object"
+              },
+              "then": {
+                "required": [
+                  "source_ref"
+                ]
+              }
+            }
+          ]
         },
         "critical_notes": {
           "type": "string"
@@ -758,8 +794,355 @@
           "items": {
             "type": "string"
           }
+        },
+        "source_class": {
+          "enum": [
+            "mundane_weapon",
+            "natural_weapon",
+            "learned_veil",
+            "innate_veil",
+            "breath",
+            "environment",
+            "other"
+          ],
+          "description": "Classification only; a separately authored legal source and action/resolution still required."
+        },
+        "resolution_kind": {
+          "enum": [
+            "ordinary_weapon_attack",
+            "authored_natural_attack",
+            "authored_veil_attack",
+            "authored_breath_area",
+            "authored_non_damage_effect",
+            "other"
+          ],
+          "description": "Category does not itself authorize or define rolls, sizes, armor handling, area geometry or action economy."
+        },
+        "source_authority_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Canonical rule or separately authored creature ability needed for natural attack/breath/innate source."
+        },
+        "target_geometry": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "range_rule_ref"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "melee_one",
+                "ranged_one",
+                "area",
+                "self",
+                "special"
+              ]
+            },
+            "range_rule_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "area_rule_ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "creatureProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "species_or_kind",
+        "body_state",
+        "cognition",
+        "veil_relationship",
+        "physical_presence",
+        "mvp_player_option",
+        "pillar_affinities",
+        "physiology_notes",
+        "behavior_notes"
+      ],
+      "properties": {
+        "family": {
+          "enum": [
+            "ordinary_humanoid",
+            "archetype_humanoid",
+            "natural_beast",
+            "veil_touched_beast",
+            "dragon",
+            "raised_undead",
+            "turned_undead",
+            "pillar_manifestation",
+            "spirit",
+            "unknown_species"
+          ]
+        },
+        "species_or_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body_state": {
+          "enum": [
+            "living",
+            "corporeal_raised",
+            "corporeal_turned",
+            "veil_formed",
+            "nonphysical_spirit",
+            "undetermined"
+          ]
+        },
+        "cognition": {
+          "enum": [
+            "sapient",
+            "animal_like",
+            "non_sentient_pattern",
+            "undetermined"
+          ]
+        },
+        "veil_relationship": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "ordinary_no_independent_invocation",
+              "learned_or_bonded_archetype",
+              "outward_dominant",
+              "inward_dominant",
+              "innate_pillar_affinity",
+              "veil_touched",
+              "corporeal_reanimation",
+              "undead_transformation",
+              "surge_manifestation",
+              "independent_spirit",
+              "undetermined"
+            ]
+          }
+        },
+        "physical_presence": {
+          "enum": [
+            "corporeal",
+            "nonphysical_no_ordinary_interaction",
+            "manifested_conditional",
+            "undetermined"
+          ]
+        },
+        "mvp_player_option": {
+          "enum": [
+            "human_only",
+            "not_playable_mvp",
+            "not_applicable"
+          ]
+        },
+        "pillar_affinities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "pillar",
+              "aspect",
+              "origin_status"
+            ],
+            "properties": {
+              "pillar": {
+                "type": "string",
+                "minLength": 1
+              },
+              "aspect": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "origin_status": {
+                "enum": [
+                  "canonical_pillar_identity",
+                  "example_only",
+                  "to_be_authored"
+                ]
+              }
+            }
+          }
+        },
+        "physiology_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "behavior_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "plannedCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "source_class",
+        "state",
+        "concept",
+        "missing_authority"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^B06-CAP-[A-Z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_class": {
+          "enum": [
+            "mundane_weapon",
+            "natural_weapon",
+            "physiology",
+            "innate_veil",
+            "learned_veil",
+            "magical_item",
+            "undead_animation",
+            "surge_manifestation",
+            "environment",
+            "none"
+          ]
+        },
+        "state": {
+          "enum": [
+            "existing_authority_only",
+            "requires_authored_attack_or_effect",
+            "narrative_only",
+            "deferred"
+          ]
+        },
+        "concept": {
+          "type": "string"
+        },
+        "missing_authority": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "bestiaryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "entry_status",
+        "mvp_phase",
+        "rules_basis",
+        "creature_profile",
+        "planned_capabilities",
+        "open_mechanics",
+        "fixture_path",
+        "lore_boundary"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^B06-EN-[0-9]{2}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_status": {
+          "enum": [
+            "EXECUTABLE_FIXTURE_EXISTS",
+            "CONCEPT_ONLY",
+            "DEFERRED"
+          ]
+        },
+        "mvp_phase": {
+          "enum": [
+            "B06_A",
+            "B06_LATER",
+            "POST_MVP"
+          ]
+        },
+        "rules_basis": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "creature_profile": {
+          "$ref": "#/$defs/creatureProfile"
+        },
+        "planned_capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/plannedCapability"
+          }
+        },
+        "open_mechanics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fixture_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lore_boundary": {
+          "type": "string"
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "identity": {
+            "properties": {
+              "type": {
+                "const": "player_rules_derived_opponent"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        },
+        "required": [
+          "identity"
+        ]
+      },
+      "then": {
+        "required": [
+          "progression"
+        ]
+      },
+      "else": {
+        "required": [
+          "creature_profile"
+        ]
+      }
+    }
+  ]
 }
