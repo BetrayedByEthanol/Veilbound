@@ -36,3 +36,47 @@ After the **first later event causing actual HP loss**, complete all normal dama
 | Earlier hit fully absorbed by Armor, or Vigor-only packet | Held points remain pending; no false HP trigger |
 | All throughput spent in the original Step | No legal activation, no VP spent |
 | Host ends, initiative ends, or Priest reaches next true Step | Pending held points expire; no carryover, new Step, Vigor or Spent VP refund |
+
+## EX-LP-01 — Vital Interposition
+
+| Field | Rule |
+|---|---|
+| Identity | **Life / Preservation**, Level-3 Low Priest Exaltation |
+| Pattern | Temporarily **convert some of a finite protective budget** to a new, bounded form of bodily protection |
+| Host | **Self-targeted maintained Chosen Vital Shelter Primary** with **at least 2 actual remaining prevention-budget points** |
+| Activation | One legal **own-turn decision point in initiative**, while conscious and at positive HP; expressly **0 additional AP, no Reaction** |
+| Price | **1 Spent VP** immediately, beyond the Chosen host's **1 Committed +1 Spent** establishment price |
+| Trigger | First subsequent **incoming HP-damage packet** that would actually lower the Priest's HP after ordinary defense/armor/resistance |
+| Output | Before HP subtraction, prevent up to **2 HP**, spending **2 Shelter budget points per 1 HP prevented**: `prevented HP = min(2, eligible HP damage, floor(current Shelter budget / 2))` |
+| Duration | Until the start of the Priest's **next own turn**, first qualifying HP packet, initiative exit, end of the exact Chosen Shelter, or depletion of its finite budget |
+| Frequency | **At most once per Priest own turn**; no stacking, free reroute or renewal of remaining budget |
+
+**Activation.** Require the actual Chosen maintained **Vital Shelter Primary** active **on the Priest**, at least 2 remaining budget, one free pending Exaltation slot, a legal own-turn decision point and 1 Available VP. Pay that VP as **Spent on activation**, regardless of whether any HP harm subsequently arrives. This permission to arm the property for 0 additional AP **is specific to this entry**: no ordinary spell activation, off-turn ability or Reaction is created.
+
+**Conversion.** An incoming hit/hazard first resolves its normal delivery, defenses, Armor and any applicable existing resistance. If it would deal **positive actual HP damage**, use up to **2** of that HP packet's points and consume **2 real, already remaining Vital Shelter budget points for each HP prevented**. Do this **before subtracting HP and assessing the resulting 0-HP threshold**. A Devastating Critical or independently authored wound trigger still applies even when HP injury is partly prevented. One arm protects **one actual HP packet only**; no other HP packets gain protection until a separately legal new activation.
+
+For a mixed HP/Vigor event, after native defensive/mitigation checks, **apply the Exaltation's HP-budget diversion first**, then process that event's independent direct Vigor packet under normal Vital Shelter prevention using **only the remaining original budget**. If earlier Vigor packets consumed enough budget that fewer than 2 remain, the next HP packet consumes the armed Exaltation **without preventing HP**. Pure Vigor packets still use normal Vital Shelter rules and **do not trigger** the Exaltation. Fully mitigated HP packets, voluntary expenditures and ordinary Dying-round HP decay do not trigger it. No extra HP resistance rating is created.
+
+**Termination.** Reaching original Shelter budget **0** ends the host immediately under its own rules, refunds only its actual **1 Committed VP** if Chosen, and ends pending Exaltation. The original Shelter **1 Spent establishment VP** and the Exaltation **1 Spent VP** never return. Ordinary budget depletion, Rite release, initiative exit or expiry do not recharge anything, and non-Chosen copies do not inherit the property.
+
+**Identity boundary.** This expresses **Preservation** by redirecting an existing finite self-protective reservoir to prevent a little direct HP injury. It is not automatic Stone Skin-style resistance, retrospective healing, regeneration, Venom Endurance's toxin prevention/suppression, or protection for other recipients.
+
+### EX-LP-01 regression
+
+| Case | Expected |
+|---|---|
+| L3 Low VA0, VC0, Chosen Vital Shelter | Max VP **6**; host costs **1 Committed + 1 Spent** leaving **4 Available**, with actual **B8** |
+| Arm Vital Interposition on own turn | Pay **1 more Spent**, leave **3 Available**; original **B8** unchanged at arming |
+| B8, next after-mitigation packet HP5 | Prevent **2 HP**, consume **4 of B8**, apply **3 HP**, leaving **B4** |
+| B8, mixed event HP5 + Vigor3, current Vigor positive | HP prevention consumes B4; original shelter then prevents Vigor3 consuming B3; **B1** remains |
+| B3, next HP5 | Prevent **1 HP** for **2 budget**, apply 4 HP, leave **B1** |
+| B1 from earlier Vigor prevention, first HP packet arrives | Spend **0** budget preventing **0 HP**; pending property expires, no bonus capacity |
+| Incoming Vigor only, or HP fully stopped by Armor | Ordinary shelter handles Vigor; pending HP property stays armed while host remains |
+| Another HP hit after the first qualifying HP packet | No further HP diversion until another legal own-turn Exaltation activation |
+| Shelter depleted or released, or Priest exits initiative | Pending property expires, no Spent VP refund; no second Rite or independent protection |
+
+## Scope and Level-5 boundary
+
+These are **two executable Level-3 Life properties** with **provisional 1-Spent VP prices and 2-point limits**. Their required host capabilities are narrow; other future Life Rites may qualify only if a property explicitly names or accurately covers their authored capability. No automatically cast Venom Endurance or other technique is granted.
+
+At Level 3 they cannot cross Aspects. At Level 5, Living Liturgy still needs an **explicitly authorized cross-Aspect host match and all normal stability rules**; none is granted merely because the property shares the Life Pillar. Held Renewal does not work on Vital Shelter (no Regen modifier), and Vital Interposition does not work on Guided Regeneration (no finite shelter budget). The [Earth and Fire probes](../../design/b05-exaltation-cross-pillar-design-tests.md) are NON-EXECUTABLE.
