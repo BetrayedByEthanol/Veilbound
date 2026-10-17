@@ -169,7 +169,15 @@
       "legality_refs": [
         "docs/rules/05-combat/weapons-and-armor.md",
         "docs/rules/05-combat/defensive-responses-and-criticals.md"
-      ]
+      ],
+      "source_class": "mundane_weapon",
+      "resolution_kind": "ordinary_weapon_attack",
+      "source_authority_ref": "docs/rules/05-combat/weapons-and-armor.md",
+      "target_geometry": {
+        "kind": "melee_one",
+        "range_rule_ref": "docs/rules/05-combat/weapon-attack-and-guard-math.md",
+        "area_rule_ref": null
+      }
     },
     {
       "id": "B06-AT-02",
@@ -232,7 +240,15 @@
       "legality_refs": [
         "docs/rules/07-veil-magic/conjure-flame-v0.md",
         "docs/rules/05-combat/defensive-responses-and-criticals.md"
-      ]
+      ],
+      "source_class": "learned_veil",
+      "resolution_kind": "ordinary_weapon_attack",
+      "source_authority_ref": "docs/rules/07-veil-magic/conjure-flame-v0.md",
+      "target_geometry": {
+        "kind": "melee_one",
+        "range_rule_ref": "docs/rules/05-combat/weapon-attack-and-guard-math.md",
+        "area_rule_ref": null
+      }
     }
   ],
   "tactics": {
@@ -277,5 +293,24 @@
       "NPC tactics are benchmark policy only; they create no free Reactions, AP, VP, physical traits, or spell casts."
     ],
     "certification_status": "B06 schema/attack-profile fixture only; pending reproducible opposed encounter traces and Codex Review. No B06 encounter pack or Priest Focus certified."
+  },
+  "bestiary_ref": "B06-EN-01",
+  "creature_profile": {
+    "family": "archetype_humanoid",
+    "species_or_kind": "Human",
+    "body_state": "living",
+    "cognition": "sapient",
+    "veil_relationship": [
+      "learned_or_bonded_archetype"
+    ],
+    "physical_presence": "corporeal",
+    "mvp_player_option": "human_only",
+    "pillar_affinities": [],
+    "physiology_notes": [
+      "Standard human physiology; Vigor36 and Armor3 in independently authored fixture."
+    ],
+    "behavior_notes": [
+      "Uses authored sword/Conjure Flame tactics."
+    ]
   }
 }
