@@ -272,25 +272,46 @@ Low Priest emphasizes persistent self/equipment expressions and selective Active
 
 ### Devotional Rites
 
-A **Devotional Rite** is a prepared sustained inward or immediately worn/wielded expression of the chosen Pillar anchored to the Priest or their own equipment.
+A **Devotional Rite** is **automatically** any otherwise legal **Prepared chosen-Pillar technique activation** whose selected profile actually targets **the Low Priest themself** (including an authored `Self` profile or an otherwise legal self-selected recipient) **or one item currently held, wielded, or worn by that Priest**, and whose selected payment mode establishes **positive Committed VP maintaining an ongoing effect**. Both conditions must hold for that actual recipient/anchor and mode. This is a **universal Low Priest eligibility test**, not a separate technique-by-technique permission or a requirement that the profile carry an `Inward`/`[Embodiment]` metadata tag. An effect merely cast near the Priest, an ally-targeted maintained blessing, an item left in storage, an instant cast, or a fixed-duration **Spent-only** mode is not a Rite. The technique's normal access, components, activation time, range, target restrictions, tier, effect and end conditions **continue to govern throughout maintenance**; a Rite does not gain new channels, targets, Reactive casting or damage packets. **Profile-specific targeting may be narrower than this universal self/held/wielded/worn test**: [Conjure Flame Reserved Weapon](../07-veil-magic/conjure-flame-v0.md#b-reserved-weapon--weapon-enchantment), for example, requires the selected weapon to stay **actually wielded** and ends its channel immediately on sheathing/stowing rather than remaining active as a merely held or carried-item Rite.
 
-**Active Devotional Rite limit:** A Low Priest may maintain **at most 1 Active Devotional Rite at levels 1–3**, increasing to **at most 2 from level 4** through **Twofold Devotion**. Count **all** currently active Devotional Rites toward this cap, whether **Chosen** or **non-Chosen** and regardless of their technique names, recipient/profile, action cost, available VP, or commitment discount. **Chosen Devotion is a designation of one prepared Rite, not an additional active slot or an automatic second reservation.** A non-Chosen prepared Rite remains activatable at its **normal, undiscounted** cost when a Rite slot is available; it does not inherit the Chosen commitment discount. Gaining another Prepared Prayer at level 2 does **not** increase this active-Rite limit.
+**Active Devotional Rite limit:** A Low Priest may maintain **at most 1 Active Devotional Rite at levels 1–3**, increasing to **at most 2 from level 4** through **Twofold Devotion**. Count **all** currently active qualifying maintained techniques toward this cap when the Low Priest is their caster/maintainer, whether **Chosen** or **non-Chosen**, whether called a Rite or an ordinary cast, and regardless of their technique names, action cost, available VP, or commitment discount. A Low Priest cannot bypass this cap by declining to call an eligible maintained effect a Rite. **Chosen Devotion names one Prepared technique during preparation, but exactly one explicitly identified active Rite instance may carry the Chosen status and discounted commitment at a time.** Other active instances of that same technique are **non-Chosen** and must pay their **normal, undiscounted Committed VP** when a Rite slot is available. Chosen Devotion never provides an additional active slot, a second discounted reservation, or a second Exaltation anchor. Gaining another Prepared Prayer at level 2 does **not** increase this active-Rite limit.
 
-**Capacity at declaration and application:** If the limit is already occupied, declaring another Rite is **illegal**, even with sufficient Available VP; do not spend AP/VP or open a response window. The Priest may end a prior Rite at a legal own-turn decision point under ordinary zero-action release timing, then declare a **fresh** paid activation if AP/VP and all other conditions permit. No automatic replacement, simultaneous overlap, out-of-turn free release, budget refresh, or discounted non-Chosen activation follows. Ending the Chosen Rite **does not change which prepared Rite is designated Chosen** until the next permitted prayer preparation. This limit applies to **Devotional Rites**; it does not automatically prohibit a separate non-Rite prayer/technique that is otherwise legal and payable.
+**Capacity at declaration and application:** Apply the automatic eligibility test and count active qualifying effects before choosing/paying any activation method, **including a technique-authorized Reaction**; if the limit is occupied, declaring another eligible maintained activation is **illegal** even with sufficient Available VP, and spends no AP/Reaction/VP or response window. The Priest may end a prior Rite at a legal own-turn decision point under ordinary zero-action release timing, then declare a **fresh** paid activation if AP/VP and all other conditions permit. No automatic replacement, simultaneous overlap, out-of-turn free release, budget refresh, or discounted non-Chosen activation follows. Ending the Chosen Rite **does not change which prepared Rite is designated Chosen** until the next permitted prayer preparation. This limit applies to **Devotional Rites**; it does not automatically prohibit a separate non-Rite prayer/technique that is otherwise legal and payable.
 
-**Authored v0 examples:** [Guided Regeneration's maintained `Self` profile](../07-veil-magic/guided-regeneration-v0.md#b-maintained-reserve--2-committed-vp) is Devotional Rite-compatible; its Chosen Devotion discount reduces **2→1 Committed VP**, with no ordinary Spent VP. [Vital Shelter's maintained `Self` Primary](../07-veil-magic/vital-shelter-v0.md#low-priest--maintained-self-devotional-rite) is an **alternative** Rite: **2 Committed + 1 Spent**, discounted as Chosen to **1 Committed + 1 Spent** (full 2 Available required at VA0 L1). Neither fixed **2-Spent VP** version is a Rite. **No authored Exaltation property** is provided for either technique by these v0 profiles.
+**Chosen instance selection and ledger:** When declaring a qualifying activation of the Prepared technique designated Chosen Devotion, the Low Priest must identify that **specific new Rite instance** (including its actual self/item anchor and selected mode) and declare **Chosen** or **non-Chosen** **before** locking the VP price or committing any AP/Reaction. Chosen status and its **−1 Committed VP, minimum 1** are legal only if **no other active Chosen Rite instance exists**, even if that other instance uses the same technique or another weapon. Recheck the proposed Chosen slot at application after responses; assign the Chosen status **only upon successful establishment** of that specific maintained instance, with its locked effective commitment. A rejected, interrupted, resisted, or otherwise unsuccessful activation does not occupy the Chosen slot; do not silently reprice an interrupted activation. If a Chosen instance is already active, another eligible cast of the same Prepared technique may be declared **only as an ordinary non-Chosen Rite** with the **full normal Committed VP** checked at declaration and application. A different Prepared Rite is likewise non-Chosen. Each successful instance retains its own locked commitment and Chosen/non-Chosen status until it ends; neither release, disarm, unconsciousness, a new preparation, nor recasting **retroactively transfers the discount or Chosen status to an already active non-Chosen instance**. Ending the Chosen instance vacates the Chosen slot for a **fresh, otherwise legal activation of the currently designated Prepared technique**, not for promotion of an existing effect. Any changed preparation designation cannot make two active discounted Chosen instances coexist; the previous active Chosen instance continues occupying the unique Chosen slot until it ends. Only the identified **active Chosen instance**, while still eligible and maintained, may anchor an expressly authored Exaltation or Living Liturgy property; other active Rites cannot.
+
+**Executable v0 examples (automatic qualification):** [Guided Regeneration maintained on self](../07-veil-magic/guided-regeneration-v0.md#b-maintained-reserve--2-committed-vp) qualifies: **2→1 Committed VP** if Chosen, without ordinary Spent VP. [Vital Shelter maintained on self](../07-veil-magic/vital-shelter-v0.md#low-priest--maintained-self-devotional-rite) qualifies: base **2 Committed + 1 Spent**, or Chosen **1 Committed + 1 Spent**. Their **fixed 2-Spent-only** modes do not qualify. [Stone Skin `Self`](../07-veil-magic/stone-skin-v0.md) qualifies through its **`ceil(Max VP/3)` Committed** cost and retains its own normal or Reaction activation and consciousness end condition; Chosen discount gives **max(1, ceil(Max VP/3)−1)** Committed. [Conjure Flame `Weapon Enchantment`](../07-veil-magic/conjure-flame-v0.md#b-reserved-weapon--weapon-enchantment) qualifies only while anchored to **the Priest's currently wielded weapon**: base **4×T Committed**, or Chosen **4×T−1 Committed** (minimum 1), and ends whenever the weapon stops being wielded, including disarm/drop/hand-off **or legal sheathing/stowing**. At L1 Low VA0, Max VP **2**, so even the Chosen T1 weapon reservation **3 VP** is unaffordable; a normal eligible Stone Skin reserve costs **1 VP**, not zero after the Chosen discount. None of these grants an Exaltation property automatically.
+
+### Universal Rite regression cases (definition locks)
+
+| Case | Required outcome |
+|---|---|
+| Low Priest prepares and maintains Guided Regeneration `Self` or legally selects themself with its maintained `Single Target` profile | **Rite**: actual beneficiary self and positive Committed VP; Chosen reduces 2→1 Committed, non-Chosen pays full 2 |
+| Same maintained Guided Regeneration applied to another creature | **Not** a Rite; normal prepared projected blessing only, no Chosen discount or Rite slot |
+| Low Priest casts Guided Regeneration or Vital Shelter in fixed-duration **Spent-only** `Self` mode | **Not** a Rite, even if the fixed effect persists for one minute |
+| Low Priest prepares Stone Skin `Self`; uses its authored Reaction method with vacant Rite slot | **Rite** on successful activation: uses the technique's own Reaction and locked effective Committed VP; universal Rite eligibility does not create another Reaction |
+| Low Priest attempts reactive Stone Skin when the sole L1–3 Active Rite slot is already occupied | **Illegal before Reaction/VP payment**; naming it an ordinary Stone Skin cast does not bypass the slot cap |
+| Low Priest prepares Conjure Flame's maintained `Weapon Enchantment` on a wielded sword | **Rite** when actually wielded; base 4×Used Tier Committed, Chosen reduces by 1 Committed, and original weapon channel-break rule still applies |
+| Low Priest uses Conjure Flame Thrown Flame or an ammunition effect, or targets an item merely carried in storage | **Not** a Rite: no qualifying ongoing Committed channel on current self/held/wielded/worn target |
+| L1 Low Priest VA0 chooses Conjure Flame T1 `Weapon Enchantment` | Max VP 2 cannot fund even **Chosen 3 Committed** (base 4−1); declaration illegal |
+| L1 Low Priest VA0 chooses Stone Skin `Self` | Base ceil(2/3)=1 Committed; Chosen minimum 1, no zero-VP reservation |
+| L4 Low Priest with Twofold Devotion maintains two qualifying Rites | At most **two Active Rites**; **one specifically identified successful instance** may be Chosen and discounted, and the other pays its undiscounted commitment even if **both instances use the same Prepared technique** |
+| L4 Low Priest VA0 maintains two T1 Conjure Flame Reserved Weapon instances on two wielded weapons (one Prepared technique designated Chosen) | Max VP **8**. Declare first instance Chosen on **weapon A**: **3 Committed**. Declare second **weapon B** only as **non-Chosen**: **4 Committed**. Both count toward the two-Rite cap, leaving **1 Available**; B never receives the −1 discount or an Exaltation anchor |
+| Chosen weapon A is dropped **or legally stowed** with non-Chosen weapon B still wielded and maintained | A's channel and Chosen status end **immediately**, refund **3** (Available **1→4**; B's **4 Committed** remain locked). B does **not** inherit the Chosen designation, discount, or Exaltation; a new qualifying cast on an eligible anchor must be declared and paid to establish a new Chosen instance |
+| A Low Priest stows their only enchanted Reserved Weapon, then tries to activate another Rite and later re-wields the sword | The legal stow ends the enchantment and frees its Rite slot **at that event**, refunding only the old instance's effective Committed VP; the next Rite may be declared under ordinary cap/VP rules. Re-wielding gives **no revived old enchantment or Rite**. No action permission is granted to stow or redraw out of turn |
+| Low Priest attempts Exaltation solely because a profile qualifies as a Rite | **No executable extra property** without a separately authored compatible Exaltation; and only its specifically identified active Chosen instance may anchor one. No automatic Secondary/Rider import |
 
 ### Level 1 — Chosen Devotion
 
-During preparation, designate one prepared Devotional Rite as the **Chosen Devotion**. This designation uses the ordinary **Active Devotional Rite cap** when maintained; it never grants a second slot at levels 1–3.
+During preparation, designate one **Prepared technique capable of a qualifying self/equipped-item Committed maintenance mode** as **Chosen Devotion**. This designates **a technique eligible to produce the Chosen Rite**, not all its activations: declare and identify **one particular maintained instance as Chosen at activation** according to the [Chosen instance selection and ledger](#devotional-rites). No more than **one active instance** can be Chosen at any level. The technique may still have other modes/profiles, and those are not locked or removed by the designation. A Chosen activation must pass the universal Rite test and ordinary Active Rite cap. Every other qualifying instance, even from the same Prepared technique, uses its **full normal commitment**, cannot become Chosen retroactively, and cannot anchor Exaltation. Nonqualifying modes/targets remain legal ordinary casts without Rite or Chosen status.
 
 It:
 
 - belongs to the chosen Pillar;
-- targets the Priest or immediately worn/wielded equipment;
+- actually targets the Priest or their immediately held, wielded, or worn equipment, and has an ongoing effect maintained by positive Committed VP;
 - remains a Prepared Prayer;
-- commits VP normally except commitment is reduced by **1 VP, minimum 1**;
-- anchors later Exaltation features.
+- commits VP normally except **the single declared Chosen active instance**, if no other Chosen instance is active, reduces its ordinary Committed VP requirement by **1 VP, minimum 1**; all other instances pay the normal undiscounted commitment, and any Spent VP/surcharges stay unchanged;
+- **only that identified active Chosen Rite instance** anchors later Exaltation features; neither the merely designated technique nor a second non-Chosen instance does.
 
 ### Level 2 — Devotional Repertoire
 
@@ -298,11 +319,11 @@ Increase **base Prepared Prayer capacity by +1** at level 2 (Low **1→2**), app
 
 ### Level 3 — Exaltation
 
-Spend additional VP so the Chosen Devotion temporarily expresses a related authored secondary property of the same Pillar/Aspect.
+Spend additional VP so the **single specifically identified active Chosen Rite instance** temporarily expresses a related authored secondary property of the same Pillar/Aspect. Other active Rite instances, including another activation of the same prepared technique, cannot anchor Exaltation.
 
 Exaltation is not merely a generic numerical bonus.
 
-A rough 1–3 Spent VP range is an early calibration benchmark only; each Rite defines compatible expressions and costs.
+A rough 1–3 Spent VP range is an early calibration benchmark only; a separately authored compatible Exaltation property must define its real effect, trigger and cost. **Automatic Rite eligibility does not automatically grant a Secondary contribution, Exaltation property, or Living Liturgy compatibility.**
 
 ### Level 4 — Twofold Devotion + Ability Increase
 
@@ -311,11 +332,11 @@ Gain:
 - +1 Ability;
 - increase the **maximum Active Devotional Rites from 1 to 2**.
 
-Only one remains Chosen unless a later rule says otherwise.
+**Only one active Rite instance may be Chosen** even with two Active Rites. The other uses full normal Committed VP and cannot anchor Exaltation, including when both instances come from the same Prepared technique.
 
 ### Level 5 — Living Liturgy
 
-If the Chosen Devotion has remained active and unchanged continuously since the start of the Priest's previous turn, its Exaltation may express **one authored compatible property from another Aspect of the same chosen Pillar**.
+If the **same identified active Chosen Rite instance** has remained active and unchanged continuously since the start of the Priest's previous turn, its Exaltation may express **one authored compatible property from another Aspect of the same chosen Pillar**.
 
 Rules:
 
@@ -327,7 +348,7 @@ Rules:
 - no separate target, action, full technique payload, or independent duration unless explicitly authored;
 - only one Living Liturgy cross-Aspect expression at a time unless expanded later.
 
-Changing or ending the Chosen Devotion breaks the stable state.
+Changing or ending that **identified Chosen Rite instance** breaks the stable state; another instance of the same technique neither inherits the stability clock nor becomes Chosen by default.
 
 ### Active Prayers
 
