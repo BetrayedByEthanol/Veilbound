@@ -173,13 +173,13 @@ class B06FootprintEncounterTests(unittest.TestCase):
     def test_grapple_single_square_exception_explicitly_pending(self):
         self.assertIn("shared single-square Grapple", self.rules)
         self.assertIn("Pounce-linked takedown require", self.rules)
-        self.assertIn("CONCEPT_ONLY", self.encounter_docs)
+        self.assertIn("CONCEPT_ONLY", self.encounter_docs)  # historical design boundary
 
-    def test_hunter_remains_numerically_unexecuted(self):
-        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
-        self.assertIsNone(self.hunter["fixture_path"])
-        self.assertTrue(all(c["state"] != "existing_authority_only"
-                            for c in self.hunter["planned_capabilities"]))
+    def test_hunter_now_has_source_backed_full_fixture_but_no_certified_cr(self):
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
+        self.assertEqual(self.hunter["encounter_guidance"]["challenge_rating"]["status"], "unrated")
         self.assertTrue(self.hunter["open_mechanics"])
 
     def test_hunter_pounce_bite_independent_takedown(self):
@@ -189,7 +189,7 @@ class B06FootprintEncounterTests(unittest.TestCase):
             self.assertIn(name, cap)
         for name in ("B06-CAP-HUNTER-POUNCE", "B06-CAP-HUNTER-BITE",
                      "B06-CAP-HUNTER-HORN"):
-            self.assertEqual(cap[name]["state"], "requires_authored_attack_or_effect")
+            self.assertEqual(cap[name]["state"], "existing_authority_only")
             self.assertTrue(cap[name]["missing_authority"])
         self.assertEqual(cap["B06-CAP-HUNTER-TRACK"]["state"], "narrative_only")
         self.assertIn("irrespective of whether pounce/takedown succeeded",
@@ -198,7 +198,7 @@ class B06FootprintEncounterTests(unittest.TestCase):
     def test_hunter_venom_resistance_and_timing_still_requires_source(self):
         bite = next(c for c in self.hunter["planned_capabilities"]
                     if c["name"] == "Venomous bite")
-        self.assertIn("TX framework", " ".join(bite["missing_authority"]))
+        self.assertTrue(any("calibration" in x.lower() for x in bite["missing_authority"]))
         self.assertIn("slow-acting", bite["concept"])
         self.assertIn("short TX-HM", bite["concept"])
         self.assertIn("not already a long-term pursuit venom", self.encounter_docs)
@@ -212,8 +212,9 @@ class B06FootprintEncounterTests(unittest.TestCase):
         self.assertIn("excavat", anatomy)
         self.assertIn("predator", behavior)
 
-    def test_hunter_vigor_not_numerically_locked(self):
-        self.assertTrue(any("Vigor" in x for x in self.hunter["open_mechanics"]))
+    def test_hunter_vigor_sourced_only_by_full_fixture_not_bestiary_top_level(self):
+        self.assertTrue(any("Vigor" in x for x in self.hunter["open_mechanics"]) or
+                        any("HP" in x for x in self.hunter["open_mechanics"]))
         self.assertNotIn("vigor_max", self.hunter)
         self.assertIn("not a generalized stamina bar", self.encounter_docs)
 
