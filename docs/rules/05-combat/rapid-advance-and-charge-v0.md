@@ -126,6 +126,8 @@ The Charge attack is **one ordinary paid melee attack**, not a free extra attack
 | Controller wants to turn while driving during Rapid Advance | No: Drive / Drag's ordinary turning freedom does not override the active Rapid Advance heading |
 | Controller aborts tentative Charge to Rapid Advance, then uses Drive / Drag | Permitted if the Grapple is legal; same original heading, already-spent MP and ordinary paid Drive / Drag contest |
 
+**Specific exception, not universal Charge:** [Hunter of the Woods Pounce v0](hunter-pounce-and-prey-takedown-v0.md) proposes a Hunter-only body-impact balance rider combined with **one paid Bite attack** after a head-forward 1×2 Charge approach, against one-square standing PCs. The exception must be explicitly declared and does **not** add a Trip rider, accuracy bonus, additional attack or mass modifier to ordinary Charge.
+
 ## Deferred and calibration watch
 
 **LOCKED v0:** Rapid Advance 1.5 x M (floor), straight heading and no AP; Charge 2 x M with one attack costing a Focus-priced Physical Action; 3-step minimum; no prior MP spending/reservations; no voluntary turn or Cautious steps; no universal accuracy/damage bonus; **no Charge/Rapid Dodge penalty**; ordinary Movement Opportunities/Interceptions; retargeting in actual Reach; tentative AP-free abort within Rapid allowance and paid commitment on the first completed step beyond it or when the Charge attack begins. **Prone suspends both modes; Stand may use 4 suspended MP, Crawl cannot; after Stand, heading persists and an unfinished Charge must complete a fresh three-step approach with its existing AP status.**

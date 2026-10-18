@@ -17,6 +17,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Limb / Weapon-Hand Control v0](limb-control-v0.md)
 - [Feint Combination v0](feint-combination-v0.md)
 - [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md)
+- [Hunter of the Woods Pounce and Prey Takedown v0 — scoped linked Charge/Bite/balance, review candidate](hunter-pounce-and-prey-takedown-v0.md)
 - [Aim v0](aim-v0.md)
 - [Cover and Line of Fire v0](cover-and-line-of-fire-v0.md)
 - [Unified Firing Lane v0 — Living Screens](unified-firing-lane-v0.md)
