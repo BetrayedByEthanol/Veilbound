@@ -71,6 +71,90 @@ class HunterTacticalDiversityTests(unittest.TestCase):
         self.assertIsNone(result["toxin"])
         self.assertEqual(result["pc_attacks"], 0)
 
+
+    def test_exposed_caster_before_hunter_moves_two_mp_and_casts(self):
+        # In ambush head=(0,0), F front at (4,0) starts OUT of the
+        # three-square Thrown Flame range; F wins Initiative and walks one
+        # ordinary cardinal step into (3,0), pays 2 MP, then casts at
+        # the Hunter at range 3. Only later does Hunter make contact.
+        original_die = die
+        def initiative(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"F1": 20, "R1": 18, "H": 15, "B1": 1}[key[1]]
+            return original_die(seed, sides, *key)
+        def harmless(*_args, **_kwargs):
+            return (0, 0, "miss")
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=initiative), \\
+             patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                   side_effect=harmless):
+            result = trial(2, 3, "mixed", "ambush", "exposed", 0)
+        self.assertFalse(result["hunter_first"])
+        self.assertEqual(result["front_caster_approach_mp"], 2)
+        self.assertEqual(result["front_caster_precontact_casts"], 1)
+        self.assertEqual(result["vp_spent"], 2)
+        self.assertEqual(result["skipped_threatened_flame"], 0)
+        self.assertEqual(result["arrows_fired"], 1)
+        self.assertIn("F1", result["lane_disrupted_by"])
+        self.assertFalse(result["pounce_declared"])
+        self.assertTrue(result["frontal_contact_established"])
+
+    def test_prior_nonmoving_ranged_turns_preserve_pounce(self):
+        # Hunter can pounce after BOTH R's bow shot and a non-front F
+        # Thrown Flame: neither actor entered the separate clear corridor.
+        original_die = die
+        def initiative(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"R1": 20, "F1": 19, "H": 18, "B1": 1}[key[1]]
+            if key[-1] == "balance_pressure": return 15
+            if key[-1] == "balance_defense": return 20
+            return original_die(seed, sides, *key)
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=initiative), \\
+             patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                   return_value=(0, 0, "miss")):
+            result = trial(2, 3, "mixed", "ambush", "armored", 0)
+        self.assertFalse(result["hunter_first"])
+        self.assertEqual(result["arrows_fired"], 1)
+        self.assertEqual(result["vp_spent"], 2)
+        self.assertEqual(result["front_caster_approach_mp"], 0)
+        self.assertEqual(result["lane_disrupted_by"], [])
+        self.assertTrue(result["pounce_declared"])
+        self.assertTrue(result["balance_resolved"])
+        self.assertTrue(result["frontal_contact_established"])
+
+    def test_earlier_moving_melee_actor_disrupts_charge_corridor(self):
+        original_die = die
+        def initiative(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"A1": 20, "H": 18, "R1": 1,
+                        "F1": 1, "B1": 1}[key[1]]
+            return original_die(seed, sides, *key)
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=initiative), \\
+             patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                   return_value=(0, 0, "miss")):
+            result = trial(2, 4, "mixed", "ambush", "armored", 0)
+        self.assertIn("A1", result["lane_disrupted_by"])
+        self.assertFalse(result["pounce_declared"])
+
+    def test_warned_front_caster_remains_threatened_without_free_cast(self):
+        original_die = die
+        def initiative(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"F1": 20, "H": 18, "R1": 1, "B1": 1}[key[1]]
+            return original_die(seed, sides, *key)
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=initiative), \\
+             patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                   return_value=(0, 0, "miss")):
+            result = trial(2, 3, "mixed", "warned", "exposed", 0)
+        self.assertEqual(result["skipped_threatened_flame"], 1)
+        self.assertEqual(result["front_caster_precontact_casts"], 0)
+        self.assertEqual(result["front_caster_approach_mp"], 0)
+        self.assertTrue(result["frontal_contact_established"])
+        self.assertFalse(result["pounce_declared"])
+
     def test_unsupported_combinations_fail_and_fixed_seed_replays(self):
         bad_cases = ((1, 3, "mixed", "warned", "armored", 0),
                      (2, 5, "mixed", "ambush", "exposed", 0),
