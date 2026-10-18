@@ -217,9 +217,14 @@
           "shape": "rectangular",
           "width_cells": 1,
           "length_cells": 2,
-          "reference_rule": "Two orthogonally adjacent grid squares, stable head/front and rear labels; use either cell as stationary pivot for legal 90-degree rotations.",
+          "reference_rule": "Stable 1-based body-local indices: 1=head (reference), 2=rear. Labels remain with anatomical cells through translation, 90/180-degree pivots and legal repositioning; no post-movement coordinate re-sort.",
           "movement_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
-          "rotation_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md"
+          "rotation_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
+          "cell_ids": [
+            "head",
+            "rear"
+          ],
+          "reference_cell_id": "head"
         }
       },
       "planned_capabilities": [
