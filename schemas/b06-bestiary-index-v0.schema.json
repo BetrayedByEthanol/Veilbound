@@ -171,7 +171,9 @@
             "length_cells",
             "reference_rule",
             "movement_rule_ref",
-            "rotation_rule_ref"
+            "rotation_rule_ref",
+            "cell_ids",
+            "reference_cell_id"
           ],
           "properties": {
             "shape": {
@@ -201,6 +203,23 @@
                 "string",
                 "null"
               ]
+            },
+            "cell_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+              },
+              "description": "Immutable 1-based body-local ordinal order: index 1 is cell_ids[0], 2 is cell_ids[1], etc. IDs remain fixed to anatomy through every pivot, translation, Blink or other legal move. NEVER reconstruct or re-sort these indices from current x/y/z coordinates."
+            },
+            "reference_cell_id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "description": "One permanent cell ID in cell_ids used as the fixed map-reference cell. Its world coordinate moves with the same anatomy cell; it must not be reselected by world-coordinate sorting after a turn."
             }
           },
           "description": "Optional rigid footprint metadata; multi-square movement and pivot legality follows independently authored rules. No size-derived natural attacks or combat bonuses."
