@@ -158,7 +158,7 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("does **not** move into or share the target's square", self.rules)
 
     def test_player_commits_balance_ability_before_opposed_dice(self):
-        self.assertIn("Before either balance die is rolled", self.rules)
+        self.assertIn("before either balance die is rolled", self.rules)
         self.assertIn("Strength to brace", self.rules)
         self.assertIn("Agility to recover balance", self.rules)
         self.assertIn("Neither participant may switch Abilities", self.rules)
@@ -181,7 +181,7 @@ class HunterPounceRulesTests(unittest.TestCase):
         r=pounce_result(14,13,20,7,balance_legal=False)
         self.assertTrue(r["bite_hit"])
         self.assertFalse(r["prone"])
-        self.assertIn("already Prone", self.rules)
+        self.assertIn("Already Prone", self.rules)
 
     def test_bite_incapacitates_standing_pc_auto_prone_under_trip_rule(self):
         # Four post-Armor HP damage takes a 3-HP standing PC to -1:
