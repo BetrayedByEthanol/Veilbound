@@ -124,6 +124,25 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertEqual(r["hp"], 4)
         self.assertFalse(r["prone"])
 
+    def test_worked_surviving_bite_requires_authored_venom_before_balance(self):
+        # First worked table row must use the already-authored delivery source.
+        worked = next(line for line in self.rules.splitlines()
+                      if line.startswith("| **Bite lands; prey resists takedown**"))
+        self.assertEqual(pounce_result(12, 13, 9, 15)["hp"], 4)
+        self.assertIn("**4 Piercing HP**", worked)
+        self.assertIn("one DC12 Vitality resistance check in stage D, before Balance",
+                      worked)
+        self.assertNotIn("only if** venom source authored", worked)
+        self.assertIn("11 < DC12", self.rules)
+        self.assertLess(9 + 2, 12)  # Illustrative failed natural resistance.
+        self.assertIn("**Full** `B06-TX-HUNTER-SLOW-MY`", self.rules)
+        self.assertIn("**T+10 minutes**", self.rules)
+        self.assertIn("**T+30 minutes**", self.rules)
+        self.assertIn("**T+120 minutes**", self.rules)
+        self.assertIn("**Reduced**", self.rules)
+        self.assertIn("Do not make a second toxin check after Balance", self.rules)
+        self.assertFalse(pounce_result(12, 13, 9, 15)["prone"])
+
     def test_missed_bite_but_takedown_succeeds(self):
         r=pounce_result(3,13,17,9)
         self.assertFalse(r["bite_hit"])
