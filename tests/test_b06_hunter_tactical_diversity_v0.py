@@ -85,7 +85,7 @@ class HunterTacticalDiversityTests(unittest.TestCase):
         def harmless(*_args, **_kwargs):
             return (0, 0, "miss")
         with patch("scripts.b06_hunter_tactical_diversity_v0.die",
-                   side_effect=initiative), \\
+                   side_effect=initiative), \
              patch("scripts.b06_hunter_tactical_diversity_v0.attack",
                    side_effect=harmless):
             result = trial(2, 3, "mixed", "ambush", "exposed", 0)
@@ -110,7 +110,7 @@ class HunterTacticalDiversityTests(unittest.TestCase):
             if key[-1] == "balance_defense": return 20
             return original_die(seed, sides, *key)
         with patch("scripts.b06_hunter_tactical_diversity_v0.die",
-                   side_effect=initiative), \\
+                   side_effect=initiative), \
              patch("scripts.b06_hunter_tactical_diversity_v0.attack",
                    return_value=(0, 0, "miss")):
             result = trial(2, 3, "mixed", "ambush", "armored", 0)
@@ -131,7 +131,7 @@ class HunterTacticalDiversityTests(unittest.TestCase):
                         "F1": 1, "B1": 1}[key[1]]
             return original_die(seed, sides, *key)
         with patch("scripts.b06_hunter_tactical_diversity_v0.die",
-                   side_effect=initiative), \\
+                   side_effect=initiative), \
              patch("scripts.b06_hunter_tactical_diversity_v0.attack",
                    return_value=(0, 0, "miss")):
             result = trial(2, 4, "mixed", "ambush", "armored", 0)
@@ -145,7 +145,7 @@ class HunterTacticalDiversityTests(unittest.TestCase):
                 return {"F1": 20, "H": 18, "R1": 1, "B1": 1}[key[1]]
             return original_die(seed, sides, *key)
         with patch("scripts.b06_hunter_tactical_diversity_v0.die",
-                   side_effect=initiative), \\
+                   side_effect=initiative), \
              patch("scripts.b06_hunter_tactical_diversity_v0.attack",
                    return_value=(0, 0, "miss")):
             result = trial(2, 3, "mixed", "warned", "exposed", 0)
