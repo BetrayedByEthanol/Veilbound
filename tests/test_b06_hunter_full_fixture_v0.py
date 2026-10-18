@@ -3,6 +3,7 @@
 Fixture execution means deterministic attack/contest data and authoritative
 rules exist. These checks are NOT Monte Carlo fights or a certified CR.
 """
+import copy
 import json
 import math
 import unittest
@@ -229,6 +230,94 @@ class B06HunterFullFixtureTests(unittest.TestCase):
         self.assertIn("linked_contest", schema["properties"])
         self.assertEqual(schema["properties"]["linked_contest"]["properties"]
                          ["extra_ap_cost"]["const"], 0)
+
+    def test_linked_contest_kinds_are_structurally_bound_in_schema(self):
+        """Always-on stdlib guard: ensure conditionals cannot disappear unnoticed."""
+        attack = self.schema["$defs"]["attack"]
+        linked = attack["properties"]["linked_contest"]
+
+        def nested_rule(kind):
+            return next(branch["then"] for branch in linked["allOf"]
+                        if branch["if"]["properties"]["kind"]["const"] == kind)
+
+        def parent_rule(kind):
+            return next(branch["then"] for branch in attack["allOf"]
+                        if branch["if"]["properties"]["linked_contest"]
+                        ["properties"]["kind"]["const"] == kind)
+
+        self.assertEqual(nested_rule("pounce_balance")["properties"]
+                         ["result_on_strict_win"]["const"], "prone_in_place")
+        self.assertEqual(nested_rule("horn_drive_shove")["properties"]
+                         ["result_on_strict_win"]["const"],
+                         "straight_head_forward_shove_and_whole_body_advance")
+
+        pounce = parent_rule("pounce_balance")["properties"]
+        self.assertEqual(pounce["attack_roll"]["type"], "object")
+        self.assertEqual(pounce["primary_hp_packet"]["type"], "object")
+        self.assertEqual(pounce["primary_hp_packet"]["properties"]["damage_type"]["const"],
+                         "Piercing")
+        self.assertEqual(pounce["toxin_delivery"]["type"], "object")
+        self.assertTrue(pounce["toxin_delivery"]["properties"]
+                        ["requires_surviving_puncture"]["const"])
+        self.assertEqual(pounce["additional_packets"]["maxItems"], 0)
+        self.assertEqual(pounce["resolution_kind"]["const"], "authored_natural_attack")
+
+        drive = parent_rule("horn_drive_shove")["properties"]
+        for field in ("attack_roll", "primary_hp_packet", "toxin_delivery"):
+            with self.subTest(field=field):
+                self.assertEqual(drive[field]["type"], "null")
+        self.assertEqual(drive["additional_packets"]["maxItems"], 0)
+        self.assertEqual(drive["resolution_kind"]["const"], "authored_non_damage_effect")
+        for props in (pounce, drive):
+            self.assertEqual(props["action_class"]["const"], "physical")
+            self.assertEqual(props["ap"]["const"], 24)
+
+    def test_linked_contest_invalid_mutations_rejected_by_draft202012(self):
+        try:
+            from jsonschema import Draft202012Validator
+        except ImportError:
+            self.skipTest("optional jsonschema dependency unavailable")
+        Draft202012Validator.check_schema(self.schema)
+        validator = Draft202012Validator(self.schema)
+        self.assertTrue(validator.is_valid(self.hunter))
+
+        bite = self.profiles["B06-AT-04"]
+        cases = [
+            ("pounce uses shove win result", "B06-AT-06",
+             ("linked_contest", "result_on_strict_win"),
+             "straight_head_forward_shove_and_whole_body_advance"),
+            ("drive uses prone win result", "B06-AT-07",
+             ("linked_contest", "result_on_strict_win"), "prone_in_place"),
+            ("pounce missing rolled Bite", "B06-AT-06", ("attack_roll",), None),
+            ("pounce missing Bite HP packet", "B06-AT-06",
+             ("primary_hp_packet",), None),
+            ("pounce missing injection", "B06-AT-06",
+             ("toxin_delivery",), None),
+            ("pounce uses Crush not Bite Piercing", "B06-AT-06",
+             ("primary_hp_packet", "damage_type"), "Crush"),
+            ("pounce adds extra HP packet", "B06-AT-06",
+             ("additional_packets",), [bite["primary_hp_packet"]]),
+            ("drive retains rolled Horn attack", "B06-AT-07",
+             ("attack_roll",), bite["attack_roll"]),
+            ("drive retains HP damage packet", "B06-AT-07",
+             ("primary_hp_packet",), bite["primary_hp_packet"]),
+            ("drive retains venom", "B06-AT-07",
+             ("toxin_delivery",), bite["toxin_delivery"]),
+            ("drive retains additional packets", "B06-AT-07",
+             ("additional_packets",), [bite["primary_hp_packet"]]),
+            ("drive mislabeled damaging attack", "B06-AT-07",
+             ("resolution_kind",), "authored_natural_attack"),
+        ]
+        for label, attack_id, key_path, bad_value in cases:
+            with self.subTest(case=label):
+                mutated = copy.deepcopy(self.hunter)
+                profile = next(a for a in mutated["attack_profiles"]
+                               if a["id"] == attack_id)
+                owner = profile
+                for key in key_path[:-1]:
+                    owner = owner[key]
+                owner[key_path[-1]] = bad_value
+                self.assertFalse(validator.is_valid(mutated), label)
 
     def test_schema_validation_when_jsonschema_installed(self):
         try:
