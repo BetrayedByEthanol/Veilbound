@@ -141,11 +141,13 @@ class B06FootprintEncounterTests(unittest.TestCase):
         self.assertIn("not already a long-term pursuit venom", self.encounter_docs)
 
     def test_horn_ecological_roles_not_optimized_weapon(self):
-        anatomy = " ".join(self.hunter["creature_profile"]["physiology_notes"]).lower()
+        profile = self.hunter["creature_profile"]
+        anatomy = " ".join(profile["physiology_notes"]).casefold()
+        behavior = " ".join(profile["behavior_notes"]).casefold()
         self.assertIn("rutting", anatomy)
         self.assertIn("intimidation", anatomy)
         self.assertIn("excavat", anatomy)
-        self.assertIn("predator", anatomy)
+        self.assertIn("predator", behavior)
 
     def test_hunter_vigor_not_numerically_locked(self):
         self.assertTrue(any("Vigor" in x for x in self.hunter["open_mechanics"]))
