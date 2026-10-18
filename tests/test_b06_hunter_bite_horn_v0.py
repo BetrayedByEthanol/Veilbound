@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
 POUNCE = ROOT / "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
 TX = ROOT / "docs/rules/05-combat/mundane-toxins-v0.md"
+VENOM_ENDURANCE = ROOT / "docs/rules/07-veil-magic/venom-endurance-v0.md"
 SHOVE = ROOT / "docs/rules/05-combat/universal-maneuvers.md"
 INDEX = ROOT / "content/creatures/b06-initial-bestiary-v0.json"
 
@@ -57,6 +58,27 @@ def remaining_seconds_after_round_exit(next_event_round, current_round):
     return 6 * max(0, next_event_round - current_round - 1)
 
 
+def long_venom_suppression_exploration(cast_at, check_at, *, outcome="Full", units=3):
+    """Uninterrupted-exploration reference only: staged toxin and local suppression.
+
+    Returns (M penalty, Strength-check penalty, protected now, units spent).
+    Does not purport to implement initiative, reactions or the whole spell.
+    """
+    if check_at < cast_at:
+        raise ValueError("Observation cannot precede the cast")
+    move, strength, active = stage_after_seconds(outcome, check_at)
+    if not active or check_at >= cast_at + 60:
+        return move, strength, False, 0
+    first_paid_at = max(cast_at, 600)  # No unit before delayed stage 1.
+    if check_at < first_paid_at:
+        return move, strength, False, 0
+    elapsed = check_at - first_paid_at
+    spent = min(units, elapsed // 6 + 1)
+    if elapsed < 6 * units:
+        return 0, 0, True, spent
+    return move, strength, False, spent
+
+
 def horn_drive(rear, head, target, *, obstacle=False):
     """A frontal 1×2 Shove win with the full footprint moving atomically."""
     dr = (head[0] - rear[0], head[1] - rear[1])
@@ -76,6 +98,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         cls.rules = SOURCE.read_text(encoding="utf-8")
         cls.pounce = POUNCE.read_text(encoding="utf-8")
         cls.tx = TX.read_text(encoding="utf-8")
+        cls.venom_endurance = VENOM_ENDURANCE.read_text(encoding="utf-8")
         cls.shove = SHOVE.read_text(encoding="utf-8")
         cls.index = json.loads(INDEX.read_text(encoding="utf-8"))
         cls.hunter = next(x for x in cls.index["entries"] if x["id"] == "B06-EN-03")
@@ -259,6 +282,56 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertEqual(stage_after_seconds("Reduced", 599), (0, 0, True))
         self.assertIn("T+10-minute onset", self.pounce)
         self.assertIn("none retroactively alters the Pounce Balance", self.pounce)
+
+    def test_long_suppression_requires_venom_endurance_authority(self):
+        self.assertIn("B06-TX-HUNTER-SLOW-MY", self.venom_endurance)
+        self.assertIn("six-second-equivalent suppression-local intervals", self.venom_endurance)
+        self.assertIn("genuine recipient Step 3", self.venom_endurance)
+        self.assertIn("no second unit for the stage change", self.venom_endurance)
+        self.assertIn("VC0 cast has **3 finite units**", self.rules)
+        self.assertIn("not** independently purge", self.rules)
+
+    def test_long_suppression_stage_one_three_units_are_18_seconds(self):
+        # Accepted Full venom is in stage 1 at T+15m (900 seconds).
+        self.assertEqual(long_venom_suppression_exploration(900, 900),
+                         (0, 0, True, 1))
+        self.assertEqual(long_venom_suppression_exploration(900, 905),
+                         (0, 0, True, 1))
+        self.assertEqual(long_venom_suppression_exploration(900, 906),
+                         (0, 0, True, 2))
+        self.assertEqual(long_venom_suppression_exploration(900, 917),
+                         (0, 0, True, 3))
+        self.assertEqual(long_venom_suppression_exploration(900, 918),
+                         (-2, -1, False, 3))
+
+    def test_long_suppression_stage_escalation_does_not_spend_extra_unit(self):
+        # Suppression at T+29m59s covers the T+30m stage escalation.
+        self.assertEqual(long_venom_suppression_exploration(1799, 1799),
+                         (0, 0, True, 1))
+        self.assertEqual(long_venom_suppression_exploration(1799, 1800),
+                         (0, 0, True, 1))
+        self.assertEqual(stage_after_seconds("Full", 1800), (-4, -2, True))
+        self.assertEqual(long_venom_suppression_exploration(1799, 1805),
+                         (0, 0, True, 2))
+        self.assertEqual(long_venom_suppression_exploration(1799, 1817),
+                         (-4, -2, False, 3))
+
+    def test_long_suppression_silent_onset_spends_only_when_stage_starts(self):
+        self.assertEqual(long_venom_suppression_exploration(599, 599),
+                         (0, 0, False, 0))
+        self.assertEqual(long_venom_suppression_exploration(599, 600),
+                         (0, 0, True, 1))
+        self.assertEqual(long_venom_suppression_exploration(599, 606),
+                         (0, 0, True, 2))
+        # A one-minute spell cast well before onset cannot protect at T+10m.
+        self.assertEqual(long_venom_suppression_exploration(300, 600),
+                         (-2, -1, False, 0))
+
+    def test_pounce_provisional_bite_waits_on_calibration_not_authoring(self):
+        self.assertNotIn("when the independently sourced natural Bite is authored",
+                         self.pounce)
+        self.assertIn("full Hunter physiology/stat block and encounter calibration",
+                      self.pounce)
 
     def test_venom_endurance_is_existing_protection_not_free_cure(self):
         self.assertIn("Venom Endurance", self.rules)
