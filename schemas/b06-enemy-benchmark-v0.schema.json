@@ -947,7 +947,7 @@
               "minLength": 1
             }
           },
-          "description": "Optional Hunter-local linked physical-contest metadata, with exact v0 calibrated-for-fixture—not playtest-certified—component totals: Pounce and Horn Drive both require attacker_modifier=4 (Strength), training_modifier=0, other_modifier=0 and total_pressure_bonus=4. Each kind is conditionally bound to its strict-win result and parent attack/packet/toxin/source shape via attack.allOf. Standard Draft 2020-12 JSON Schema cannot express a generic arithmetic sum across sibling fields: new contest kinds/bonuses require their own validated rule or a semantic sum checker. Null/absent for attacks without linked contests. No additional paid action or attack roll is implied.",
+          "description": "Optional Hunter-local linked physical-contest metadata, with exact v0 calibrated-for-fixture—not playtest-certified—component totals: Pounce and Horn Drive both require attacker_modifier=4 (Strength), training_modifier=0, other_modifier=0 and total_pressure_bonus=4. Each kind is conditionally bound to its strict-win result and parent attack/packet/toxin/source shape via attack.allOf. Standard Draft 2020-12 JSON Schema cannot express a generic arithmetic sum across sibling fields: new contest kinds/bonuses require their own validated rule or a semantic sum checker. Null/absent for attacks without linked contests. No additional paid action or attack roll is implied. Both contest-specific rule references (defender and local resolution) are bound to exact authored paths for each kind, and both parent attack effects prereqs remain null. Pounce's explicit canine toxin-source prose is constrained to its authored record.",
           "allOf": [
             {
               "if": {
@@ -977,6 +977,12 @@
                   },
                   "total_pressure_bonus": {
                     "const": 4
+                  },
+                  "resolution_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+                  },
+                  "defender_rule_ref": {
+                    "const": "docs/rules/05-combat/universal-maneuvers.md"
                   }
                 }
               }
@@ -1009,6 +1015,12 @@
                   },
                   "total_pressure_bonus": {
                     "const": 4
+                  },
+                  "resolution_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+                  },
+                  "defender_rule_ref": {
+                    "const": "docs/rules/05-combat/universal-maneuvers.md"
                   }
                 }
               }
@@ -1185,6 +1197,9 @@
                   },
                   "profile_id": {
                     "const": "B06-TX-HUNTER-SLOW-MY"
+                  },
+                  "explicit_source": {
+                    "const": "B06-SRC-HUNTER-GROOVED-CANINES — paired grooved upper canines and salivary venom apparatus"
                   }
                 }
               },
@@ -1218,6 +1233,12 @@
                   "range_rule_ref",
                   "area_rule_ref"
                 ]
+              },
+              "required_active_effect": {
+                "const": null
+              },
+              "requires_effect_inactive": {
+                "const": null
               }
             },
             "required": [
@@ -1302,6 +1323,12 @@
                   "range_rule_ref",
                   "area_rule_ref"
                 ]
+              },
+              "required_active_effect": {
+                "const": null
+              },
+              "requires_effect_inactive": {
+                "const": null
               }
             },
             "required": [
