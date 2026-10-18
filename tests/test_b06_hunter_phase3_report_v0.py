@@ -153,6 +153,7 @@ class Phase3ReportTests(unittest.TestCase):
                    if r["scenario"] == "L2-P3-mixed-ambush-armored")
         # Each isolated Boolean count is <=3; their sum is impossible.
         row["pounce_declared"] = 3
+        row["balance_resolved"] = 3  # Keep Pounce/Balance valid; isolate lane overlap.
         row["lane_disrupted_trials"] = 3
         with patch("scripts.b06_hunter_phase3_report_v0.census",
                    return_value=rows):
