@@ -27,6 +27,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install optional Draft 2020-12 schema validator for full suite coverage
+        run: python -m pip install 'jsonschema>=4.21,<5'
       - name: Verify focused Phase 3 tactical and report tests
         run: |
           python -m unittest discover -s tests -p 'test_b06_hunter_tactical_diversity_v0.py' -v
