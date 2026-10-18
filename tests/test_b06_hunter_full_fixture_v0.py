@@ -291,6 +291,18 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                                  sum(rules[field]["const"] for field in
                                      ("attacker_modifier", "training_modifier",
                                       "other_modifier")))
+                # Contest-local authority must not drift from the parent
+                # attack's authored rules, even in an external B06 fixture.
+                for ref in ("resolution_rule_ref", "defender_rule_ref"):
+                    self.assertEqual(rules[ref]["const"], authored[ref])
+                parent_fields = parent_rule(kind)["properties"]
+                record = self.profiles[attack_id]
+                self.assertEqual(rules["resolution_rule_ref"]["const"],
+                                 record["resolution_rule_ref"])
+                for effect_field in ("required_active_effect",
+                                     "requires_effect_inactive"):
+                    self.assertEqual(parent_fields[effect_field], {"const": None})
+                    self.assertIsNone(record[effect_field])
 
         pounce = parent_rule("pounce_balance")["properties"]
         self.assertEqual(pounce["attack_roll"]["type"], "object")
@@ -340,6 +352,12 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                          "B06-SRC-HUNTER-GROOVED-CANINES")
         self.assertEqual(pounce["toxin_delivery"]["properties"]["profile_id"]["const"],
                          "B06-TX-HUNTER-SLOW-MY")
+        self.assertEqual(pounce["toxin_delivery"]["properties"]
+                         ["explicit_source"]["const"],
+                         pounce_profile["toxin_delivery"]["explicit_source"])
+        self.assertIn("grooved upper canines",
+                      pounce["toxin_delivery"]["properties"]
+                      ["explicit_source"]["const"])
 
         drive = parent_rule("horn_drive_shove")["properties"]
         for field in ("attack_roll", "primary_hp_packet", "toxin_delivery"):
@@ -447,6 +465,29 @@ class B06HunterFullFixtureTests(unittest.TestCase):
              ("range_class",), "ranged"),
             ("drive geometry becomes area", "B06-AT-07",
              ("target_geometry", "kind"), "area"),
+            ("pounce changes contest resolution rule", "B06-AT-06",
+             ("linked_contest", "resolution_rule_ref"),
+             "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"),
+            ("drive changes contest resolution rule", "B06-AT-07",
+             ("linked_contest", "resolution_rule_ref"),
+             "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
+            ("pounce changes contest defender rule", "B06-AT-06",
+             ("linked_contest", "defender_rule_ref"),
+             "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
+            ("drive changes contest defender rule", "B06-AT-07",
+             ("linked_contest", "defender_rule_ref"),
+             "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"),
+            ("pounce requires an activation effect", "B06-AT-06",
+             ("required_active_effect",), "B06-FAKE-EFFECT"),
+            ("pounce becomes contingent on inactive effect", "B06-AT-06",
+             ("requires_effect_inactive",), "B06-FAKE-EFFECT"),
+            ("drive requires an activation effect", "B06-AT-07",
+             ("required_active_effect",), "B06-FAKE-EFFECT"),
+            ("drive becomes contingent on inactive effect", "B06-AT-07",
+             ("requires_effect_inactive",), "B06-FAKE-EFFECT"),
+            ("pounce toxin explicit_source falsely names horn", "B06-AT-06",
+             ("toxin_delivery", "explicit_source"),
+             "B06-SRC-HUNTER-FRONTAL-HORN — cranial horn"),
         ]
         # A future independent fixture must not declare a pressure total
         # unrelated to its component modifiers; test both linked kinds.
