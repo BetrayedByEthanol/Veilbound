@@ -3,7 +3,8 @@ import json
 import unittest
 
 from scripts.b06_hunter_party_exchanges_v0 import (
-    BUILD, HUNTER_FILE, SCENARIOS, SHEET_AUTHORITY, simulate,
+    BUILD, HUNTER_FILE, PRONE_TARGET_MELEE_ATTACK_BONUS, SCENARIOS,
+    SHEET_AUTHORITY, simulate, standing_opportunity_attack_total,
 )
 
 
@@ -100,6 +101,37 @@ class HunterPartyExchangesTests(unittest.TestCase):
         self.assertEqual(warned["accepted_toxin_applications"], 1)
         self.assertIn("R2 repeat puncture; venom does not stack", ambush["log"])
         self.assertNotIn("R2 repeat puncture; venom does not stack", warned["log"])
+
+    def test_standing_opportunity_resolves_before_prone_state_clears(self):
+        self.assertEqual(PRONE_TARGET_MELEE_ATTACK_BONUS, 2)
+        # Regression for Prone melee modifier: a 19 Guard would stop the
+        # erroneous standing-target total 18, but cannot stop the legal 20.
+        total = standing_opportunity_attack_total(
+            12, 6, target_prone=True)
+        self.assertEqual(total, 20)
+        self.assertGreater(total, 19)
+        self.assertLessEqual(12 + 6, 19)
+        with self.assertRaises(ValueError):
+            standing_opportunity_attack_total(12, 6, target_prone=False)
+
+        for level in (2, 3):
+            for size in (3, 4):
+                with self.subTest(level=level, size=size):
+                    events = simulate(level, size, "ambush")["log"]
+                    begin = next(i for i, x in enumerate(events)
+                                 if "A1 begins Stand (4 MP; still Prone)" in x)
+                    opportunity = next(i for i, x in enumerate(events)
+                                       if ("Standing Opportunity "
+                                           "12+6+2(Prone)=20>17" in x))
+                    complete = next(i for i, x in enumerate(events)
+                                    if "A1 completes Stand; no longer Prone" in x)
+                    self.assertLess(begin, opportunity)
+                    self.assertLess(opportunity, complete)
+                    self.assertIn("target still Prone", events[opportunity])
+                    self.assertIn(": 5 HP;", events[opportunity])
+        self.assertFalse(
+            any("Standing Opportunity" in event
+                for event in simulate(2, 3, "warned")["log"]))
 
     def test_hunter_regeneration_is_real_step_not_free_between_strikes(self):
         for size, expected in ((3, 13), (4, 5)):
