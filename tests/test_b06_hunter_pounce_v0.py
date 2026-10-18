@@ -113,8 +113,8 @@ class HunterPounceRulesTests(unittest.TestCase):
 
     def test_actual_puncturing_bite_not_implied_venom(self):
         self.assertIn("does not grant TX-HM or any free poisoning", self.rules)
-        self.assertIn("positive remaining Piercing HP puncture", self.rules)
-        self.assertIn("by Pounce success", self.rules)
+        self.assertIn("only real surviving post-mitigation Piercing HP puncture", self.rules)
+        self.assertIn("Pounce success, Prone or a Balance roll", self.rules)
         self.assertIn("No poison penalty applies immediately", self.rules)
         self.assertIn("hunter-bite-venom-and-horn-v0.md", self.rules)
 
@@ -148,7 +148,7 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("Tie or defender wins", self.rules)
 
     def test_one_roll_each_and_no_auto_prone_on_bite_natural20(self):
-        self.assertIn("one ordinary melee Attack", self.rules)
+        self.assertIn("one attack, one physical damage packet", self.rules)
         self.assertIn("No new free Reaction", self.rules)
         self.assertIn("successful natural 20", self.rules)
         self.assertIn("does not automatically grant a takedown", self.rules)
