@@ -2,6 +2,7 @@
 
 No external dependencies and no claim that the full Hunter enemy is executable.
 """
+import copy
 import json
 import math
 import unittest
@@ -10,6 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PHYSIOLOGY = ROOT / "content/creatures/b06-hunter-physiology.v0.json"
+SCHEMA = ROOT / "schemas/b06-hunter-physiology-v0.schema.json"
 BESTIARY = ROOT / "content/creatures/b06-initial-bestiary-v0.json"
 DESIGN = ROOT / "docs/design/b06-hunter-physiology-v0.md"
 POUNCE = ROOT / "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
@@ -36,6 +38,7 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.profile = json.loads(PHYSIOLOGY.read_text(encoding="utf-8"))
+        cls.schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
         cls.bestiary = json.loads(BESTIARY.read_text(encoding="utf-8"))
         cls.hunter = next(x for x in cls.bestiary["entries"]
                           if x["id"] == "B06-EN-03")
@@ -44,6 +47,40 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
         cls.bite = BITE.read_text(encoding="utf-8")
         cls.hp_vigor = HP_VIGOR.read_text(encoding="utf-8")
         cls.dodge = DODGE.read_text(encoding="utf-8")
+
+    def test_snapshot_has_dedicated_strict_draft202012_schema(self):
+        root = self.schema
+        self.assertEqual(root["$schema"], "https://json-schema.org/draft/2020-12/schema")
+        self.assertFalse(root["additionalProperties"])
+        self.assertEqual(root["properties"]["schema_version"]["const"],
+                         self.profile["schema_version"])
+        self.assertIn("creature_profile", root["required"])
+        profile_schema = root["properties"]["creature_profile"]
+        self.assertIn("footprint_cell_ids", profile_schema["required"])
+        self.assertIn("reference_cell_id", profile_schema["required"])
+        self.assertEqual(profile_schema["properties"]["reference_cell_id"]["const"], "head")
+        self.assertEqual(profile_schema["properties"]["footprint_cell_ids"]["const"],
+                         ["head", "rear"])
+
+    def test_snapshot_draft202012_schema_validation_when_available(self):
+        # This repository's required tests remain stdlib-only; schema execution
+        # is additionally exercised when a Draft 2020-12 validator is installed.
+        try:
+            from jsonschema import Draft202012Validator
+        except ImportError:
+            self.skipTest("optional jsonschema package not installed")
+        Draft202012Validator.check_schema(self.schema)
+        validator = Draft202012Validator(self.schema)
+        self.assertEqual(list(validator.iter_errors(self.profile)), [])
+        invalid = copy.deepcopy(self.profile)
+        invalid["creature_profile"]["reference_cell_id"] = "wing"
+        self.assertTrue(list(validator.iter_errors(invalid)))
+        invalid = copy.deepcopy(self.profile)
+        invalid["creature_profile"]["footprint_cell_ids"] = ["head", "head"]
+        self.assertTrue(list(validator.iter_errors(invalid)))
+        invalid = copy.deepcopy(self.profile)
+        invalid["record_status"] = "EXECUTABLE_TEST_FIXTURE"
+        self.assertTrue(list(validator.iter_errors(invalid)))
 
     def test_slice_record_explicitly_not_an_executable_enemy(self):
         self.assertEqual(self.profile["record_status"], "PHYSIOLOGY_ONLY_NOT_EXECUTABLE")
