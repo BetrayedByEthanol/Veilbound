@@ -176,9 +176,9 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
     def test_pounce_bite_and_horn_remain_independent_and_uncalibrated(self):
         self.assertIn("d20+6 Bite", self.design)
         self.assertIn("d20+5 Horn", self.design)
-        self.assertIn("complete B06-EN-03 executable enemy", self.design)
-        self.assertIn("Pounce/Drive mode authoring", self.design)
-        self.assertIn("CONCEPT_ONLY", self.design)
+        self.assertIn("full B06-EN-03 executable test fixture", self.design)
+        self.assertIn("Pounce/Drive contest authority", self.design)
+        self.assertIn("PHYSIOLOGY_ONLY_NOT_EXECUTABLE", self.design)
         self.assertIn("24 AP", self.pounce)
 
 
