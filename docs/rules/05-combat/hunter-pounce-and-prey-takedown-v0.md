@@ -1,0 +1,104 @@
+# Hunter of the Woods — Pounce and Prey Takedown v0
+
+> **B06-EN-03 HUNTER-LOCAL RULE CANDIDATE; not a general Charge/Trip/Grapple revision.** This authors the *combined physical action, timing, footprint contact and defender counterplay* for an elite 1×2 forest ambush predator against **one standing, corporeal, ordinarily one-square player character on a surface where Prone is meaningful**. It **does not** give the Hunter a complete executable stat block, a certified level/CR, a magical power, or finished natural Bite/Venom statistics. Numeric attack/pressure fixtures below are explicitly **provisional B06 test inputs**, not canonical Hunter abilities until its final physiology/attack source is reviewed.
+
+## 1. Identity and limits
+
+**Hunter Pounce** is a specially authored **Charge variant** delivering **one paid Bite attack** and **one Pounce-specific forceful balance contest** as its *one linked compound action*. The body impact tries to knock ordinary standing prey **Prone**; jaws try to puncture. Both outcomes are **independent after a legal approach**:
+
+- A Bite **hit** may injure (and eventually inject species-authored venom) when **the prey resists the takedown**.
+- A Bite **miss**, successful Dodge, Guard block or natural 1 **does not automatically cancel the independently contested body-impact takedown**, provided the prey remains in the Hunter's physical frontal contact zone after the normal response window. The defender gets an active **free Balance Resistance contest** against the body impact, even if it took a hit. Neither component makes the other succeed automatically.
+- This is **not** canonical [Grapple Takedown](universal-maneuvers.md#takedown), which requires an existing Controller/Controlled Grappling State. The Pounce's knockdown uses the [Trip](universal-maneuvers.md#trip-v0) **Prone-only outcome**, with a specifically authored linked pressure contest. It creates **no Grappling State, Controller, Pin, shared Grapple square or maintained hold**.
+- Only the Hunter of the Woods receives this explicit linked-rider permission. Ordinary Charge still buys **one attack only** and no free Trip, damage or knockdown. No generic large-creature Pounce is created.
+- The target must be physically reachable by the Hunter's **head/front** without illegal overlap, on sufficiently supported ground, with the anatomy/relative bulk to destabilize a **one-square PC**. Target may be armored, shield-bearing or unarmed. **Large/multi-square targets, animals larger than the Hunter (including moose), flying/falling/climbing targets, and multi-square Grapple or true restraint are outside this first mechanically runnable scope**; the Hunter's ecological ability to hunt these prey remains design canon but not a numerical size exploit.
+
+## 2. AP, MP and movement
+
+Use a **Hunter-local provisional Level-3-equivalent** physical-turn testing anchor:
+
+| Resource | Current v0 proposal | Authoritative boundary |
+|---|---|---|
+| Hunter Turn AP | **42 AP** | **B06-local benchmark only**; not a player Level, Focus choice or established monster scaling rule |
+| Pounce cost | **one Physical Action = 24 Turn AP** | Hunter-specific **provisional non-Focus** AP; includes **one Bite + one conditional balance contest**, not 24 AP each |
+| Normal Move | **M = 12 MP** | Provisional 1×2 creature's ordinary allowance; terrain/mobility impairments alter effective **M** |
+| Pounce maximum turn movement | **2 × M = 24 MP** unimpaired | Replaces ordinary MP allowance; **not +24 MP** added to 12 MP |
+| AP-free tentative Charge cutoff | **floor(3 × M / 2) = 18 MP** unimpaired | Follow all canonical Charge AP commitment/abort timing |
+| Minimum approach | **3 completed voluntary translated steps** | Terrain is paid per actual 1×2 step; higher terrain cost does not satisfy steps early |
+| Heading | **one of 4 cardinal head-forward directions** | Hunter-specific anatomical restriction narrower than the eight-direction universal Charge; **no pivots** once Pounce begins |
+| Follow-up cost | **0 extra AP, 0 extra MP** | Only the specified immediate balance contest; **no second Bite, Horn or standalone Trip action** |
+| Balance defense | **0 AP, 0 Reaction** | One free opposed roll when the rider is physically eligible; not Dodge/Guard capacity |
+
+The Hunter must start with the **head oriented forward along the chosen cardinal Charge heading**, and both indexed footprint cells move as **one rigid step** under [Multi-Square Creature Footprints v0](multi-square-creature-footprints-v0.md). It cannot pay an extra turn/pivot to reorient while Pouncing. It can turn normally **before the turn it begins Pounce**, or instead use an ordinary non-Pounce action. The target must be in **the single immediately head-forward adjacent square** when the Pounce attack begins; neither its rear nor its side squares permit a Pounce impact, even where those squares are within ordinary melee Reach. This is a specific contact limit, not a global directional bonus or permanent facial targeting rule.
+
+Pounce follows [Charge's](rapid-advance-and-charge-v0.md#exactly-when-ap-becomes-committed) full approach accounting: no prior MP spent/reserved on that turn; declare initial target, **Bite profile and intended Pounce rider**, heading and eligibility **before moving**; continue straight; no Rapid Advance/Sprint combination or voluntary Cautious movement. At the **first completed step exceeding the Rapid Advance cutoff**, commit **24 AP**; earlier abort costs MP only and converts to fixed-heading Rapid Advance. If the attack is initiated before cutoff, commit 24 AP **before its response window**. If AP already committed and the attack is lost through obstruction, Interrupt, target escape or failed contact, it is **not refunded**; Charge ends with unused Pounce MP discarded. Normal Charge Prone/suspension/Standing (4 MP, restart three-step minimum after Standing), retargeting-before-defenses, Movement Opportunities and Interceptions remain in force.
+
+The Hunter may retarget at the end of the approach to **one other eligible front-square PC**, exactly before the original Attack Sequence defenses are assigned; it may not change its heading, the Bite/Pounce profile, or select a side target. If the originally declared target is no longer in the front square, the ordinary Charge AP-commitment/abort rules govern whether any legal front-square target remains. A PC can avoid contact by genuinely changing occupied squares through an eligible precommitted Movement Interception, Reactive Blink or other authored effect. **Choosing Dodge does not by itself teleport the defender out of its occupied square.**
+
+On normal orthogonal ground, a Hunter moving **three** straight east steps pays **6 MP** (three 2-MP whole-footprint translations). If its head destination is Difficult and the rear destination Normal, each such mixed step costs **ceil((4+2)/2) = 3 MP**. Neither movement has any hidden additional Pounce MP cost, but the 3-step minimum and full 1×2-body passage test must be satisfied.
+
+## 3. One declaration, one response window, two independent resolutions
+
+**A. Declare and approach.** Before any movement, commit to the **natural Bite/Pounce package**, not Horn. Follow the strict Charge route. At the end of at least three translated steps, the Hunter's head must be directly one square behind/in front-contact with a **single one-square standing PC**, with both Hunter squares legally occupied. Identify the final PC before defenses; a different one-square PC may be substituted under normal Charge retargeting **before rolling or assigning defenses**. One ordinary Attack Sequence is opened against that PC and cannot be reopened after seeing a result.
+
+**B. Commit and let the PC defend.** Pay the **one 24-AP Physical Action** when Charge says to commit it (possibly prepaid from the extended approach). Declare **both Bite and knockdown rider** so the PC has full information. The defender assigns **Take Hit, Dodge or one eligible Guard** to the **one Bite attack**, consuming exactly the usual Guard/Dodge round resources. Any eligible precommitted Interception resolves first; spontaneous Reactions, Reactive Blink, Protective Intervene or independently legal protection follow the normal response window. No new free Reaction, separate attack, second defense assignment or defense reassignment is created for the balance rider.
+
+**C. Recheck whole-package legality after responses.** A cancelled/interrupted Bite action loses its linked rider as well: **neither** roll occurs when the attack itself was legally **Interrupted**, target left frontal contact, original target attack became invalid and no legal Blink-follow preserves it, Hunter was disabled or the footprint cannot physically maintain contact. **The 24 AP stay spent** once committed. Merely spending a Guard or choosing Dodge does not cancel the still-valid body impact.
+
+**D. Resolve the one Bite attack.** Roll **one ordinary melee Attack** against the defender's already committed Take Hit/Dodge/Guard. Apply ordinary natural 1/20 confirmation and Strong/Critical procedure, then actual post-mitigation Piercing HP and wound consequences **if the Bite hit**. Do not make another natural-weapon attack roll for the body impact. A Bite miss/blocked hit deals **no Bite damage**, but does not automatically cancel stage E when the target remains in the frontal contact zone. A **successful natural 20** does not automatically grant a takedown; the separate balance contest still decides Prone.
+
+**E. Resolve the Pounce balance rider (independently of Bite hit).** If the PC is still **standing, physically in the front-contact square, capable of becoming Prone** and the Hunter is capable of applying the body force, make **one** contest, immediately after the Bite resolution and **without an additional AP expenditure**:
+
+```text
+Hunter Pounce Pressure =
+    d20 + Hunter Strength + specifically applicable Pounce Training/modifiers
+
+Player Balance Resistance =
+    d20 + player Strength OR player Agility
+        + specifically applicable Balance Training/modifiers
+```
+
+This uses **Trip v0's** force-based attacker Strength and the player's physically justified **Strength to brace** or **Agility to recover balance**. No general Athletics proficiency, forced fixed Ability pair or bonus from simply being larger is invented. The Hunter's **provisional +4 pressure anchor** below assumes Hunter Strength contribution +4 and *zero separately trained modifier*; final anatomy and size rules may replace it. The PC rolls **once, for free** without using a Reaction, Dodge, Guard or AP; this is not an additional Attack to which it assigns a second Guard/Dodge. A defender incapable of *any plausible* active resistance follows the existing Trip unable-to-contest rule **only if Prone is still a physically possible result**.
+
+- **Pounce Pressure > Balance Resistance** → target becomes **Prone in its own occupied square**, with **no displacement, Grapple Control, Pin, additional damage or extra attack**.
+- **Tie or defender wins** → target remains standing. No automatic counter-grapple, rebound, self-Prone or damage.
+- If target was already Prone/incapacitated or no longer physically eligible after Bite damage, there is **no new free knockdown check** or position change; apply existing injury/Dying rules first. A later separate maneuver may still be attempted only by paying its own legal cost.
+
+**F. Toxin provenance and end.** An eventual authored venom check is triggered **only by its own actual delivery rule** (positive remaining Piercing HP puncture or independently established breach) from stage D, **not** by Pounce success, Prone or the balance roll. The exact species slow-venom profile is still **unauthored**; **this rule does not grant TX-HM or any free poisoning**. Ending Pounce ends the Charge movement mode and discards unused Pounce MP; the remaining Turn AP may fund other **otherwise legal** actions. It grants no retained high-speed heading state, Grapple Contact, hold, or automatic subsequent Bite. The Hunter may decide to withdraw on another legal turn and track wounded prey normally.
+
+**Timing statement:** One paid Bite Attack Sequence with a conditionally attached **force/balance check**; all movement responses and Bite Reactions happen **before** results are rolled. The balance check occurs after Bite damage but **does not reopen** the completed Bite's assigned defense, target choice or response window. A new independently authored triggered effect must follow its own existing timing, not a fictitious second Pounce attack window.
+
+## 4. Provisional B06 contact/attack fixture (not the final Hunter stat block)
+
+To make the procedure reproducible before the full natural Bite/physiology slice, use these **test-only numbers**, without declaring they are actual STR/AGI/Training scores or a universal monster rule:
+
+| Pounce-specific sample input | Value | Status |
+|---|---:|---|
+| One Bite Attack roll | **d20 + 6** | **Provisional illustrative attack-total bonus** |
+| Bite HP packet on a normal hit | **3 + d6 Piercing, Penetration 1** | **Provisional illustrative packet**, physical Armor still applies normally |
+| Pounce Pressure | **d20 + 4** | **Provisional illustrative force contribution**, no free extra Training |
+| Turn AP/Physical Action | **42 / 24** | Provisional Hunter-only non-Focus action budget |
+| Effective normal M/Charge MP | **12 / 24** | Provisional Hunter-only baseline |
+| Player Defense / Balance | **Actual sheet values** | No fixed universal 13/16/18 defense or resistance is granted |
+
+This is **a scenario test harness**, not a completed executable `b06-enemy-v0` fixture: it does not define the Hunter's HP, Armor, Vigor, Initiative, ordinary non-Pounce attacks, source-linked toxin or full enemy abilities. Its accuracy/damage entries must be replaced or explicitly accepted when the independently sourced natural Bite is authored.
+
+## 5. Worked player-character cases
+
+Assume clear ground, three legal 2-MP head-forward translations, a standing Level-2 PC in the final head-forward adjacent square, and a Hunter with **42 Turn AP**, **12 normal MP**. A tentative Pounce spends **6 MP**, less than its **18-MP cutoff**; beginning the Bite commits **24 AP**, leaving **18 AP** (not enough for another 24-AP Hunter Physical Action). Pounce ends with unused Charge MP discarded.
+
+| Case | Bite: committed defense and sample roll | Pounce balance | Outcome |
+|---|---|---|---|
+| **Bite lands; prey resists takedown** | PC Dodge **13**; Hunter natural **12+6=18** hit. Bite packet `3+d6` with d6=4 → 7 Piercing HP before mitigation. PC Armor **4**, Pen1 → Armor reduces by **3**, **4 HP remain** | Hunter **9+4=13**, PC Strength resistance **12+3=15** | **PC stays standing**, takes 4 HP (possible future puncture exposure **only if** venom source authored); **no extra Trip AP** |
+| **Bite misses; prey falls** | PC Dodge **13**; Hunter natural **3+6=9** miss; no Bite damage | Hunter **17+4=21**, PC Agility resistance **6+3=9** | **PC becomes Prone**, 0 Bite damage; no new Grapple and no automatic venom |
+| **Shield blocks jaws; balance succeeds** | PC Guard **16**, attack **11+6=17** actually beats Guard; for a true block use **9+6=15** against Guard16 | Hunter **7+4=11**, PC Strength **13+3=16** | Guard stops the Bite; PC remains standing; one Guard capacity spent |
+| **Shield blocks jaws; body topples PC** | PC Guard **16**, attack **9+6=15** blocked | Hunter **16+4=20**, PC Strength **8+3=11** | Bite stopped, **Prone** from independently resisted body pressure; not poison |
+| **Guard/Dodge or armor leaves zero actual Piercing HP** | Bite hit is possible but post-mitigation Piercing HP = 0 (or stopped by Guard) | Balance resolved independently when frontal contact remains | Prone possible; **no injected venom** based solely on a zero-HP/fully prevented puncture |
+| **Reactive Blink to a legal distant square; no follow** | PC legally Blinks during suspended Bite window and front-contact square becomes empty | No contest | Attack/rider now impossible; **24 AP lost if committed**, no extra free lunge or Ward retarget |
+| **Interrupted before an attack roll** | Valid precommitted response actually **Interrupts** the Bite/Pounce action | No contest | Pounce paid action lost; no Bite damage and no knockdown |
+| **Standing after successful Pounce** | Next PC turn, normal **4 MP Stand** if possible | Standard **Standing Opportunity** before standing finishes | Hunter gets no automatic free attack; only an otherwise legal available Opportunity can be exploited |
+
+## 6. Boundaries and next authoring work
+
+**Lock candidate here:** one Charge-like paid Pounce at **24 AP** (provisional number), 2×M MP allowance, 3 real translated steps, 4 cardinal head-forward headings, full footprint and existing Charge AP cutoff/aborts, one declared Bite defense, **independent free force/balance contest even when Bite misses**, target Prone **only on pressure win**, no free Grapple or recurring Bite, and clear counterplay through warning, obstruction, Interception, Blink, Guard/Dodge, Balance and normal Standing.
+
+**NOT locked by this slice:** final Hunter STR/AGI, natural weapon training/damage, HP/Armor/Dodge/Vigor, 1×2 vs 1×2 or moose-scale takedowns, ongoing Bite grapple/hold, natural venom and long pursuit, numeric CR/encounter challenge, natural senses/stealth, charge exposure bonuses, prone injury upgrades, fear/intimidation mechanics, or environmental collision damage. **B06-EN-03 remains CONCEPT_ONLY** until the complete stat block, real biological source, and opposed encounters are validated.
