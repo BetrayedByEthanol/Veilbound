@@ -1097,7 +1097,7 @@
             ]
           },
           "then": {
-            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection. Enforces the exact authored grooved-canine natural Bite source, Bite Strength/Agility roll and toxin origin, not merely the natural_weapon category. Pounce requires melee/special head-forward contact governed by the authored Pounce range rule; one exact 3+d6 Piercing Pen1 Bite with no extra strength contribution or formula.",
+            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection. Enforces the exact authored grooved-canine natural Bite source, Bite Strength/Agility roll and toxin origin, not merely the natural_weapon category. Pounce requires melee/special head-forward contact governed by the authored Pounce range rule; one exact 3+d6 Piercing Pen1 Bite with no extra strength contribution or formula. Its rolled Bite uses the already-authored baseline +6 Strength+Agility+Training0 (no added Attack bonus).",
             "properties": {
               "action_class": {
                 "const": "physical"
@@ -1119,6 +1119,18 @@
                   },
                   "ability_b": {
                     "const": "Agility"
+                  },
+                  "training_family": {
+                    "const": "None — creature-local natural attack"
+                  },
+                  "effective_training": {
+                    "const": 0
+                  },
+                  "situational_bonus": {
+                    "const": 0
+                  },
+                  "total_bonus": {
+                    "const": 6
                   }
                 }
               },
