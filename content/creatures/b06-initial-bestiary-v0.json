@@ -202,7 +202,7 @@
         "mvp_player_option": "not_playable_mvp",
         "pillar_affinities": [],
         "physiology_notes": [
-          "Large, bulky forest quadruped, exceeding ordinary bear mass; wolf-like head, powerful legs, one prominent horn and venom-bearing puncturing jaws.",
+          "Large, bulky forest quadruped, exceeding ordinary bear mass; wolf-like head, powerful legs, one prominent horn and venomous puncturing bite and strong jaws.",
           "1×2-square rigid footprint; translation/turning follows Multi-Square Creature Footprints v0. No automatic added Reach, Armor, Guard or attack cadence.",
           "Horn serves primarily mating-season rutting, territorial intimidation and deterrence, and breaking up loose material/roots when enlarging an excavated den.",
           "Vigor presence/amount, natural Armor, HP, regeneration, Guard/Dodge and attack numbers are not yet authored; no personal Veil invocation assumed."
@@ -219,7 +219,7 @@
           "length_cells": 2,
           "reference_rule": "Two orthogonally adjacent grid squares, stable head/front and rear labels; use either cell as stationary pivot for legal 90-degree rotations.",
           "movement_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
-          "rotation_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md#3-turning-first-executable-shape-is-a-straight-12"
+          "rotation_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md"
         }
       },
       "planned_capabilities": [
@@ -244,7 +244,7 @@
           "missing_authority": [
             "Natural bite attack source/roll/AP/physical damage and Penetration",
             "Actual venom material/injection delivery source ref and resistance grade",
-            "Species-specific slow-onset/timecourse/exploration/expiry/recovery rules respecting one-instance policy"
+            "Species-specific slow-onset/timecourse/exploration/expiry/recovery rules (TX framework) respecting one-instance policy"
           ]
         },
         {
