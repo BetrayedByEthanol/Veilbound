@@ -58,12 +58,43 @@ class B06FootprintSemanticValidationTests(unittest.TestCase):
                          "b06-hunter-physiology-v0")
         self.assertEqual(self.physiology_schema["properties"]["record_status"]["const"],
                          "PHYSIOLOGY_ONLY_NOT_EXECUTABLE")
+        self.assertIn("calibration_status", self.physiology_schema["required"])
+        self.assertEqual(self.physiology_schema["properties"]["calibration_status"]["const"],
+                         "PROVISIONAL_B06")
         p = self.physiology_schema["properties"]["creature_profile"]
         self.assertIn("footprint_cell_ids", p["required"])
         self.assertIn("reference_cell_id", p["required"])
         self.assertTrue(p["properties"]["footprint_cell_ids"]["uniqueItems"])
         self.assertEqual(p["properties"]["footprint_cell_ids"]["const"], ["head", "rear"])
         self.assertEqual(p["properties"]["reference_cell_id"]["const"], "head")
+
+    def test_hunter_physiology_missing_or_wrong_calibration_fails_default_cli(self):
+        # The required no-argument CLI does not run JSON Schema validation.
+        # It must reject absent and nonprovisional status independently.
+        for value in (None, "FINAL_B06", "PROVISIONAL_B06_typo"):
+            with self.subTest(calibration_status=value):
+                mutated = copy.deepcopy(self.physiology)
+                if value is None:
+                    mutated.pop("calibration_status")
+                else:
+                    mutated["calibration_status"] = value
+
+                errors = validate_b06_document(mutated, "physiology")
+                self.assertEqual(len(errors), 1)
+                self.assertIn("physiology.calibration_status", errors[0])
+                self.assertIn("PROVISIONAL_B06", errors[0])
+
+                with tempfile.TemporaryDirectory() as td:
+                    # The exact discovered filename and default CLI path.
+                    path = Path(td) / "b06-hunter-physiology.v0.json"
+                    path.write_text(json.dumps(mutated), encoding="utf-8")
+                    with patch("scripts.validate_b06_footprints.CREATURE_DIR", Path(td)):
+                        with patch("builtins.print") as printed:
+                            self.assertEqual(main([]), 1)
+                    self.assertTrue(any(
+                        "calibration_status" in str(call)
+                        for call in printed.call_args_list
+                    ))
 
     def test_hunter_physiology_reference_to_missing_cell_fails(self):
         mutated = copy.deepcopy(self.physiology)
