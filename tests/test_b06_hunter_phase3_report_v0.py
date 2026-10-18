@@ -145,6 +145,93 @@ class Phase3ReportTests(unittest.TestCase):
                             "Per-trial Boolean count exceeds trial count"):
                         build_report(seeds=3)
 
+    def test_pounce_and_disrupted_lane_cannot_overlap(self):
+        valid = build_report(seeds=3)
+        rows = copy.deepcopy(valid["cases"])
+        row = next(r for r in rows
+                   if r["scenario"] == "L2-P3-mixed-ambush-armored")
+        # Each isolated Boolean count is <=3; their sum is impossible.
+        row["pounce_declared"] = 3
+        row["lane_disrupted_trials"] = 3
+        with patch("scripts.b06_hunter_phase3_report_v0.census",
+                   return_value=rows):
+            with self.assertRaisesRegex(
+                    AssertionError, "Inconsistent Pounce/lane/path attribution"):
+                build_report(seeds=3)
+
+    def test_unresolved_path_requires_disrupted_lane(self):
+        valid = build_report(seeds=3)
+        rows = copy.deepcopy(valid["cases"])
+        # Move exactly one terminal to unresolved, preserving all three
+        # trial stops; arrange an impossible zero prior lane disruptions.
+        row = next(r for r in rows if "-ambush-" in r["scenario"]
+                   and any(v > 0 for k, v in r["terminal"].items()
+                           if k != "contact_path_unresolved"))
+        donor = next(k for k, v in row["terminal"].items()
+                     if k != "contact_path_unresolved" and v > 0)
+        row["terminal"][donor] -= 1
+        row["terminal"]["contact_path_unresolved"] = (
+            row["terminal"].get("contact_path_unresolved", 0) + 1)
+        row["contact_path_unresolved"] = row["terminal"]["contact_path_unresolved"]
+        row["lane_disrupted_trials"] = 0
+        with patch("scripts.b06_hunter_phase3_report_v0.census",
+                   return_value=rows):
+            with self.assertRaisesRegex(
+                    AssertionError, "Inconsistent Pounce/lane/path attribution"):
+                build_report(seeds=3)
+
+    def test_warned_opening_forbids_lane_disruption_and_unresolved_path(self):
+        valid = build_report(seeds=3)
+        idx = next(i for i, r in enumerate(valid["cases"])
+                   if r["scenario"] == "L2-P3-original-warned-armored")
+        for kind in ("lane", "path"):
+            with self.subTest(kind=kind):
+                rows = copy.deepcopy(valid["cases"])
+                row = rows[idx]
+                if kind == "lane":
+                    row["lane_disrupted_trials"] = 1
+                else:
+                    donor = next(k for k, v in row["terminal"].items()
+                                 if k != "contact_path_unresolved" and v > 0)
+                    row["terminal"][donor] -= 1
+                    row["terminal"]["contact_path_unresolved"] = 1
+                    row["contact_path_unresolved"] = 1
+                    row["lane_disrupted_trials"] = 1
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError, "Warned opening has ambush-only counters"):
+                        build_report(seeds=3)
+
+    def test_flame_vigor_burn_cannot_exceed_paid_launches(self):
+        valid = build_report(seeds=3)
+        for scenario in ("L2-P3-mixed-warned-armored",
+                         "L2-P3-mixed-ambush-exposed"):
+            with self.subTest(scenario=scenario):
+                rows = copy.deepcopy(valid["cases"])
+                row = next(r for r in rows if r["scenario"] == scenario)
+                row["vigor_burn"] = (row["vp_spent"] // 2) * 5 + 1
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError, "Vigor burn exceeds paid Flame launches"):
+                        build_report(seeds=3)
+
+    def test_every_front_caster_approach_requires_flame_launch(self):
+        valid = build_report(seeds=3)
+        rows = copy.deepcopy(valid["cases"])
+        row = next(r for r in rows
+                   if r["scenario"] == "L2-P3-mixed-ambush-exposed")
+        row["front_caster_approach_mp"] = 2
+        row["front_caster_precontact_casts"] = 0
+        # It is impossible to pay movement without reaching this launch,
+        # even if the reported VP also says zero.
+        with patch("scripts.b06_hunter_phase3_report_v0.census",
+                   return_value=rows):
+            with self.assertRaisesRegex(
+                    AssertionError, "Front caster moved without launching Flame"):
+                build_report(seeds=3)
+
     def test_precontact_casts_require_range_entry_mp(self):
         valid = build_report(seeds=3)
         rows = copy.deepcopy(valid["cases"])
