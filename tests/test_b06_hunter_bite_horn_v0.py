@@ -110,15 +110,15 @@ class HunterBiteHornV0Tests(unittest.TestCase):
 
     def test_bite_uses_one_action_not_one_per_cuspid(self):
         self.assertIn("24 Turn AP", self.rules)
-        self.assertIn("one Bite", self.rules)
+        self.assertIn("one Bite attack", self.rules)
         self.assertIn("not two grooved-canine attacks", self.rules)
-        self.assertIn("no additional attack", self.rules)
+        self.assertIn("No extra free off-hand", self.rules)
 
     def test_venom_is_delivered_from_canines_not_horn_or_contact(self):
         self.assertIn("modified salivary gland", self.rules)
         self.assertIn("injection only", self.rules)
         self.assertIn("not horn or unarmed contact", self.rules)
-        self.assertIn("no second Bite", self.rules)
+        self.assertIn("No new Bite attack", self.rules)
 
     def test_full_and_reduced_do_not_automatically_negate_on_save(self):
         self.assertEqual(venom_result(10, 2), "Reduced")
@@ -158,7 +158,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
     def test_no_immediate_effect_on_pounce_balance(self):
         self.assertEqual(stage_after_seconds("Full", 0), (0, 0, True))
         self.assertIn("No poison penalty applies immediately", self.pounce)
-        self.assertIn("cannot change the linked Pounce Balance", self.rules)
+        self.assertIn("cannot rewrite the Balance roll of that same Pounce", self.rules)
 
     def test_one_instance_active_even_before_onset(self):
         self.assertTrue(stage_after_seconds("Full", 300)[2])
@@ -194,11 +194,11 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertIn("d20 + 5", self.rules)
         self.assertIn("2 + d6 Crush, Pen 0", self.rules)
         self.assertIn("not venomous", self.rules)
-        self.assertIn("no automatic Shove", self.rules)
-        self.assertIn("Frontal", self.rules)
+        self.assertIn("not automatically trigger Shove", self.rules)
+        self.assertIn("frontal-cranial horn", self.rules)
 
     def test_horn_drive_is_separate_paid_shove_not_bash_rider(self):
-        self.assertIn("instead of Horn Bash/Bite", self.rules)
+        self.assertIn("**instead of** Horn Bash/Bite", self.rules)
         self.assertIn("No Crush damage", self.rules)
         self.assertIn("+2 Hold Ground", self.rules)
         self.assertIn("Close-Contact Opportunity", self.rules)
@@ -224,7 +224,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
 
     def test_horn_repeated_force_has_no_free_pounce_grapple_or_guard(self):
         self.assertIn("Horn Bash is not a Guard", self.rules)
-        self.assertIn("no free fear effect", self.rules)
+        self.assertIn("free fear effect", self.rules)
         self.assertIn("not a free Bash rider", self.rules)
 
     def test_hunter_stays_concept_only_and_both_sources_are_still_uncalibrated(self):
