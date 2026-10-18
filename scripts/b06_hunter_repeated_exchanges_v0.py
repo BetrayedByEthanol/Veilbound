@@ -94,6 +94,7 @@ def simulate_trial(level, party_size, setup, defense_policy, seed, *, hunter=Non
     toxin = None
     pounce_used = False
     pounce_success = False
+    pounce_balance_resolved = False
     stand_opportunities = 0
     criticals = 0
     attacks = 0
@@ -156,22 +157,24 @@ def simulate_trial(level, party_size, setup, defense_policy, seed, *, hunter=Non
                     base=3, penetration=1, target_armor=a1["armor"])
                 criticals += tier in ("strong", "critical", "devastating")
                 ahp -= damage
+                # Stop at the *damage/wound boundary*, before injecting toxin
+                # or resolving the linked Pounce balance rider. A Dying or
+                # Devastating result cannot be followed by invented effects.
+                terminal = finish_zero("A1", tier) or terminal
+                if terminal != "window_end":
+                    break
                 if damage > 0 and toxin is None:
                     resist = die(seed, 20, rnd, "H", "toxin") + a1["vit"]
                     toxin = "reduced" if resist >= 12 else "full"
-                if legal_pounce and ahp > 0:
-                    # Independent Balance, not gated on Bite success.
+                if legal_pounce:
+                    # Independent Balance, not gated on Bite *success*, but
+                    # reached only when Bite has not triggered the declared
+                    # 0-HP or Devastating-wound simulation stop.
+                    pounce_balance_resolved = True
                     pressure = die(seed, 20, rnd, "H", "pounce") + 4
                     balance = die(seed, 20, rnd, "A1", "balance") + a1["agi"]
                     pounce_success = pressure > balance
                     prone = pounce_success
-                if legal_pounce and ahp <= 0:
-                    # Unable-to-contest Trip still requires legal force contact.
-                    prone = True
-                    pounce_success = True
-                terminal = finish_zero("A1", tier) or terminal
-                if terminal != "window_end":
-                    break
             else:
                 member = next(x for x in members if x["id"] == who)
                 if who == "A1":
@@ -201,12 +204,14 @@ def simulate_trial(level, party_size, setup, defense_policy, seed, *, hunter=Non
                                 penetration=1, target_armor=a1["armor"])
                             criticals += tier in ("strong", "critical", "devastating")
                             ahp -= damage
-                            if damage > 0 and toxin is None:
-                                resist = die(seed, 20, rnd, "H", "opp_toxin") + a1["vit"]
-                                toxin = "reduced" if resist >= 12 else "full"
+                            # An Opportunity can also create an unresolved
+                            # wound. Stop before its toxin resistance or Stand.
                             terminal = finish_zero("A1", tier) or terminal
                             if terminal != "window_end":
                                 break
+                            if damage > 0 and toxin is None:
+                                resist = die(seed, 20, rnd, "H", "opp_toxin") + a1["vit"]
+                                toxin = "reduced" if resist >= 12 else "full"
                         prone = False  # Stand only after all Opportunity responses
                 # Phase 2 policy: each character spends all legal AP on
                 # ordinary martial strikes; no optional magic/Talent use.
@@ -237,6 +242,7 @@ def simulate_trial(level, party_size, setup, defense_policy, seed, *, hunter=Non
         "hunter_first_initiative": h_first, "hunter_hp": hhp,
         "frontline_hp": ahp, "hunter_vigor": hvig, "frontline_vigor": avig,
         "first_round_hunter_hp": first_round, "pounce_used": pounce_used,
+        "pounce_balance_resolved": pounce_balance_resolved,
         "pounce_prone": pounce_success, "standing_opportunities": stand_opportunities,
         "toxin": toxin, "critical_events": criticals, "pc_attack_attempts": attacks,
     }
@@ -256,6 +262,7 @@ def run_matrix(seeds=SEED_COUNT, *, hunter=None):
                 "defense": policy, "trials": seeds, "terminal_counts": dict(t),
                 "hunter_initiative_first": sum(x["hunter_first_initiative"] for x in trials),
                 "pounce_attempts": sum(x["pounce_used"] for x in trials),
+                "pounce_balance_resolutions": sum(x["pounce_balance_resolved"] for x in trials),
                 "pounce_prone": sum(x["pounce_prone"] for x in trials),
                 "standing_opportunities": sum(x["standing_opportunities"] for x in trials),
                 "full_toxin": sum(x["toxin"] == "full" for x in trials),
