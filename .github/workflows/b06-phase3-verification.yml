@@ -1,0 +1,51 @@
+name: B06 Phase 3 Census and Rules Verification
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/b06_hunter_phase3_report_v0.py'
+      - 'scripts/b06_hunter_tactical_diversity_v0.py'
+      - 'scripts/b06_hunter_party_exchanges_v0.py'
+      - 'scripts/b06_hunter_repeated_exchanges_v0.py'
+      - 'tests/**'
+      - 'content/creatures/**'
+      - '.github/workflows/b06-phase3-verification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b06-phase3:
+    name: Verify B06 Phase 3 and full B06 regression suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact PR commit
+        uses: actions/checkout@v4
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify focused Phase 3 tactical and report tests
+        run: |
+          python -m unittest discover -s tests -p 'test_b06_hunter_tactical_diversity_v0.py' -v
+          python -m unittest discover -s tests -p 'test_b06_hunter_phase3_report_v0.py' -v
+      - name: Run complete repository test suite
+        run: python -m unittest discover -s tests -v
+      - name: Verify enemy footprints and index geometry
+        run: python -m scripts.validate_b06_footprints
+      - name: Execute all 4096 Phase 3 windows and write audited reports
+        run: |
+          python -m scripts.b06_hunter_phase3_report_v0 \
+            --json-out build/b06-phase3-census.json \
+            --markdown-out build/b06-phase3-census.md
+          cat build/b06-phase3-census.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve machine-readable results and audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: b06-phase3-census
+          path: |
+            build/b06-phase3-census.json
+            build/b06-phase3-census.md
+          if-no-files-found: error
