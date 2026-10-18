@@ -28,8 +28,10 @@ def pounce_result(
     guard_or_dodge=True,
     attack_legal=True,
     balance_legal=True,
+    defender_can_resist=True,
+    target_hp_before_bite=None,
 ):
-    """One fixed, non-critical illustrative Bite and independent balance contest.
+    """One fixed, non-critical Bite and post-damage balance resolution.
 
     This calculation is intentionally limited to ordinary, non-natural-20
     rolls. The canonical critical and defense rules still govern actual play.
@@ -40,8 +42,24 @@ def pounce_result(
     # Against Take Hit, a legal melee attack hits unless natural 1.
     hit = bite_die != 1 and (bite_die + bite_bonus > defense if guard_or_dodge else True)
     hp = max(0, 3 + bite_damage_d6 - max(0, armor - penetration)) if hit else 0
-    prone = bool(balance_legal and balance_die + pounce_bonus > target_balance)
-    return dict(bite_hit=hit, hp=hp, prone=prone, rolled=True)
+    # Resolve injury first: 0 HP or below means unconscious and Dying,
+    # but neither incapacitation nor an ordinary Bite grants free extra damage.
+    able_to_resist = defender_can_resist
+    if target_hp_before_bite is not None:
+        able_to_resist = able_to_resist and target_hp_before_bite - hp > 0
+    if not balance_legal:
+        prone = False
+        balance_rolled = False
+    elif not able_to_resist:
+        # Trip's unable-to-contest outcome requires a physically legal
+        # knockdown: balance_legal includes contact, surface and force.
+        prone = True
+        balance_rolled = False
+    else:
+        prone = balance_die + pounce_bonus > target_balance
+        balance_rolled = True
+    return dict(bite_hit=hit, hp=hp, prone=prone, rolled=True,
+                balance_rolled=balance_rolled)
 
 
 class HunterPounceRulesTests(unittest.TestCase):
@@ -164,6 +182,36 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertTrue(r["bite_hit"])
         self.assertFalse(r["prone"])
         self.assertIn("already Prone", self.rules)
+
+    def test_bite_incapacitates_standing_pc_auto_prone_under_trip_rule(self):
+        # Four post-Armor HP damage takes a 3-HP standing PC to -1:
+        # the PC cannot resist and must fall if still in frontal contact.
+        result = pounce_result(12, 13, 1, 99, target_hp_before_bite=3)
+        self.assertTrue(result["bite_hit"])
+        self.assertEqual(result["hp"], 4)
+        self.assertTrue(result["prone"])
+        self.assertFalse(result["balance_rolled"])
+        self.assertIn("Bite damage made the PC unconscious/Dying", self.rules)
+        self.assertIn("no Balance Resistance or Hunter Pressure die is rolled", self.rules)
+        self.assertIn("unable to make any plausible active resistance", self.trip)
+
+    def test_unable_to_contest_before_bite_auto_prone_only_if_contact_legal(self):
+        result = pounce_result(3, 13, 1, 99, defender_can_resist=False)
+        self.assertFalse(result["bite_hit"])
+        self.assertTrue(result["prone"])
+        self.assertFalse(result["balance_rolled"])
+        invalid_contact = pounce_result(12, 13, 20, 7,
+                                        target_hp_before_bite=3,
+                                        balance_legal=False)
+        self.assertTrue(invalid_contact["bite_hit"])
+        self.assertFalse(invalid_contact["prone"])
+        self.assertFalse(invalid_contact["balance_rolled"])
+
+    def test_incapacitated_is_not_an_unconditional_no_balance_exception(self):
+        self.assertIn("Being incapacitated **does not by itself cancel**", self.rules)
+        self.assertIn("Already Prone", self.rules)
+        self.assertIn("no supported ground where Prone is meaningful", self.rules)
+        self.assertIn("Still standing and able to resist after Bite", self.rules)
 
     def test_damage_cannot_be_via_free_body_impact(self):
         self.assertIn("no displacement, Grapple Control, Pin, additional damage or extra attack",self.rules)
