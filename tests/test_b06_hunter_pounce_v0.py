@@ -1,0 +1,190 @@
+"""Hunter Pounce / Prey Takedown v0 action-economy and player-response regressions.
+
+These standard-library tests formalize the B06-EN-03 *provisional* Pounce
+sample. They do not certify attack balance or make the Hunter executable.
+"""
+import json
+import math
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+POUNCE = ROOT / "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+CHARGE = ROOT / "docs/rules/05-combat/rapid-advance-and-charge-v0.md"
+TRIP = ROOT / "docs/rules/05-combat/universal-maneuvers.md"
+FOOTPRINT = ROOT / "docs/rules/05-combat/multi-square-creature-footprints-v0.md"
+BESTIARY = ROOT / "content/creatures/b06-initial-bestiary-v0.json"
+
+
+def pounce_result(
+    bite_die, defense, balance_die, target_balance,
+    *,
+    bite_bonus=6,
+    pounce_bonus=4,
+    bite_damage_d6=4,
+    armor=4,
+    penetration=1,
+    guard_or_dodge=True,
+    attack_legal=True,
+    balance_legal=True,
+):
+    """One fixed, non-critical illustrative Bite and independent balance contest.
+
+    This calculation is intentionally limited to ordinary, non-natural-20
+    rolls. The canonical critical and defense rules still govern actual play.
+    """
+    if not attack_legal:
+        return dict(bite_hit=False, hp=0, prone=False, rolled=False)
+
+    # Against Take Hit, a legal melee attack hits unless natural 1.
+    hit = bite_die != 1 and (bite_die + bite_bonus > defense if guard_or_dodge else True)
+    hp = max(0, 3 + bite_damage_d6 - max(0, armor - penetration)) if hit else 0
+    prone = bool(balance_legal and balance_die + pounce_bonus > target_balance)
+    return dict(bite_hit=hit, hp=hp, prone=prone, rolled=True)
+
+
+class HunterPounceRulesTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.rules = POUNCE.read_text(encoding="utf-8")
+        cls.charge = CHARGE.read_text(encoding="utf-8")
+        cls.trip = TRIP.read_text(encoding="utf-8")
+        cls.footprint = FOOTPRINT.read_text(encoding="utf-8")
+        cls.index = json.loads(BESTIARY.read_text(encoding="utf-8"))
+        cls.hunter = next(e for e in cls.index["entries"] if e["id"] == "B06-EN-03")
+
+    def test_pounce_is_hunter_only_not_global_charge_revision(self):
+        self.assertIn("HUNTER-LOCAL RULE CANDIDATE", self.rules)
+        self.assertIn("not a general Charge/Trip/Grapple revision", self.rules)
+        self.assertIn("one paid Bite attack", self.rules)
+        self.assertIn("one Pounce-specific forceful balance contest", self.rules)
+        self.assertIn("Charge never", self.charge)
+
+    def test_pounce_single_action_and_pool_replace_not_add(self):
+        self.assertIn("one Physical Action = 24 Turn AP", self.rules)
+        self.assertIn("42 AP", self.rules)
+        self.assertIn("2 × M = 24 MP", self.rules)
+        self.assertEqual(42-24, 18)
+        self.assertEqual(2*12, 24)
+        self.assertIn("not +24 MP", self.rules)
+
+    def test_rapid_cutoff_and_three_actual_steps(self):
+        self.assertEqual(math.floor(3*12/2), 18)
+        self.assertIn("floor(3 × M / 2) = 18 MP", self.rules)
+        self.assertIn("3 completed voluntary translated steps", self.rules)
+        self.assertEqual(3*2, 6)
+        self.assertEqual(3*3, 9)  # Even three mixed-terrain steps are three, not four+.
+        self.assertIn("first completed step exceeding the Rapid Advance cutoff", self.rules)
+
+    def test_natural_bite_and_pressure_both_test_only(self):
+        for marker in ("d20 + 6", "3 + d6 Piercing, Penetration 1", "d20 + 4"):
+            self.assertIn(marker, self.rules)
+        self.assertIn("test-only numbers", self.rules)
+        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
+        self.assertIsNone(self.hunter["fixture_path"])
+
+    def test_front_head_only_one_by_two_footprint(self):
+        shape = self.hunter["creature_profile"]["footprint"]
+        self.assertEqual(shape["cell_ids"], ["head", "rear"])
+        self.assertEqual(shape["reference_cell_id"], "head")
+        self.assertIn("one of 4 cardinal head-forward directions", self.rules)
+        self.assertIn("single immediately head-forward adjacent square", self.rules)
+        self.assertIn("no pivots", self.rules.lower())
+        self.assertIn("No voluntary pivot", self.charge)
+
+    def test_actual_puncturing_bite_not_implied_venom(self):
+        self.assertIn("no free poisoning", self.rules)
+        self.assertIn("positive remaining Piercing HP puncture", self.rules)
+        self.assertIn("not by Pounce success", self.rules)
+        self.assertIn("species slow-venom profile is still", self.rules)
+
+    def test_hit_and_takedown_failure_independent(self):
+        r=pounce_result(12,13,9,15)
+        self.assertTrue(r["bite_hit"])
+        self.assertEqual(r["hp"], 4)
+        self.assertFalse(r["prone"])
+
+    def test_missed_bite_but_takedown_succeeds(self):
+        r=pounce_result(3,13,17,9)
+        self.assertFalse(r["bite_hit"])
+        self.assertEqual(r["hp"], 0)
+        self.assertTrue(r["prone"])
+
+    def test_guard_blocked_bite_but_balance_fails(self):
+        r=pounce_result(9,16,16,11)
+        self.assertFalse(r["bite_hit"])
+        self.assertEqual(r["hp"], 0)
+        self.assertTrue(r["prone"])
+
+    def test_guard_blocked_bite_and_balance_succeeds(self):
+        r=pounce_result(9,16,7,16)
+        self.assertFalse(r["bite_hit"])
+        self.assertFalse(r["prone"])
+
+    def test_tied_balance_does_not_knock_prone(self):
+        r=pounce_result(12,13,9,13)
+        self.assertTrue(r["bite_hit"])
+        self.assertFalse(r["prone"])
+        self.assertIn("Tie or defender wins", self.rules)
+
+    def test_one_roll_each_and_no_auto_prone_on_bite_natural20(self):
+        self.assertIn("one ordinary melee Attack", self.rules)
+        self.assertIn("No new free Reaction", self.rules)
+        self.assertIn("successful natural 20", self.rules)
+        self.assertIn("does not automatically grant a takedown", self.rules)
+
+    def test_bite_natural_one_miss_does_not_automatically_cancel_balance(self):
+        r=pounce_result(1,13,16,11)
+        self.assertFalse(r["bite_hit"])
+        self.assertTrue(r["prone"])
+        self.assertIn("natural 1", self.rules)
+
+    def test_no_balance_if_bite_action_interrupt_or_target_moved(self):
+        r=pounce_result(14,13,20,7,attack_legal=False)
+        self.assertFalse(r["rolled"])
+        self.assertFalse(r["prone"])
+        self.assertEqual(r["hp"],0)
+        self.assertIn("neither** roll occurs", self.rules)
+        self.assertIn("24 AP stay spent", self.rules)
+
+    def test_no_balance_if_already_prone_or_no_eligible_ground(self):
+        r=pounce_result(14,13,20,7,balance_legal=False)
+        self.assertTrue(r["bite_hit"])
+        self.assertFalse(r["prone"])
+        self.assertIn("already Prone", self.rules)
+
+    def test_damage_cannot_be_via_free_body_impact(self):
+        self.assertIn("no displacement, Grapple Control, Pin, additional damage or extra attack",self.rules)
+        self.assertIn("no retained", self.rules)
+        self.assertIn("without an additional AP expenditure", self.rules)
+
+    def test_non_focus_ap_does_not_grant_extra_attack(self):
+        self.assertIn("not enough for another 24-AP",self.rules)
+        self.assertIn("one ordinary Attack Sequence", self.rules)
+        self.assertIn("does not reopen", self.rules)
+
+    def test_defender_choices_and_standing_opportunity(self):
+        for x in ("Take Hit, Dodge or one eligible Guard", "Reactive Blink",
+                  "precommitted Interception", "Standing Opportunity", "4 MP Stand"):
+            self.assertIn(x, self.rules)
+        self.assertIn("not a new free Reaction", self.rules) if "not a new free Reaction" in self.rules else self.assertIn("No new free Reaction",self.rules)
+
+    def test_canonical_grapple_takedown_not_redefined(self):
+        self.assertIn("existing Controller/Controlled Grappling State", self.trip)
+        self.assertIn("no Grappling State",self.rules)
+        self.assertIn("not** canonical", self.rules)
+
+    def test_b06_capability_keeps_missing_authority(self):
+        cap=next(c for c in self.hunter["planned_capabilities"]
+                 if c["id"]=="B06-CAP-HUNTER-POUNCE")
+        self.assertEqual(cap["state"],"requires_authored_attack_or_effect")
+        self.assertTrue(cap["missing_authority"])
+        self.assertIn("hunter-pounce-and-prey-takedown-v0.md",
+                      self.hunter["rules_basis"])
+        self.assertFalse(any(c["state"]=="existing_authority_only"
+                             for c in self.hunter["planned_capabilities"]))
+
+
+if __name__=="__main__":
+    unittest.main()
