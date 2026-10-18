@@ -1,6 +1,7 @@
 """Regression gates for B06 Phase 3 census/report (only bounded stops)."""
 import copy
 import json
+import math
 import unittest
 from unittest.mock import patch
 
@@ -231,6 +232,95 @@ class Phase3ReportTests(unittest.TestCase):
             with self.assertRaisesRegex(
                     AssertionError, "Front caster moved without launching Flame"):
                 build_report(seeds=3)
+
+    def test_exposed_front_all_vp_is_paid_precontact_casts(self):
+        valid = build_report(seeds=128)
+        rows = copy.deepcopy(valid["cases"])
+        row = next(r for r in rows
+                   if r["scenario"] == "L2-P3-mixed-ambush-exposed")
+        self.assertLess(row["vp_spent"] + 2, 128 * 2)
+        self.assertEqual(row["vp_spent"],
+                         row["front_caster_precontact_casts"] * 2)
+        row["vp_spent"] += 2
+        with patch("scripts.b06_hunter_phase3_report_v0.census",
+                   return_value=rows):
+            with self.assertRaisesRegex(
+                    AssertionError, "Exposed-front VP does not match Flame casts"):
+                build_report(seeds=128)
+
+    def test_unresolved_pounce_requires_terminal_bite_stop(self):
+        valid = build_report(seeds=128)
+        rows = copy.deepcopy(valid["cases"])
+        row = next(r for r in rows
+                   if r["scenario"] == "L2-P3-mixed-ambush-armored")
+        self.assertGreater(row["pounce_declared"],
+                           row["terminal"].get("wound_unresolved", 0) +
+                           row["terminal"].get("frontline_first_zero", 0))
+        row["balance_resolved"] = 0
+        with patch("scripts.b06_hunter_phase3_report_v0.census",
+                   return_value=rows):
+            with self.assertRaisesRegex(
+                    AssertionError, "Unresolved Pounce lacks terminal Bite stop"):
+                build_report(seeds=128)
+
+    def test_toxin_cannot_overlap_unresolved_contact_path(self):
+        valid = build_report(seeds=128)
+        rows = copy.deepcopy(valid["cases"])
+        row = next(r for r in rows
+                   if r["scenario"] == "L2-P3-original-ambush-armored")
+        self.assertGreater(row["contact_path_unresolved"], 0)
+        row["full_toxin"] = 128 - row["contact_path_unresolved"] + 1
+        row["reduced_toxin"] = 0
+        self.assertLessEqual(row["full_toxin"] + row["reduced_toxin"], 128)
+        with patch("scripts.b06_hunter_phase3_report_v0.census",
+                   return_value=rows):
+            with self.assertRaisesRegex(
+                    AssertionError, "Toxin overlaps unresolved contact path"):
+                build_report(seeds=128)
+
+    def test_flame_vigor_aggregate_never_equals_one_or_two(self):
+        valid = build_report(seeds=128)
+        for burn in (1, 2):
+            with self.subTest(burn=burn):
+                rows = copy.deepcopy(valid["cases"])
+                row = next(r for r in rows
+                           if r["scenario"] == "L2-P3-mixed-warned-armored")
+                self.assertGreater(row["vp_spent"], 0)
+                row["vigor_burn"] = burn
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError, "Impossible sub-three Vigor burn"):
+                        build_report(seeds=128)
+
+    def test_mean_hunter_hp_must_be_finite_and_physically_bounded(self):
+        valid = build_report(seeds=3)
+        for bad_mean in (float("nan"), float("inf"), -float("inf"),
+                         -19.001, -20, 14.001, 15, "3", True):
+            with self.subTest(mean=repr(bad_mean)):
+                rows = copy.deepcopy(valid["cases"])
+                rows[0]["mean_hunter_hp"] = bad_mean
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError, "Invalid mean Hunter HP"):
+                        build_report(seeds=3)
+
+    def test_replay_rejects_plausible_counter_and_mean_tampering(self):
+        valid = build_report(seeds=128)
+        for metric in ("arrows_fired", "mean_hunter_hp"):
+            with self.subTest(metric=metric):
+                rows = copy.deepcopy(valid["cases"])
+                row = next(r for r in rows
+                           if r["scenario"] == "L2-P3-mixed-warned-armored")
+                row[metric] += 1 if metric == "arrows_fired" else 0.001
+                # All explicit coarse bounds remain satisfied, so the
+                # independent per-seed replay must catch this corruption.
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError, "Census differs from source trial replay"):
+                        build_report(seeds=128)
 
     def test_precontact_casts_require_range_entry_mp(self):
         valid = build_report(seeds=3)
