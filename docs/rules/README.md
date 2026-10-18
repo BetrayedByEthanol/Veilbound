@@ -32,6 +32,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Initiative and Round/Turn Procedure](05-combat/initiative-and-round-structure.md)
 - [Turn Action Points and Tempo](05-combat/action-categories-and-physical-tempo.md)
 - [Movement Foundation](05-combat/movement-foundation.md)
+- [Multi-Square Creature Footprints v0 — translation and 1×2 pivots (lock candidate)](05-combat/multi-square-creature-footprints-v0.md)
 - [Special Movement, Terrain, and Prone](05-combat/special-movement-terrain-and-prone.md)
 - [Traversal Foundation](05-combat/traversal-foundation.md)
 - [Universal Maneuvers](05-combat/universal-maneuvers.md)

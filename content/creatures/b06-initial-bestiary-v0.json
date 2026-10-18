@@ -107,7 +107,75 @@
         "No unearned magical item/equipment enchantment; actual independent magical item mechanics still deferred."
       ],
       "fixture_path": "content/creatures/b06-ordinary-human-soldier.v0.json",
-      "lore_boundary": "Ordinary humans have Vigor and a relationship to the Veil but cannot themselves invoke Veil techniques; learned Archetypes are exceptional, not universal."
+      "lore_boundary": "Ordinary humans have Vigor and a relationship to the Veil but cannot themselves invoke Veil techniques; learned Archetypes are exceptional, not universal.",
+      "encounter_guidance": {
+        "combat_role": "ordinary_humanoid",
+        "challenge_rating": {
+          "status": "unrated",
+          "value": null,
+          "scale": null,
+          "reference_setup": "Ordinary equipped non-Archetype soldier on open neutral terrain; L3-equivalent is the AP/Vigor benchmark, NOT a published creature CR."
+        },
+        "frequency_contexts": [
+          {
+            "context": "Staffed town gate or checkpoint",
+            "frequency_assessment": "regular",
+            "contact_may_be_nonhostile": true,
+            "notes": "Social interaction, inspection or passage; presence does not imply a hostile Attack Sequence."
+          },
+          {
+            "context": "Road patrol / escort route",
+            "frequency_assessment": "situational",
+            "contact_may_be_nonhostile": true,
+            "notes": "Frequency depends on settlement, traffic, patrol orders and time; encounter may be directions, escort, warning or investigation."
+          },
+          {
+            "context": "Remote woods without stationed patrol",
+            "frequency_assessment": "unquantified",
+            "contact_may_be_nonhostile": true,
+            "notes": "No implied random roadside spawn chance."
+          }
+        ],
+        "test_scenarios": [
+          {
+            "id": "B06-SC-SOLDIER-ONE-L3",
+            "party_size_min": 1,
+            "party_size_max": 1,
+            "party_level_min": 3,
+            "party_level_max": 3,
+            "enemy_count": 1,
+            "intended_difficulty": "standard",
+            "setup": "One fully equipped Soldier against one L3 player-character benchmark on neutral open ground with stated initial resources and actual defense choices.",
+            "evidence_status": "untested"
+          },
+          {
+            "id": "B06-SC-SOLDIER-TWO-FOURL1",
+            "party_size_min": 4,
+            "party_size_max": 4,
+            "party_level_min": 1,
+            "party_level_max": 1,
+            "enemy_count": 2,
+            "intended_difficulty": "standard",
+            "setup": "Two ordinary soldiers against four L1 PCs; group-action and low-level fragility make this a non-equivalent untested comparison, not a point-budget guarantee.",
+            "evidence_status": "untested"
+          },
+          {
+            "id": "B06-SC-SOLDIER-GATE",
+            "party_size_min": 1,
+            "party_size_max": 4,
+            "party_level_min": 1,
+            "party_level_max": 3,
+            "enemy_count": 1,
+            "intended_difficulty": "noncombat",
+            "setup": "Gate guard interactable through social/inspection/travel procedures; no automatic hostility. Additional guards or alarm/reinforcement must be recorded separately.",
+            "evidence_status": "untested"
+          }
+        ],
+        "notes": [
+          "Soldier is a mundane/sapient normal-or-social NPC, not necessarily an enemy.",
+          "Expected matchup bands and role do not add Attack, VP, HP, movement, equipment or any missing NPC magic."
+        ]
+      }
     },
     {
       "id": "B06-EN-03",
@@ -116,7 +184,11 @@
       "mvp_phase": "B06_A",
       "rules_basis": [
         "docs/rules/05-combat/weapons-and-armor.md",
-        "docs/rules/05-combat/mundane-toxins-v0.md"
+        "docs/rules/05-combat/mundane-toxins-v0.md",
+        "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
+        "docs/rules/05-combat/rapid-advance-and-charge-v0.md",
+        "docs/rules/05-combat/universal-maneuvers.md",
+        "docs/design/b06-encounter-frequency-challenge-and-hunter-ecology-v0.md"
       ],
       "creature_profile": {
         "family": "natural_beast",
@@ -130,49 +202,154 @@
         "mvp_player_option": "not_playable_mvp",
         "pillar_affinities": [],
         "physiology_notes": [
-          "Larger and bulkier than a bear; wolf-like head; a horn; venomous bite."
+          "Large, bulky forest quadruped, exceeding ordinary bear mass; wolf-like head, powerful legs, one prominent horn and venomous puncturing bite and strong jaws.",
+          "1×2-square rigid footprint; translation/turning follows Multi-Square Creature Footprints v0. No automatic added Reach, Armor, Guard or attack cadence.",
+          "Horn serves primarily mating-season rutting, territorial intimidation and deterrence, and breaking up loose material/roots when enlarging an excavated den.",
+          "Vigor presence/amount, natural Armor, HP, regeneration, Guard/Dodge and attack numbers are not yet authored; no personal Veil invocation assumed."
         ],
         "behavior_notes": [
-          "Predatory animal instincts; exact intelligence, sociality and hunting tactics await creature authoring."
-        ]
+          "Apex woodland ambush predator able to hunt deer/elk and sometimes moose; stalks, uses explosive pounce/bite and attempts to bring prey down.",
+          "If the pounce fails to take prey down but the independently successful bite genuinely punctures, venom may still be delivered; it can withdraw, track scent/sign and attempt to finish weakened prey later.",
+          "Conserves energy and avoids unnecessary injury; tracking, withdrawal and rest from exertion are ordinary animal behavior, not automatically a Vigor expenditure/recovery.",
+          "May threaten competitors with horn displays, defend a den, retreat from a costly encounter or interact with approaching humans without automatically attacking."
+        ],
+        "footprint": {
+          "shape": "rectangular",
+          "width_cells": 1,
+          "length_cells": 2,
+          "reference_rule": "Stable 1-based body-local indices: 1=head (reference), 2=rear. Labels remain with anatomical cells through translation, 90/180-degree pivots and legal repositioning; no post-movement coordinate re-sort.",
+          "movement_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
+          "rotation_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
+          "cell_ids": [
+            "head",
+            "rear"
+          ],
+          "reference_cell_id": "head"
+        }
       },
       "planned_capabilities": [
+        {
+          "id": "B06-CAP-HUNTER-POUNCE",
+          "name": "Ambush pounce and attempted takedown",
+          "source_class": "physiology",
+          "state": "requires_authored_attack_or_effect",
+          "concept": "Powerful legs deliver a sudden charge/pounce. Bite and actual takedown may resolve distinctly once an explicit creature-specific legal sequence and 1×2 multi-square contact geometry is written; neither is a free attack or guaranteed Prone result.",
+          "missing_authority": [
+            "Exact pounce AP/MP and initial awareness/timing",
+            "Bite vs takedown roll separation, counters and order",
+            "Multi-square Grapple/Trip/Takedown size, adjacency and controlled-body rules"
+          ]
+        },
         {
           "id": "B06-CAP-HUNTER-BITE",
           "name": "Venomous bite",
           "source_class": "natural_weapon",
           "state": "requires_authored_attack_or_effect",
-          "concept": "Puncturing bite may deliver a separately selected fictional TX catalogue profile after true surviving puncture; no toxin route from merely naming venom.",
+          "concept": "Separately successful bite with genuinely surviving Piercing HP puncture may deliver species-authored slow-acting fictional venom irrespective of whether pounce/takedown succeeded. No poison on miss, fully prevented puncture or merely by naming a toxin; short TX-HM is a separate testing candidate, not the long-pursuit profile.",
           "missing_authority": [
-            "Natural bite Attack/Defense/AP, puncture damage, source and selected TX profile; independently authorized venom delivery"
+            "Natural bite attack source/roll/AP/physical damage and Penetration",
+            "Actual venom material/injection delivery source ref and resistance grade",
+            "Species-specific slow-onset/timecourse/exploration/expiry/recovery rules (TX framework) respecting one-instance policy"
           ]
         },
         {
           "id": "B06-CAP-HUNTER-HORN",
-          "name": "Horn strike",
+          "name": "Horn deterrent and defensive bash",
           "source_class": "natural_weapon",
           "state": "requires_authored_attack_or_effect",
-          "concept": "A physical horn attack; does not inherit bite venom.",
+          "concept": "Horn is used for rutting, intimidation, predator deterrence and digging dens; occasional defensive bash can injure or Shove only with separately authored physical attack/maneuver. Not automatically a high-penetration primary killing weapon.",
           "missing_authority": [
-            "Natural horn attack roll/AP/damage/trauma"
+            "If combat version is needed: horn Attack/AP/impact damage/penetration and any Shove timing",
+            "No inferred free knockdown, Disarm or anti-armor bonus"
           ]
         },
         {
-          "id": "B06-CAP-HUNTER-BODY",
-          "name": "Claw or body strike",
-          "source_class": "natural_weapon",
-          "state": "requires_authored_attack_or_effect",
-          "concept": "Alternative natural physical attack, no free attack sequence.",
+          "id": "B06-CAP-HUNTER-TRACK",
+          "name": "Track prey after failed takedown",
+          "source_class": "physiology",
+          "state": "narrative_only",
+          "concept": "May withdraw and follow tracks/scent after injuring prey; ordinary exploration tracking/observation can adjudicate a chase. Neither perfect tracking nor stamina/Vigor recharge follows automatically.",
           "missing_authority": [
-            "Actual anatomy and natural attack action profile"
+            "If numerical bonuses are desired: scent acuity, tracking check, environmental penalties and prey counterplay"
           ]
         }
       ],
       "open_mechanics": [
-        "Large body/size rules, reach, attack cadence, bite puncture and toxin source, HP/Vigor, Guard/Dodge limitations."
+        "Full multi-square Pounce/takedown and contact legality unresolved: do not import existing single shared Grapple square.",
+        "Natural Bite/Horn executable attack sources, AP, damage, physical size limits, true puncture-to-venom exposure and distinct slower pursuit venom remain unauthored.",
+        "HP/Vigor/throughput/Natural Armor/Dodge/Guard choice and party-specific outcomes need calibration; target role is elite ambush predator, not a published CR.",
+        "Do not convert physical exertion/resting into Vigor recovery: current Vigor is wound-repair reserve, not a general stamina bar."
       ],
       "fixture_path": null,
-      "lore_boundary": "Not a humanoid, Priest or Gifted; no implied learnable spells, psychic control or attack bonus from its ominous name."
+      "lore_boundary": "Not a humanoid, Priest or Gifted; no implied learnable spells, psychic control or attack bonus from its ominous name.",
+      "encounter_guidance": {
+        "combat_role": "elite_ambush_predator",
+        "challenge_rating": {
+          "status": "unrated",
+          "value": null,
+          "scale": null,
+          "reference_setup": "One Hunter on forest terrain with opportunities to warn/retreat; no stats, slow venom or Pounce mechanics are certified, so no CR or TP value is publishable."
+        },
+        "frequency_contexts": [
+          {
+            "context": "Forest territory with large grazing prey",
+            "frequency_assessment": "unquantified",
+            "contact_may_be_nonhostile": true,
+            "notes": "Observing tracks, carcasses, an excavated den, horn gouges or signs of pursuit may precede direct sighting. Density not established."
+          },
+          {
+            "context": "Near occupied den, mating competition or defended territory",
+            "frequency_assessment": "situational",
+            "contact_may_be_nonhostile": true,
+            "notes": "Threat display/withdrawal/defensive behavior possible; season and territory matter, not an automatic hostile encounter."
+          },
+          {
+            "context": "Open road outside its woodland territory",
+            "frequency_assessment": "unquantified",
+            "contact_may_be_nonhostile": true,
+            "notes": "Do not imply regular highway encounters with a forest apex predator."
+          }
+        ],
+        "test_scenarios": [
+          {
+            "id": "B06-SC-HUNTER-WARNED-L2L3",
+            "party_size_min": 3,
+            "party_size_max": 4,
+            "party_level_min": 2,
+            "party_level_max": 3,
+            "enemy_count": 1,
+            "intended_difficulty": "dangerous",
+            "setup": "Forest approach with signs or successful Awareness giving meaningful warning, known escape routes and full resources. Intended dangerous elite fight, entirely untested.",
+            "evidence_status": "untested"
+          },
+          {
+            "id": "B06-SC-HUNTER-AMBUSH-L2L3",
+            "party_size_min": 3,
+            "party_size_max": 4,
+            "party_level_min": 2,
+            "party_level_max": 3,
+            "enemy_count": 1,
+            "intended_difficulty": "severe",
+            "setup": "Successful forest ambush opening; test actual perception, defense response and target concentration after Pounce/Bite have legal mechanics, not guaranteed first-turn incapacity.",
+            "evidence_status": "untested"
+          },
+          {
+            "id": "B06-SC-HUNTER-DEN-SIGNS",
+            "party_size_min": 3,
+            "party_size_max": 4,
+            "party_level_min": 2,
+            "party_level_max": 3,
+            "enemy_count": 0,
+            "intended_difficulty": "noncombat",
+            "setup": "Explore den, tracks or prey remains without a direct Hunter; opportunity to bypass, follow, warn or retreat rather than mandatory fight.",
+            "evidence_status": "untested"
+          }
+        ],
+        "notes": [
+          "Predator ecological role and encounter severity labels are independent of encounter chance and untested numeric challenge rating.",
+          "A prepared party might defeat it easily despite its elite role; woodland visibility, prey selection, escape and concealment are scenario-specific."
+        ]
+      }
     },
     {
       "id": "B06-EN-04",

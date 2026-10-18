@@ -33,7 +33,7 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
         self.assertEqual(self.index_schema["$schema"], "https://json-schema.org/draft/2020-12/schema")
 
     def test_shared_schema_definitions_do_not_drift(self):
-        for name in ("creatureProfile", "plannedCapability", "bestiaryEntry"):
+        for name in ("creatureProfile", "plannedCapability", "bestiaryEntry", "encounterGuidance"):
             self.assertEqual(self.creature_schema["$defs"][name],
                              self.index_schema["$defs"][name], name)
 

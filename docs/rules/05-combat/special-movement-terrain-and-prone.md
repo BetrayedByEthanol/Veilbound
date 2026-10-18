@@ -104,6 +104,8 @@ If no legal continuation or Forced Redirection is available, the creature may st
 
 ## Terrain
 
+**Multi-square creatures:** The [scoped footprint foundation](multi-square-creature-footprints-v0.md) calculates a rigid body's one-step cost by averaging each occupied destination cell's base/terrain cost once and rounding up. An impassable cell makes the whole move illegal; any distinct allied-square transit surcharge is added separately. This does not alter the single-square examples below or the authored Rapid Advance/Charge/Sprint total allowances.
+
 Terrain changes the cost of crossing affected squares rather than reducing the creature's whole Movement Allowance.
 
 | Terrain | Flat step surcharge |

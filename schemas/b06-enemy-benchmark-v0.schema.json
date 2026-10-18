@@ -1077,6 +1077,69 @@
           "items": {
             "type": "string"
           }
+        },
+        "footprint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "shape",
+            "width_cells",
+            "length_cells",
+            "reference_rule",
+            "movement_rule_ref",
+            "rotation_rule_ref",
+            "cell_ids",
+            "reference_cell_id"
+          ],
+          "properties": {
+            "shape": {
+              "enum": [
+                "rectangular",
+                "irregular"
+              ]
+            },
+            "width_cells": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "length_cells": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "reference_rule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "movement_rule_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "rotation_rule_ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cell_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+              },
+              "description": "Body-local cell identities, unique and ordered (index 1 is cell_ids[0]). Semantic validator also enforces reference_cell_id membership and rectangular cell-count consistency."
+            },
+            "reference_cell_id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "description": "Permanent reference cell identity. MUST be a member of sibling cell_ids; run scripts.validate_b06_footprints to enforce cross-field membership for all B06 documents. It is never selected again by world-coordinate sorting."
+            }
+          },
+          "description": "Optional rigid footprint metadata; multi-square movement and pivot legality follows independently authored rules. No size-derived natural attacks or combat bonuses.",
+          "$comment": "SEMANTIC CONSTRAINT (not expressible with standard Draft 2020-12 JSON Schema): reference_cell_id MUST be an element of cell_ids. Run python -m scripts.validate_b06_footprints (as well as schema validation) for every B06 bestiary index and executable enemy fixture. For rectangular footprints, len(cell_ids) must equal width_cells * length_cells."
         }
       }
     },
@@ -1201,8 +1264,254 @@
         },
         "lore_boundary": {
           "type": "string"
+        },
+        "encounter_guidance": {
+          "$ref": "#/$defs/encounterGuidance"
         }
       }
+    },
+    "encounterGuidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "combat_role",
+        "challenge_rating",
+        "frequency_contexts",
+        "test_scenarios",
+        "notes"
+      ],
+      "properties": {
+        "combat_role": {
+          "enum": [
+            "ordinary_humanoid",
+            "specialist_humanoid",
+            "elite_ambush_predator",
+            "boss",
+            "noncombat",
+            "unrated"
+          ],
+          "description": "Encounter identity only, never a numerical defense or damage grant."
+        },
+        "challenge_rating": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "value",
+            "scale",
+            "reference_setup"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "unrated",
+                "provisional",
+                "calibrated"
+              ]
+            },
+            "value": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "scale": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "reference_setup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "calibration_evidence": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Source links/encounter logs required when declaring a rating calibrated. Optional for unrated/provisional records."
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "unrated"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "null"
+                  },
+                  "scale": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "provisional",
+                      "calibrated"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "scale": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "calibrated"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "required": [
+                  "calibration_evidence"
+                ]
+              }
+            }
+          ],
+          "description": "No numeric rating without explicit scale and reference. Status unrated means null value/scale."
+        },
+        "frequency_contexts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "context",
+              "frequency_assessment",
+              "contact_may_be_nonhostile",
+              "notes"
+            ],
+            "properties": {
+              "context": {
+                "type": "string",
+                "minLength": 1
+              },
+              "frequency_assessment": {
+                "enum": [
+                  "unquantified",
+                  "regular",
+                  "situational",
+                  "rare"
+                ]
+              },
+              "contact_may_be_nonhostile": {
+                "type": "boolean"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "test_scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "party_size_min",
+              "party_size_max",
+              "party_level_min",
+              "party_level_max",
+              "enemy_count",
+              "intended_difficulty",
+              "setup",
+              "evidence_status"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^B06-SC-[A-Z0-9-]+$"
+              },
+              "party_size_min": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "party_size_max": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "party_level_min": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "party_level_max": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "enemy_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "intended_difficulty": {
+                "enum": [
+                  "noncombat",
+                  "routine",
+                  "standard",
+                  "dangerous",
+                  "severe",
+                  "unrated"
+                ]
+              },
+              "setup": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence_status": {
+                "enum": [
+                  "untested",
+                  "observed",
+                  "calibrated"
+                ]
+              }
+            }
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "B06 provisional assessment fields distinguish frequency, intrinsic CR, per-scenario party/number and intended difficulty. A scenario tag is NOT a verified balance claim."
     }
   },
   "allOf": [
