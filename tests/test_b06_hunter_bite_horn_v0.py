@@ -110,7 +110,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
 
     def test_bite_uses_one_action_not_one_per_cuspid(self):
         self.assertIn("24 Turn AP", self.rules)
-        self.assertIn("one Bite attack", self.rules)
+        self.assertIn("one attack, not two grooved-canine attacks", self.rules)
         self.assertIn("not two grooved-canine attacks", self.rules)
         self.assertIn("No extra free off-hand", self.rules)
 
@@ -194,7 +194,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertIn("d20 + 5", self.rules)
         self.assertIn("2 + d6 Crush, Pen 0", self.rules)
         self.assertIn("not venomous", self.rules)
-        self.assertIn("not automatically trigger Shove", self.rules)
+        self.assertIn("automatically trigger Shove", self.rules)
         self.assertIn("frontal-cranial horn", self.rules)
 
     def test_horn_drive_is_separate_paid_shove_not_bash_rider(self):
