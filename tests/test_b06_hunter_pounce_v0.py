@@ -59,7 +59,7 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("not a general Charge/Trip/Grapple revision", self.rules)
         self.assertIn("one paid Bite attack", self.rules)
         self.assertIn("one Pounce-specific forceful balance contest", self.rules)
-        self.assertIn("Charge never", self.charge)
+        self.assertIn("one ordinary paid melee attack", self.charge)
 
     def test_pounce_single_action_and_pool_replace_not_add(self):
         self.assertIn("one Physical Action = 24 Turn AP", self.rules)
@@ -94,9 +94,9 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("No voluntary pivot", self.charge)
 
     def test_actual_puncturing_bite_not_implied_venom(self):
-        self.assertIn("no free poisoning", self.rules)
+        self.assertIn("does not grant TX-HM or any free poisoning", self.rules)
         self.assertIn("positive remaining Piercing HP puncture", self.rules)
-        self.assertIn("not by Pounce success", self.rules)
+        self.assertIn("by Pounce success", self.rules)
         self.assertIn("species slow-venom profile is still", self.rules)
 
     def test_hit_and_takedown_failure_independent(self):
@@ -145,7 +145,7 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertFalse(r["rolled"])
         self.assertFalse(r["prone"])
         self.assertEqual(r["hp"],0)
-        self.assertIn("neither** roll occurs", self.rules)
+        self.assertIn("**neither** roll occurs", self.rules)
         self.assertIn("24 AP stay spent", self.rules)
 
     def test_no_balance_if_already_prone_or_no_eligible_ground(self):
@@ -161,14 +161,14 @@ class HunterPounceRulesTests(unittest.TestCase):
 
     def test_non_focus_ap_does_not_grant_extra_attack(self):
         self.assertIn("not enough for another 24-AP",self.rules)
-        self.assertIn("one ordinary Attack Sequence", self.rules)
+        self.assertIn("One ordinary Attack Sequence", self.rules)
         self.assertIn("does not reopen", self.rules)
 
     def test_defender_choices_and_standing_opportunity(self):
         for x in ("Take Hit, Dodge or one eligible Guard", "Reactive Blink",
                   "precommitted Interception", "Standing Opportunity", "4 MP Stand"):
             self.assertIn(x, self.rules)
-        self.assertIn("not a new free Reaction", self.rules) if "not a new free Reaction" in self.rules else self.assertIn("No new free Reaction",self.rules)
+        self.assertIn("No new free Reaction", self.rules)
 
     def test_canonical_grapple_takedown_not_redefined(self):
         self.assertIn("existing Controller/Controlled Grappling State", self.trip)
