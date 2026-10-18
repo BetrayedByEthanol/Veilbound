@@ -947,7 +947,49 @@
               "minLength": 1
             }
           },
-          "description": "Optional separately authored linked physical-contest metadata for Hunter Pounce or non-damage Horn Drive; total_pressure_bonus = attacker_modifier + training_modifier + other_modifier. Null/absent for ordinary attack with no linked contest. No additional paid action or attack roll is implied."
+          "description": "Optional separately authored linked physical-contest metadata for Hunter Pounce or non-damage Horn Drive; each kind is conditionally bound to its canonical strict-win result and parent attack/packet/toxin shape via attack.allOf. Total_pressure_bonus = attacker_modifier + training_modifier + other_modifier. Null/absent for ordinary attacks. No additional paid action or attack roll is implied.",
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "pounce_balance"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "result_on_strict_win": {
+                    "const": "prone_in_place"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "horn_drive_shove"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "result_on_strict_win": {
+                    "const": "straight_head_forward_shove_and_whole_body_advance"
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "allOf": [
@@ -1008,6 +1050,126 @@
             "required": [
               "source_authority_ref",
               "resolution_rule_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "linked_contest": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "pounce_balance"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "linked_contest"
+            ]
+          },
+          "then": {
+            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection.",
+            "properties": {
+              "action_class": {
+                "const": "physical"
+              },
+              "ap": {
+                "const": 24
+              },
+              "source_class": {
+                "const": "natural_weapon"
+              },
+              "resolution_kind": {
+                "const": "authored_natural_attack"
+              },
+              "attack_roll": {
+                "type": "object"
+              },
+              "primary_hp_packet": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "hp"
+                  },
+                  "damage_type": {
+                    "const": "Piercing"
+                  }
+                }
+              },
+              "additional_packets": {
+                "maxItems": 0
+              },
+              "toxin_delivery": {
+                "type": "object",
+                "properties": {
+                  "route": {
+                    "const": "injection"
+                  },
+                  "requires_surviving_puncture": {
+                    "const": true
+                  }
+                }
+              }
+            },
+            "required": [
+              "resolution_kind"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "linked_contest": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "horn_drive_shove"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "linked_contest"
+            ]
+          },
+          "then": {
+            "description": "Hunter-local Horn Drive is a paid canonical Shove contest, not an attack roll, damaging horn Bash or toxin delivery.",
+            "properties": {
+              "action_class": {
+                "const": "physical"
+              },
+              "ap": {
+                "const": 24
+              },
+              "source_class": {
+                "const": "natural_weapon"
+              },
+              "resolution_kind": {
+                "const": "authored_non_damage_effect"
+              },
+              "attack_roll": {
+                "type": "null"
+              },
+              "primary_hp_packet": {
+                "type": "null"
+              },
+              "additional_packets": {
+                "maxItems": 0
+              },
+              "toxin_delivery": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "resolution_kind"
             ]
           }
         }
