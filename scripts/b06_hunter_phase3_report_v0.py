@@ -59,10 +59,33 @@ def build_report(seeds=SEEDS):
         level, size, roster, opening, front = CASES[expected_keys.index(row["scenario"])]
         if opening == "warned" and row["pounce_declared"]:
             raise AssertionError(f"Warned Pounce: {row['scenario']}")
-        if roster == "original" and (row["vp_spent"] or row["arrows_fired"] or
-                                     row["front_caster_precontact_casts"]):
-            raise AssertionError(f"Original roster received mixed resources: {row['scenario']}")
+        # A/B-only original parties have neither a Bow shooter nor a Fire
+        # caster. The census must never attribute Flame-caused Vigor burn,
+        # Flame VP, or the front caster's range-entry MP/casts to them.
+        caster_only = ("vp_spent", "vigor_burn",
+                       "front_caster_precontact_casts",
+                       "front_caster_approach_mp")
+        if roster == "original" and (
+                row["arrows_fired"] or any(row[k] for k in caster_only)):
+            raise AssertionError(
+                f"Original roster received mixed resources: {row['scenario']}")
+        # Front F needs to step into the 1-3-square cast lane *only* in
+        # mixed/ambush/exposed scenarios, and casts made before Hunter
+        # contact can only belong to that same setup. Backline F can still
+        # cast in other mixed setups; only these front-specific fields
+        # must remain zero there.
+        front_flame_setup = (roster == "mixed" and opening == "ambush"
+                             and front == "exposed")
+        if not front_flame_setup and (
+                row["front_caster_precontact_casts"] or
+                row["front_caster_approach_mp"]):
+            raise AssertionError(
+                f"Impossible front-caster attribution: {row['scenario']}")
         max_actions = (30 + 6 * (level - 1)) // 20
+        if row["front_caster_precontact_casts"] > (
+                row["front_caster_approach_mp"] // 2 * max_actions):
+            raise AssertionError(
+                f"Precontact caster lacked paid range-entry movement: {row['scenario']}")
         if (row["vp_spent"] > seeds * max_actions * 2 or
                 row["arrows_fired"] > seeds * max_actions):
             raise AssertionError(f"Impossible VP/ammunition bound: {row['scenario']}")
@@ -189,7 +212,8 @@ def render_markdown(report):
         "",
         "## Verification and limits",
         "",
-        "- Source: merged Phase 3 runner, 32 cells, seeds `0..127` per cell.",
+        f"- Source: merged Phase 3 runner, 32 cells, seeds " 
+        f"`0..{report['seed_count_per_cell'] - 1}` per cell.",
         "- Internally checked: count conservation, known terminal types, ",
         "  bounds on ammo/VP/movement, toxin and Pounce resolution, ",
         "  original-roster resource isolation and group totals.",
