@@ -81,7 +81,7 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
         self.assertEqual(armor["rating"], 3)
         self.assertIsNone(armor["dodge_agility_cap"])
         self.assertFalse(armor["worn_armor_stacking"])
-        self.assertIn("one uniform hide/dermis Armor rating", self.design)
+        self.assertIn("One uniform hide/dermis Armor rating", self.design)
 
     def test_dodge_base_and_pressure_sequence(self):
         p = self.profile
@@ -132,14 +132,14 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
         p = self.profile
         restored = min(p["vigor"]["max"], 38 + p["vigor"]["six_hour_recovery"])
         self.assertEqual(restored, 42)
-        self.assertIn("every completed 6 hours", self.hp_vigor)
+        self.assertIn("completed 6-hour interval", self.hp_vigor)
         self.assertIn("no corresponding free HP repair", self.design)
 
     def test_pounce_bite_and_horn_remain_independent_and_uncalibrated(self):
         self.assertIn("d20+6 Bite", self.design)
         self.assertIn("d20+5 Horn", self.design)
-        self.assertIn("full executable enemy", self.design)
-        self.assertIn("independent Pounce Balance", self.design)
+        self.assertIn("complete B06-EN-03 executable enemy", self.design)
+        self.assertIn("Pounce/Drive mode authoring", self.design)
         self.assertIn("CONCEPT_ONLY", self.design)
         self.assertIn("24 AP", self.pounce)
 
