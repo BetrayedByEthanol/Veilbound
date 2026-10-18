@@ -115,7 +115,8 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("does not grant TX-HM or any free poisoning", self.rules)
         self.assertIn("positive remaining Piercing HP puncture", self.rules)
         self.assertIn("by Pounce success", self.rules)
-        self.assertIn("species slow-venom profile is still", self.rules)
+        self.assertIn("No poison penalty applies immediately", self.rules)
+        self.assertIn("hunter-bite-venom-and-horn-v0.md", self.rules)
 
     def test_hit_and_takedown_failure_independent(self):
         r=pounce_result(12,13,9,15)
