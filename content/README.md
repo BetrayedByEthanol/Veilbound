@@ -16,7 +16,7 @@ Planned collections:
 - `creatures/`
 - `tables/`
 
-Content should validate against schemas in `/schemas` and use stable IDs.
+Content should validate against schemas in `/schemas` and use stable IDs. For B06 creatures with multi-square footprints, **schema validation alone is insufficient**: also run [`python -m scripts.validate_b06_footprints`](../scripts/validate_b06_footprints.py) to verify the reference cell is a member of the body-local `cell_ids` (for both the bestiary index and executable enemy fixtures).
 
 The repository currently defines only the initial schema contracts; large-scale content migration should happen after those contracts are reviewed.
 
