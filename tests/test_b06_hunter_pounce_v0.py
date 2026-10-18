@@ -1,7 +1,8 @@
 """Hunter Pounce / Prey Takedown v0 action-economy and player-response regressions.
 
 These standard-library tests formalize the B06-EN-03 *provisional* Pounce
-sample. They do not certify attack balance or make the Hunter executable.
+sample. They do not certify attack balance; the separate complete enemy fixture
+now exists as an executable B06 benchmark.
 """
 import json
 import math
