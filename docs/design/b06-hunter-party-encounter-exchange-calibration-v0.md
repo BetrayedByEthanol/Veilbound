@@ -77,7 +77,7 @@ Run from the repository root:
 
 ```sh
 python -m scripts.b06_hunter_party_exchanges_v0
-python -m unittest tests.test_b06_hunter_party_exchanges_v0 -v
+python -m unittest discover -s tests -p 'test_b06_hunter_party_exchanges_v0.py' -v
 python -m unittest discover -s tests -v
 python -m scripts.validate_b06_footprints
 ```
