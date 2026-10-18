@@ -109,6 +109,11 @@ def validate_b06_document(document: Any, location: str = "<document>") -> list[s
                 f"{location}.record_status: Hunter physiology must remain "
                 "'PHYSIOLOGY_ONLY_NOT_EXECUTABLE'"
             )
+        if document.get("calibration_status") != "PROVISIONAL_B06":
+            errors.append(
+                f"{location}.calibration_status: Hunter physiology must remain "
+                "'PROVISIONAL_B06'"
+            )
         if document.get("full_enemy_fixture_path", object()) is not None:
             errors.append(
                 f"{location}.full_enemy_fixture_path: physiology record "
