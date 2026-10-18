@@ -947,7 +947,7 @@
               "minLength": 1
             }
           },
-          "description": "Optional separately authored linked physical-contest metadata for Hunter Pounce or non-damage Horn Drive; each kind is conditionally bound to its canonical strict-win result and parent attack/packet/toxin shape via attack.allOf. Total_pressure_bonus = attacker_modifier + training_modifier + other_modifier. Null/absent for ordinary attacks. No additional paid action or attack roll is implied.",
+          "description": "Optional Hunter-local linked physical-contest metadata, with exact v0 calibrated-for-fixture—not playtest-certified—component totals: Pounce and Horn Drive both require attacker_modifier=4 (Strength), training_modifier=0, other_modifier=0 and total_pressure_bonus=4. Each kind is conditionally bound to its strict-win result and parent attack/packet/toxin/source shape via attack.allOf. Standard Draft 2020-12 JSON Schema cannot express a generic arithmetic sum across sibling fields: new contest kinds/bonuses require their own validated rule or a semantic sum checker. Null/absent for attacks without linked contests. No additional paid action or attack roll is implied.",
           "allOf": [
             {
               "if": {
@@ -965,6 +965,18 @@
                 "properties": {
                   "result_on_strict_win": {
                     "const": "prone_in_place"
+                  },
+                  "attacker_modifier": {
+                    "const": 4
+                  },
+                  "training_modifier": {
+                    "const": 0
+                  },
+                  "other_modifier": {
+                    "const": 0
+                  },
+                  "total_pressure_bonus": {
+                    "const": 4
                   }
                 }
               }
@@ -985,6 +997,18 @@
                 "properties": {
                   "result_on_strict_win": {
                     "const": "straight_head_forward_shove_and_whole_body_advance"
+                  },
+                  "attacker_modifier": {
+                    "const": 4
+                  },
+                  "training_modifier": {
+                    "const": 0
+                  },
+                  "other_modifier": {
+                    "const": 0
+                  },
+                  "total_pressure_bonus": {
+                    "const": 4
                   }
                 }
               }
