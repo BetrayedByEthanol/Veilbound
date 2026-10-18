@@ -102,6 +102,13 @@ class B06FootprintSemanticValidationTests(unittest.TestCase):
                 mutated[key] = value
                 self.assertTrue(validate_b06_document(mutated, "physiology"))
 
+    def test_default_cli_discovers_physiology_and_all_b06_records(self):
+        # Reproduces the exact mandatory command: python -m
+        # scripts.validate_b06_footprints (no explicit filenames).
+        self.assertTrue(PHYSIOLOGY_FILE.exists())
+        with patch("builtins.print"):
+            self.assertEqual(main([]), 0)
+
     def test_hunter_physiology_cli_accepts_valid_and_rejects_corrupt(self):
         with patch("builtins.print"):
             self.assertEqual(main([str(PHYSIOLOGY_FILE)]), 0)
