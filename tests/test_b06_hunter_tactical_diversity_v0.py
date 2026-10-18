@@ -137,6 +137,127 @@ class HunterTacticalDiversityTests(unittest.TestCase):
             result = trial(2, 4, "mixed", "ambush", "armored", 0)
         self.assertIn("A1", result["lane_disrupted_by"])
         self.assertFalse(result["pounce_declared"])
+        self.assertEqual(result["terminal"], "contact_path_unresolved")
+        self.assertEqual(result["hunter_attack_resolution"],
+                         "contact_path_unresolved")
+        self.assertEqual(result["contact_route"],
+                         "unresolved_nonfront_melee_block")
+
+
+    def test_nonfront_melee_block_stops_before_illegal_bite(self):
+        # Hunter starts head=(0,0), rear=(-1,0), facing B1=(4,0).
+        # Higher-Initiative A1 enters (1,0) to attack the Hunter and
+        # threatens its corridor. No normal step can pass A1; a detour
+        # would need a routed 1x2 path + Movement Opportunity resolution.
+        # Resolve A1's legal hit and Hunter's actual own Step, but NEVER
+        # roll an invented Bite against remote B1.
+        original_die = die
+        def order(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"A1": 20, "H": 18, "B1": 1,
+                        "R1": 1, "F1": 1}[key[1]]
+            return original_die(seed, sides, *key)
+        seen = []
+        def attack_only_a1(seed, key, *args, **kwargs):
+            seen.append(key)
+            if key[0] == "A1":
+                return (3, 0, "ordinary")
+            self.fail(f"Illegal Hunter attack before route/Opportunity: {key}")
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=order):
+            with patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                       side_effect=attack_only_a1):
+                outcome = trial(2, 4, "mixed", "ambush", "armored", 0)
+        self.assertEqual(outcome["terminal"], "contact_path_unresolved")
+        self.assertEqual(outcome["contact_route"],
+                         "unresolved_nonfront_melee_block")
+        self.assertEqual(outcome["hunter_attack_resolution"],
+                         "contact_path_unresolved")
+        self.assertFalse(outcome["frontal_contact_established"])
+        self.assertEqual(outcome["melee_corridor_occupant"], "A1")
+        self.assertEqual(outcome["pc_attacks"], 1)
+        self.assertEqual(outcome["front_hp"], ROLE["B"]["hp"])
+        self.assertEqual(outcome["hunter_hp"], 14)  # 14-3 +3 at Step2
+        self.assertEqual(outcome["hunter_vigor"], 39)
+        self.assertEqual(outcome["standing_opportunities"], 0)
+        self.assertIsNone(outcome["toxin"])
+        self.assertEqual(len(seen), 1)
+        self.assertEqual(seen[0][0], "A1")
+
+    def test_front_melee_mover_can_be_bitten_without_hunter_detour(self):
+        # A1 itself is the declared lead and approaches from (4,0) to
+        # (1,0), adjacent to the stationary Hunter head. Only this first
+        # mover has occupied the scripted entry. No exit from threatened
+        # space or unsupported detour is required for the later Bite.
+        original_die = die
+        def order(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"A1": 20, "H": 18, "B1": 1, "A2": 1}[key[1]]
+            return original_die(seed, sides, *key)
+        seen = []
+        def misses(seed, key, *args, **kwargs):
+            seen.append(key)
+            return (0, 0, "miss")
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=order):
+            with patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                       side_effect=misses):
+                outcome = trial(2, 3, "original", "ambush", "exposed", 0)
+        self.assertEqual(outcome["contact_route"], "front_melee_adjacent")
+        self.assertEqual(outcome["hunter_attack_resolution"], "bite")
+        self.assertTrue(outcome["frontal_contact_established"])
+        self.assertFalse(outcome["pounce_declared"])
+        self.assertEqual(outcome["terminal"], "round_one_complete")
+        self.assertTrue(any(k[:2] == ("H", "bite") for k in seen))
+
+    def test_two_pre_hunter_melee_actors_cannot_share_entry_square(self):
+        original_die = die
+        def order(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"A1": 20, "A2": 19, "H": 18,
+                        "B1": 1, "B2": 1}[key[1]]
+            return original_die(seed, sides, *key)
+        seen = []
+        def only_first(seed, key, *args, **kwargs):
+            seen.append(key)
+            if key[0] == "A1":
+                return (0, 0, "miss")
+            self.fail(f"Second attacker entered already-occupied (1,0): {key}")
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=order):
+            with patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                       side_effect=only_first):
+                outcome = trial(2, 4, "original", "ambush", "armored", 0)
+        self.assertEqual(outcome["terminal"], "contact_path_unresolved")
+        self.assertEqual(outcome["contact_route"],
+                         "unresolved_multiple_melee_approaches")
+        self.assertEqual(outcome["melee_corridor_occupant"], "A1")
+        self.assertEqual(outcome["pc_attacks"], 1)
+        self.assertEqual(len(seen), 1)
+        self.assertIsNone(outcome["hunter_attack_resolution"])
+
+    def test_front_flame_does_not_shoot_through_early_melee_screen(self):
+        original_die = die
+        def order(seed, sides, *key):
+            if key[:1] == ("initiative",):
+                return {"A1": 20, "F1": 19, "H": 18,
+                        "B1": 1, "R1": 1}[key[1]]
+            return original_die(seed, sides, *key)
+        def only_a1(seed, key, *args, **kwargs):
+            if key[0] == "A1":
+                return (0, 0, "miss")
+            self.fail(f"F1's spell path passes through A1: {key}")
+        with patch("scripts.b06_hunter_tactical_diversity_v0.die",
+                   side_effect=order):
+            with patch("scripts.b06_hunter_tactical_diversity_v0.attack",
+                       side_effect=only_a1):
+                outcome = trial(2, 4, "mixed", "ambush", "exposed", 0)
+        self.assertEqual(outcome["terminal"], "contact_path_unresolved")
+        self.assertEqual(outcome["contact_route"], "unresolved_flame_living_screen")
+        self.assertEqual(outcome["melee_corridor_occupant"], "A1")
+        self.assertEqual(outcome["front_caster_precontact_casts"], 0)
+        self.assertEqual(outcome["front_caster_approach_mp"], 0)
+        self.assertEqual(outcome["vp_spent"], 0)
 
     def test_warned_front_caster_remains_threatened_without_free_cast(self):
         original_die = die
