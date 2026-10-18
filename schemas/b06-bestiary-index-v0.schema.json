@@ -389,6 +389,15 @@
             "reference_setup": {
               "type": "string",
               "minLength": 1
+            },
+            "calibration_evidence": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Source links/encounter logs required when declaring a rating calibrated. Optional for unrated/provisional records."
             }
           },
           "allOf": [
@@ -439,6 +448,23 @@
                     "minLength": 1
                   }
                 }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "calibrated"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "required": [
+                  "calibration_evidence"
+                ]
               }
             }
           ],
