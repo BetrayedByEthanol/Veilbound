@@ -90,6 +90,15 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
     if not isinstance(seed, int) or seed < 0:
         raise ValueError("Seed must be nonnegative integer")
     hunter = hunter or json.loads(HUNTER_FILE.read_text(encoding="utf-8"))
+    # Catch any later changes to the two actually audited Low Life inputs.
+    for name in ("A", "B"):
+        source = BUILD[name]
+        for field in ("hp", "vit", "agi", "armor", "guard",
+                      "guard_extra", "attack", "weapon_base",
+                      "penetration", "regen", "initiative"):
+            alias = {"weapon_base": "base", "penetration": "pen",
+                     "initiative": "init"}.get(field, field)
+            assert ROLE[name][alias] == source[field], (name, field)
     hd = hunter["defenses"]
     modes = {m["id"]: m for m in hunter["attack_profiles"]}
     assert (hd["hp_max"], hd["armor"], hd["dodge_base"]) == (14, 3, 14)
