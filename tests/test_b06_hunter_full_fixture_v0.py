@@ -16,6 +16,7 @@ FULL = ROOT / "content/creatures/b06-hunter-of-the-woods.v0.json"
 PARTIAL = ROOT / "content/creatures/b06-hunter-physiology.v0.json"
 INDEX = ROOT / "content/creatures/b06-initial-bestiary-v0.json"
 SCHEMA = ROOT / "schemas/b06-enemy-benchmark-v0.schema.json"
+CONTENT_README = ROOT / "content/README.md"
 SOURCE = ROOT / "docs/design/b06-hunter-full-statblock-v0.md"
 POUNCE = ROOT / "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
 BITE = ROOT / "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
@@ -50,6 +51,22 @@ class B06HunterFullFixtureTests(unittest.TestCase):
         self.assertIsNone(e["encounter_guidance"]["challenge_rating"]["value"])
         self.assertTrue(all(s["evidence_status"] == "untested" for s in
                             e["encounter_guidance"]["test_scenarios"]))
+
+    def test_content_index_tracks_three_executable_and_eleven_other_entries(self):
+        contents = CONTENT_README.read_text(encoding="utf-8")
+        entries = self.index["entries"]
+        executable = [e for e in entries
+                      if e["entry_status"] == "EXECUTABLE_FIXTURE_EXISTS"]
+        nonexec = [e for e in entries
+                   if e["entry_status"] != "EXECUTABLE_FIXTURE_EXISTS"]
+        self.assertEqual(len(entries), 14)
+        self.assertEqual(len(executable), 3)
+        self.assertEqual(len(nonexec), 11)
+        self.assertIn("three executable benchmark fixtures", contents)
+        self.assertIn("eleven remaining non-executable entries", contents)
+        for entry in executable:
+            self.assertIn(entry["fixture_path"].replace("content/", ""), contents)
+        self.assertIn("unrated contextual encounter guidance", contents)
 
     def test_fixture_matches_bestiary_creature_metadata(self):
         self.assertEqual(self.hunter["creature_profile"], self.entry["creature_profile"])
