@@ -123,6 +123,13 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
     standing_opportunities = 0
     pc_attacks = 0
     skipped_threatened_flame = 0
+    front_caster_precontact_casts = 0
+    front_caster_approach_mp = 0
+    lane_disrupted_by = []
+    # Warned begins head-adjacent. Ambush begins three legal straight
+    # translations from head-forward contact; no one is threatened by the
+    # Hunter until it actually completes a legal approach.
+    frontal_contact = opening == "warned"
     outcome = "round_one_complete"
     h_dodge = 0
     t_dodge = 0
@@ -140,11 +147,18 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
         -initiative[x][0], -initiative[x][1], -initiative[x][2],
         die(seed, 20, "tie", x)))
     hunter_first = order[0] == "H"
-    # Exactly one round. Positions are separately staged per 'front' case:
-    # Hunter has legal frontal Bite contact at action time; ambush has a valid
-    # three-step lane only if Hunter acts before all PCs. Other PCs are already
-    # in distinct clear attack lanes: bow 7-12 squares, flame 1-3 squares,
-    # melee able to reach by ordinary within-budget walking. No screen/cover.
+    # Conditional map sketch: ambush starts Hunter head=(0,0), rear=(-1,0),
+    # facing east, with its standing target=(4,0); three translations put
+    # head=(3,0), adjacent to target. An earlier frontal F at (4,0) is OUT
+    # of Thrown Flame's 3-square range. It can use one ordinary cardinal
+    # step to (3,0) (2 MP), cast back three squares at the Hunter's original
+    # head, and disrupt the three-step Pounce run-up. The Hunter can still
+    # approach two steps to head=(2,0) and ordinary Bite the moved F at
+    # (3,0). R shoots from a separate unobstructed 7-12-square lane without
+    # moving, so R's earlier attack never disrupts the Pounce corridor.
+    # Melee actors' already-declared within-budget approach is modeled as
+    # entering the contested corridor and does disrupt it. These are
+    # explicit staging contracts, NOT a general-purpose map/pathfinder.
     for ident in order:
         if ident == "H":
             # Hunter may have taken damage from higher-Initiative PCs:
@@ -152,7 +166,12 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
             restoration = min(4, 14 - h_hp, h_vigor)
             h_hp += restoration
             h_vigor -= restoration
-            pounce_declared = opening == "ambush" and hunter_first
+            # The lane can survive an earlier stationary bow/Flame shot:
+            # initiative order alone cannot cancel Charge. Earlier walking
+            # melee approach or front F's 2-MP range-entry does cancel it.
+            pounce_declared = (opening == "ambush" and
+                               not lane_disrupted_by)
+            frontal_contact = True  # full Pounce OR ordinary approach/Bite
             defense_kind = ("guard" if front_stat["guard"] is not None
                             and guard_remaining > 0 else "dodge")
             if defense_kind == "guard":
@@ -183,6 +202,22 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
                 t_prone = pressure > response
         else:
             member = ROLE[ident[0]]
+            if opening == "ambush" and not frontal_contact:
+                if member["kind"] == "melee":
+                    # This model's side-melee action requires an ordinary
+                    # forward approach into the disputed Charge corridor.
+                    # A ranged R never needs that movement. Do not mark
+                    # disruption if the model stops before this actor acts.
+                    lane_disrupted_by.append(ident)
+                elif member["kind"] == "flame" and ident == front_id:
+                    # Before Hunter's approach, F's initially head-forward
+                    # target square is four squares away: out of Flame range.
+                    # F may move one cardinal step toward the Hunter (2 MP)
+                    # from (4,0) to (3,0), now at legal range 3. This
+                    # occupies the last prospective Charge-head square and
+                    # thus prevents the Hunter's three-step Pounce later.
+                    front_caster_approach_mp += 2
+                    lane_disrupted_by.append(ident)
             if ident == front_id:
                 healed = min(member["regen"], member["hp"] - t_hp, t_vigor)
                 t_hp += healed
@@ -215,10 +250,11 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
                                   front_stat["vit"])
                         toxin = "reduced" if resist >= 12 else "full"
                     t_prone = False
-            if ident[0] == "F" and ident == front_id:
-                # The threatened self-defending caster does not attempt a
-                # free/unguarded close projectile. Movement + Opportunity
-                # adjudication is outside this test; conservatively skip.
+            if ident[0] == "F" and ident == front_id and frontal_contact:
+                # Already-threatened caster: this model does not grant free
+                # Withdrawal or silently ignore nested Opportunities.
+                # A front F who acted *before* Hunter contact instead moved
+                # 2 MP to a legal 3-square range and casts normally below.
                 skipped_threatened_flame += 1
                 continue
             action_count = (30 + 6 * (level - 1)) // member["action_ap"]
@@ -230,6 +266,8 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
                     arrows_fired += 1
                 if member["kind"] == "flame":
                     vp_spent += 2  # spent on launch, including misses
+                    if ident == front_id and not frontal_contact:
+                        front_caster_precontact_casts += 1
                 # No natural Guard for Hunter. Melee and ranged Dodge both
                 # happen to start at 14 here (ranged Evasion=Tempo1−1=0).
                 d = hd["dodge_base"] - h_dodge
@@ -264,6 +302,10 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
         "arrows_fired": arrows_fired, "vp_spent": vp_spent,
         "burn_received": burn_received,
         "skipped_threatened_flame": skipped_threatened_flame,
+        "frontal_contact_established": frontal_contact,
+        "front_caster_precontact_casts": front_caster_precontact_casts,
+        "front_caster_approach_mp": front_caster_approach_mp,
+        "lane_disrupted_by": lane_disrupted_by,
     }
 
 
@@ -284,6 +326,12 @@ def census(seeds=SEEDS, hunter=None):
             "vp_spent": sum(x["vp_spent"] for x in trials),
             "arrows_fired": sum(x["arrows_fired"] for x in trials),
             "vigor_burn": sum(x["burn_received"] for x in trials),
+            "front_caster_precontact_casts": sum(
+                x["front_caster_precontact_casts"] for x in trials),
+            "front_caster_approach_mp": sum(
+                x["front_caster_approach_mp"] for x in trials),
+            "lane_disrupted_trials": sum(
+                bool(x["lane_disrupted_by"]) for x in trials),
             "mean_hunter_hp": round(sum(x["hunter_hp"] for x in trials) / seeds, 3),
         })
     return results
