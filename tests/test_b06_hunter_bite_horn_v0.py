@@ -261,6 +261,18 @@ class HunterBiteHornV0Tests(unittest.TestCase):
             self.assertEqual(cap["state"],"existing_authority_only")
             self.assertTrue(cap["missing_authority"])
 
+    def test_full_hunter_ap_and_movement_no_longer_await_physio_authoring(self):
+        self.assertIn("complete B06-EN-03 executable fixture", self.rules)
+        self.assertIn("already integrates the authored physiology", self.rules)
+        self.assertIn("42 Turn AP, 24 AP per Physical Action", self.rules)
+        self.assertIn("M = 12 MP", self.rules)
+        self.assertIn("opposed encounter calibration", self.rules)
+        self.assertNotIn("until the full physiology is authored", self.rules)
+        self.assertNotIn("physiology baseline is pending", self.rules)
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["encounter_guidance"]
+                         ["challenge_rating"]["status"], "unrated")
+
     def test_pounce_resolves_bite_then_venom_then_balance_once(self):
         bite = self.pounce.index("**D. Resolve the one Bite attack.**")
         balance = self.pounce.index("**E. Resolve the Pounce balance rider")
