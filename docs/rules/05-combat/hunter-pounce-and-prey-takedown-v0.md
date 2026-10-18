@@ -84,7 +84,7 @@ To make the procedure reproducible before the full natural Bite/physiology slice
 | Effective normal M/Charge MP | **12 / 24** | Provisional Hunter-only baseline |
 | Player Defense / Balance | **Actual sheet values** | No fixed universal 13/16/18 defense or resistance is granted |
 
-This is **a scenario test harness**, not a completed executable `b06-enemy-v0` fixture: it does not define the Hunter's HP, Armor, Vigor, Initiative or full enemy abilities. **Natural Bite, defensive Horn Bash/Drive and its source-linked species venom now have [separate B06 local authority](hunter-bite-venom-and-horn-v0.md)**, but that alone does not supply a complete combatant fixture or calibrate attack/venom balance. Its accuracy/damage entries must be replaced or explicitly accepted when the independently sourced natural Bite is authored.
+This is **a scenario test harness**, not a completed executable `b06-enemy-v0` fixture: it does not define the Hunter's HP, Armor, Vigor, Initiative or full enemy abilities. **Natural Bite, defensive Horn Bash/Drive and its source-linked species venom now have [separate B06 local authority](hunter-bite-venom-and-horn-v0.md)**, but that alone does not supply a complete combatant fixture or calibrate attack/venom balance. Its provisional accuracy/damage entries already derive from the separately authored natural Bite; retain them only for B06-local encounter tests until the **full Hunter physiology/stat block and encounter calibration** explicitly accept or recalibrate them. No second Bite-authoring event is required.
 
 ## 5. Worked player-character cases
 
