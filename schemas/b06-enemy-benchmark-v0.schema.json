@@ -947,7 +947,7 @@
               "minLength": 1
             }
           },
-          "description": "Optional Hunter-local linked physical-contest metadata, with exact v0 calibrated-for-fixture—not playtest-certified—component totals: Pounce and Horn Drive both require attacker_modifier=4 (Strength), training_modifier=0, other_modifier=0 and total_pressure_bonus=4. Each kind is conditionally bound to its strict-win result and parent attack/packet/toxin/source shape via attack.allOf. Standard Draft 2020-12 JSON Schema cannot express a generic arithmetic sum across sibling fields: new contest kinds/bonuses require their own validated rule or a semantic sum checker. Null/absent for attacks without linked contests. No additional paid action or attack roll is implied. Both contest-specific rule references (defender and local resolution) are bound to exact authored paths for each kind, and both parent attack effects prereqs remain null. Pounce's explicit canine toxin-source prose is constrained to its authored record.",
+          "description": "Optional Hunter-local linked physical-contest metadata, with exact v0 calibrated-for-fixture—not playtest-certified—component totals: Pounce and Horn Drive both require attacker_modifier=4 (Strength), training_modifier=0, other_modifier=0 and total_pressure_bonus=4. Each kind is conditionally bound to its strict-win result and parent attack/packet/toxin/source shape via attack.allOf. Standard Draft 2020-12 JSON Schema cannot express a generic arithmetic sum across sibling fields: new contest kinds/bonuses require their own validated rule or a semantic sum checker. Null/absent for attacks without linked contests. No additional paid action or attack roll is implied. Both contest-specific rule references (defender and local resolution) are bound to exact authored paths for each kind, and both parent attack effects prereqs remain null. Pounce's explicit canine toxin-source prose is constrained to its authored record. The response_rule is required to equal each Hunter kind's exact authored v0 procedure; prose replacement is a content revision that must update the fixture, authority, and schema together.",
           "allOf": [
             {
               "if": {
@@ -983,6 +983,9 @@
                   },
                   "defender_rule_ref": {
                     "const": "docs/rules/05-combat/universal-maneuvers.md"
+                  },
+                  "response_rule": {
+                    "const": "Single defender response to the Bite before the attack roll; AFTER final Bite damage/injection/possible incapacitation, eligible active defender chooses Strength or Agility and contests d20+4 against d20+ability+applicable specific Training. Tie holds standing. Dying/incapable defender uses Trip unable-to-contest if standing and valid. No second attack/defense window."
                   }
                 }
               }
@@ -1021,6 +1024,9 @@
                   },
                   "defender_rule_ref": {
                     "const": "docs/rules/05-combat/universal-maneuvers.md"
+                  },
+                  "response_rule": {
+                    "const": "Canonical Shove: attacker d20+4 vs defender d20+Strength+specific Training+2 Hold Ground+Anchoring; tie blocks. Legal Close-Contact Opportunity before contest; successful hit there gives Shove −2 situational modifier and may invalidate maneuver. Strict win displaces PC one square forward and advances whole 1×2 Hunter one square, otherwise neither moves if destination blocked."
                   }
                 }
               }
