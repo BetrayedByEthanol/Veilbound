@@ -4,9 +4,9 @@
 
 ## Exact execution evidence
 
-- Verified on GitHub Actions [workflow run 39175462023](https://github.com/BetrayedByEthanol/Veilbound/actions/runs/39175462023) for PR #96 at source commit `28cb2ce131ff032b90f24be7cf50c2ca98b991ec` (the original Phase 3 gameplay runner is unchanged from merged PR #94).
-- **Focused tactical tests:** 14/14 pass; **new report tests:** 6/6 pass; **full repository unittest discovery:** **219/219 passed with zero skipped** after enabling optional Draft 2020-12 JSON Schema checks in [follow-up CI run 39175985347](https://github.com/BetrayedByEthanol/Veilbound/actions/runs/39175985347) (the first baseline run passed 219 with three optional schema skips). **B06 footprint semantic validator:** all five creature fixture/index documents passed. Python 3.12 CI environment. Both executions produced **the same counts and canonical JSON SHA-256**.
-- CI [`b06-phase3-census` artifact](https://github.com/BetrayedByEthanol/Veilbound/actions/runs/39175462023/artifacts/12154072570) contains the full machine-readable 32-cell JSON and generated Markdown (both independently preserved). Canonical JSON SHA-256 (excluding its `audit_sha256` field) was separately recomputed and matched:
+- **PR-head-source attestation** is verified by [workflow run 39176629075](https://github.com/BetrayedByEthanol/Veilbound/actions/runs/39176629075), which explicitly checked out and matched **PR head `277eb573e0fff02178db1bab5e1e4d5f42ac390e`** before executing the simulator. Earlier runs used GitHub's default synthetic merge checkout; their matching numeric results are supplementary rather than the authoritative head-attestation evidence. The Phase 3 gameplay runner remains unchanged from merged PR #94.
+- **Focused tactical tests:** **14/14 passed**; **new report tests:** **11/11 passed** (including source attribution guards and variable-seed report tests); **full repository unittest discovery: 224/224 passed, zero skipped** using optional Draft 2020-12 `jsonschema`. **B06 footprint semantic validator:** all five creature fixture/index documents passed. Python 3.12 CI environment. The pinned-head run reproduced the earlier **identical terminal counts and canonical JSON SHA-256**.
+- CI [`b06-phase3-census` artifact](https://github.com/BetrayedByEthanol/Veilbound/actions/runs/39176629075/artifacts/12154312529) from the PR-head-pinned execution contains the full machine-readable 32-cell JSON and generated Markdown. Canonical JSON SHA-256 (excluding its `audit_sha256` field) was independently recomputed from the prior artifact and confirmed unchanged:
   `c02c9830d10f1bcaf7d80ccedfe81102c1d4d9b28f4f004e9f715560b184ca5b`.
 - No extrapolation to playtest balance, a generic Hunter rating or an actual party wipe is authorized. **Hunter remains `unrated`; B06 remains blocking; 0 certified complete B06 encounter packs; 0/12 full Focus certificates.**
 
@@ -100,7 +100,7 @@ For an additional context split, **warned** initial positions account for 0 unre
 
 ## Scope discipline and next gates
 
-- Verify the exact artifact/run provenance on future changes: **numbers correspond to the execution stated above**, not an automatically refreshed dataset.
+- Verify the exact artifact/run provenance on future changes: **numbers correspond to the PR-head-attested execution stated above**, not an automatically refreshed dataset. The CI checkout asserts source HEAD equals the event PR-head SHA (or the dispatched ref SHA), while the report's seed-range provenance is generated from the requested seed count.
 - Resolve obstructed `contact_path_unresolved` cases with actual 1×2 occupancy, legal Cautious/Normal paths, Movement Opportunities and correct defensive responses; do not redistribute these 770 stops between player/Hunter outcomes.
 - Finish independent L1→3 Bow and High Scholar sheets; authorize the real full technique sets before claiming valid mixed-Focus playtesting.
 - Continue into **multi-round** Soldier/Sentry/Hunter encounters with authentic Rites/Exaltations, wound repair, Dying, delayed toxin, retreat and GM decision-making.
