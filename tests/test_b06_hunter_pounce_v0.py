@@ -256,15 +256,24 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("no Grappling State",self.rules)
         self.assertIn("not** canonical", self.rules)
 
-    def test_b06_capability_keeps_missing_authority(self):
-        cap=next(c for c in self.hunter["planned_capabilities"]
-                 if c["id"]=="B06-CAP-HUNTER-POUNCE")
-        self.assertEqual(cap["state"],"requires_authored_attack_or_effect")
+    def test_b06_capability_has_authored_authority_but_calibration_remains_open(self):
+        cap = next(c for c in self.hunter["planned_capabilities"]
+                   if c["id"] == "B06-CAP-HUNTER-POUNCE")
+        self.assertEqual(cap["state"], "existing_authority_only")
         self.assertTrue(cap["missing_authority"])
+        self.assertTrue(any("calibration" in item.lower()
+                            for item in cap["missing_authority"]))
         self.assertIn("docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
                       self.hunter["rules_basis"])
-        self.assertFalse(any(c["state"]=="existing_authority_only"
-                             for c in self.hunter["planned_capabilities"]))
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
+        self.assertEqual(self.hunter["encounter_guidance"]["challenge_rating"]["status"],
+                         "unrated")
+        self.assertEqual({c["id"] for c in self.hunter["planned_capabilities"]
+                          if c["state"] == "existing_authority_only"},
+                         {"B06-CAP-HUNTER-POUNCE", "B06-CAP-HUNTER-BITE",
+                          "B06-CAP-HUNTER-HORN"})
 
 
 if __name__=="__main__":
