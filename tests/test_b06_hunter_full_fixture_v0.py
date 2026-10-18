@@ -297,6 +297,30 @@ class B06HunterFullFixtureTests(unittest.TestCase):
         self.assertEqual(pounce["primary_hp_packet"]["type"], "object")
         self.assertEqual(pounce["primary_hp_packet"]["properties"]["damage_type"]["const"],
                          "Piercing")
+        self.assertEqual(pounce["range_class"]["const"], "melee")
+        self.assertIn("target_geometry", parent_rule("pounce_balance")["required"])
+        geometry = pounce["target_geometry"]
+        self.assertEqual(geometry["type"], "object")
+        self.assertEqual(geometry["properties"]["kind"]["const"], "special")
+        self.assertEqual(geometry["properties"]["range_rule_ref"]["const"],
+                         "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md")
+        self.assertIsNone(geometry["properties"]["area_rule_ref"]["const"])
+        self.assertEqual(set(geometry["required"]),
+                         {"kind", "range_rule_ref", "area_rule_ref"})
+        self.assertEqual(self.profiles["B06-AT-06"]["target_geometry"]["kind"], "special")
+        packet_fields = ("kind", "damage_type", "fixed_base", "die",
+                         "strength_contribution", "armor_penetration",
+                         "mitigation", "source")
+        bite_packet = self.profiles["B06-AT-04"]["primary_hp_packet"]
+        for field in packet_fields:
+            self.assertEqual(pounce["primary_hp_packet"]["properties"][field]["const"],
+                             bite_packet[field])
+        self.assertEqual(pounce["primary_hp_packet"]["not"],
+                         {"required": ["extra_formula"]})
+        for field in ("training_family", "effective_training",
+                      "situational_bonus", "total_bonus"):
+            self.assertEqual(pounce["attack_roll"]["properties"][field]["const"],
+                             self.profiles["B06-AT-04"]["attack_roll"][field])
         self.assertEqual(pounce["toxin_delivery"]["type"], "object")
         self.assertTrue(pounce["toxin_delivery"]["properties"]
                         ["requires_surviving_puncture"]["const"])
@@ -323,6 +347,13 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                 self.assertEqual(drive[field]["type"], "null")
         self.assertEqual(drive["additional_packets"]["maxItems"], 0)
         self.assertEqual(drive["resolution_kind"]["const"], "authored_non_damage_effect")
+        self.assertEqual(drive["range_class"]["const"], "melee")
+        self.assertIn("target_geometry", parent_rule("horn_drive_shove")["required"])
+        self.assertEqual(drive["target_geometry"]["properties"]["kind"]["const"],
+                         "special")
+        self.assertEqual(drive["target_geometry"]["properties"]["range_rule_ref"]["const"],
+                         "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md")
+        self.assertIsNone(drive["target_geometry"]["properties"]["area_rule_ref"]["const"])
         drive_profile = self.profiles["B06-AT-07"]
         for key in ("weapon_or_source", "source_authority_ref", "resolution_rule_ref"):
             self.assertEqual(drive[key]["const"], drive_profile[key])
@@ -384,6 +415,38 @@ class B06HunterFullFixtureTests(unittest.TestCase):
              ("source_authority_ref",), "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
             ("drive changes resolution source", "B06-AT-07",
              ("resolution_rule_ref",), "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
+            ("pounce illegally ranged", "B06-AT-06",
+             ("range_class",), "ranged"),
+            ("pounce geometry omitted", "B06-AT-06",
+             ("target_geometry",), None),
+            ("pounce geometry becomes area", "B06-AT-06",
+             ("target_geometry", "kind"), "area"),
+            ("pounce uses melee_one instead of scoped Pounce", "B06-AT-06",
+             ("target_geometry", "kind"), "melee_one"),
+            ("pounce wrong range rule", "B06-AT-06",
+             ("target_geometry", "range_rule_ref"),
+             "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"),
+            ("pounce gets area geometry rule", "B06-AT-06",
+             ("target_geometry", "area_rule_ref"),
+             "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
+            ("pounce Bite base changed", "B06-AT-06",
+             ("primary_hp_packet", "fixed_base"), 999),
+            ("pounce Bite die changed", "B06-AT-06",
+             ("primary_hp_packet", "die"), "d12"),
+            ("pounce Bite contribution doubled", "B06-AT-06",
+             ("primary_hp_packet", "strength_contribution"), "full"),
+            ("pounce Bite penetration changed", "B06-AT-06",
+             ("primary_hp_packet", "armor_penetration"), 99),
+            ("pounce Bite mitigation changed", "B06-AT-06",
+             ("primary_hp_packet", "mitigation"), "none"),
+            ("pounce attack total changed", "B06-AT-06",
+             ("attack_roll", "total_bonus"), 99),
+            ("pounce extra attack Training", "B06-AT-06",
+             ("attack_roll", "effective_training"), 4),
+            ("drive illegally ranged", "B06-AT-07",
+             ("range_class",), "ranged"),
+            ("drive geometry becomes area", "B06-AT-07",
+             ("target_geometry", "kind"), "area"),
         ]
         # A future independent fixture must not declare a pressure total
         # unrelated to its component modifiers; test both linked kinds.
@@ -406,6 +469,27 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                     owner = owner[key]
                 owner[key_path[-1]] = bad_value
                 self.assertFalse(validator.is_valid(mutated), label)
+
+        # The Pounce source has no extra variable packet formula. Its
+        # absence is required even if the formula fields look innocuous.
+        extra = copy.deepcopy(self.hunter)
+        extra_pounce = next(a for a in extra["attack_profiles"]
+                            if a["id"] == "B06-AT-06")
+        extra_pounce["primary_hp_packet"]["extra_formula"] = {
+            "operator": "ceil_div_dice", "die": "d4",
+            "multiplier": 1, "divisor": 1, "vc_bonus": 0,
+        }
+        self.assertFalse(validator.is_valid(extra),
+                         "Pounce must reject additional damage formula")
+
+        # A missing target_geometry member must also fail the conditional:
+        # the base schema allows it to be absent for ordinary profiles.
+        missing = copy.deepcopy(self.hunter)
+        missing_pounce = next(a for a in missing["attack_profiles"]
+                              if a["id"] == "B06-AT-06")
+        missing_pounce.pop("target_geometry")
+        self.assertFalse(validator.is_valid(missing),
+                         "Pounce requires explicit front-contact geometry")
 
         # A malicious replacement of BOTH the declared natural source AND roll
         # must not turn Pounce into a Horn attack while preserving Prone metadata.
