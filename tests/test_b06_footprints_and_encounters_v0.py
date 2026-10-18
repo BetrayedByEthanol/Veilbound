@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RULE = ROOT / "docs/rules/05-combat/multi-square-creature-footprints-v0.md"
+WARD = ROOT / "docs/rules/07-veil-magic/protective-ward-v0.md"
 ENCOUNTER_DOC = ROOT / "docs/design/b06-encounter-frequency-challenge-and-hunter-ecology-v0.md"
 INDEX_PATH = ROOT / "content/creatures/b06-initial-bestiary-v0.json"
 ENEMY_SCHEMA = ROOT / "schemas/b06-enemy-benchmark-v0.schema.json"
@@ -34,6 +35,7 @@ class B06FootprintEncounterTests(unittest.TestCase):
         cls.enemy_schema = json.loads(ENEMY_SCHEMA.read_text(encoding="utf-8"))
         cls.index_schema = json.loads(INDEX_SCHEMA.read_text(encoding="utf-8"))
         cls.rules = RULE.read_text(encoding="utf-8")
+        cls.ward_rules = WARD.read_text(encoding="utf-8")
         cls.encounter_docs = ENCOUNTER_DOC.read_text(encoding="utf-8")
         cls.sentry = json.loads(SENTRY.read_text(encoding="utf-8"))
         cls.soldier = json.loads(SOLDIER.read_text(encoding="utf-8"))
@@ -61,10 +63,71 @@ class B06FootprintEncounterTests(unittest.TestCase):
         self.assertEqual(p["family"], "natural_beast")
         self.assertEqual((shape["width_cells"], shape["length_cells"]), (1, 2))
         self.assertEqual(shape["shape"], "rectangular")
-        self.assertIn("front", shape["reference_rule"])
+        self.assertEqual(shape["cell_ids"], ["head", "rear"])
+        self.assertEqual(shape["reference_cell_id"], "head")
+        self.assertIn("head", shape["reference_rule"])
         self.assertIn("multi-square-creature-footprints-v0.md",
                       shape["movement_rule_ref"])
         self.assertEqual(shape["movement_rule_ref"], shape["rotation_rule_ref"])
+
+    def test_pivots_preserve_anatomical_cell_index_even_if_coordinate_sort_flips(self):
+        """A committed head hit must never move to rear after a 90-degree pivot."""
+        ids = self.hunter["creature_profile"]["footprint"]["cell_ids"]
+        self.assertEqual(ids, ["head", "rear"])
+        before = {"head": (1, 0, 0), "rear": (0, 0, 0)}
+        after = {"head": (0, -1, 0), "rear": (0, 0, 0)}
+        # Existing Ward implementation used world-coordinate sorting before/after.
+        before_by_coordinates = sorted(before, key=lambda k: before[k])
+        after_by_coordinates = sorted(after, key=lambda k: after[k])
+        self.assertEqual(before_by_coordinates, ["rear", "head"])
+        self.assertEqual(after_by_coordinates, ["head", "rear"])
+        # A previous x/y/z rank of head=2 would now incorrectly land on rear.
+        head_old_rank = before_by_coordinates.index("head")
+        self.assertEqual(after_by_coordinates[head_old_rank], "rear")
+        head_id = ids[0]  # permanent body-local cell 1
+        self.assertEqual(before[head_id], (1, 0, 0))
+        self.assertEqual(after[head_id], (0, -1, 0))
+        self.assertNotEqual(after[head_id], after["rear"])
+        self.assertIn("head (0,-1)", self.ward_rules)
+        self.assertIn("same original cell ID/index", self.ward_rules)
+
+    def test_reference_cell_tracks_head_through_pivot_and_relocation(self):
+        shape = self.hunter["creature_profile"]["footprint"]
+        ref = shape["reference_cell_id"]
+        self.assertEqual(ref, "head")
+        original = {"head": (1, 0, 0), "rear": (0, 0, 0)}
+        pivoted = {"head": (0, -1, 0), "rear": (0, 0, 0)}
+        translated = {cell: (x + 4, y + 2, z + 1)
+                      for cell, (x, y, z) in pivoted.items()}
+        self.assertEqual(original[ref], (1, 0, 0))
+        self.assertEqual(pivoted[ref], (0, -1, 0))
+        self.assertEqual(translated[ref], (4, 1, 1))
+        self.assertIn("same identity", self.ward_rules)
+        self.assertIn("never re-sort world coordinates", self.ward_rules)
+
+    def test_precommitted_rear_cell_and_removed_cell_fallback(self):
+        # Repeated coordinate sorting also corrupts precommitted rear impacts.
+        ids = self.hunter["creature_profile"]["footprint"]["cell_ids"]
+        rear_id = ids[1]
+        pivoted = {"head": (0, -1, 0), "rear": (0, 0, 0)}
+        self.assertEqual(pivoted[rear_id], (0, 0, 0))
+        self.assertIn("lowest remaining original body-local cell index", self.rules)
+        self.assertIn("lowest surviving **original body-local index**",
+                      self.ward_rules)
+        self.assertIn("only if original attack/Ward legality survives",
+                      self.ward_rules)
+
+    def test_body_local_ids_are_schema_required_and_unique(self):
+        footprint = self.index_schema["$defs"]["creatureProfile"]["properties"]["footprint"]
+        self.assertIn("cell_ids", footprint["required"])
+        self.assertIn("reference_cell_id", footprint["required"])
+        self.assertTrue(footprint["properties"]["cell_ids"]["uniqueItems"])
+        ids = self.hunter["creature_profile"]["footprint"]["cell_ids"]
+        self.assertEqual(len(ids), 2)
+        self.assertEqual(len(set(ids)), len(ids))
+        self.assertIn(self.hunter["creature_profile"]["footprint"]["reference_cell_id"], ids)
+        self.assertEqual(self.enemy_schema["$defs"]["creatureProfile"]["properties"]
+                         ["footprint"], footprint)
 
     def test_translation_average_rounds_up_after_terrain(self):
         self.assertEqual(translated_mp_cost(2, [0, 0]), 2)
