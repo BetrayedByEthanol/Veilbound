@@ -267,6 +267,20 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                         ["requires_surviving_puncture"]["const"])
         self.assertEqual(pounce["additional_packets"]["maxItems"], 0)
         self.assertEqual(pounce["resolution_kind"]["const"], "authored_natural_attack")
+        pounce_profile = self.profiles["B06-AT-06"]
+        bite_profile = self.profiles["B06-AT-04"]
+        for key in ("weapon_or_source", "source_authority_ref", "resolution_rule_ref"):
+            self.assertEqual(pounce[key]["const"], pounce_profile[key])
+        self.assertEqual(pounce["attack_roll"]["properties"]["ability_a"]["const"],
+                         bite_profile["attack_roll"]["ability_a"])
+        self.assertEqual(pounce["attack_roll"]["properties"]["ability_b"]["const"],
+                         bite_profile["attack_roll"]["ability_b"])
+        self.assertEqual(pounce["primary_hp_packet"]["properties"]["source"]["const"],
+                         bite_profile["primary_hp_packet"]["source"])
+        self.assertEqual(pounce["toxin_delivery"]["properties"]["source_ref"]["const"],
+                         "B06-SRC-HUNTER-GROOVED-CANINES")
+        self.assertEqual(pounce["toxin_delivery"]["properties"]["profile_id"]["const"],
+                         "B06-TX-HUNTER-SLOW-MY")
 
         drive = parent_rule("horn_drive_shove")["properties"]
         for field in ("attack_roll", "primary_hp_packet", "toxin_delivery"):
@@ -274,6 +288,10 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                 self.assertEqual(drive[field]["type"], "null")
         self.assertEqual(drive["additional_packets"]["maxItems"], 0)
         self.assertEqual(drive["resolution_kind"]["const"], "authored_non_damage_effect")
+        drive_profile = self.profiles["B06-AT-07"]
+        for key in ("weapon_or_source", "source_authority_ref", "resolution_rule_ref"):
+            self.assertEqual(drive[key]["const"], drive_profile[key])
+        self.assertIn("B06-SRC-HUNTER-FRONTAL-HORN", drive["weapon_or_source"]["const"])
         for props in (pounce, drive):
             self.assertEqual(props["action_class"]["const"], "physical")
             self.assertEqual(props["ap"]["const"], 24)
@@ -288,6 +306,8 @@ class B06HunterFullFixtureTests(unittest.TestCase):
         self.assertTrue(validator.is_valid(self.hunter))
 
         bite = self.profiles["B06-AT-04"]
+        horn = self.profiles["B06-AT-05"]
+        drive = self.profiles["B06-AT-07"]
         cases = [
             ("pounce uses shove win result", "B06-AT-06",
              ("linked_contest", "result_on_strict_win"),
@@ -313,6 +333,22 @@ class B06HunterFullFixtureTests(unittest.TestCase):
              ("additional_packets",), [bite["primary_hp_packet"]]),
             ("drive mislabeled damaging attack", "B06-AT-07",
              ("resolution_kind",), "authored_natural_attack"),
+            ("pounce switches to frontal horn", "B06-AT-06",
+             ("weapon_or_source",), horn["weapon_or_source"]),
+            ("pounce switches to Horn roll", "B06-AT-06",
+             ("attack_roll",), horn["attack_roll"]),
+            ("pounce replaces canine toxin source", "B06-AT-06",
+             ("toxin_delivery", "source_ref"), "B06-SRC-HUNTER-FRONTAL-HORN"),
+            ("pounce uses foreign HP packet source", "B06-AT-06",
+             ("primary_hp_packet", "source"), horn["primary_hp_packet"]["source"]),
+            ("pounce replaces authority with Horn source", "B06-AT-06",
+             ("source_authority_ref",), "docs/rules/05-combat/weapon-attack-and-guard-math.md"),
+            ("drive switches to canines", "B06-AT-07",
+             ("weapon_or_source",), bite["weapon_or_source"]),
+            ("drive changes source authority", "B06-AT-07",
+             ("source_authority_ref",), "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
+            ("drive changes resolution source", "B06-AT-07",
+             ("resolution_rule_ref",), "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
         ]
         for label, attack_id, key_path, bad_value in cases:
             with self.subTest(case=label):
@@ -324,6 +360,15 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                     owner = owner[key]
                 owner[key_path[-1]] = bad_value
                 self.assertFalse(validator.is_valid(mutated), label)
+
+        # A malicious replacement of BOTH the declared natural source AND roll
+        # must not turn Pounce into a Horn attack while preserving Prone metadata.
+        compound = copy.deepcopy(self.hunter)
+        pounce = next(a for a in compound["attack_profiles"] if a["id"] == "B06-AT-06")
+        pounce["weapon_or_source"] = horn["weapon_or_source"]
+        pounce["attack_roll"] = copy.deepcopy(horn["attack_roll"])
+        self.assertFalse(validator.is_valid(compound),
+                         "Pounce must not validate after simultaneous Horn source/roll swap")
 
     def test_schema_validation_when_jsonschema_installed(self):
         try:
