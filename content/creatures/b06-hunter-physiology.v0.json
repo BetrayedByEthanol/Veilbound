@@ -1,0 +1,84 @@
+{
+  "schema_version": "b06-hunter-physiology-v0",
+  "creature_id": "B06-EN-03",
+  "name": "Hunter of the Woods — physiology slice",
+  "record_status": "PHYSIOLOGY_ONLY_NOT_EXECUTABLE",
+  "calibration_status": "PROVISIONAL_B06",
+  "rules_basis": [
+    "docs/design/b06-hunter-physiology-v0.md",
+    "docs/rules/06-vigor-wounds-death/hp-and-vigor.md",
+    "docs/rules/05-combat/defensive-responses-and-criticals.md",
+    "docs/rules/05-combat/weapons-and-armor.md",
+    "docs/rules/05-combat/multi-square-creature-footprints-v0.md"
+  ],
+  "creature_profile": {
+    "body_state": "living",
+    "family": "natural_beast",
+    "has_personal_veil_invocation": false,
+    "footprint_cell_ids": [
+      "head",
+      "rear"
+    ],
+    "reference_cell_id": "head",
+    "hp_vigor_pool_count": 1
+  },
+  "abilities": {
+    "vitality": 4,
+    "agility": 2,
+    "awareness": 2
+  },
+  "benchmark_rank": 3,
+  "hp": {
+    "max": 14,
+    "formula": "10 + vitality",
+    "size_or_footprint_multiplier": 1
+  },
+  "natural_armor": {
+    "rating": 3,
+    "source": "dense hide and dermis",
+    "coverage": "single shared creature, all occupied cells",
+    "dodge_agility_cap": null,
+    "worn_armor_stacking": false
+  },
+  "dodge": {
+    "base": 14,
+    "formula": "10 + agility + awareness - dodge_pressure",
+    "pressure_per_prior_dodge": 2,
+    "first_four_defenses": [
+      14,
+      12,
+      10,
+      8
+    ]
+  },
+  "guard": {
+    "instrument": null,
+    "capacity": 1,
+    "natural_horn_or_jaws_grant_guard": false,
+    "usable_with_current_natural_sources": false,
+    "capacity_basis": "provisional Turn AP42 / Physical Action24 => Physical Tempo1; no legal Guard instrument"
+  },
+  "vigor": {
+    "max": 42,
+    "formula": "(10 + vitality) * benchmark_rank",
+    "non_focus_rate": 0,
+    "regeneration_throughput": 4,
+    "regeneration_clock": "one genuine own-turn Regeneration Step",
+    "vigor_cost_per_hp_or_repair_progress": 1,
+    "six_hour_recovery": 11,
+    "recovery_rounding": "round half up",
+    "recovery_clock": "every completed 6 hours, capped at max Vigor"
+  },
+  "personal_vp": {
+    "max": 0,
+    "projection_action_authorized": false
+  },
+  "full_enemy_fixture_path": null,
+  "explicit_pending": [
+    "complete Strength and other abilities",
+    "Initiative and actionable Turn AP/Reaction source",
+    "normal Bite, Pounce, Horn Bash and Horn Drive attack/contest entries in B06 enemy schema",
+    "complete start states, tactics, validated source provenance",
+    "full opposed encounter and statistical balance testing"
+  ]
+}

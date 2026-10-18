@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:veilbound:schema:b06-hunter-physiology-v0",
+  "title": "B06 Hunter of the Woods — Physiology-Only Calibration Snapshot v0",
+  "description": "Partial non-executable Hunter biology/defenses record. This does not satisfy b06-enemy-v0 or provide action/attack/encounter capabilities. Run scripts.validate_b06_footprints for cross-field anatomical reference membership and rectangular 1×2 semantic checks in addition to JSON Schema validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "creature_id",
+    "name",
+    "record_status",
+    "calibration_status",
+    "rules_basis",
+    "creature_profile",
+    "abilities",
+    "benchmark_rank",
+    "hp",
+    "natural_armor",
+    "dodge",
+    "guard",
+    "vigor",
+    "personal_vp",
+    "full_enemy_fixture_path",
+    "explicit_pending"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "b06-hunter-physiology-v0"
+    },
+    "creature_id": {
+      "const": "B06-EN-03"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_status": {
+      "const": "PHYSIOLOGY_ONLY_NOT_EXECUTABLE"
+    },
+    "calibration_status": {
+      "const": "PROVISIONAL_B06"
+    },
+    "rules_basis": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "creature_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "body_state",
+        "family",
+        "has_personal_veil_invocation",
+        "footprint_cell_ids",
+        "reference_cell_id",
+        "hp_vigor_pool_count"
+      ],
+      "properties": {
+        "body_state": {
+          "const": "living"
+        },
+        "family": {
+          "const": "natural_beast"
+        },
+        "has_personal_veil_invocation": {
+          "const": false
+        },
+        "footprint_cell_ids": {
+          "const": [
+            "head",
+            "rear"
+          ],
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+          },
+          "description": "Ordered stable local 1×2 body-cell identities; ref membership additionally checked by semantic validator."
+        },
+        "reference_cell_id": {
+          "const": "head",
+          "description": "Must be one of footprint_cell_ids. Run scripts.validate_b06_footprints; no world-coordinate reassignment."
+        },
+        "hp_vigor_pool_count": {
+          "const": 1
+        }
+      }
+    },
+    "abilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vitality",
+        "agility",
+        "awareness"
+      ],
+      "properties": {
+        "vitality": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "agility": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        },
+        "awareness": {
+          "type": "integer",
+          "minimum": -2,
+          "maximum": 20
+        }
+      }
+    },
+    "benchmark_rank": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "hp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max",
+        "formula",
+        "size_or_footprint_multiplier"
+      ],
+      "properties": {
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "formula": {
+          "const": "10 + vitality"
+        },
+        "size_or_footprint_multiplier": {
+          "const": 1
+        }
+      }
+    },
+    "natural_armor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rating",
+        "source",
+        "coverage",
+        "dodge_agility_cap",
+        "worn_armor_stacking"
+      ],
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "coverage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dodge_agility_cap": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "worn_armor_stacking": {
+          "const": false
+        }
+      }
+    },
+    "dodge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base",
+        "formula",
+        "pressure_per_prior_dodge",
+        "first_four_defenses"
+      ],
+      "properties": {
+        "base": {
+          "type": "integer"
+        },
+        "formula": {
+          "const": "10 + agility + awareness - dodge_pressure"
+        },
+        "pressure_per_prior_dodge": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "first_four_defenses": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "instrument",
+        "capacity",
+        "natural_horn_or_jaws_grant_guard",
+        "usable_with_current_natural_sources",
+        "capacity_basis"
+      ],
+      "properties": {
+        "instrument": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "natural_horn_or_jaws_grant_guard": {
+          "const": false
+        },
+        "usable_with_current_natural_sources": {
+          "const": false
+        },
+        "capacity_basis": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "vigor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max",
+        "formula",
+        "non_focus_rate",
+        "regeneration_throughput",
+        "regeneration_clock",
+        "vigor_cost_per_hp_or_repair_progress",
+        "six_hour_recovery",
+        "recovery_rounding",
+        "recovery_clock"
+      ],
+      "properties": {
+        "max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "formula": {
+          "const": "(10 + vitality) * benchmark_rank"
+        },
+        "non_focus_rate": {
+          "type": "integer"
+        },
+        "regeneration_throughput": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "regeneration_clock": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vigor_cost_per_hp_or_repair_progress": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "six_hour_recovery": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "recovery_rounding": {
+          "const": "round half up"
+        },
+        "recovery_clock": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "personal_vp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max",
+        "projection_action_authorized"
+      ],
+      "properties": {
+        "max": {
+          "const": 0
+        },
+        "projection_action_authorized": {
+          "const": false
+        }
+      }
+    },
+    "full_enemy_fixture_path": {
+      "const": null
+    },
+    "explicit_pending": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "$comment": "Formula arithmetic is separately regression-tested. Semantic validator enforces that reference_cell_id is actually a member of footprint_cell_ids and that the actual footprint is the Hunter's 1x2 head/rear geometry."
+}

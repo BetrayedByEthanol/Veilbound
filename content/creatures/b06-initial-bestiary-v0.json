@@ -190,7 +190,8 @@
         "docs/rules/05-combat/universal-maneuvers.md",
         "docs/design/b06-encounter-frequency-challenge-and-hunter-ecology-v0.md",
         "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
-        "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+        "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "docs/design/b06-hunter-physiology-v0.md"
       ],
       "creature_profile": {
         "family": "natural_beast",
@@ -207,7 +208,8 @@
           "Large, bulky forest quadruped, exceeding ordinary bear mass; wolf-like head, powerful legs, one prominent horn and venomous puncturing bite and strong jaws.",
           "1×2-square rigid footprint; translation/turning follows Multi-Square Creature Footprints v0. No automatic added Reach, Armor, Guard or attack cadence.",
           "Horn serves primarily mating-season rutting, territorial intimidation and deterrence, and breaking up loose material/roots when enlarging an excavated den.",
-          "Vigor presence/amount, natural Armor, HP, regeneration, Guard/Dodge and attack numbers are not yet authored; no personal Veil invocation assumed.",
+          "B06 physiology lock candidate: Vitality+4, Agility+2, Awareness+2; HP14 from 10+Vitality, natural hide Armor3 (uniform; no worn-armor Dodge cap), Dodge14 at first use then −2 per previous Dodge. No anatomical natural Guard instrument; no personal Veil invocation.",
+          "B06 rank-3-equivalent local Vigor anchor: (10+Vitality4)×3=42 Vigor, non-Focus regeneration +0 giving 4 per actual own-turn Regeneration Step at 1 Vigor per point, and 11 Vigor Recovery per completed six hours (25%, round half-up, cap42). These values require opposed encounter calibration; no size-based HP multiplier, virtual exploration Regeneration Step or exertion stamina system.",
           "Venom apparatus: paired modified salivary glands supply grooves in existing reinforced upper canines; delivery occurs only on genuinely puncturing Bite, not horn/contact. Single central frontal-cranial horn has bony core/keratin sheath; neck/skull reinforced for rutting, deterring rivals and den excavation."
         ],
         "behavior_notes": [
@@ -238,7 +240,7 @@
           "state": "requires_authored_attack_or_effect",
           "concept": "Hunter-only B06 v0 head-forward 1×2 linked Charge+one natural Bite+independent Trip-like balance rider against one-square PCs is now sourced by Hunter Pounce v0. Its normal Bite shares the new Grooved Canine source; any eligible injection uses the one slow venom profile. 24 AP/2×M and d20+6 Bite remain numerical playtest baselines, not a certified full Hunter encounter. No free Grapple/Pin/extra Bite.",
           "missing_authority": [
-            "Final full Hunter stat/resource/Defense fixture and numeric Turn AP/M/Strength derivations; opposed-playtest acceptance",
+            "Complete B06 Hunter executable enemy/defense/resource record, Strength/Initiative/AP/Movement integration and opposed-playtest acceptance; the separate Hunter physiology v0 numeric defense/reserve baseline is already authored",
             "Large/multi-square prey Pounce and size/mass contests, multi-square Grapple or persistent hold still unauthored"
           ]
         },
@@ -249,7 +251,7 @@
           "state": "requires_authored_attack_or_effect",
           "concept": "B06-SRC-HUNTER-GROOVED-CANINES is now an authored physical Bite delivery source: paired venomous salivary glands, grooved reinforced upper canines; one local d20+6 attack, 3+d6 Piercing Pen1, 24 AP and genuine post-Armor/prevention puncture gate. B06-TX-HUNTER-SLOW-MY is an authored Moderate DC12 slow-acting myotoxin-style pursuit profile: Full 10m/30m progressive movement+Strength-based-exertion penalties until 120m, Reduced stage 10m to 60m, one instance/no instant poison damage. The short TX-HM catalogue profile is NOT already a long-term pursuit venom and is not applied automatically. Bite can puncture irrespective of whether pounce/takedown succeeded. Values and full enemy anatomy still require calibration.",
           "missing_authority": [
-            "Calibrate B06-local attack d20+6 / 3+d6 Pen1 against finalized Hunter Strength/Agility/Training and full enemy schema fixture",
+            "Decompose/recalibrate the local d20+6 Bite / 3+d6 Pen1 against complete Hunter Strength/natural-weapon modeling and the authored physiology baseline, then integrate with the full enemy schema",
             "Calibrate source-authored slow-venom onset/stages against PCs and Venom Endurance; current TX framework delivery/resistance/timing is sourced but untested"
           ]
         },
@@ -260,7 +262,7 @@
           "state": "requires_authored_attack_or_effect",
           "concept": "Frontal cranial single horn with bony core and keratin sheath, used for mating-season rutting, den excavation and defensive predator deterrence. B06-SRC-HUNTER-FRONTAL-HORN now sources one 24-AP head-forward Horn Bash d20+5, 2+d6 Crush Pen0 without venom or free Shove; alternatively the Hunter may spend 24 AP on independently declared Horn Drive using the canonical contested Shove and a rigid whole-1×2 built-in advance, dealing no Bash damage. No free Guard/fear/extra attack.",
           "missing_authority": [
-            "Calibrate defensive horn damage and attacker Strength/Training against finalized Hunter physiology and opposed encounter tests",
+            "Decompose/recalibrate d20+5 Horn Bash and Horn Drive Strength/Training against complete Hunter attack statistics and the already-authored defense/HP/Vigor physiology baseline",
             "Expanded multi-square prey/size geometry and any actual environmental digging mechanics remain unauthored"
           ]
         },
@@ -276,7 +278,7 @@
         }
       ],
       "open_mechanics": [
-        "Hunter local natural Bite/Horn attack sources and separate slow pursuit toxin are now authored v0, but creature full HP/Vigor/Armor/Dodge/initiative and derivation of fixed bonuses are still missing; B06 concept-only.",
+        "Hunter physiology has a B06-local v0 baseline for Vitality+4, Agility+2, Awareness+2, HP14, hide Armor3, Dodge14, Vigor42, regeneration4 and six-hour Vigor Recovery11, but full Strength/Initiative/action/resource integration, legal sourced attacks in schema, full executable fixture and opposed calibration remain pending; CONCEPT_ONLY remains correct.",
         "Hunter Pounce is scoped to standing one-square PCs; larger prey, moose-scale mass/size contests, multi-square Grapple and persistent holds require further rules.",
         "Slow Moderate myotoxin-style profile uses existing toxin gates/clocks; stage magnitude, long transition correctness and Venom Endurance interplay require opposed tests before numeric certification.",
         "Horn Drive uses canonical Shove with whole-body 1×2 advance; no free Horn Bash+Shove, real environmental excavation effect or Guard instrument authored.",
@@ -290,7 +292,7 @@
           "status": "unrated",
           "value": null,
           "scale": null,
-          "reference_setup": "One Hunter on forest terrain with opportunities to warn/retreat; no stats, slow venom or Pounce mechanics are certified, so no CR or TP value is publishable."
+          "reference_setup": "One Hunter in forest terrain with possible warning/retreat; its v0 physiology and local attack/venom rules are sourced, but no complete executable fixture or opposed encounters are certified. No numerical CR or TP value is publishable."
         },
         "frequency_contexts": [
           {

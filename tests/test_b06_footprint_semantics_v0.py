@@ -1,8 +1,8 @@
 """B06 footprint cross-field semantics: real positive/negative file validation.
 
 The JSON Schema checks field shape. These tests ensure the companion semantic
-validator rejects references to nonexistent anatomical cells for BOTH accepted
-B06 content formats. Every 'unittest discover' run executes these tests.
+validator rejects references to nonexistent anatomical cells for ALL THREE
+registered B06 content formats. Every 'unittest discover' run executes these tests.
 """
 import copy
 import json
@@ -23,6 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 INDEX_FILE = ROOT / "content/creatures/b06-initial-bestiary-v0.json"
 SOLDIER_FILE = ROOT / "content/creatures/b06-ordinary-human-soldier.v0.json"
 SENTRY_FILE = ROOT / "content/creatures/b06-firebound-sentry.v0.json"
+PHYSIOLOGY_FILE = ROOT / "content/creatures/b06-hunter-physiology.v0.json"
+PHYSIOLOGY_SCHEMA = ROOT / "schemas/b06-hunter-physiology-v0.schema.json"
 
 
 class B06FootprintSemanticValidationTests(unittest.TestCase):
@@ -31,6 +33,8 @@ class B06FootprintSemanticValidationTests(unittest.TestCase):
         cls.index = json.loads(INDEX_FILE.read_text(encoding="utf-8"))
         cls.soldier = json.loads(SOLDIER_FILE.read_text(encoding="utf-8"))
         cls.sentry = json.loads(SENTRY_FILE.read_text(encoding="utf-8"))
+        cls.physiology = json.loads(PHYSIOLOGY_FILE.read_text(encoding="utf-8"))
+        cls.physiology_schema = json.loads(PHYSIOLOGY_SCHEMA.read_text(encoding="utf-8"))
         cls.hunter = next(e for e in cls.index["entries"] if e["id"] == "B06-EN-03")
         cls.footprint = cls.hunter["creature_profile"]["footprint"]
 
@@ -43,8 +47,109 @@ class B06FootprintSemanticValidationTests(unittest.TestCase):
         # This makes `python -m unittest discover -s tests` catch future invalid
         # bestiary entries and new executable enemy files alike.
         paths = sorted((ROOT / "content/creatures").glob("b06-*.json"))
-        self.assertTrue({INDEX_FILE, SOLDIER_FILE, SENTRY_FILE}.issubset(set(paths)))
+        self.assertTrue({INDEX_FILE, SOLDIER_FILE, SENTRY_FILE, PHYSIOLOGY_FILE}.issubset(set(paths)))
         self.assertEqual(validate_files(paths), [])
+
+    def test_hunter_physiology_version_and_schema_are_explicit(self):
+        self.assertEqual(validate_b06_document(self.physiology, "physiology"), [])
+        self.assertEqual(self.physiology_schema["$schema"],
+                         "https://json-schema.org/draft/2020-12/schema")
+        self.assertEqual(self.physiology_schema["properties"]["schema_version"]["const"],
+                         "b06-hunter-physiology-v0")
+        self.assertEqual(self.physiology_schema["properties"]["record_status"]["const"],
+                         "PHYSIOLOGY_ONLY_NOT_EXECUTABLE")
+        self.assertIn("calibration_status", self.physiology_schema["required"])
+        self.assertEqual(self.physiology_schema["properties"]["calibration_status"]["const"],
+                         "PROVISIONAL_B06")
+        p = self.physiology_schema["properties"]["creature_profile"]
+        self.assertIn("footprint_cell_ids", p["required"])
+        self.assertIn("reference_cell_id", p["required"])
+        self.assertTrue(p["properties"]["footprint_cell_ids"]["uniqueItems"])
+        self.assertEqual(p["properties"]["footprint_cell_ids"]["const"], ["head", "rear"])
+        self.assertEqual(p["properties"]["reference_cell_id"]["const"], "head")
+
+    def test_hunter_physiology_missing_or_wrong_calibration_fails_default_cli(self):
+        # The required no-argument CLI does not run JSON Schema validation.
+        # It must reject absent and nonprovisional status independently.
+        for value in (None, "FINAL_B06", "PROVISIONAL_B06_typo"):
+            with self.subTest(calibration_status=value):
+                mutated = copy.deepcopy(self.physiology)
+                if value is None:
+                    mutated.pop("calibration_status")
+                else:
+                    mutated["calibration_status"] = value
+
+                errors = validate_b06_document(mutated, "physiology")
+                self.assertEqual(len(errors), 1)
+                self.assertIn("physiology.calibration_status", errors[0])
+                self.assertIn("PROVISIONAL_B06", errors[0])
+
+                with tempfile.TemporaryDirectory() as td:
+                    # The exact discovered filename and default CLI path.
+                    path = Path(td) / "b06-hunter-physiology.v0.json"
+                    path.write_text(json.dumps(mutated), encoding="utf-8")
+                    with patch("scripts.validate_b06_footprints.CREATURE_DIR", Path(td)):
+                        with patch("builtins.print") as printed:
+                            self.assertEqual(main([]), 1)
+                    self.assertTrue(any(
+                        "calibration_status" in str(call)
+                        for call in printed.call_args_list
+                    ))
+
+    def test_hunter_physiology_reference_to_missing_cell_fails(self):
+        mutated = copy.deepcopy(self.physiology)
+        mutated["creature_profile"]["reference_cell_id"] = "wing"
+        errors = validate_b06_document(mutated, "physiology")
+        self.assertTrue(any("creature_profile.reference_cell_id" in error
+                            and "wing" in error for error in errors))
+
+    def test_hunter_physiology_wrong_ids_and_duplicate_fail(self):
+        for ids in (["head", "head"], ["wing", "rear"], ["head"],
+                    ["head", "rear", "tail"], [], None, ["head", ""]):
+            with self.subTest(ids=ids):
+                mutated = copy.deepcopy(self.physiology)
+                mutated["creature_profile"]["footprint_cell_ids"] = ids
+                self.assertTrue(validate_b06_document(mutated, "physiology"))
+
+    def test_hunter_physiology_missing_profile_or_fields_fail(self):
+        for target in ("creature_profile", "record_status", "creature_id",
+                       "full_enemy_fixture_path"):
+            with self.subTest(missing=target):
+                mutated = copy.deepcopy(self.physiology)
+                mutated.pop(target)
+                self.assertTrue(validate_b06_document(mutated, "physiology"))
+        mutated = copy.deepcopy(self.physiology)
+        mutated["creature_profile"].pop("reference_cell_id")
+        self.assertTrue(validate_b06_document(mutated, "physiology"))
+
+    def test_hunter_physiology_cannot_claim_executable_status(self):
+        for key, value in (
+            ("record_status", "EXECUTABLE_TEST_FIXTURE"),
+            ("creature_id", "B06-EN-04"),
+            ("full_enemy_fixture_path", "content/creatures/pretend-enemy.json"),
+        ):
+            with self.subTest(key=key):
+                mutated = copy.deepcopy(self.physiology)
+                mutated[key] = value
+                self.assertTrue(validate_b06_document(mutated, "physiology"))
+
+    def test_default_cli_discovers_physiology_and_all_b06_records(self):
+        # Reproduces the exact mandatory command: python -m
+        # scripts.validate_b06_footprints (no explicit filenames).
+        self.assertTrue(PHYSIOLOGY_FILE.exists())
+        with patch("builtins.print"):
+            self.assertEqual(main([]), 0)
+
+    def test_hunter_physiology_cli_accepts_valid_and_rejects_corrupt(self):
+        with patch("builtins.print"):
+            self.assertEqual(main([str(PHYSIOLOGY_FILE)]), 0)
+        mutated = copy.deepcopy(self.physiology)
+        mutated["creature_profile"]["reference_cell_id"] = "wing"
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "b06-hunter-physiology.json"
+            path.write_text(json.dumps(mutated), encoding="utf-8")
+            with patch("builtins.print"):
+                self.assertEqual(main([str(path)]), 1)
 
     def test_typo_wing_reference_is_rejected_in_index(self):
         mutated = copy.deepcopy(self.index)
