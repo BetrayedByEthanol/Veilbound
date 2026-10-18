@@ -38,6 +38,20 @@ SCENARIOS = tuple(
 )
 
 
+PRONE_TARGET_MELEE_ATTACK_BONUS = 2  # special-movement-terrain-and-prone.md
+
+
+def standing_opportunity_attack_total(die, bite_bonus, *, target_prone):
+    """Resolve the pre-Stand melee bonus while the defender remains Prone.
+
+    The opportunity is interrupted BEFORE Prone ends. Do not reuse the
+    ordinary upright-target Bite total, even if both happen to beat Guard.
+    """
+    if not target_prone:
+        raise ValueError("Standing Opportunity must resolve before Prone ends")
+    return die + bite_bonus + PRONE_TARGET_MELEE_ATTACK_BONUS
+
+
 def actor(kind, index, level):
     spec = BUILD[kind]
     return {
@@ -153,17 +167,24 @@ def simulate(level, size, setup, hunter=None):
                 log.append(f"R{rnd} {pc['id']} Step2 +{recovered} HP, "
                            f"-{recovered} Vigor")
             if pc["prone"]:
-                # 4 MP Stand, followed by one legal head-reach Standing
-                # Opportunity by the Hunter (not a free Pounce Bite).
+                # Commit 4 MP, then suspend Standing. The defender remains
+                # Prone throughout the Hunter's Standing Opportunity, giving
+                # the non-Prone Hunter +2 on its melee attack. Only after
+                # resolving ALL responses and rechecking Stand legality may
+                # this turn's Prone state end; 4 MP are not refunded on failure.
                 assert resource["movement_points"] >= 4
-                pc["prone"] = False
+                log.append(f"R{rnd} {pc['id']} begins Stand (4 MP; still Prone)")
                 if opportunity_available and pc["id"] == "A1":
                     opportunity_available = False
                     opportunity_used = True
                     pc["guard_remaining"] -= 1
                     assert pc["guard_remaining"] >= 0
-                    opp_total = 12 + bite["attack_roll"]["total_bonus"]
-                    if opp_total > BUILD["A"]["guard"]:
+                    opp_total = standing_opportunity_attack_total(
+                        12, bite["attack_roll"]["total_bonus"],
+                        target_prone=pc["prone"],
+                    )
+                    guard_defense = BUILD[pc["kind"]]["guard"]
+                    if opp_total > guard_defense:
                         packet = bite["primary_hp_packet"]
                         opp_damage = max(
                             0, packet["fixed_base"] + 4 -
@@ -174,8 +195,21 @@ def simulate(level, size, setup, hunter=None):
                         if pc["toxin"] is None and opp_damage > 0:
                             pc["toxin"] = "Full (delayed; no instant penalty)"
                             toxin_applications += 1
-                        log.append(f"R{rnd} A1 Stand 4 MP; Hunter Opportunity "
-                                   f"{opp_total} vs Guard17: {opp_damage} HP")
+                        log.append(f"R{rnd} Hunter Standing Opportunity "
+                                   f"12+6+2(Prone)={opp_total}>{guard_defense}: "
+                                   f"{opp_damage} HP; target still Prone")
+                    else:
+                        log.append(f"R{rnd} Hunter Standing Opportunity "
+                                   f"12+6+2(Prone)={opp_total}<={guard_defense}: "
+                                   "Guard stops Bite; target still Prone")
+                if pc["hp"] > 0:
+                    # Only modeled interruption here is incapacitation;
+                    # other physically invalidating responses are excluded.
+                    pc["prone"] = False
+                    log.append(f"R{rnd} {pc['id']} completes Stand; no longer Prone")
+                else:
+                    log.append(f"R{rnd} {pc['id']} cannot complete Stand; "
+                               "still Prone after incapacitating response")
             if pc["hp"] <= 0:
                 continue
             ap = 30 + 6 * (level - 1)
