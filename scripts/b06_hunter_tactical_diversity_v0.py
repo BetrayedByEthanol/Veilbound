@@ -100,8 +100,7 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
     front_id = ("B1" if front == "armored" else
                 "A1" if roster == "original" else "F1")
     assert front_id in party
-    front_kind = front_id[0]
-    front_stat = ROLE[front_kind]
+    front_stat = ROLE[front_id[0]]
     h_hp, h_vigor = 14, 42
     t_hp = front_stat["hp"]
     t_vigor = t_hp * level
@@ -139,6 +138,11 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
     # melee able to reach by ordinary within-budget walking. No screen/cover.
     for ident in order:
         if ident == "H":
+            # Hunter may have taken damage from higher-Initiative PCs:
+            # restore only at its genuine Step 2, paying equal Vigor.
+            restoration = min(4, 14 - h_hp, h_vigor)
+            h_hp += restoration
+            h_vigor -= restoration
             pounce_declared = opening == "ambush" and hunter_first
             defense_kind = ("guard" if front_stat["guard"] is not None
                             and guard_remaining > 0 else "dodge")
@@ -166,7 +170,7 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
                 balance_resolved = True
                 pressure = die(seed, 20, "H", "balance_pressure") + 4
                 response = (die(seed, 20, "H", "balance_defense") +
-                            max(front_stat["agi"], 2 if front_kind != "B" else 2))
+                            front_stat["agi"])
                 t_prone = pressure > response
         else:
             member = ROLE[ident[0]]
