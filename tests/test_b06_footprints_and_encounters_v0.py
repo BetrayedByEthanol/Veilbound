@@ -103,7 +103,7 @@ class B06FootprintEncounterTests(unittest.TestCase):
 
     def test_existing_charge_is_not_free_pounce(self):
         self.assertIn("three straight-line translated approach steps", self.rules)
-        self.assertIn("no free Pounce", self.rules)
+        self.assertIn("no free pounce", self.rules.lower())
         self.assertIn("Rapid Advance, Charge and Sprint forbid voluntary pivot", self.rules)
         self.assertIn("one normally paid melee attack", self.encounter_docs)
 
