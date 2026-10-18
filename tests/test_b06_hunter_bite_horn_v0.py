@@ -115,7 +115,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertIn("d20 + 6", self.rules)
         self.assertIn("3 + d6 Piercing, Pen 1", self.rules)
         self.assertIn("same natural Bite d20+6 and 3+d6 Pen1", self.rules)
-        self.assertIn("do not add unestablished Strength", self.rules)
+        self.assertIn("never add +4 Strength damage again", self.rules)
         self.assertIn("one paid Bite attack", self.pounce)
 
     def test_bite_damage_against_leather_brigandine_harness(self):
@@ -334,7 +334,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
     def test_pounce_provisional_bite_waits_on_calibration_not_authoring(self):
         self.assertNotIn("when the independently sourced natural Bite is authored",
                          self.pounce)
-        self.assertIn("full Hunter physiology/stat block and encounter calibration",
+        self.assertIn("opposed encounter calibration",
                       self.pounce)
 
     def test_venom_endurance_is_existing_protection_not_free_cure(self):
