@@ -2,7 +2,7 @@
 
 > **HUNTER-LOCAL PHYSIOLOGY LOCK CANDIDATE / CALIBRATION BASELINE.** This is **step 1** toward the complete B06-EN-03 executable enemy. It authors the Hunter's HP, natural Armor, Dodge, Vigor and regeneration from already defined Veilbound procedures, with independently stated biological ability anchors and one narrow non-Focus mapping. These **initial numbers remain provisional for opposed encounter calibration**; this document does **not** certify difficulty, promote a complete enemy fixture or change global NPC, natural-armor, size, or level rules. The 14-entry bestiary retains **B06-EN-03 CONCEPT_ONLY** and a null executable fixture path until the remaining attack/ability-resource integration is reviewed.
 
-The machine-readable physiology-only calibration record is [B06 Hunter physiology v0](../../content/creatures/b06-hunter-physiology.v0.json). It intentionally does not satisfy the full enemy schema or grant attack actions by itself.
+The machine-readable physiology-only calibration record is [B06 Hunter physiology v0](../../content/creatures/b06-hunter-physiology.v0.json), formally defined by its own [Draft 2020-12 JSON Schema](../../schemas/b06-hunter-physiology-v0.schema.json) and checked by [the shared B06 semantic validator](../../scripts/validate_b06_footprints.py) for ordered `head`/`rear` cells and reference-cell membership. The default `python -m scripts.validate_b06_footprints` discovers this record alongside the bestiary and enemies. This **partial record does not satisfy** the full `b06-enemy-v0` schema or grant attack actions by itself.
 
 ## 1. Anatomy and permitted source
 
