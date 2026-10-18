@@ -413,6 +413,33 @@
                   }
                 }
               }
+            },
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "provisional",
+                      "calibrated"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "scale": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
             }
           ],
           "description": "No numeric rating without explicit scale and reference. Status unrated means null value/scale."
