@@ -260,8 +260,9 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
                     if ident == front_id:
                         # Front target walks from (4,0) into (1,0) to
                         # attack Hunter head=(0,0). No Hunter movement will
-                        # be needed to Bite this target later.
-                        frontal_contact = True
+                        # be needed to Bite this target later. Keep the
+                        # pre-Hunter action window open so a second moving
+                        # melee actor is not silently ignored.
                         contact_route = "front_melee_adjacent"
                 elif member["kind"] == "flame" and ident == front_id:
                     # Before Hunter's approach, F's initially head-forward
