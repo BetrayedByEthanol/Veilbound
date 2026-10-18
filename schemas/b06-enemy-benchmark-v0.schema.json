@@ -883,6 +883,71 @@
           "type": "string",
           "minLength": 1,
           "description": "Authoritative resolution rule for an unusual bite, breath, incorporeal effect or unrolled application; absent on existing standard weapon Attack profiles."
+        },
+        "linked_contest": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "attacker_ability",
+            "attacker_modifier",
+            "training_modifier",
+            "other_modifier",
+            "total_pressure_bonus",
+            "defender_rule_ref",
+            "resolution_rule_ref",
+            "result_on_strict_win",
+            "extra_ap_cost",
+            "response_rule"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "pounce_balance",
+                "horn_drive_shove"
+              ]
+            },
+            "attacker_ability": {
+              "const": "Strength"
+            },
+            "attacker_modifier": {
+              "type": "integer"
+            },
+            "training_modifier": {
+              "type": "integer"
+            },
+            "other_modifier": {
+              "type": "integer"
+            },
+            "total_pressure_bonus": {
+              "type": "integer"
+            },
+            "defender_rule_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "resolution_rule_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "result_on_strict_win": {
+              "enum": [
+                "prone_in_place",
+                "straight_head_forward_shove_and_whole_body_advance"
+              ]
+            },
+            "extra_ap_cost": {
+              "const": 0
+            },
+            "response_rule": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "description": "Optional separately authored linked physical-contest metadata for Hunter Pounce or non-damage Horn Drive; total_pressure_bonus = attacker_modifier + training_modifier + other_modifier. Null/absent for ordinary attack with no linked contest. No additional paid action or attack roll is implied."
         }
       },
       "allOf": [
