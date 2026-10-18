@@ -1129,16 +1129,17 @@
                 "minLength": 1,
                 "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
               },
-              "description": "Immutable 1-based body-local ordinal order: index 1 is cell_ids[0], 2 is cell_ids[1], etc. IDs remain fixed to anatomy through every pivot, translation, Blink or other legal move. NEVER reconstruct or re-sort these indices from current x/y/z coordinates."
+              "description": "Body-local cell identities, unique and ordered (index 1 is cell_ids[0]). Semantic validator also enforces reference_cell_id membership and rectangular cell-count consistency."
             },
             "reference_cell_id": {
               "type": "string",
               "minLength": 1,
               "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
-              "description": "One permanent cell ID in cell_ids used as the fixed map-reference cell. Its world coordinate moves with the same anatomy cell; it must not be reselected by world-coordinate sorting after a turn."
+              "description": "Permanent reference cell identity. MUST be a member of sibling cell_ids; run scripts.validate_b06_footprints to enforce cross-field membership for all B06 documents. It is never selected again by world-coordinate sorting."
             }
           },
-          "description": "Optional rigid footprint metadata; multi-square movement and pivot legality follows independently authored rules. No size-derived natural attacks or combat bonuses."
+          "description": "Optional rigid footprint metadata; multi-square movement and pivot legality follows independently authored rules. No size-derived natural attacks or combat bonuses.",
+          "$comment": "SEMANTIC CONSTRAINT (not expressible with standard Draft 2020-12 JSON Schema): reference_cell_id MUST be an element of cell_ids. Run python -m scripts.validate_b06_footprints (as well as schema validation) for every B06 bestiary index and executable enemy fixture. For rectangular footprints, len(cell_ids) must equal width_cells * length_cells."
         }
       }
     },
