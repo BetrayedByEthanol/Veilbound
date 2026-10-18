@@ -883,6 +883,155 @@
           "type": "string",
           "minLength": 1,
           "description": "Authoritative resolution rule for an unusual bite, breath, incorporeal effect or unrolled application; absent on existing standard weapon Attack profiles."
+        },
+        "linked_contest": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "attacker_ability",
+            "attacker_modifier",
+            "training_modifier",
+            "other_modifier",
+            "total_pressure_bonus",
+            "defender_rule_ref",
+            "resolution_rule_ref",
+            "result_on_strict_win",
+            "extra_ap_cost",
+            "response_rule"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "pounce_balance",
+                "horn_drive_shove"
+              ]
+            },
+            "attacker_ability": {
+              "const": "Strength"
+            },
+            "attacker_modifier": {
+              "type": "integer"
+            },
+            "training_modifier": {
+              "type": "integer"
+            },
+            "other_modifier": {
+              "type": "integer"
+            },
+            "total_pressure_bonus": {
+              "type": "integer"
+            },
+            "defender_rule_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "resolution_rule_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "result_on_strict_win": {
+              "enum": [
+                "prone_in_place",
+                "straight_head_forward_shove_and_whole_body_advance"
+              ]
+            },
+            "extra_ap_cost": {
+              "const": 0
+            },
+            "response_rule": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "description": "Optional Hunter-local linked physical-contest metadata, with exact v0 calibrated-for-fixture—not playtest-certified—component totals: Pounce and Horn Drive both require attacker_modifier=4 (Strength), training_modifier=0, other_modifier=0 and total_pressure_bonus=4. Each kind is conditionally bound to its strict-win result and parent attack/packet/toxin/source shape via attack.allOf. Standard Draft 2020-12 JSON Schema cannot express a generic arithmetic sum across sibling fields: new contest kinds/bonuses require their own validated rule or a semantic sum checker. Null/absent for attacks without linked contests. No additional paid action or attack roll is implied. Both contest-specific rule references (defender and local resolution) are bound to exact authored paths for each kind, and both parent attack effects prereqs remain null. Pounce's explicit canine toxin-source prose is constrained to its authored record. The response_rule is required to equal each Hunter kind's exact authored v0 procedure; prose replacement is a content revision that must update the fixture, authority, and schema together.",
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "pounce_balance"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "result_on_strict_win": {
+                    "const": "prone_in_place"
+                  },
+                  "attacker_modifier": {
+                    "const": 4
+                  },
+                  "training_modifier": {
+                    "const": 0
+                  },
+                  "other_modifier": {
+                    "const": 0
+                  },
+                  "total_pressure_bonus": {
+                    "const": 4
+                  },
+                  "resolution_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+                  },
+                  "defender_rule_ref": {
+                    "const": "docs/rules/05-combat/universal-maneuvers.md"
+                  },
+                  "response_rule": {
+                    "const": "Single defender response to the Bite before the attack roll; AFTER final Bite damage/injection/possible incapacitation, eligible active defender chooses Strength or Agility and contests d20+4 against d20+ability+applicable specific Training. Tie holds standing. Dying/incapable defender uses Trip unable-to-contest if standing and valid. No second attack/defense window."
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "horn_drive_shove"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "result_on_strict_win": {
+                    "const": "straight_head_forward_shove_and_whole_body_advance"
+                  },
+                  "attacker_modifier": {
+                    "const": 4
+                  },
+                  "training_modifier": {
+                    "const": 0
+                  },
+                  "other_modifier": {
+                    "const": 0
+                  },
+                  "total_pressure_bonus": {
+                    "const": 4
+                  },
+                  "resolution_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+                  },
+                  "defender_rule_ref": {
+                    "const": "docs/rules/05-combat/universal-maneuvers.md"
+                  },
+                  "response_rule": {
+                    "const": "Canonical Shove: attacker d20+4 vs defender d20+Strength+specific Training+2 Hold Ground+Anchoring; tie blocks. Legal Close-Contact Opportunity before contest; successful hit there gives Shove −2 situational modifier and may invalidate maneuver. Strict win displaces PC one square forward and advances whole 1×2 Hunter one square, otherwise neither moves if destination blocked."
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "allOf": [
@@ -943,6 +1092,254 @@
             "required": [
               "source_authority_ref",
               "resolution_rule_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "linked_contest": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "pounce_balance"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "linked_contest"
+            ]
+          },
+          "then": {
+            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection. Enforces the exact authored grooved-canine natural Bite source, Bite Strength/Agility roll and toxin origin, not merely the natural_weapon category. Pounce requires melee/special head-forward contact governed by the authored Pounce range rule; one exact 3+d6 Piercing Pen1 Bite with no extra strength contribution or formula. Its rolled Bite uses the already-authored baseline +6 Strength+Agility+Training0 (no added Attack bonus).",
+            "properties": {
+              "action_class": {
+                "const": "physical"
+              },
+              "ap": {
+                "const": 24
+              },
+              "source_class": {
+                "const": "natural_weapon"
+              },
+              "resolution_kind": {
+                "const": "authored_natural_attack"
+              },
+              "attack_roll": {
+                "type": "object",
+                "properties": {
+                  "ability_a": {
+                    "const": "Strength"
+                  },
+                  "ability_b": {
+                    "const": "Agility"
+                  },
+                  "training_family": {
+                    "const": "None — creature-local natural attack"
+                  },
+                  "effective_training": {
+                    "const": 0
+                  },
+                  "situational_bonus": {
+                    "const": 0
+                  },
+                  "total_bonus": {
+                    "const": 6
+                  }
+                }
+              },
+              "primary_hp_packet": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "hp"
+                  },
+                  "damage_type": {
+                    "const": "Piercing"
+                  },
+                  "source": {
+                    "const": "Hunter grooved-canine Bite B06-local includes all damage contribution: exactly 3+d6 Piercing Pen1, never +Strength again"
+                  },
+                  "fixed_base": {
+                    "const": 3
+                  },
+                  "die": {
+                    "const": "d6"
+                  },
+                  "strength_contribution": {
+                    "const": "none"
+                  },
+                  "armor_penetration": {
+                    "const": 1
+                  },
+                  "mitigation": {
+                    "const": "physical_armor_after_penetration"
+                  }
+                },
+                "not": {
+                  "required": [
+                    "extra_formula"
+                  ]
+                }
+              },
+              "additional_packets": {
+                "maxItems": 0
+              },
+              "toxin_delivery": {
+                "type": "object",
+                "properties": {
+                  "route": {
+                    "const": "injection"
+                  },
+                  "requires_surviving_puncture": {
+                    "const": true
+                  },
+                  "source_ref": {
+                    "const": "B06-SRC-HUNTER-GROOVED-CANINES"
+                  },
+                  "profile_id": {
+                    "const": "B06-TX-HUNTER-SLOW-MY"
+                  },
+                  "explicit_source": {
+                    "const": "B06-SRC-HUNTER-GROOVED-CANINES — paired grooved upper canines and salivary venom apparatus"
+                  }
+                }
+              },
+              "weapon_or_source": {
+                "const": "B06-SRC-HUNTER-GROOVED-CANINES as one Charge-linked Bite"
+              },
+              "source_authority_ref": {
+                "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+              },
+              "resolution_rule_ref": {
+                "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+              },
+              "range_class": {
+                "const": "melee"
+              },
+              "target_geometry": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "special"
+                  },
+                  "range_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+                  },
+                  "area_rule_ref": {
+                    "const": null
+                  }
+                },
+                "required": [
+                  "kind",
+                  "range_rule_ref",
+                  "area_rule_ref"
+                ]
+              },
+              "required_active_effect": {
+                "const": null
+              },
+              "requires_effect_inactive": {
+                "const": null
+              }
+            },
+            "required": [
+              "resolution_kind",
+              "target_geometry"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "linked_contest": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "horn_drive_shove"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "linked_contest"
+            ]
+          },
+          "then": {
+            "description": "Hunter-local Horn Drive is a paid canonical Shove contest, not an attack roll, damaging horn Bash or toxin delivery. Requires the authored frontal horn/shoulder whole-body contact source, not interchangeable Bite/other natural weapons. Horn Drive similarly requires melee/special front-contact geometry, not a ranged attack or area effect.",
+            "properties": {
+              "action_class": {
+                "const": "physical"
+              },
+              "ap": {
+                "const": 24
+              },
+              "source_class": {
+                "const": "natural_weapon"
+              },
+              "resolution_kind": {
+                "const": "authored_non_damage_effect"
+              },
+              "attack_roll": {
+                "type": "null"
+              },
+              "primary_hp_packet": {
+                "type": "null"
+              },
+              "additional_packets": {
+                "maxItems": 0
+              },
+              "toxin_delivery": {
+                "type": "null"
+              },
+              "weapon_or_source": {
+                "const": "B06-SRC-HUNTER-FRONTAL-HORN and shoulders, head-forward whole-body contact"
+              },
+              "source_authority_ref": {
+                "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+              },
+              "resolution_rule_ref": {
+                "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+              },
+              "range_class": {
+                "const": "melee"
+              },
+              "target_geometry": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "special"
+                  },
+                  "range_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+                  },
+                  "area_rule_ref": {
+                    "const": null
+                  }
+                },
+                "required": [
+                  "kind",
+                  "range_rule_ref",
+                  "area_rule_ref"
+                ]
+              },
+              "required_active_effect": {
+                "const": null
+              },
+              "requires_effect_inactive": {
+                "const": null
+              }
+            },
+            "required": [
+              "resolution_kind",
+              "target_geometry"
             ]
           }
         }

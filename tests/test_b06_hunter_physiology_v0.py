@@ -85,8 +85,9 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
     def test_slice_record_explicitly_not_an_executable_enemy(self):
         self.assertEqual(self.profile["record_status"], "PHYSIOLOGY_ONLY_NOT_EXECUTABLE")
         self.assertIsNone(self.profile["full_enemy_fixture_path"])
-        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
-        self.assertIsNone(self.hunter["fixture_path"])
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
         self.assertEqual(self.hunter["encounter_guidance"]["challenge_rating"]["status"], "unrated")
         self.assertIn("docs/design/b06-hunter-physiology-v0.md", self.hunter["rules_basis"])
 
@@ -175,9 +176,9 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
     def test_pounce_bite_and_horn_remain_independent_and_uncalibrated(self):
         self.assertIn("d20+6 Bite", self.design)
         self.assertIn("d20+5 Horn", self.design)
-        self.assertIn("complete B06-EN-03 executable enemy", self.design)
-        self.assertIn("Pounce/Drive mode authoring", self.design)
-        self.assertIn("CONCEPT_ONLY", self.design)
+        self.assertIn("full B06-EN-03 executable test fixture", self.design)
+        self.assertIn("Pounce/Drive contest authority", self.design)
+        self.assertIn("PHYSIOLOGY_ONLY_NOT_EXECUTABLE", self.design)
         self.assertIn("24 AP", self.pounce)
 
 

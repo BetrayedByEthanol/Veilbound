@@ -1,0 +1,373 @@
+{
+  "schema_version": "b06-enemy-v0",
+  "id": "B06-EN-03",
+  "name": "Hunter of the Woods — Level-3-equivalent beast benchmark",
+  "status": "EXECUTABLE_TEST_FIXTURE",
+  "benchmark_level": 3,
+  "rules_basis": [
+    "docs/design/b06-hunter-full-statblock-v0.md",
+    "docs/design/b06-hunter-physiology-v0.md",
+    "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+    "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
+    "docs/rules/05-combat/universal-maneuvers.md",
+    "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
+    "docs/rules/05-combat/action-categories-and-physical-tempo.md",
+    "docs/rules/05-combat/initiative-and-round-structure.md",
+    "docs/rules/05-combat/movement-foundation.md",
+    "docs/rules/05-combat/defensive-responses-and-criticals.md",
+    "docs/rules/05-combat/weapons-and-armor.md",
+    "docs/rules/06-vigor-wounds-death/hp-and-vigor.md",
+    "docs/rules/05-combat/mundane-toxins-v0.md"
+  ],
+  "identity": {
+    "type": "authored_creature",
+    "archetype": null,
+    "focus": null,
+    "pillar": null,
+    "focus_feature_notes": "Hunter is a living, non-Archetype natural beast with no Focus and no personal Veil invocations. Benchmark rank3 is a Vigor and Turn AP comparison anchor, not character Level/CR/XP. Physical24 and natural regen +0 are creature-local provisional B06 mappings."
+  },
+  "creature_profile": {
+    "family": "natural_beast",
+    "species_or_kind": "Hunter of the Woods",
+    "body_state": "living",
+    "cognition": "animal_like",
+    "veil_relationship": [
+      "ordinary_no_independent_invocation"
+    ],
+    "physical_presence": "corporeal",
+    "mvp_player_option": "not_playable_mvp",
+    "pillar_affinities": [],
+    "physiology_notes": [
+      "Large, bulky forest quadruped, exceeding ordinary bear mass; wolf-like head, powerful legs, one prominent horn and venomous puncturing bite and strong jaws.",
+      "1×2-square rigid footprint; translation/turning follows Multi-Square Creature Footprints v0. No automatic added Reach, Armor, Guard or attack cadence.",
+      "Horn serves primarily mating-season rutting, territorial intimidation and deterrence, and breaking up loose material/roots when enlarging an excavated den.",
+      "B06 physiology lock candidate: Vitality+4, Agility+2, Awareness+2; HP14 from 10+Vitality, natural hide Armor3 (uniform; no worn-armor Dodge cap), Dodge14 at first use then −2 per previous Dodge. No anatomical natural Guard instrument; no personal Veil invocation.",
+      "B06 rank-3-equivalent local Vigor anchor: (10+Vitality4)×3=42 Vigor, non-Focus regeneration +0 giving 4 per actual own-turn Regeneration Step at 1 Vigor per point, and 11 Vigor Recovery per completed six hours (25%, round half-up, cap42). These values require opposed encounter calibration; no size-based HP multiplier, virtual exploration Regeneration Step or exertion stamina system.",
+      "Venom apparatus: paired modified salivary glands supply grooves in existing reinforced upper canines; delivery occurs only on genuinely puncturing Bite, not horn/contact. Single central frontal-cranial horn has bony core/keratin sheath; neck/skull reinforced for rutting, deterring rivals and den excavation.",
+      "Phase 2 executable v0 fixture: STR+4, AGI+2, Precision+1, Intelligence−2, Awareness+2, Presence−1, VIT+4, Veil Affinity0/Control0, Initiative+4, Turn AP42/Physical24, 12 MP, one latent Guard capacity with no legal natural Guard instrument and one Opportunity/Reaction. Bite +6 (STR4+AGI2), Horn +5 (STR4+Precision1), Pounce/Drive pressure +4 (STR4). V0 numeric benchmark, not CR."
+    ],
+    "behavior_notes": [
+      "Apex woodland ambush predator able to hunt deer/elk and sometimes moose; stalks, uses explosive pounce/bite and attempts to bring prey down.",
+      "If the pounce fails to take prey down but the independently successful bite genuinely punctures, venom may still be delivered; it can withdraw, track scent/sign and attempt to finish weakened prey later.",
+      "Conserves energy and avoids unnecessary injury; tracking, withdrawal and rest from exertion are ordinary animal behavior, not automatically a Vigor expenditure/recovery.",
+      "May threaten competitors with horn displays, defend a den, retreat from a costly encounter or interact with approaching humans without automatically attacking."
+    ],
+    "footprint": {
+      "shape": "rectangular",
+      "width_cells": 1,
+      "length_cells": 2,
+      "reference_rule": "Stable 1-based body-local indices: 1=head (reference), 2=rear. Labels remain with anatomical cells through translation, 90/180-degree pivots and legal repositioning; no post-movement coordinate re-sort.",
+      "movement_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
+      "rotation_rule_ref": "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
+      "cell_ids": [
+        "head",
+        "rear"
+      ],
+      "reference_cell_id": "head"
+    }
+  },
+  "bestiary_ref": "B06-EN-03",
+  "abilities": {
+    "strength": 4,
+    "agility": 2,
+    "precision": 1,
+    "intelligence": -2,
+    "awareness": 2,
+    "presence": -1,
+    "vitality": 4,
+    "veil_affinity": 0,
+    "veil_control": 0
+  },
+  "defenses": {
+    "hp_max": 14,
+    "vigor_max": 42,
+    "armor": 3,
+    "armor_name": "Natural dense hide/dermis — uniform single creature, no worn armor stacking",
+    "dodge_agility_cap": null,
+    "dodge_base": 14,
+    "guard_instrument": null,
+    "guard_base": null,
+    "guard_capacity": 1,
+    "initiative_bonus": 4,
+    "resistance_notes": "Normal living-beast resistances only. No generic toxin immunity, Fire resistance, free head/rear defenses, Guard instrument, free anti-regeneration, size-derived modifiers or latent special senses. One latent derived Guard capacity is unusable without a separately authored instrument. Dying and ordinary wounds apply."
+  },
+  "resources": {
+    "turn_ap": 42,
+    "physical_action_ap": 24,
+    "projection_action_ap": null,
+    "movement_points": 12,
+    "max_vp": 0,
+    "natural_regeneration_throughput": 4,
+    "reaction_capacity": 1,
+    "start_states": [
+      {
+        "id": "hunter_fresh_front_contact",
+        "available_vp": 0,
+        "committed_vp": 0,
+        "spent_vp": 0,
+        "hp": 14,
+        "vigor": 42,
+        "active_effects": [],
+        "condition": "Unwounded living Hunter; rigid 1×2 rear/head positioned with known cardinal head-forward orientation; no prior Dodge pressure or Reaction spent. Head and rear share one HP/Vigor pool. At Round Begin refresh one physically unusable Guard budget, one Opportunity capacity, one Reaction; do not create an ambush surprise advantage without actual scenario checks."
+      }
+    ]
+  },
+  "equipment": [],
+  "effects": [],
+  "attack_profiles": [
+    {
+      "id": "B06-AT-04",
+      "name": "Hunter natural grooved-canine Bite",
+      "action_class": "physical",
+      "ap": 24,
+      "attack_roll": {
+        "ability_a": "Strength",
+        "ability_b": "Agility",
+        "training_family": "None — creature-local natural attack",
+        "effective_training": 0,
+        "situational_bonus": 0,
+        "total_bonus": 6
+      },
+      "range_class": "melee",
+      "weapon_or_source": "B06-SRC-HUNTER-GROOVED-CANINES",
+      "primary_hp_packet": {
+        "kind": "hp",
+        "damage_type": "Piercing",
+        "fixed_base": 3,
+        "die": "d6",
+        "strength_contribution": "none",
+        "armor_penetration": 1,
+        "mitigation": "physical_armor_after_penetration",
+        "source": "Hunter grooved-canine Bite B06-local includes all damage contribution: exactly 3+d6 Piercing Pen1, never +Strength again"
+      },
+      "additional_packets": [],
+      "required_active_effect": null,
+      "requires_effect_inactive": null,
+      "toxin_delivery": {
+        "profile_id": "B06-TX-HUNTER-SLOW-MY",
+        "route": "injection",
+        "explicit_source": "B06-SRC-HUNTER-GROOVED-CANINES — paired grooved upper canines and salivary venom apparatus",
+        "requires_surviving_puncture": true,
+        "source_ref": "B06-SRC-HUNTER-GROOVED-CANINES"
+      },
+      "critical_notes": "One natural Bite with one defense assignment and standard critical confirmation; toxin application only on surviving after-prevention Piercing puncture; DC12 Vitality resistance once for valid new accepted exposure, Full/Reduced 10/30/60/120-minute clock; no immediate poison penalty.",
+      "legality_refs": [
+        "docs/design/b06-hunter-full-statblock-v0.md",
+        "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "docs/rules/05-combat/initiative-and-round-structure.md",
+        "docs/rules/05-combat/defensive-responses-and-criticals.md"
+      ],
+      "source_class": "natural_weapon",
+      "resolution_kind": "authored_natural_attack",
+      "source_authority_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+      "target_geometry": {
+        "kind": "melee_one",
+        "range_rule_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "area_rule_ref": null
+      },
+      "resolution_rule_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+    },
+    {
+      "id": "B06-AT-05",
+      "name": "Hunter frontal Horn Bash",
+      "action_class": "physical",
+      "ap": 24,
+      "attack_roll": {
+        "ability_a": "Strength",
+        "ability_b": "Precision",
+        "training_family": "None — creature-local natural attack",
+        "effective_training": 0,
+        "situational_bonus": 0,
+        "total_bonus": 5
+      },
+      "range_class": "melee",
+      "weapon_or_source": "B06-SRC-HUNTER-FRONTAL-HORN",
+      "primary_hp_packet": {
+        "kind": "hp",
+        "damage_type": "Crush",
+        "fixed_base": 2,
+        "die": "d6",
+        "strength_contribution": "none",
+        "armor_penetration": 0,
+        "mitigation": "physical_armor_after_penetration",
+        "source": "Hunter frontal Horn Bash B06-local includes all damage contribution: exactly 2+d6 Crush Pen0, never +Strength again"
+      },
+      "additional_packets": [],
+      "required_active_effect": null,
+      "requires_effect_inactive": null,
+      "toxin_delivery": null,
+      "critical_notes": "One ordinary head-forward Horn Bash. Standard natural-attack critical process. No toxin, fear, shove, second attack, movement or Guard capability.",
+      "legality_refs": [
+        "docs/design/b06-hunter-full-statblock-v0.md",
+        "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "docs/rules/05-combat/initiative-and-round-structure.md",
+        "docs/rules/05-combat/defensive-responses-and-criticals.md"
+      ],
+      "source_class": "natural_weapon",
+      "resolution_kind": "authored_natural_attack",
+      "source_authority_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+      "target_geometry": {
+        "kind": "melee_one",
+        "range_rule_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "area_rule_ref": null
+      },
+      "resolution_rule_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+    },
+    {
+      "id": "B06-AT-06",
+      "name": "Hunter Pounce — one linked Bite and independent balance rider",
+      "action_class": "physical",
+      "ap": 24,
+      "attack_roll": {
+        "ability_a": "Strength",
+        "ability_b": "Agility",
+        "training_family": "None — creature-local natural attack",
+        "effective_training": 0,
+        "situational_bonus": 0,
+        "total_bonus": 6
+      },
+      "range_class": "melee",
+      "weapon_or_source": "B06-SRC-HUNTER-GROOVED-CANINES as one Charge-linked Bite",
+      "primary_hp_packet": {
+        "kind": "hp",
+        "damage_type": "Piercing",
+        "fixed_base": 3,
+        "die": "d6",
+        "strength_contribution": "none",
+        "armor_penetration": 1,
+        "mitigation": "physical_armor_after_penetration",
+        "source": "Hunter grooved-canine Bite B06-local includes all damage contribution: exactly 3+d6 Piercing Pen1, never +Strength again"
+      },
+      "additional_packets": [],
+      "required_active_effect": null,
+      "requires_effect_inactive": null,
+      "toxin_delivery": {
+        "profile_id": "B06-TX-HUNTER-SLOW-MY",
+        "route": "injection",
+        "explicit_source": "B06-SRC-HUNTER-GROOVED-CANINES — paired grooved upper canines and salivary venom apparatus",
+        "requires_surviving_puncture": true,
+        "source_ref": "B06-SRC-HUNTER-GROOVED-CANINES"
+      },
+      "critical_notes": "One paid 24-AP Pounce with one Bite attack and, only if forceful front contact remains, one separately resolved non-attack Balance contest after Bite/injection/wound/Dying. No extra Bite or second defense response; a blocked/missed Bite may still allow the balance contest. If target unable to resist after Bite, use Trip unable-to-contest automatic Prone when physically valid.",
+      "legality_refs": [
+        "docs/design/b06-hunter-full-statblock-v0.md",
+        "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
+        "docs/rules/05-combat/initiative-and-round-structure.md",
+        "docs/rules/05-combat/defensive-responses-and-criticals.md"
+      ],
+      "source_class": "natural_weapon",
+      "resolution_kind": "authored_natural_attack",
+      "source_authority_ref": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
+      "target_geometry": {
+        "kind": "special",
+        "range_rule_ref": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
+        "area_rule_ref": null
+      },
+      "resolution_rule_ref": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
+      "linked_contest": {
+        "kind": "pounce_balance",
+        "attacker_ability": "Strength",
+        "attacker_modifier": 4,
+        "training_modifier": 0,
+        "other_modifier": 0,
+        "total_pressure_bonus": 4,
+        "defender_rule_ref": "docs/rules/05-combat/universal-maneuvers.md",
+        "resolution_rule_ref": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
+        "result_on_strict_win": "prone_in_place",
+        "extra_ap_cost": 0,
+        "response_rule": "Single defender response to the Bite before the attack roll; AFTER final Bite damage/injection/possible incapacitation, eligible active defender chooses Strength or Agility and contests d20+4 against d20+ability+applicable specific Training. Tie holds standing. Dying/incapable defender uses Trip unable-to-contest if standing and valid. No second attack/defense window."
+      }
+    },
+    {
+      "id": "B06-AT-07",
+      "name": "Hunter Horn Drive — canonical Shove instead of Horn Bash",
+      "action_class": "physical",
+      "ap": 24,
+      "attack_roll": null,
+      "range_class": "melee",
+      "weapon_or_source": "B06-SRC-HUNTER-FRONTAL-HORN and shoulders, head-forward whole-body contact",
+      "primary_hp_packet": null,
+      "additional_packets": [],
+      "required_active_effect": null,
+      "requires_effect_inactive": null,
+      "toxin_delivery": null,
+      "critical_notes": "No attack roll and no HP packet: declare alternative 24-AP physical Shove with normal Close-Contact Opportunity, strict opposed win and full rigid-1x2 legal advance; no venom or Horn Bash damage.",
+      "legality_refs": [
+        "docs/design/b06-hunter-full-statblock-v0.md",
+        "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "docs/rules/05-combat/initiative-and-round-structure.md",
+        "docs/rules/05-combat/defensive-responses-and-criticals.md"
+      ],
+      "source_class": "natural_weapon",
+      "resolution_kind": "authored_non_damage_effect",
+      "source_authority_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+      "target_geometry": {
+        "kind": "special",
+        "range_rule_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "area_rule_ref": null
+      },
+      "resolution_rule_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+      "linked_contest": {
+        "kind": "horn_drive_shove",
+        "attacker_ability": "Strength",
+        "attacker_modifier": 4,
+        "training_modifier": 0,
+        "other_modifier": 0,
+        "total_pressure_bonus": 4,
+        "defender_rule_ref": "docs/rules/05-combat/universal-maneuvers.md",
+        "resolution_rule_ref": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md",
+        "result_on_strict_win": "straight_head_forward_shove_and_whole_body_advance",
+        "extra_ap_cost": 0,
+        "response_rule": "Canonical Shove: attacker d20+4 vs defender d20+Strength+specific Training+2 Hold Ground+Anchoring; tie blocks. Legal Close-Contact Opportunity before contest; successful hit there gives Shove −2 situational modifier and may invalidate maneuver. Strict win displaces PC one square forward and advances whole 1×2 Hunter one square, otherwise neither moves if destination blocked."
+      }
+    }
+  ],
+  "tactics": {
+    "action_policy": [
+      "B06 provisional Level3-equivalent Turn AP42; local Physical Action24 (one paid Bite, Horn Bash, Pounce or Horn Drive per turn), 18 AP left; no spontaneous 2nd physical attack. General Tempo24 is legal if independently authored, but after one 24AP action 18 remaining cannot buy it. No Projection Actions, spells or personal VP.",
+      "One 12-MP ordinary allowance per own turn, base 2 MP orthogonal and 3 MP diagonal per valid whole-1x2 translation. All translation and pivots must respect stable head/rear cells, entire-body clearance and per-cell terrain cost average; a pivot is paid ordinary movement, not a free Pounce heading change.",
+      "Pounce is strict head-forward cardinal Charge variant, starts without prior MP spent/reserved, minimum 3 translated steps, 2×effective M movement cap (unimpaired24), provisional rapid cutoff floor(3M/2)=18; AP commits at crossing cutoff or before eligible attack; unused extended movement discarded. End front-adjacent to one standing one-square PC, no lateral/rear Pounce, no free Grapple.",
+      "Normal Bite and Horn Bash each require immediately head-forward adjacency to one square PC for v0. An ordinary pivot can reorient before an attack; no creature-wide omnidirectional Reach granted from two cells.",
+      "Horn Drive is a separately declared paid Shove against one standing one-square PC in immediate head-forward square, not a free Bash rider. Canonical Close-Contact Opportunity and −2 Pressure if it hits, defender +2 Hold Ground, rigid 1×2 built-in advance only after a strict winning contest and clear destination.",
+      "Hunter Pounce resolves one paid Bite+venom first, then separately one free forceful balance contest on still-eligible standing contact; pressure d20+4. No extra physical-action AP, defense response or second toxin registration. Horn cannot be substituted for committed Pounce Bite.",
+      "Tracking prey, retreating, pouncing or waiting for toxin onset do not automatically spend/replenish Vigor. No spontaneous HP regeneration outside an actual Regeneration Step, no magical stealth/invisibility or guaranteed surprise."
+    ],
+    "defense_policy": [
+      "Initiative d20+Agility2+Awareness2=d20+4, no automatic ambush initiative/surprise bonus. Ordinary one Reaction refreshes Round Begin but has no invented reaction-only attack feature.",
+      "Dodge14 first, then 12/10/8 under +2 Dodge Pressure per previous chosen Dodge in same round; reset at Round Begin. Choose Take Hit when desirable; no per-cell separate defense.",
+      "Derived Physical Tempo=floor(42/24)=1, so base Guard capacity1 and Opportunity capacity1 at Round Begin. Guard instrument/Guard Defense absent, so personal Guard response illegal despite unused capacity; ordinary legal Opportunity Attack may use a frontal Bite or Horn Bash, not Horn Drive.",
+      "Natural Armor3 reduces one packet after penetration; no extra Agility cap or stacking. Regeneration Step restores at most 4 actual missing HP or lawful Repair Progress, costing equal Vigor. Six-hour Vigor Recovery11 caps at42."
+    ],
+    "scenario_constraints": [
+      "No independent Veil invocation, no Focus/AP conversion or natural-weapon Training automatically supplied. Strength4 and Agility2 produce Bite+6; Strength4+Precision1 produce Horn+5; no Training or situational modifier; Pounce/Horn Drive pressure uses Strength4 alone. The horn and bite ability pairings are Hunter-local, not general new natural-weapon rules.",
+      "Natural Bite damage is exactly 3+d6 Piercing Pen1 and Horn Bash exactly 2+d6 Crush Pen0, not plus another STR4, Light Physical Contribution, or extra collision mass.",
+      "Only a genuine unprevented remaining Piercing puncture through grooved canines after mitigation (or separately proven breached route) allows one slow toxin application. One existing active instance blocks equal/lower-grade reexposure; use DC12 Vitality Full/Reduced and delayed T+10/T+30/T+60/T+120 clocks; no immediate penalty or Fire substitute.",
+      "Pounce Force +4 is distinct from Bite Attack +6, uses a single after-Bite free balance contest, and can still succeed on Bite miss/Guard. No Grapple/Pin, Prone displacement or force from second cell. Incapable defender uses canonical Trip unable-to-contest only with physically legal standing contact.",
+      "Horn Drive Shove Pressure +4, reduced to +2 by a qualifying Close-Contact Opportunity hit, versus d20+defender Strength+Training+2 Hold Ground+Anchoring. A clear full-body advance and target destination are required; no raw HP, toxin, damage on blocked displacement or direct advance through third parties.",
+      "B06 status EXECUTABLE_TEST_FIXTURE means mechanically sourced, deterministic benchmark inputs in the schema. It does NOT certify a full encounter engine, simulation, any opponent balance outcome, level equivalence or numerical CR."
+    ]
+  },
+  "validation": {
+    "formula_checks": [
+      "Nine ability anchors STR4 AGI2 PRECI1 INT−2 AWA2 PRES−1 VIT4 VA0 VC0 are authored local beast statistics; not a PC point buy or universal beast species template.",
+      "HP=10+VIT4=14; Vigor=(10+VIT4)×rank3=42; natural Armor3; Agility cap null; no size multiplier or second square HP.",
+      "Dodge=10+AGI2+AWA2=14; same-round Dodge sequence 14,12,10,8; Initiative=AGI2+AWA2=+4.",
+      "Bite=d20+STR4+AGI2+Training0+situational0=d20+6; exactly 3+d6 Piercing Pen1 with all physical damage included.",
+      "Horn Bash=d20+STR4+Precision1+Training0+situational0=d20+5; exactly 2+d6 Crush Pen0 with all damage included.",
+      "Pounce Pressure=d20+STR4+Pounce Training0=d20+4; Horn Drive Shove Pressure=d20+STR4+relevant Training0=d20+4 (subject to legal Close-Contact Opportunity −2).",
+      "Turn AP=min(120,30+6×(3−1))=42; B06 local Physical24; Physical Tempo=floor(42/24)=1; base Guard1 (unusable without instrument), Opportunity capacity1 and Reaction1. One physical attack leaves 18 AP.",
+      "Ordinary M12; Pounce 2M24, cutoff floor(3M/2)=18, minimum three translated steps, head-forward cardinal and whole-1×2 clearance.",
+      "Non-Focus local Regeneration throughput=max(VIT4,0)+0=4 per actual own-turn Step; Vigor spent one per recovered HP/Repair Progress; completed 6h Vigor Recovery half-up(42×0.25)=11, capped at42.",
+      "Bite and Pounce delivery include same true puncture gate, DC12 Vitality resistance and nonstacking pursuit toxin, no second injector or toxin attack; Horn Bash and Horn Drive have no toxin."
+    ],
+    "known_exclusions": [
+      "No proven numerical encounter rank, CR, XP, TP, environmental frequency, TTK or actual fights simulated; intended elite encounter scenarios remain labelled untested.",
+      "No new species-wide natural weapon attack pairings, animal armor scaling, additional horn Guard, natural attack training inheritance or body-mass kinetic packet.",
+      "No PC progression/Talent/Archetype/Focus, personally Available/Committed/Spent VP, supernatural sensory range, universal special smell bonus, magical powers or innate immune states.",
+      "Pounce/Drive only authored versus standing corporeal ordinary one-square PC and actual physical terrain; multi-square target takedown/Grapple, exotic unsupported targets, complex mass and mounted uses are deferred.",
+      "A linked contest is not a bonus action or an additional attack. Pounce has one Bite damage event/defender response; Horn Drive has no damage attack roll at all.",
+      "Normal animal behavior is not new initiative advantage, implicit stealth action or automatic extra Vigor recovery."
+    ],
+    "certification_status": "Schema-valid B06-EN-03 executable benchmark fixture for authored one-square-target Bite, venom, Pounce, Horn Bash and Horn Drive mechanics; provisional v0 physiology/economy preserved. No actual opposed fight, statistical calibration, CR or MVP encounter certification yet."
+  }
+}

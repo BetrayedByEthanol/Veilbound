@@ -14,6 +14,7 @@ CREATURE_SCHEMA = ROOT / "schemas/b06-enemy-benchmark-v0.schema.json"
 INDEX_SCHEMA = ROOT / "schemas/b06-bestiary-index-v0.schema.json"
 BESTIARY = ROOT / "content/creatures/b06-initial-bestiary-v0.json"
 SENTRY = ROOT / "content/creatures/b06-firebound-sentry.v0.json"
+HUNTER_FIXTURE = ROOT / "content/creatures/b06-hunter-of-the-woods.v0.json"
 
 
 class B06CreatureTaxonomyTests(unittest.TestCase):
@@ -23,6 +24,7 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
         cls.index_schema = json.loads(INDEX_SCHEMA.read_text(encoding="utf-8"))
         cls.index = json.loads(BESTIARY.read_text(encoding="utf-8"))
         cls.sentry = json.loads(SENTRY.read_text(encoding="utf-8"))
+        cls.hunter_fixture = json.loads(HUNTER_FIXTURE.read_text(encoding="utf-8"))
         cls.entries = {e["id"]: e for e in cls.index["entries"]}
 
     def test_schema_versions_and_collection_contract(self):
@@ -46,14 +48,18 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
                             {"EXECUTABLE_FIXTURE_EXISTS", "CONCEPT_ONLY", "DEFERRED"}
                             for e in self.index["entries"]))
 
-    def test_two_executable_benchmarks_linked_without_altering_sentry(self):
+    def test_three_executable_benchmarks_linked_without_altering_sentry(self):
         executable = [e for e in self.index["entries"]
                       if e["entry_status"] == "EXECUTABLE_FIXTURE_EXISTS"]
-        self.assertEqual([e["id"] for e in executable], ["B06-EN-01", "B06-EN-02"])
+        self.assertEqual([e["id"] for e in executable], ["B06-EN-01", "B06-EN-02", "B06-EN-03"])
         self.assertEqual(executable[0]["fixture_path"],
                          "content/creatures/b06-firebound-sentry.v0.json")
         self.assertEqual(executable[1]["fixture_path"],
                          "content/creatures/b06-ordinary-human-soldier.v0.json")
+        self.assertEqual(executable[2]["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
+        self.assertEqual(self.hunter_fixture["creature_profile"], executable[2]["creature_profile"])
+        self.assertEqual(self.hunter_fixture["bestiary_ref"], "B06-EN-03")
         self.assertEqual(self.sentry["bestiary_ref"], "B06-EN-01")
         self.assertEqual(self.sentry["creature_profile"],
                          executable[0]["creature_profile"])
@@ -119,14 +125,16 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
         self.assertEqual(dwarf["creature_profile"]["veil_relationship"], ["undetermined"])
         self.assertEqual(dwarf["planned_capabilities"], [])
 
-    def test_hunter_venom_delivery_remains_unauthored(self):
+    def test_hunter_venom_delivery_is_sourced_but_uncalibrated(self):
         hunter = self.entries["B06-EN-03"]
         self.assertEqual(hunter["creature_profile"]["family"], "natural_beast")
         self.assertTrue(any("horn" in s.lower() for s in hunter["creature_profile"]["physiology_notes"]))
         self.assertTrue(any("venomous" in s.lower() for s in hunter["creature_profile"]["physiology_notes"]))
         bite = next(c for c in hunter["planned_capabilities"] if c["name"] == "Venomous bite")
-        self.assertEqual(bite["state"], "requires_authored_attack_or_effect")
-        self.assertTrue(any("TX" in x for x in bite["missing_authority"]))
+        self.assertEqual(bite["state"], "existing_authority_only")
+        self.assertTrue(any("calibration" in x.lower() for x in bite["missing_authority"]))
+        self.assertEqual(self.hunter_fixture["attack_profiles"][0]["toxin_delivery"]["profile_id"],
+                         "B06-TX-HUNTER-SLOW-MY")
 
     def test_spider_veil_touch_needs_authored_alteration(self):
         spider = self.entries["B06-EN-04"]

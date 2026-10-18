@@ -1,7 +1,8 @@
 """Hunter Pounce / Prey Takedown v0 action-economy and player-response regressions.
 
 These standard-library tests formalize the B06-EN-03 *provisional* Pounce
-sample. They do not certify attack balance or make the Hunter executable.
+sample. They do not certify attack balance; the separate complete enemy fixture
+now exists as an executable B06 benchmark.
 """
 import json
 import math
@@ -73,7 +74,7 @@ class HunterPounceRulesTests(unittest.TestCase):
         cls.hunter = next(e for e in cls.index["entries"] if e["id"] == "B06-EN-03")
 
     def test_pounce_is_hunter_only_not_global_charge_revision(self):
-        self.assertIn("HUNTER-LOCAL RULE CANDIDATE", self.rules)
+        self.assertIn("HUNTER-LOCAL RULE v0 — EXECUTABLE TEST FIXTURE", self.rules)
         self.assertIn("not a general Charge/Trip/Grapple revision", self.rules)
         self.assertIn("one paid Bite attack", self.rules)
         self.assertIn("one Pounce-specific forceful balance contest", self.rules)
@@ -95,12 +96,19 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertEqual(3*3, 9)  # Even three mixed-terrain steps are three, not four+.
         self.assertIn("first completed step exceeding the Rapid Advance cutoff", self.rules)
 
-    def test_natural_bite_and_pressure_both_test_only(self):
+    def test_source_authored_bite_and_pressure_provisional_for_calibration(self):
         for marker in ("d20 + 6", "3 + d6 Piercing, Penetration 1", "d20 + 4"):
             self.assertIn(marker, self.rules)
-        self.assertIn("test-only numbers", self.rules)
-        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
-        self.assertIsNone(self.hunter["fixture_path"])
+        self.assertIn("actual authored v0 Hunter-specific scores", self.rules)
+        self.assertIn("complete executable Hunter stat block", self.rules)
+        self.assertIn("complete `EXECUTABLE_TEST_FIXTURE`", self.rules)
+        self.assertIn("challenge remains `unrated`", self.rules)
+        self.assertNotIn("without completing the full executable enemy", self.rules)
+        self.assertNotIn("not canonical Hunter abilities until", self.rules)
+        self.assertNotIn("until the complete stat block, integration", self.rules)
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
 
     def test_front_head_only_one_by_two_footprint(self):
         shape = self.hunter["creature_profile"]["footprint"]
@@ -254,15 +262,24 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("no Grappling State",self.rules)
         self.assertIn("not** canonical", self.rules)
 
-    def test_b06_capability_keeps_missing_authority(self):
-        cap=next(c for c in self.hunter["planned_capabilities"]
-                 if c["id"]=="B06-CAP-HUNTER-POUNCE")
-        self.assertEqual(cap["state"],"requires_authored_attack_or_effect")
+    def test_b06_capability_has_authored_authority_but_calibration_remains_open(self):
+        cap = next(c for c in self.hunter["planned_capabilities"]
+                   if c["id"] == "B06-CAP-HUNTER-POUNCE")
+        self.assertEqual(cap["state"], "existing_authority_only")
         self.assertTrue(cap["missing_authority"])
+        self.assertTrue(any("calibration" in item.lower()
+                            for item in cap["missing_authority"]))
         self.assertIn("docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
                       self.hunter["rules_basis"])
-        self.assertFalse(any(c["state"]=="existing_authority_only"
-                             for c in self.hunter["planned_capabilities"]))
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
+        self.assertEqual(self.hunter["encounter_guidance"]["challenge_rating"]["status"],
+                         "unrated")
+        self.assertEqual({c["id"] for c in self.hunter["planned_capabilities"]
+                          if c["state"] == "existing_authority_only"},
+                         {"B06-CAP-HUNTER-POUNCE", "B06-CAP-HUNTER-BITE",
+                          "B06-CAP-HUNTER-HORN"})
 
 
 if __name__=="__main__":

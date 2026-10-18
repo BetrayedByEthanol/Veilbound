@@ -115,7 +115,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertIn("d20 + 6", self.rules)
         self.assertIn("3 + d6 Piercing, Pen 1", self.rules)
         self.assertIn("same natural Bite d20+6 and 3+d6 Pen1", self.rules)
-        self.assertIn("do not add unestablished Strength", self.rules)
+        self.assertIn("never add +4 Strength damage again", self.rules)
         self.assertIn("one paid Bite attack", self.pounce)
 
     def test_bite_damage_against_leather_brigandine_harness(self):
@@ -251,14 +251,27 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertIn("free fear effect", self.rules)
         self.assertIn("not a free Bash rider", self.rules)
 
-    def test_hunter_stays_concept_only_and_both_sources_are_still_uncalibrated(self):
-        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
-        self.assertIsNone(self.hunter["fixture_path"])
+    def test_hunter_fixture_exists_but_both_sources_still_uncalibrated(self):
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
         self.assertEqual(self.hunter["encounter_guidance"]["challenge_rating"]["status"],"unrated")
         for cid in ("B06-CAP-HUNTER-BITE","B06-CAP-HUNTER-HORN"):
             cap=next(x for x in self.hunter["planned_capabilities"] if x["id"]==cid)
-            self.assertEqual(cap["state"],"requires_authored_attack_or_effect")
+            self.assertEqual(cap["state"],"existing_authority_only")
             self.assertTrue(cap["missing_authority"])
+
+    def test_full_hunter_ap_and_movement_no_longer_await_physio_authoring(self):
+        self.assertIn("complete B06-EN-03 executable fixture", self.rules)
+        self.assertIn("already integrates the authored physiology", self.rules)
+        self.assertIn("42 Turn AP, 24 AP per Physical Action", self.rules)
+        self.assertIn("M = 12 MP", self.rules)
+        self.assertIn("opposed encounter calibration", self.rules)
+        self.assertNotIn("until the full physiology is authored", self.rules)
+        self.assertNotIn("physiology baseline is pending", self.rules)
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["encounter_guidance"]
+                         ["challenge_rating"]["status"], "unrated")
 
     def test_pounce_resolves_bite_then_venom_then_balance_once(self):
         bite = self.pounce.index("**D. Resolve the one Bite attack.**")
@@ -333,7 +346,7 @@ class HunterBiteHornV0Tests(unittest.TestCase):
     def test_pounce_provisional_bite_waits_on_calibration_not_authoring(self):
         self.assertNotIn("when the independently sourced natural Bite is authored",
                          self.pounce)
-        self.assertIn("full Hunter physiology/stat block and encounter calibration",
+        self.assertIn("opposed encounter calibration",
                       self.pounce)
 
     def test_venom_endurance_is_existing_protection_not_free_cure(self):
