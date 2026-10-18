@@ -130,6 +130,11 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
     # translations from head-forward contact; no one is threatened by the
     # Hunter until it actually completes a legal approach.
     frontal_contact = opening == "warned"
+    # Contact is only sufficient to resolve Bite if a reachable head/target
+    # geometry has actually been established. A non-front melee body in the
+    # approach corridor requires real path/Opportunity resolution instead.
+    contact_route = "warned_adjacent" if frontal_contact else None
+    hunter_attack_resolution = None
     outcome = "round_one_complete"
     h_dodge = 0
     t_dodge = 0
@@ -157,8 +162,13 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
     # (3,0). R shoots from a separate unobstructed 7-12-square lane without
     # moving, so R's earlier attack never disrupts the Pounce corridor.
     # Melee actors' already-declared within-budget approach is modeled as
-    # entering the contested corridor and does disrupt it. These are
-    # explicit staging contracts, NOT a general-purpose map/pathfinder.
+    # entering (1,0), next to the Hunter's original head. If this is the
+    # front target itself, Bite can resolve in place with no Hunter movement.
+    # If this is a DIFFERENT character while the front stays at (4,0),
+    # the straight route is occupied and a possible detour would provoke a
+    # Movement Opportunity or require a concrete Cautious route. STOP the
+    # bounded trial before Hunter attacks in that case. These are explicit
+    # staging contracts, NOT a general-purpose map/pathfinder.
     for ident in order:
         if ident == "H":
             # Hunter may have taken damage from higher-Initiative PCs:
@@ -166,12 +176,50 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
             restoration = min(4, 14 - h_hp, h_vigor)
             h_hp += restoration
             h_vigor -= restoration
+            # An earlier NON-front melee attacker occupies (1,0), adjacent
+            # to Hunter's head, while its declared front target stays at
+            # (4,0). The Hunter cannot simply translate its 1x2 footprint
+            # through the attacker and Bite the distant target. A detour's
+            # legal cells, MP and possible Movement Opportunity have not
+            # been authored for this bounded test: do not roll that Bite.
+            nonfront_melee_blockers = [
+                ident for ident in lane_disrupted_by
+                if ident != front_id and ROLE[ident[0]]["kind"] == "melee"
+            ]
+            if opening == "ambush" and nonfront_melee_blockers:
+                contact_route = "unresolved_nonfront_melee_block"
+                hunter_attack_resolution = "contact_path_unresolved"
+                outcome = "contact_path_unresolved"
+                break
             # The lane can survive an earlier stationary bow/Flame shot:
-            # initiative order alone cannot cancel Charge. Earlier walking
-            # melee approach or front F's 2-MP range-entry does cancel it.
+            # initiative order alone cannot cancel Charge.
             pounce_declared = (opening == "ambush" and
                                not lane_disrupted_by)
-            frontal_contact = True  # full Pounce OR ordinary approach/Bite
+            if pounce_declared:
+                contact_route = "three_step_pounce"
+                hunter_attack_resolution = "pounce"
+            elif opening == "ambush":
+                if front_id in lane_disrupted_by and ROLE[front_id[0]]["kind"] == "melee":
+                    # The target itself approached Hunter head to (1,0):
+                    # Hunter stays in place and can Bite it without exiting
+                    # the original threatened square.
+                    contact_route = "front_melee_adjacent"
+                elif front_id in lane_disrupted_by and ROLE[front_id[0]]["kind"] == "flame":
+                    # Front F moved (4,0)->(3,0); Hunter can translate
+                    # head 0->1->2 with no intervening occupied cells,
+                    # reaching a legal Bite at F (3,0).
+                    contact_route = "two_step_front_caster"
+                else:
+                    # There must be a concrete route for every fallback.
+                    contact_route = "unresolved_other_approach"
+                    hunter_attack_resolution = "contact_path_unresolved"
+                    outcome = "contact_path_unresolved"
+                    break
+                hunter_attack_resolution = "bite"
+            else:
+                contact_route = "warned_adjacent"
+                hunter_attack_resolution = "bite"
+            frontal_contact = True
             defense_kind = ("guard" if front_stat["guard"] is not None
                             and guard_remaining > 0 else "dodge")
             if defense_kind == "guard":
@@ -209,6 +257,12 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
                     # A ranged R never needs that movement. Do not mark
                     # disruption if the model stops before this actor acts.
                     lane_disrupted_by.append(ident)
+                    if ident == front_id:
+                        # Front target walks from (4,0) into (1,0) to
+                        # attack Hunter head=(0,0). No Hunter movement will
+                        # be needed to Bite this target later.
+                        frontal_contact = True
+                        contact_route = "front_melee_adjacent"
                 elif member["kind"] == "flame" and ident == front_id:
                     # Before Hunter's approach, F's initially head-forward
                     # target square is four squares away: out of Flame range.
@@ -306,6 +360,8 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
         "front_caster_precontact_casts": front_caster_precontact_casts,
         "front_caster_approach_mp": front_caster_approach_mp,
         "lane_disrupted_by": lane_disrupted_by,
+        "contact_route": contact_route,
+        "hunter_attack_resolution": hunter_attack_resolution,
     }
 
 
@@ -332,6 +388,8 @@ def census(seeds=SEEDS, hunter=None):
                 x["front_caster_approach_mp"] for x in trials),
             "lane_disrupted_trials": sum(
                 bool(x["lane_disrupted_by"]) for x in trials),
+            "contact_path_unresolved": sum(
+                x["terminal"] == "contact_path_unresolved" for x in trials),
             "mean_hunter_hp": round(sum(x["hunter_hp"] for x in trials) / seeds, 3),
         })
     return results
