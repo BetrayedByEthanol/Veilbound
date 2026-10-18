@@ -273,6 +273,24 @@ class B06HunterFullFixtureTests(unittest.TestCase):
         self.assertEqual(nested_rule("horn_drive_shove")["properties"]
                          ["result_on_strict_win"]["const"],
                          "straight_head_forward_shove_and_whole_body_advance")
+        # These two are fixed Hunter-local v0 contests: JSON Schema does not
+        # automatically enforce arithmetic between sibling integer fields.
+        # The schema must require the authored +4 = 4 + 0 + 0 components.
+        for kind, attack_id in (("pounce_balance", "B06-AT-06"),
+                                ("horn_drive_shove", "B06-AT-07")):
+            with self.subTest(kind=kind):
+                authored = self.profiles[attack_id]["linked_contest"]
+                rules = nested_rule(kind)["properties"]
+                for field, expected in (("attacker_modifier", 4),
+                                        ("training_modifier", 0),
+                                        ("other_modifier", 0),
+                                        ("total_pressure_bonus", 4)):
+                    self.assertEqual(rules[field]["const"], expected)
+                    self.assertEqual(authored[field], expected)
+                self.assertEqual(rules["total_pressure_bonus"]["const"],
+                                 sum(rules[field]["const"] for field in
+                                     ("attacker_modifier", "training_modifier",
+                                      "other_modifier")))
 
         pounce = parent_rule("pounce_balance")["properties"]
         self.assertEqual(pounce["attack_roll"]["type"], "object")
@@ -367,6 +385,17 @@ class B06HunterFullFixtureTests(unittest.TestCase):
             ("drive changes resolution source", "B06-AT-07",
              ("resolution_rule_ref",), "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"),
         ]
+        # A future independent fixture must not declare a pressure total
+        # unrelated to its component modifiers; test both linked kinds.
+        for attack_id in ("B06-AT-06", "B06-AT-07"):
+            for field, bad_value in (("total_pressure_bonus", 99),
+                                     ("total_pressure_bonus", 5),
+                                     ("attacker_modifier", 5),
+                                     ("training_modifier", 2),
+                                     ("other_modifier", -1)):
+                cases.append((f"{attack_id}: invalid {field}={bad_value}",
+                              attack_id, ("linked_contest", field), bad_value))
+
         for label, attack_id, key_path, bad_value in cases:
             with self.subTest(case=label):
                 mutated = copy.deepcopy(self.hunter)
