@@ -2,6 +2,9 @@
 
 JSON Schema Draft 2020-12 cannot, without nonstandard extensions, express
 "reference_cell_id is one of the values in sibling array cell_ids".
+The physiology-only Hunter snapshot uses footprint_cell_ids directly under
+creature_profile; its own JSON Schema constrains the shape, and this validator
+checks membership and the authoritative head/rear identity semantically.
 Run this alongside normal JSON Schema validation, not in place of it:
 
     python -m scripts.validate_b06_footprints
