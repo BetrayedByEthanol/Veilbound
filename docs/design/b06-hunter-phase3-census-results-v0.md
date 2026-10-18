@@ -33,7 +33,7 @@ Each column counts the **first stop in one specific scripted window**; categorie
 | Spent VP | 2,538 |
 | Arrows fired | 2,023 |
 | Fire-caused direct Vigor burn | 3,283 |
-| Front caster successful precontact spell launches | 229 |
+| Front caster paid precontact spell launches | 229 |
 | Front caster approach MP paid | 308 |
 | Trials with a disrupted approach lane | 1,321 |
 | Contact path unresolved stops | 770 |
