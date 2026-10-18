@@ -299,6 +299,18 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                 record = self.profiles[attack_id]
                 self.assertEqual(rules["resolution_rule_ref"]["const"],
                                  record["resolution_rule_ref"])
+                self.assertEqual(rules["response_rule"]["const"],
+                                 authored["response_rule"])
+                if kind == "pounce_balance":
+                    self.assertIn("Tie holds standing",
+                                  rules["response_rule"]["const"])
+                    self.assertIn("No second attack/defense window",
+                                  rules["response_rule"]["const"])
+                else:
+                    self.assertIn("Hold Ground",
+                                  rules["response_rule"]["const"])
+                    self.assertIn("−2 situational modifier",
+                                  rules["response_rule"]["const"])
                 for effect_field in ("required_active_effect",
                                      "requires_effect_inactive"):
                     self.assertEqual(parent_fields[effect_field], {"const": None})
@@ -488,6 +500,18 @@ class B06HunterFullFixtureTests(unittest.TestCase):
             ("pounce toxin explicit_source falsely names horn", "B06-AT-06",
              ("toxin_delivery", "explicit_source"),
              "B06-SRC-HUNTER-FRONTAL-HORN — cranial horn"),
+            ("pounce response falsely knocks prone on tie", "B06-AT-06",
+             ("linked_contest", "response_rule"),
+             "Tie knocks defender Prone; no balance opposition required."),
+            ("pounce response invents second Bite window", "B06-AT-06",
+             ("linked_contest", "response_rule"),
+             "Make a second Bite attack roll after the balance check."),
+            ("horn drive response drops Opportunity penalty", "B06-AT-07",
+             ("linked_contest", "response_rule"),
+             "Canonical Shove against Hold Ground; ignore Opportunity hits."),
+            ("horn drive response allows ties to displace", "B06-AT-07",
+             ("linked_contest", "response_rule"),
+             "Ties move the target one square; no head-first advance required."),
         ]
         # A future independent fixture must not declare a pressure total
         # unrelated to its component modifiers; test both linked kinds.
