@@ -1097,7 +1097,7 @@
             ]
           },
           "then": {
-            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection. Enforces the exact authored grooved-canine natural Bite source, Bite Strength/Agility roll and toxin origin, not merely the natural_weapon category.",
+            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection. Enforces the exact authored grooved-canine natural Bite source, Bite Strength/Agility roll and toxin origin, not merely the natural_weapon category. Pounce requires melee/special head-forward contact governed by the authored Pounce range rule; one exact 3+d6 Piercing Pen1 Bite with no extra strength contribution or formula.",
             "properties": {
               "action_class": {
                 "const": "physical"
@@ -1133,7 +1133,27 @@
                   },
                   "source": {
                     "const": "Hunter grooved-canine Bite B06-local includes all damage contribution: exactly 3+d6 Piercing Pen1, never +Strength again"
+                  },
+                  "fixed_base": {
+                    "const": 3
+                  },
+                  "die": {
+                    "const": "d6"
+                  },
+                  "strength_contribution": {
+                    "const": "none"
+                  },
+                  "armor_penetration": {
+                    "const": 1
+                  },
+                  "mitigation": {
+                    "const": "physical_armor_after_penetration"
                   }
+                },
+                "not": {
+                  "required": [
+                    "extra_formula"
+                  ]
                 }
               },
               "additional_packets": {
@@ -1164,10 +1184,33 @@
               },
               "resolution_rule_ref": {
                 "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+              },
+              "range_class": {
+                "const": "melee"
+              },
+              "target_geometry": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "special"
+                  },
+                  "range_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+                  },
+                  "area_rule_ref": {
+                    "const": null
+                  }
+                },
+                "required": [
+                  "kind",
+                  "range_rule_ref",
+                  "area_rule_ref"
+                ]
               }
             },
             "required": [
-              "resolution_kind"
+              "resolution_kind",
+              "target_geometry"
             ]
           }
         },
@@ -1191,7 +1234,7 @@
             ]
           },
           "then": {
-            "description": "Hunter-local Horn Drive is a paid canonical Shove contest, not an attack roll, damaging horn Bash or toxin delivery. Requires the authored frontal horn/shoulder whole-body contact source, not interchangeable Bite/other natural weapons.",
+            "description": "Hunter-local Horn Drive is a paid canonical Shove contest, not an attack roll, damaging horn Bash or toxin delivery. Requires the authored frontal horn/shoulder whole-body contact source, not interchangeable Bite/other natural weapons. Horn Drive similarly requires melee/special front-contact geometry, not a ranged attack or area effect.",
             "properties": {
               "action_class": {
                 "const": "physical"
@@ -1225,10 +1268,33 @@
               },
               "resolution_rule_ref": {
                 "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+              },
+              "range_class": {
+                "const": "melee"
+              },
+              "target_geometry": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "special"
+                  },
+                  "range_rule_ref": {
+                    "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+                  },
+                  "area_rule_ref": {
+                    "const": null
+                  }
+                },
+                "required": [
+                  "kind",
+                  "range_rule_ref",
+                  "area_rule_ref"
+                ]
               }
             },
             "required": [
-              "resolution_kind"
+              "resolution_kind",
+              "target_geometry"
             ]
           }
         }
