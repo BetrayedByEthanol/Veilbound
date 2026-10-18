@@ -48,6 +48,13 @@ def build_report(seeds=SEEDS):
             raise AssertionError(f"Terminal conservation: {row['scenario']}")
         if any(not isinstance(row[k], int) or row[k] < 0 for k in METRICS):
             raise AssertionError(f"Invalid counter: {row['scenario']}")
+        # These are summed *per-trial booleans*, not event multiplicities.
+        # Each can occur at most once within one source trial.
+        boolean_counts = ("pounce_declared", "balance_resolved",
+                          "lane_disrupted_trials")
+        if any(row[k] > row["trials"] for k in boolean_counts):
+            raise AssertionError(
+                f"Per-trial Boolean count exceeds trial count: {row['scenario']}")
         if row["contact_path_unresolved"] != terminal.get("contact_path_unresolved", 0):
             raise AssertionError(f"Bad unresolved count: {row['scenario']}")
         if row["balance_resolved"] > row["pounce_declared"] or (
@@ -81,6 +88,15 @@ def build_report(seeds=SEEDS):
                 row["front_caster_approach_mp"]):
             raise AssertionError(
                 f"Impossible front-caster attribution: {row['scenario']}")
+        # In mixed/warned/exposed, F is the unique caster and the lead:
+        # warned contact already threatens F, so the source trial skips
+        # its action before any VP is spent or direct Fire Vigor is dealt.
+        # No backline F exists to account for those totals instead.
+        if (roster == "mixed" and opening == "warned" and
+                front == "exposed" and
+                (row["vp_spent"] or row["vigor_burn"])):
+            raise AssertionError(
+                f"Threatened front Flame spent resources: {row['scenario']}")
         max_actions = (30 + 6 * (level - 1)) // 20
         if row["front_caster_precontact_casts"] > (
                 row["front_caster_approach_mp"] // 2 * max_actions):
