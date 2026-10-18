@@ -7,6 +7,7 @@ This directory contains the currently promoted native Veilbound combat foundatio
 - [Initiative and Round/Turn Procedure](initiative-and-round-structure.md)
 - [Turn Action Points and Tempo](action-categories-and-physical-tempo.md)
 - [Movement Foundation](movement-foundation.md)
+- [Multi-Square Creature Footprints v0 — averaged movement cost and 1×2 pivots (lock candidate)](multi-square-creature-footprints-v0.md)
 - [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md)
 - [Traversal Foundation](traversal-foundation.md)
 - [Physical Hazards v0 — Falling, Catch Grip and Minor Displacement (LOCKED); other impacts (PROVISIONAL)](physical-hazards-v0.md)
@@ -32,7 +33,7 @@ Durability, Dying, and wound-repair rules live under [../06-vigor-wounds-death/]
 
 The current canonical combat foundation still requires Veilbound-native rules for:
 
-- mounted/impact Charge variants beyond locked [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md), exact Climb/Swim MP costs, jumping and specialized falls beyond locked [Falling and Catch Grip v0](physical-hazards-v0.md), detailed water hazards, squeezing, size exceptions, flight, and other special movement modes;
+- mounted/impact Charge variants beyond locked [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md), exact Climb/Swim MP costs, jumping and specialized falls beyond locked [Falling and Catch Grip v0](physical-hazards-v0.md), detailed water hazards, squeezing, **multi-square rotations beyond scoped 1×2 pivots, large-body grappling/forced movement**, size bonuses, flight and other special modes;
 - weapon-specific Prone posture restrictions beyond the locked baseline, including detailed long-weapon handling and specialized ranged firing/reload postures;
 - final weapon-family Reach assignments beyond the adjacent baseline;
 - exact weapon/maneuver modifiers for deliberate Disrupting Interceptions;
@@ -41,6 +42,6 @@ The current canonical combat foundation still requires Veilbound-native rules fo
 - **Called Shot** Turn-AP migration, difficulty/wound/Interrupt integration; weapon-to-weapon binds outside Grapple, advanced/multi-limb control and non-humanoid anatomy, authored Disarm-capable weapon traits/techniques, cooperative multi-creature Grapples, and other universal maneuvers beyond locked Shove v0, Grapple v0, Trip/Takedown v0, Drive/Drag v0, Throw v0, Disarm v0, Secure Limb v0, Feint Combination v0, Charge v0 and Aim v0;
 - calibration and unusual-physics extensions of the locked [Falling v0 playtest damage values](physical-hazards-v0.md#falling-damage-v0--standard-impact), plus damaging horizontal collision/crushing, falling-object and structural-impact procedures (still provisional/deferred); ordinary Shove/Throw minor displacement is already [LOCKED as non-damaging](physical-hazards-v0.md#minor-displacement-and-collision-boundary-v0--locked);
 - conditions;
-- encounter building and NPC/creature construction.
+- **numerically calibrated** encounter building and NPC/creature construction; the [B06 classification proposal](../../design/b06-encounter-frequency-challenge-and-hunter-ecology-v0.md) defines frequency vs creature challenge vs party/composition vs actual encounter danger but no calibrated CR/TP scale.
 
 Do not fill those gaps from D&D/5e by assumption. They remain explicit Veilbound design work.
