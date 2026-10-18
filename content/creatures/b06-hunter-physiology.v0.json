@@ -53,8 +53,10 @@
   },
   "guard": {
     "instrument": null,
-    "capacity": 0,
-    "natural_horn_or_jaws_grant_guard": false
+    "capacity": 1,
+    "natural_horn_or_jaws_grant_guard": false,
+    "usable_with_current_natural_sources": false,
+    "capacity_basis": "provisional Turn AP42 / Physical Action24 => Physical Tempo1; no legal Guard instrument"
   },
   "vigor": {
     "max": 42,
