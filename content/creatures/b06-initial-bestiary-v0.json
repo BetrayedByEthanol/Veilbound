@@ -246,7 +246,7 @@
           "name": "Venomous bite",
           "source_class": "natural_weapon",
           "state": "requires_authored_attack_or_effect",
-          "concept": "A separate provisional bite hit-roll/damage illustration exists within Hunter Pounce v0 (d20+6, 3+d6 Piercing Pen1), but is NOT a fully sourced natural weapon or final Bite profile. Bite can hit when linked knockdown fails, and only real post-mitigation Piercing HP or an independently sourced breached route can permit venom exposure. Species-specific slow-acting toxin remains unauthored. A physically successful puncture remains independently valid irrespective of whether pounce/takedown succeeded.",
+          "concept": "A separate provisional bite hit-roll/damage illustration exists within Hunter Pounce v0 (d20+6, 3+d6 Piercing Pen1), but is NOT a fully sourced natural weapon or final Bite profile. Bite can hit when linked knockdown fails, and only real post-mitigation Piercing HP or an independently sourced breached route can permit venom exposure. Species-specific slow-acting toxin remains unauthored; the short TX-HM catalogue profile is only a separate short-duration test candidate, NOT the Hunter's long-pursuit venom. A physically successful puncture remains independently valid irrespective of whether pounce/takedown succeeded.",
           "missing_authority": [
             "Natural bite attack source/roll/AP/physical damage and Penetration",
             "Actual venom material/injection delivery source ref and resistance grade",
