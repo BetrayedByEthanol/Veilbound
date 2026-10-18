@@ -67,14 +67,15 @@ def long_venom_suppression_exploration(cast_at, check_at, *, outcome="Full", uni
     if check_at < cast_at:
         raise ValueError("Observation cannot precede the cast")
     move, strength, active = stage_after_seconds(outcome, check_at)
-    if not active or check_at >= cast_at + 60:
-        return move, strength, False, 0
     first_paid_at = max(cast_at, 600)  # No unit before delayed stage 1.
-    if check_at < first_paid_at:
-        return move, strength, False, 0
-    elapsed = check_at - first_paid_at
-    spent = min(units, elapsed // 6 + 1)
-    if elapsed < 6 * units:
+    original_expiry = 7200 if outcome == "Full" else 3600
+    # Count purchases already made, even if the cast later expires.
+    last_eligible = min(check_at, cast_at + 59, original_expiry - 1)
+    spent = (min(units, (last_eligible - first_paid_at) // 6 + 1)
+             if last_eligible >= first_paid_at else 0)
+    protected = (active and check_at < cast_at + 60 and
+                 first_paid_at <= check_at < first_paid_at + 6 * units)
+    if protected:
         return 0, 0, True, spent
     return move, strength, False, spent
 
@@ -302,6 +303,8 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertEqual(long_venom_suppression_exploration(900, 917),
                          (0, 0, True, 3))
         self.assertEqual(long_venom_suppression_exploration(900, 918),
+                         (-2, -1, False, 3))
+        self.assertEqual(long_venom_suppression_exploration(900, 970),
                          (-2, -1, False, 3))
 
     def test_long_suppression_stage_escalation_does_not_spend_extra_unit(self):
