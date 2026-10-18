@@ -173,7 +173,7 @@ class B06FootprintEncounterTests(unittest.TestCase):
     def test_grapple_single_square_exception_explicitly_pending(self):
         self.assertIn("shared single-square Grapple", self.rules)
         self.assertIn("Pounce-linked takedown require", self.rules)
-        self.assertIn("CONCEPT_ONLY", self.encounter_docs)  # historical design boundary
+        self.assertIn("full Hunter test fixture", self.encounter_docs)
 
     def test_hunter_now_has_source_backed_full_fixture_but_no_certified_cr(self):
         self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
