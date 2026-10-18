@@ -61,11 +61,25 @@ def build_report(seeds=SEEDS):
             row["full_toxin"] + row["reduced_toxin"] > seeds
         ):
             raise AssertionError(f"Impossible Pounce/toxin count: {row['scenario']}")
+        # Pounce is declared only with a clear lane, and every unresolved
+        # contact path requires a previously disrupted lane. These are
+        # mutually exclusive first-window state flags per source trial.
+        if (row["pounce_declared"] + row["lane_disrupted_trials"] >
+                row["trials"] or
+                row["contact_path_unresolved"] > row["lane_disrupted_trials"]):
+            raise AssertionError(
+                f"Inconsistent Pounce/lane/path attribution: {row['scenario']}")
         if row["vp_spent"] % 2 or row["front_caster_approach_mp"] % 2:
             raise AssertionError(f"Invalid VP/movement increment: {row['scenario']}")
         level, size, roster, opening, front = CASES[expected_keys.index(row["scenario"])]
-        if opening == "warned" and row["pounce_declared"]:
-            raise AssertionError(f"Warned Pounce: {row['scenario']}")
+        # Warned starts in frontal contact; no precontact corridor move
+        # occurs, so neither Pounce, lane disruption nor unresolved paths
+        # are possible in a warned source trial.
+        if opening == "warned" and any(
+                row[k] for k in ("pounce_declared", "lane_disrupted_trials",
+                                 "contact_path_unresolved")):
+            raise AssertionError(
+                f"Warned opening has ambush-only counters: {row['scenario']}")
         # A/B-only original parties have neither a Bow shooter nor a Fire
         # caster. The census must never attribute Flame-caused Vigor burn,
         # Flame VP, or the front caster's range-entry MP/casts to them.
@@ -102,6 +116,17 @@ def build_report(seeds=SEEDS):
                 row["front_caster_approach_mp"] // 2 * max_actions):
             raise AssertionError(
                 f"Precontact caster lacked paid range-entry movement: {row['scenario']}")
+        # Every 2-MP front-F approach in the bounded runner is followed
+        # by at least one affordable Flame launch, counted even on a miss.
+        if (row["front_caster_precontact_casts"] <
+                row["front_caster_approach_mp"] // 2):
+            raise AssertionError(
+                f"Front caster moved without launching Flame: {row['scenario']}")
+        # Every Flame launch costs 2 VP and may burn at most 5 Vigor
+        # (2 + ceil(d8/3)). Its critical HP packet does not multiply burn.
+        if row["vigor_burn"] > (row["vp_spent"] // 2) * 5:
+            raise AssertionError(
+                f"Vigor burn exceeds paid Flame launches: {row['scenario']}")
         if (row["vp_spent"] > seeds * max_actions * 2 or
                 row["arrows_fired"] > seeds * max_actions):
             raise AssertionError(f"Impossible VP/ammunition bound: {row['scenario']}")
