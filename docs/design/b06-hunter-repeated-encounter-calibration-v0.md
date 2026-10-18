@@ -59,4 +59,4 @@ python -m unittest discover -s tests -v
 python -m scripts.validate_b06_footprints
 ```
 
-The **new focused tests were run and passed** against an isolated local harness and a minimal mirror of the merged Hunter's pinned stats (**5 methods**, 512-seed matrix), not against a connected repository checkout. The full repo test suite and footprint validation have **not** run in that isolated environment and require CI/Codex verification. Count pins are reproducibility tests, **not** an endorsement of simulation assumptions.
+The **new focused tests were run and passed** against an isolated local harness and a minimal mirror of the merged Hunter's pinned stats (**7 methods**, 512-seed matrix), not against a connected repository checkout. The full repo test suite and footprint validation have **not** run in that isolated environment and require CI/Codex verification. Count pins are reproducibility tests, **not** an endorsement of simulation assumptions.
