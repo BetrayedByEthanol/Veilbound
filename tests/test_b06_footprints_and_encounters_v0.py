@@ -172,6 +172,8 @@ class B06FootprintEncounterTests(unittest.TestCase):
         self.assertTrue(any(branch.get("then", {}).get("properties", {})
                             .get("scale", {}).get("type") == "string"
                             for branch in cr["allOf"]))
+        self.assertTrue(any("calibration_evidence" in branch.get("then", {}).get("required", [])
+                            for branch in cr["allOf"]))
 
     def test_party_size_vs_footprint_vs_enemy_count_are_independent(self):
         for n in ("B06-EN-02", "B06-EN-03"):
