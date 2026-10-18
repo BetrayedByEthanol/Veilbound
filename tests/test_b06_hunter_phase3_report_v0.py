@@ -106,6 +106,45 @@ class Phase3ReportTests(unittest.TestCase):
                                 AssertionError, "Impossible front-caster attribution"):
                             build_report(seeds=3)
 
+    def test_warned_exposed_front_flame_never_spends_vp_or_burns_vigor(self):
+        valid = build_report(seeds=3)
+        index = next(i for i, row in enumerate(valid["cases"])
+                     if row["scenario"] == "L2-P3-mixed-warned-exposed")
+        row = valid["cases"][index]
+        self.assertEqual(row["vp_spent"], 0)
+        self.assertEqual(row["vigor_burn"], 0)
+        # Codex counterexample: 2 VP and 3 Vigor burn can be individually
+        # plausible aggregates, but are impossible with a threatened F.
+        for bogus in ({"vp_spent": 2}, {"vigor_burn": 3},
+                      {"vp_spent": 2, "vigor_burn": 3}):
+            with self.subTest(bogus=bogus):
+                rows = copy.deepcopy(valid["cases"])
+                rows[index].update(bogus)
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError, "Threatened front Flame spent resources"):
+                        build_report(seeds=3)
+
+    def test_bool_aggregate_cannot_exceed_per_cell_seed_count(self):
+        valid = build_report(seeds=3)
+        index = next(i for i, row in enumerate(valid["cases"])
+                     if row["scenario"] == "L2-P3-mixed-ambush-armored")
+        self.assertEqual(valid["cases"][index]["trials"], 3)
+        for bogus in (
+                {"pounce_declared": 4},
+                {"pounce_declared": 4, "balance_resolved": 4},
+                {"lane_disrupted_trials": 4}):
+            with self.subTest(bogus=bogus):
+                rows = copy.deepcopy(valid["cases"])
+                rows[index].update(bogus)
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError,
+                            "Per-trial Boolean count exceeds trial count"):
+                        build_report(seeds=3)
+
     def test_precontact_casts_require_range_entry_mp(self):
         valid = build_report(seeds=3)
         rows = copy.deepcopy(valid["cases"])
