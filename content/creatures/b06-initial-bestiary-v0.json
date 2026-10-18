@@ -188,7 +188,8 @@
         "docs/rules/05-combat/multi-square-creature-footprints-v0.md",
         "docs/rules/05-combat/rapid-advance-and-charge-v0.md",
         "docs/rules/05-combat/universal-maneuvers.md",
-        "docs/design/b06-encounter-frequency-challenge-and-hunter-ecology-v0.md"
+        "docs/design/b06-encounter-frequency-challenge-and-hunter-ecology-v0.md",
+        "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
       ],
       "creature_profile": {
         "family": "natural_beast",
@@ -233,11 +234,11 @@
           "name": "Ambush pounce and attempted takedown",
           "source_class": "physiology",
           "state": "requires_authored_attack_or_effect",
-          "concept": "Powerful legs deliver a sudden charge/pounce. Bite and actual takedown may resolve distinctly once an explicit creature-specific legal sequence and 1×2 multi-square contact geometry is written; neither is a free attack or guaranteed Prone result.",
+          "concept": "Hunter-specific linked Charge maneuver has a dedicated **review-candidate** head-forward 1×2/one-square-PC procedure: one tentative 24-AP Physical Action with 2×M MP, 3 real steps, one declared Bite and independent Trip-like free force/balance contest; Bite and Prone are independent, no Grapple/Pin. Actual natural Bite ability/stats and non-PC size handling remain unauthored, so not yet an executable creature fixture.",
           "missing_authority": [
-            "Exact pounce AP/MP and initial awareness/timing",
-            "Bite vs takedown roll separation, counters and order",
-            "Multi-square Grapple/Trip/Takedown size, adjacency and controlled-body rules"
+            "Adoption/review of Hunter Pounce v0 numeric 24-AP/42-AP/12-MP calibration and natural Bite attack/damage sources",
+            "Final one-square PC bite provenance/numeric attack, body Strength/Training/defenses and wound interactions",
+            "Size/mass and large-prey Pounce beyond one-square standing PCs; multi-square Grapple/hold remains deferred"
           ]
         },
         {
@@ -245,7 +246,7 @@
           "name": "Venomous bite",
           "source_class": "natural_weapon",
           "state": "requires_authored_attack_or_effect",
-          "concept": "Separately successful bite with genuinely surviving Piercing HP puncture may deliver species-authored slow-acting fictional venom irrespective of whether pounce/takedown succeeded. No poison on miss, fully prevented puncture or merely by naming a toxin; short TX-HM is a separate testing candidate, not the long-pursuit profile.",
+          "concept": "A separate provisional bite hit-roll/damage illustration exists within Hunter Pounce v0 (d20+6, 3+d6 Piercing Pen1), but is NOT a fully sourced natural weapon or final Bite profile. Bite can hit when linked knockdown fails, and only real post-mitigation Piercing HP or an independently sourced breached route can permit venom exposure. Species-specific slow-acting toxin remains unauthored.",
           "missing_authority": [
             "Natural bite attack source/roll/AP/physical damage and Penetration",
             "Actual venom material/injection delivery source ref and resistance grade",
@@ -275,10 +276,10 @@
         }
       ],
       "open_mechanics": [
-        "Full multi-square Pounce/takedown and contact legality unresolved: do not import existing single shared Grapple square.",
-        "Natural Bite/Horn executable attack sources, AP, damage, physical size limits, true puncture-to-venom exposure and distinct slower pursuit venom remain unauthored.",
-        "HP/Vigor/throughput/Natural Armor/Dodge/Guard choice and party-specific outcomes need calibration; target role is elite ambush predator, not a published CR.",
-        "Do not convert physical exertion/resting into Vigor recovery: current Vigor is wound-repair reserve, not a general stamina bar."
+        "Review-candidate head-forward 1×2 Pounce is locally specified against standing one-square PCs; complete natural Bite source, calibration and full enemy fixture still pending.",
+        "Multi-square Grapple/true Takedown and moose-scale size/mass contest remain UNAUTHORED: Pounce uses Prone-only force/balance rider and never gives Control.",
+        "Natural Bite/Horn executable attack source, physical stats, venom profile/exposure and Vigor/Armor/Dodge/HP still unauthored.",
+        "Numeric encounter difficulty and challenge rating uncalibrated; no independent stalking/ambush surprise rule or stamina/Vigor reset on pursuit."
       ],
       "fixture_path": null,
       "lore_boundary": "Not a humanoid, Priest or Gifted; no implied learnable spells, psychic control or attack bonus from its ominous name.",
