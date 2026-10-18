@@ -41,6 +41,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 - [Feint Combination v0](05-combat/feint-combination-v0.md)
 - [Rapid Advance and Charge v0](05-combat/rapid-advance-and-charge-v0.md)
 - [Hunter Pounce and Prey Takedown v0 — B06 creature-specific review candidate](05-combat/hunter-pounce-and-prey-takedown-v0.md)
+- [Hunter Bite / slow pursuit venom / defensive Horn Bash and Drive v0 — B06 local review candidate](05-combat/hunter-bite-venom-and-horn-v0.md)
 - [Aim v0](05-combat/aim-v0.md)
 - [Cover and Line of Fire v0](05-combat/cover-and-line-of-fire-v0.md)
 - [Unified Firing Lane v0 — Living Screens](05-combat/unified-firing-lane-v0.md)
