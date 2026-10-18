@@ -171,6 +171,39 @@ def build_report(seeds=SEEDS):
             raise AssertionError(
                 f"Invalid mean Hunter HP: {row['scenario']}")
 
+        # One-way arithmetic guards cannot prove the provenance of every
+        # possible combination of aggregate counters. Re-run each keyed
+        # source trial independently from census() and require an *exact*
+        # match for every published field before signing the JSON. This
+        # also catches numerically plausible counter or mean tampering.
+        replayed = [trial(level, size, roster, opening, front, seed)
+                    for seed in range(seeds)]
+        expected = {
+            "terminal": dict(Counter(t["terminal"] for t in replayed)),
+            "pounce_declared": sum(t["pounce_declared"] for t in replayed),
+            "balance_resolved": sum(t["balance_resolved"] for t in replayed),
+            "full_toxin": sum(t["toxin"] == "full" for t in replayed),
+            "reduced_toxin": sum(t["toxin"] == "reduced" for t in replayed),
+            "vp_spent": sum(t["vp_spent"] for t in replayed),
+            "arrows_fired": sum(t["arrows_fired"] for t in replayed),
+            "vigor_burn": sum(t["burn_received"] for t in replayed),
+            "front_caster_precontact_casts": sum(
+                t["front_caster_precontact_casts"] for t in replayed),
+            "front_caster_approach_mp": sum(
+                t["front_caster_approach_mp"] for t in replayed),
+            "lane_disrupted_trials": sum(
+                bool(t["lane_disrupted_by"]) for t in replayed),
+            "contact_path_unresolved": sum(
+                t["terminal"] == "contact_path_unresolved" for t in replayed),
+            "mean_hunter_hp": round(
+                sum(t["hunter_hp"] for t in replayed) / seeds, 3),
+        }
+        for key, source_value in expected.items():
+            if row[key] != source_value:
+                raise AssertionError(
+                    f"Census differs from source trial replay "
+                    f"({key}): {row['scenario']}")
+
     totals = {
         "trials": sum(r["trials"] for r in rows),
         "terminal": {s: sum(r["terminal"].get(s, 0) for r in rows)
