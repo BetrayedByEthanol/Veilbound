@@ -1073,7 +1073,7 @@
             ]
           },
           "then": {
-            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection.",
+            "description": "Hunter-local linked Pounce: one physical Bite damage attack with one subsequent Prone pressure contest. Venom must have a sourced surviving-puncture injection. Enforces the exact authored grooved-canine natural Bite source, Bite Strength/Agility roll and toxin origin, not merely the natural_weapon category.",
             "properties": {
               "action_class": {
                 "const": "physical"
@@ -1088,7 +1088,15 @@
                 "const": "authored_natural_attack"
               },
               "attack_roll": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "ability_a": {
+                    "const": "Strength"
+                  },
+                  "ability_b": {
+                    "const": "Agility"
+                  }
+                }
               },
               "primary_hp_packet": {
                 "type": "object",
@@ -1098,6 +1106,9 @@
                   },
                   "damage_type": {
                     "const": "Piercing"
+                  },
+                  "source": {
+                    "const": "Hunter grooved-canine Bite B06-local includes all damage contribution: exactly 3+d6 Piercing Pen1, never +Strength again"
                   }
                 }
               },
@@ -1112,8 +1123,23 @@
                   },
                   "requires_surviving_puncture": {
                     "const": true
+                  },
+                  "source_ref": {
+                    "const": "B06-SRC-HUNTER-GROOVED-CANINES"
+                  },
+                  "profile_id": {
+                    "const": "B06-TX-HUNTER-SLOW-MY"
                   }
                 }
+              },
+              "weapon_or_source": {
+                "const": "B06-SRC-HUNTER-GROOVED-CANINES as one Charge-linked Bite"
+              },
+              "source_authority_ref": {
+                "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
+              },
+              "resolution_rule_ref": {
+                "const": "docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md"
               }
             },
             "required": [
@@ -1141,7 +1167,7 @@
             ]
           },
           "then": {
-            "description": "Hunter-local Horn Drive is a paid canonical Shove contest, not an attack roll, damaging horn Bash or toxin delivery.",
+            "description": "Hunter-local Horn Drive is a paid canonical Shove contest, not an attack roll, damaging horn Bash or toxin delivery. Requires the authored frontal horn/shoulder whole-body contact source, not interchangeable Bite/other natural weapons.",
             "properties": {
               "action_class": {
                 "const": "physical"
@@ -1166,6 +1192,15 @@
               },
               "toxin_delivery": {
                 "type": "null"
+              },
+              "weapon_or_source": {
+                "const": "B06-SRC-HUNTER-FRONTAL-HORN and shoulders, head-forward whole-body contact"
+              },
+              "source_authority_ref": {
+                "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
+              },
+              "resolution_rule_ref": {
+                "const": "docs/rules/05-combat/hunter-bite-venom-and-horn-v0.md"
               }
             },
             "required": [
