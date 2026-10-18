@@ -236,6 +236,30 @@ class HunterBiteHornV0Tests(unittest.TestCase):
             self.assertEqual(cap["state"],"requires_authored_attack_or_effect")
             self.assertTrue(cap["missing_authority"])
 
+    def test_pounce_resolves_bite_then_venom_then_balance_once(self):
+        bite = self.pounce.index("**D. Resolve the one Bite attack.**")
+        balance = self.pounce.index("**E. Resolve the Pounce balance rider")
+        recap = self.pounce.index("**F. Toxin provenance recap and end")
+        self.assertLess(bite, balance)
+        self.assertLess(balance, recap)
+        self.assertIn("before Pounce stage E", self.pounce[bite:balance])
+        self.assertIn("one DC12 Vitality resistance", self.pounce[bite:balance])
+        self.assertIn("NO second check", self.pounce)
+
+    def test_horn_drive_tie_preserves_pc_square(self):
+        # Canonical Shove requires the attacker to BEAT the defender.
+        hunter = 10 + 4
+        pc = 10 + 2 + 2  # 2 is the printed Hold Ground defense bonus.
+        self.assertEqual(hunter, pc)
+        self.assertIn("A tie holds the position", self.rules)
+        self.assertIn("The attacker must **beat**", self.shove)
+
+    def test_venom_reduced_does_not_modify_a_fresh_pounce(self):
+        self.assertEqual(stage_after_seconds("Reduced", 0), (0, 0, True))
+        self.assertEqual(stage_after_seconds("Reduced", 599), (0, 0, True))
+        self.assertIn("T+10-minute onset", self.pounce)
+        self.assertIn("none retroactively alters the Pounce Balance", self.pounce)
+
     def test_venom_endurance_is_existing_protection_not_free_cure(self):
         self.assertIn("Venom Endurance", self.rules)
         self.assertIn("not** independently purge", self.rules)
