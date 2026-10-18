@@ -2,6 +2,8 @@
 
 > **HUNTER-LOCAL PHYSIOLOGY LOCK CANDIDATE / CALIBRATION BASELINE.** This is **step 1** toward the complete B06-EN-03 executable enemy. It authors the Hunter's HP, natural Armor, Dodge, Vigor and regeneration from already defined Veilbound procedures, with independently stated biological ability anchors and one narrow non-Focus mapping. These **initial numbers remain provisional for opposed encounter calibration**; this document does **not** certify difficulty, promote a complete enemy fixture or change global NPC, natural-armor, size, or level rules. The 14-entry bestiary retains **B06-EN-03 CONCEPT_ONLY** and a null executable fixture path until the remaining attack/ability-resource integration is reviewed.
 
+The machine-readable physiology-only calibration record is [B06 Hunter physiology v0](../../content/creatures/b06-hunter-physiology.v0.json). It intentionally does not satisfy the full enemy schema or grant attack actions by itself.
+
 ## 1. Anatomy and permitted source
 
 The Hunter is one **living, corporeal, animal-like, non-Archetype** forest quadruped, bulkier than a bear, occupying a **rigid 1×2 footprint** with stable anatomical cell IDs **head** (reference cell) and **rear**. Its dense hide and dermis are the **creature-local natural Armor source**, not worn Leather, an equipment stack, a magic effect, a detachable shield or an armored horn that can Guard. Muscularity and body length **do not themselves multiply HP, Vigor, Armor, attack damage, Guard opportunities or regeneration**. A strike or area that affects both occupied cells still targets one creature, with one shared HP/Vigor state and normal packet processing; a hit on a particular body cell remains associated with that stable anatomical cell through movement.
