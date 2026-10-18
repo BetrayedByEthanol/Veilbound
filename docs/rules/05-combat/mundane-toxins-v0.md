@@ -158,6 +158,8 @@ The profile's Reduced effect generally halves the **number of finite damaging/im
 
 
 
+**New separately sourced B06 creature profile:** [Hunter's Lingering Venom](hunter-bite-venom-and-horn-v0.md#4-pursuit-venom-profile--b06-tx-hunter-slow-my) is **not a twelfth generic catalogue exemplar**; it is an independently authored **Moderate DC12 injection myotoxin-style** instance delivered only through the Hunter's actually puncturing grooved canine Bite, with Full/Reduced **10-minute onset, 30-minute Full escalation, 60/120-minute expiry**. Apply the same actual-delivery/nonstack/Venom Endurance and long-duration milestone mapping. This does **not** change the eleven generic toxin exemplars, their clocks, or TX-HM's five/three short HP ticks.
+
 ## 6. Venom Endurance, Death/Plague and Alchemy boundaries
 
 **Life / Preservation — [Venom Endurance v0](../07-veil-magic/venom-endurance-v0.md):** This catalogue supplies the ordinary exposure, nonstacking, Full/Reduced and clock rules against which the independent spell operates. **Preventive Ward** intercepts one valid, non-ignored new Minor/Moderate application before natural resistance; **Active Suppression** uses one finite budget against future consequences of one eligible existing instance. Follow the spell's actual casting time, recipient, duration, spent-VP price, consumption, and expiry. No generic +2 toxin save, instant cure, retroactive HP/Vigor repair, immunity to magical disease/Plague or free per-tick magic follows from this catalogue.
