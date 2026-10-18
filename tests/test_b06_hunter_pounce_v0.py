@@ -113,15 +113,35 @@ class HunterPounceRulesTests(unittest.TestCase):
 
     def test_actual_puncturing_bite_not_implied_venom(self):
         self.assertIn("does not grant TX-HM or any free poisoning", self.rules)
-        self.assertIn("positive remaining Piercing HP puncture", self.rules)
-        self.assertIn("by Pounce success", self.rules)
-        self.assertIn("species slow-venom profile is still", self.rules)
+        self.assertIn("real surviving post-mitigation Piercing HP puncture", self.rules)
+        self.assertIn("Pounce success, Prone or a Balance roll", self.rules)
+        self.assertIn("No poison penalty applies immediately", self.rules)
+        self.assertIn("hunter-bite-venom-and-horn-v0.md", self.rules)
 
     def test_hit_and_takedown_failure_independent(self):
         r=pounce_result(12,13,9,15)
         self.assertTrue(r["bite_hit"])
         self.assertEqual(r["hp"], 4)
         self.assertFalse(r["prone"])
+
+    def test_worked_surviving_bite_requires_authored_venom_before_balance(self):
+        # First worked table row must use the already-authored delivery source.
+        worked = next(line for line in self.rules.splitlines()
+                      if line.startswith("| **Bite lands; prey resists takedown**"))
+        self.assertEqual(pounce_result(12, 13, 9, 15)["hp"], 4)
+        self.assertIn("**4 Piercing HP**", worked)
+        self.assertIn("one DC12 Vitality resistance check in stage D, before Balance",
+                      worked)
+        self.assertNotIn("only if** venom source authored", worked)
+        self.assertIn("11 < DC12", self.rules)
+        self.assertLess(9 + 2, 12)  # Illustrative failed natural resistance.
+        self.assertIn("**Full** `B06-TX-HUNTER-SLOW-MY`", self.rules)
+        self.assertIn("**T+10 minutes**", self.rules)
+        self.assertIn("**T+30 minutes**", self.rules)
+        self.assertIn("**T+120 minutes**", self.rules)
+        self.assertIn("**Reduced**", self.rules)
+        self.assertIn("Do not make a second toxin check after Balance", self.rules)
+        self.assertFalse(pounce_result(12, 13, 9, 15)["prone"])
 
     def test_missed_bite_but_takedown_succeeds(self):
         r=pounce_result(3,13,17,9)
@@ -147,7 +167,7 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("Tie or defender wins", self.rules)
 
     def test_one_roll_each_and_no_auto_prone_on_bite_natural20(self):
-        self.assertIn("one ordinary melee Attack", self.rules)
+        self.assertIn("one attack, one physical damage packet", self.rules)
         self.assertIn("No new free Reaction", self.rules)
         self.assertIn("successful natural 20", self.rules)
         self.assertIn("does not automatically grant a takedown", self.rules)
