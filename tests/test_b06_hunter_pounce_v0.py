@@ -191,7 +191,7 @@ class HunterPounceRulesTests(unittest.TestCase):
                  if c["id"]=="B06-CAP-HUNTER-POUNCE")
         self.assertEqual(cap["state"],"requires_authored_attack_or_effect")
         self.assertTrue(cap["missing_authority"])
-        self.assertIn("hunter-pounce-and-prey-takedown-v0.md",
+        self.assertIn("docs/rules/05-combat/hunter-pounce-and-prey-takedown-v0.md",
                       self.hunter["rules_basis"])
         self.assertFalse(any(c["state"]=="existing_authority_only"
                              for c in self.hunter["planned_capabilities"]))
