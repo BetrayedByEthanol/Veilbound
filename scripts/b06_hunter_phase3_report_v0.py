@@ -8,6 +8,7 @@ import argparse
 from collections import Counter
 from hashlib import sha256
 import json
+import math
 from pathlib import Path
 
 from scripts.b06_hunter_tactical_diversity_v0 import CASES, SEEDS, census, trial
@@ -61,6 +62,19 @@ def build_report(seeds=SEEDS):
             row["full_toxin"] + row["reduced_toxin"] > seeds
         ):
             raise AssertionError(f"Impossible Pounce/toxin count: {row['scenario']}")
+        # A declared Pounce always resolves Balance unless the Bite itself
+        # terminates on first-frontline-zero or a Devastating wound.
+        if (row["pounce_declared"] - row["balance_resolved"] >
+                terminal.get("frontline_first_zero", 0) +
+                terminal.get("wound_unresolved", 0)):
+            raise AssertionError(
+                f"Unresolved Pounce lacks terminal Bite stop: {row['scenario']}")
+        # No toxin can be applied by a contact-path-unresolved trial: the
+        # model stops before a legal Hunter Bite is rolled.
+        if (row["full_toxin"] + row["reduced_toxin"] +
+                row["contact_path_unresolved"] > row["trials"]):
+            raise AssertionError(
+                f"Toxin overlaps unresolved contact path: {row['scenario']}")
         # Pounce is declared only with a clear lane, and every unresolved
         # contact path requires a previously disrupted lane. These are
         # mutually exclusive first-window state flags per source trial.
@@ -111,6 +125,13 @@ def build_report(seeds=SEEDS):
                 (row["vp_spent"] or row["vigor_burn"])):
             raise AssertionError(
                 f"Threatened front Flame spent resources: {row['scenario']}")
+        # For mixed/ambush/exposed the sole F caster is the front actor.
+        # Every paid launch is counted as a precontact cast, and subsequent
+        # threatened F turns cannot spend VP. No other caster exists.
+        if front_flame_setup and (
+                row["vp_spent"] != 2 * row["front_caster_precontact_casts"]):
+            raise AssertionError(
+                f"Exposed-front VP does not match Flame casts: {row['scenario']}")
         max_actions = (30 + 6 * (level - 1)) // 20
         if row["front_caster_precontact_casts"] > (
                 row["front_caster_approach_mp"] // 2 * max_actions):
@@ -127,6 +148,11 @@ def build_report(seeds=SEEDS):
         if row["vigor_burn"] > (row["vp_spent"] // 2) * 5:
             raise AssertionError(
                 f"Vigor burn exceeds paid Flame launches: {row['scenario']}")
+        # An individual successful Flame burns 3, 4 or 5 Vigor, and a
+        # miss burns zero. An aggregate of 1 or 2 cannot be constructed.
+        if 0 < row["vigor_burn"] < 3:
+            raise AssertionError(
+                f"Impossible sub-three Vigor burn: {row['scenario']}")
         if (row["vp_spent"] > seeds * max_actions * 2 or
                 row["arrows_fired"] > seeds * max_actions):
             raise AssertionError(f"Impossible VP/ammunition bound: {row['scenario']}")
@@ -134,6 +160,16 @@ def build_report(seeds=SEEDS):
             raise AssertionError(f"Unpaid front spell: {row['scenario']}")
         if row["front_caster_approach_mp"] > 2 * seeds:
             raise AssertionError(f"Impossible front F movement: {row['scenario']}")
+        # HP starts at 14, never exceeds its cap after Regeneration,
+        # and a single terminal hit can overkill from HP=1 by at most
+        # 20 (B's base6 + d6 + two d4 critical dice, Pen3 vs Armor3).
+        # Thus a finite numeric *mean at the first stop* lies in [-19,14].
+        mean_hp = row["mean_hunter_hp"]
+        if (isinstance(mean_hp, bool) or
+                not isinstance(mean_hp, (int, float)) or
+                not math.isfinite(mean_hp) or not -19 <= mean_hp <= 14):
+            raise AssertionError(
+                f"Invalid mean Hunter HP: {row['scenario']}")
 
     totals = {
         "trials": sum(r["trials"] for r in rows),
@@ -176,7 +212,7 @@ def build_report(seeds=SEEDS):
         "totals": totals, "by": group_totals, "cases": rows,
     }
     serialized = json.dumps(data, sort_keys=True, separators=(",", ":"),
-                            ensure_ascii=True).encode("utf-8")
+                            ensure_ascii=True, allow_nan=False).encode("utf-8")
     data["audit_sha256"] = sha256(serialized).hexdigest()
     return data
 
@@ -278,7 +314,8 @@ def main(argv=None):
     result = build_report(seeds=args.seeds)
     if args.json_out:
         args.json_out.parent.mkdir(parents=True, exist_ok=True)
-        args.json_out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n",
+        args.json_out.write_text(json.dumps(result, indent=2, sort_keys=True,
+                                            allow_nan=False) + "\n",
                                  encoding="utf-8")
     if args.markdown_out:
         args.markdown_out.parent.mkdir(parents=True, exist_ok=True)
