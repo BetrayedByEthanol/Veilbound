@@ -241,9 +241,15 @@ class B06HunterFullFixtureTests(unittest.TestCase):
                         if branch["if"]["properties"]["kind"]["const"] == kind)
 
         def parent_rule(kind):
-            return next(branch["then"] for branch in attack["allOf"]
-                        if branch["if"]["properties"]["linked_contest"]
-                        ["properties"]["kind"]["const"] == kind)
+            # Earlier attack.allOf clauses cover ordinary attack_roll,
+            # primary_hp_packet and source_class; they are not contests.
+            # A missing linked_contest discriminant is not an error.
+            return next(
+                branch["then"] for branch in attack["allOf"]
+                if "linked_contest" in branch.get("if", {}).get("properties", {})
+                and branch["if"]["properties"]["linked_contest"]
+                ["properties"]["kind"]["const"] == kind
+            )
 
         self.assertEqual(nested_rule("pounce_balance")["properties"]
                          ["result_on_strict_win"]["const"], "prone_in_place")
