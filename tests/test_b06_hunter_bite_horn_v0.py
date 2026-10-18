@@ -251,13 +251,14 @@ class HunterBiteHornV0Tests(unittest.TestCase):
         self.assertIn("free fear effect", self.rules)
         self.assertIn("not a free Bash rider", self.rules)
 
-    def test_hunter_stays_concept_only_and_both_sources_are_still_uncalibrated(self):
-        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
-        self.assertIsNone(self.hunter["fixture_path"])
+    def test_hunter_fixture_exists_but_both_sources_still_uncalibrated(self):
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
         self.assertEqual(self.hunter["encounter_guidance"]["challenge_rating"]["status"],"unrated")
         for cid in ("B06-CAP-HUNTER-BITE","B06-CAP-HUNTER-HORN"):
             cap=next(x for x in self.hunter["planned_capabilities"] if x["id"]==cid)
-            self.assertEqual(cap["state"],"requires_authored_attack_or_effect")
+            self.assertEqual(cap["state"],"existing_authority_only")
             self.assertTrue(cap["missing_authority"])
 
     def test_pounce_resolves_bite_then_venom_then_balance_once(self):
