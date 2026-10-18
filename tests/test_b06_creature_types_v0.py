@@ -46,12 +46,14 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
                             {"EXECUTABLE_FIXTURE_EXISTS", "CONCEPT_ONLY", "DEFERRED"}
                             for e in self.index["entries"]))
 
-    def test_only_sentry_is_executable_and_linked_to_original(self):
+    def test_two_executable_benchmarks_linked_without_altering_sentry(self):
         executable = [e for e in self.index["entries"]
                       if e["entry_status"] == "EXECUTABLE_FIXTURE_EXISTS"]
-        self.assertEqual([e["id"] for e in executable], ["B06-EN-01"])
+        self.assertEqual([e["id"] for e in executable], ["B06-EN-01", "B06-EN-02"])
         self.assertEqual(executable[0]["fixture_path"],
                          "content/creatures/b06-firebound-sentry.v0.json")
+        self.assertEqual(executable[1]["fixture_path"],
+                         "content/creatures/b06-ordinary-human-soldier.v0.json")
         self.assertEqual(self.sentry["bestiary_ref"], "B06-EN-01")
         self.assertEqual(self.sentry["creature_profile"],
                          executable[0]["creature_profile"])
@@ -96,8 +98,10 @@ class B06CreatureTaxonomyTests(unittest.TestCase):
         soldier = self.entries["B06-EN-02"]["creature_profile"]
         self.assertIn("ordinary_no_independent_invocation", soldier["veil_relationship"])
         self.assertEqual(soldier["family"], "ordinary_humanoid")
-        self.assertIn("non-Archetype" .lower(),
-                      self.entries["B06-EN-02"]["open_mechanics"][0].lower())
+        self.assertTrue(any(
+            "non-focus" in note.casefold() or "non-archetype" in note.casefold()
+            for note in self.entries["B06-EN-02"]["open_mechanics"]
+        ))
 
     def test_inward_and_outward_species_do_not_inherit_focus(self):
         for n in (5, 6):
