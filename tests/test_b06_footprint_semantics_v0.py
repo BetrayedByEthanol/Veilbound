@@ -38,10 +38,13 @@ class B06FootprintSemanticValidationTests(unittest.TestCase):
         self.assertEqual(validate_footprint(self.footprint), [])
         self.assertEqual(validate_b06_document(self.index), [])
 
-    def test_all_current_b06_files_pass_via_runtime_validator(self):
-        self.assertEqual(
-            validate_files([INDEX_FILE, SOLDIER_FILE, SENTRY_FILE]), []
-        )
+    def test_all_current_and_future_named_b06_files_pass_semantic_validation(self):
+        # Discover all B06 files, not merely a hard-coded list of today's fixtures.
+        # This makes `python -m unittest discover -s tests` catch future invalid
+        # bestiary entries and new executable enemy files alike.
+        paths = sorted((ROOT / "content/creatures").glob("b06-*.json"))
+        self.assertTrue({INDEX_FILE, SOLDIER_FILE, SENTRY_FILE}.issubset(set(paths)))
+        self.assertEqual(validate_files(paths), [])
 
     def test_typo_wing_reference_is_rejected_in_index(self):
         mutated = copy.deepcopy(self.index)
