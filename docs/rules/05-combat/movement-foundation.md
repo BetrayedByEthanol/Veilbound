@@ -1,6 +1,6 @@
 # Movement Foundation
 
-> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md) author fixed-heading faster approaches; Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md). Climbing and swimming capability/state/segment rules are defined in [Traversal Foundation](traversal-foundation.md).
+> Canonical Veilbound grid-movement baseline. This page defines ordinary Movement Points, split movement, movement segments, diagonal cost, cautious movement, occupancy, blocked corners, melee reach, threatened space, movement-based Opportunities, forced movement, teleportation, and reserved Movement Interception. [Rapid Advance and Charge v0](rapid-advance-and-charge-v0.md) author fixed-heading faster approaches; Sprint, terrain costs, movement impairments, and Prone/Crawl/Stand movement are defined in [Special Movement, Terrain, and Prone](special-movement-terrain-and-prone.md). Climbing and swimming capability/state/segment rules are defined in [Traversal Foundation](traversal-foundation.md). The scoped [Multi-Square Creature Footprints v0](multi-square-creature-footprints-v0.md) extends occupancy, translated movement costs, pivots and threatened space for larger bodies without overriding this page's single-square movement rules.
 
 ## Grid scale and Movement Points
 
@@ -242,7 +242,7 @@ The following are intentionally not defined by Movement Foundation:
 - future numerical playtesting and specialized physics for locked [Falling and Catch Grip v0](physical-hazards-v0.md), plus detailed water-hazard procedures;
 - jumping, exact exceptional/extended-fall timing and special midair movement;
 - squeezing;
-- size-based occupancy/reach exceptions;
+- size-based occupancy/reach exceptions **beyond the scoped rigid translation/1×2-turn foundation in [Multi-Square Creature Footprints v0](multi-square-creature-footprints-v0.md)**;
 - flight and other special movement modes;
 - generic movement checks outside authored traversal/hazard procedures;
 - detailed forced-movement resolution;
