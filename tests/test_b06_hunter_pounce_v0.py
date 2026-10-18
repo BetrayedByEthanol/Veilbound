@@ -99,8 +99,9 @@ class HunterPounceRulesTests(unittest.TestCase):
         for marker in ("d20 + 6", "3 + d6 Piercing, Penetration 1", "d20 + 4"):
             self.assertIn(marker, self.rules)
         self.assertIn("test-only numbers", self.rules)
-        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
-        self.assertIsNone(self.hunter["fixture_path"])
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
 
     def test_front_head_only_one_by_two_footprint(self):
         shape = self.hunter["creature_profile"]["footprint"]
