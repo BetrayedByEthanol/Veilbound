@@ -1,4 +1,4 @@
-"""B06 semantic footprint checks for bestiary and executable enemy JSON.
+"""B06 semantic footprint checks for bestiary, enemy and physiology JSON.
 
 JSON Schema Draft 2020-12 cannot, without nonstandard extensions, express
 "reference_cell_id is one of the values in sibling array cell_ids".
@@ -19,7 +19,11 @@ from typing import Any, Mapping, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
 CREATURE_DIR = ROOT / "content" / "creatures"
-SUPPORTED_VERSIONS = frozenset(("b06-bestiary-index-v0", "b06-enemy-v0"))
+SUPPORTED_VERSIONS = frozenset((
+    "b06-bestiary-index-v0",
+    "b06-enemy-v0",
+    "b06-hunter-physiology-v0",
+))
 
 
 def validate_footprint(footprint: Any, location: str = "footprint") -> list[str]:
@@ -63,7 +67,7 @@ def validate_footprint(footprint: Any, location: str = "footprint") -> list[str]
 
 
 def validate_b06_document(document: Any, location: str = "<document>") -> list[str]:
-    """Check each present B06 footprint in a bestiary index or enemy fixture."""
+    """Check B06 anatomical-cell semantics by explicitly registered format."""
     if not isinstance(document, dict):
         return [f"{location}: B06 document must be an object"]
 
@@ -86,12 +90,58 @@ def validate_b06_document(document: Any, location: str = "<document>") -> list[s
                 errors.extend(validate_footprint(
                     profile["footprint"], f"{where}.creature_profile.footprint"
                 ))
-    else:
+    elif version == "b06-enemy-v0":
         profile = document.get("creature_profile")
         if isinstance(profile, dict) and "footprint" in profile:
             errors.extend(validate_footprint(
                 profile["footprint"], f"{location}.creature_profile.footprint"
             ))
+    elif version == "b06-hunter-physiology-v0":
+        # This is a deliberately incomplete, NON-EXECUTABLE Hunter calibration
+        # record. Its footprint fields are direct children of creature_profile,
+        # unlike the full enemy/index formats. Never silently ignore them or
+        # accept an empty record with only schema_version.
+        if document.get("record_status") != "PHYSIOLOGY_ONLY_NOT_EXECUTABLE":
+            errors.append(
+                f"{location}.record_status: Hunter physiology must remain "
+                "'PHYSIOLOGY_ONLY_NOT_EXECUTABLE'"
+            )
+        if document.get("full_enemy_fixture_path", object()) is not None:
+            errors.append(
+                f"{location}.full_enemy_fixture_path: physiology record "
+                "must not claim an executable enemy fixture"
+            )
+        if document.get("creature_id") != "B06-EN-03":
+            errors.append(
+                f"{location}.creature_id: Hunter physiology must identify B06-EN-03"
+            )
+        profile = document.get("creature_profile")
+        where = f"{location}.creature_profile"
+        if not isinstance(profile, dict):
+            errors.append(f"{where}: expected an object")
+        else:
+            errors.extend(validate_footprint(
+                {
+                    "cell_ids": profile.get("footprint_cell_ids"),
+                    "reference_cell_id": profile.get("reference_cell_id"),
+                    "shape": "rectangular",
+                    "width_cells": 1,
+                    "length_cells": 2,
+                },
+                where,
+            ))
+            # The referenced Hunter's anatomy is specifically head/rear.
+            # A matching list/ref that silently describes a different body
+            # is not a valid partial snapshot of B06-EN-03.
+            if profile.get("footprint_cell_ids") != ["head", "rear"]:
+                errors.append(
+                    f"{where}.footprint_cell_ids: Hunter requires "
+                    "ordered ['head', 'rear'] local cells"
+                )
+            if profile.get("reference_cell_id") != "head":
+                errors.append(
+                    f"{where}.reference_cell_id: Hunter reference must be 'head'"
+                )
     return errors
 
 
