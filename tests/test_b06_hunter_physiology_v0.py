@@ -85,8 +85,9 @@ class HunterPhysiologyV0Tests(unittest.TestCase):
     def test_slice_record_explicitly_not_an_executable_enemy(self):
         self.assertEqual(self.profile["record_status"], "PHYSIOLOGY_ONLY_NOT_EXECUTABLE")
         self.assertIsNone(self.profile["full_enemy_fixture_path"])
-        self.assertEqual(self.hunter["entry_status"], "CONCEPT_ONLY")
-        self.assertIsNone(self.hunter["fixture_path"])
+        self.assertEqual(self.hunter["entry_status"], "EXECUTABLE_FIXTURE_EXISTS")
+        self.assertEqual(self.hunter["fixture_path"],
+                         "content/creatures/b06-hunter-of-the-woods.v0.json")
         self.assertEqual(self.hunter["encounter_guidance"]["challenge_rating"]["status"], "unrated")
         self.assertIn("docs/design/b06-hunter-physiology-v0.md", self.hunter["rules_basis"])
 
