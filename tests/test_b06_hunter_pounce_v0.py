@@ -134,6 +134,17 @@ class HunterPounceRulesTests(unittest.TestCase):
         self.assertIn("successful natural 20", self.rules)
         self.assertIn("does not automatically grant a takedown", self.rules)
 
+    def test_pounce_rider_does_not_double_charge_close_contact_opportunities(self):
+        self.assertIn("creates **no additional Close-Contact Opportunity**", self.rules)
+        self.assertIn("Movement Opportunities along the actual Charge route", self.rules)
+        self.assertIn("does **not** move into or share the target's square", self.rules)
+
+    def test_player_commits_balance_ability_before_opposed_dice(self):
+        self.assertIn("Before either balance die is rolled", self.rules)
+        self.assertIn("Strength to brace", self.rules)
+        self.assertIn("Agility to recover balance", self.rules)
+        self.assertIn("Neither participant may switch Abilities", self.rules)
+
     def test_bite_natural_one_miss_does_not_automatically_cancel_balance(self):
         r=pounce_result(1,13,16,11)
         self.assertFalse(r["bite_hit"])
