@@ -126,6 +126,7 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
     front_caster_precontact_casts = 0
     front_caster_approach_mp = 0
     lane_disrupted_by = []
+    melee_corridor_occupant = None
     # Warned begins head-adjacent. Ambush begins three legal straight
     # translations from head-forward contact; no one is threatened by the
     # Hunter until it actually completes a legal approach.
@@ -252,25 +253,32 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
             member = ROLE[ident[0]]
             if opening == "ambush" and not frontal_contact:
                 if member["kind"] == "melee":
-                    # This model's side-melee action requires an ordinary
-                    # forward approach into the disputed Charge corridor.
-                    # A ranged R never needs that movement. Do not mark
-                    # disruption if the model stops before this actor acts.
+                    # The ONE scripted melee entry point is (1,0), beside
+                    # Hunter head (0,0). A second walker cannot share it;
+                    # a new path and responses must be explicitly authored
+                    # before that actor's attack is allowed to resolve.
+                    if melee_corridor_occupant is not None:
+                        contact_route = "unresolved_multiple_melee_approaches"
+                        outcome = "contact_path_unresolved"
+                        break
+                    melee_corridor_occupant = ident
                     lane_disrupted_by.append(ident)
                     if ident == front_id:
-                        # Front target walks from (4,0) into (1,0) to
-                        # attack Hunter head=(0,0). No Hunter movement will
-                        # be needed to Bite this target later. Keep the
-                        # pre-Hunter action window open so a second moving
-                        # melee actor is not silently ignored.
+                        # The FRONT target comes into direct Bite reach
+                        # of the stationary Hunter. This is a genuine
+                        # short-route fallback when no non-front blocker
+                        # is present before Hunter's own turn.
                         contact_route = "front_melee_adjacent"
                 elif member["kind"] == "flame" and ident == front_id:
-                    # Before Hunter's approach, F's initially head-forward
-                    # target square is four squares away: out of Flame range.
-                    # F may move one cardinal step toward the Hunter (2 MP)
-                    # from (4,0) to (3,0), now at legal range 3. This
-                    # occupies the last prospective Charge-head square and
-                    # thus prevents the Hunter's three-step Pounce later.
+                    # An already-present melee body at (1,0) would act as
+                    # a Living Screen on F's proposed (3,0)->(0,0)
+                    # projectile lane. Do not grant a magical clear shot.
+                    if melee_corridor_occupant is not None:
+                        contact_route = "unresolved_flame_living_screen"
+                        outcome = "contact_path_unresolved"
+                        break
+                    # From front F (4,0) one 2-MP step reaches (3,0):
+                    # exactly three clear squares from Hunter head.
                     front_caster_approach_mp += 2
                     lane_disrupted_by.append(ident)
             if ident == front_id:
@@ -361,6 +369,7 @@ def trial(level, size, roster, opening, front, seed, hunter=None):
         "front_caster_precontact_casts": front_caster_precontact_casts,
         "front_caster_approach_mp": front_caster_approach_mp,
         "lane_disrupted_by": lane_disrupted_by,
+        "melee_corridor_occupant": melee_corridor_occupant,
         "contact_route": contact_route,
         "hunter_attack_resolution": hunter_attack_resolution,
     }
