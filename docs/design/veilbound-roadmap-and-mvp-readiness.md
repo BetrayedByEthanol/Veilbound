@@ -88,6 +88,10 @@ These boxes concern **verified end-to-end MVP acceptance**, **not** whether a pr
 
 **Definition progress:** **3/7 B01–B07 blockers closed as definitions** (B01–B03); **B04/B05/B07 partial and B06 open**. The **13 Tier-1 techniques / 10 of 24 MVP Aspects / Life 6 of 6 T1 / two Life L3 properties** counts are unchanged by PR #82. **Two structurally checked character variants, 0/12 independently certified Focus combinations, 0 reviewed opposed B06 encounter packs.** This is **not** a playable-MVP percentage; no end-to-end exit item above is certified complete.
 
+### B06 current next-step evidence — scripted Hunter party exchanges (scope-limited)
+
+[Eight reproducible Hunter/Low Life party exchange cells](b06-hunter-party-encounter-exchange-calibration-v0.md) now exercise **3 or 4 Level-2/3 combatants** under distinct **warned adjacency** and **ambush Pounce-lane** assumptions. They use the two verified Low Life Priest sheets (and their L2 progression) repeated as controlled A/B baseline members, actual Hunter/weapon attack and defense math, one legitimate Standing Opportunity, puncture-gated toxin, and real Step-2 Vigor spending. The fixed-dice traces reach the Hunter's first **HP≤0** in **R1 for L3** or **R2 for L2** in these particular scripted choices; **this is not a kill, probability, numerical CR, representative mixed-party victory, or full B06-1/B06-2/B06-3 encounter certification**. Wounds/Dying continuation, GM tactics, natural-20/1 confirmations, legal player Veil actions and repeated random seeds remain open. **B06 MVP blocker and 0 certified full opposed encounter packs remain unchanged.**
+
 ### B06 next acceptance slice — comparative Level-3 Life Low Priest encounters
 
 | Required test | Shared test input / evidence to record | Exit condition |
