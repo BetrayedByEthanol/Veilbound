@@ -196,9 +196,25 @@ class SpellState:
         self._funds(a,spent,committed)
         self._commit(caster,on_committed=on_committed,
                      label="g3:composite:Stone Skin+"+secondary)
-        if a.hp<=0 or a.vp_available<spent+committed or (
-                secondary=="Basic Heal" and hand_available is not True):
-            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Composite",secondary=secondary)
+        # A G0 response to committing this Projected Action can legally
+        # establish Reactive Stone Skin BEFORE this Composite applies. The
+        # initial exclusivity preflight is not sufficient after that window:
+        # decline the Composite, keeping paid AP but spending/committing no
+        # additional VP, rather than adding an undeletable second host.
+        if self.active(caster,"Stone Skin"):
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Composite",secondary=secondary,
+                       cause="stone_skin_activated_during_responses",vp_spent=0)
+            return None
+        if (a.hp<=0 or a.vp_available<spent+committed
+                or (secondary=="Basic Heal" and (
+                    hand_available is not True or a.wounds))
+                or (secondary=="Vital Shelter" and
+                    any(v.kind.endswith("Shelter") and v.recipient==caster
+                        for v in self.effects.values()))):
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Composite",secondary=secondary,
+                       cause="post_commit_source_or_resources",vp_spent=0)
             return None
         self._pay(caster,spent,committed,label="g3:composite:"+secondary)
         host=self._new_effect(caster,"Stone Skin",caster,reserve,resistance=2)
@@ -232,6 +248,22 @@ class SpellState:
             return None
         self._pay(caster,0,reserve,label="g3:stone_skin")
         return self._new_effect(caster,"Stone Skin",caster,reserve,resistance=2)
+
+    def on_response_window_closed(self,trigger):
+        """Expire only unresolved preflight claims for this exact G0 window.
+
+        An Interception cancellation never enters a spontaneous callback.
+        Even after a normal or exceptional window exit, unused response
+        claims cannot be carried to a different attack with the same
+        external text key or used to authorize a late defensive spell.
+        The actual consumed-response tombstones are preserved separately.
+        """
+        for token,(original,response) in list(self.reactive_stone_claims.items()):
+            if original is trigger:
+                del self.reactive_stone_claims[token]
+                self.e.log("g3_reactive_claim_expired",caster=token[0],
+                           trigger=trigger.key,response_label=response.label,
+                           reason="response_window_closed_without_application")
 
     def prepare_reactive_stone(self,caster,trigger,*,perceptible):
         """Return a genuine G0 Response choice; do not consume it yet.
