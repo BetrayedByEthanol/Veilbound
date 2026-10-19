@@ -45,6 +45,7 @@ class Source:
     equipment: tuple
     attack_profiles: tuple
     start_state: str
+    attack_requirements: tuple = ()  # (profile_id, required effect, forbidden effect)
 
 
 @dataclass
@@ -164,7 +165,10 @@ def enemy_actor(source_id, actor_id, team, *, start_state=None, occupied):
     source = Source(path, source_id, _fingerprint(path), obj["status"],
                     tuple(sorted(obj["abilities"].items())), (),
                     tuple((e["name"], e["equipped"]) for e in obj["equipment"]),
-                    tuple(p["id"] for p in obj["attack_profiles"]), init["id"])
+                    tuple(p["id"] for p in obj["attack_profiles"]), init["id"],
+                    tuple((p["id"], p.get("required_active_effect"),
+                           p.get("requires_effect_inactive"))
+                          for p in obj["attack_profiles"]))
     actor = Actor(actor_id, team, source, obj["benchmark_level"],
                   obj["identity"]["focus"], d["initiative_bonus"],
                   obj["abilities"]["awareness"], obj["abilities"]["agility"],
@@ -310,6 +314,7 @@ class Encounter:
         self.reservations = []
         self.seen_sequences = set()
         self.regen_done = set()
+        self.pending_regeneration = None
         rank = {v: i for i, v in enumerate(tie_order)}
         def priority(a):
             return (-initiative_scores[a.id], -a.awareness, -a.agility,
@@ -346,10 +351,7 @@ class Encounter:
     def begin_round(self):
         if self.round and self.cursor != len(self.order):
             raise ValueError("Cannot refresh round capacities mid-round")
-        if self.round:
-            # No universal Round End healing/refresh. Authored effect ticks
-            # are still G3/G4 and are not guessed by this G0 ledger.
-            self.log("round_end", effects="authored effects deferred")
+        # Round End is logged on last end_turn(), before any subsequent round.
         self.round += 1
         self.regen_done.clear()
         self.seen_sequences.clear()
@@ -433,26 +435,31 @@ class Encounter:
         self.check()
 
     def start_turn(self, actor_id, *, regen_choice=None):
-        if not self.round or self.current is not None or self.cursor >= len(self.order):
+        if not self.round or self.cursor >= len(self.order):
             raise ValueError("No turn is ready")
+        if self.current is not None and self.pending_regeneration != actor_id:
+            raise ValueError("Another turn is already open")
+        if self.current is not None and self.pending_regeneration is None:
+            raise ValueError("Turn resources already established")
         if actor_id != self.order[self.cursor]:
             raise ValueError("Actor is not next in Initiative order")
         a = self.actors[actor_id]
-        # Preflight debt before mutating persistent status or turn state.
-        if a.blink_debt_due > a.ap_total:
-            self.log("unresolved_decision", actor=actor_id, choice="blink_debt_shortage")
-            raise UnresolvedDecision("Authored exceptional Blink AP shortage")
-        self.current = actor_id
-        # Record canonical Step 1 expiry before Step 2 Regeneration, without
-        # destroying reservations if a mandatory policy choice is unresolved.
-        expired = [r.label for r in self.reservations if r.actor_id == actor_id]
-        self.log("turn_start_expiry", actor=actor_id, expired=expired)
-        try:
-            self._regenerate(a, regen_choice)
-        except (UnresolvedDecision, ValueError):
-            self.current = None  # Retriable, with original reservations intact.
-            raise
-        self.reservations = [r for r in self.reservations if r.actor_id != actor_id]
+        if self.pending_regeneration is None:
+            # Preflight debt before beginning Step 1; invalid debt is not
+            # allowed to partially expire reservations or start a turn.
+            if a.blink_debt_due > a.ap_total:
+                self.log("unresolved_decision", actor=actor_id, choice="blink_debt_shortage")
+                raise UnresolvedDecision("Authored exceptional Blink AP shortage")
+            self.current = actor_id
+            expired = [r.label for r in self.reservations if r.actor_id == actor_id]
+            self.reservations = [r for r in self.reservations if r.actor_id != actor_id]
+            self.log("turn_start_expiry", actor=actor_id, expired=expired)
+            self.pending_regeneration = actor_id
+        # Step 1 is committed and logged only once. If Step 2 needs a policy
+        # choice, keep this turn suspended here and resume Step 2 later; do
+        # NOT revive expired reservations or append a duplicate expiry event.
+        self._regenerate(a, regen_choice)
+        self.pending_regeneration = None
         # External spell/hazard consequences remain G3/G4; no automatic ticks.
         a.ap_remaining = (0 if a.hp <= 0 or a.dead
                           else a.ap_total - a.blink_debt_due)
@@ -464,8 +471,8 @@ class Encounter:
         self.check()
 
     def end_turn(self):
-        if self.current is None:
-            raise ValueError("No open turn")
+        if self.current is None or self.pending_regeneration is not None:
+            raise ValueError("No resolved open turn")
         a = self.actors[self.current]
         self.log("turn_end", actor=a.id, unused_ap=a.ap_remaining, unused_mp=a.mp_remaining)
         self.seen_sequences = {key for key in self.seen_sequences if key[0] != a.id}
@@ -473,10 +480,14 @@ class Encounter:
         a.mp_remaining = 0
         self.cursor += 1
         self.current = None
+        if self.cursor == len(self.order):
+            # Resolves the canonical Round End boundary even when a scenario
+            # stops here without requesting the next Round Begin.
+            self.log("round_end", effects="authored effects deferred")
 
     def spend_ap(self, actor_id, kind, *, label):
-        if self.current != actor_id:
-            raise ValueError("Only current actor may spend Turn AP")
+        if self.current != actor_id or self.pending_regeneration is not None:
+            raise ValueError("Only ready current actor may spend Turn AP")
         a = self.actors[actor_id]
         if a.dead or a.hp <= 0:
             raise ValueError("Dying/dead actors cannot take ordinary voluntary actions")
@@ -558,10 +569,13 @@ class Encounter:
         # Sentry sword profile requires its actually active Chosen Reserve.
         if a.source.source_id == "B06-EN-03":
             raise UnresolvedDecision("Hunter attack needs G1 physical contact and manoeuvre validation")
-        if (a.source.source_id == "B06-EN-01"
-                and "B06-AT-02" in profiles
-                and "B06-FIRE-RESERVE-01" not in a.maintained):
-            raise ValueError("Cold Sentry has no active enchanted sword profile")
+        for profile_id, required, inactive in a.source.attack_requirements:
+            if profile_id not in profiles:
+                continue
+            if required is not None and required not in a.maintained:
+                raise ValueError("Attack profile requires active effect: " + required)
+            if inactive is not None and inactive in a.maintained:
+                raise ValueError("Attack profile requires inactive effect: " + inactive)
         if a.ap_remaining < len(profiles) * a.physical_ap:
             raise ValueError("Not enough AP for full Attack Sequence")
         if any(x not in VALID_DEFENSES for x in defenses):
@@ -597,6 +611,8 @@ class Encounter:
         from a separately source-validated effect. No spontaneous response is
         collected after the first legality recheck fails.
         """
+        if self.pending_regeneration is not None:
+            raise UnresolvedDecision("Resolve pending Regeneration Step before responding")
         matches = []
         used = set()
         for r in self.reservations:
