@@ -29,6 +29,9 @@ class ShotChoice:
     # Exposure is (actor_id, L), with L source-authored from the actual
     # silhouette and firing opening; never inferred from melee engagement.
     exposures: tuple = ()
+    # Stable G1 anatomical target point; mandatory for 1x2 recipients.
+    origin_cell: tuple | None = None
+    target_cell: tuple | None = None
     # Conditional declared personal defenses for exposed creatures.
     collateral: tuple = ()
     secondary_face: int | None = None
@@ -52,6 +55,8 @@ class AimRecord:
     source: str
     position: tuple
     own_turn_number: int
+    target_cell: tuple | None = None
+    origin_cell: tuple | None = None
 
 
 @dataclass(frozen=True)
@@ -263,11 +268,12 @@ class RangedCombat:
         return a
 
     def aim(self, shooter_id, target_id, source, *, profile="bow",
-            exposures=()):
+            exposures=(), origin_cell=None, target_cell=None):
         if profile!="bow":
             raise UnresolvedDecision("G2 Aim requires audited Bow attack profile")
         a=self._bow_ready(shooter_id)
-        lane=self.lane(shooter_id,target_id,range_kind="bow",exposures=exposures)
+        lane=self.lane(shooter_id,target_id,range_kind="bow",exposures=exposures,
+                       origin=origin_cell,target_cell=target_cell)
         if source not in ("range", "cover") and not source.startswith("screen:"):
             raise ValueError("Aim names one exact shot-difficulty source")
         if source.startswith("screen:") and source.removeprefix("screen:") not in (
@@ -277,7 +283,8 @@ class RangedCombat:
             raise ValueError("Insufficient AP to Aim")
         self.e.spend_ap(shooter_id,"physical",label="g2:aim:"+source)
         self.aims[shooter_id]=AimRecord(target_id,profile,source,a.occupied,
-                                       self.own_turn_number[shooter_id])
+                                       self.own_turn_number[shooter_id],
+                                       target_cell,origin_cell)
         self.e.log("g2_aim_prepared",shooter=shooter_id,target=target_id,
                    profile=profile,source=source)
         return self.aims[shooter_id]
@@ -436,7 +443,8 @@ class RangedCombat:
         def on_interception(state,tr,res):
             self._intercept(tr,res,shot.interceptor_routes)
             try:
-                self.lane(shooter_id,target_id,exposures=shot.exposures)
+                self.lane(shooter_id,target_id,exposures=shot.exposures,
+                          origin=shot.origin_cell,target_cell=shot.target_cell)
             except (ValueError,UnresolvedDecision):
                 tr.legal=False
         trig=Trigger(key,shooter_id,target_id)
@@ -452,7 +460,8 @@ class RangedCombat:
                   trigger=key,reason="interrupted_or_obstructed",ammunition_spent=0)
             return {"outcome":"interrupted_before_launch"}
         try:
-            lane=self.lane(shooter_id,target_id,exposures=shot.exposures)
+            lane=self.lane(shooter_id,target_id,exposures=shot.exposures,
+                           origin=shot.origin_cell,target_cell=shot.target_cell)
         except (ValueError,UnresolvedDecision) as err:
             e.log("g2_bow_no_launch",shooter=shooter_id,target=target_id,
                   trigger=key,reason=str(err),ammunition_spent=0)
@@ -618,7 +627,8 @@ class RangedCombat:
             if sh.secondary_face is not None and (type(sh.secondary_face) is not int or
                                                    not 1<=sh.secondary_face<=20):
                 raise ValueError("Conditional d20 face must be 1–20")
-            lane=self.lane(shooter_id,target_id,exposures=sh.exposures)
+            lane=self.lane(shooter_id,target_id,exposures=sh.exposures,
+                           origin=sh.origin_cell,target_cell=sh.target_cell)
             self._screen_sides(shooter_id,target_id,lane,sh.neutral_sides)
             if sh.defense not in ("take_hit","guard","dodge"):
                 raise ValueError("Invalid intended defense")
@@ -651,8 +661,11 @@ class RangedCombat:
                 raise ValueError("Duplicate Opportunity source")
             if sh.aim_source is not None:
                 record=self.aims.get(shooter_id)
-                if not record or record.target!=target_id or record.profile!="bow" or record.source!=sh.aim_source:
-                    raise ValueError("Shot has no matching retained Aim")
+                if (not record or record.target!=target_id or record.profile!="bow"
+                        or record.source!=sh.aim_source
+                        or record.target_cell!=sh.target_cell
+                        or record.origin_cell!=sh.origin_cell):
+                    raise ValueError("Shot has no matching retained Aim for this exact point")
         # G0's own-action hook breaks G1 segment, as canon requires.
         e.seen_sequences.add((shooter_id,target_id))
         for i in range(len(shots)):
