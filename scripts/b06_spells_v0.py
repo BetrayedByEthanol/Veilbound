@@ -465,7 +465,8 @@ class SpellState:
 
     def cast_flame(self,caster,target,*,tier,face,vigor_die,
                    defense="take_hit",aware=False,hand_available=False,
-                   on_committed=None,exposures=(),origin=None,target_cell=None):
+                   on_committed=None,exposures=(),origin=None,target_cell=None,
+                   prone_cover_policy=(),prone_dodge_feasible=False):
         """Bounded direct clear/cover-only F Thrown Flame; no G4 HP mutations.
 
         Mixed living-screen destination/scatter and full opportunity/Reaction
@@ -497,8 +498,11 @@ class SpellState:
                if enemy.team!=a.team for c in a.occupied):
             raise UnresolvedDecision("Threatened F casting needs genuine Opportunity response")
         victim=self.e.actors[target]
-        if defense=="guard" or defense=="dodge":
-            self.e.g2._defense_value(victim,defense,0,lane.cover)
+        position=self.e.g2._prone_position(
+            victim,lane.distance,lane.cover,prone_cover_policy)
+        self.e.g2._defense_value(
+            victim,defense,0,lane.cover,position_bonus=position,
+            prone_dodge_feasible=prone_dodge_feasible)
         price=2*tier
         self._funds(a,price,0)
         self._commit(caster,on_committed=on_committed,label="g3:thrown_flame:T"+str(tier))
@@ -509,13 +513,32 @@ class SpellState:
             self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Thrown Flame",
                        cause="post_commit_physical_lane")
             return {"outcome":"interrupted_before_launch","vp_spent":0}
-        if (a.hp<=0 or a.vp_available<price or
-                refreshed.screens):
+        if (a.hp<=0 or a.vp_available<price or refreshed.screens):
             self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Thrown Flame",
                        cause="caster_or_resources")
             return {"outcome":"interrupted_before_launch","vp_spent":0}
+        # Recheck final physical position and declared defense BEFORE VP
+        # payment. A Dodge or shield that became illegal during committed
+        # responses cannot consume a launched spell's VP and then raise.
+        try:
+            position=self.e.g2._prone_position(
+                victim,refreshed.distance,refreshed.cover,prone_cover_policy)
+            self.e.g2._defense_value(
+                victim,defense,0,refreshed.cover,
+                position_bonus=position,
+                prone_dodge_feasible=prone_dodge_feasible)
+        except (ValueError,UnresolvedDecision) as error:
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Thrown Flame",
+                       cause="post_commit_defense_unusable",reason=str(error))
+            return {"outcome":"interrupted_before_launch","vp_spent":0}
         self._pay(caster,price,0,label="g3:thrown_flame:T"+str(tier))
-        b,d=self.e.g2._defense_value(victim,defense,0,refreshed.cover,commit=True)
+        # No callback or geometry mutation occurs between the pure final
+        # validation and this one native G2 defensive-resource commitment.
+        b,d=self.e.g2._defense_value(
+            victim,defense,0,refreshed.cover,commit=True,
+            position_bonus=position,
+            prone_dodge_feasible=prone_dodge_feasible)
         attack=face+5
         if face==1:
             outcome="automatic_miss"
