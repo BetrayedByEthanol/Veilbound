@@ -315,8 +315,13 @@ class Encounter:
         self.seen_sequences = set()
         self.regen_done = set()
         self.pending_regeneration = None
+        # Only the actual currently executing spontaneous callback may
+        # apply pre-roll effects. A historical ledger entry is NOT proof
+        # that the response window remains open; nested windows restore it.
+        self._live_spontaneous_response = None
         self.g1 = None  # Optional native physical grid; G0-only stays supported.
         self.g2 = None  # Optional G2 ranged executor; never adds phantom shots.
+        self.g3 = None  # Optional source-bound spell state; G0-only is unchanged.
         rank = {v: i for i, v in enumerate(tie_order)}
         def priority(a):
             return (-initiative_scores[a.id], -a.awareness, -a.agility,
@@ -369,6 +374,8 @@ class Encounter:
             a.opportunity_active = False
             a.opportunity_used = 0
         self.log("round_begin", refreshed=list(self.order))
+        if self.g3 is not None:
+            self.g3.on_round_begin()
         self.check()
 
     def _regenerate(self, a, choice):
@@ -378,8 +385,12 @@ class Encounter:
             self.regen_done.add(a.id)
             self.log("regeneration_dead", actor=a.id)
             return
+        # Guided Regeneration is only +1 throughput at the beneficiary's
+        # existing genuine Regeneration Step, never a new or early step.
+        throughput=(a.regen + (self.g3.regen_throughput(a.id)
+                               if self.g3 is not None else 0))
         missing = a.hp < a.hp_max or any(w.repairable and w.progress < w.requirement for w in a.wounds)
-        if missing and a.vigor and a.regen and choice is None:
+        if missing and a.vigor and throughput and choice is None:
             self.log("unresolved_decision", actor=a.id, choice="regeneration_allocation")
             raise UnresolvedDecision("Explicit regeneration allocation required")
         choice = choice or RegenerationChoice()
@@ -394,7 +405,7 @@ class Encounter:
             raise ValueError("Cannot cancel Dying loss while conscious")
         survival = int(dying and choice.cancel_dying_loss)
         debit = survival + choice.hp + choice.repair
-        if debit > a.regen or debit > a.vigor:
+        if debit > throughput or debit > a.vigor:
             raise ValueError("Natural regeneration exceeds throughput or available Vigor")
         if not dying and choice.hp > a.hp_max - a.hp:
             raise ValueError("Cannot heal above Max HP")
@@ -631,8 +642,31 @@ class Encounter:
         self.log("interception_reserved", actor=actor_id, trigger=trigger_key,
                  label=label)
 
+    def is_live_spontaneous(self, trigger, response):
+        """True only inside this exact native response's active callback."""
+        current = self._live_spontaneous_response
+        return (current is not None and current[0] is trigger
+                and current[1] is response)
+
     def response_window(self, trigger, *, on_interception, spontaneous=(),
                         on_spontaneous=None, after_interceptions=None):
+        """Run an original trigger and expire its unused G3 preflight on exit.
+
+        Cleanup covers Interception cancellation, normal resolution, errors,
+        and nested windows without touching claims for distinct Trigger
+        objects that happen to reuse the same external text key.
+        """
+        try:
+            return self._response_window(
+                trigger,on_interception=on_interception,
+                spontaneous=spontaneous,on_spontaneous=on_spontaneous,
+                after_interceptions=after_interceptions)
+        finally:
+            if self.g3 is not None:
+                self.g3.on_response_window_closed(trigger)
+
+    def _response_window(self, trigger, *, on_interception, spontaneous=(),
+                         on_spontaneous=None, after_interceptions=None):
         """Caller resolves independently authorized effects; G0 never invents Interrupt.
 
         Interception callback may call nested response_window() or set trigger.legal
@@ -721,7 +755,17 @@ class Encounter:
             self.log("spontaneous_committed", actor=c.actor_id, response_kind=c.kind,
                      trigger=trigger.key, label=c.label)
         for c in choices:
-            on_spontaneous(self, trigger, c)
+            # G0 commits all capacities before executing initiative-ordered
+            # responses. Mark ONLY this live callback as the authority for
+            # G3 pre-roll effect application. The finally block prevents
+            # stale authorization after returns, exceptions, or nested G0
+            # response windows.
+            previous = self._live_spontaneous_response
+            self._live_spontaneous_response = (trigger, c)
+            try:
+                on_spontaneous(self, trigger, c)
+            finally:
+                self._live_spontaneous_response = previous
         self.log("trigger_rechecked_after_responses", trigger=trigger.key,
                  legal=trigger.legal)
         if trigger.legal:
