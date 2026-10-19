@@ -315,6 +315,7 @@ class Encounter:
         self.seen_sequences = set()
         self.regen_done = set()
         self.pending_regeneration = None
+        self.g1 = None  # Optional native physical grid; G0-only stays supported.
         rank = {v: i for i, v in enumerate(tie_order)}
         def priority(a):
             return (-initiative_scores[a.id], -a.awareness, -a.agility,
@@ -471,12 +472,16 @@ class Encounter:
         a.blink_debt_next = 0
         self.log("turn_resources", actor=actor_id, ap=a.ap_remaining,
                  mp=a.mp_remaining)
+        if self.g1 is not None:
+            self.g1.on_turn_start(actor_id)
         self.check()
 
     def end_turn(self):
         if self.current is None or self.pending_regeneration is not None:
             raise ValueError("No resolved open turn")
         a = self.actors[self.current]
+        if self.g1 is not None and self.g1.pounce is not None and self.g1.pounce.hunter_id == a.id:
+            raise ValueError("Resolve or explicitly abort ongoing Pounce before turn end")
         self.log("turn_end", actor=a.id, unused_ap=a.ap_remaining, unused_mp=a.mp_remaining)
         self.seen_sequences = {key for key in self.seen_sequences if key[0] != a.id}
         a.ap_remaining = 0
@@ -500,6 +505,10 @@ class Encounter:
         a = self.actors[actor_id]
         if a.dead or a.hp <= 0:
             raise ValueError("Dying/dead actors cannot take ordinary voluntary actions")
+        if (self.g1 is not None and self.g1.pounce is not None
+                and self.g1.pounce.hunter_id == actor_id
+                and not self.g1._internal_pounce_spend):
+            raise ValueError("Complete or abort active Pounce before another own action")
         costs = {"physical": a.physical_ap, "projection": a.projection_ap,
                  "general": 24, "full": a.ap_total}
         if kind not in costs or costs[kind] is None:
@@ -512,6 +521,8 @@ class Encounter:
         a.ap_remaining -= cost
         self.log("action_committed", actor=actor_id, action_class=kind, label=label,
                  ap_spent=cost, ap_remaining=a.ap_remaining)
+        if self.g1 is not None:
+            self.g1.on_own_action(actor_id, label=label)
         return cost
 
     def spend_vp(self, actor_id, points, *, mode, label):
@@ -650,12 +661,19 @@ class Encounter:
         if not trigger.legal:
             self.log("trigger_cancelled_before_spontaneous", trigger=trigger.key)
             return False
-        if spontaneous and on_spontaneous is None:
+        # A callable policy is evaluated only AFTER all matching Interceptions
+        # and the first original-trigger legality recheck. This permits G1 to
+        # derive eligible Movement Opportunities from the resulting geometry
+        # without incorrectly cancelling the *original movement step*.
+        declared = spontaneous(self, trigger) if callable(spontaneous) else spontaneous
+        if declared is None:
+            raise UnresolvedDecision("Spontaneous policy must return explicit choices")
+        if declared and on_spontaneous is None:
             raise ValueError("Spontaneous choices require effect resolution")
         # Validate whole declaration set before paying any Reaction. Multiple
         # same-window responses from one actor may need a separate authored
         # permission, which this G0 subset deliberately does not provide.
-        choices = sorted(spontaneous, key=lambda c: self.order.index(c.actor_id))
+        choices = sorted(declared, key=lambda c: self.order.index(c.actor_id))
         if len({c.actor_id for c in choices}) != len(choices):
             raise UnresolvedDecision("Multiple simultaneous responses by one actor")
         for c in choices:
