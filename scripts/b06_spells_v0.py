@@ -314,7 +314,12 @@ class SpellState:
             raise ValueError("Choose Guided Regeneration fixed or maintained")
         if self.active(caster,"Guided Regeneration"):
             raise ValueError("Cannot stack/replace same Guided instance")
-        if self.active(caster,"Devotional Rite"):
+        # Fixed Spent-only blessings are not Rites; maintained positive
+        # self-reservations are, whether chosen or ordinary.
+        if any(v.caster==caster and v.recipient==caster and v.committed>0
+               and v.kind in ("Guided Regeneration","Vital Shelter",
+                              "Stone Skin","Sentry Sword Reserve")
+               for v in self.effects.values()):
             raise ValueError("One active L1-3 Devotional Rite slot")
         if chosen and mode!="maintained":
             raise ValueError("Spent-only Fixed Guided is not a Chosen Rite")
@@ -329,6 +334,28 @@ class SpellState:
         return self._new_effect(caster,"Guided Regeneration",caster,committed,
                                 chosen=chosen,
                                 expiry_round=(self.e.round+10 if mode=="fixed" else None))
+
+    def exaltation_eligibility(self,caster,property_id):
+        """Check real authored L3 Low Life host eligibility, not an activation.
+
+        EX-LR-01's Step-end arm/payout belongs to G4's dated HP-loss ledger.
+        EX-LP-01 needs a finite Chosen Vital Shelter Primary host, which the
+        R starting repertoire does NOT currently have.
+        """
+        a=self._actor(caster)
+        if a.source.source_id!="R" or a.level<3:
+            return False
+        chosen=[v for v in self.effects.values()
+                if v.caster==caster and v.recipient==caster and v.chosen
+                and v.committed>0]
+        if len(chosen)!=1:
+            return False
+        host=chosen[0]
+        if property_id=="EX-LR-01":
+            return host.kind=="Guided Regeneration" and host.expiry_round is None
+        if property_id=="EX-LP-01":
+            return host.kind=="Vital Shelter" and (host.budget or 0)>=2
+        raise ValueError("Only the two authored L3 Life properties exist")
 
     def regen_throughput(self,actor_id):
         # No invented instant Regeneration Step; augment one actual G0 Step.
@@ -409,7 +436,7 @@ class SpellState:
         # as explicitly authored. G4 must invoke this at the damage event.
         for v in list(self.effects.values()):
             if v.caster==actor_id and (
-                    v.kind=="Stone Skin" or (a.dead and v.kind!="Guided Regeneration")):
+                    v.kind=="Stone Skin" or a.dead):
                 self._end(v,reason="caster_unconscious_or_dead")
             elif v.recipient==actor_id and a.dead:
                 self._end(v,reason="recipient_dead")
