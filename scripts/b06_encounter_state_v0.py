@@ -505,6 +505,10 @@ class Encounter:
         a = self.actors[actor_id]
         if a.dead or a.hp <= 0:
             raise ValueError("Dying/dead actors cannot take ordinary voluntary actions")
+        if (self.g1 is not None and self.g1.pounce is not None
+                and self.g1.pounce.hunter_id == actor_id
+                and not label.startswith("g1:pounce:")):
+            raise ValueError("Complete or abort active Pounce before another own action")
         costs = {"physical": a.physical_ap, "projection": a.projection_ap,
                  "general": 24, "full": a.ap_total}
         if kind not in costs or costs[kind] is None:
