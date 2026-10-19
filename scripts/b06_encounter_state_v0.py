@@ -507,7 +507,7 @@ class Encounter:
             raise ValueError("Dying/dead actors cannot take ordinary voluntary actions")
         if (self.g1 is not None and self.g1.pounce is not None
                 and self.g1.pounce.hunter_id == actor_id
-                and not label.startswith("g1:pounce:")):
+                and not self.g1._internal_pounce_spend):
             raise ValueError("Complete or abort active Pounce before another own action")
         costs = {"physical": a.physical_ap, "projection": a.projection_ap,
                  "general": 24, "full": a.ap_total}
@@ -661,12 +661,19 @@ class Encounter:
         if not trigger.legal:
             self.log("trigger_cancelled_before_spontaneous", trigger=trigger.key)
             return False
-        if spontaneous and on_spontaneous is None:
+        # A callable policy is evaluated only AFTER all matching Interceptions
+        # and the first original-trigger legality recheck. This permits G1 to
+        # derive eligible Movement Opportunities from the resulting geometry
+        # without incorrectly cancelling the *original movement step*.
+        declared = spontaneous(self, trigger) if callable(spontaneous) else spontaneous
+        if declared is None:
+            raise UnresolvedDecision("Spontaneous policy must return explicit choices")
+        if declared and on_spontaneous is None:
             raise ValueError("Spontaneous choices require effect resolution")
         # Validate whole declaration set before paying any Reaction. Multiple
         # same-window responses from one actor may need a separate authored
         # permission, which this G0 subset deliberately does not provide.
-        choices = sorted(spontaneous, key=lambda c: self.order.index(c.actor_id))
+        choices = sorted(declared, key=lambda c: self.order.index(c.actor_id))
         if len({c.actor_id for c in choices}) != len(choices):
             raise UnresolvedDecision("Multiple simultaneous responses by one actor")
         for c in choices:
