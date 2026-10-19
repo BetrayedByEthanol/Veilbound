@@ -412,8 +412,15 @@ class GridMovement:
         a = self.e.actors[actor_id]
         if not moves:
             raise ValueError("Nonempty declared route required")
+        if a.dead or a.hp <= 0:
+            raise ValueError("Incapacitated creature cannot voluntarily move")
+        if any(str(x).lower() == "prone" for x in a.conditions):
+            raise UnresolvedDecision("Prone locomotion requires Crawl/Stand executor")
         if self.pounce and self.pounce.hunter_id == actor_id:
             return all(self.step(actor_id, d) for d in moves)
+        if actor_id in self.rapid_heading and (
+                cautious or any(d != self.rapid_heading[actor_id] for d in moves)):
+            raise ValueError("Aborted Pounce retains fixed Rapid Advance heading")
         old = a.occupied
         total = 0
         transient = False
