@@ -766,6 +766,28 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertNotIn("archer",g2.aims)
         e.check()
 
+    def test_45_departed_neutral_screen_drops_old_risk_side_too(self):
+        neutral=hero("A","neutral",(5,2),team="neutral")
+        r=hero("R","archer",(1,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(neutral,r,target,score={
+            "neutral":30,"archer":20,"target":10})
+        e.start_turn("neutral")
+        key=g1.reserve_movement("neutral","neutral-leaves",2,
+                                label="stepping-aside")
+        e.end_turn()
+        e.start_turn("archer")
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=14,exposures=(("neutral",2),),
+            neutral_sides=(("neutral","ally"),),
+            collateral=(("neutral","take_hit"),),
+            trigger_key="neutral-leaves",
+            interceptor_routes={key:((0,1),)}),))[0]
+        self.assertEqual(out["outcome"],"intended_hit_pending_G5")
+        self.assertEqual(neutral.occupied,((5,3),))
+        self.assertEqual(r.ammunition,19)
+        e.check()
+
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
         r=hero("R","archer",(1,2))
         t=hero("B","target",(9,2),"enemy")
