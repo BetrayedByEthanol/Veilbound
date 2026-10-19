@@ -410,6 +410,110 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertEqual(r.ammunition,19)
         e.check()
 
+    def test_26_intended_guard_resources_preassigned_before_first_roll(self):
+        threat=soldier("threat",(2,3))
+        r=hero("R","archer",(1,2))
+        target=soldier("target",(9,2))
+        e,g1,g2=fixture(threat,r,target,
+                         score={"threat":30,"archer":20,"target":10})
+        e.start_turn("threat");e.end_turn();e.start_turn("archer")
+        out=g2.bow_sequence("archer","target",(
+            ShotChoice(primary_face=10,defense="guard",aware_target=True),
+            ShotChoice(primary_face=20,defense="guard",aware_target=True,
+                       opportunities=(Response("threat","opportunity","hit"),),
+                       on_opportunity=lambda c:True)))
+        self.assertEqual(tuple(x["outcome"] for x in out),
+                         ("intended_guard_impact","interrupted_before_launch"))
+        self.assertEqual(target.guard_remaining,0)
+        self.assertEqual(r.ammunition,19)
+        self.assertEqual(r.ap_remaining,2)
+        pre=[x["index"] for x in e.ledger
+             if x["kind"]=="g2_projectile_defense_preassigned"]
+        launch=[x["index"] for x in e.ledger if x["kind"]=="g2_bow_launched"]
+        self.assertEqual(len(pre),2)
+        self.assertTrue(max(pre)<min(launch))
+        e.check()
+
+    def test_27_multiple_preassigned_dodges_use_respective_pressure(self):
+        r=hero("R","archer",(1,2))
+        t=soldier("target",(9,2))
+        e,g1,g2=fixture(r,t)
+        e.start_turn("archer")
+        shots=(ShotChoice(defense="dodge",aware_target=True,primary_face=9),
+               ShotChoice(defense="dodge",aware_target=True,primary_face=9))
+        out=g2.bow_sequence("archer","target",shots)
+        self.assertEqual([x["base_defense"] for x in out],[13,11])
+        self.assertEqual([x["outcome"] for x in out],
+                         ["ordinary_miss","intended_hit_pending_G5"])
+        self.assertEqual(t.dodge_pressure,4)
+        self.assertEqual(r.ammunition,18)
+        e.check()
+
+    def test_28_neutral_screen_requires_declared_collateral_side(self):
+        r=hero("R","archer",(1,2))
+        third=hero("A","third",(3,2),team="neutral")
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(r,third,target)
+        e.start_turn("archer")
+        initial=(r.ammunition,r.ap_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"risk side"):
+            g2.bow_sequence("archer","target",(
+                ShotChoice(primary_face=2,exposures=(("third",2),),
+                           collateral=(("third","take_hit"),),
+                           secondary_face=19),))
+        self.assertEqual((r.ammunition,r.ap_remaining,len(e.ledger)),initial)
+        out=g2.bow_sequence("archer","target",(
+            ShotChoice(primary_face=2,exposures=(("third",2),),
+                       neutral_sides=(("third","ally"),),
+                       collateral=(("third","take_hit"),),
+                       secondary_face=19),))[0]
+        self.assertEqual((out["outcome"],out["target"]),
+                         ("collateral_hit_pending_G5","third"))
+        self.assertEqual(r.ammunition,19)
+        e.check()
+
+    def test_29_guard_instrument_lost_after_assignment_falls_back_to_dodge(self):
+        threat=soldier("threat",(2,3))
+        r=hero("R","archer",(1,2))
+        target=soldier("target",(9,2))
+        e,g1,g2=fixture(threat,r,target,
+                         score={"threat":30,"archer":20,"target":10})
+        e.start_turn("threat");e.end_turn();e.start_turn("archer")
+        def disarm_guard(response):
+            target.ready_guard=False
+            return False  # independently resolved threat attack did not hit
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            defense="guard",aware_target=True,primary_face=12,
+            opportunities=(Response("threat","opportunity","disarm-guard"),),
+            on_opportunity=disarm_guard),))[0]
+        self.assertEqual(out["outcome"],"intended_hit_pending_G5")
+        self.assertEqual(target.guard_remaining,1)  # spent despite fallback
+        self.assertEqual(target.dodge_pressure,2)
+        fallbacks=[v for v in e.ledger
+                   if v["kind"]=="g2_projectile_defense_fallback"]
+        self.assertEqual(fallbacks[0]["detail"]["actual"],"dodge")
+        e.check()
+
+    def test_30_loss_of_wielded_bow_prelaunch_no_arrow_or_ap_refund(self):
+        threat=soldier("threat",(2,3))
+        r=hero("R","archer",(1,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(threat,r,target,
+                         score={"threat":30,"archer":20,"target":10})
+        e.start_turn("threat");e.end_turn();e.start_turn("archer")
+        def disarm_bow(response):
+            g2.wielded["archer"].discard("Bow")
+            return False
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=16,
+            opportunities=(Response("threat","opportunity","break-bow"),),
+            on_opportunity=disarm_bow),))[0]
+        self.assertEqual(out["outcome"],"illegal_after_commit")
+        self.assertEqual(r.ap_remaining,22)
+        self.assertEqual(r.ammunition,20)
+        self.assertEqual(len(result(e)),0)
+        e.check()
+
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
         r=hero("R","archer",(1,2))
         t=hero("B","target",(9,2),"enemy")
