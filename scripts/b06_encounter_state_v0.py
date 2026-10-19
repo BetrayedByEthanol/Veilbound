@@ -484,9 +484,15 @@ class Encounter:
         self.cursor += 1
         self.current = None
         if self.cursor == len(self.order):
-            # Resolves the canonical Round End boundary even when a scenario
-            # stops here without requesting the next Round Begin.
-            self.log("round_end", effects="authored effects deferred")
+            # Close the round even when the scenario never begins another.
+            # No authored end-of-round effect executor exists in G0; after
+            # that deferred boundary, Opportunity Response expires NOW.
+            expired = [a.id for a in self.actors.values()
+                       if a.opportunity_active]
+            self.log("round_end", effects="authored effects deferred",
+                     expired_opportunity_response=expired)
+            for participant in self.actors.values():
+                participant.opportunity_active = False
 
     def spend_ap(self, actor_id, kind, *, label):
         if self.current != actor_id or self.pending_regeneration is not None:
@@ -621,6 +627,11 @@ class Encounter:
         """
         if self.pending_regeneration is not None:
             raise UnresolvedDecision("Resolve pending Regeneration Step before responding")
+        # The response window belongs to an existing round, not the gap
+        # after its Round End. This also prevents a new Reaction on a closed
+        # round even if the combatant had never used it.
+        if self.round == 0 or self.cursor == len(self.order):
+            raise ValueError("Cannot open response window outside an active round")
         matches = []
         used = set()
         for r in self.reservations:
