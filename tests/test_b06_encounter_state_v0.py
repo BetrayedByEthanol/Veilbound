@@ -289,6 +289,76 @@ class G0LedgerTests(unittest.TestCase):
             e.declare_sequence("soldier", "sentry", ("B06-AT-03",), ("take_hit",))
         e.check()
 
+    def test_round_end_expires_opportunity_and_blocks_stale_reaction(self):
+        # First Opportunity uses the one Reaction, leaving a second available
+        # Opportunity Attack in Physical Tempo; Round End must expire it.
+        a = soldier()
+        e = scene(a)
+        e.begin_round()
+        self.assertTrue(e.response_window(
+            Trigger("first-opportunity", "soldier", "soldier"),
+            on_interception=lambda *_: None,
+            spontaneous=(Response("soldier", "opportunity", "one legal trigger"),),
+            on_spontaneous=lambda *_: None))
+        self.assertTrue(a.opportunity_active)
+        self.assertFalse(a.reaction_available)
+        self.assertEqual(a.opportunity_used, 1)
+        self.assertEqual(a.ap_total // a.physical_ap, 1)  # 42//24 == 1
+        e.start_turn("soldier")
+        e.end_turn()
+        self.assertEqual(e.ledger[-1]["kind"], "round_end")
+        self.assertEqual(e.ledger[-1]["detail"]["expired_opportunity_response"],
+                         ["soldier"])
+        self.assertFalse(a.opportunity_active)
+        old_length = len(e.ledger)
+        with self.assertRaisesRegex(ValueError, "outside an active round"):
+            e.response_window(
+                Trigger("post-round-opportunity", "soldier", "soldier"),
+                on_interception=lambda *_: None,
+                spontaneous=(Response("soldier", "opportunity", "illegal stale"),),
+                on_spontaneous=lambda *_: self.fail("Opportunity after Round End"))
+        self.assertEqual(len(e.ledger), old_length)
+        self.assertEqual(a.opportunity_used, 1)
+        self.assertFalse(a.reaction_available)
+        e.begin_round()
+        self.assertTrue(a.reaction_available)
+        self.assertFalse(a.opportunity_active)
+        self.assertEqual(a.opportunity_used, 0)
+        self.assertTrue(e.response_window(
+            Trigger("new-round-opportunity", "soldier", "soldier"),
+            on_interception=lambda *_: None,
+            spontaneous=(Response("soldier", "opportunity", "new round"),),
+            on_spontaneous=lambda *_: None))
+        e.check()
+
+    def test_response_windows_rejected_before_first_or_after_last_turn(self):
+        a = sentry("cold_start")
+        e = scene(a)
+        with self.assertRaisesRegex(ValueError, "outside an active round"):
+            e.response_window(Trigger("before-combat", "sentry", "sentry"),
+                              on_interception=lambda *_: None)
+        self.assertEqual(len(e.ledger), 1)  # Encounter creation only.
+        e.begin_round()
+        e.start_turn("sentry")
+        # Responses stay legal on the final actor's live own turn.
+        self.assertTrue(e.response_window(
+            Trigger("inside-final-turn", "sentry", "sentry"),
+            on_interception=lambda *_: None,
+            spontaneous=(Response("sentry", "reaction", "live turn"),),
+            on_spontaneous=lambda *_: None))
+        self.assertFalse(a.reaction_available)
+        e.end_turn()
+        before = e.serialize()
+        with self.assertRaisesRegex(ValueError, "outside an active round"):
+            e.response_window(
+                Trigger("after-round", "sentry", "sentry"),
+                on_interception=lambda *_: None,
+                spontaneous=(Response("sentry", "reaction", "illegal late"),),
+                on_spontaneous=lambda *_: self.fail("No after-round reaction"))
+        self.assertEqual(e.serialize(), before)
+        e.begin_round()
+        self.assertTrue(a.reaction_available)
+
     def test_attack_profile_active_and_inactive_predicates_are_precommitted(self):
         # Both source predicates are required, not just profile membership.
         for start, illegal, legal in (
