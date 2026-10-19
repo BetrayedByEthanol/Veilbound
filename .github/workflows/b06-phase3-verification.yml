@@ -9,6 +9,7 @@ on:
       - 'scripts/b06_hunter_repeated_exchanges_v0.py'
       - 'tests/**'
       - 'content/creatures/**'
+      - 'docs/design/b06-encounter-integration-readiness-audit-v0.md'
       - 'docs/design/b06-hunter-phase3-census-results-v0.md'
       - 'docs/design/b06-hunter-tactical-and-party-diversity-v0.md'
       - 'docs/design/veilbound-roadmap-and-mvp-readiness.md'
