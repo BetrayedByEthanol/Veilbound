@@ -297,9 +297,16 @@ class Encounter:
             a, b = (self.actors[x] for x in self.order[i:i + 2])
             if priority(a) == priority(b):
                 raise UnresolvedDecision("Exact Initiative tie needs chosen ally order or roll-off")
-        self.log("encounter_created", order=self.order, source_ids={
-            a.id: (a.source.source_id, a.source.digest, a.source.start_state)
-            for a in actors})
+        self.log("encounter_created", order=self.order, seed=self.seed,
+                 scenario=self.scenario, policy=self.policy,
+                 objective=self.objective, source_ids={
+                     a.id: {
+                         "source_id": a.source.source_id, "digest": a.source.digest,
+                         "start_state": a.source.start_state, "team": a.team,
+                         "level": a.level, "hp": a.hp, "vigor": a.vigor,
+                         "vp": [a.vp_available, a.vp_committed, a.vp_spent],
+                         "occupied": a.occupied,
+                     } for a in actors})
 
     def log(self, kind, **details):
         # JSON-serializable, immutable-by-serialization history; no refs to actors.
