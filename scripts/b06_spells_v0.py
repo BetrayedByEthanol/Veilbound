@@ -37,6 +37,8 @@ class SpellState:
         self.effects = {}
         self.next_effect = 0
         self.reactive_stone_claimed = set()
+        self.reactive_stone_claims = {}
+        self.reactive_stone_serial = 0
         # G0 deliberately stores the exact original Sentry active-effect ID.
         # Reconstruct that genuine source-backed reservation without moving VP.
         for a in encounter.actors.values():
@@ -87,7 +89,7 @@ class SpellState:
         self.effects[(caster,ident)]=v
         a.maintained.append(ident)
         self.e.log("g3_effect_established",caster=caster,recipient=recipient,
-                   effect=ident,kind=kind,committed=committed,
+                   effect=ident,effect_kind=kind,committed=committed,
                    chosen=chosen,anchor=anchor,parent=parent,
                    budget=budget,resistance=resistance,expiry_round=expiry_round)
         return v
@@ -134,7 +136,7 @@ class SpellState:
         self._funds(a,0,3)
         self._commit(caster,on_committed=on_committed,label="g3:sentry:chosen_reserved_sword")
         if a.hp<=0 or not self._sentry_wielded(a) or a.vp_available<3:
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Sentry Sword Reserve")
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Sentry Sword Reserve")
             return None
         self._pay(caster,0,3,label="g3:sentry:chosen_reserved_sword")
         return self._new_effect(caster,"Sentry Sword Reserve",caster,3,
@@ -193,7 +195,7 @@ class SpellState:
                      label="g3:composite:Stone Skin+"+secondary)
         if a.hp<=0 or a.vp_available<spent+committed or (
                 secondary=="Basic Heal" and hand_available is not True):
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Composite",secondary=secondary)
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Composite",secondary=secondary)
             return None
         self._pay(caster,spent,committed,label="g3:composite:"+secondary)
         host=self._new_effect(caster,"Stone Skin",caster,reserve,resistance=2)
@@ -223,7 +225,7 @@ class SpellState:
         self._funds(a,0,reserve)
         self._commit(caster,on_committed=on_committed,label="g3:standalone:stone_skin")
         if a.hp<=0 or a.vp_available<reserve or self.active(caster,"Stone Skin"):
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Stone Skin")
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Stone Skin")
             return None
         self._pay(caster,0,reserve,label="g3:stone_skin")
         return self._new_effect(caster,"Stone Skin",caster,reserve,resistance=2)
@@ -244,27 +246,39 @@ class SpellState:
         if self.active(caster,"Stone Skin"):
             raise ValueError("Cannot stack Stone Skin")
         self._funds(a,0,(a.vp_max+2)//3)
-        return Response(caster,"reaction","g3:reactive_stone")
+        # Bind the returned Response to THIS trigger object and actor, not
+        # merely an easily forged generic label or matching spell identity.
+        # An unrelated genuine response window must never authorize magic.
+        key=(caster,trigger.key)
+        if key in self.reactive_stone_claims:
+            raise ValueError("Reactive Stone Skin already preflighted for trigger")
+        self.reactive_stone_serial+=1
+        response=Response(caster,"reaction",
+                          f"g3:reactive_stone:{self.reactive_stone_serial}")
+        self.reactive_stone_claims[key]=(trigger,response)
+        return response
 
     def resolve_reactive_stone(self,caster,trigger,response):
         """Only after G0 has *actually* committed this labeled Reaction."""
         a=self._actor(caster)
-        if (response!=Response(caster,"reaction","g3:reactive_stone")
+        token=(caster,trigger.key)
+        claim=self.reactive_stone_claims.get(token)
+        if (claim is None or claim[0] is not trigger or claim[1]!=response
                 or trigger.target_id!=caster or not trigger.legal
                 or a.source.source_id!="F"):
-            raise ValueError("Illegal Reactive Stone Skin source/trigger")
-        token=(caster,trigger.key)
+            raise ValueError("No matching preflight claim for exact trigger")
         proof=any(event["kind"]=="spontaneous_committed" and
                   event["detail"].get("trigger")==trigger.key and
                   event["detail"].get("actor")==caster and
                   event["detail"].get("response_kind")=="reaction" and
-                  event["detail"].get("label")=="g3:reactive_stone"
+                  event["detail"].get("label")==response.label
                   for event in self.e.ledger)
         if not proof or token in self.reactive_stone_claimed or a.reaction_available:
             raise ValueError("No unused G0-committed matching Reaction")
         self.reactive_stone_claimed.add(token)
+        del self.reactive_stone_claims[token]
         if self.active(caster,"Stone Skin") or a.vp_available<(a.vp_max+2)//3:
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Reactive Stone Skin",
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Reactive Stone Skin",
                        trigger=trigger.key)
             return None
         reserve=(a.vp_max+2)//3
@@ -292,7 +306,7 @@ class SpellState:
         self._funds(a,cost,0)
         self._commit(caster,on_committed=on_committed,label="g3:self_basic_heal")
         if a.hp<=0 or a.vp_available<cost:
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Basic Heal")
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Basic Heal")
             return None
         self._pay(caster,cost,0,label="g3:self_basic_heal")
         hp=min(2,a.hp_max-a.hp)
@@ -330,7 +344,7 @@ class SpellState:
         self._funds(a,spent,committed)
         self._commit(caster,on_committed=on_committed,label="g3:guided:"+mode)
         if a.hp<=0 or a.vp_available<spent+committed:
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Guided Regeneration")
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Guided Regeneration")
             return None
         self._pay(caster,spent,committed,label="g3:guided:"+mode)
         return self._new_effect(caster,"Guided Regeneration",caster,committed,
@@ -408,11 +422,11 @@ class SpellState:
         if effect.committed:
             self.e.release_vp(effect.caster,effect.committed,label="g3:"+reason)
         self.e.log("g3_effect_ended",caster=effect.caster,effect=effect.ident,
-                   kind=effect.kind,returned=effect.committed,reason=reason)
+                   effect_kind=effect.kind,returned=effect.committed,reason=reason)
 
-    def release(self,caster,kind,*,own_turn=True):
-        if own_turn and (self.e.current!=caster or
-                         self.e.pending_regeneration is not None):
+    def release(self,caster,kind):
+        if (self.e.current!=caster or
+                self.e.pending_regeneration is not None):
             raise ValueError("Voluntary release only at legal own-turn decision")
         found=self.active(caster,kind)
         if len(found)!=1:
@@ -492,12 +506,12 @@ class SpellState:
             refreshed=self.e.g2.preview_thrown_flame(
                 caster,target,exposures=exposures,origin=origin,target_cell=target_cell)
         except (ValueError,UnresolvedDecision):
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Thrown Flame",
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Thrown Flame",
                        cause="post_commit_physical_lane")
             return {"outcome":"interrupted_before_launch","vp_spent":0}
         if (a.hp<=0 or a.vp_available<price or
                 refreshed.screens):
-            self.e.log("g3_cast_interrupted",caster=caster,kind="Thrown Flame",
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Thrown Flame",
                        cause="caster_or_resources")
             return {"outcome":"interrupted_before_launch","vp_spent":0}
         self._pay(caster,price,0,label="g3:thrown_flame:T"+str(tier))
