@@ -452,6 +452,33 @@ class B06G3Test(unittest.TestCase):
         self.assertEqual((r.vp_available,r.vp_committed,r.vp_spent),(6,0,0))
         e.check()
 
+    def test_39_fixed_guided_expires_before_regen_step_at_round_eleven(self):
+        r=pc("R",2);e,g=game(r);e.start_turn("caster")
+        g.cast_guided("caster",mode="fixed")
+        e.end_turn()
+        for nr in range(2,12):
+            e.begin_round()
+            self.assertEqual(e.round,nr)
+            self.assertEqual(bool(g.active("caster","Guided Regeneration")),nr<11)
+            if nr<11:
+                e.start_turn("caster")
+                e.end_turn()
+        self.assertEqual((r.vp_available,r.vp_committed,r.vp_spent),(2,0,2))
+        self.assertEqual(g.regen_throughput("caster"),0)
+        e.check()
+
+    def test_40_stone_composite_not_recasteable_while_host_remains_active(self):
+        f=pc("F",3);e,g=game(f);e.start_turn("caster")
+        g.cast_scholar_composite("caster","Vital Shelter")
+        before=(f.ap_remaining,f.vp_available,f.vp_committed,f.vp_spent,
+                len(e.ledger))
+        with self.assertRaisesRegex(ValueError,"one Stone Skin"):
+            g.cast_scholar_composite("caster","Basic Heal",heal_die=3,
+                                      hand_available=True)
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_committed,
+                          f.vp_spent,len(e.ledger)),before)
+        e.check()
+
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
         f=pc("F");t=pc("R",3,"target",(3,2),"enemy")
         e,g=game(f,t);e.start_turn("caster")
