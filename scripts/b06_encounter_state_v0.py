@@ -553,10 +553,21 @@ class Encounter:
             raise ValueError("Commit all declared profiles and defenses together")
         if any(p not in a.source.attack_profiles for p in profiles):
             raise UnresolvedDecision("Profile is not a supported native G0 fixture attack")
+        # The profile catalogue is not itself an eligibility grant. Special
+        # Pounce/Horn Drive require G1 manoeuvre/contact state, and an enhanced
+        # Sentry sword profile requires its actually active Chosen Reserve.
+        if a.source.source_id == "B06-EN-03":
+            raise UnresolvedDecision("Hunter attack needs G1 physical contact and manoeuvre validation")
+        if (a.source.source_id == "B06-EN-01"
+                and "B06-AT-02" in profiles
+                and "B06-FIRE-RESERVE-01" not in a.maintained):
+            raise ValueError("Cold Sentry has no active enchanted sword profile")
         if a.ap_remaining < len(profiles) * a.physical_ap:
             raise ValueError("Not enough AP for full Attack Sequence")
         if any(x not in VALID_DEFENSES for x in defenses):
             raise ValueError("Invalid defense declaration")
+        if t.hp <= 0 and any(d != "take_hit" for d in defenses):
+            raise ValueError("Dying/dead target cannot actively defend a sequence")
         if defenses.count("guard") > t.guard_remaining or (
             "guard" in defenses and (t.guard_value is None or not t.ready_guard)):
             raise ValueError("Insufficient legal Guard assignments")
