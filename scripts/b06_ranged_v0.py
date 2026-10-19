@@ -41,6 +41,10 @@ class ShotChoice:
     aware_collateral: tuple = ()
     # Third-party/nonaligned screens need GM-chosen collateral-risk side.
     neutral_sides: tuple = ()
+    # When Prone and actual environmental cover overlap, the GM must
+    # decide per-actor whether the two profile reductions are independent
+    # or the Cover tier already incorporates the lowered silhouette.
+    prone_cover_policy: tuple = ()
     aim_source: str | None = None
     trigger_key: str | None = None
     opportunities: tuple = ()
@@ -326,8 +330,27 @@ class RangedCombat:
         return range_difficulty,cover,screens,mitigation
 
     @staticmethod
+    def _prone_position(actor,distance,cover,policy):
+        if (not any(str(c).lower()=="prone" for c in actor.conditions)
+                or distance<3):
+            return 0
+        # A level 2-D tile-center shot is a roughly horizontal trajectory.
+        # At >=3 squares a genuinely reduced profile grants +2 to static
+        # defense (and ranged Dodge when that maneuver is otherwise legal).
+        # If physical cover already measures the same lower silhouette,
+        # applying both would count the same exposure twice.
+        if cover>0:
+            choice=dict(policy).get(actor.id)
+            if choice not in ("independent","absorbed"):
+                raise UnresolvedDecision("Prone plus Cover needs explicit independent/absorbed profile policy")
+            if choice=="absorbed":
+                return 0
+        return 2
+
+    @staticmethod
     def _defense_value(actor,choice,range_diff,obstruction,*,
-                       commit=False,prior_pressure=None,committed_guard=False):
+                       commit=False,prior_pressure=None,committed_guard=False,
+                       position_bonus=0):
         if choice not in ("take_hit","dodge","guard"):
             raise ValueError("Invalid projectile defense")
         if actor.hp <= 0 or actor.dead:
@@ -349,12 +372,12 @@ class RangedCombat:
                 raise UnresolvedDecision("Prone Dodge requires explicit physical capability")
             evasion=actor.ap_total//actor.physical_ap - 1
             pressure=(actor.dodge_pressure if prior_pressure is None else prior_pressure)
-            value=10+min(actor.agility,4)+actor.awareness+evasion+range_diff+obstruction-pressure
+            value=10+min(actor.agility,4)+actor.awareness+evasion+range_diff+obstruction+position_bonus-pressure
             base=value-obstruction
             if commit:
                 actor.dodge_pressure+=2
         else:
-            value=10+range_diff+obstruction
+            value=10+range_diff+obstruction+position_bonus
             base=value-obstruction
         return base,value
 
@@ -498,24 +521,29 @@ class RangedCombat:
         # Assign declared personal defense before rolling, after Interception.
         target=e.actors[target_id]
         obstruction=max((cover,*screens.values()),default=0)
+        position=self._prone_position(target,lane.distance,cover,
+                                      shot.prone_cover_policy)
         effective_defense=shot.defense
         try:
             b,d=self._defense_value(target,shot.defense,range_mod,obstruction,
                                    prior_pressure=defense_record["pressure"],
-                                   committed_guard=(shot.defense=="guard"))
+                                   committed_guard=(shot.defense=="guard"),
+                                   position_bonus=position)
         except ValueError as error:
             if shot.defense!="guard" and shot.defense!="dodge":
                 raise
             if shot.defense=="guard" and target.hp>0 and not target.dead:
                 try:
                     b,d=self._defense_value(target,"dodge",range_mod,obstruction,
-                                            commit=True)
+                                            commit=True,position_bonus=position)
                     effective_defense="dodge"
                 except (ValueError,UnresolvedDecision):
-                    b,d=self._defense_value(target,"take_hit",range_mod,obstruction)
+                    b,d=self._defense_value(target,"take_hit",range_mod,obstruction,
+                                            position_bonus=position)
                     effective_defense="take_hit"
             else:
-                b,d=self._defense_value(target,"take_hit",range_mod,obstruction)
+                b,d=self._defense_value(target,"take_hit",range_mod,obstruction,
+                                        position_bonus=position)
                 effective_defense="take_hit"
             e.log("g2_projectile_defense_fallback",actor=target_id,
                   original=shot.defense,actual=effective_defense,reason=str(error))
@@ -569,8 +597,11 @@ class RangedCombat:
                                          if squares<=limit),None)
                     actual_defense=declaration
                     try:
-                        cb,cd=self._defense_value(candidate,declaration,
-                                                   secondary_band,0,commit=True)
+                        position_secondary=self._prone_position(candidate,squares,0,
+                                                              shot.prone_cover_policy)
+                    cb,cd=self._defense_value(candidate,declaration,
+                                                   secondary_band,0,commit=True,
+                                                   position_bonus=position_secondary)
                     except (ValueError,UnresolvedDecision) as error:
                         # A predeclared ordinary Guard can become physically
                         # unusable before its conditional face is selected.
@@ -582,11 +613,13 @@ class RangedCombat:
                             if candidate.hp<=0 or candidate.dead:
                                 raise ValueError("Incapacitated incidental target")
                             cb,cd=self._defense_value(candidate,"dodge",
-                                                        secondary_band,0,commit=True)
+                                                        secondary_band,0,commit=True,
+                                                        position_bonus=position_secondary)
                             actual_defense="dodge"
                         except (ValueError,UnresolvedDecision):
                             cb,cd=self._defense_value(candidate,"take_hit",
-                                                        secondary_band,0)
+                                                        secondary_band,0,
+                                                        position_bonus=position_secondary)
                             actual_defense="take_hit"
                         e.log("g2_collateral_defense_fallback",actor=incidental,
                               originally=declaration,actual=actual_defense,
