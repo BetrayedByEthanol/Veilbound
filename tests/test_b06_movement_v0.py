@@ -649,6 +649,96 @@ class G1PhysicalAcceptance(unittest.TestCase):
         self.assertFalse(any(v["kind"] == "g1_pounce_declared" for v in e.ledger))
         e.check()
 
+    def test_review_p1_committed_opportunity_counts_when_callback_cancels_step(self):
+        # The reaction is committed in G0 BEFORE a source-authored effect
+        # can cancel the voluntary step. Retrying in the SAME segment must
+        # not grant the same enemy a second general Movement Opportunity.
+        mover = hero("mover", (2, 2))
+        threat = sentry("threat", at=((3, 2),))
+        e, g = scenario(mover, threat, scores={"mover": 20, "threat": 10})
+        e.begin_round()
+        e.start_turn("mover")
+        start = (mover.occupied, mover.mp_remaining, mover.ap_remaining)
+        effects = []
+
+        def interrupted(state, trigger, response):
+            effects.append(response.actor_id)
+            trigger.legal = False  # caller-authored Interrupt consequence
+
+        self.assertFalse(g.step("mover", (0, -1),
+            responses=(Response("threat", "opportunity", "source Interrupt"),),
+            on_response=interrupted))
+        self.assertEqual((mover.occupied, mover.mp_remaining,
+                          mover.ap_remaining), start)
+        self.assertEqual(effects, ["threat"])
+        self.assertEqual(g.provoked["mover"], {"threat"})
+        self.assertEqual((threat.reaction_available,
+                          threat.opportunity_used, threat.opportunity_active),
+                         (False, 1, True))
+        eligible_on_retry = []
+        self.assertTrue(g.step("mover", (0, -1),
+            responses=lambda eligible: eligible_on_retry.append(tuple(eligible)) or ()))
+        self.assertEqual(eligible_on_retry, [()])
+        self.assertEqual(mover.occupied, ((2, 1),))
+        self.assertEqual(mover.mp_remaining, 10)
+        self.assertEqual(threat.opportunity_used, 1)
+        self.assertEqual(sum(v["kind"] == "g1_movement_opportunity_pending"
+                             for v in e.ledger), 1)
+        e.check()
+
+    def test_review_p1_cancelled_after_response_geometry_recheck_counts_opportunity(self):
+        # A separate effect changes occupied geometry after G0 has committed
+        # the original response. Although the move destination is no longer
+        # passable, its Opportunity must be marked as already offered.
+        mover = hero("mover", (2, 2))
+        threat = sentry("threat", at=((3, 2),))
+        e, g = scenario(mover, threat, scores={"mover": 20, "threat": 10})
+        e.begin_round()
+        e.start_turn("mover")
+        def external_reposition(state, trigger, response):
+            # Simulated source-resolved response positioning. G1 owns
+            # geometry rechecks, not the missing G4 effect executor.
+            threat.occupied = ((2, 1),)
+            state.log("test_external_response_reposition", actor="threat")
+
+        self.assertFalse(g.step("mover", (0, -1),
+            responses=(Response("threat", "opportunity", "positional change"),),
+            on_response=external_reposition))
+        self.assertEqual(mover.occupied, ((2, 2),))
+        self.assertEqual(mover.mp_remaining, 12)
+        self.assertEqual(g.provoked["mover"], {"threat"})
+        self.assertEqual(threat.opportunity_used, 1)
+        self.assertFalse(threat.reaction_available)
+        # Retry using a different legal square; no second response for the
+        # original movement segment, even though the original step failed.
+        self.assertTrue(g.step("mover", (1, 0), responses=lambda _: ()))
+        self.assertEqual(threat.opportunity_used, 1)
+        self.assertEqual(len([v for v in e.ledger
+                              if v["kind"] == "g1_movement_opportunity_pending"]), 1)
+        e.check()
+
+    def test_review_p1_committed_opportunity_persists_after_callback_error(self):
+        mover = hero("mover", (2, 2))
+        threat = sentry("threat", at=((3, 2),))
+        e, g = scenario(mover, threat, scores={"mover": 20, "threat": 10})
+        e.begin_round()
+        e.start_turn("mover")
+        def unresolved_effect(*_):
+            raise UnresolvedDecision("response result unavailable")
+        with self.assertRaisesRegex(UnresolvedDecision, "response result unavailable"):
+            g.step("mover", (0, -1),
+                   responses=(Response("threat", "opportunity", "pending"),),
+                   on_response=unresolved_effect)
+        self.assertEqual(mover.occupied, ((2, 2),))
+        self.assertEqual(mover.mp_remaining, 12)
+        self.assertEqual(g.provoked["mover"], {"threat"})
+        self.assertEqual(threat.opportunity_used, 1)
+        self.assertFalse(threat.reaction_available)
+        self.assertTrue(g.step("mover", (0, -1)))
+        self.assertEqual(len([v for v in e.ledger
+                              if v["kind"] == "g1_movement_opportunity_pending"]), 1)
+        e.check()
+
     def test_expired_mp_reservation_never_releases_next_turn(self):
         a = sentry("a", at=((1, 1),))
         b = hero("b", (6, 1))
