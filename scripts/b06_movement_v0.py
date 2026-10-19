@@ -447,6 +447,8 @@ class GridMovement:
                 run.committed = True
         self._commit_mp(actor_id, cost, reserved)
         a.occupied = latest
+        if self.e.g2 is not None:
+            self.e.g2.on_position_change(actor_id)
         if self.pounce and self.pounce.hunter_id == actor_id:
             self.pounce.steps += 1
             self.pounce.spent_mp += cost
