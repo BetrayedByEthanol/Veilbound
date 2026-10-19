@@ -268,6 +268,11 @@ class B06G3Test(unittest.TestCase):
     def test_22_guided_cannot_be_fully_duplicated_without_break(self):
         r=pc("R",3);e,g=game(r);e.start_turn("caster")
         g.cast_guided("caster",chosen=True)
+        # Validate duplicate Rite exclusion at the start of a fresh turn,
+        # where AP is sufficient, instead of masking it with AP exhaustion.
+        e.end_turn()
+        e.begin_round()
+        e.start_turn("caster")
         before=(r.ap_remaining,r.vp_available,r.vp_committed)
         with self.assertRaisesRegex(ValueError,"Cannot stack"):
             g.cast_guided("caster",chosen=True)
@@ -369,7 +374,7 @@ class B06G3Test(unittest.TestCase):
     def test_31_reactive_stone_cannot_be_cast_using_unguarded_direct_call(self):
         f=pc("F");e,g=game(f)
         trig=Trigger("false","attacker","caster")
-        with self.assertRaisesRegex(ValueError,"No unused G0-committed"):
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
             g.resolve_reactive_stone(
                 "caster",trig,Response("caster","reaction","g3:reactive_stone"))
         self.assertEqual(f.vp_committed,0)
