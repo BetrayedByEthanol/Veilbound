@@ -53,7 +53,7 @@ An optional **medical kit costs 15 sp**, raising the purchase total to **83 sp**
 | Ordinary bow shot | **20 Physical AP**, one actual arrow | No auto Aim, no extra shot or VP enchantment |
 | Normal first Dodge | **14** = 10 + leather-capped AGI3 + AWA1 | Dodge Pressure, ranged Evasion, range/cover and other legal terms apply separately |
 | Initiative | **d20+4** = AGI3 + AWA1 | No unselected Combat Awareness |
-| **Bow Guard** | **Not legal** | A bow cannot Guard regardless of Guard capacity or TAL-C05 |
+| **Bow Guard** | **Not legal** | A bow cannot Guard regardless of Guard capacity or TAL-C05; **Phase 3 ROLE R metadata now records `guard_extra=1` at L2–3** to retain TAL-C05's separate Guard capacity modifier |
 | Dagger *if separately wielded legally* | **d20+3** (AGI3 + PRE0 + Small Blades0); **3+d4 Cut/Pierce, Pen0** | No Bows Training transfer; legal melee dagger Guard would be **13** (10+3+0+0) |
 | Movement | **12 MP** | Legal occupied-square, threatened-movement and Opportunity procedures apply |
 | Range | Bow **7–12 squares Short +0**; 1–6 Close −2, 13–30 Medium +2, 31–60 Long +5, 61–120 Extreme +8 | Range modifies the applicable ranged-defense difficulty, not the listed d20+4 Attack |
@@ -78,7 +78,7 @@ An optional **medical kit costs 15 sp**, raising the purchase total to **83 sp**
 | Actual Prepared Prayers at Accord +1 | 2 | 3 | 3 |
 | Total selected Talents | 1 | 2 | 3 |
 
-These are **ceilings/capacities, not free attacks or defenses**. Guard capacity does not override a bow's ineligibility. Turn AP is **one shared pool**: L3 can spend **20+20=40** on two ordinary bow shots or **20+20=40** on Aim followed by a legal shot, but **20+30=50 >42**, so no standard bow attack plus Projection Action on the same L3 turn. At L1–2 even Aim (20) plus firing (20) cannot fit into the turn; Aim must retain its usual legal future-shot duration. Reactive Aim (TAL-C07) is a possible later **alternative L3 Talent selection**, not part of this unchanged build or a bonus conferred by the bow.
+These are **ceilings/capacities, not free attacks or defenses**. Guard capacity does not override a bow's ineligibility. **Source reconciliation:** Phase 3 R must encode `guard_extra=1` for TAL-C05 at both L2 and L3, while `guard=None` continues to make bow Guard unusable. The metadata correction does not itself create a defense; only independently legally readying the dagger would expose that capacity in a later fully modeled encounter. Turn AP is **one shared pool**: L3 can spend **20+20=40** on two ordinary bow shots or **20+20=40** on Aim followed by a legal shot, but **20+30=50 >42**, so no standard bow attack plus Projection Action on the same L3 turn. At L1–2 even Aim (20) plus firing (20) cannot fit into the turn; Aim must retain its usual legal future-shot duration. Reactive Aim (TAL-C07) is a possible later **alternative L3 Talent selection**, not part of this unchanged build or a bonus conferred by the bow.
 
 ### Conditional spell and VP examples
 
