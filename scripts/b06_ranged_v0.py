@@ -36,6 +36,8 @@ class ShotChoice:
     # Unaware collateral/target may only use passive static Take Hit.
     aware_target: bool = False
     aware_collateral: tuple = ()
+    # Third-party/nonaligned screens need GM-chosen collateral-risk side.
+    neutral_sides: tuple = ()
     aim_source: str | None = None
     trigger_key: str | None = None
     opportunities: tuple = ()
@@ -340,16 +342,30 @@ class RangedCombat:
     def _faces(b, d, bonus):
         return tuple(n for n in range(2,20) if n+bonus<=d)
 
+    def _screen_sides(self, shooter_id, target_id, lane, neutral_sides):
+        shooter=self.e.actors[shooter_id]
+        target=self.e.actors[target_id]
+        overrides=dict(neutral_sides)
+        if len(overrides)!=len(neutral_sides):
+            raise ValueError("One declared side per nonaligned Living Screen")
+        required={sid for sid,_,_ in lane.screens if
+                  self.e.actors[sid].team not in (shooter.team,target.team)}
+        if set(overrides)!=required or any(v not in ("ally","enemy") for v in overrides.values()):
+            raise UnresolvedDecision("GM must predeclare the risk side of each nonaligned screen")
+        return {sid: ("ally" if self.e.actors[sid].team==shooter.team
+                      else "enemy" if self.e.actors[sid].team==target.team
+                      else overrides[sid]) for sid,_,_ in lane.screens}
+
     @staticmethod
-    def _allocate(b, d, bonus, cover, screens, shooter_team, actors):
+    def _allocate(b, d, bonus, cover, screens, risks):
         available=[n for n in range(2,20) if n+bonus<=d]
         faces={}
         for face in reversed(available[-cover:] if cover else []):
             faces[face]=("cover",None)
         remain=[n for n in available if n not in faces]
-        allies=sorted((item for item in screens if actors[item[0]].team==shooter_team),
+        allies=sorted((item for item in screens if risks[item[0]]=="ally"),
                       key=lambda x:x[2])
-        enemies=sorted((item for item in screens if actors[item[0]].team!=shooter_team),
+        enemies=sorted((item for item in screens if risks[item[0]]=="enemy"),
                        key=lambda x:x[2])
         for actor_id,tier,_ in allies:
             for face in remain[:tier]:
@@ -495,7 +511,9 @@ class RangedCombat:
         if lane.screens:
             modified=tuple((sid,screens[sid],pos) for sid,_,pos in lane.screens
                            if screens[sid]>0)
-            faces=self._allocate(b,d,bonus,cover,modified,shooter.team,e.actors)
+            faces=self._allocate(b,d,bonus,cover,modified,
+                                  self._screen_sides(shooter_id,target_id,
+                                                     lane,shot.neutral_sides))
         e.log("g2_miss_faces_preallocated",shooter=shooter_id,target=target_id,
               faces={str(k):v for k,v in sorted(faces.items())},
               primary_face=face,base_defense=b,final_defense=d)
@@ -597,6 +615,7 @@ class RangedCombat:
                                                    not 1<=sh.secondary_face<=20):
                 raise ValueError("Conditional d20 face must be 1–20")
             lane=self.lane(shooter_id,target_id,exposures=sh.exposures)
+            self._screen_sides(shooter_id,target_id,lane,sh.neutral_sides)
             if sh.defense not in ("take_hit","guard","dodge"):
                 raise ValueError("Invalid intended defense")
             if type(sh.aware_target) is not bool:
