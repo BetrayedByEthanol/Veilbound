@@ -131,6 +131,7 @@ class G0LedgerTests(unittest.TestCase):
         events = json.loads(execute())
         self.assertEqual([e["index"] for e in events], list(range(len(events))))
         self.assertIn("round_begin", [e["kind"] for e in events])
+        self.assertEqual(sum(e["kind"] == "round_end" for e in events), 1)
 
     def test_vp_available_committed_spent_refund_not_spent(self):
         s = sentry("prepared_start")
@@ -234,6 +235,11 @@ class G0LedgerTests(unittest.TestCase):
         e4.begin_round()
         e4.start_turn("soldier")
         self.assertEqual((z.hp, z.vigor), (-1, 0))
+        with self.assertRaisesRegex(ValueError, "Unconscious/dead"):
+            e4.defense("soldier", "dodge", attack_key="dying")
+        with self.assertRaisesRegex(ValueError, "Unconscious/dead"):
+            e4.defense("soldier", "guard", attack_key="dying")
+        self.assertIsNone(e4.defense("soldier", "take_hit", attack_key="dying"))
         for x in (e2, e3, e4):
             x.check()
 
