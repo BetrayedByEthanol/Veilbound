@@ -663,6 +663,142 @@ class B06G3Test(unittest.TestCase):
         self.assertEqual(f.vp_spent,2)
         e.check()
 
+    def test_52_reactive_stone_cannot_resolve_after_response_window_returns(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        trigger=Trigger("incoming-live-only","attacker","caster")
+        response=g.prepare_reactive_stone("caster",trigger,perceptible=True)
+        seen=[]
+        self.assertTrue(e.response_window(
+            trigger,on_interception=lambda state,tr,r:None,
+            spontaneous=(response,),
+            on_spontaneous=lambda state,tr,r:seen.append(r.label)))
+        self.assertEqual(seen,[response.label])
+        self.assertFalse(f.reaction_available)  # G0 really paid the Reaction
+        self.assertTrue(spell_events(e,"trigger_ready_to_resolve"))
+        self.assertFalse(e.is_live_spontaneous(trigger,response))
+        with self.assertRaisesRegex(ValueError,"requires its live response callback"):
+            g.resolve_reactive_stone("caster",trigger,response)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(g.effects)
+        self.assertFalse(spell_events(e,"g3_stone_reacted"))
+        e.check()
+
+    def test_53_earlier_initiative_response_incapacitates_committed_stone_caster(self):
+        interruptor=pc("A",3,"interruptor",(4,3),"enemy")
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(interruptor,attacker,f)
+        trigger=Trigger("incoming-precommitted","attacker","caster")
+        stone=g.prepare_reactive_stone("caster",trigger,perceptible=True)
+        other=Response("interruptor","reaction","earlier-hp-zero")
+        results=[]
+        def on_spontaneous(state,tr,response):
+            if response is other:
+                self.assertFalse(f.reaction_available)
+                # Independently resolved earlier response; G4 will later
+                # own the actual HP/damage engine.
+                f.hp=0
+                results.append("incapacitated_before_stone")
+            else:
+                results.append(g.resolve_reactive_stone("caster",tr,response))
+        self.assertTrue(e.response_window(
+            trigger,on_interception=lambda state,tr,res:None,
+            spontaneous=(stone,other),on_spontaneous=on_spontaneous))
+        self.assertEqual(results,["incapacitated_before_stone",None])
+        self.assertFalse(f.reaction_available)
+        self.assertFalse(interruptor.reaction_available)
+        self.assertFalse(g.reactive_stone_claims)
+        self.assertIn(("caster",trigger.key),g.reactive_stone_claimed)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(g.effects)
+        cancelled=spell_events(e,"g3_cast_interrupted")
+        self.assertEqual(cancelled[-1]["detail"]["cause"],"post_commit_incapacitated")
+        self.assertEqual(cancelled[-1]["detail"]["vp_spent"],0)
+        self.assertEqual(len(spell_events(e,"trigger_rechecked_after_responses")),1)
+        self.assertEqual(len(spell_events(e,"trigger_ready_to_resolve")),1)
+        self.assertFalse(e.is_live_spontaneous(trigger,stone))
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
+            g.resolve_reactive_stone("caster",trigger,stone)
+        e.check()
+
+    def test_54_live_other_actor_callback_cannot_execute_precommitted_stone(self):
+        interruptor=pc("A",3,"interruptor",(4,3),"enemy")
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(interruptor,attacker,f)
+        trigger=Trigger("incoming-other-callback","attacker","caster")
+        stone=g.prepare_reactive_stone("caster",trigger,perceptible=True)
+        other=Response("interruptor","reaction","earlier-attempt")
+        observed=[]
+        def on_spontaneous(state,tr,response):
+            if response is other:
+                with self.assertRaisesRegex(ValueError,"requires its live response callback"):
+                    g.resolve_reactive_stone("caster",tr,stone)
+                self.assertEqual(f.vp_committed,0)
+                observed.append("rejected_wrong_live_callback")
+            else:
+                self.assertIsNotNone(g.resolve_reactive_stone("caster",tr,response))
+                observed.append("accepted_matching_callback")
+        self.assertTrue(e.response_window(
+            trigger,on_interception=lambda state,tr,r:None,
+            spontaneous=(stone,other),on_spontaneous=on_spontaneous))
+        self.assertEqual(observed,["rejected_wrong_live_callback",
+                                   "accepted_matching_callback"])
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        self.assertFalse(e.is_live_spontaneous(trigger,stone))
+        e.check()
+
+    def test_55_nested_response_window_restores_parent_authorization(self):
+        interruptor=pc("A",3,"interruptor",(4,3),"enemy")
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,interruptor,f)
+        outer=Trigger("outer-incoming","attacker","caster")
+        stone=g.prepare_reactive_stone("caster",outer,perceptible=True)
+        inner=Trigger("nested-incoming","attacker","interruptor")
+        inner_choice=Response("interruptor","reaction","nested-choice")
+        def outer_callback(state,tr,response):
+            self.assertTrue(state.is_live_spontaneous(outer,stone))
+            def inner_callback(state_inner,tr_inner,response_inner):
+                self.assertTrue(state_inner.is_live_spontaneous(inner,inner_choice))
+                self.assertFalse(state_inner.is_live_spontaneous(outer,stone))
+                with self.assertRaisesRegex(ValueError,"requires its live response callback"):
+                    g.resolve_reactive_stone("caster",outer,stone)
+            self.assertTrue(state.response_window(
+                inner,on_interception=lambda st,trigger,res:None,
+                spontaneous=(inner_choice,),on_spontaneous=inner_callback))
+            self.assertTrue(state.is_live_spontaneous(outer,stone))
+            self.assertIsNotNone(g.resolve_reactive_stone("caster",outer,stone))
+        self.assertTrue(e.response_window(
+            outer,on_interception=lambda state,tr,res:None,
+            spontaneous=(stone,),on_spontaneous=outer_callback))
+        self.assertFalse(e.is_live_spontaneous(outer,stone))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        e.check()
+
+    def test_56_exception_in_callback_clears_live_response_authority(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        trigger=Trigger("raise-after-commit","attacker","caster")
+        stone=g.prepare_reactive_stone("caster",trigger,perceptible=True)
+        def broken_callback(state,tr,response):
+            self.assertTrue(state.is_live_spontaneous(trigger,stone))
+            raise RuntimeError("authored effect resolver failed")
+        with self.assertRaisesRegex(RuntimeError,"authored effect resolver failed"):
+            e.response_window(
+                trigger,on_interception=lambda state,tr,r:None,
+                spontaneous=(stone,),on_spontaneous=broken_callback)
+        self.assertFalse(e.is_live_spontaneous(trigger,stone))
+        self.assertFalse(f.reaction_available)
+        with self.assertRaisesRegex(ValueError,"requires its live response callback"):
+            g.resolve_reactive_stone("caster",trigger,stone)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(g.effects)
+        e.check()
+
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
         f=pc("F");t=pc("R",3,"target",(3,2),"enemy")
         e,g=game(f,t);e.start_turn("caster")
