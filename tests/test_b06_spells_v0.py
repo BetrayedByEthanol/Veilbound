@@ -339,7 +339,7 @@ class B06G3Test(unittest.TestCase):
         self.assertFalse(f.reaction_available)
         self.assertEqual(g.resistance("caster","Fire"),2)
         self.assertEqual(spell_events(e,"g3_stone_reacted")[0]["detail"]["ap_debt"],0)
-        with self.assertRaisesRegex(ValueError,"Cannot stack Stone Skin"):
+        with self.assertRaisesRegex(ValueError,"Reaction not available"):
             g.prepare_reactive_stone(
                 "caster",Trigger("next-threat","attacker","caster"),
                 perceptible=True)
