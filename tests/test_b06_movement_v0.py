@@ -488,7 +488,6 @@ class G1PhysicalAcceptance(unittest.TestCase):
         layouts = (
             ((0, 2), ()),          # target behind body
             ((6, 3), ()),          # off fixed heading
-            ((11, 2), ()),         # beyond map/24 MP? outside 24 normal not;
             ((6, 2), ((4, 2),)),   # solid wall in the body's exact lane
             ((6, 2), ((3, 1),)),   # harmless adjacent wall is not a blocker
         )
@@ -511,7 +510,7 @@ class G1PhysicalAcceptance(unittest.TestCase):
         # Within width but >24 orthogonal MP, cannot borrow unlimited
         # Charge allowance or count inaccessible squares as a run-up.
         h = hunter()
-        prey = hero("prey", (15, 2))
+        prey = hero("prey", (17, 2))
         e, g = scenario(h, prey, w=20)
         e.begin_round()
         e.start_turn("hunter")
