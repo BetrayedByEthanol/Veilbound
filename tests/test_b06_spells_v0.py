@@ -367,6 +367,8 @@ class B06G3Test(unittest.TestCase):
             spontaneous=(response,),on_spontaneous=on_spontaneous)
         self.assertFalse(result)
         self.assertTrue(f.reaction_available)
+        self.assertFalse(g.reactive_stone_claims)
+        self.assertEqual(len(spell_events(e,"g3_reactive_claim_expired")),1)
         self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
         self.assertFalse(g.effects)
         e.check()
@@ -678,7 +680,8 @@ class B06G3Test(unittest.TestCase):
         self.assertFalse(f.reaction_available)  # G0 really paid the Reaction
         self.assertTrue(spell_events(e,"trigger_ready_to_resolve"))
         self.assertFalse(e.is_live_spontaneous(trigger,response))
-        with self.assertRaisesRegex(ValueError,"requires its live response callback"):
+        self.assertFalse(g.reactive_stone_claims)
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
             g.resolve_reactive_stone("caster",trigger,response)
         self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
         self.assertFalse(g.effects)
@@ -792,8 +795,9 @@ class B06G3Test(unittest.TestCase):
                 trigger,on_interception=lambda state,tr,r:None,
                 spontaneous=(stone,),on_spontaneous=broken_callback)
         self.assertFalse(e.is_live_spontaneous(trigger,stone))
+        self.assertFalse(g.reactive_stone_claims)
         self.assertFalse(f.reaction_available)
-        with self.assertRaisesRegex(ValueError,"requires its live response callback"):
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
             g.resolve_reactive_stone("caster",trigger,stone)
         self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
         self.assertFalse(g.effects)
@@ -939,6 +943,138 @@ class B06G3Test(unittest.TestCase):
         self.assertEqual((s.ap_remaining,s.vp_available,s.vp_committed,
                           s.vp_spent),before)
         self.assertEqual((s.vp_available,s.vp_committed,s.vp_spent),(6,0,0))
+        e.check()
+
+    def test_61_composite_rechecks_reactive_stone_exclusivity_after_ap_commit(self):
+        for secondary in ("Basic Heal","Vital Shelter"):
+            with self.subTest(secondary=secondary):
+                f=pc("F",3)
+                f.hp-=2;f.vigor-=5
+                e,g=game(f)
+                e.start_turn("caster",regen_choice=RegenerationChoice())
+                hp_before,vigor_before=f.hp,f.vigor
+                def incoming_stone(event):
+                    tr=Trigger("respond-during-composite","enemy","caster")
+                    choice=g.prepare_reactive_stone("caster",tr,perceptible=True)
+                    self.assertTrue(event.response_window(
+                        tr,on_interception=lambda ev,t,r:None,
+                        spontaneous=(choice,),
+                        on_spontaneous=lambda ev,t,r:
+                            g.resolve_reactive_stone("caster",t,r)))
+                kwargs=({"heal_tier":1,"heal_die":4,"hand_available":True}
+                        if secondary=="Basic Heal" else {})
+                out=g.cast_scholar_composite(
+                    "caster",secondary,on_committed=incoming_stone,**kwargs)
+                self.assertIsNone(out)
+                self.assertEqual((f.ap_remaining,f.vp_available,
+                                  f.vp_committed,f.vp_spent),(22,12,6,0))
+                self.assertEqual((f.hp,f.vigor),(hp_before,vigor_before))
+                self.assertEqual(len(g.active("caster","Stone Skin")),1)
+                self.assertFalse(g.active("caster","Vital Shelter"))
+                self.assertFalse(spell_events(e,"g3_basic_heal_secondary_once"))
+                self.assertEqual(len(spell_events(e,"g3_effect_established")),1)
+                latest=spell_events(e,"g3_cast_interrupted")[-1]["detail"]
+                self.assertEqual(latest["cause"],
+                                 "stone_skin_activated_during_responses")
+                self.assertEqual(latest["vp_spent"],0)
+                g.release("caster","Stone Skin")
+                self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),
+                                 (18,0,0))
+                e.check()
+
+    def test_62_interception_cancellation_expires_claim_before_reused_key(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        e.start_turn("attacker")
+        e.reserve("attacker","same-key-after-cancel","stop",
+                  action_kind="physical")
+        e.end_turn()
+        original=Trigger("same-key-after-cancel","attacker","caster")
+        first=g.prepare_reactive_stone("caster",original,perceptible=True)
+        self.assertFalse(e.response_window(
+            original,
+            on_interception=lambda ev,tr,r:setattr(tr,"legal",False),
+            spontaneous=(first,),
+            on_spontaneous=lambda ev,tr,r:
+                g.resolve_reactive_stone("caster",tr,r)))
+        self.assertTrue(f.reaction_available)
+        self.assertFalse(g.reactive_stone_claims)
+        self.assertFalse(g.reactive_stone_claimed)
+        self.assertEqual(len(spell_events(e,"g3_reactive_claim_expired")),1)
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
+            g.resolve_reactive_stone("caster",original,first)
+        e.start_turn("caster")
+        e.end_turn()
+        e.begin_round()
+        new=Trigger("same-key-after-cancel","attacker","caster")
+        second=g.prepare_reactive_stone("caster",new,perceptible=True)
+        self.assertNotEqual(first.label,second.label)
+        self.assertTrue(e.response_window(
+            new,on_interception=lambda ev,tr,r:None,
+            spontaneous=(second,),
+            on_spontaneous=lambda ev,tr,r:
+                g.resolve_reactive_stone("caster",tr,r)))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        self.assertFalse(f.reaction_available)
+        self.assertEqual(len(spell_events(e,"g3_stone_reacted")),1)
+        self.assertIn(("caster",second.label),g.reactive_stone_claimed)
+        self.assertNotIn(("caster",first.label),g.reactive_stone_claimed)
+        self.assertFalse(g.reactive_stone_claims)
+        self.assertEqual(len(spell_events(e,"trigger_cancelled_before_spontaneous")),1)
+        e.check()
+
+    def test_63_prepared_but_undeclared_response_claim_expires_on_normal_exit(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        old=Trigger("normal-window-omit","attacker","caster")
+        response=g.prepare_reactive_stone("caster",old,perceptible=True)
+        self.assertTrue(e.response_window(
+            old,on_interception=lambda ev,tr,r:None,spontaneous=()))
+        self.assertTrue(f.reaction_available)
+        self.assertFalse(g.reactive_stone_claims)
+        self.assertFalse(g.reactive_stone_claimed)
+        self.assertEqual(len(spell_events(e,"g3_reactive_claim_expired")),1)
+        new=Trigger("normal-window-omit","attacker","caster")
+        accepted=g.prepare_reactive_stone("caster",new,perceptible=True)
+        self.assertNotEqual(response.label,accepted.label)
+        self.assertTrue(e.response_window(
+            new,on_interception=lambda ev,tr,r:None,
+            spontaneous=(accepted,),
+            on_spontaneous=lambda ev,tr,r:
+                g.resolve_reactive_stone("caster",tr,r)))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        e.check()
+
+    def test_64_exception_exit_clears_only_exact_trigger_claim(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        old=Trigger("exception-cancel","attacker","caster")
+        first=g.prepare_reactive_stone("caster",old,perceptible=True)
+        def fail_interception(ev,tr,res):
+            raise RuntimeError("interception policy exception")
+        e.start_turn("attacker")
+        e.reserve("attacker",old.key,"deliberate-exception",
+                  action_kind="physical")
+        e.end_turn()
+        with self.assertRaisesRegex(RuntimeError,"interception policy exception"):
+            e.response_window(old,on_interception=fail_interception,
+                              spontaneous=(first,),
+                              on_spontaneous=lambda ev,tr,r:None)
+        self.assertTrue(f.reaction_available)
+        self.assertFalse(g.reactive_stone_claims)
+        self.assertEqual(len(spell_events(e,"g3_reactive_claim_expired")),1)
+        new=Trigger(old.key,"attacker","caster")
+        response=g.prepare_reactive_stone("caster",new,perceptible=True)
+        self.assertNotEqual(first.label,response.label)
+        self.assertTrue(e.response_window(
+            new,on_interception=lambda ev,tr,r:None,
+            spontaneous=(response,),
+            on_spontaneous=lambda ev,tr,r:
+                g.resolve_reactive_stone("caster",tr,r)))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
         e.check()
 
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
