@@ -531,6 +531,39 @@ class GridMovement:
                    label=key, mp=mp, unreserved_mp=a.mp_remaining)
         return key
 
+    def _pounce_approach(self, hunter_id, target_id, heading):
+        """Check an attainable straight head-forward run-up before Charge starts.
+
+        This is a snapshot legality check, not pathfinding or a promise that
+        the prey/terrain cannot change during the eventual response windows.
+        The initial prey must be exactly in a forward square reachable after
+        >=3 whole-footprint translations with <=24 actual destination MP.
+        """
+        a, target = self.e.actors[hunter_id], self.e.actors[target_id]
+        head = self.body_cell(hunter_id, "head")
+        delta = (target.occupied[0][0]-head[0],
+                 target.occupied[0][1]-head[1])
+        forward = delta[0]*heading[0] + delta[1]*heading[1]
+        if (delta != (heading[0]*forward, heading[1]*forward)
+                or forward < 4):
+            raise ValueError("Pounce needs a plausible straight head-forward run-up")
+        required_steps = forward - 1
+        original = a.occupied
+        spent = 0
+        try:
+            for _ in range(required_steps):
+                _, cost, _, _ = self.preview(hunter_id, delta=heading)
+                spent += cost
+                if spent > 24:
+                    raise ValueError("Pounce target beyond actual 24-MP allowance")
+                a.occupied = tuple((x+heading[0], y+heading[1])
+                                   for x, y in a.occupied)
+        except (ValueError, UnresolvedDecision) as error:
+            raise ValueError("Pounce has no legal whole-body forward route: " + str(error)) from error
+        finally:
+            a.occupied = original
+        return required_steps, spent
+
     def start_pounce(self, hunter_id, target_id):
         a = self.e.actors[hunter_id]
         if self.pounce is not None or hunter_id in self.rapid_heading:
@@ -555,19 +588,29 @@ class GridMovement:
                 any(str(x).lower() == "prone"
                     for x in self.e.actors[target_id].conditions)):
             raise ValueError("Pounce requires standing Hunter and standing prey")
+        steps, minimum_mp = self._pounce_approach(hunter_id, target_id, heading)
         a.mp_remaining = 24
         self.pounce = PounceRun(hunter_id, target_id, heading)
         self.e.log("g1_pounce_declared", hunter=hunter_id, target=target_id,
-                   heading=heading, max_mp=24, cutoff_mp=18)
+                   heading=heading, max_mp=24, cutoff_mp=18,
+                   legal_runup_steps=steps, expected_minimum_mp=minimum_mp)
         return heading
 
     def pounce_contact(self, *, defense="take_hit", interceptor_routes=None,
-                       responses=(), on_response=None, trigger_key=None):
+                       responses=(), on_response=None, trigger_key=None,
+                       final_target_id=None):
         run = self.pounce
         if run is None:
             raise ValueError("No Pounce approach")
         a = self.e.actors[run.hunter_id]
-        t = self.e.actors[run.target_id]
+        selected_id = run.target_id if final_target_id is None else final_target_id
+        if selected_id not in self.e.actors:
+            raise ValueError("Unknown Pounce contact target")
+        t = self.e.actors[selected_id]
+        if (t.team == a.team or t.source.source_id not in ("A", "B", "R", "F")
+                or len(t.occupied) != 1
+                or any(str(x).lower() == "prone" for x in t.conditions)):
+            raise ValueError("Final Pounce target must be eligible one-square standing PC")
         if run.steps < 3 or not self.melee_contact(a.id, t.id, hunter_front=True):
             raise ValueError("Pounce needs three translated steps and frontal contact")
         if a.hp <= 0 or a.dead or t.dead:
@@ -582,6 +625,13 @@ class GridMovement:
                 not t.ready_guard or t.guard_instrument is None
                 or t.guard_value is None or t.guard_remaining == 0):
             raise ValueError("Illegal Bite Guard")
+        # Retarget exactly ONCE, before any defense/AP commitment; it does
+        # not reopen a paid Bite or change heading or attack profile.
+        if t.id != run.target_id:
+            self.e.log("g1_pounce_retargeted", hunter=a.id,
+                       from_target=run.target_id, final_target=t.id,
+                       reason="legal_final_front_square_before_defenses")
+            run.target_id = t.id
         if not run.committed:
             self._pay_pounce_ap(a.id, "g1:pounce:bite")
             run.committed = True
@@ -597,8 +647,17 @@ class GridMovement:
             if entry is None:
                 raise UnresolvedDecision("Pounce attack-action Interception needs G3 resolver")
             for delta in (interceptor_routes or {}).get(r.label, ()):
-                self._movement(entry.actor_id, delta=tuple(delta), reserved=entry,
-                               trigger_key=f"{tr.key}:intercept:{entry.steps}")
+                try:
+                    self._movement(entry.actor_id, delta=tuple(delta), reserved=entry,
+                                   trigger_key=f"{tr.key}:intercept:{entry.steps}")
+                except (ValueError, UnresolvedDecision) as error:
+                    # Route errors do not unwind a previously paid Bite,
+                    # defense or sequence lock. The released reservation
+                    # forfeits its unused MP, then the Bite recheck continues.
+                    e.log("g1_interception_route_rejected", actor=entry.actor_id,
+                          label=entry.label, reason=str(error),
+                          spent_mp=entry.spent_mp)
+                    break
             e.log("g1_movement_interception_resolved", actor=entry.actor_id,
                   label=entry.label, committed_mp=entry.reserved_mp,
                   consumed_mp=entry.spent_mp, completed_steps=entry.steps)
