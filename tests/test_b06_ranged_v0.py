@@ -514,6 +514,70 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertEqual(len(result(e)),0)
         e.check()
 
+    def test_31_hunter_target_requires_explicit_stable_anatomical_cell(self):
+        r=hero("R","archer",(1,2))
+        h=hunter(at=((8,2),(7,2)))
+        e,g1,g2=fixture(r,h)
+        e.start_turn("archer")
+        with self.assertRaisesRegex(UnresolvedDecision,"anatomy cell"):
+            g2.bow_sequence("archer","hunter",(ShotChoice(primary_face=15),))
+        self.assertEqual((r.ap_remaining,r.ammunition),(42,20))
+        self.assertNotIn(("archer","hunter"),e.seen_sequences)
+        out=g2.bow_sequence("archer","hunter",(ShotChoice(
+            primary_face=15,target_cell=g1.body_cell("hunter","head")),))[0]
+        self.assertEqual(out["outcome"],"intended_hit_pending_G5")
+        self.assertEqual(r.ammunition,19)
+        self.assertEqual(h.hp,h.hp_max) # injury is G4/G5; G2 logs delivery only
+        e.check()
+
+    def test_32_hunter_one_silhouette_and_nearest_cell_secondary_range(self):
+        r=hero("R","archer",(1,2))
+        h=hunter(at=((8,2),(7,2)))
+        t=hero("B","target",(11,2),"enemy")
+        e,g1,g2=fixture(r,h,t)
+        e.start_turn("archer")
+        lane=g2.lane("archer","target",exposures=(("hunter",6),))
+        self.assertEqual(len(lane.screens),1)
+        self.assertEqual(lane.screens[0],("hunter",6,6))
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=8,exposures=(("hunter",6),),
+            collateral=(("hunter","take_hit"),),secondary_face=5),))[0]
+        self.assertEqual((out["outcome"],out["target"]),
+                         ("collateral_hit_pending_G5","hunter"))
+        secondary=[v for v in e.ledger
+                   if v["kind"]=="g2_conditional_secondary"]
+        self.assertEqual(secondary[0]["detail"]["defense_value"],8)
+        self.assertEqual(r.ammunition,19)
+        e.check()
+
+    def test_33_paid_dagger_ready_updates_true_g1_melee_threat(self):
+        r=hero("R","archer",(1,2))
+        t=hero("B","target",(2,2),"enemy")
+        e,g1,g2=fixture(r,t)
+        e.start_turn("archer")
+        self.assertFalse(g1.threatens("archer",(2,2)))
+        self.assertFalse(g1.melee_contact("archer","target"))
+        g2.ready_weapon("archer","Dagger")
+        self.assertTrue(g1.threatens("archer",(2,2)))
+        self.assertTrue(g1.melee_contact("archer","target"))
+        self.assertEqual(r.ap_remaining,18)
+        e.check()
+
+    def test_34_aim_cannot_swap_hunter_anatomical_point_for_free(self):
+        r=hero("R","archer",(1,2))
+        h=hunter(at=((8,2),(7,2)))
+        e,g1,g2=fixture(r,h)
+        e.start_turn("archer")
+        g2.aim("archer","hunter","range",target_cell=(8,2))
+        self.assertEqual(r.ap_remaining,22)
+        with self.assertRaisesRegex(ValueError,"exact point"):
+            g2.bow_sequence("archer","hunter",(ShotChoice(
+                primary_face=20,aim_source="range",target_cell=(7,2)),))
+        self.assertEqual(r.ammunition,20)
+        self.assertEqual(r.ap_remaining,22)
+        self.assertIn("archer",g2.aims)
+        e.check()
+
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
         r=hero("R","archer",(1,2))
         t=hero("B","target",(9,2),"enemy")
