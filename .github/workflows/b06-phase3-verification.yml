@@ -5,8 +5,10 @@ on:
     paths:
       - 'scripts/b06_encounter_state_v0.py'
       - 'scripts/b06_movement_v0.py'
+      - 'scripts/b06_ranged_v0.py'
       - 'docs/design/b06-g0-shared-encounter-state-and-event-ledger-v0.md'
       - 'docs/design/b06-g1-native-movement-footprint-contact-v0.md'
+      - 'docs/design/b06-g2-ranged-legality-cover-projectile-response-v0.md'
       - 'scripts/b06_hunter_phase3_report_v0.py'
       - 'scripts/b06_hunter_tactical_diversity_v0.py'
       - 'scripts/b06_hunter_party_exchanges_v0.py'
@@ -58,6 +60,8 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_b06_encounter_state_v0.py' -v
       - name: Verify G1 physical map, footprint and contact traces
         run: python -m unittest discover -s tests -p 'test_b06_movement_v0.py' -v
+      - name: Verify G2 ranged legality, cover and projectile response traces
+        run: python -m unittest discover -s tests -p 'test_b06_ranged_v0.py' -v
       - name: Run complete repository test suite
         run: python -m unittest discover -s tests -v
       - name: Verify enemy footprints and index geometry

@@ -316,6 +316,7 @@ class Encounter:
         self.regen_done = set()
         self.pending_regeneration = None
         self.g1 = None  # Optional native physical grid; G0-only stays supported.
+        self.g2 = None  # Optional G2 ranged executor; never adds phantom shots.
         rank = {v: i for i, v in enumerate(tie_order)}
         def priority(a):
             return (-initiative_scores[a.id], -a.awareness, -a.agility,
@@ -474,6 +475,8 @@ class Encounter:
                  mp=a.mp_remaining)
         if self.g1 is not None:
             self.g1.on_turn_start(actor_id)
+        if self.g2 is not None:
+            self.g2.on_turn_start(actor_id)
         self.check()
 
     def end_turn(self):
@@ -629,7 +632,7 @@ class Encounter:
                  label=label)
 
     def response_window(self, trigger, *, on_interception, spontaneous=(),
-                        on_spontaneous=None):
+                        on_spontaneous=None, after_interceptions=None):
         """Caller resolves independently authorized effects; G0 never invents Interrupt.
 
         Interception callback may call nested response_window() or set trigger.legal
@@ -656,6 +659,11 @@ class Encounter:
             self.log("interception_released", actor=r.actor_id, label=r.label,
                      trigger=trigger.key)
             on_interception(self, trigger, r)
+        # Validate the final geometry only after every same-trigger
+        # Interception. An intermediate state may change again before
+        # the original trigger's single canonical legality recheck.
+        if after_interceptions is not None:
+            after_interceptions(self, trigger)
         self.log("trigger_rechecked_after_interceptions", trigger=trigger.key,
                  legal=trigger.legal)
         if not trigger.legal:
