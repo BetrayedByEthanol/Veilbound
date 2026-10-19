@@ -79,6 +79,7 @@ class GridMovement:
         self.motion = {}
         self.next_reservation = 0
         self.pounce = None
+        self._internal_pounce_spend = False
         self.rapid_heading = {}  # After tentative Pounce abort, fixed for turn.
         encounter.g1 = self
         encounter.log("g1_map_installed", scene=scene_id, width=width, height=height,
@@ -236,11 +237,22 @@ class GridMovement:
         self.rapid_heading.pop(actor_id, None)
 
     def on_own_action(self, actor_id, *, label):
-        # Pounce's AP commitment at its own legal threshold is part of one
-        # fixed-heading approach, not an intervening action/segment break.
-        if self.pounce and self.pounce.hunter_id == actor_id and label.startswith("g1:pounce:"):
+        # Internal G1 payment is authenticated by a narrowly scoped flag,
+        # never by caller-provided log labels.
+        if self.pounce and self.pounce.hunter_id == actor_id and self._internal_pounce_spend:
             return
         self.break_segment(actor_id, reason="own_action")
+
+    def _pay_pounce_ap(self, actor_id, label):
+        if (self.pounce is None or self.pounce.hunter_id != actor_id
+                or label not in ("g1:pounce:cutoff", "g1:pounce:bite")
+                or self._internal_pounce_spend):
+            raise ValueError("Invalid internal Pounce AP commitment")
+        self._internal_pounce_spend = True
+        try:
+            return self.e.spend_ap(actor_id, "physical", label=label)
+        finally:
+            self._internal_pounce_spend = False
 
     def break_segment(self, actor_id, *, reason):
         self.segment[actor_id] += 1
@@ -377,7 +389,7 @@ class GridMovement:
         if self.pounce and self.pounce.hunter_id == actor_id:
             run = self.pounce
             if not run.committed and run.spent_mp + cost > 18:
-                self.e.spend_ap(actor_id, "physical", label="g1:pounce:cutoff")
+                self._pay_pounce_ap(actor_id, "g1:pounce:cutoff")
                 run.committed = True
         self._commit_mp(actor_id, cost, reserved)
         a.occupied = latest
@@ -542,7 +554,7 @@ class GridMovement:
                 or t.guard_value is None or t.guard_remaining == 0):
             raise ValueError("Illegal Bite Guard")
         if not run.committed:
-            self.e.spend_ap(a.id, "physical", label="g1:pounce:bite")
+            self._pay_pounce_ap(a.id, "g1:pounce:bite")
             run.committed = True
         self.e.seen_sequences.add((a.id, t.id))
         self.e.log("g1_pounce_bite_committed", hunter=a.id, target=t.id,
