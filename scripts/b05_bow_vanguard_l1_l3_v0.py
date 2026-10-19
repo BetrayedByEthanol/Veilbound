@@ -66,8 +66,8 @@ def profile(level):
             **START_DISCIPLINES, **({"Survival": 1} if level >= 2 else {})
         },
         "learned_points": 8 + (level >= 2),
-        "background_familiarities": (
-            "Home community", "Prior rural medical practice"),
+        "background_familiarities": [
+            "Home community", "Prior rural medical practice"],
         "talents": [v for k, v in TALENTS.items() if k <= level],
         "prepared_prayers": list(PRAYERS[level]),
         "chosen_devotion": "Guided Regeneration",
@@ -146,11 +146,9 @@ def verify():
                     ("hp_max", "hp"), ("bow_attack_bonus", "attack"),
                     ("bow_penetration", "pen"),
                     ("normal_regen_throughput", "regen"),
-                    ("initiative", "init"), ("first_dodge", "dummy")):
-                if source_key == "dummy":
-                    assert p[sheet_key] == 14
-                else:
-                    assert p[sheet_key] == role[source_key], sheet_key
+                    ("initiative", "init")):
+                assert p[sheet_key] == role[source_key], sheet_key
+            assert p["first_dodge"] == 14
             assert (role["armor"], role["base"], role["die"],
                     role["kind"], role["action_ap"], role["guard"]) == (
                         3, 2, 4, "bow", 20, None)
