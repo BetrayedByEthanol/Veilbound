@@ -127,8 +127,11 @@ class SpellState:
 
     def cast_sentry_reserve(self,caster,*,on_committed=None):
         a=self._own(caster,30)
-        if a.source.source_id!="B06-EN-01" or a.source.start_state!="cold_start":
-            raise ValueError("Only cold-start Sentry may establish its Chosen Reserve")
+        # Initial cold/prepared state determines only the scene's ORIGINAL
+        # VP/effect load. Once a genuinely held Sentry reserve has ended,
+        # both source-authored starts may pay to establish a fresh instance.
+        if a.source.source_id!="B06-EN-01":
+            raise ValueError("Only source-backed Sentry may establish its Chosen Reserve")
         if self.active(caster,"Sentry Sword Reserve"):
             raise ValueError("Already active")
         if not self._sentry_wielded(a):
@@ -285,11 +288,15 @@ class SpellState:
                   event["detail"].get("response_kind")=="reaction" and
                   event["detail"].get("label")==response.label
                   for event in self.e.ledger)
-        if not proof or token in self.reactive_stone_claimed or a.reaction_available:
+        # Unique prepared Response labels are minted monotonically per G3
+        # instance. Never tombstone a reusable text trigger key; a subsequent
+        # distinct live Trigger/Response with the same key is valid.
+        consumed=(caster,response.label)
+        if not proof or consumed in self.reactive_stone_claimed or a.reaction_available:
             raise ValueError("No unused G0-committed matching Reaction")
         # The Reaction has already been paid by G0. Consume authorization
         # before evaluating the now-live actor, including interrupted casts.
-        self.reactive_stone_claimed.add(token)
+        self.reactive_stone_claimed.add(consumed)
         del self.reactive_stone_claims[token]
         # A previous same-window response may have cancelled the original
         # trigger AFTER G0 had committed this caster's Reaction. This is
