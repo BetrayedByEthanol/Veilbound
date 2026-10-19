@@ -149,7 +149,7 @@ class BowVanguardBuildTests(unittest.TestCase):
         self.assertGreater(10, profile(3)["vp_max"])
         heal = (ROOT / "docs/rules/07-veil-magic" /
                 "basic-heal-v0.md").read_text()
-        self.assertIn("one available, functioning hand", heal)
+        self.assertIn("at least one functioning available hand", heal)
 
     def test_bow_guard_is_not_rescued_by_guard_reserve(self):
         for level in LEVELS:
