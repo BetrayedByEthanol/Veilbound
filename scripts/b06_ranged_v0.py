@@ -264,6 +264,8 @@ class RangedCombat:
 
     def aim(self, shooter_id, target_id, source, *, profile="bow",
             exposures=()):
+        if profile!="bow":
+            raise UnresolvedDecision("G2 Aim requires audited Bow attack profile")
         a=self._bow_ready(shooter_id)
         lane=self.lane(shooter_id,target_id,range_kind="bow",exposures=exposures)
         if source not in ("range", "cover") and not source.startswith("screen:"):
@@ -535,8 +537,10 @@ class RangedCombat:
                 elif category=="creature":
                     candidate=e.actors[incidental]
                     declaration=dict(shot.collateral)[incidental]
-                    squares=max(abs(candidate.occupied[0][0]-lane.origin[0]),
-                                abs(candidate.occupied[0][1]-lane.origin[1]))
+                    first=next(pos for sid,_,pos in lane.screens if sid==incidental)
+                    point=lane.cells[first]
+                    squares=max(abs(point[0]-lane.origin[0]),
+                                abs(point[1]-lane.origin[1]))
                     secondary_band=next((m for limit,m in BOW_BANDS
                                          if squares<=limit),None)
                     cb,cd=self._defense_value(candidate,declaration,secondary_band,
