@@ -84,8 +84,8 @@ class G0SourceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "overlaps another actor"):
             scene(soldier(), party(at=((1, 0),)))
         with self.assertRaisesRegex(UnresolvedDecision, "Initiative tie"):
-            scene(party(name="R1"), party(name="R2", at=((3, 0),)),
-                  score={"R1": 12, "R2": 12})
+            Encounter([party(name="R1"), party(name="R2", at=((3, 0),))],
+                      {"R1": 12, "R2": 12}, seed=123)
         e = scene(party(name="R1"), party(name="R2", at=((3, 0),)),
                   score={"R1": 12, "R2": 12})
         self.assertEqual(e.order, ("R1", "R2"))
