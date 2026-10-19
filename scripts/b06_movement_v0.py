@@ -157,7 +157,7 @@ class GridMovement:
             return (a.source.source_id == "B06-EN-03"
                     and len(t.occupied) == 1
                     and self.front(attacker_id) == t.occupied[0])
-        return self._can_melee(a) and bool(self.reach(attacker_id).intersection(t.occupied))
+        return any(self.threatens(attacker_id,c) for c in t.occupied)
 
     def preview(self, actor_id, *, delta=None, pivot=None, clockwise=None,
                 cautious=False, reserved=False, ally_transit=False):
