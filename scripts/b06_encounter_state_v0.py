@@ -360,7 +360,10 @@ class Encounter:
         for a in self.actors.values():
             a.guard_remaining = a.guard_capacity
             a.dodge_pressure = 0
-            a.reaction_available = a.hp > 0 and not a.dead
+            # Refresh is a once-per-round capacity, not a snapshot of HP.
+            # Dying actors cannot use it now; declaration validates current
+            # consciousness. If Step 2 later restores HP, capacity is intact.
+            a.reaction_available = True
             a.opportunity_active = False
             a.opportunity_used = 0
         self.log("round_begin", refreshed=list(self.order))
@@ -555,11 +558,16 @@ class Encounter:
         return value
 
     def declare_sequence(self, attacker, target, profiles, defenses):
-        if self.current != attacker:
-            raise ValueError("Only current actor declares ordinary sequence")
+        if self.current != attacker or self.pending_regeneration is not None:
+            raise ValueError("Only ready current actor declares ordinary sequence")
+        a, t = self.actors[attacker], self.actors[target]
+        # A same-turn 0-HP crossing can invalidate an attacker after Turn AP
+        # was established. Rejection MUST precede the sequence lock and all
+        # AP/Guard/Dodge commitment, so later legal recovery can retry.
+        if a.dead or a.hp <= 0:
+            raise ValueError("Dying/dead attacker cannot declare ordinary attacks")
         if (attacker, target) in self.seen_sequences:
             raise ValueError("Second ordinary Attack Sequence to same target forbidden")
-        a, t = self.actors[attacker], self.actors[target]
         if not profiles or len(profiles) != len(defenses):
             raise ValueError("Commit all declared profiles and defenses together")
         if any(p not in a.source.attack_profiles for p in profiles):
@@ -641,6 +649,11 @@ class Encounter:
             raise UnresolvedDecision("Multiple simultaneous responses by one actor")
         for c in choices:
             a = self.actors[c.actor_id]
+            # Round Begin refreshed the capacity independently of HP; only
+            # a currently conscious/alive actor can actually declare a
+            # spontaneous Reaction or Opportunity Attack.
+            if a.dead or a.hp <= 0:
+                raise ValueError("Dying/dead actor cannot declare a response")
             if c.kind not in ("reaction", "opportunity"):
                 raise ValueError("Unknown response category")
             if c.kind == "reaction" and not a.reaction_available:
