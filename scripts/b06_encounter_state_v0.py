@@ -455,7 +455,7 @@ class Encounter:
         if a.ap_remaining < cost:
             raise ValueError("Insufficient Turn AP")
         a.ap_remaining -= cost
-        self.log("action_committed", actor=actor_id, kind=kind, label=label,
+        self.log("action_committed", actor=actor_id, action_class=kind, label=label,
                  ap_spent=cost, ap_remaining=a.ap_remaining)
         return cost
 
@@ -604,7 +604,7 @@ class Encounter:
                 a.opportunity_used += 1
             else:
                 raise ValueError("Unknown response category")
-            self.log("spontaneous_committed", actor=c.actor_id, kind=c.kind,
+            self.log("spontaneous_committed", actor=c.actor_id, response_kind=c.kind,
                      trigger=trigger.key, label=c.label)
         for c in choices:
             on_spontaneous(self, trigger, c)
