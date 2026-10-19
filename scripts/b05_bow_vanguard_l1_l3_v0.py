@@ -148,6 +148,12 @@ def verify():
                     ("normal_regen_throughput", "regen"),
                     ("initiative", "init")):
                 assert p[sheet_key] == role[source_key], sheet_key
+            # Source R has the level-2 Guard Reserve Talent, despite
+            # being unable to Guard with its currently held bow. Capacity
+            # is what the modifier records, not a Guard instrument.
+            assert (p["normal_guard_capacity"] - p["physical_tempo"] ==
+                    role["guard_extra"]), "guard_extra mismatch"
+            assert role["guard"] is p["bow_guard"] is None
             assert p["first_dodge"] == 14
             assert (role["armor"], role["base"], role["die"],
                     role["kind"], role["action_ap"], role["guard"]) == (
