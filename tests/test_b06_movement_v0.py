@@ -171,16 +171,16 @@ class G1PhysicalAcceptance(unittest.TestCase):
                               if ev["kind"] == "g1_movement_opportunity_pending"]), 1)
         # Step 2 in same movement segment may not take a second general
         # Opportunity from the same sentry even while it has Tempo capacity.
-        self.assertTrue(g.step("mover", (1, 0)))
+        self.assertTrue(g.step("mover", (0, 1)))
         self.assertEqual(len([ev for ev in e.ledger
                               if ev["kind"] == "g1_movement_opportunity_pending"]), 1)
         with self.assertRaisesRegex(ValueError, "not eligible"):
-            g.step("mover", (0, 1),
+            g.step("mover", (0, -1),
                    responses=(Response("threat", "opportunity", "duplicate segment"),))
         # A real own action ends segment; opportunity timing resets, but the
         # already-active Opportunity still consumes capacity normally.
         e.spend_ap("mover", "physical", label="new own action")
-        self.assertTrue(g.step("mover", (0, 1),
+        self.assertTrue(g.step("mover", (0, -1),
                       responses=(Response("threat", "opportunity", "after own action"),)))
         self.assertEqual(threat.opportunity_used, 2)
         self.assertFalse(threat.reaction_available)
