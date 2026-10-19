@@ -292,30 +292,30 @@ class G0LedgerTests(unittest.TestCase):
     def test_round_end_expires_opportunity_and_blocks_stale_reaction(self):
         # First Opportunity uses the one Reaction, leaving a second available
         # Opportunity Attack in Physical Tempo; Round End must expire it.
-        a = soldier()
+        a = sentry("cold_start")
         e = scene(a)
         e.begin_round()
         self.assertTrue(e.response_window(
-            Trigger("first-opportunity", "soldier", "soldier"),
+            Trigger("first-opportunity", "sentry", "sentry"),
             on_interception=lambda *_: None,
-            spontaneous=(Response("soldier", "opportunity", "one legal trigger"),),
+            spontaneous=(Response("sentry", "opportunity", "one legal trigger"),),
             on_spontaneous=lambda *_: None))
         self.assertTrue(a.opportunity_active)
         self.assertFalse(a.reaction_available)
         self.assertEqual(a.opportunity_used, 1)
-        self.assertEqual(a.ap_total // a.physical_ap, 1)  # 42//24 == 1
-        e.start_turn("soldier")
+        self.assertEqual(a.ap_total // a.physical_ap, 2)  # 42//20 == 2
+        e.start_turn("sentry")
         e.end_turn()
         self.assertEqual(e.ledger[-1]["kind"], "round_end")
         self.assertEqual(e.ledger[-1]["detail"]["expired_opportunity_response"],
-                         ["soldier"])
+                         ["sentry"])
         self.assertFalse(a.opportunity_active)
         old_length = len(e.ledger)
         with self.assertRaisesRegex(ValueError, "outside an active round"):
             e.response_window(
-                Trigger("post-round-opportunity", "soldier", "soldier"),
+                Trigger("post-round-opportunity", "sentry", "sentry"),
                 on_interception=lambda *_: None,
-                spontaneous=(Response("soldier", "opportunity", "illegal stale"),),
+                spontaneous=(Response("sentry", "opportunity", "illegal stale"),),
                 on_spontaneous=lambda *_: self.fail("Opportunity after Round End"))
         self.assertEqual(len(e.ledger), old_length)
         self.assertEqual(a.opportunity_used, 1)
@@ -325,9 +325,9 @@ class G0LedgerTests(unittest.TestCase):
         self.assertFalse(a.opportunity_active)
         self.assertEqual(a.opportunity_used, 0)
         self.assertTrue(e.response_window(
-            Trigger("new-round-opportunity", "soldier", "soldier"),
+            Trigger("new-round-opportunity", "sentry", "sentry"),
             on_interception=lambda *_: None,
-            spontaneous=(Response("soldier", "opportunity", "new round"),),
+            spontaneous=(Response("sentry", "opportunity", "new round"),),
             on_spontaneous=lambda *_: None))
         e.check()
 
