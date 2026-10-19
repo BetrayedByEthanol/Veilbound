@@ -126,7 +126,7 @@ class GridMovement:
             return False
         gear = dict(a.source.equipment)
         melee = (a.source.source_id == "B06-EN-03"
-                 or any(state == "wielded" and any(
+                 or any((state is True or state == "wielded") and any(
                      term in name.lower()
                      for term in ("sword", "mace", "dagger", "axe", "spear", "club"))
                      for name, state in gear.items()))
@@ -351,7 +351,7 @@ class GridMovement:
             self.pounce.steps += 1
             self.pounce.spent_mp += cost
         self.e.log("g1_movement_step", actor=actor_id,
-                   old=initial, new=latest, kind=kind,
+                   old=initial, new=latest, step_kind=kind,
                    direction=delta, pivot_anchor=pivot, clockwise=clockwise,
                    cautious=cautious, cost=cost, mp_remaining=self._budget(actor_id, reserved),
                    opportunity_sources=threats, segment=self.segment[actor_id],
