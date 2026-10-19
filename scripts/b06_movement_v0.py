@@ -79,6 +79,7 @@ class GridMovement:
         self.motion = {}
         self.next_reservation = 0
         self.pounce = None
+        self.rapid_heading = {}  # After tentative Pounce abort, fixed for turn.
         encounter.g1 = self
         encounter.log("g1_map_installed", scene=scene_id, width=width, height=height,
                       walls=sorted(self.walls),
@@ -232,6 +233,7 @@ class GridMovement:
                        unused_mp=r.reserved_mp-r.spent_mp)
         self.provoked[actor_id].clear()
         self.segment[actor_id] += 1
+        self.rapid_heading.pop(actor_id, None)
 
     def on_own_action(self, actor_id, *, label):
         # Pounce's AP commitment at its own legal threshold is part of one
@@ -283,6 +285,10 @@ class GridMovement:
         if self.pounce and self.pounce.hunter_id == actor_id:
             if pivot is not None or cautious or reserved is not None or delta != self.pounce.heading:
                 raise ValueError("Pounce is fixed-head-forward straight translation")
+        if actor_id in self.rapid_heading:
+            if (pivot is not None or cautious or reserved is not None
+                    or delta != self.rapid_heading[actor_id]):
+                raise ValueError("Aborted Pounce retains fixed Rapid Advance heading")
         dest, cost, kind, allies = self.preview(
             actor_id, delta=delta, pivot=pivot, clockwise=clockwise,
             cautious=cautious)
@@ -411,6 +417,7 @@ class GridMovement:
         old = a.occupied
         total = 0
         transient = False
+        any_threats = False
         simulated = []
         try:
             for i, direction in enumerate(moves):
@@ -420,8 +427,9 @@ class GridMovement:
                     transient = True
                     if i == len(moves)-1:
                         raise ValueError("Cannot end movement on ally")
-                if transient and (self._threats(actor_id, new, cautious)
-                                  or self.e.reservations):
+                any_threats = any_threats or bool(
+                    self._threats(actor_id, new, cautious))
+                if transient and (any_threats or self.e.reservations):
                     raise UnresolvedDecision("Allied transit with responses needs explicit route adjudication")
                 simulated.append((old, new, cost, kind, ally))
                 total += cost
@@ -431,6 +439,8 @@ class GridMovement:
             a.occupied = simulated[0][0] if simulated else old
         if not transient:
             return all(self.step(actor_id, d, cautious=cautious) for d in moves)
+        if any_threats:
+            raise UnresolvedDecision("Cannot atomically bypass threatened allied transit")
         if self.e.current != actor_id or self.e.pending_regeneration:
             raise ValueError("Allied transit requires active turn")
         if total > a.mp_remaining:
@@ -451,6 +461,8 @@ class GridMovement:
             raise ValueError("Reserve MP on ready own turn only")
         if self.pounce is not None and self.pounce.hunter_id == actor_id:
             raise ValueError("Pounce prohibits new Movement Interception reservations")
+        if actor_id in self.rapid_heading:
+            raise ValueError("Rapid Advance prohibits new MP reservations")
         a = self.e.actors[actor_id]
         if a.dead or a.hp <= 0:
             raise ValueError("Dying/dead creature cannot reserve voluntary movement")
@@ -473,8 +485,8 @@ class GridMovement:
 
     def start_pounce(self, hunter_id, target_id):
         a = self.e.actors[hunter_id]
-        if self.pounce is not None:
-            raise ValueError("Pounce already active")
+        if self.pounce is not None or hunter_id in self.rapid_heading:
+            raise ValueError("Pounce already active or this turn's Charge was aborted")
         if (a.source.source_id != "B06-EN-03" or
                 self.e.current != hunter_id or self.e.pending_regeneration):
             raise ValueError("Pounce requires Hunter on own ready turn")
@@ -580,4 +592,5 @@ class GridMovement:
             a.mp_remaining = 0
         else:
             a.mp_remaining = max(0, 18-run.spent_mp)
+            self.rapid_heading[a.id] = run.heading
         self.pounce = None
