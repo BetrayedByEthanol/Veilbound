@@ -175,7 +175,7 @@ class RangedCombat:
         return tuple(route), tuple(corner_sides)
 
     def lane(self, shooter_id, target_id, *, exposures=(), origin=None,
-             target_cell=None, range_kind="bow"):
+             target_cell=None, range_kind="bow", drop_departed_screens=False):
         if shooter_id not in self.e.actors or target_id not in self.e.actors:
             raise ValueError("Unknown G2 shooter or target")
         shooter, target = self.e.actors[shooter_id], self.e.actors[target_id]
@@ -209,8 +209,15 @@ class RangedCombat:
                        if a.id not in (shooter_id, target_id)
                        and any(p in cells[1:-1] for p in a.occupied)}
         source_exposures = dict(exposures)
-        if (len(source_exposures) != len(tuple(exposures))
-                or set(source_exposures) != overlapping
+        if len(source_exposures) != len(tuple(exposures)):
+            raise ValueError("Duplicate authored Living Screen exposure")
+        if drop_departed_screens:
+            # A formerly declared screen that physically left the firing
+            # ray is no longer an obstruction. Newly interposed actors
+            # still require explicit exposure authoring; no guessed tier.
+            source_exposures = {ident:value for ident,value in source_exposures.items()
+                                if ident in overlapping}
+        if (set(source_exposures) != overlapping
                 or any(v not in TIERS - {0} for v in source_exposures.values())):
             raise UnresolvedDecision("Specify each physically interposed Living Screen and its authored exposure")
         # Directional partial cover is authored from this origin. Where two
@@ -409,7 +416,7 @@ class RangedCombat:
                    label=record.label,steps=entry.steps,
                    consumed_mp=entry.spent_mp,committed_mp=entry.reserved_mp)
 
-    def _shot(self,shooter_id,target_id,shot,seq_no,defense_record):
+    def _shot(self,shooter_id,target_id,shot,seq_no,defense_record,target_part):
         e=self.e
         shooter=e.actors[shooter_id]
         # Defensive choices were validated with the batch before AP payment.
@@ -448,7 +455,9 @@ class RangedCombat:
             self._intercept(tr,res,shot.interceptor_routes)
             try:
                 self.lane(shooter_id,target_id,exposures=shot.exposures,
-                          origin=shot.origin_cell,target_cell=shot.target_cell)
+                          origin=shot.origin_cell,
+                          target_cell=self.g.body_cell(target_id,target_part),
+                          drop_departed_screens=True)
             except (ValueError,UnresolvedDecision):
                 tr.legal=False
         trig=Trigger(key,shooter_id,target_id)
@@ -465,7 +474,9 @@ class RangedCombat:
             return {"outcome":"interrupted_before_launch"}
         try:
             lane=self.lane(shooter_id,target_id,exposures=shot.exposures,
-                           origin=shot.origin_cell,target_cell=shot.target_cell)
+                           origin=shot.origin_cell,
+                           target_cell=self.g.body_cell(target_id,target_part),
+                           drop_departed_screens=True)
         except (ValueError,UnresolvedDecision) as err:
             e.log("g2_bow_no_launch",shooter=shooter_id,target=target_id,
                   trigger=key,reason=str(err),ammunition_spent=0)
@@ -705,6 +716,16 @@ class RangedCombat:
                         or record.target_cell!=sh.target_cell
                         or record.origin_cell!=sh.origin_cell):
                     raise ValueError("Shot has no matching retained Aim for this exact point")
+        # Snapshot selected stable G1 anatomical labels before AP and any
+        # reactive movement. Shots track the named body CELL, not its former
+        # world coordinate. Preflight above already rejects a missing target
+        # cell on multi-square targets.
+        target_parts=[]
+        for sh in shots:
+            actor=e.actors[target_id]
+            selected=(sh.target_cell if sh.target_cell is not None
+                      else actor.occupied[0])
+            target_parts.append(actor.footprint[actor.occupied.index(selected)])
         # G0's own-action hook breaks G1 segment, as canon requires.
         e.seen_sequences.add((shooter_id,target_id))
         for i in range(len(shots)):
@@ -730,5 +751,6 @@ class RangedCombat:
                   guard_remaining=t.guard_remaining,
                   dodge_pressure=t.dodge_pressure)
         e.check()
-        return tuple(self._shot(shooter_id,target_id,shot,i,defense_records[i])
+        return tuple(self._shot(shooter_id,target_id,shot,i,
+                                defense_records[i],target_parts[i])
                      for i,shot in enumerate(shots))
