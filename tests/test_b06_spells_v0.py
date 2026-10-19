@@ -417,6 +417,39 @@ class B06G3Test(unittest.TestCase):
         self.assertFalse(g.effects)
         e.check()
 
+    def test_36_held_renewal_has_real_chosen_host_only_at_l3(self):
+        for level in (1,2,3):
+            r=pc("R",level);e,g=game(r);e.start_turn("caster")
+            self.assertFalse(g.exaltation_eligibility("caster","EX-LR-01"))
+            g.cast_guided("caster",chosen=True)
+            self.assertEqual(g.exaltation_eligibility("caster","EX-LR-01"),
+                             level==3)
+            self.assertFalse(g.exaltation_eligibility("caster","EX-LP-01"))
+            g.release("caster","Guided Regeneration")
+            self.assertFalse(g.exaltation_eligibility("caster","EX-LR-01"))
+            e.check()
+
+    def test_37_nonchosen_rite_and_fixed_spell_never_anchor_exaltation(self):
+        for mode,chosen in (("maintained",False),("fixed",False)):
+            r=pc("R",3);e,g=game(r);e.start_turn("caster")
+            g.cast_guided("caster",mode=mode,chosen=chosen)
+            self.assertFalse(g.exaltation_eligibility("caster","EX-LR-01"))
+            self.assertFalse(g.exaltation_eligibility("caster","EX-LP-01"))
+            self.assertEqual(len([x for x in e.ledger
+                                  if x["kind"]=="vp_transition" and
+                                  x["detail"]["label"].startswith("g3:exaltation")]),0)
+            e.check()
+
+    def test_38_maintained_guided_ends_on_actual_caster_death(self):
+        r=pc("R",3);e,g=game(r);e.start_turn("caster")
+        g.cast_guided("caster",chosen=True)
+        r.hp=-r.hp_max
+        r.dead=True
+        g.sync_consciousness("caster")
+        self.assertFalse(g.effects)
+        self.assertEqual((r.vp_available,r.vp_committed,r.vp_spent),(6,0,0))
+        e.check()
+
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
         f=pc("F");t=pc("R",3,"target",(3,2),"enemy")
         e,g=game(f,t);e.start_turn("caster")
