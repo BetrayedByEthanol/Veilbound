@@ -49,7 +49,7 @@ class G2RangedAcceptance(unittest.TestCase):
         out=g2.bow_sequence("archer","target",(ShotChoice(
             primary_face=3,exposures=(("ally",2),("screen",6)),
             collateral=(("ally","take_hit"),("screen","guard")),
-            secondary_face=14),))
+            aware_collateral=("screen",),secondary_face=14),))
         self.assertEqual(out[0]["outcome"],"collateral_hit_pending_G5")
         self.assertEqual(out[0]["target"],"ally")
         self.assertEqual(r.ammunition,19)
@@ -100,7 +100,7 @@ class G2RangedAcceptance(unittest.TestCase):
         e,g1,g2=fixture(r,target)
         e.start_turn("archer")
         out=g2.bow_sequence("archer","target",(ShotChoice(
-            defense="guard",primary_face=10),))[0]
+            defense="guard",aware_target=True,primary_face=10),))[0]
         self.assertEqual(out["outcome"],"intended_guard_impact")
         self.assertEqual(target.guard_remaining,1)
         self.assertEqual(target.dodge_pressure,0)
@@ -115,7 +115,7 @@ class G2RangedAcceptance(unittest.TestCase):
         before=(r.ap_remaining,r.ammunition,other.guard_remaining)
         with self.assertRaisesRegex(ValueError,"projectile-capable shield"):
             g2.bow_sequence("archer","bow_target",(ShotChoice(
-                defense="guard",primary_face=7),))
+                defense="guard",aware_target=True,primary_face=7),))
         self.assertEqual((r.ap_remaining,r.ammunition,other.guard_remaining),before)
 
     def test_06_threatened_bow_hit_interrupts_prelaunch_only_ap_spent(self):
@@ -245,7 +245,8 @@ class G2RangedAcceptance(unittest.TestCase):
         e.start_turn("archer")
         out=g2.bow_sequence("archer","target",(ShotChoice(
             primary_face=8,exposures=(("screen",4),),
-            collateral=(("screen","guard"),),secondary_face=2),))[0]
+            collateral=(("screen","guard"),),
+            aware_collateral=("screen",),secondary_face=2),))[0]
         self.assertEqual(out["outcome"],"collateral_guard_impact")
         self.assertEqual(enemy.guard_remaining,1)
         self.assertEqual(r.ammunition,19)
@@ -261,7 +262,8 @@ class G2RangedAcceptance(unittest.TestCase):
         e.start_turn("archer")
         out=g2.bow_sequence("archer","target",(ShotChoice(
             primary_face=20,exposures=(("screen",4),),
-            collateral=(("screen","guard"),)),))[0]
+            collateral=(("screen","guard"),),
+            aware_collateral=("screen",)),))[0]
         self.assertEqual(out["outcome"],"critical_confirmation_pending_G5")
         self.assertEqual(enemy.guard_remaining,2)
         self.assertEqual(r.ammunition,19)
@@ -346,6 +348,66 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertEqual(r.ammunition,19)
         self.assertEqual(r.ap_remaining,22)
         self.assertEqual(len([v for v in e.ledger if v["kind"]=="g2_conditional_secondary"]),1)
+        e.check()
+
+    def test_22_unaware_collateral_shield_cannot_be_predeclared(self):
+        r=hero("R","archer",(1,2))
+        screen=soldier("screen",(5,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(r,screen,target)
+        e.start_turn("archer")
+        before=(r.ap_remaining,r.ammunition,screen.guard_remaining,len(e.ledger))
+        with self.assertRaisesRegex(ValueError,"Unaware screen"):
+            g2.bow_sequence("archer","target",(ShotChoice(
+                primary_face=8,exposures=(("screen",4),),
+                collateral=(("screen","guard"),),secondary_face=1),))
+        self.assertEqual((r.ap_remaining,r.ammunition,
+                          screen.guard_remaining,len(e.ledger)),before)
+
+    def test_23_unaware_intended_defender_cannot_choose_dodge(self):
+        r=hero("R","archer",(1,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(r,target)
+        e.start_turn("archer")
+        with self.assertRaisesRegex(ValueError,"Unaware target"):
+            g2.bow_sequence("archer","target",(
+                ShotChoice(primary_face=12,defense="dodge"),))
+        self.assertEqual(r.ammunition,20)
+        self.assertEqual(r.ap_remaining,42)
+
+    def test_24_secondary_natural_one_still_impacts_legal_shield(self):
+        r=hero("R","archer",(1,2))
+        screen=soldier("screen",(5,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(r,screen,target)
+        e.start_turn("archer")
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=8,exposures=(("screen",4),),
+            collateral=(("screen","guard"),),
+            aware_collateral=("screen",),secondary_face=1),))[0]
+        self.assertEqual(out["outcome"],"collateral_guard_impact")
+        self.assertEqual(screen.guard_remaining,1)
+        self.assertEqual(r.ammunition,19)
+        e.check()
+
+    def test_25_interception_moving_aimed_archer_no_stale_bonus(self):
+        # Movement Interception after Aim already starts shot: its aimed
+        # source is gone, but the underlying AP-paid Bow shot still flies.
+        r=hero("R","archer",(1,2))
+        target=hero("B","target",(16,2),"enemy")
+        e,g1,g2=fixture(r,target)
+        e.start_turn("archer")
+        g2.aim("archer","target","range")
+        # Shooter is never permitted to self-trigger a Movement Interception;
+        # instead simulate an independently authored displacement response
+        # through G1's on_position_change hook immediately after the Aim
+        # is consumed, before firing (no phantom MP spend).
+        r.occupied=((2,2),)
+        out=g2.bow_sequence("archer","target",(
+            ShotChoice(primary_face=7,aim_source="range"),))[0]
+        self.assertEqual(out["base_defense"],12)  # Medium +2 remains
+        self.assertEqual(out["outcome"],"ordinary_miss")
+        self.assertEqual(r.ammunition,19)
         e.check()
 
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
