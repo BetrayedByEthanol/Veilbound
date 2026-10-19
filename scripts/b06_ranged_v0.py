@@ -713,6 +713,12 @@ class RangedCombat:
             lane=self.lane(shooter_id,target_id,exposures=sh.exposures,
                            origin=sh.origin_cell,target_cell=sh.target_cell)
             self._screen_sides(shooter_id,target_id,lane,sh.neutral_sides)
+            # A Prone target behind partial cover can either receive its
+            # independently applicable ranged-profile +2 or have that same
+            # smaller silhouette already counted by the chosen Cover tier.
+            # Require the GM decision BEFORE committing sequence AP/defense.
+            self._prone_position(e.actors[target_id],lane.distance,lane.cover,
+                                 sh.prone_cover_policy)
             if sh.defense not in ("take_hit","guard","dodge"):
                 raise ValueError("Invalid intended defense")
             if type(sh.aware_target) is not bool:
