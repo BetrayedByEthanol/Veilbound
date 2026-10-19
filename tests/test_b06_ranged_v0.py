@@ -565,17 +565,92 @@ class G2RangedAcceptance(unittest.TestCase):
 
     def test_34_aim_cannot_swap_hunter_anatomical_point_for_free(self):
         r=hero("R","archer",(1,2))
-        h=hunter(at=((8,2),(7,2)))
+        h=hunter(at=((16,2),(15,2)))
         e,g1,g2=fixture(r,h)
         e.start_turn("archer")
-        g2.aim("archer","hunter","range",target_cell=(8,2))
+        g2.aim("archer","hunter","range",target_cell=(16,2))
         self.assertEqual(r.ap_remaining,22)
         with self.assertRaisesRegex(ValueError,"exact point"):
             g2.bow_sequence("archer","hunter",(ShotChoice(
-                primary_face=20,aim_source="range",target_cell=(7,2)),))
+                primary_face=20,aim_source="range",target_cell=(15,2)),))
         self.assertEqual(r.ammunition,20)
         self.assertEqual(r.ap_remaining,22)
         self.assertIn("archer",g2.aims)
+        e.check()
+
+    def test_35_reject_nonpositive_aim_sources_before_spending_ap(self):
+        r=hero("R","archer",(1,2))
+        t=hero("B","target",(9,2),"enemy") # Short range +0
+        e,g1,g2=fixture(r,t)
+        e.start_turn("archer")
+        initial=(r.ap_remaining,len(e.ledger))
+        for objective in ("range","cover"):
+            with self.subTest(objective=objective):
+                with self.assertRaisesRegex(ValueError,"positive applicable"):
+                    g2.aim("archer","target",objective)
+                self.assertEqual((r.ap_remaining,len(e.ledger)),initial)
+                self.assertNotIn("archer",g2.aims)
+        e.check()
+
+    def test_36_no_conditional_shield_overcommit_across_sequence(self):
+        r=hero("R","archer",(1,2))
+        screen=soldier("screen",(5,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(r,screen,target)
+        e.start_turn("archer")
+        screen.guard_remaining=1 # prior legal Guard in this round
+        spec=ShotChoice(primary_face=8,exposures=(("screen",4),),
+                        collateral=(("screen","guard"),),
+                        aware_collateral=("screen",),secondary_face=2)
+        before=(r.ap_remaining,r.ammunition,screen.guard_remaining,len(e.ledger))
+        with self.assertRaisesRegex(ValueError,"collateral Guard sequence"):
+            g2.bow_sequence("archer","target",(spec,spec))
+        self.assertEqual((r.ap_remaining,r.ammunition,
+                          screen.guard_remaining,len(e.ledger)),before)
+        self.assertNotIn(("archer","target"),e.seen_sequences)
+
+    def test_37_two_selected_conditional_guards_legal_if_capacity_two(self):
+        r=hero("R","archer",(1,2))
+        screen=soldier("screen",(5,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(r,screen,target)
+        e.start_turn("archer")
+        spec=ShotChoice(primary_face=8,exposures=(("screen",4),),
+                        collateral=(("screen","guard"),),
+                        aware_collateral=("screen",),secondary_face=2)
+        out=g2.bow_sequence("archer","target",(spec,spec))
+        self.assertEqual([x["outcome"] for x in out],
+                         ["collateral_guard_impact","collateral_guard_impact"])
+        self.assertEqual(screen.guard_remaining,0)
+        self.assertEqual(r.ammunition,18)
+        self.assertEqual(r.ap_remaining,2)
+        self.assertEqual(len([x for x in e.ledger
+                              if x["kind"]=="g2_conditional_secondary"]),2)
+        e.check()
+
+    def test_38_conditional_guard_lost_preimpact_falls_back_no_fake_guard_charge(self):
+        threat=soldier("threat",(2,3))
+        r=hero("R","archer",(1,2))
+        screen=soldier("screen",(5,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(threat,r,screen,target,score={
+            "threat":40,"archer":30,"screen":20,"target":10})
+        e.start_turn("threat");e.end_turn();e.start_turn("archer")
+        def change_shield(response):
+            screen.ready_guard=False
+            return False
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=8,exposures=(("screen",4),),
+            collateral=(("screen","guard"),),aware_collateral=("screen",),
+            secondary_face=2,
+            opportunities=(Response("threat","opportunity","disarm-screen"),),
+            on_opportunity=change_shield),))[0]
+        self.assertEqual(out["outcome"],"collateral_miss")
+        self.assertEqual(screen.guard_remaining,2) # not physically committed
+        self.assertEqual(screen.dodge_pressure,2) # actual fallback
+        self.assertEqual(len([x for x in e.ledger
+                              if x["kind"]=="g2_collateral_defense_fallback"]),1)
+        self.assertEqual(r.ammunition,19)
         e.check()
 
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
