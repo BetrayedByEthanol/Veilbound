@@ -5,6 +5,7 @@ Tests a derived character ledger, not a probabilistic encounter outcome.
 from pathlib import Path
 import json
 import unittest
+from unittest.mock import patch
 
 from scripts.b05_bow_vanguard_l1_l3_v0 import (
     ABILITIES, ABILITY_COST, GEAR_SP, LEVELS, PRAYERS,
@@ -113,8 +114,9 @@ class BowVanguardBuildTests(unittest.TestCase):
     def test_bow_damage_defense_and_phase3_role_stay_unchanged(self):
         r = ROLE["R"]
         self.assertEqual((r["attack"], r["base"], r["die"], r["pen"],
-                          r["kind"], r["guard"], r["action_ap"],
-                          r["regen"]), (4, 2, 4, 3, "bow", None, 20, 6))
+                          r["kind"], r["guard"], r["guard_extra"],
+                          r["action_ap"], r["regen"]),
+                         (4, 2, 4, 3, "bow", None, 1, 20, 6))
         for level in (2, 3):
             sheet = profile(level)
             self.assertEqual(sheet["bow_attack_bonus"], r["attack"])
@@ -124,7 +126,21 @@ class BowVanguardBuildTests(unittest.TestCase):
             self.assertEqual(sheet["initiative"], r["init"])
             self.assertEqual(sheet["first_dodge"], 14)
             self.assertIsNone(sheet["bow_guard"])
+            # TAL-C05 adds capacity, not an instrument. R must carry
+            # the bonus even though a bow still cannot Guard.
+            self.assertEqual(sheet["normal_guard_capacity"] -
+                             sheet["physical_tempo"], r["guard_extra"])
             self.assertEqual(sheet["ranged_evasion_bonus"], level - 2)
+
+    def test_guard_reserve_compatibility_check_catches_role_regression(self):
+        self.assertEqual(ROLE["R"]["guard_extra"], 1)
+        self.assertIsNone(ROLE["R"]["guard"])
+        self.assertEqual(profile(1)["normal_guard_capacity"], 1)
+        self.assertEqual(profile(2)["normal_guard_capacity"], 2)
+        self.assertEqual(profile(3)["normal_guard_capacity"], 3)
+        with patch.dict(ROLE["R"], {"guard_extra": 0}):
+            with self.assertRaisesRegex(AssertionError, "guard_extra mismatch"):
+                verify()
 
     def test_ap_tradeoffs_aim_and_heal_do_not_create_shots(self):
         for level in LEVELS:
