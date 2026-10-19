@@ -145,8 +145,10 @@ class SpellState:
         a=self._actor(caster)
         if a.source.source_id!="B06-EN-01":
             raise ValueError("Not a Firebound Sentry")
+        if not self._sentry_wielded(a):
+            raise ValueError("Unwielded sword cannot deliver a sword attack")
         active=bool(self.active(caster,"Sentry Sword Reserve"))
-        return "B06-AT-02" if active and self._sentry_wielded(a) else "B06-AT-01"
+        return "B06-AT-02" if active else "B06-AT-01"
 
     def _formula(self,a,secondary):
         if a.source.source_id!="F":
