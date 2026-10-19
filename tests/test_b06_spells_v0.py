@@ -2,7 +2,8 @@
 import unittest
 
 from scripts.b06_encounter_state_v0 import (
-    Encounter, RegenerationChoice, UnresolvedDecision, party_actor, enemy_actor,
+    Encounter, RegenerationChoice, Response, Trigger, UnresolvedDecision,
+    party_actor, enemy_actor,
 )
 from scripts.b06_movement_v0 import GridMovement
 from scripts.b06_ranged_v0 import RangedCombat, CoverSurface
@@ -303,6 +304,115 @@ class B06G3Test(unittest.TestCase):
         f.vigor=0
         self.assertEqual(g.prevent_vigor("caster",8),8)
         self.assertEqual(g.active("caster","Vital Shelter")[0].budget,4)
+        e.check()
+
+    def test_28_standalone_stone_skin_l1_to_l3_reserves_one_third(self):
+        for level in (1,2,3):
+            with self.subTest(level=level):
+                f=pc("F",level)
+                e,g=game(f);e.start_turn("caster")
+                effect=g.cast_stone("caster")
+                self.assertEqual(effect.resistance,2)
+                self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),
+                                 (4*level,2*level,0))
+                self.assertEqual(f.ap_remaining,f.ap_total-20)
+                g.release("caster","Stone Skin")
+                self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),
+                                 (6*level,0,0))
+                e.check()
+
+    def test_29_stone_skin_reaction_only_after_actual_g0_commit(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        trigger=Trigger("incoming-stone","attacker","caster")
+        response=g.prepare_reactive_stone("caster",trigger,perceptible=True)
+        before_ap=f.ap_remaining
+        ok=e.response_window(
+            trigger,on_interception=lambda event,tr,r:None,
+            spontaneous=(response,),
+            on_spontaneous=lambda event,tr,r:g.resolve_reactive_stone(
+                "caster",tr,r))
+        self.assertTrue(ok)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        self.assertEqual(f.ap_remaining,before_ap)
+        self.assertFalse(f.reaction_available)
+        self.assertEqual(g.resistance("caster","Fire"),2)
+        self.assertEqual(spell_events(e,"g3_stone_reacted")[0]["detail"]["ap_debt"],0)
+        with self.assertRaisesRegex(ValueError,"already"):
+            g.cast_stone("caster")
+        e.check()
+
+    def test_30_stone_reaction_preempted_by_interception_no_vp_reaction(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        e.start_turn("attacker")
+        e.reserve("attacker","incoming-stone","cancel",action_kind="physical")
+        e.end_turn()
+        trigger=Trigger("incoming-stone","attacker","caster")
+        response=g.prepare_reactive_stone("caster",trigger,perceptible=True)
+        on_spontaneous=lambda event,tr,r:g.resolve_reactive_stone("caster",tr,r)
+        result=e.response_window(
+            trigger,on_interception=lambda event,tr,r:setattr(tr,"legal",False),
+            spontaneous=(response,),on_spontaneous=on_spontaneous)
+        self.assertFalse(result)
+        self.assertTrue(f.reaction_available)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_31_reactive_stone_cannot_be_cast_using_unguarded_direct_call(self):
+        f=pc("F");e,g=game(f)
+        trig=Trigger("false","attacker","caster")
+        with self.assertRaisesRegex(ValueError,"No unused G0-committed"):
+            g.resolve_reactive_stone(
+                "caster",trig,Response("caster","reaction","g3:reactive_stone"))
+        self.assertEqual(f.vp_committed,0)
+        e.check()
+
+    def test_32_primary_basic_heal_self_does_not_debit_vigor_throughput(self):
+        f=pc("F",3)
+        f.hp=7;f.vigor=20
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        result=g.cast_self_basic_heal("caster",tier=2,die=7,
+                                      hand_available=True)
+        self.assertEqual(result,{"hp_restored":2,"vigor_restored":9,"spent_vp":4})
+        self.assertEqual((f.hp,f.vigor),(9,29))
+        self.assertEqual((f.vp_available,f.vp_spent,f.ap_remaining),(14,4,22))
+        e.check()
+
+    def test_33_low_priest_bow_does_not_automatically_free_heal_hand(self):
+        r=pc("R",3)
+        r.hp=10
+        e,g=game(r);e.start_turn("caster",regen_choice=RegenerationChoice())
+        before=(r.ap_remaining,r.vp_available)
+        with self.assertRaisesRegex(ValueError,"available hand"):
+            g.cast_self_basic_heal("caster",tier=1,die=6)
+        self.assertEqual((r.ap_remaining,r.vp_available),before)
+        heal=g.cast_self_basic_heal("caster",tier=1,die=6,
+                                    hand_available=True)
+        self.assertEqual(heal["hp_restored"],2)
+        self.assertEqual((r.ap_remaining,r.vp_available,r.vp_spent),(12,4,2))
+        e.check()
+
+    def test_34_one_active_stone_skin_instance_cannot_recast(self):
+        f=pc("F");e,g=game(f);e.start_turn("caster")
+        g.cast_stone("caster")
+        before=(f.ap_remaining,f.vp_available,f.vp_committed,len(e.ledger))
+        with self.assertRaisesRegex(ValueError,"One Stone Skin"):
+            g.cast_stone("caster")
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_committed,
+                          len(e.ledger)),before)
+        e.check()
+
+    def test_35_standalone_stone_aborted_after_commit_preserves_vp(self):
+        f=pc("F");e,g=game(f);e.start_turn("caster")
+        def lose_consciousness(event):event.actors["caster"].hp=0
+        outcome=g.cast_stone("caster",on_committed=lose_consciousness)
+        self.assertIsNone(outcome)
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_committed),(22,18,0))
+        self.assertFalse(g.effects)
         e.check()
 
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
