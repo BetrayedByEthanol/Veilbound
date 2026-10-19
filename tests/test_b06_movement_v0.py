@@ -244,7 +244,9 @@ class G1PhysicalAcceptance(unittest.TestCase):
 
     def test_pounce_cutoff_commits_ap_on_first_step_past_eighteen_mp(self):
         h = hunter(at=((2, 2), (1, 2)))
-        prey = hero("prey", (8, 2))
+        prey = hero("prey", (7, 2))
+        # Four severe 6-MP steps reach frontal contact within the actual
+        # 24-MP Charge allowance; the fourth crosses the 18-MP cutoff.
         ground = {(x, 2): "severe" for x in range(1, 9)}
         e, g = scenario(h, prey, terrain=ground)
         e.begin_round()
@@ -358,6 +360,203 @@ class G1PhysicalAcceptance(unittest.TestCase):
         with self.assertRaisesRegex(UnresolvedDecision, "transit|responses"):
             g.move_route("mover", ((1, 0), (1, 0), (1, 0)))
         self.assertEqual((mover.occupied, mover.mp_remaining, len(e.ledger)), baseline)
+
+    def test_review_p1_opportunity_source_moves_away_step_still_commits(self):
+        # Threat is initially a legal responder, then its own saved MP
+        # Interception escapes the mover's pre-step reach. That only drops
+        # its spontaneous Opportunity; the mover's unblocked step proceeds.
+        threat = sentry("threat", at=((3, 2),))
+        mover = hero("mover", (2, 2))
+        e, g = scenario(threat, mover, scores={"threat": 20, "mover": 10})
+        e.begin_round()
+        e.start_turn("threat")
+        key = g.reserve_movement("threat", "mover-leaves", 4, label="withdraw")
+        e.end_turn()
+        e.start_turn("mover")
+        assert g.threatens("threat", (2, 2))
+        self.assertTrue(g.step(
+            "mover", (0, -1), trigger_key="mover-leaves",
+            responses=(Response("threat", "opportunity", "preplanned-offer"),),
+            interceptor_routes={key: ((1, 0), (1, 0))}))
+        self.assertEqual(threat.occupied, ((5, 2),))
+        self.assertEqual(mover.occupied, ((2, 1),))
+        self.assertEqual(mover.mp_remaining, 10)
+        self.assertTrue(threat.reaction_available)
+        self.assertEqual(threat.opportunity_used, 0)
+        kinds = [item["kind"] for item in e.ledger]
+        self.assertIn("g1_opportunity_no_longer_eligible", kinds)
+        self.assertNotIn("g1_movement_opportunity_pending", kinds)
+        self.assertEqual(kinds.count("g1_step_cancelled"), 0)
+        e.check()
+
+    def test_review_p1_post_interception_dynamic_opportunity_selection(self):
+        # A second enemy moves INTO threat position while the original
+        # triggering step remains clear. Post-Interception policy chooses it.
+        scout = hero("scout", (2, 2))
+        approach = sentry("approach", at=((4, 2),))
+        e, g = scenario(approach, scout, scores={"approach": 20, "scout": 10})
+        e.begin_round()
+        e.start_turn("approach")
+        key = g.reserve_movement("approach", "scout-goes", 2,
+                                 label="close-gap")
+        e.end_turn()
+        e.start_turn("scout")
+        # Initial source is 2 squares away and cannot declare an Opportunity.
+        self.assertFalse(g.threatens("approach", (2, 2)))
+        selected_from = []
+        def choose(eligible):
+            selected_from.append(tuple(eligible))
+            return (Response("approach", "opportunity", "post-interception"),
+                    ) if "approach" in eligible else ()
+        self.assertTrue(g.step(
+            "scout", (0, -1), trigger_key="scout-goes", responses=choose,
+            interceptor_routes={key: ((-1, 0),)}))
+        self.assertEqual(selected_from, [("approach",)])
+        self.assertFalse(approach.reaction_available)
+        self.assertEqual(approach.opportunity_used, 1)
+        self.assertEqual(scout.occupied, ((2, 1),))
+        self.assertEqual([x["kind"] for x in e.ledger].count(
+            "g1_movement_opportunity_pending"), 1)
+        e.check()
+
+    def test_review_p1_rejected_bite_reservation_route_completes_paid_window(self):
+        for route, expected, spent in (
+                (((0, -1),), True, 0),
+                (((1, 0), (0, -1)), False, 2)):
+            with self.subTest(route=route):
+                prey = hero("prey", (6, 2))
+                h = hunter()
+                # Illegal first step is the blocked north cell; illegal
+                # second step follows one valid displacement east.
+                walls = ((6, 1), (7, 1))
+                e, g = scenario(prey, h, scores={"prey": 20, "hunter": 10},
+                                walls=walls)
+                e.begin_round()
+                e.start_turn("prey")
+                key = g.reserve_movement("prey", "bite-commit", 4,
+                                         label="attempt-escape")
+                e.end_turn()
+                e.start_turn("hunter")
+                g.start_pounce("hunter", "prey")
+                for _ in range(3):
+                    self.assertTrue(g.step("hunter", (1, 0)))
+                self.assertEqual(h.ap_remaining, 42)
+                self.assertEqual(g.pounce.steps, 3)
+                self.assertEqual(g.pounce.committed, False)
+                result = g.pounce_contact(
+                    defense="take_hit", trigger_key="bite-commit",
+                    interceptor_routes={key: route})
+                self.assertIs(result, expected)
+                self.assertEqual(h.ap_remaining, 18)
+                self.assertIsNone(g.pounce)
+                self.assertNotIn(key, g.motion)
+                self.assertIn(("hunter", "prey"), e.seen_sequences)
+                self.assertEqual(sum(ev["kind"] == "g1_pounce_bite_committed"
+                                     for ev in e.ledger), 1)
+                rejected = [ev for ev in e.ledger
+                            if ev["kind"] == "g1_interception_route_rejected"]
+                self.assertEqual(len(rejected), 1)
+                self.assertEqual(rejected[0]["detail"]["spent_mp"], spent)
+                self.assertEqual([ev["kind"] for ev in e.ledger].count(
+                    "g1_pounce_contact_result"), 1)
+                self.assertEqual(prey.vp_available, prey.vp_max)
+                e.check()
+
+    def test_review_p2_internal_pounce_ap_cannot_be_label_spoofed(self):
+        h = hunter()
+        prey = hero("prey", (6, 2))
+        e, g = scenario(h, prey)
+        e.begin_round()
+        e.start_turn("hunter")
+        g.start_pounce("hunter", "prey")
+        before = (h.ap_remaining, len(e.ledger), g.segment["hunter"])
+        for label in ("g1:pounce:anything", "g1:pounce:cutoff",
+                      "g1:pounce:bite"):
+            with self.subTest(label=label):
+                with self.assertRaisesRegex(ValueError, "Complete or abort active Pounce"):
+                    e.spend_ap("hunter", "physical", label=label)
+                self.assertEqual((h.ap_remaining, len(e.ledger),
+                                  g.segment["hunter"]), before)
+        for _ in range(3):
+            self.assertTrue(g.step("hunter", (1, 0)))
+        self.assertTrue(g.pounce_contact())
+        self.assertEqual(h.ap_remaining, 18)
+        self.assertFalse(g._internal_pounce_spend)
+        e.check()
+
+    def test_review_p2_invalid_initial_pounce_approaches_atomic(self):
+        layouts = (
+            ((0, 2), ()),          # target behind body
+            ((6, 3), ()),          # off fixed heading
+            ((11, 2), ()),         # beyond map/24 MP? outside 24 normal not;
+            ((6, 2), ((4, 2),)),   # solid wall in the body's exact lane
+            ((6, 2), ((3, 1),)),   # harmless adjacent wall is not a blocker
+        )
+        for prey_at, walls in layouts:
+            if prey_at == (6, 2) and walls == ((3, 1),):
+                continue
+            with self.subTest(prey=prey_at, walls=walls):
+                h = hunter()
+                prey = hero("prey", prey_at)
+                e, g = scenario(h, prey, walls=walls, w=16)
+                e.begin_round()
+                e.start_turn("hunter")
+                initial = (h.occupied, h.mp_remaining, h.ap_remaining,
+                           len(e.ledger))
+                with self.assertRaisesRegex(ValueError, "Pounce"):
+                    g.start_pounce("hunter", "prey")
+                self.assertEqual((h.occupied, h.mp_remaining, h.ap_remaining,
+                                  len(e.ledger)), initial)
+                self.assertIsNone(g.pounce)
+        # Within width but >24 orthogonal MP, cannot borrow unlimited
+        # Charge allowance or count inaccessible squares as a run-up.
+        h = hunter()
+        prey = hero("prey", (15, 2))
+        e, g = scenario(h, prey, w=20)
+        e.begin_round()
+        e.start_turn("hunter")
+        with self.assertRaisesRegex(ValueError, "24-MP"):
+            g.start_pounce("hunter", "prey")
+        self.assertEqual(h.mp_remaining, 12)
+        self.assertIsNone(g.pounce)
+
+    def test_review_p2_retarg_to_other_front_pc_before_defense(self):
+        original = hero("original", (6, 2))
+        replacement = hero("replacement", (6, 3), role="B")
+        h = hunter()
+        e, g = scenario(original, replacement, h,
+                        scores={"original": 30, "replacement": 20, "hunter": 10})
+        e.begin_round()
+        e.start_turn("original")
+        old_key = g.reserve_movement("original", "front-shift", 2,
+                                     label="retreat-east")
+        e.end_turn()
+        e.start_turn("replacement")
+        new_key = g.reserve_movement("replacement", "front-shift", 2,
+                                     label="fill-front")
+        e.end_turn()
+        e.start_turn("hunter")
+        self.assertEqual(g.start_pounce("hunter", "original"), (1, 0))
+        self.assertTrue(g.step("hunter", (1, 0)))
+        self.assertTrue(g.step("hunter", (1, 0)))
+        self.assertTrue(g.step("hunter", (1, 0), trigger_key="front-shift",
+                    interceptor_routes={
+                        old_key: ((1, 0),),
+                        new_key: ((0, -1),),
+                    }))
+        self.assertEqual(original.occupied, ((7, 2),))
+        self.assertEqual(replacement.occupied, ((6, 2),))
+        self.assertTrue(g.melee_contact("hunter", "replacement", hunter_front=True))
+        self.assertFalse(g.melee_contact("hunter", "original", hunter_front=True))
+        self.assertTrue(g.pounce_contact(
+            final_target_id="replacement", defense="guard"))
+        self.assertIn(("hunter", "replacement"), e.seen_sequences)
+        self.assertNotIn(("hunter", "original"), e.seen_sequences)
+        changed = [ev for ev in e.ledger if ev["kind"] == "g1_pounce_retargeted"]
+        self.assertEqual(len(changed), 1)
+        self.assertEqual(changed[0]["detail"]["final_target"], "replacement")
+        self.assertEqual(h.ap_remaining, 18)
+        e.check()
 
     def test_expired_mp_reservation_never_releases_next_turn(self):
         a = sentry("a", at=((1, 1),))
