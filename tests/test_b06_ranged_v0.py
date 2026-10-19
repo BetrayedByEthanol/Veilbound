@@ -244,7 +244,7 @@ class G2RangedAcceptance(unittest.TestCase):
         e,g1,g2=fixture(r,enemy,target)
         e.start_turn("archer")
         out=g2.bow_sequence("archer","target",(ShotChoice(
-            primary_face=4,exposures=(("screen",4),),
+            primary_face=8,exposures=(("screen",4),),
             collateral=(("screen","guard"),),secondary_face=2),))[0]
         self.assertEqual(out["outcome"],"collateral_guard_impact")
         self.assertEqual(enemy.guard_remaining,1)
