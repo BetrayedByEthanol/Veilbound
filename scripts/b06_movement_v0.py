@@ -643,51 +643,68 @@ class GridMovement:
         self.e.log("g1_pounce_bite_committed", hunter=a.id, target=t.id,
                    profile="B06-AT-06", ap_spent=24,
                    translated_steps=run.steps, cost_mp=run.spent_mp)
-        self.e.defense(t.id, defense, attack_key=f"G1-pounce:{a.id}:{t.id}")
-        trig = Trigger(trigger_key or f"g1:pounce:bite:{len(self.e.ledger)}", a.id, t.id)
-        initial_target = t.occupied
-        def intercept(e, tr, r):
-            entry = self.motion.pop(r.label, None)
-            if entry is None:
-                raise UnresolvedDecision("Pounce attack-action Interception needs G3 resolver")
-            for delta in (interceptor_routes or {}).get(r.label, ()):
-                try:
-                    self._movement(entry.actor_id, delta=tuple(delta), reserved=entry,
-                                   trigger_key=f"{tr.key}:intercept:{entry.steps}")
-                except (ValueError, UnresolvedDecision) as error:
-                    # Route errors do not unwind a previously paid Bite,
-                    # defense or sequence lock. The released reservation
-                    # forfeits its unused MP, then the Bite recheck continues.
-                    e.log("g1_interception_route_rejected", actor=entry.actor_id,
-                          label=entry.label, reason=str(error),
-                          spent_mp=entry.spent_mp)
-                    break
-            e.log("g1_movement_interception_resolved", actor=entry.actor_id,
-                  label=entry.label, committed_mp=entry.reserved_mp,
-                  consumed_mp=entry.spent_mp, completed_steps=entry.steps)
-            if not self.melee_contact(a.id, t.id, hunter_front=True):
-                tr.legal = False
-        def react(e, tr, c):
-            e.log("g1_pounce_reaction_pending", actor=c.actor_id, trigger=tr.key,
-                  outcome="G3/G5_action_unresolved")
-            if on_response:
-                on_response(e, tr, c)
-        ok = self.e.response_window(
-            trig, on_interception=intercept,
-            spontaneous=tuple(responses), on_spontaneous=react if responses else None)
-        valid = bool(ok and t.occupied == initial_target and
-                     self.melee_contact(a.id, t.id, hunter_front=True)
-                     and a.hp > 0 and not a.dead)
-        self.e.log("g1_pounce_contact_result", hunter=a.id, target=t.id,
-                   legal_after_responses=valid,
-                   bite="one_paid_Bite_pending_G5" if valid else "cancelled",
-                   balance=("conditional_after_Bite_resolution_G5"
-                            if valid else "not_applicable"))
-        # No roll, damage, poison, condition or forced Prone before G4/G5.
-        a.mp_remaining = 0
-        self.pounce = None
-        self.e.check()
-        return valid
+        # Costs, target and pre-roll defense are already committed. If
+        # response validation or a caller effect fails after this point,
+        # close the Pounce exactly once without fabricating a Bite result.
+        # A pre-commit check alone is insufficient: Interceptions may
+        # change the validity of an otherwise stale spontaneous offer.
+        try:
+            self.e.defense(t.id, defense, attack_key=f"G1-pounce:{a.id}:{t.id}")
+            trig = Trigger(trigger_key or f"g1:pounce:bite:{len(self.e.ledger)}", a.id, t.id)
+            initial_target = t.occupied
+            def intercept(e, tr, r):
+                entry = self.motion.pop(r.label, None)
+                if entry is None:
+                    raise UnresolvedDecision("Pounce attack-action Interception needs G3 resolver")
+                for delta in (interceptor_routes or {}).get(r.label, ()):
+                    try:
+                        self._movement(entry.actor_id, delta=tuple(delta), reserved=entry,
+                                       trigger_key=f"{tr.key}:intercept:{entry.steps}")
+                    except (ValueError, UnresolvedDecision) as error:
+                        # Route errors do not unwind a previously paid Bite,
+                        # defense or sequence lock. The released reservation
+                        # forfeits its unused MP, then the Bite recheck continues.
+                        e.log("g1_interception_route_rejected", actor=entry.actor_id,
+                              label=entry.label, reason=str(error),
+                              spent_mp=entry.spent_mp)
+                        break
+                e.log("g1_movement_interception_resolved", actor=entry.actor_id,
+                      label=entry.label, committed_mp=entry.reserved_mp,
+                      consumed_mp=entry.spent_mp, completed_steps=entry.steps)
+                if not self.melee_contact(a.id, t.id, hunter_front=True):
+                    tr.legal = False
+            def react(e, tr, c):
+                e.log("g1_pounce_reaction_pending", actor=c.actor_id, trigger=tr.key,
+                      outcome="G3/G5_action_unresolved")
+                if on_response:
+                    on_response(e, tr, c)
+            ok = self.e.response_window(
+                trig, on_interception=intercept,
+                spontaneous=tuple(responses), on_spontaneous=react if responses else None)
+            valid = bool(ok and t.occupied == initial_target and
+                         self.melee_contact(a.id, t.id, hunter_front=True)
+                         and a.hp > 0 and not a.dead)
+        except Exception as error:
+            self.e.log("g1_pounce_contact_result", hunter=a.id, target=t.id,
+                       legal_after_responses=None,
+                       bite="unresolved_response_window_G1",
+                       balance="not_adjudicated",
+                       response_error=f"{type(error).__name__}: {error}")
+            raise
+        else:
+            self.e.log("g1_pounce_contact_result", hunter=a.id, target=t.id,
+                       legal_after_responses=valid,
+                       bite="one_paid_Bite_pending_G5" if valid else "cancelled",
+                       balance=("conditional_after_Bite_resolution_G5"
+                                if valid else "not_applicable"))
+            return valid
+        finally:
+            # Spent AP, committed defense and sequence lock are never
+            # refunded. An invalid policy must not leave Charge active,
+            # duplicate a Bite on retry, or prevent ordinary turn cleanup.
+            a.mp_remaining = 0
+            self.pounce = None
+            self.e.check()
 
     def pounce_abort(self):
         run = self.pounce
