@@ -205,7 +205,9 @@ class G0LedgerTests(unittest.TestCase):
         e3.start_turn("soldier", regen_choice=RegenerationChoice(cancel_dying_loss=True,
                                                                  repair=1))
         self.assertEqual((d.hp, d.vigor, d.wounds[0].progress), (0, 34, 1))
-        self.assertEqual(e3.ledger[-2]["detail"]["survival_cancelled"], True)
+        regen_event = next(x for x in e3.ledger if x["kind"] == "regeneration_step")
+        self.assertTrue(regen_event["detail"]["survival_cancelled"])
+        self.assertEqual(regen_event["detail"]["throughput_spent"], 2)
         z = soldier()
         z.hp, z.vigor = 0, 0
         e4 = scene(z)
