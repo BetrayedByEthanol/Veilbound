@@ -574,7 +574,7 @@ class B06G3Test(unittest.TestCase):
 
     def test_47_guard_invalidated_after_ap_loses_no_flame_vp_or_guard_capacity(self):
         f=pc("F")
-        target=sentry("cold_start","target",(4,2))
+        target=enemy_actor("B06-EN-02","target","enemy",occupied=((4,2),))
         e,g=game(f,target);e.start_turn("caster")
         before=target.guard_remaining
         def lose_shield(state):
