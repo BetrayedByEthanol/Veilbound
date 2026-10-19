@@ -32,6 +32,10 @@ class ShotChoice:
     # Conditional declared personal defenses for exposed creatures.
     collateral: tuple = ()
     secondary_face: int | None = None
+    # Active defenses require actual awareness of the incoming projectile.
+    # Unaware collateral/target may only use passive static Take Hit.
+    aware_target: bool = False
+    aware_collateral: tuple = ()
     aim_source: str | None = None
     trigger_key: str | None = None
     opportunities: tuple = ()
@@ -294,8 +298,9 @@ class RangedCombat:
                 else:
                     mitigation=min(4,screens[selected])
                     screens[selected]-=mitigation
-        elif source is not None:
-            raise ValueError("No matching active Aim")
+        # The matching Aim was prevalidated before Attack AP commitment.
+        # A legal prelaunch displacement can spoil its firing position
+        # without invalidating the separately committed ordinary shot.
         return range_difficulty,cover,screens,mitigation
 
     @staticmethod
@@ -431,8 +436,16 @@ class RangedCombat:
             e.log("g2_bow_no_launch",shooter=shooter_id,target=target_id,
                   trigger=key,reason=str(err),ammunition_spent=0)
             return {"outcome":"illegal_after_commit"}
-        if shooter.ammunition<1:
-            raise UnresolvedDecision("Committed bow sequence lacks remaining physical arrows")
+        # Re-evaluate launch prerequisites after all response effects. A
+        # real Disarm/incapacitation or lost last arrow prevents launch,
+        # but never refunds the already committed Physical Action.
+        if (shooter.dead or shooter.hp<=0
+                or "Bow" not in self.wielded[shooter_id]
+                or shooter.ammunition<1):
+            e.log("g2_bow_no_launch",shooter=shooter_id,target=target_id,
+                  trigger=key,reason="shooter_or_bow_no_longer_ready",
+                  ammunition_spent=0)
+            return {"outcome":"illegal_after_commit"}
         screen_tiers={sid:l for sid,l,_ in lane.screens}
         range_mod,cover,screens,mitigation=self._aim_reduce(
             shooter_id,target_id,shot.aim_source,lane.range_difficulty,
@@ -493,7 +506,7 @@ class RangedCombat:
                     if sec!=1 and sec+bonus>cd:
                         outcome="collateral_hit_pending_G5"
                         struck=incidental
-                    elif declaration=="guard" and sec!=1:
+                    elif declaration=="guard":
                         outcome="collateral_guard_impact"
                         struck=None
                     else:
@@ -563,15 +576,25 @@ class RangedCombat:
             lane=self.lane(shooter_id,target_id,exposures=sh.exposures)
             if sh.defense not in ("take_hit","guard","dodge"):
                 raise ValueError("Invalid intended defense")
+            if type(sh.aware_target) is not bool:
+                raise ValueError("Intended-target awareness must be explicitly boolean")
+            if not sh.aware_target and sh.defense != "take_hit":
+                raise ValueError("Unaware target cannot spontaneously Dodge or Guard")
             if sh.defense=="guard":
                 self._defense_value(e.actors[target_id],"guard",0,0)
             if sh.defense=="dodge" and e.actors[target_id].hp<=0:
                 raise ValueError("Dying target cannot Dodge")
-            if set(dict(sh.collateral))!=set(sid for sid,_,_ in lane.screens):
-                raise UnresolvedDecision("Every eligible incidental creature needs predeclared personal defense")
+            if (len(dict(sh.collateral))!=len(sh.collateral) or
+                    set(dict(sh.collateral))!=set(sid for sid,_,_ in lane.screens)):
+                raise UnresolvedDecision("Every eligible incidental creature needs one predeclared personal defense")
+            if len(set(sh.aware_collateral))!=len(sh.aware_collateral) or any(
+                    name not in dict(sh.collateral) for name in sh.aware_collateral):
+                raise ValueError("Awareness evidence must refer to a unique declared screen")
             for incidental,choice in sh.collateral:
                 if choice not in ("take_hit","dodge","guard"):
                     raise ValueError("Invalid conditional defense")
+                if incidental not in sh.aware_collateral and choice!="take_hit":
+                    raise ValueError("Unaware screen cannot spontaneously Dodge or Guard")
                 self._defense_value(e.actors[incidental],choice,0,0)
             if sh.opportunities and sh.on_opportunity is None:
                 raise UnresolvedDecision("Threatened bow Opportunity requires explicit attack outcome policy")
