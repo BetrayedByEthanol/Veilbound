@@ -11,6 +11,58 @@ from scripts.b06_hunter_phase3_report_v0 import (
 
 
 class Phase3ReportTests(unittest.TestCase):
+    def test_boolean_substitutions_are_not_numeric_census_counts(self):
+        # One-seed true counts compare equal to True in Python. Neither
+        # replay equality nor isinstance(value, int) is type-strict enough.
+        valid = build_report(seeds=1)
+        lane_index = next(
+            i for i, row in enumerate(valid["cases"])
+            if row["lane_disrupted_trials"] == 1)
+        for field, expected_message in (
+                ("trials", "Terminal conservation"),
+                ("lane_disrupted_trials", "Invalid counter"),
+                ("terminal", "Terminal conservation")):
+            with self.subTest(field=field):
+                rows = copy.deepcopy(valid["cases"])
+                if field == "terminal":
+                    stop = next(k for k, v in rows[lane_index]["terminal"].items()
+                                if v == 1)
+                    rows[lane_index]["terminal"][stop] = True
+                else:
+                    rows[lane_index][field] = True
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(AssertionError, expected_message):
+                        build_report(seeds=1)
+        # False == 0 must also be rejected; zero counts are integers.
+        zero_index = next(
+            i for i, row in enumerate(valid["cases"])
+            if row["front_caster_approach_mp"] == 0)
+        rows = copy.deepcopy(valid["cases"])
+        rows[zero_index]["front_caster_approach_mp"] = False
+        with patch("scripts.b06_hunter_phase3_report_v0.census",
+                   return_value=rows):
+            with self.assertRaisesRegex(AssertionError, "Invalid counter"):
+                build_report(seeds=1)
+
+    def test_census_rows_reject_extra_and_missing_aggregate_fields(self):
+        valid = build_report(seeds=1)
+        for mutation in ("extra_integer", "extra_boolean", "missing"):
+            with self.subTest(mutation=mutation):
+                rows = copy.deepcopy(valid["cases"])
+                row = rows[0]
+                if mutation == "extra_integer":
+                    row["unreplayed_packet_count"] = 99
+                elif mutation == "extra_boolean":
+                    row["unreplayed_flag"] = True
+                else:
+                    del row["arrows_fired"]
+                with patch("scripts.b06_hunter_phase3_report_v0.census",
+                           return_value=rows):
+                    with self.assertRaisesRegex(
+                            AssertionError, "Unexpected census fields"):
+                        build_report(seeds=1)
+
     def test_reproducible_small_census_and_sha(self):
         a = build_report(seeds=3)
         b = build_report(seeds=3)
