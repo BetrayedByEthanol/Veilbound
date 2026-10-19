@@ -65,6 +65,15 @@ class GridMovement:
         for actor in encounter.actors.values():
             if not self.valid_footprint(actor, actor.occupied):
                 raise ValueError("Invalid initial G1 actor placement")
+            if len(actor.occupied) not in (1, 2):
+                raise UnresolvedDecision("G1 map only supports 1x1 and straight 1x2")
+            if len(actor.occupied) == 2:
+                if (actor.footprint != ("head", "rear")
+                        or actor.source.source_id != "B06-EN-03"):
+                    raise UnresolvedDecision("Unspecified 1x2 body geometry")
+                head, rear = actor.occupied
+                if (head[0]-rear[0], head[1]-rear[1]) not in HEADINGS:
+                    raise ValueError("Hunter head/rear must be cardinally adjacent")
         self.segment = {a: 0 for a in encounter.actors}
         self.provoked = {a: set() for a in encounter.actors}
         self.motion = {}
@@ -120,19 +129,20 @@ class GridMovement:
                  for c in a.occupied for d in AROUND
                  if (c[0]+d[0], c[1]+d[1]) not in a.occupied }
 
-    def threatens(self, actor_id, at):
-        a = self.e.actors[actor_id]
+    @staticmethod
+    def _can_melee(a):
         if a.dead or a.hp <= 0:
             return False
-        gear = dict(a.source.equipment)
-        melee = (a.source.source_id == "B06-EN-03"
-                 or any((state is True or state == "wielded") and any(
-                     term in name.lower()
-                     for term in ("sword", "mace", "dagger", "axe", "spear", "club"))
-                     for name, state in gear.items()))
-        if not melee:
-            return False
-        return at in self.reach(actor_id)
+        if a.source.source_id == "B06-EN-03":
+            return True  # Hunter-natural Bite and Horn are source-authored.
+        return any((state is True or state == "wielded") and any(
+            term in name.lower()
+            for term in ("sword", "mace", "dagger", "axe", "spear", "club"))
+            for name, state in a.source.equipment)
+
+    def threatens(self, actor_id, at):
+        a = self.e.actors[actor_id]
+        return self._can_melee(a) and at in self.reach(actor_id)
 
     def melee_contact(self, attacker_id, target_id, *, hunter_front=False):
         a, t = self.e.actors[attacker_id], self.e.actors[target_id]
@@ -142,7 +152,7 @@ class GridMovement:
             return (a.source.source_id == "B06-EN-03"
                     and len(t.occupied) == 1
                     and self.front(attacker_id) == t.occupied[0])
-        return bool(self.reach(attacker_id).intersection(t.occupied))
+        return self._can_melee(a) and bool(self.reach(attacker_id).intersection(t.occupied))
 
     def preview(self, actor_id, *, delta=None, pivot=None, clockwise=None,
                 cautious=False, reserved=False, ally_transit=False):
