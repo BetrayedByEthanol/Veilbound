@@ -799,6 +799,54 @@ class B06G3Test(unittest.TestCase):
         self.assertFalse(g.effects)
         e.check()
 
+    def test_57_prior_spontaneous_cancels_trigger_after_both_reactions_paid(self):
+        interrupter=pc("A",3,"interrupter",(4,3),"enemy")
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(interrupter,attacker,f)
+        trigger=Trigger("previous-response-cancel","attacker","caster")
+        stone=g.prepare_reactive_stone("caster",trigger,perceptible=True)
+        first=Response("interrupter","reaction","preempt-original-trigger")
+        resolved=[]
+        before=(f.vp_available,f.vp_committed,f.vp_spent,
+                interrupter.reaction_available,f.reaction_available)
+        def on_spontaneous(state,tr,response):
+            # G0 reserves BOTH Reactions before resolving by initiative.
+            self.assertFalse(f.reaction_available)
+            self.assertFalse(interrupter.reaction_available)
+            if response is first:
+                tr.legal=False
+                resolved.append("cancelled_by_earlier_response")
+            else:
+                self.assertTrue(state.is_live_spontaneous(trigger,stone))
+                resolved.append(g.resolve_reactive_stone("caster",tr,response))
+        self.assertFalse(e.response_window(
+            trigger,on_interception=lambda state,tr,res:None,
+            spontaneous=(stone,first),on_spontaneous=on_spontaneous))
+        self.assertEqual(resolved,["cancelled_by_earlier_response",None])
+        self.assertEqual(before[:3],(18,0,0))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(f.reaction_available)
+        self.assertFalse(interrupter.reaction_available)
+        self.assertEqual(g.reactive_stone_claims,{})
+        self.assertIn(("caster",trigger.key),g.reactive_stone_claimed)
+        self.assertFalse(g.effects)
+        self.assertFalse(spell_events(e,"g3_stone_reacted"))
+        ended=spell_events(e,"g3_cast_interrupted")
+        self.assertEqual(len(ended),1)
+        self.assertEqual(ended[0]["detail"]["cause"],"post_commit_trigger_cancelled")
+        self.assertEqual(ended[0]["detail"]["vp_spent"],0)
+        self.assertEqual([x["detail"]["legal"] for x in
+                          spell_events(e,"trigger_rechecked_after_responses")],[False])
+        self.assertEqual(len(spell_events(e,"trigger_cancelled_after_spontaneous")),1)
+        self.assertFalse(spell_events(e,"trigger_ready_to_resolve"))
+        self.assertFalse(e.is_live_spontaneous(trigger,stone))
+        # The cancelled claim cannot later be reused, including from
+        # another allegedly current response window with the same key.
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
+            g.resolve_reactive_stone("caster",trigger,stone)
+        e.check()
+
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
         f=pc("F");t=pc("R",3,"target",(3,2),"enemy")
         e,g=game(f,t);e.start_turn("caster")
