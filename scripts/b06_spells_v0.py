@@ -259,14 +259,25 @@ class SpellState:
         return response
 
     def resolve_reactive_stone(self,caster,trigger,response):
-        """Only after G0 has *actually* committed this labeled Reaction."""
-        a=self._actor(caster)
+        """Resolve exactly once INSIDE the matching live G0 response callback.
+
+        All G0 spontaneous capacities are committed before any callback.
+        Another higher-initiative response may incapacitate this caster
+        after declaration; that loses the Reaction but not any VP.
+        """
+        a=self.e.actors.get(caster)
         token=(caster,trigger.key)
         claim=self.reactive_stone_claims.get(token)
-        if (claim is None or claim[0] is not trigger or claim[1]!=response
-                or trigger.target_id!=caster or not trigger.legal
-                or a.source.source_id!="F"):
+        if (a is None or claim is None or claim[0] is not trigger
+                or claim[1] is not response or trigger.target_id!=caster
+                or not trigger.legal or a.source.source_id!="F"):
             raise ValueError("No matching preflight claim for exact trigger")
+        # Ledger history establishes past commitment, not pre-damage
+        # timing. This scoped G0 capability exists ONLY while that exact
+        # response's on_spontaneous callback is being executed, and is
+        # restored/cleared by G0 even on exceptions or nested windows.
+        if not self.e.is_live_spontaneous(trigger,response):
+            raise ValueError("Reactive Stone Skin requires its live response callback")
         proof=any(event["kind"]=="spontaneous_committed" and
                   event["detail"].get("trigger")==trigger.key and
                   event["detail"].get("actor")==caster and
@@ -275,11 +286,19 @@ class SpellState:
                   for event in self.e.ledger)
         if not proof or token in self.reactive_stone_claimed or a.reaction_available:
             raise ValueError("No unused G0-committed matching Reaction")
+        # The Reaction has already been paid by G0. Consume authorization
+        # before evaluating the now-live actor, including interrupted casts.
         self.reactive_stone_claimed.add(token)
         del self.reactive_stone_claims[token]
+        if a.hp<=0 or a.dead:
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Reactive Stone Skin",trigger=trigger.key,
+                       cause="post_commit_incapacitated",vp_spent=0)
+            return None
         if self.active(caster,"Stone Skin") or a.vp_available<(a.vp_max+2)//3:
-            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Reactive Stone Skin",
-                       trigger=trigger.key)
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Reactive Stone Skin",trigger=trigger.key,
+                       cause="source_or_vp_no_longer_available",vp_spent=0)
             return None
         reserve=(a.vp_max+2)//3
         self._pay(caster,0,reserve,label="g3:reactive_stone:"+trigger.key)
