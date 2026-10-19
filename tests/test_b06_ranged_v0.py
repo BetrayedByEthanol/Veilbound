@@ -653,6 +653,97 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertEqual(r.ammunition,19)
         e.check()
 
+    def test_39_screen_departing_lane_no_longer_blocks_valid_shot(self):
+        screen=soldier("screen",(5,2))
+        r=hero("R","archer",(1,2))
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(screen,r,target,score={
+            "screen":30,"archer":20,"target":10})
+        e.start_turn("screen")
+        key=g1.reserve_movement("screen","screen-steps-aside",2,label="step-aside")
+        e.end_turn()
+        e.start_turn("archer")
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=15,exposures=(("screen",4),),
+            collateral=(("screen","take_hit"),),
+            trigger_key="screen-steps-aside",
+            interceptor_routes={key:((0,1),)}),))[0]
+        self.assertEqual(screen.occupied,((5,3),))
+        self.assertEqual(out["outcome"],"intended_hit_pending_G5")
+        self.assertEqual(r.ammunition,19)
+        self.assertEqual(r.ap_remaining,22)
+        self.assertEqual(out["final_defense"],10)
+        self.assertEqual(len([v for v in e.ledger
+                              if v["kind"]=="g2_conditional_secondary"]),0)
+        e.check()
+
+    def test_40_hunter_head_moves_during_interception_stable_target_identity(self):
+        h=hunter(at=((7,2),(6,2)))
+        r=hero("R","archer",(1,2))
+        e,g1,g2=fixture(h,r,score={"hunter":20,"archer":10})
+        e.start_turn("hunter")
+        key=g1.reserve_movement("hunter","hunter-moves",2,label="head-forward")
+        e.end_turn()
+        e.start_turn("archer")
+        out=g2.bow_sequence("archer","hunter",(ShotChoice(
+            primary_face=6,target_cell=(7,2),
+            trigger_key="hunter-moves",
+            interceptor_routes={key:((1,0),)}),))[0]
+        self.assertEqual(h.occupied,((8,2),(7,2)))
+        self.assertEqual(g1.body_cell("hunter","head"),(8,2))
+        self.assertEqual(out["outcome"],"ordinary_miss")
+        self.assertEqual(out["base_defense"],10) # head now Short, not Close
+        self.assertEqual(r.ammunition,19)
+        e.check()
+
+    def test_41_prone_static_ranged_position_plus_two_at_three_squares(self):
+        r=hero("R","archer",(1,2))
+        target=hero("B","target",(9,2),"enemy")
+        target.conditions.append("Prone")
+        e,g1,g2=fixture(r,target)
+        e.start_turn("archer")
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            defense="take_hit",primary_face=8),))[0]
+        self.assertEqual(out["outcome"],"ordinary_miss")
+        self.assertEqual((out["base_defense"],out["final_defense"]),(12,12))
+        self.assertEqual(out["scatter_margin"],0)
+        e.check()
+
+    def test_42_prone_incidental_defense_changes_same_arrow_accuracy(self):
+        r=hero("R","archer",(1,2))
+        screen=soldier("screen",(4,2))
+        screen.conditions.append("Prone")
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(r,screen,target)
+        e.start_turn("archer")
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=8,exposures=(("screen",4),),
+            collateral=(("screen","take_hit"),),secondary_face=6),))[0]
+        self.assertEqual(out["outcome"],"collateral_miss")
+        incidental=[x for x in e.ledger
+                    if x["kind"]=="g2_conditional_secondary"][0]["detail"]
+        self.assertEqual(incidental["defense_value"],10) # 10-2 Close+2 Prone
+        self.assertEqual(r.ammunition,19)
+        e.check()
+
+    def test_43_prone_with_cover_requires_explicit_nonduplicate_policy(self):
+        r=hero("R","archer",(1,2))
+        target=hero("B","target",(9,2),"enemy")
+        target.conditions.append("Prone")
+        e,g1,g2=fixture(r,target,cover=(CoverSurface((5,2),4,(1,0)),))
+        e.start_turn("archer")
+        before=(r.ap_remaining,r.ammunition,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"Prone plus Cover"):
+            g2.bow_sequence("archer","target",(ShotChoice(primary_face=8),))
+        self.assertEqual((r.ap_remaining,r.ammunition,len(e.ledger)),before)
+        self.assertNotIn(("archer","target"),e.seen_sequences)
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=8,
+            prone_cover_policy=(("target","absorbed"),)),))[0]
+        self.assertEqual((out["base_defense"],out["final_defense"]),(10,14))
+        self.assertEqual(out["outcome"],"cover_impact")
+        e.check()
+
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
         r=hero("R","archer",(1,2))
         t=hero("B","target",(9,2),"enemy")
