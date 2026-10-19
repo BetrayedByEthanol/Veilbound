@@ -209,6 +209,13 @@ class G0LedgerTests(unittest.TestCase):
         e2.start_turn("soldier", regen_choice=RegenerationChoice(hp=1, repair=1))
         self.assertEqual((s2.hp, s2.vigor, s2.wounds[0].progress), (8, 34, 3))
         self.assertIn("turn_resources", [x["kind"] for x in e2.ledger])
+        e2_kinds = [x["kind"] for x in e2.ledger]
+        self.assertLess(e2_kinds.index("turn_start_expiry"),
+                        e2_kinds.index("regeneration_step"))
+        e2.end_turn()
+        e2.begin_round()
+        e2.start_turn("soldier", regen_choice=RegenerationChoice(hp=1, repair=1))
+        self.assertEqual((s2.hp, s2.vigor, s2.wounds[0].progress), (9, 32, 4))
         e2.end_turn()
         d = soldier()
         d.hp = 0
@@ -229,6 +236,23 @@ class G0LedgerTests(unittest.TestCase):
         self.assertEqual((z.hp, z.vigor), (-1, 0))
         for x in (e2, e3, e4):
             x.check()
+
+    def test_non_dying_multiple_wound_allocation_requires_policy(self):
+        a = soldier()
+        a.hp = 10
+        a.wounds = [Wound("arm", 10, 1), Wound("leg", 20, 2)]
+        e = scene(a)
+        e.begin_round()
+        with self.assertRaisesRegex(UnresolvedDecision, "non-Dying wound"):
+            e.start_turn("soldier", regen_choice=RegenerationChoice(repair=1))
+        self.assertIsNone(e.current)
+        self.assertEqual((a.hp, a.vigor, [w.progress for w in a.wounds]),
+                         (10, 36, [1, 2]))
+        self.assertIn("unresolved_decision", [x["kind"] for x in e.ledger])
+        # It remains possible to choose HP instead, without repair targeting.
+        e.start_turn("soldier", regen_choice=RegenerationChoice(hp=1))
+        self.assertEqual((a.hp, a.vigor), (11, 35))
+        e.end_turn()
 
     def test_reject_dying_bypass_and_no_implicit_healing(self):
         a = soldier()
