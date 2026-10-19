@@ -340,6 +340,8 @@ class G1PhysicalAcceptance(unittest.TestCase):
         e.spend_ap("hunter", "physical", label="separate legal action")
         self.assertEqual(h.ap_remaining, 18)
         e.end_turn()
+        e.start_turn("prey")
+        e.end_turn()
         e.begin_round()
         e.start_turn("hunter")
         self.assertNotIn("hunter", g.rapid_heading)
