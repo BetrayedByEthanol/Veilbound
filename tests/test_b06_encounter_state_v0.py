@@ -79,6 +79,19 @@ class G0SourceTests(unittest.TestCase):
         self.assertEqual((f.ammunition, f.guard_capacity, f.regen,
                           f.physical_ap, f.projection_ap), (0, 1, 3, 30, 20))
         self.assertNotEqual(r.source.digest, f.source.digest)
+        self.assertIn(("Bow", "wielded"), r.source.equipment)
+        self.assertIn(("Dagger", "carried"), f.source.equipment)
+        self.assertNotIn(("Dagger", "wielded"), f.source.equipment)
+        a1 = party("A", 1)
+        a2 = party("A", 2)
+        b1 = party("B", 1)
+        b2 = party("B", 2)
+        self.assertEqual((a1.guard_capacity, a2.guard_capacity), (1, 2))
+        self.assertEqual((b1.guard_capacity, b2.guard_capacity), (3, 3))
+        self.assertEqual((b1.initiative_bonus, b2.initiative_bonus), (2, 4))
+        self.assertEqual(dict(b1.source.abilities)["Veil Affinity"], 0)
+        self.assertIn(("Mace", "wielded"), b1.source.equipment)
+        self.assertIn(("Shield", "held"), b1.source.equipment)
 
     def test_no_overlap_and_unresolved_tie(self):
         with self.assertRaisesRegex(ValueError, "overlaps another actor"):
