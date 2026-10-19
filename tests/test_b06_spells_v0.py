@@ -710,7 +710,7 @@ class B06G3Test(unittest.TestCase):
         self.assertFalse(f.reaction_available)
         self.assertFalse(interruptor.reaction_available)
         self.assertFalse(g.reactive_stone_claims)
-        self.assertIn(("caster",trigger.key),g.reactive_stone_claimed)
+        self.assertIn(("caster",stone.label),g.reactive_stone_claimed)
         self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
         self.assertFalse(g.effects)
         cancelled=spell_events(e,"g3_cast_interrupted")
@@ -829,7 +829,7 @@ class B06G3Test(unittest.TestCase):
         self.assertFalse(f.reaction_available)
         self.assertFalse(interrupter.reaction_available)
         self.assertEqual(g.reactive_stone_claims,{})
-        self.assertIn(("caster",trigger.key),g.reactive_stone_claimed)
+        self.assertIn(("caster",stone.label),g.reactive_stone_claimed)
         self.assertFalse(g.effects)
         self.assertFalse(spell_events(e,"g3_stone_reacted"))
         ended=spell_events(e,"g3_cast_interrupted")
@@ -845,6 +845,100 @@ class B06G3Test(unittest.TestCase):
         # another allegedly current response window with the same key.
         with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
             g.resolve_reactive_stone("caster",trigger,stone)
+        e.check()
+
+    def test_58_new_stone_reaction_reusing_previous_text_key_is_legal(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        first_trigger=Trigger("repeat-attacked-cell","attacker","caster")
+        first=g.prepare_reactive_stone("caster",first_trigger,perceptible=True)
+        self.assertTrue(e.response_window(
+            first_trigger,on_interception=lambda state,tr,response:None,
+            spontaneous=(first,),
+            on_spontaneous=lambda state,tr,response:
+                g.resolve_reactive_stone("caster",tr,response)))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        self.assertIn(("caster",first.label),g.reactive_stone_claimed)
+        # The first Stone Skin must be released on its actual own turn.
+        e.start_turn("attacker")
+        e.end_turn()
+        e.start_turn("caster")
+        g.release("caster","Stone Skin")
+        e.end_turn()
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        e.begin_round()
+        # Fresh, source-valid attack reuses the same external text key.
+        second_trigger=Trigger("repeat-attacked-cell","attacker","caster")
+        second=g.prepare_reactive_stone("caster",second_trigger,perceptible=True)
+        self.assertIsNot(first_trigger,second_trigger)
+        self.assertNotEqual(first.label,second.label)
+        self.assertTrue(e.response_window(
+            second_trigger,on_interception=lambda state,tr,response:None,
+            spontaneous=(second,),
+            on_spontaneous=lambda state,tr,response:
+                g.resolve_reactive_stone("caster",tr,response)))
+        self.assertEqual(len(spell_events(e,"g3_stone_reacted")),2)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        self.assertEqual(g.reactive_stone_claims,{})
+        self.assertIn(("caster",first.label),g.reactive_stone_claimed)
+        self.assertIn(("caster",second.label),g.reactive_stone_claimed)
+        self.assertNotIn(("caster",first_trigger.key),g.reactive_stone_claimed)
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
+            g.resolve_reactive_stone("caster",first_trigger,first)
+        e.check()
+
+    def test_59_prepared_sentry_can_rewield_and_pay_to_recast_ended_reserve(self):
+        s=sentry("prepared_start")
+        e,g=game(s)
+        e.start_turn("sentry")
+        # Initial prepared source state loaded 3 Committed without recast.
+        self.assertEqual((s.vp_available,s.vp_committed,s.vp_spent),(3,3,0))
+        e.g2.wielded["sentry"].discard("Sword")
+        g.sword_no_longer_wielded("sentry")
+        self.assertEqual((s.vp_available,s.vp_committed,s.vp_spent),(6,0,0))
+        self.assertFalse(g.active("sentry","Sentry Sword Reserve"))
+        with self.assertRaisesRegex(ValueError,"Unwielded sword"):
+            g.sentry_profile("sentry")
+        # The equipment action is separately source-adjudicated; G3 does
+        # not invent a free re-wielding action or refill spell resources.
+        # This actor starts its later ready turn with a re-wielded sword.
+        e.end_turn()
+        e.begin_round()
+        e.start_turn("sentry")
+        e.g2.wielded["sentry"].add("Sword")
+        self.assertEqual(g.sentry_profile("sentry"),"B06-AT-01")
+        self.assertEqual((s.ap_remaining,s.vp_available,s.vp_committed),
+                         (42,6,0))
+        instance=g.cast_sentry_reserve("sentry")
+        self.assertEqual(instance.ident,"B06-FIRE-RESERVE-01")
+        self.assertEqual((s.ap_remaining,s.vp_available,s.vp_committed,
+                          s.vp_spent),(12,3,3,0))
+        self.assertEqual(g.sentry_profile("sentry"),"B06-AT-02")
+        with self.assertRaisesRegex(ValueError,"Insufficient source-specific Projection AP"):
+            g.cast_sentry_reserve("sentry")
+        self.assertEqual(len(spell_events(e,"g3_effect_established")),1)
+        self.assertEqual(len(spell_events(e,"vp_transition")),1)
+        self.assertEqual(len(spell_events(e,"vp_release")),1)
+        e.check()
+
+    def test_60_prepared_sentry_cannot_recast_without_wielding_or_with_active_reserve(self):
+        s=sentry("prepared_start")
+        e,g=game(s)
+        e.start_turn("sentry")
+        initial=(s.ap_remaining,s.vp_available,s.vp_committed,s.vp_spent)
+        with self.assertRaisesRegex(ValueError,"Already active"):
+            g.cast_sentry_reserve("sentry")
+        self.assertEqual((s.ap_remaining,s.vp_available,s.vp_committed,
+                          s.vp_spent),initial)
+        e.g2.wielded["sentry"].discard("Sword")
+        g.sword_no_longer_wielded("sentry")
+        before=(s.ap_remaining,s.vp_available,s.vp_committed,s.vp_spent)
+        with self.assertRaisesRegex(ValueError,"must actually be wielded"):
+            g.cast_sentry_reserve("sentry")
+        self.assertEqual((s.ap_remaining,s.vp_available,s.vp_committed,
+                          s.vp_spent),before)
+        self.assertEqual((s.vp_available,s.vp_committed,s.vp_spent),(6,0,0))
         e.check()
 
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
