@@ -279,6 +279,10 @@ class RangedCombat:
         if source.startswith("screen:") and source.removeprefix("screen:") not in (
                 sid for sid,_,_ in lane.screens):
             raise ValueError("Aim must name a currently exposed screen on this lane")
+        available={"range":lane.range_difficulty,"cover":lane.cover,
+                   **{"screen:"+sid:tier for sid,tier,_ in lane.screens}}
+        if available.get(source,0)<=0:
+            raise ValueError("Aim needs positive applicable difficulty at declaration")
         if not a.ap_remaining >= a.physical_ap:
             raise ValueError("Insufficient AP to Aim")
         self.e.spend_ap(shooter_id,"physical",label="g2:aim:"+source)
@@ -552,22 +556,44 @@ class RangedCombat:
                                 abs(point[1]-lane.origin[1]))
                     secondary_band=next((m for limit,m in BOW_BANDS
                                          if squares<=limit),None)
-                    cb,cd=self._defense_value(candidate,declaration,secondary_band,
-                                               0,commit=True)
+                    actual_defense=declaration
+                    try:
+                        cb,cd=self._defense_value(candidate,declaration,
+                                                   secondary_band,0,commit=True)
+                    except (ValueError,UnresolvedDecision) as error:
+                        # A predeclared ordinary Guard can become physically
+                        # unusable before its conditional face is selected.
+                        # Since no capacity was yet consumed for this screen,
+                        # fallback must not pre-spend a fictional Guard.
+                        if declaration not in ("guard","dodge"):
+                            raise
+                        try:
+                            if candidate.hp<=0 or candidate.dead:
+                                raise ValueError("Incapacitated incidental target")
+                            cb,cd=self._defense_value(candidate,"dodge",
+                                                        secondary_band,0,commit=True)
+                            actual_defense="dodge"
+                        except (ValueError,UnresolvedDecision):
+                            cb,cd=self._defense_value(candidate,"take_hit",
+                                                        secondary_band,0)
+                            actual_defense="take_hit"
+                        e.log("g2_collateral_defense_fallback",actor=incidental,
+                              originally=declaration,actual=actual_defense,
+                              reason=str(error))
                     if shot.secondary_face is None:
                         raise UnresolvedDecision("Selected collateral face requires conditional d20")
                     sec=shot.secondary_face
                     if sec!=1 and sec+bonus>cd:
                         outcome="collateral_hit_pending_G5"
                         struck=incidental
-                    elif declaration=="guard":
+                    elif actual_defense=="guard":
                         outcome="collateral_guard_impact"
                         struck=None
                     else:
                         outcome="collateral_miss"
                         struck=None
                     e.log("g2_conditional_secondary",projectile="same_bow_arrow",
-                          target=incidental,defense=declaration,defense_value=cd,
+                          target=incidental,defense=actual_defense,defense_value=cd,
                           secondary_face=sec,secondary_total=sec+bonus,
                           outcome=outcome,extra_ap=0,extra_ammo=0)
                 elif effective_defense=="guard" and total<=b:
@@ -621,6 +647,19 @@ class RangedCombat:
             raise ValueError("One retained Aim can apply to one attack only")
         if sum(sh.defense=="guard" for sh in shots)>e.actors[target_id].guard_remaining:
             raise ValueError("Cannot promise more projectile Guard uses than remain")
+        # Conditional collateral defenses cost resources ONLY when selected;
+        # nonetheless, a complete sequence cannot promise a second Guard
+        # after the same defender's finite per-round capacity would be
+        # exhausted if both faces were selected. Reject such declarations
+        # atomically before spending a single attack AP/arrow.
+        possible_collateral_guards={}
+        for sh in shots:
+            for person,defense in sh.collateral:
+                if defense=="guard":
+                    possible_collateral_guards[person]=possible_collateral_guards.get(person,0)+1
+        if any(count>e.actors[person].guard_remaining for person,count
+               in possible_collateral_guards.items() if person in e.actors):
+            raise ValueError("Conditional collateral Guard sequence exceeds remaining capacity")
         for idx,sh in enumerate(shots):
             if type(sh.primary_face) is not int or not 1<=sh.primary_face<=20:
                 raise ValueError("Exactly one lawful primary d20 face per shot")
