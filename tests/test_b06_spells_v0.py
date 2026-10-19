@@ -479,6 +479,185 @@ class B06G3Test(unittest.TestCase):
                           f.vp_spent,len(e.ledger)),before)
         e.check()
 
+    def test_41_successful_effect_and_end_logging_does_not_collide_with_event_kind(self):
+        f=pc("F",2);e,g=game(f);e.start_turn("caster")
+        host=g.cast_scholar_composite("caster","Vital Shelter")
+        self.assertEqual(len(g.active("caster","Vital Shelter")),1)
+        established=spell_events(e,"g3_effect_established")
+        self.assertEqual([x["detail"]["effect_kind"] for x in established],
+                         ["Stone Skin","Vital Shelter"])
+        self.assertEqual(host.ident,established[0]["detail"]["effect"])
+        g.release("caster","Stone Skin")
+        ended=spell_events(e,"g3_effect_ended")
+        self.assertEqual([x["detail"]["effect_kind"] for x in ended],
+                         ["Vital Shelter","Stone Skin"])
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(11,0,1))
+        e.check()
+
+    def test_42_reactive_stone_forged_generic_response_rejected_even_after_real_g0_commit(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        tr=Trigger("forged","attacker","caster")
+        forged=Response("caster","reaction","g3:reactive_stone")
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
+            e.response_window(
+                tr,on_interception=lambda state,trigger,r:None,
+                spontaneous=(forged,),
+                on_spontaneous=lambda state,trigger,r:
+                    g.resolve_reactive_stone("caster",trigger,r))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_43_reactive_stone_prepared_on_event_a_cannot_apply_to_event_b(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        a=Trigger("incoming-A","attacker","caster")
+        b=Trigger("incoming-B","attacker","caster")
+        prepared=g.prepare_reactive_stone("caster",a,perceptible=True)
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
+            e.response_window(
+                b,on_interception=lambda state,trigger,r:None,
+                spontaneous=(prepared,),
+                on_spontaneous=lambda state,trigger,r:
+                    g.resolve_reactive_stone("caster",trigger,r))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_44_reactive_stone_claim_binds_same_trigger_instance_not_just_key(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        original=Trigger("reused-key","attacker","caster")
+        clone=Trigger("reused-key","attacker","caster")
+        response=g.prepare_reactive_stone("caster",original,perceptible=True)
+        with self.assertRaisesRegex(ValueError,"No matching preflight claim"):
+            e.response_window(
+                clone,on_interception=lambda state,trigger,r:None,
+                spontaneous=(response,),
+                on_spontaneous=lambda state,trigger,r:
+                    g.resolve_reactive_stone("caster",trigger,r))
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_45_reactive_stone_claim_cannot_be_created_twice(self):
+        attacker=pc("R",3,"attacker",(4,2),"enemy")
+        f=pc("F")
+        e,g=game(attacker,f)
+        tr=Trigger("incoming-once","attacker","caster")
+        g.prepare_reactive_stone("caster",tr,perceptible=True)
+        with self.assertRaisesRegex(ValueError,"already preflighted"):
+            g.prepare_reactive_stone("caster",tr,perceptible=True)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        e.check()
+
+    def test_46_dodge_invalidated_after_ap_loses_no_flame_vp_or_dodge_pressure(self):
+        f=pc("F")
+        target=pc("R",3,"target",(4,2),"enemy")
+        e,g=game(f,target);e.start_turn("caster")
+        def target_incapacitated(state):
+            state.actors["target"].hp=0
+        result=g.cast_flame("caster","target",tier=1,face=18,
+                            vigor_die=6,defense="dodge",aware=True,
+                            hand_available=True,on_committed=target_incapacitated)
+        self.assertEqual(result,{"outcome":"interrupted_before_launch","vp_spent":0})
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_spent),(22,18,0))
+        self.assertEqual(target.dodge_pressure,0)
+        self.assertFalse(spell_events(e,"g3_flame_launched"))
+        self.assertEqual(spell_events(e,"g3_cast_interrupted")[-1]["detail"]["cause"],
+                         "post_commit_defense_unusable")
+        e.check()
+
+    def test_47_guard_invalidated_after_ap_loses_no_flame_vp_or_guard_capacity(self):
+        f=pc("F")
+        target=sentry("cold_start","target",(4,2))
+        e,g=game(f,target);e.start_turn("caster")
+        before=target.guard_remaining
+        def lose_shield(state):
+            state.actors["target"].ready_guard=False
+        result=g.cast_flame("caster","target",tier=1,face=14,
+                            vigor_die=4,defense="guard",aware=True,
+                            hand_available=True,on_committed=lose_shield)
+        self.assertEqual(result["outcome"],"interrupted_before_launch")
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_spent),(22,18,0))
+        self.assertEqual(target.guard_remaining,before)
+        self.assertFalse(spell_events(e,"g3_flame_launched"))
+        e.check()
+
+    def test_48_voluntary_release_rejects_out_of_turn_and_bypass_keyword(self):
+        f=pc("F")
+        other=pc("R",3,"other",(4,2),"enemy")
+        e,g=game(f,other);e.start_turn("caster")
+        g.cast_stone("caster")
+        e.end_turn()
+        e.start_turn("other")
+        before=(f.vp_available,f.vp_committed,f.vp_spent,len(g.effects))
+        with self.assertRaisesRegex(ValueError,"own-turn decision"):
+            g.release("caster","Stone Skin")
+        with self.assertRaises(TypeError):
+            g.release("caster","Stone Skin",own_turn=False)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent,
+                          len(g.effects)),before)
+        # An actual loss-of-consciousness event can still trigger the
+        # dedicated forced termination path outside the caster's turn.
+        f.hp=0
+        g.sync_consciousness("caster")
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        e.check()
+
+    def test_49_flame_at_three_squares_uses_prone_plus_two_static_defense(self):
+        f=pc("F")
+        target=pc("R",3,"target",(4,2),"enemy")
+        target.conditions.append("Prone")
+        e,g=game(f,target);e.start_turn("caster")
+        r=g.cast_flame("caster","target",tier=1,face=7,vigor_die=5,
+                       hand_available=True)
+        self.assertEqual((r["base_defense"],r["final_defense"]),(12,12))
+        self.assertEqual(r["outcome"],"ordinary_miss")
+        self.assertIsNone(r["packets_pending_g4"])
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_spent),(22,16,2))
+        e.check()
+
+    def test_50_flame_prone_with_cover_requires_profile_policy_before_ap(self):
+        f=pc("F")
+        target=pc("R",3,"target",(4,2),"enemy")
+        target.conditions.append("Prone")
+        e,g=game(f,target,cover=(CoverSurface((2,2),4,(1,0)),))
+        e.start_turn("caster")
+        before=(f.ap_remaining,f.vp_available,f.vp_spent)
+        with self.assertRaisesRegex(UnresolvedDecision,"Prone plus Cover"):
+            g.cast_flame("caster","target",tier=1,face=10,vigor_die=2,
+                         hand_available=True)
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_spent),before)
+        r=g.cast_flame("caster","target",tier=1,face=10,vigor_die=2,
+                       hand_available=True,
+                       prone_cover_policy=(("target","absorbed"),))
+        self.assertEqual((r["base_defense"],r["final_defense"]),(10,14))
+        self.assertEqual(r["outcome"],"direct_hit_pending_G4")
+        e.check()
+
+    def test_51_flame_explicit_prone_dodge_feasibility_not_implicitly_granted(self):
+        f=pc("F")
+        target=pc("R",3,"target",(4,2),"enemy")
+        target.conditions.append("Prone")
+        e,g=game(f,target);e.start_turn("caster")
+        before=(f.ap_remaining,f.vp_available,f.vp_spent)
+        with self.assertRaisesRegex(UnresolvedDecision,"Prone Dodge"):
+            g.cast_flame("caster","target",tier=1,face=6,vigor_die=3,
+                         defense="dodge",aware=True,hand_available=True)
+        self.assertEqual((f.ap_remaining,f.vp_available,f.vp_spent),before)
+        r=g.cast_flame("caster","target",tier=1,face=6,vigor_die=3,
+                       defense="dodge",aware=True,hand_available=True,
+                       prone_dodge_feasible=True)
+        self.assertEqual(target.dodge_pressure,2)
+        self.assertGreaterEqual(r["final_defense"],12)
+        self.assertEqual(f.vp_spent,2)
+        e.check()
+
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
         f=pc("F");t=pc("R",3,"target",(3,2),"enemy")
         e,g=game(f,t);e.start_turn("caster")
