@@ -45,6 +45,9 @@ class ShotChoice:
     # decide per-actor whether the two profile reductions are independent
     # or the Cover tier already incorporates the lowered silhouette.
     prone_cover_policy: tuple = ()
+    # Actor IDs explicitly adjudicated as physically capable of a Prone
+    # Dodge for this shot; NOT a new free defense/MP allowance.
+    prone_dodge_feasible: tuple = ()
     aim_source: str | None = None
     trigger_key: str | None = None
     opportunities: tuple = ()
@@ -353,7 +356,7 @@ class RangedCombat:
     @staticmethod
     def _defense_value(actor,choice,range_diff,obstruction,*,
                        commit=False,prior_pressure=None,committed_guard=False,
-                       position_bonus=0):
+                       position_bonus=0,prone_dodge_feasible=False):
         if choice not in ("take_hit","dodge","guard"):
             raise ValueError("Invalid projectile defense")
         if actor.hp <= 0 or actor.dead:
@@ -371,7 +374,8 @@ class RangedCombat:
             if commit:
                 actor.guard_remaining-=1
         elif choice=="dodge":
-            if any(str(x).lower()=="prone" for x in actor.conditions):
+            if (any(str(x).lower()=="prone" for x in actor.conditions)
+                    and not prone_dodge_feasible):
                 raise UnresolvedDecision("Prone Dodge requires explicit physical capability")
             evasion=actor.ap_total//actor.physical_ap - 1
             pressure=(actor.dodge_pressure if prior_pressure is None else prior_pressure)
@@ -485,17 +489,26 @@ class RangedCombat:
                       reason="source_authored_opportunity_hit")
         def on_interception(state,tr,res):
             self._intercept(tr,res,shot.interceptor_routes)
+
+        def after_interceptions(state,tr):
+            # Do not make an intermediate crossing sticky: all reserved
+            # moves complete before the single source-trigger lane check.
+            if not tr.legal:
+                return  # preserve independently authored Interrupts
             try:
                 self.lane(shooter_id,target_id,exposures=shot.exposures,
                           origin=shot.origin_cell,
                           target_cell=self.g.body_cell(target_id,target_part),
                           drop_departed_screens=True)
-            except (ValueError,UnresolvedDecision):
+            except (ValueError,UnresolvedDecision) as error:
                 tr.legal=False
+                e.log("g2_prelaunch_lane_rejected",trigger=tr.key,
+                      reason=str(error))
         trig=Trigger(key,shooter_id,target_id)
         try:
             proceeds=e.response_window(trig,on_interception=on_interception,
-                        spontaneous=dynamic_opportunities,on_spontaneous=on_opp)
+                        spontaneous=dynamic_opportunities,on_spontaneous=on_opp,
+                        after_interceptions=after_interceptions)
         except Exception as err:
             e.log("g2_bow_unresolved",shooter=shooter_id,target=target_id,
                   reason=f"{type(err).__name__}: {err}",ap_paid=True,launched=False)
@@ -537,14 +550,16 @@ class RangedCombat:
             b,d=self._defense_value(target,shot.defense,range_mod,obstruction,
                                    prior_pressure=defense_record["pressure"],
                                    committed_guard=(shot.defense=="guard"),
-                                   position_bonus=position)
+                                   position_bonus=position,
+                                   prone_dodge_feasible=target_id in shot.prone_dodge_feasible)
         except ValueError as error:
             if shot.defense!="guard" and shot.defense!="dodge":
                 raise
             if shot.defense=="guard" and target.hp>0 and not target.dead:
                 try:
                     b,d=self._defense_value(target,"dodge",range_mod,obstruction,
-                                            commit=True,position_bonus=position)
+                                            commit=True,position_bonus=position,
+                                            prone_dodge_feasible=target_id in shot.prone_dodge_feasible)
                     effective_defense="dodge"
                 except (ValueError,UnresolvedDecision):
                     b,d=self._defense_value(target,"take_hit",range_mod,obstruction,
@@ -611,7 +626,8 @@ class RangedCombat:
                             candidate,squares,0,shot.prone_cover_policy)
                         cb,cd=self._defense_value(
                             candidate,declaration,secondary_band,0,commit=True,
-                            position_bonus=position_secondary)
+                            position_bonus=position_secondary,
+                            prone_dodge_feasible=incidental in shot.prone_dodge_feasible)
                     except (ValueError,UnresolvedDecision) as error:
                         # A predeclared ordinary Guard can become physically
                         # unusable before its conditional face is selected.
@@ -624,7 +640,8 @@ class RangedCombat:
                                 raise ValueError("Incapacitated incidental target")
                             cb,cd=self._defense_value(candidate,"dodge",
                                                         secondary_band,0,commit=True,
-                                                        position_bonus=position_secondary)
+                                                        position_bonus=position_secondary,
+                                                        prone_dodge_feasible=incidental in shot.prone_dodge_feasible)
                             actual_defense="dodge"
                         except (ValueError,UnresolvedDecision):
                             cb,cd=self._defense_value(candidate,"take_hit",
@@ -735,10 +752,15 @@ class RangedCombat:
                 raise ValueError("Intended-target awareness must be explicitly boolean")
             if not sh.aware_target and sh.defense != "take_hit":
                 raise ValueError("Unaware target cannot spontaneously Dodge or Guard")
-            if sh.defense=="guard":
-                self._defense_value(e.actors[target_id],"guard",0,0)
-            if sh.defense=="dodge" and e.actors[target_id].hp<=0:
-                raise ValueError("Dying target cannot Dodge")
+            if (len(set(sh.prone_dodge_feasible))!=len(sh.prone_dodge_feasible)
+                    or any(pid not in (target_id,*(sid for sid,_,_ in lane.screens))
+                           for pid in sh.prone_dodge_feasible)):
+                raise ValueError("Prone Dodge feasibility must name unique current defenders")
+            # Validate the actual intended Dodge *before* AP, sequence lock
+            # or Guard/Dodge preassignment. Prone is not always helpless;
+            # the GM must explicitly attest plausible physical movement.
+            self._defense_value(e.actors[target_id],sh.defense,0,0,
+                                prone_dodge_feasible=target_id in sh.prone_dodge_feasible)
             if (len(dict(sh.collateral))!=len(sh.collateral) or
                     set(dict(sh.collateral))!=set(sid for sid,_,_ in lane.screens)):
                 raise UnresolvedDecision("Every eligible incidental creature needs one predeclared personal defense")
@@ -750,7 +772,8 @@ class RangedCombat:
                     raise ValueError("Invalid conditional defense")
                 if incidental not in sh.aware_collateral and choice!="take_hit":
                     raise ValueError("Unaware screen cannot spontaneously Dodge or Guard")
-                self._defense_value(e.actors[incidental],choice,0,0)
+                self._defense_value(e.actors[incidental],choice,0,0,
+                                    prone_dodge_feasible=incidental in sh.prone_dodge_feasible)
             if sh.opportunities and sh.on_opportunity is None:
                 raise UnresolvedDecision("Threatened bow Opportunity requires explicit attack outcome policy")
             if any(not isinstance(x,Response) or x.kind!="opportunity"
@@ -795,7 +818,8 @@ class RangedCombat:
         t=e.actors[target_id]
         for i,sh in enumerate(shots):
             before=t.dodge_pressure
-            self._defense_value(t,sh.defense,0,0,commit=True)
+            self._defense_value(t,sh.defense,0,0,commit=True,
+                                prone_dodge_feasible=target_id in sh.prone_dodge_feasible)
             defense_records.append({"pressure":before})
             e.log("g2_projectile_defense_preassigned",actor=target_id,
                   shooter=shooter_id,sequence_index=i,choice=sh.defense,
