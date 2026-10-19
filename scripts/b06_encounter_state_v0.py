@@ -316,6 +316,7 @@ class Encounter:
         self.regen_done = set()
         self.pending_regeneration = None
         self.g1 = None  # Optional native physical grid; G0-only stays supported.
+        self.g2 = None  # Optional G2 ranged executor; never adds phantom shots.
         rank = {v: i for i, v in enumerate(tie_order)}
         def priority(a):
             return (-initiative_scores[a.id], -a.awareness, -a.agility,
@@ -474,6 +475,8 @@ class Encounter:
                  mp=a.mp_remaining)
         if self.g1 is not None:
             self.g1.on_turn_start(actor_id)
+        if self.g2 is not None:
+            self.g2.on_turn_start(actor_id)
         self.check()
 
     def end_turn(self):
