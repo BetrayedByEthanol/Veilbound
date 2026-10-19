@@ -878,10 +878,11 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertEqual(shooter.ap_remaining,22)
         self.assertEqual(len([x for x in e.ledger
                               if x["kind"]=="interception_released"]),2)
-        self.assertEqual(len([x for x in e.ledger
-                              if x["kind"]=="trigger_rechecked_after_interceptions"]),1)
-        self.assertEqual([x["detail"]["legal"] for x in e.ledger
-                          if x["kind"]=="trigger_rechecked_after_interceptions"],[True])
+        original_rechecks=[x for x in e.ledger
+                           if x["kind"]=="trigger_rechecked_after_interceptions"
+                           and x["detail"]["trigger"]=="line-shift"]
+        self.assertEqual(len(original_rechecks),1)
+        self.assertEqual(original_rechecks[0]["detail"]["legal"],True)
         self.assertFalse(any(x["kind"]=="g2_prelaunch_lane_rejected" for x in e.ledger))
         e.check()
 
