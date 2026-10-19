@@ -573,6 +573,8 @@ class GridMovement:
             raise ValueError("Pounce requires Hunter on own ready turn")
         if a.mp_remaining != 12 or any(r.actor_id == hunter_id for r in self.motion.values()):
             raise ValueError("Pounce must begin before movement or MP reservation")
+        if a.dead or a.hp <= 0:
+            raise ValueError("Dying/dead Hunter cannot begin Pounce")
         if a.ap_remaining < a.physical_ap:
             raise ValueError("Pounce needs one available Physical Action")
         head, rear = a.occupied
@@ -582,6 +584,8 @@ class GridMovement:
         if (target_id not in self.e.actors or
                 len(self.e.actors[target_id].occupied) != 1 or
                 self.e.actors[target_id].team == a.team or
+                self.e.actors[target_id].dead or
+                self.e.actors[target_id].hp <= -self.e.actors[target_id].hp_max or
                 self.e.actors[target_id].source.source_id not in ("A", "B", "R", "F")):
             raise ValueError("Pounce requires one-square opposing player character")
         if (any(str(x).lower() == "prone" for x in a.conditions) or
