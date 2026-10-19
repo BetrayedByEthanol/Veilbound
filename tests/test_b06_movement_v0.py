@@ -260,6 +260,58 @@ class G1PhysicalAcceptance(unittest.TestCase):
         g.pounce_abort()
         self.assertEqual(h.mp_remaining, 0)
 
+    def test_g1_validates_rigid_body_and_unwielded_melee_capability(self):
+        h = hunter(at=((2, 2), (1, 1)))
+        e = Encounter([h], {"hunter": 20}, seed=919)
+        with self.assertRaisesRegex(ValueError, "cardinally adjacent"):
+            GridMovement(e, width=9, height=9)
+        f = hero("F", (1, 1), role="F")
+        e2, g2 = scenario(f)
+        self.assertFalse(g2.threatens("F", (2, 1)))
+        r = hero("R", (3, 1), role="R")
+        e3, g3 = scenario(f, r)
+        self.assertFalse(g3.threatens("R", (4, 1)))
+        self.assertFalse(g3.threatens("F", (2, 1)))
+
+    def test_mp_interception_cannot_self_trigger_or_be_reserved_while_dying(self):
+        a = sentry("a", at=((1, 1),))
+        e, g = scenario(a)
+        e.begin_round()
+        e.start_turn("a")
+        key = g.reserve_movement("a", "self-attack-response", 2,
+                                 label="cannot-react-to-my-step")
+        baseline = (a.occupied, a.mp_remaining, len(e.reservations),
+                    len(g.motion), len(e.ledger))
+        with self.assertRaisesRegex(ValueError, "self-trigger"):
+            g.step("a", (1, 0), trigger_key="self-attack-response")
+        self.assertEqual((a.occupied, a.mp_remaining, len(e.reservations),
+                          len(g.motion), len(e.ledger)), baseline)
+        self.assertIn(key, g.motion)
+        a.hp = 0
+        with self.assertRaisesRegex(ValueError, "Dying/dead"):
+            g.reserve_movement("a", "future", 2, label="unable")
+        self.assertEqual(a.mp_remaining, 10)
+
+    def test_illegal_released_interception_path_spends_no_extra_mp(self):
+        a = soldier("a", at=((2, 1),))
+        b = hero("b", (0, 1))
+        e, g = scenario(a, b, walls=((1, 1),))
+        e.begin_round()
+        e.start_turn("a")
+        key = g.reserve_movement("a", "b-movement", 3, label="blocked-route")
+        e.end_turn()
+        e.start_turn("b")
+        self.assertTrue(g.step("b", (0, 1), trigger_key="b-movement",
+                       interceptor_routes={key: ((-1, 0),)}))
+        self.assertEqual(a.occupied, ((2, 1),))
+        rejected = [v for v in e.ledger if v["kind"] == "g1_interception_route_rejected"]
+        self.assertEqual(len(rejected), 1)
+        self.assertEqual(rejected[0]["detail"]["spent_mp"], 0)
+        self.assertFalse(any(v["kind"] == "g1_movement_step"
+                             and v["detail"]["actor"] == "a" for v in e.ledger))
+        self.assertNotIn(key, g.motion)
+        e.check()
+
     def test_expired_mp_reservation_never_releases_next_turn(self):
         a = sentry("a", at=((1, 1),))
         b = hero("b", (6, 1))
