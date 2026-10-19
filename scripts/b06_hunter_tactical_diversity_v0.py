@@ -23,7 +23,8 @@ CASES = tuple((level, size, roster, opening, front)
 
 # These are sourced combat *probes*, not automatically awarded player builds.
 # R: A's L2/3 statistics, Talents and Low Focus retained, but L1 Sword +2
-# becomes Bow +2 and gear is leather/bow/20 arrows/pack. No Guard with bow.
+# becomes Bow +2 and gear is leather/bow/20 arrows/dagger/pack.
+# Guard Reserve still gives +1 *capacity* at L2/3; the bow cannot Guard.
 # F: provisional High Scholar Fire, A's 28-point Ability array, Throwing +2
 # of its L1 discipline points, Conjure Flame individually known. Other known
 # spells / disciplines / talents not asserted; incomplete sheet by design.
@@ -37,7 +38,7 @@ ROLE = {
           "focus": "Low", "attack": 6, "base": 6, "die": 6, "pen": 3,
           "kind": "melee", "action_ap": 20},
     "R": {"hp": 12, "armor": 3, "vit": 2, "agi": 3, "awa": 1,
-          "init": 4, "guard": None, "guard_extra": 0, "regen": 6,
+          "init": 4, "guard": None, "guard_extra": 1, "regen": 6,
           "focus": "Low", "attack": 4, "base": 2, "die": 4, "pen": 3,
           "kind": "bow", "action_ap": 20},
     "F": {"hp": 12, "armor": 3, "vit": 2, "agi": 3, "awa": 1,
