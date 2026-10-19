@@ -650,6 +650,23 @@ class Encounter:
 
     def response_window(self, trigger, *, on_interception, spontaneous=(),
                         on_spontaneous=None, after_interceptions=None):
+        """Run an original trigger and expire its unused G3 preflight on exit.
+
+        Cleanup covers Interception cancellation, normal resolution, errors,
+        and nested windows without touching claims for distinct Trigger
+        objects that happen to reuse the same external text key.
+        """
+        try:
+            return self._response_window(
+                trigger,on_interception=on_interception,
+                spontaneous=spontaneous,on_spontaneous=on_spontaneous,
+                after_interceptions=after_interceptions)
+        finally:
+            if self.g3 is not None:
+                self.g3.on_response_window_closed(trigger)
+
+    def _response_window(self, trigger, *, on_interception, spontaneous=(),
+                         on_spontaneous=None, after_interceptions=None):
         """Caller resolves independently authorized effects; G0 never invents Interrupt.
 
         Interception callback may call nested response_window() or set trigger.legal
