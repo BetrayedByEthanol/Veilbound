@@ -390,6 +390,13 @@ class Encounter:
         # Dying is survival -> oldest-first wound repair -> HP (only if unblocked).
         incomplete = [w for w in a.wounds if w.progress < w.requirement]
         repairable = [w for w in incomplete if w.repairable]
+        # Non-Dying PCs choose *which* wound to repair; this minimal G0
+        # plan lacks per-wound allocation. Never silently give them Dying's
+        # oldest-first selection when multiple wounds are available.
+        if not dying and choice.repair and len(repairable) > 1:
+            self.log("unresolved_decision", actor=a.id,
+                     choice="non_dying_wound_target_allocation")
+            raise UnresolvedDecision("Select non-Dying wound allocation explicitly in G4")
         if choice.repair > sum(w.requirement - w.progress for w in repairable):
             raise ValueError("Repair allocation exceeds open repairable wounds")
         if dying and choice.hp:
@@ -432,14 +439,16 @@ class Encounter:
             self.log("unresolved_decision", actor=actor_id, choice="blink_debt_shortage")
             raise UnresolvedDecision("Authored exceptional Blink AP shortage")
         self.current = actor_id
+        # Record canonical Step 1 expiry before Step 2 Regeneration, without
+        # destroying reservations if a mandatory policy choice is unresolved.
+        expired = [r.label for r in self.reservations if r.actor_id == actor_id]
+        self.log("turn_start_expiry", actor=actor_id, expired=expired)
         try:
             self._regenerate(a, regen_choice)
         except (UnresolvedDecision, ValueError):
-            self.current = None  # Can retry with explicit legal policy.
+            self.current = None  # Retriable, with original reservations intact.
             raise
-        # Start-of-turn expiry of unused reservations is independent of regen.
         self.reservations = [r for r in self.reservations if r.actor_id != actor_id]
-        self.log("turn_start_expiry", actor=actor_id)
         # External spell/hazard consequences remain G3/G4; no automatic ticks.
         a.ap_remaining = (0 if a.hp <= 0 or a.dead
                           else a.ap_total - a.blink_debt_due)
