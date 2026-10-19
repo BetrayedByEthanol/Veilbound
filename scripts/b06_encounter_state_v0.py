@@ -632,7 +632,7 @@ class Encounter:
                  label=label)
 
     def response_window(self, trigger, *, on_interception, spontaneous=(),
-                        on_spontaneous=None):
+                        on_spontaneous=None, after_interceptions=None):
         """Caller resolves independently authorized effects; G0 never invents Interrupt.
 
         Interception callback may call nested response_window() or set trigger.legal
@@ -659,6 +659,11 @@ class Encounter:
             self.log("interception_released", actor=r.actor_id, label=r.label,
                      trigger=trigger.key)
             on_interception(self, trigger, r)
+        # Validate the final geometry only after every same-trigger
+        # Interception. An intermediate state may change again before
+        # the original trigger's single canonical legality recheck.
+        if after_interceptions is not None:
+            after_interceptions(self, trigger)
         self.log("trigger_rechecked_after_interceptions", trigger=trigger.key,
                  legal=trigger.legal)
         if not trigger.legal:
