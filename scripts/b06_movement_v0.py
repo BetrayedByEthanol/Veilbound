@@ -319,6 +319,8 @@ class GridMovement:
         if len({c.actor_id for c in wanted}) != len(wanted):
             raise ValueError("One Movement Opportunity per enemy per segment")
         decided_sources = []
+        opportunity_segment = None
+        opportunity_recorded = False
         key = trigger_key or f"g1:{actor_id}:step:{len(self.e.ledger)}"
         # Block own-turn self-trigger before G0 dequeues reserved MP.
         if any(r.trigger_key == key and r.actor_id == actor_id
@@ -362,8 +364,10 @@ class GridMovement:
             # reason to cancel an otherwise legal original step.
 
         def decide_opportunities(e, tr):
+            nonlocal opportunity_segment
             eligible = self._threats(actor_id, dest, cautious)
             decided_sources[:] = eligible
+            opportunity_segment = self.segment[actor_id]
             if dynamic_policy is not None:
                 selected = dynamic_policy(eligible)
                 if selected is None:
@@ -382,7 +386,24 @@ class GridMovement:
                 raise ValueError("One Movement Opportunity per enemy per segment")
             return selected
 
+        def register_opportunities():
+            nonlocal opportunity_recorded
+            if opportunity_recorded or opportunity_segment is None:
+                return
+            opportunity_recorded = True
+            # Record the window while it is still the same movement segment.
+            # A nested real Movement Interception can end that segment, and
+            # its subsequent new segment must not inherit the old window.
+            if self.segment[actor_id] == opportunity_segment:
+                self.provoked[actor_id].update(decided_sources)
+
         def apply_response(e, tr, response):
+            # G0 has already validated and COMMITTED all spontaneous
+            # responses before invoking this callback. Do not wait for the
+            # originally intended move to succeed: a real Opportunity can
+            # Interrupt it or change geometry/MP and still count for the
+            # one-opportunity-per-enemy-per-movement-segment limit.
+            register_opportunities()
             e.log("g1_movement_opportunity_pending", attacker=response.actor_id,
                   mover=actor_id, trigger=tr.key, outcome="G5_attack_unresolved")
             if on_response:
@@ -393,6 +414,10 @@ class GridMovement:
         can_proceed = self.e.response_window(
             trigger, on_interception=apply_interception,
             spontaneous=decide_opportunities, on_spontaneous=apply_response)
+        # Also record eligible-but-declined Opportunities on a response
+        # window with zero spontaneous choices. A window rejected before
+        # validation/commit cannot register a phantom Opportunity.
+        register_opportunities()
         if not can_proceed:
             self.e.log("g1_step_cancelled", actor=actor_id, trigger=key,
                        reason="response_or_geometry_changed", mp_charged=0)
@@ -422,7 +447,6 @@ class GridMovement:
                 run.committed = True
         self._commit_mp(actor_id, cost, reserved)
         a.occupied = latest
-        self.provoked[actor_id].update(decided_sources)
         if self.pounce and self.pounce.hunter_id == actor_id:
             self.pounce.steps += 1
             self.pounce.spent_mp += cost
