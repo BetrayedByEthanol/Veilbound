@@ -2,7 +2,7 @@
 import unittest
 
 from scripts.b06_encounter_state_v0 import (
-    Encounter, Response, enemy_actor, party_actor,
+    Encounter, Response, UnresolvedDecision, enemy_actor, party_actor,
 )
 from scripts.b06_movement_v0 import GridMovement
 
@@ -311,6 +311,51 @@ class G1PhysicalAcceptance(unittest.TestCase):
                              and v["detail"]["actor"] == "a" for v in e.ledger))
         self.assertNotIn(key, g.motion)
         e.check()
+
+    def test_aborted_tentative_pounce_keeps_rapid_heading_and_action_budget(self):
+        h = hunter(at=((2, 2), (1, 2)))
+        prey = hero("prey", (8, 2))
+        e, g = scenario(h, prey)
+        e.begin_round()
+        e.start_turn("hunter")
+        g.start_pounce("hunter", "prey")
+        self.assertTrue(g.step("hunter", (1, 0)))
+        self.assertEqual((h.mp_remaining, h.ap_remaining), (22, 42))
+        with self.assertRaisesRegex(ValueError, "Complete or abort active Pounce"):
+            e.spend_ap("hunter", "physical", label="unrelated attack mid-run")
+        self.assertEqual(h.ap_remaining, 42)
+        g.pounce_abort()
+        self.assertEqual(h.mp_remaining, 16)  # Remaining 18-MP Rapid allowance.
+        self.assertEqual(g.rapid_heading["hunter"], (1, 0))
+        with self.assertRaisesRegex(ValueError, "fixed Rapid Advance heading"):
+            g.step("hunter", (0, 1))
+        with self.assertRaisesRegex(ValueError, "fixed Rapid Advance heading"):
+            g.pivot("hunter", "rear", clockwise=True)
+        with self.assertRaisesRegex(ValueError, "prohibits new MP reservations"):
+            g.reserve_movement("hunter", "future", 2, label="invalid")
+        with self.assertRaisesRegex(ValueError, "already active or this turn"):
+            g.start_pounce("hunter", "prey")
+        self.assertTrue(g.step("hunter", (1, 0)))
+        self.assertEqual(h.mp_remaining, 14)
+        e.spend_ap("hunter", "physical", label="separate legal action")
+        self.assertEqual(h.ap_remaining, 18)
+        e.end_turn()
+        e.begin_round()
+        e.start_turn("hunter")
+        self.assertNotIn("hunter", g.rapid_heading)
+        self.assertEqual(h.mp_remaining, 12)
+
+    def test_allied_transit_cannot_bypass_earlier_threatened_step(self):
+        mover = hero("mover", (0, 1))
+        ally = hero("ally", (2, 1), role="B")
+        hostile = sentry("hostile", at=((1, 2),))
+        e, g = scenario(mover, ally, hostile)
+        e.begin_round()
+        e.start_turn("mover")
+        baseline = (mover.occupied, mover.mp_remaining, len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision, "transit|responses"):
+            g.move_route("mover", ((1, 0), (1, 0), (1, 0)))
+        self.assertEqual((mover.occupied, mover.mp_remaining, len(e.ledger)), baseline)
 
     def test_expired_mp_reservation_never_releases_next_turn(self):
         a = sentry("a", at=((1, 1),))
