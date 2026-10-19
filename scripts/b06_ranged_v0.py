@@ -256,13 +256,15 @@ class RangedCombat:
             raise ValueError("No physical arrow to fire")
         return a
 
-    def aim(self, shooter_id, target_id, source, *, profile="bow"):
+    def aim(self, shooter_id, target_id, source, *, profile="bow",
+            exposures=()):
         a=self._bow_ready(shooter_id)
-        lane=self.lane(shooter_id,target_id,range_kind="bow")
+        lane=self.lane(shooter_id,target_id,range_kind="bow",exposures=exposures)
         if source not in ("range", "cover") and not source.startswith("screen:"):
             raise ValueError("Aim names one exact shot-difficulty source")
-        if source.startswith("screen:"):
-            raise UnresolvedDecision("Living-screen Aim requires a specified authored exposed lane")
+        if source.startswith("screen:") and source.removeprefix("screen:") not in (
+                sid for sid,_,_ in lane.screens):
+            raise ValueError("Aim must name a currently exposed screen on this lane")
         if not a.ap_remaining >= a.physical_ap:
             raise ValueError("Insufficient AP to Aim")
         self.e.spend_ap(shooter_id,"physical",label="g2:aim:"+source)
@@ -272,8 +274,8 @@ class RangedCombat:
                    profile=profile,source=source)
         return self.aims[shooter_id]
 
-    def _aim_reduce(self, shooter_id,target_id,source,range_difficulty,cover,screens):
-        aim=self.aims.get(shooter_id)
+    def _aim_reduce(self, shooter_id,target_id,source,range_difficulty,cover,screens,
+                    *, aim=None):
         mitigation=0
         if aim and aim.target==target_id and aim.profile=="bow" and aim.position==self.e.actors[shooter_id].occupied:
             # The chosen objective cannot be silently changed at release.
@@ -375,6 +377,12 @@ class RangedCombat:
         shooter=e.actors[shooter_id]
         # Defensive choices were validated with the batch before AP payment.
         key=shot.trigger_key or f"g2:bow:{shooter_id}:{target_id}:{seq_no}:{len(e.ledger)}"
+        # An attack consumes retained Aim WHEN IT BEGINS, even when a
+        # prelaunch Interception/Opportunity prevents actual launch.
+        active_aim=self.aims.pop(shooter_id,None) if shot.aim_source is not None else None
+        if active_aim is not None:
+            e.log("g2_aim_consumed",shooter=shooter_id,target=target_id,
+                  objective=active_aim.source,reason="attack_started")
         def dynamic_opportunities(state,tr):
             # Specific bow-while-threatened Opportunity, not a normal
             # Movement Opportunity. No hit is inferred from geometry.
@@ -425,19 +433,10 @@ class RangedCombat:
             return {"outcome":"illegal_after_commit"}
         if shooter.ammunition<1:
             raise UnresolvedDecision("Committed bow sequence lacks remaining physical arrows")
-        if shot.aim_source is not None and (shooter_id not in self.aims or
-                                            self.aims[shooter_id].source!=shot.aim_source):
-            raise ValueError("Shot's retained Aim was lost")
         screen_tiers={sid:l for sid,l,_ in lane.screens}
-        used_aim=bool(self.aims.get(shooter_id) and
-                      self.aims[shooter_id].target==target_id)
         range_mod,cover,screens,mitigation=self._aim_reduce(
             shooter_id,target_id,shot.aim_source,lane.range_difficulty,
-            lane.cover,screen_tiers)
-        if used_aim:
-            self.aims.pop(shooter_id)
-            e.log("g2_aim_consumed",shooter=shooter_id,target=target_id,
-                  mitigation=mitigation)
+            lane.cover,screen_tiers,aim=active_aim)
         # Assign declared personal defense before rolling, after Interception.
         target=e.actors[target_id]
         b,d=self._defense_value(target,shot.defense,range_mod,
@@ -455,8 +454,7 @@ class RangedCombat:
         bonus=4 # exact B05 R bow_attack_bonus at all L1-L3
         face=shot.primary_face
         total=face+bonus
-        faces=(self._allocate(b,d,bonus,cover,lane.screens,target.team if False else shooter.team,e.actors)
-               if lane.screens else {})
+        faces={}
         # Aim at a screen must narrow that specific source's collateral band.
         if lane.screens:
             modified=tuple((sid,screens[sid],pos) for sid,_,pos in lane.screens
@@ -554,6 +552,8 @@ class RangedCombat:
             raise ValueError("Not enough AP or physical arrows for declared sequence")
         if sum(s.aim_source is not None for s in shots)>1:
             raise ValueError("One retained Aim can apply to one attack only")
+        if sum(sh.defense=="guard" for sh in shots)>e.actors[target_id].guard_remaining:
+            raise ValueError("Cannot promise more projectile Guard uses than remain")
         for idx,sh in enumerate(shots):
             if type(sh.primary_face) is not int or not 1<=sh.primary_face<=20:
                 raise ValueError("Exactly one lawful primary d20 face per shot")
