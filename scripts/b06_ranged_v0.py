@@ -388,7 +388,8 @@ class RangedCombat:
     def _faces(b, d, bonus):
         return tuple(n for n in range(2,20) if n+bonus<=d)
 
-    def _screen_sides(self, shooter_id, target_id, lane, neutral_sides):
+    def _screen_sides(self, shooter_id, target_id, lane, neutral_sides,
+                      *, drop_departed=False):
         shooter=self.e.actors[shooter_id]
         target=self.e.actors[target_id]
         overrides=dict(neutral_sides)
@@ -396,6 +397,11 @@ class RangedCombat:
             raise ValueError("One declared side per nonaligned Living Screen")
         required={sid for sid,_,_ in lane.screens if
                   self.e.actors[sid].team not in (shooter.team,target.team)}
+        if drop_departed:
+            # A neutral actor's already-declared risk side is irrelevant
+            # after that actor genuinely leaves the firing ray. Newly
+            # interposed neutral creatures still require their own choice.
+            overrides={sid:side for sid,side in overrides.items() if sid in required}
         if set(overrides)!=required or any(v not in ("ally","enemy") for v in overrides.values()):
             raise UnresolvedDecision("GM must predeclare the risk side of each nonaligned screen")
         return {sid: ("ally" if self.e.actors[sid].team==shooter.team
@@ -570,7 +576,8 @@ class RangedCombat:
                            if screens[sid]>0)
             faces=self._allocate(b,d,bonus,cover,modified,
                                   self._screen_sides(shooter_id,target_id,
-                                                     lane,shot.neutral_sides))
+                                                     lane,shot.neutral_sides,
+                                                     drop_departed=True))
         e.log("g2_miss_faces_preallocated",shooter=shooter_id,target=target_id,
               faces={str(k):v for k,v in sorted(faces.items())},
               primary_face=face,base_defense=b,final_defense=d)
