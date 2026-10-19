@@ -744,6 +744,28 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertEqual(out["outcome"],"cover_impact")
         e.check()
 
+    def test_44_retained_aim_follows_same_hunter_head_across_own_turns(self):
+        r=hero("R","archer",(1,2))
+        h=hunter(at=((16,2),(15,2)))
+        e,g1,g2=fixture(r,h,score={"archer":20,"hunter":10})
+        e.start_turn("archer")
+        g2.aim("archer","hunter","range",target_cell=(16,2))
+        e.end_turn()
+        e.start_turn("hunter")
+        self.assertTrue(g1.step("hunter",(1,0)))
+        self.assertEqual(g1.body_cell("hunter","head"),(17,2))
+        e.end_turn()
+        e.begin_round()
+        e.start_turn("archer")
+        self.assertIn("archer",g2.aims)
+        out=g2.bow_sequence("archer","hunter",(ShotChoice(
+            primary_face=7,aim_source="range",target_cell=(17,2)),))[0]
+        self.assertEqual(out["outcome"],"intended_hit_pending_G5")
+        self.assertEqual(out["base_defense"],10)
+        self.assertEqual(r.ammunition,19)
+        self.assertNotIn("archer",g2.aims)
+        e.check()
+
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
         r=hero("R","archer",(1,2))
         t=hero("B","target",(9,2),"enemy")
