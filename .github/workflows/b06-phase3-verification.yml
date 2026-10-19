@@ -3,6 +3,8 @@ name: B06 Phase 3 Census and Rules Verification
 on:
   pull_request:
     paths:
+      - 'scripts/b06_encounter_state_v0.py'
+      - 'docs/design/b06-g0-shared-encounter-state-and-event-ledger-v0.md'
       - 'scripts/b06_hunter_phase3_report_v0.py'
       - 'scripts/b06_hunter_tactical_diversity_v0.py'
       - 'scripts/b06_hunter_party_exchanges_v0.py'
@@ -50,6 +52,8 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_b06_hunter_tactical_diversity_v0.py' -v
           python -m unittest discover -s tests -p 'test_b06_hunter_phase3_report_v0.py' -v
+      - name: Verify G0 encounter state and event ledger
+        run: python -m unittest discover -s tests -p 'test_b06_encounter_state_v0.py' -v
       - name: Run complete repository test suite
         run: python -m unittest discover -s tests -v
       - name: Verify enemy footprints and index geometry
