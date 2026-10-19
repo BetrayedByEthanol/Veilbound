@@ -315,6 +315,10 @@ class Encounter:
         self.seen_sequences = set()
         self.regen_done = set()
         self.pending_regeneration = None
+        # Only the actual currently executing spontaneous callback may
+        # apply pre-roll effects. A historical ledger entry is NOT proof
+        # that the response window remains open; nested windows restore it.
+        self._live_spontaneous_response = None
         self.g1 = None  # Optional native physical grid; G0-only stays supported.
         self.g2 = None  # Optional G2 ranged executor; never adds phantom shots.
         self.g3 = None  # Optional source-bound spell state; G0-only is unchanged.
@@ -638,6 +642,12 @@ class Encounter:
         self.log("interception_reserved", actor=actor_id, trigger=trigger_key,
                  label=label)
 
+    def is_live_spontaneous(self, trigger, response):
+        """True only inside this exact native response's active callback."""
+        current = self._live_spontaneous_response
+        return (current is not None and current[0] is trigger
+                and current[1] is response)
+
     def response_window(self, trigger, *, on_interception, spontaneous=(),
                         on_spontaneous=None, after_interceptions=None):
         """Caller resolves independently authorized effects; G0 never invents Interrupt.
@@ -728,7 +738,17 @@ class Encounter:
             self.log("spontaneous_committed", actor=c.actor_id, response_kind=c.kind,
                      trigger=trigger.key, label=c.label)
         for c in choices:
-            on_spontaneous(self, trigger, c)
+            # G0 commits all capacities before executing initiative-ordered
+            # responses. Mark ONLY this live callback as the authority for
+            # G3 pre-roll effect application. The finally block prevents
+            # stale authorization after returns, exceptions, or nested G0
+            # response windows.
+            previous = self._live_spontaneous_response
+            self._live_spontaneous_response = (trigger, c)
+            try:
+                on_spontaneous(self, trigger, c)
+            finally:
+                self._live_spontaneous_response = previous
         self.log("trigger_rechecked_after_responses", trigger=trigger.key,
                  legal=trigger.legal)
         if trigger.legal:
