@@ -788,6 +788,103 @@ class G2RangedAcceptance(unittest.TestCase):
         self.assertEqual(r.ammunition,19)
         e.check()
 
+    def test_45_prone_dodge_without_feasibility_is_rejected_before_payment(self):
+        shooter=hero("R","archer",(1,2))
+        target=soldier("target",(9,2))
+        target.conditions.append("Prone")
+        e,g1,g2=fixture(shooter,target)
+        e.start_turn("archer")
+        before=(shooter.ap_remaining,shooter.ammunition,
+                target.guard_remaining,target.dodge_pressure,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"Prone Dodge requires explicit physical capability"):
+            g2.bow_sequence("archer","target",(ShotChoice(
+                defense="dodge",aware_target=True,primary_face=10),))
+        self.assertEqual((shooter.ap_remaining,shooter.ammunition,
+                          target.guard_remaining,target.dodge_pressure,
+                          len(e.ledger)),before)
+        self.assertNotIn(("archer","target"),e.seen_sequences)
+        self.assertFalse(any(x["kind"]=="g2_bow_sequence_committed" for x in e.ledger))
+        e.check()
+
+    def test_46_prone_dodge_with_adjudicated_feasibility_spends_normal_capacity(self):
+        shooter=hero("R","archer",(1,2))
+        target=soldier("target",(9,2))
+        target.conditions.append("Prone")
+        e,g1,g2=fixture(shooter,target)
+        e.start_turn("archer")
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            defense="dodge",aware_target=True,primary_face=10,
+            prone_dodge_feasible=("target",)),))[0]
+        self.assertEqual(out["outcome"],"ordinary_miss")
+        self.assertEqual((out["base_defense"],out["final_defense"]),(15,15))
+        self.assertEqual(target.dodge_pressure,2)
+        self.assertEqual(shooter.ammunition,19)
+        self.assertEqual(shooter.ap_remaining,22)
+        self.assertEqual(len([x for x in e.ledger
+            if x["kind"]=="g2_projectile_defense_preassigned"]),1)
+        e.check()
+
+    def test_47_prone_collateral_dodge_requires_feasibility_before_commit(self):
+        shooter=hero("R","archer",(1,2))
+        screen=hero("A","screen",(5,2))
+        screen.conditions.append("Prone")
+        target=hero("B","target",(9,2),"enemy")
+        e,g1,g2=fixture(shooter,screen,target)
+        e.start_turn("archer")
+        before=(shooter.ap_remaining,shooter.ammunition,screen.dodge_pressure)
+        spec=ShotChoice(primary_face=4,exposures=(("screen",4),),
+                        collateral=(("screen","dodge"),),
+                        aware_collateral=("screen",),secondary_face=16)
+        with self.assertRaisesRegex(UnresolvedDecision,"Prone Dodge requires explicit physical capability"):
+            g2.bow_sequence("archer","target",(spec,))
+        self.assertEqual((shooter.ap_remaining,shooter.ammunition,
+                          screen.dodge_pressure),before)
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            primary_face=4,exposures=(("screen",4),),
+            collateral=(("screen","dodge"),),
+            aware_collateral=("screen",),secondary_face=16,
+            prone_dodge_feasible=("screen",)),))[0]
+        self.assertEqual(out["outcome"],"collateral_hit_pending_G5")
+        self.assertEqual(screen.dodge_pressure,2)
+        self.assertEqual(shooter.ammunition,19)
+        e.check()
+
+    def test_48_lane_legal_after_two_interceptions_temporary_new_screen(self):
+        # The first reserved movement shifts the original TARGET's row and
+        # temporarily makes a second reserving creature a new unknown screen.
+        # That creature's later reserved step clears it. Only the FINAL lane
+        # after BOTH released Interceptions may decide launch legality.
+        target=hero("B","target",(9,2),"enemy")
+        screen=soldier("screen",(5,3),team="enemy")
+        shooter=hero("R","archer",(1,2))
+        e,g1,g2=fixture(target,screen,shooter,
+                         score={"target":30,"screen":20,"archer":10})
+        e.start_turn("target")
+        target_key=g1.reserve_movement("target","line-shift",2,label="target-step")
+        e.end_turn()
+        e.start_turn("screen")
+        screen_key=g1.reserve_movement("screen","line-shift",2,label="screen-step")
+        e.end_turn()
+        e.start_turn("archer")
+        self.assertEqual(g2.lane("archer","target").screens,())
+        out=g2.bow_sequence("archer","target",(ShotChoice(
+            trigger_key="line-shift",primary_face=15,
+            interceptor_routes={target_key:((0,1),),
+                                screen_key:((0,1),)}),))[0]
+        self.assertEqual(target.occupied,((9,3),))
+        self.assertEqual(screen.occupied,((5,4),))
+        self.assertEqual(out["outcome"],"intended_hit_pending_G5")
+        self.assertEqual(shooter.ammunition,19)
+        self.assertEqual(shooter.ap_remaining,22)
+        self.assertEqual(len([x for x in e.ledger
+                              if x["kind"]=="interception_released"]),2)
+        self.assertEqual(len([x for x in e.ledger
+                              if x["kind"]=="trigger_rechecked_after_interceptions"]),1)
+        self.assertEqual([x["detail"]["legal"] for x in e.ledger
+                          if x["kind"]=="trigger_rechecked_after_interceptions"],[True])
+        self.assertFalse(any(x["kind"]=="g2_prelaunch_lane_rejected" for x in e.ledger))
+        e.check()
+
     def test_21_ready_dagger_is_paid_and_bow_shot_no_longer_legal(self):
         r=hero("R","archer",(1,2))
         t=hero("B","target",(9,2),"enemy")
