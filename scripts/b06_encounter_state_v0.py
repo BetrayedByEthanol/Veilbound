@@ -346,6 +346,10 @@ class Encounter:
     def begin_round(self):
         if self.round and self.cursor != len(self.order):
             raise ValueError("Cannot refresh round capacities mid-round")
+        if self.round:
+            # No universal Round End healing/refresh. Authored effect ticks
+            # are still G3/G4 and are not guessed by this G0 ledger.
+            self.log("round_end", effects="authored effects deferred")
         self.round += 1
         self.regen_done.clear()
         self.seen_sequences.clear()
@@ -519,6 +523,8 @@ class Encounter:
         a = self.actors[actor_id]
         if choice not in VALID_DEFENSES:
             raise ValueError("Defense must be declared before attack roll")
+        if a.hp <= 0 and choice != "take_hit":
+            raise ValueError("Unconscious/dead actor cannot actively Guard or Dodge")
         if projectile:
             raise UnresolvedDecision("G2 must validate projectile Guard/Dodge and lane first")
         if choice == "guard":
