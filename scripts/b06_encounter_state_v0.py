@@ -220,15 +220,18 @@ def party_actor(role, level, actor_id, team, *, occupied):
         p = BUILD[role]
         path = "scripts/b06_hunter_party_exchanges_v0.py"
         hp = p["hp"]
-        # A/B's PHYSICAL ONLY Phase-1/2 proxy has no independent VP ledger.
-        # Do not infer Priest prepared/prayer/reserve states from role stats.
-        source = Source(path, role, _fingerprint(path), "BOUNDED_PHYSICAL_PROXY",
+        # A/B were verified as Life/Low Priests in the authored B05 L3
+        # ledger: VA0 grants 2 VP/level. The Phase-2 BUILD is still ONLY
+        # the attack/defense physical projection. Default is explicitly
+        # an unbuffed full-resource scene, never automatically chosen Rite.
+        source = Source(path, role, _fingerprint(path), "B05_UNBUFFED_PHYSICAL_PROXY",
                         (("Vitality", p["vit"]), ("Agility", p["agi"])),
                         (), (), (), f"L{level}-physical-proxy")
         ap = 30 + 6 * (level - 1)
         actor = Actor(actor_id, team, source, level, "Low", p["initiative"],
                       p["initiative"] - p["agi"], p["agi"],
-                      hp, hp * level, 0, hp, hp * level, 0, 0, 0,
+                      hp, hp * level, 2 * level, hp, hp * level,
+                      2 * level, 0, 0,
                       p["regen"], ap, 20, 30, "physical_proxy_weapon",
                       p["guard"], ap // 20 + p["guard_extra"],
                       occupied=tuple(tuple(c) for c in occupied))
@@ -315,12 +318,14 @@ class Encounter:
         if self.round and self.cursor != len(self.order):
             raise ValueError("Cannot refresh round capacities mid-round")
         self.round += 1
+        self.regen_done.clear()
+        self.seen_sequences.clear()
         self.cursor = 0
         self.current = None
         for a in self.actors.values():
             a.guard_remaining = a.guard_capacity
             a.dodge_pressure = 0
-            a.reaction_available = True
+            a.reaction_available = a.hp > 0 and not a.dead
             a.opportunity_active = False
             a.opportunity_used = 0
         self.log("round_begin", refreshed=list(self.order))
@@ -329,8 +334,8 @@ class Encounter:
     def _regenerate(self, a, choice):
         if a.id in self.regen_done:
             raise ValueError("Regeneration Step already resolved this round")
-        self.regen_done.add(a.id)
         if a.dead:
+            self.regen_done.add(a.id)
             self.log("regeneration_dead", actor=a.id)
             return
         missing = a.hp < a.hp_max or any(w.repairable and w.progress < w.requirement for w in a.wounds)
@@ -364,14 +369,16 @@ class Encounter:
                 raise ValueError("Dying natural HP requires all blocking wounds repaired")
             if a.hp + choice.hp > a.hp_max:
                 raise ValueError("Dying restoration exceeds Max HP")
+        if dying and not survival and a.hp - 1 <= -a.hp_max and (
+                choice.hp or choice.repair):
+            raise ValueError("Cannot regenerate after lethal Dying loss")
+        self.regen_done.add(a.id)
         hp_before, vigor_before = a.hp, a.vigor
         if dying and not survival:
             a.hp -= 1
             if a.hp <= -a.hp_max:
                 a.hp = -a.hp_max
                 a.dead = True
-                if choice.hp or choice.repair:
-                    raise ValueError("Dead actor cannot regenerate wounds")
         if not a.dead:
             for w in repairable:
                 delta = min(choice.repair, w.requirement - w.progress)
@@ -391,16 +398,22 @@ class Encounter:
         if actor_id != self.order[self.cursor]:
             raise ValueError("Actor is not next in Initiative order")
         a = self.actors[actor_id]
-        self.current = actor_id
-        # Start expiry of unused Interception reservations at own next turn.
-        self.reservations = [r for r in self.reservations if r.actor_id != actor_id]
-        self.log("turn_start_expiry", actor=actor_id)
-        self._regenerate(a, regen_choice)
-        # Effects and debt are never silently simulated.
+        # Preflight debt before mutating persistent status or turn state.
         if a.blink_debt_due > a.ap_total:
             self.log("unresolved_decision", actor=actor_id, choice="blink_debt_shortage")
             raise UnresolvedDecision("Authored exceptional Blink AP shortage")
-        a.ap_remaining = a.ap_total - a.blink_debt_due
+        self.current = actor_id
+        try:
+            self._regenerate(a, regen_choice)
+        except (UnresolvedDecision, ValueError):
+            self.current = None  # Can retry with explicit legal policy.
+            raise
+        # Start-of-turn expiry of unused reservations is independent of regen.
+        self.reservations = [r for r in self.reservations if r.actor_id != actor_id]
+        self.log("turn_start_expiry", actor=actor_id)
+        # External spell/hazard consequences remain G3/G4; no automatic ticks.
+        a.ap_remaining = (0 if a.hp <= 0 or a.dead
+                          else a.ap_total - a.blink_debt_due)
         a.mp_remaining = 12
         a.blink_debt_due = a.blink_debt_next
         a.blink_debt_next = 0
@@ -413,6 +426,7 @@ class Encounter:
             raise ValueError("No open turn")
         a = self.actors[self.current]
         self.log("turn_end", actor=a.id, unused_ap=a.ap_remaining, unused_mp=a.mp_remaining)
+        self.seen_sequences = {key for key in self.seen_sequences if key[0] != a.id}
         a.ap_remaining = 0
         a.mp_remaining = 0
         self.cursor += 1
@@ -422,6 +436,8 @@ class Encounter:
         if self.current != actor_id:
             raise ValueError("Only current actor may spend Turn AP")
         a = self.actors[actor_id]
+        if a.dead or a.hp <= 0:
+            raise ValueError("Dying/dead actors cannot take ordinary voluntary actions")
         costs = {"physical": a.physical_ap, "projection": a.projection_ap,
                  "general": 24, "full": a.ap_total}
         if kind not in costs or costs[kind] is None:
@@ -493,8 +509,6 @@ class Encounter:
             raise ValueError("Commit all declared profiles and defenses together")
         if any(p not in a.source.attack_profiles for p in profiles):
             raise UnresolvedDecision("Profile is not a supported native G0 fixture attack")
-        if any(p != "physical" for p in (("physical",) * len(profiles))):
-            raise AssertionError("G0 only commits physical profiles")
         if a.ap_remaining < len(profiles) * a.physical_ap:
             raise ValueError("Not enough AP for full Attack Sequence")
         if any(x not in VALID_DEFENSES for x in defenses):
@@ -548,8 +562,23 @@ class Encounter:
             return False
         if spontaneous and on_spontaneous is None:
             raise ValueError("Spontaneous choices require effect resolution")
-        # Choice declaration + payment occurs before any same-trigger response executes.
+        # Validate whole declaration set before paying any Reaction. Multiple
+        # same-window responses from one actor may need a separate authored
+        # permission, which this G0 subset deliberately does not provide.
         choices = sorted(spontaneous, key=lambda c: self.order.index(c.actor_id))
+        if len({c.actor_id for c in choices}) != len(choices):
+            raise UnresolvedDecision("Multiple simultaneous responses by one actor")
+        for c in choices:
+            a = self.actors[c.actor_id]
+            if c.kind not in ("reaction", "opportunity"):
+                raise ValueError("Unknown response category")
+            if c.kind == "reaction" and not a.reaction_available:
+                raise ValueError("Reaction already used")
+            if c.kind == "opportunity":
+                if a.opportunity_used >= a.ap_total // a.physical_ap:
+                    raise ValueError("Opportunity capacity exhausted")
+                if not a.opportunity_active and not a.reaction_available:
+                    raise ValueError("First Opportunity needs Reaction")
         for c in choices:
             a = self.actors[c.actor_id]
             if c.kind == "reaction":
