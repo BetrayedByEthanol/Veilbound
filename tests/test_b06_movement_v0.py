@@ -557,6 +557,98 @@ class G1PhysicalAcceptance(unittest.TestCase):
         self.assertEqual(h.ap_remaining, 18)
         e.check()
 
+    def test_review_p1_stale_reaction_finishes_paid_pounce_unresolved(self):
+        # G0's own response engine has already spent this prey's Reaction.
+        # Rejecting that now-stale choice must not strand the paid Bite.
+        h = hunter()
+        prey = hero("prey", (6, 2))
+        e, g = scenario(h, prey, scores={"hunter": 20, "prey": 10})
+        e.begin_round()
+        from scripts.b06_encounter_state_v0 import Trigger
+        self.assertTrue(e.response_window(
+            Trigger("prior-legal-reaction", "prey", "hunter"),
+            on_interception=lambda *_: None,
+            spontaneous=(Response("prey", "reaction", "already used"),),
+            on_spontaneous=lambda *_: None))
+        self.assertFalse(prey.reaction_available)
+        e.start_turn("hunter")
+        g.start_pounce("hunter", "prey")
+        for _ in range(3):
+            self.assertTrue(g.step("hunter", (1, 0)))
+        initial = (prey.hp, prey.vigor, prey.vp_available,
+                   prey.guard_remaining, h.vigor)
+        with self.assertRaisesRegex(ValueError, "Reaction already used"):
+            g.pounce_contact(
+                defense="take_hit",
+                responses=(Response("prey", "reaction", "stale response"),))
+        self.assertIsNone(g.pounce)
+        self.assertEqual((h.ap_remaining, h.mp_remaining), (18, 0))
+        self.assertEqual((prey.hp, prey.vigor, prey.vp_available,
+                          prey.guard_remaining, h.vigor), initial)
+        self.assertIn(("hunter", "prey"), e.seen_sequences)
+        terminal = [ev for ev in e.ledger
+                    if ev["kind"] == "g1_pounce_contact_result"]
+        self.assertEqual(len(terminal), 1)
+        self.assertIsNone(terminal[0]["detail"]["legal_after_responses"])
+        self.assertEqual(terminal[0]["detail"]["bite"],
+                         "unresolved_response_window_G1")
+        self.assertIn("Reaction already used",
+                      terminal[0]["detail"]["response_error"])
+        self.assertEqual(len([ev for ev in e.ledger
+                              if ev["kind"] == "g1_pounce_bite_committed"]), 1)
+        self.assertEqual(len([ev for ev in e.ledger
+                              if ev["kind"] == "spontaneous_committed"]), 1)
+        with self.assertRaisesRegex(ValueError, "No Pounce approach"):
+            g.pounce_contact()
+        e.end_turn()
+        self.assertIsNone(e.current)
+        e.check()
+
+    def test_review_p1_late_effect_failure_also_cleans_bite_once(self):
+        # A callback may reject an independently chosen effect after
+        # G0 validates and pays its Reaction. No resource refund or
+        # fabricated Bite result is allowed on that exceptional path.
+        h = hunter()
+        prey = hero("prey", (6, 2))
+        e, g = scenario(h, prey, scores={"hunter": 20, "prey": 10})
+        e.begin_round()
+        e.start_turn("hunter")
+        g.start_pounce("hunter", "prey")
+        for _ in range(3):
+            self.assertTrue(g.step("hunter", (1, 0)))
+        def invalid_effect(*_):
+            raise UnresolvedDecision("authoritative response effect unavailable")
+        with self.assertRaisesRegex(UnresolvedDecision, "effect unavailable"):
+            g.pounce_contact(
+                responses=(Response("prey", "reaction", "legal but unresolved"),),
+                on_response=invalid_effect)
+        self.assertIsNone(g.pounce)
+        self.assertEqual((h.ap_remaining, h.mp_remaining), (18, 0))
+        self.assertFalse(prey.reaction_available)
+        self.assertEqual(len([ev for ev in e.ledger
+                              if ev["kind"] == "g1_pounce_contact_result"]), 1)
+        self.assertIn(("hunter", "prey"), e.seen_sequences)
+        e.end_turn()
+        e.check()
+
+    def test_review_p2_dead_prey_denied_pounce_before_any_commitment(self):
+        h = hunter()
+        prey = hero("prey", (6, 2))
+        prey.hp = -prey.hp_max
+        prey.dead = True
+        e, g = scenario(h, prey, scores={"hunter": 20, "prey": 10})
+        e.begin_round()
+        e.start_turn("hunter")
+        baseline = (h.occupied, h.ap_remaining, h.mp_remaining,
+                    len(e.ledger), prey.hp, prey.dead)
+        with self.assertRaisesRegex(ValueError, "Pounce requires one-square opposing"):
+            g.start_pounce("hunter", "prey")
+        self.assertEqual((h.occupied, h.ap_remaining, h.mp_remaining,
+                          len(e.ledger), prey.hp, prey.dead), baseline)
+        self.assertIsNone(g.pounce)
+        self.assertFalse(any(v["kind"] == "g1_pounce_declared" for v in e.ledger))
+        e.check()
+
     def test_expired_mp_reservation_never_releases_next_turn(self):
         a = sentry("a", at=((1, 1),))
         b = hero("b", (6, 1))
