@@ -41,13 +41,23 @@ def build_report(seeds=SEEDS):
     if [r["scenario"] for r in rows] != expected_keys:
         raise AssertionError("Case order mismatch")
 
+    # Strict allowlist: raw census rows are later copied into the signed
+    # "cases" payload. Never sign an unexpected, un-replayed aggregate.
+    expected_row_keys = {"scenario", "trials", "terminal", "mean_hunter_hp",
+                         *METRICS}
     for row in rows:
+        if set(row) != expected_row_keys:
+            raise AssertionError(f"Unexpected census fields: {row['scenario']}")
         terminal = row["terminal"]
-        if (row["trials"] != seeds or set(terminal) - TERMINAL_STATES or
-                any(not isinstance(v, int) or v < 0 for v in terminal.values()) or
+        # bool is a subclass of int in Python; enforce exact integer types,
+        # including zero and one, before comparisons and SHA generation.
+        if (type(row["trials"]) is not int or row["trials"] != seeds or
+                not isinstance(terminal, dict) or
+                set(terminal) - TERMINAL_STATES or
+                any(type(v) is not int or v < 0 for v in terminal.values()) or
                 sum(terminal.values()) != seeds):
             raise AssertionError(f"Terminal conservation: {row['scenario']}")
-        if any(not isinstance(row[k], int) or row[k] < 0 for k in METRICS):
+        if any(type(row[k]) is not int or row[k] < 0 for k in METRICS):
             raise AssertionError(f"Invalid counter: {row['scenario']}")
         # These are summed *per-trial booleans*, not event multiplicities.
         # Each can occur at most once within one source trial.
@@ -199,7 +209,8 @@ def build_report(seeds=SEEDS):
                 sum(t["hunter_hp"] for t in replayed) / seeds, 3),
         }
         for key, source_value in expected.items():
-            if row[key] != source_value:
+            if (type(row[key]) is not type(source_value) or
+                    row[key] != source_value):
                 raise AssertionError(
                     f"Census differs from source trial replay "
                     f"({key}): {row['scenario']}")
