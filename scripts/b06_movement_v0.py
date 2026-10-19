@@ -308,12 +308,17 @@ class GridMovement:
             raise ValueError("Insufficient movement MP")
         initial = a.occupied
         threats = self._threats(actor_id, dest, cautious)
-        wanted = tuple(responses)
+        # Explicit policy may choose AFTER Interceptions from then-current
+        # threats; static caller choices are preflighted here, and are safely
+        # dropped if their source ceases to threaten by response time.
+        dynamic_policy = responses if callable(responses) else None
+        wanted = () if dynamic_policy else tuple(responses)
         if any(not isinstance(c, Response) or c.kind != "opportunity"
                or c.actor_id not in threats for c in wanted):
             raise ValueError("Explicit Opportunity choice not eligible from departure")
         if len({c.actor_id for c in wanted}) != len(wanted):
             raise ValueError("One Movement Opportunity per enemy per segment")
+        decided_sources = []
         key = trigger_key or f"g1:{actor_id}:step:{len(self.e.ledger)}"
         # Block own-turn self-trigger before G0 dequeues reserved MP.
         if any(r.trigger_key == key and r.actor_id == actor_id
@@ -352,11 +357,30 @@ class GridMovement:
                              clockwise=clockwise, cautious=cautious)
             except (ValueError, UnresolvedDecision):
                 tr.legal = False
-            if any(c.actor_id not in self._threats(actor_id, dest, cautious)
-                   for c in wanted):
-                # Changed interception geometry invalidates the original
-                # responder declaration; no unrelated Opportunity is paid.
-                tr.legal = False
+            # Responder eligibility is collected by decide_opportunities()
+            # below only AFTER this stage. Invalid old offers are not a
+            # reason to cancel an otherwise legal original step.
+
+        def decide_opportunities(e, tr):
+            eligible = self._threats(actor_id, dest, cautious)
+            decided_sources[:] = eligible
+            if dynamic_policy is not None:
+                selected = dynamic_policy(eligible)
+                if selected is None:
+                    raise UnresolvedDecision("G1 Opportunity policy did not choose")
+                selected = tuple(selected)
+                if any(not isinstance(c, Response) or c.kind != "opportunity"
+                       or c.actor_id not in eligible for c in selected):
+                    raise ValueError("Post-Interception Opportunity choice not eligible")
+            else:
+                selected = tuple(c for c in wanted if c.actor_id in eligible)
+                for c in wanted:
+                    if c.actor_id not in eligible:
+                        e.log("g1_opportunity_no_longer_eligible", mover=actor_id,
+                              responder=c.actor_id, trigger=tr.key)
+            if len({c.actor_id for c in selected}) != len(selected):
+                raise ValueError("One Movement Opportunity per enemy per segment")
+            return selected
 
         def apply_response(e, tr, response):
             e.log("g1_movement_opportunity_pending", attacker=response.actor_id,
@@ -368,16 +392,21 @@ class GridMovement:
         # first legality recheck, legal spontaneous Opportunity, second recheck.
         can_proceed = self.e.response_window(
             trigger, on_interception=apply_interception,
-            spontaneous=wanted, on_spontaneous=apply_response if wanted else None)
+            spontaneous=decide_opportunities, on_spontaneous=apply_response)
         if not can_proceed:
             self.e.log("g1_step_cancelled", actor=actor_id, trigger=key,
                        reason="response_or_geometry_changed", mp_charged=0)
             return False
         # A response may cause a no-longer-passable destination or capacity
         # decrease. Revalidate before atomic state change.
-        latest, new_cost, _, _ = self.preview(
-            actor_id, delta=delta, pivot=pivot, clockwise=clockwise,
-            cautious=cautious)
+        try:
+            latest, new_cost, _, _ = self.preview(
+                actor_id, delta=delta, pivot=pivot, clockwise=clockwise,
+                cautious=cautious)
+        except (ValueError, UnresolvedDecision):
+            self.e.log("g1_step_cancelled", actor=actor_id, trigger=key,
+                       reason="destination_changed_after_response", mp_charged=0)
+            return False
         if a.occupied != initial or latest != dest or new_cost != cost:
             self.e.log("g1_step_cancelled", actor=actor_id, trigger=key,
                        reason="original_position_or_cost_changed", mp_charged=0)
@@ -393,7 +422,7 @@ class GridMovement:
                 run.committed = True
         self._commit_mp(actor_id, cost, reserved)
         a.occupied = latest
-        self.provoked[actor_id].update(threats)
+        self.provoked[actor_id].update(decided_sources)
         if self.pounce and self.pounce.hunter_id == actor_id:
             self.pounce.steps += 1
             self.pounce.spent_mp += cost
@@ -401,7 +430,7 @@ class GridMovement:
                    old=initial, new=latest, step_kind=kind,
                    direction=delta, pivot_anchor=pivot, clockwise=clockwise,
                    cautious=cautious, cost=cost, mp_remaining=self._budget(actor_id, reserved),
-                   opportunity_sources=threats, segment=self.segment[actor_id],
+                   opportunity_sources=decided_sources, segment=self.segment[actor_id],
                    reserved=bool(reserved))
         self.e.check()
         return True
