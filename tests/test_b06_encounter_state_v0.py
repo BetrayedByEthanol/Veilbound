@@ -258,9 +258,11 @@ class G0LedgerTests(unittest.TestCase):
         self.assertIsNone(e.pending_regeneration)
         self.assertEqual(sum(x["kind"] == "turn_start_expiry"
                              for x in e.ledger), 2)
-        self.assertFalse(e.response_window(
+        self.assertTrue(e.response_window(
             Trigger("future", "soldier", "soldier"),
             on_interception=lambda *_: self.fail("Expired reservation fired")))
+        self.assertEqual(sum(x["kind"] == "interception_released"
+                             for x in e.ledger), 0)
         e.end_turn()
         self.assertEqual(sum(x["kind"] == "round_end" for x in e.ledger), 2)
 
