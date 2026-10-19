@@ -262,15 +262,16 @@ class SpellState:
         """Resolve exactly once INSIDE the matching live G0 response callback.
 
         All G0 spontaneous capacities are committed before any callback.
-        Another higher-initiative response may incapacitate this caster
-        after declaration; that loses the Reaction but not any VP.
+        An earlier higher-initiative response may incapacitate this caster
+        or cancel the trigger after declaration. In either case, the already
+        paid Reaction is interrupted, and no spell VP is committed.
         """
         a=self.e.actors.get(caster)
         token=(caster,trigger.key)
         claim=self.reactive_stone_claims.get(token)
         if (a is None or claim is None or claim[0] is not trigger
                 or claim[1] is not response or trigger.target_id!=caster
-                or not trigger.legal or a.source.source_id!="F"):
+                or a.source.source_id!="F"):
             raise ValueError("No matching preflight claim for exact trigger")
         # Ledger history establishes past commitment, not pre-damage
         # timing. This scoped G0 capability exists ONLY while that exact
@@ -290,6 +291,16 @@ class SpellState:
         # before evaluating the now-live actor, including interrupted casts.
         self.reactive_stone_claimed.add(token)
         del self.reactive_stone_claims[token]
+        # A previous same-window response may have cancelled the original
+        # trigger AFTER G0 had committed this caster's Reaction. This is
+        # neither an invalid preflight claim nor a reason to abort G0's
+        # final cancellation ledger: the already-paid Reaction is lost,
+        # but no maintained effect or VP may be established.
+        if not trigger.legal:
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Reactive Stone Skin",trigger=trigger.key,
+                       cause="post_commit_trigger_cancelled",vp_spent=0)
+            return None
         if a.hp<=0 or a.dead:
             self.e.log("g3_cast_interrupted",caster=caster,
                        spell_kind="Reactive Stone Skin",trigger=trigger.key,
