@@ -226,7 +226,8 @@ class B06G3Test(unittest.TestCase):
         s=sentry("prepared_start");e,g=game(s);e.start_turn("sentry")
         e.g2.wielded["sentry"].discard("Sword")
         g.sword_no_longer_wielded("sentry")
-        self.assertEqual(g.sentry_profile("sentry"),"B06-AT-01")
+        with self.assertRaisesRegex(ValueError,"Unwielded sword"):
+            g.sentry_profile("sentry")
         self.assertEqual((s.vp_available,s.vp_committed,s.vp_spent),(6,0,0))
         self.assertNotIn("B06-FIRE-RESERVE-01",s.maintained)
         e.check()
@@ -238,7 +239,8 @@ class B06G3Test(unittest.TestCase):
         self.assertIsNone(g.cast_sentry_reserve("sentry",on_committed=disarm))
         self.assertEqual((s.ap_remaining,s.vp_available,s.vp_committed),
                          (12,6,0))
-        self.assertEqual(g.sentry_profile("sentry"),"B06-AT-01")
+        with self.assertRaisesRegex(ValueError,"Unwielded sword"):
+            g.sentry_profile("sentry")
         e.check()
 
     def test_20_guided_low_priest_chosen_and_nonchosen_cost(self):
