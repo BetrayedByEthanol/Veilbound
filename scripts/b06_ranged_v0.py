@@ -304,7 +304,8 @@ class RangedCombat:
         return range_difficulty,cover,screens,mitigation
 
     @staticmethod
-    def _defense_value(actor,choice,range_diff,obstruction,*,commit=False):
+    def _defense_value(actor,choice,range_diff,obstruction,*,
+                       commit=False,prior_pressure=None,committed_guard=False):
         if choice not in ("take_hit","dodge","guard"):
             raise ValueError("Invalid projectile defense")
         if actor.hp <= 0 or actor.dead:
@@ -313,7 +314,8 @@ class RangedCombat:
         if choice == "guard":
             instr=(actor.guard_instrument or "").lower()
             if ("shield" not in instr and "buckler" not in instr
-                    or not actor.ready_guard or actor.guard_remaining<1
+                    or not actor.ready_guard
+                    or (not committed_guard and actor.guard_remaining<1)
                     or actor.guard_value is None):
                 raise ValueError("Only ready projectile-capable shield Guard allowed")
             value=actor.guard_value+obstruction
@@ -324,7 +326,8 @@ class RangedCombat:
             if any(str(x).lower()=="prone" for x in actor.conditions):
                 raise UnresolvedDecision("Prone Dodge requires explicit physical capability")
             evasion=actor.ap_total//actor.physical_ap - 1
-            value=10+min(actor.agility,4)+actor.awareness+evasion+range_diff+obstruction-actor.dodge_pressure
+            pressure=(actor.dodge_pressure if prior_pressure is None else prior_pressure)
+            value=10+min(actor.agility,4)+actor.awareness+evasion+range_diff+obstruction-pressure
             base=value-obstruction
             if commit:
                 actor.dodge_pressure+=2
@@ -377,7 +380,7 @@ class RangedCombat:
                    label=record.label,steps=entry.steps,
                    consumed_mp=entry.spent_mp,committed_mp=entry.reserved_mp)
 
-    def _shot(self,shooter_id,target_id,shot,seq_no):
+    def _shot(self,shooter_id,target_id,shot,seq_no,defense_record):
         e=self.e
         shooter=e.actors[shooter_id]
         # Defensive choices were validated with the batch before AP payment.
@@ -452,10 +455,30 @@ class RangedCombat:
             lane.cover,screen_tiers,aim=active_aim)
         # Assign declared personal defense before rolling, after Interception.
         target=e.actors[target_id]
-        b,d=self._defense_value(target,shot.defense,range_mod,
-                                 max((cover,*screens.values()),default=0),
-                                 commit=True)
-        e.log("g2_projectile_defense_assigned",actor=target_id,choice=shot.defense,
+        obstruction=max((cover,*screens.values()),default=0)
+        effective_defense=shot.defense
+        try:
+            b,d=self._defense_value(target,shot.defense,range_mod,obstruction,
+                                   prior_pressure=defense_record["pressure"],
+                                   committed_guard=(shot.defense=="guard"))
+        except ValueError as error:
+            if shot.defense!="guard" and shot.defense!="dodge":
+                raise
+            if shot.defense=="guard" and target.hp>0 and not target.dead:
+                try:
+                    b,d=self._defense_value(target,"dodge",range_mod,obstruction,
+                                            commit=True)
+                    effective_defense="dodge"
+                except (ValueError,UnresolvedDecision):
+                    b,d=self._defense_value(target,"take_hit",range_mod,obstruction)
+                    effective_defense="take_hit"
+            else:
+                b,d=self._defense_value(target,"take_hit",range_mod,obstruction)
+                effective_defense="take_hit"
+            e.log("g2_projectile_defense_fallback",actor=target_id,
+                  original=shot.defense,actual=effective_defense,reason=str(error))
+        e.log("g2_projectile_defense_rechecked",actor=target_id,
+              declared=shot.defense,actual=effective_defense,
               base=b,final=d,guard_remaining=target.guard_remaining,
               dodge_pressure=target.dodge_pressure)
         shooter.ammunition-=1  # only now has the arrow physically launched
@@ -516,7 +539,7 @@ class RangedCombat:
                           target=incidental,defense=declaration,defense_value=cd,
                           secondary_face=sec,secondary_total=sec+bonus,
                           outcome=outcome,extra_ap=0,extra_ammo=0)
-                elif shot.defense=="guard" and total<=b:
+                elif effective_defense=="guard" and total<=b:
                     outcome="intended_guard_impact"
                     struck=None
                 else:
@@ -525,7 +548,7 @@ class RangedCombat:
             elif cover and total>b and total<=d:
                 outcome="cover_impact"
                 struck=None
-            elif shot.defense=="guard" and total<=b:
+            elif effective_defense=="guard" and total<=b:
                 outcome="intended_guard_impact"
                 struck=None
             else:
@@ -614,4 +637,23 @@ class RangedCombat:
         e.log("g2_bow_sequence_committed",shooter=shooter_id,target=target_id,
               profiles=["Bow"]*len(shots),defenses=[s.defense for s in shots],
               ammunition_selected=len(shots),note="only launched arrows are expended")
-        return tuple(self._shot(shooter_id,target_id,shot,i) for i,shot in enumerate(shots))
+        # Defense choices and their resources are committed for the
+        # ENTIRE on-turn sequence before its first attack roll, matching
+        # the canonical Attack Sequence and the existing native G0 path.
+        # Record each Dodge's original pressure before advancing it;
+        # later lane/interception rechecks recompute numeric B/D from that
+        # snapshot without charging Guard/Dodge twice.
+        defense_records=[]
+        t=e.actors[target_id]
+        for i,sh in enumerate(shots):
+            before=t.dodge_pressure
+            self._defense_value(t,sh.defense,0,0,commit=True)
+            defense_records.append({"pressure":before})
+            e.log("g2_projectile_defense_preassigned",actor=target_id,
+                  shooter=shooter_id,sequence_index=i,choice=sh.defense,
+                  dodge_pressure_before=before,
+                  guard_remaining=t.guard_remaining,
+                  dodge_pressure=t.dodge_pressure)
+        e.check()
+        return tuple(self._shot(shooter_id,target_id,shot,i,defense_records[i])
+                     for i,shot in enumerate(shots))
