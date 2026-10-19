@@ -59,7 +59,7 @@ class AimRecord:
     source: str
     position: tuple
     own_turn_number: int
-    target_cell: tuple | None = None
+    target_part: str | None = None
     origin_cell: tuple | None = None
 
 
@@ -297,9 +297,12 @@ class RangedCombat:
         if not a.ap_remaining >= a.physical_ap:
             raise ValueError("Insufficient AP to Aim")
         self.e.spend_ap(shooter_id,"physical",label="g2:aim:"+source)
+        target=self.e.actors[target_id]
+        named=(target_cell if target_cell is not None else target.occupied[0])
+        part=target.footprint[target.occupied.index(named)]
         self.aims[shooter_id]=AimRecord(target_id,profile,source,a.occupied,
                                        self.own_turn_number[shooter_id],
-                                       target_cell,origin_cell)
+                                       part,origin_cell)
         self.e.log("g2_aim_prepared",shooter=shooter_id,target=target_id,
                    profile=profile,source=source)
         return self.aims[shooter_id]
@@ -752,7 +755,10 @@ class RangedCombat:
                 record=self.aims.get(shooter_id)
                 if (not record or record.target!=target_id or record.profile!="bow"
                         or record.source!=sh.aim_source
-                        or record.target_cell!=sh.target_cell
+                        or record.target_part!=e.actors[target_id].footprint[
+                            e.actors[target_id].occupied.index(
+                                sh.target_cell if sh.target_cell is not None
+                                else e.actors[target_id].occupied[0])]
                         or record.origin_cell!=sh.origin_cell):
                     raise ValueError("Shot has no matching retained Aim for this exact point")
         # Snapshot selected stable G1 anatomical labels before AP and any
