@@ -315,6 +315,7 @@ class Encounter:
         self.seen_sequences = set()
         self.regen_done = set()
         self.pending_regeneration = None
+        self.g1 = None  # Optional native physical grid; G0-only stays supported.
         rank = {v: i for i, v in enumerate(tie_order)}
         def priority(a):
             return (-initiative_scores[a.id], -a.awareness, -a.agility,
@@ -471,12 +472,16 @@ class Encounter:
         a.blink_debt_next = 0
         self.log("turn_resources", actor=actor_id, ap=a.ap_remaining,
                  mp=a.mp_remaining)
+        if self.g1 is not None:
+            self.g1.on_turn_start(actor_id)
         self.check()
 
     def end_turn(self):
         if self.current is None or self.pending_regeneration is not None:
             raise ValueError("No resolved open turn")
         a = self.actors[self.current]
+        if self.g1 is not None and self.g1.pounce is not None and self.g1.pounce.hunter_id == a.id:
+            raise ValueError("Resolve or explicitly abort ongoing Pounce before turn end")
         self.log("turn_end", actor=a.id, unused_ap=a.ap_remaining, unused_mp=a.mp_remaining)
         self.seen_sequences = {key for key in self.seen_sequences if key[0] != a.id}
         a.ap_remaining = 0
@@ -512,6 +517,8 @@ class Encounter:
         a.ap_remaining -= cost
         self.log("action_committed", actor=actor_id, action_class=kind, label=label,
                  ap_spent=cost, ap_remaining=a.ap_remaining)
+        if self.g1 is not None:
+            self.g1.on_own_action(actor_id, label=label)
         return cost
 
     def spend_vp(self, actor_id, points, *, mode, label):
