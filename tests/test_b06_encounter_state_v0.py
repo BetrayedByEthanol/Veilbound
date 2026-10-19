@@ -174,6 +174,121 @@ class G0LedgerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             e.begin_round()  # Mid-round refresh is forbidden.
 
+    def test_dying_at_round_begin_keeps_reaction_for_own_turn_recovery(self):
+        # Dying Sentry has an unfinished wound, then spends the real
+        # survival + repair + HP natural-regeneration budget at its own Step 2.
+        a = sentry("cold_start")
+        a.hp = 0
+        a.wounds = [Wound("serious", 10, 9)]
+        e = scene(a)
+        e.begin_round()
+        self.assertTrue(a.reaction_available)  # refreshed, not currently usable
+        for kind in ("reaction", "opportunity"):
+            with self.subTest(kind=kind):
+                with self.assertRaisesRegex(ValueError, "Dying/dead actor"):
+                    e.response_window(
+                        Trigger("before-" + kind, "sentry", "sentry"),
+                        on_interception=lambda *_: None,
+                        spontaneous=(Response("sentry", kind, "unauthorized while Dying"),),
+                        on_spontaneous=lambda *_: self.fail("Dying response resolved"))
+                self.assertTrue(a.reaction_available)
+                self.assertFalse(a.opportunity_active)
+                self.assertEqual(a.opportunity_used, 0)
+        self.assertFalse(any(x["kind"] == "spontaneous_committed"
+                             for x in e.ledger))
+        e.start_turn("sentry", regen_choice=RegenerationChoice(
+            hp=1, repair=1, cancel_dying_loss=True))
+        self.assertEqual((a.hp, a.vigor, a.wounds[0].progress), (1, 33, 10))
+        self.assertTrue(a.reaction_available)  # no extra refresh, same capacity
+        self.assertTrue(e.response_window(
+            Trigger("after-recovery", "sentry", "sentry"),
+            on_interception=lambda *_: None,
+            spontaneous=(Response("sentry", "reaction", "explicit legal reaction probe"),),
+            on_spontaneous=lambda st, tr, c: st.log("test_authorized_response",
+                                                      actor=c.actor_id)))
+        self.assertFalse(a.reaction_available)
+        with self.assertRaisesRegex(ValueError, "Reaction already used"):
+            e.response_window(
+                Trigger("second-in-round", "sentry", "sentry"),
+                on_interception=lambda *_: None,
+                spontaneous=(Response("sentry", "reaction", "second"),),
+                on_spontaneous=lambda *_: self.fail("Double Reaction"))
+        e.check()
+
+    def test_recovered_actors_can_activate_opportunity_once_per_round(self):
+        a = sentry("cold_start")
+        a.hp = 0
+        a.wounds = [Wound("wound", 10, 9)]
+        e = scene(a)
+        e.begin_round()
+        e.start_turn("sentry", regen_choice=RegenerationChoice(
+            hp=1, repair=1, cancel_dying_loss=True))
+        for index in (1, 2):  # Physical Tempo 42//20 == 2
+            self.assertTrue(e.response_window(
+                Trigger(f"opportunity-{index}", "sentry", "sentry"),
+                on_interception=lambda *_: None,
+                spontaneous=(Response("sentry", "opportunity", "eligible test trigger"),),
+                on_spontaneous=lambda *_: None))
+        self.assertFalse(a.reaction_available)
+        self.assertTrue(a.opportunity_active)
+        self.assertEqual(a.opportunity_used, 2)
+        with self.assertRaisesRegex(ValueError, "Opportunity capacity exhausted"):
+            e.response_window(
+                Trigger("third-opportunity", "sentry", "sentry"),
+                on_interception=lambda *_: None,
+                spontaneous=(Response("sentry", "opportunity", "third"),),
+                on_spontaneous=lambda *_: self.fail("Excess Opportunity"))
+
+    def test_recovery_does_not_replenish_already_spent_reaction(self):
+        a = sentry("cold_start")
+        e = scene(a)
+        e.begin_round()
+        e.response_window(
+            Trigger("earlier", "sentry", "sentry"),
+            on_interception=lambda *_: None,
+            spontaneous=(Response("sentry", "reaction", "prior legal response"),),
+            on_spontaneous=lambda *_: None)
+        self.assertFalse(a.reaction_available)
+        # Source-resolved damage/earlier wound state is an input; G0 does
+        # not invent the damaging event or an external spell execution.
+        a.hp = 0
+        a.wounds = [Wound("wound", 10, 9)]
+        e.start_turn("sentry", regen_choice=RegenerationChoice(
+            hp=1, repair=1, cancel_dying_loss=True))
+        self.assertEqual(a.hp, 1)
+        self.assertFalse(a.reaction_available)
+        e.end_turn()
+        e.begin_round()
+        self.assertTrue(a.reaction_available)
+
+    def test_incapacitated_attacker_cannot_poison_sequence_lock_or_ap(self):
+        a = soldier()
+        target = sentry("cold_start")
+        e = scene(a, target, score={"soldier": 20, "sentry": 10})
+        e.begin_round()
+        e.start_turn("soldier")
+        self.assertEqual(a.ap_remaining, 42)
+        # A separate previously legal event incapacitates the attacker
+        # after AP was established; G0 does not adjudicate that event.
+        a.hp = 0
+        baseline = len(e.ledger)
+        with self.assertRaisesRegex(ValueError, "Dying/dead attacker"):
+            e.declare_sequence("soldier", "sentry", ("B06-AT-03",), ("guard",))
+        self.assertEqual(a.ap_remaining, 42)
+        self.assertEqual(target.guard_remaining, 3)
+        self.assertFalse(e.seen_sequences)
+        self.assertEqual(len(e.ledger), baseline)
+        # A separately authored external recovery (G3/G4) restores HP
+        # before this turn ends; the original target is still eligible.
+        a.hp = 1
+        e.declare_sequence("soldier", "sentry", ("B06-AT-03",), ("guard",))
+        self.assertEqual(a.ap_remaining, 18)
+        self.assertEqual(target.guard_remaining, 2)
+        self.assertIn(("soldier", "sentry"), e.seen_sequences)
+        with self.assertRaisesRegex(ValueError, "Second ordinary"):
+            e.declare_sequence("soldier", "sentry", ("B06-AT-03",), ("take_hit",))
+        e.check()
+
     def test_attack_profile_active_and_inactive_predicates_are_precommitted(self):
         # Both source predicates are required, not just profile membership.
         for start, illegal, legal in (
