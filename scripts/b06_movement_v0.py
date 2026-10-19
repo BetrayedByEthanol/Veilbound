@@ -144,6 +144,9 @@ class GridMovement:
 
     def threatens(self, actor_id, at):
         a = self.e.actors[actor_id]
+        if self.e.g2 is not None and a.source.source_id == "R":
+            return ("Dagger" in self.e.g2.wielded[actor_id]
+                    and a.hp > 0 and not a.dead and at in self.reach(actor_id))
         return self._can_melee(a) and at in self.reach(actor_id)
 
     def melee_contact(self, attacker_id, target_id, *, hunter_front=False):
@@ -525,6 +528,8 @@ class GridMovement:
                        entered_allies=sorted(ally), mode="cautious" if cautious else "normal")
         a.occupied = simulated[-1][1]
         a.mp_remaining -= total
+        if self.e.g2 is not None:
+            self.e.g2.on_position_change(actor_id)
         self.e.log("g1_allied_transit_finished", actor=actor_id,
                    steps=len(simulated), cost=total, remaining_mp=a.mp_remaining)
         self.e.check()
