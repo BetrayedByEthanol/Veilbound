@@ -132,6 +132,10 @@ class G0LedgerTests(unittest.TestCase):
         self.assertEqual([e["index"] for e in events], list(range(len(events))))
         self.assertIn("round_begin", [e["kind"] for e in events])
         self.assertEqual(sum(e["kind"] == "round_end" for e in events), 1)
+        # Round End must precede the *next* Round Begin, not wait for it.
+        ends = [i for i, ev in enumerate(events) if ev["kind"] == "round_end"]
+        begins = [i for i, ev in enumerate(events) if ev["kind"] == "round_begin"]
+        self.assertLess(ends[0], begins[1])
 
     def test_vp_available_committed_spent_refund_not_spent(self):
         s = sentry("prepared_start")
@@ -169,6 +173,96 @@ class G0LedgerTests(unittest.TestCase):
             e.defense("soldier", "guard", attack_key="arrow", projectile=True)
         with self.assertRaises(ValueError):
             e.begin_round()  # Mid-round refresh is forbidden.
+
+    def test_attack_profile_active_and_inactive_predicates_are_precommitted(self):
+        # Both source predicates are required, not just profile membership.
+        for start, illegal, legal in (
+                ("cold_start", "B06-AT-02", "B06-AT-01"),
+                ("prepared_start", "B06-AT-01", "B06-AT-02")):
+            with self.subTest(start=start):
+                caster = sentry(start)
+                defender = soldier(at=((5, 0),))
+                e = scene(caster, defender,
+                          score={"sentry": 20, "soldier": 10})
+                e.begin_round()
+                e.start_turn("sentry")
+                before = caster.ap_remaining
+                with self.assertRaisesRegex(ValueError, "requires.*effect"):
+                    e.declare_sequence("sentry", "soldier",
+                                       (illegal,), ("guard",))
+                self.assertEqual(caster.ap_remaining, before)
+                self.assertEqual(defender.guard_remaining, 2)
+                self.assertNotIn(("sentry", "soldier"), e.seen_sequences)
+                e.declare_sequence("sentry", "soldier",
+                                   (legal,), ("guard",))
+                self.assertEqual(caster.ap_remaining, before - 20)
+                self.assertEqual(defender.guard_remaining, 1)
+
+    def test_hunter_contact_and_dying_defense_preflight_are_atomic(self):
+        hunter_actor = hunter()
+        opponent = soldier(at=((1, 0),))
+        e = scene(hunter_actor, opponent,
+                  score={"hunter": 20, "soldier": 10})
+        e.begin_round()
+        e.start_turn("hunter")
+        before = hunter_actor.ap_remaining
+        with self.assertRaisesRegex(UnresolvedDecision, "Hunter attack"):
+            e.declare_sequence("hunter", "soldier",
+                               ("B06-AT-04",), ("guard",))
+        self.assertEqual(hunter_actor.ap_remaining, before)
+        self.assertEqual(opponent.guard_remaining, 2)
+        self.assertNotIn(("hunter", "soldier"), e.seen_sequences)
+
+        attacker = sentry("cold_start")
+        dying = soldier(at=((5, 0),))
+        dying.hp = 0
+        e2 = scene(attacker, dying,
+                   score={"sentry": 20, "soldier": 10})
+        e2.begin_round()
+        e2.start_turn("sentry")
+        with self.assertRaisesRegex(ValueError, "Dying/dead target"):
+            e2.declare_sequence("sentry", "soldier",
+                                ("B06-AT-01",), ("dodge",))
+        self.assertEqual(attacker.ap_remaining, 42)
+        self.assertEqual(dying.dodge_pressure, 0)
+        self.assertNotIn(("sentry", "soldier"), e2.seen_sequences)
+        e2.declare_sequence("sentry", "soldier",
+                            ("B06-AT-01",), ("take_hit",))
+        self.assertEqual(attacker.ap_remaining, 22)
+
+    def test_expiry_is_committed_once_when_regeneration_policy_is_pending(self):
+        a = soldier()
+        e = scene(a)
+        e.begin_round()
+        e.start_turn("soldier")
+        e.reserve("soldier", "future", "expires on next own turn")
+        e.end_turn()
+        # The round must end *now*, without requiring another begin_round.
+        self.assertEqual(e.ledger[-1]["kind"], "round_end")
+        e.begin_round()
+        a.hp = 10
+        with self.assertRaisesRegex(UnresolvedDecision, "regeneration allocation"):
+            e.start_turn("soldier")
+        self.assertEqual(e.current, "soldier")
+        self.assertEqual(e.pending_regeneration, "soldier")
+        self.assertFalse(e.reservations)
+        self.assertEqual(sum(x["kind"] == "turn_start_expiry"
+                             for x in e.ledger), 2)  # once each own turn
+        with self.assertRaises(UnresolvedDecision):
+            e.response_window(Trigger("future", "soldier", "soldier"),
+                              on_interception=lambda *_: None)
+        with self.assertRaises(ValueError):
+            e.end_turn()
+        e.start_turn("soldier", regen_choice=RegenerationChoice(hp=1))
+        self.assertEqual((a.hp, a.vigor), (11, 35))
+        self.assertIsNone(e.pending_regeneration)
+        self.assertEqual(sum(x["kind"] == "turn_start_expiry"
+                             for x in e.ledger), 2)
+        self.assertFalse(e.response_window(
+            Trigger("future", "soldier", "soldier"),
+            on_interception=lambda *_: self.fail("Expired reservation fired")))
+        e.end_turn()
+        self.assertEqual(sum(x["kind"] == "round_end" for x in e.ledger), 2)
 
     def test_no_illegal_second_sequence_or_dice_after_defense(self):
         a = soldier()
@@ -251,7 +345,8 @@ class G0LedgerTests(unittest.TestCase):
         e.begin_round()
         with self.assertRaisesRegex(UnresolvedDecision, "non-Dying wound"):
             e.start_turn("soldier", regen_choice=RegenerationChoice(repair=1))
-        self.assertIsNone(e.current)
+        self.assertEqual(e.current, "soldier")
+        self.assertEqual(e.pending_regeneration, "soldier")
         self.assertEqual((a.hp, a.vigor, [w.progress for w in a.wounds]),
                          (10, 36, [1, 2]))
         self.assertIn("unresolved_decision", [x["kind"] for x in e.ledger])
