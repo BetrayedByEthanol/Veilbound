@@ -264,6 +264,8 @@ class GridMovement:
         a = self.e.actors[actor_id]
         if a.hp <= 0 or a.dead:
             raise ValueError("Incapacitated creature cannot voluntarily move")
+        if any(str(status).lower() == "prone" for status in a.conditions):
+            raise UnresolvedDecision("Prone locomotion requires Crawl/Stand executor")
         if reserved is None and (self.e.current != actor_id or self.e.pending_regeneration):
             raise ValueError("Normal movement requires ready current actor turn")
         if reserved is not None and self.e.current == actor_id:
@@ -285,6 +287,10 @@ class GridMovement:
         if len({c.actor_id for c in wanted}) != len(wanted):
             raise ValueError("One Movement Opportunity per enemy per segment")
         key = trigger_key or f"g1:{actor_id}:step:{len(self.e.ledger)}"
+        # Block own-turn self-trigger before G0 dequeues reserved MP.
+        if any(r.trigger_key == key and r.actor_id == actor_id
+               for r in self.e.reservations if r.label in self.motion):
+            raise ValueError("Movement Interception cannot self-trigger on own turn")
         trigger = Trigger(key, actor_id, actor_id)
         interception_paths = interceptor_routes or {}
 
@@ -295,20 +301,33 @@ class GridMovement:
             route = interception_paths.get(reservation.label, ())
             steps_before = entry.steps
             for step in route:
-                self._movement(entry.actor_id, delta=tuple(step), reserved=entry,
-                               trigger_key=f"{key}:intercept:{entry.steps}",
-                               interceptor_routes=interception_paths)
+                try:
+                    self._movement(entry.actor_id, delta=tuple(step), reserved=entry,
+                                   trigger_key=f"{key}:intercept:{entry.steps}",
+                                   interceptor_routes=interception_paths)
+                except (ValueError, UnresolvedDecision) as error:
+                    # Invalid caller policy never grants movement; any MP
+                    # remaining in a released reservation is still forfeited.
+                    e.log("g1_interception_route_rejected", actor=entry.actor_id,
+                          label=entry.label, reason=str(error),
+                          spent_mp=entry.spent_mp)
+                    break
             e.log("g1_movement_interception_resolved", actor=entry.actor_id,
                   label=entry.label, committed_mp=entry.reserved_mp,
                   consumed_mp=entry.spent_mp, completed_steps=entry.steps)
-            if entry.steps > steps_before and self.e.current is not None:
-                self.break_segment(self.e.current, reason="movement_interception")
+            if entry.steps > steps_before:
+                self.break_segment(actor_id, reason="movement_interception")
             # Original declaration must be rechecked against changed map;
             # if geometry invalidated it, precommitted costs are not refunded.
             try:
                 self.preview(actor_id, delta=delta, pivot=pivot,
                              clockwise=clockwise, cautious=cautious)
             except (ValueError, UnresolvedDecision):
+                tr.legal = False
+            if any(c.actor_id not in self._threats(actor_id, dest, cautious)
+                   for c in wanted):
+                # Changed interception geometry invalidates the original
+                # responder declaration; no unrelated Opportunity is paid.
                 tr.legal = False
 
         def apply_response(e, tr, response):
@@ -423,6 +442,10 @@ class GridMovement:
         if self.pounce is not None and self.pounce.hunter_id == actor_id:
             raise ValueError("Pounce prohibits new Movement Interception reservations")
         a = self.e.actors[actor_id]
+        if a.dead or a.hp <= 0:
+            raise ValueError("Dying/dead creature cannot reserve voluntary movement")
+        if any(str(status).lower() == "prone" for status in a.conditions):
+            raise UnresolvedDecision("Prone MP reservation needs Crawl/Stand executor")
         if type(mp) is not int or mp < 1 or mp > a.mp_remaining:
             raise ValueError("Positive available MP required")
         if not trigger_key or not label:
@@ -455,8 +478,13 @@ class GridMovement:
             raise ValueError("Pounce needs cardinal head-forward body")
         if (target_id not in self.e.actors or
                 len(self.e.actors[target_id].occupied) != 1 or
-                self.e.actors[target_id].team == a.team):
-            raise ValueError("Pounce target must be one-square opposing creature")
+                self.e.actors[target_id].team == a.team or
+                self.e.actors[target_id].source.source_id not in ("A", "B", "R", "F")):
+            raise ValueError("Pounce requires one-square opposing player character")
+        if (any(str(x).lower() == "prone" for x in a.conditions) or
+                any(str(x).lower() == "prone"
+                    for x in self.e.actors[target_id].conditions)):
+            raise ValueError("Pounce requires standing Hunter and standing prey")
         a.mp_remaining = 24
         self.pounce = PounceRun(hunter_id, target_id, heading)
         self.e.log("g1_pounce_declared", hunter=hunter_id, target=target_id,
