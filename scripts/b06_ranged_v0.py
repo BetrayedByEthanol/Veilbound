@@ -600,11 +600,11 @@ class RangedCombat:
                                          if squares<=limit),None)
                     actual_defense=declaration
                     try:
-                        position_secondary=self._prone_position(candidate,squares,0,
-                                                              shot.prone_cover_policy)
-                    cb,cd=self._defense_value(candidate,declaration,
-                                                   secondary_band,0,commit=True,
-                                                   position_bonus=position_secondary)
+                        position_secondary=self._prone_position(
+                            candidate,squares,0,shot.prone_cover_policy)
+                        cb,cd=self._defense_value(
+                            candidate,declaration,secondary_band,0,commit=True,
+                            position_bonus=position_secondary)
                     except (ValueError,UnresolvedDecision) as error:
                         # A predeclared ordinary Guard can become physically
                         # unusable before its conditional face is selected.
