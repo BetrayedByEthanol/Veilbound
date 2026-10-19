@@ -66,8 +66,8 @@ class G0SourceTests(unittest.TestCase):
                 self.assertEqual(a.ap_total, 30 + 6 * (lvl - 1))
                 a.validate()
                 if role in ("A", "B"):
-                    self.assertEqual(a.source.status, "BOUNDED_PHYSICAL_PROXY")
-                    self.assertEqual(a.vp_max, 0)
+                    self.assertEqual(a.source.status, "B05_UNBUFFED_PHYSICAL_PROXY")
+                    self.assertEqual(a.vp_max, 2 * lvl)
                 else:
                     self.assertEqual(a.source.status, "STRUCTURAL_B05_ONLY")
                     self.assertEqual(a.vp_max, (2 if role == "R" else 6) * lvl)
@@ -153,7 +153,8 @@ class G0LedgerTests(unittest.TestCase):
             e.defense("hero", "guard", attack_key="no bow guard")
         with self.assertRaises(UnresolvedDecision):
             e.defense("soldier", "guard", attack_key="arrow", projectile=True)
-        e.begin_round() if False else None  # Mid-round refresh is forbidden.
+        with self.assertRaises(ValueError):
+            e.begin_round()  # Mid-round refresh is forbidden.
 
     def test_no_illegal_second_sequence_or_dice_after_defense(self):
         a = soldier()
@@ -194,6 +195,7 @@ class G0LedgerTests(unittest.TestCase):
         e2.begin_round()
         e2.start_turn("soldier", regen_choice=RegenerationChoice(hp=1, repair=1))
         self.assertEqual((s2.hp, s2.vigor, s2.wounds[0].progress), (8, 34, 3))
+        self.assertIn("turn_resources", [x["kind"] for x in e2.ledger])
         e2.end_turn()
         d = soldier()
         d.hp = 0
@@ -271,7 +273,10 @@ class G0LedgerTests(unittest.TestCase):
         kinds = [x["kind"] for x in e.ledger]
         idx_nested = next(i for i, x in enumerate(e.ledger)
                           if x["kind"] == "response_window_open" and x["detail"]["trigger"] == "nested")
-        self.assertLess(idx_nested, kinds.index("trigger_rechecked_after_interceptions", idx_nested + 1) + 1)
+        original_recheck = next(i for i, x in enumerate(e.ledger)
+                                if x["kind"] == "trigger_rechecked_after_interceptions"
+                                and x["detail"]["trigger"] == "main")
+        self.assertLess(idx_nested, original_recheck)
         self.assertFalse(s.reaction_available)
         self.assertEqual(kinds[-1], "trigger_ready_to_resolve")
 
