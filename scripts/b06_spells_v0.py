@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from math import ceil
 
 from scripts.b05_high_scholar_fire_l1_l3_v0 import FORMULAS, profile as scholar
-from scripts.b06_encounter_state_v0 import UnresolvedDecision
+from scripts.b06_encounter_state_v0 import Response, UnresolvedDecision
 
 
 @dataclass
@@ -36,6 +36,7 @@ class SpellState:
         self.e = encounter
         self.effects = {}
         self.next_effect = 0
+        self.reactive_stone_claimed = set()
         # G0 deliberately stores the exact original Sentry active-effect ID.
         # Reconstruct that genuine source-backed reservation without moving VP.
         for a in encounter.actors.values():
@@ -206,6 +207,101 @@ class SpellState:
         else:
             self._new_effect(caster,"Vital Shelter",caster,2,parent=host.ident,budget=4)
         return host
+
+    def cast_stone(self,caster,*,tier=1,on_committed=None):
+        """One independently known F Stone Skin Primary, ordinary on-turn."""
+        a=self._own(caster,20)
+        if a.source.source_id!="F":
+            raise UnresolvedDecision("Only F has verified standalone Stone Skin access")
+        if type(tier) is not int or tier<1 or tier>scholar(a.level)["max_used_tier"]:
+            raise ValueError("Stone Skin Used Tier over source ceiling")
+        if self.active(caster,"Stone Skin"):
+            raise ValueError("One Stone Skin instance per caster")
+        reserve=(a.vp_max+2)//3
+        self._funds(a,0,reserve)
+        self._commit(caster,on_committed=on_committed,label="g3:standalone:stone_skin")
+        if a.hp<=0 or a.vp_available<reserve or self.active(caster,"Stone Skin"):
+            self.e.log("g3_cast_interrupted",caster=caster,kind="Stone Skin")
+            return None
+        self._pay(caster,0,reserve,label="g3:stone_skin")
+        return self._new_effect(caster,"Stone Skin",caster,reserve,resistance=2)
+
+    def prepare_reactive_stone(self,caster,trigger,*,perceptible):
+        """Return a genuine G0 Response choice; do not consume it yet.
+
+        The caller must submit it through Encounter.response_window before
+        a roll/hazard, with the normal post-Interception eligibility ordering.
+        """
+        a=self._actor(caster)
+        if a.source.source_id!="F":
+            raise UnresolvedDecision("Only F has verified Stone Skin knowledge")
+        if not trigger.legal or trigger.target_id!=caster or perceptible is not True:
+            raise ValueError("No eligible perceived incoming target/hazard")
+        if not a.reaction_available or self.e.round==0:
+            raise ValueError("Stone Skin Reaction not available")
+        if self.active(caster,"Stone Skin"):
+            raise ValueError("Cannot stack Stone Skin")
+        self._funds(a,0,(a.vp_max+2)//3)
+        return Response(caster,"reaction","g3:reactive_stone")
+
+    def resolve_reactive_stone(self,caster,trigger,response):
+        """Only after G0 has *actually* committed this labeled Reaction."""
+        a=self._actor(caster)
+        if (response!=Response(caster,"reaction","g3:reactive_stone")
+                or trigger.target_id!=caster or not trigger.legal
+                or a.source.source_id!="F"):
+            raise ValueError("Illegal Reactive Stone Skin source/trigger")
+        token=(caster,trigger.key)
+        proof=any(event["kind"]=="spontaneous_committed" and
+                  event["detail"].get("trigger")==trigger.key and
+                  event["detail"].get("actor")==caster and
+                  event["detail"].get("response_kind")=="reaction" and
+                  event["detail"].get("label")=="g3:reactive_stone"
+                  for event in self.e.ledger)
+        if not proof or token in self.reactive_stone_claimed or a.reaction_available:
+            raise ValueError("No unused G0-committed matching Reaction")
+        self.reactive_stone_claimed.add(token)
+        if self.active(caster,"Stone Skin") or a.vp_available<(a.vp_max+2)//3:
+            self.e.log("g3_cast_interrupted",caster=caster,kind="Reactive Stone Skin",
+                       trigger=trigger.key)
+            return None
+        reserve=(a.vp_max+2)//3
+        self._pay(caster,0,reserve,label="g3:reactive_stone:"+trigger.key)
+        effect=self._new_effect(caster,"Stone Skin",caster,reserve,resistance=2)
+        self.e.log("g3_stone_reacted",caster=caster,trigger=trigger.key,
+                   reaction_spent=True,ap_spent=0,ap_debt=0)
+        return effect
+
+    def cast_self_basic_heal(self,caster,*,tier=1,die,hand_available=False,
+                             on_committed=None):
+        """Independent Primary; non-Dying self only, G4 owns wound allocation."""
+        a=self._own(caster,20 if self.e.actors[caster].source.source_id=="F" else 30)
+        if a.source.source_id not in ("F","R"):
+            raise UnresolvedDecision("Only source-backed F/R Basic Heal access")
+        if type(tier) is not int or tier<1 or tier>(1 if a.level<3 else 2):
+            raise ValueError("Invalid Basic Heal Used Tier")
+        if type(die) is not int or not 1<=die<=8:
+            raise UnresolvedDecision("Explicit actual Heal Primary d8 required")
+        if hand_available is not True:
+            raise ValueError("Basic Heal needs genuinely available hand")
+        if a.wounds or a.hp<=0:
+            raise UnresolvedDecision("Wound or Dying recipient requires G4")
+        cost=2*tier
+        self._funds(a,cost,0)
+        self._commit(caster,on_committed=on_committed,label="g3:self_basic_heal")
+        if a.hp<=0 or a.vp_available<cost:
+            self.e.log("g3_cast_interrupted",caster=caster,kind="Basic Heal")
+            return None
+        self._pay(caster,cost,0,label="g3:self_basic_heal")
+        hp=min(2,a.hp_max-a.hp)
+        vigor=min(4+ceil(die*tier/3),a.vigor_max-a.vigor)
+        a.hp+=hp
+        a.vigor+=vigor
+        self.e.log("g3_basic_heal_primary_once",caster=caster,recipient=caster,
+                   tier=tier,die=die,hp=hp,vigor=vigor,
+                   regen_debit=0,spent_vp=cost)
+        self.e.check()
+        return {"hp_restored":hp,"vigor_restored":vigor,"spent_vp":cost}
 
     def cast_guided(self,caster,*,mode="maintained",chosen=False,
                     recipient=None,on_committed=None):
