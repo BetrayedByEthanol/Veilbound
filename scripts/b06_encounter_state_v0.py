@@ -200,10 +200,19 @@ def party_actor(role, level, actor_id, team, *, occupied):
         guard = None  # Bow in hands, or F's dagger only carried.
         cap = p["normal_guard_capacity"] if is_bow else p["guard_capacity"]
         equipments = p["equipment_sp"] if is_bow else p["starting_equipment_sp"]
+        # The R bow is wielded but never Guard-capable. F's dagger is
+        # purchased/carried, NOT wielded; leather is worn in both scenes.
+        equipment_state = {
+            name: ("worn" if name == "Leather armor"
+                   else "wielded" if is_bow and name == "Bow"
+                   else "ammunition" if is_bow and name == "20 arrows"
+                   else "carried")
+            for name in equipments
+        }
         source = Source(path, role, _fingerprint(path), "STRUCTURAL_B05_ONLY",
                         tuple(sorted(abilities.items())),
                         tuple(sorted(p["weapon_training"].items())),
-                        tuple((k, False) for k in sorted(equipments)), (),
+                        tuple(sorted(equipment_state.items())), (),
                         f"L{level}-structural")
         actor = Actor(actor_id, team, source, level, focus, p["initiative"],
                       abilities["Awareness"], abilities["Agility"],
@@ -224,16 +233,29 @@ def party_actor(role, level, actor_id, team, *, occupied):
         # ledger: VA0 grants 2 VP/level. The Phase-2 BUILD is still ONLY
         # the attack/defense physical projection. Default is explicitly
         # an unbuffed full-resource scene, never automatically chosen Rite.
+        ability_array = ((2, 3, 0, 0, 1, -2, 2, 0, 0) if role == "A"
+                         else (2, 2, 0, 1, 0, -2, 3, 0, 0))
+        keys = ("Strength", "Agility", "Precision", "Intellect", "Awareness",
+                "Presence", "Vitality", "Veil Affinity", "Veil Control")
+        gear = (("Leather armor", "worn"), ("Sword", "wielded"),
+                ("Medical kit", "carried"), ("Adventuring pack", "carried")) if role == "A" else (
+                ("Brigandine", "worn"), ("Mace", "wielded"), ("Shield", "held"),
+                ("Medical kit", "carried"), ("Adventuring pack", "carried"))
         source = Source(path, role, _fingerprint(path), "B05_UNBUFFED_PHYSICAL_PROXY",
-                        (("Vitality", p["vit"]), ("Agility", p["agi"])),
-                        (), (), (), f"L{level}-physical-proxy")
+                        tuple(zip(keys, ability_array)),
+                        (("Sword", 2),) if role == "A" else (("Mace", 2),),
+                        gear, (), f"L{level}-physical-proxy")
         ap = 30 + 6 * (level - 1)
-        actor = Actor(actor_id, team, source, level, "Low", p["initiative"],
-                      p["initiative"] - p["agi"], p["agi"],
+        # B gets Combat Awareness +2 only after L2; A gets Guard Reserve
+        # only after L2. The Phase 1/2 physical role constants are L2/L3.
+        initiative = (p["initiative"] if role == "A" or level >= 2 else 2)
+        extra_guard = (p["guard_extra"] if role == "B" or level >= 2 else 0)
+        actor = Actor(actor_id, team, source, level, "Low", initiative,
+                      ability_array[4], p["agi"],
                       hp, hp * level, 2 * level, hp, hp * level,
                       2 * level, 0, 0,
-                      p["regen"], ap, 20, 30, "physical_proxy_weapon",
-                      p["guard"], ap // 20 + p["guard_extra"],
+                      p["regen"], ap, 20, 30, "Sword" if role == "A" else "Shield",
+                      p["guard"], ap // 20 + extra_guard,
                       occupied=tuple(tuple(c) for c in occupied))
     else:
         raise ValueError("G0 supports only A/B/R/F sources")
