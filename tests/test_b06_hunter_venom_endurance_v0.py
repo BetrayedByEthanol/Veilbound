@@ -891,5 +891,95 @@ class G44Regressions(unittest.TestCase):
         self.assertEqual(len(entries(e,"g44_toxin_packet_prevented")),3)
         e.check()
 
+
+    def test_43_preventive_ward_intercepts_legacy_before_any_roll_or_tick(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        caster=e.actors["caster"]
+        cost_before=caster.vp_spent
+        effect=cast(e,v,mode="ward")
+        hp_before=e.actors["victim"].hp
+        self.assertTrue(v.effects[effect]["active"])
+        result=d.schedule_hemotoxin("victim",exposure_key="warded-legacy",
+                     actual_exposure=True,
+                     resistance_total=None,wound_location_roll=None)
+        self.assertEqual(result,{"outcome":"prevented"})
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertTrue(c.events[v.effects[effect]["expiry"]].canceled)
+        self.assertEqual(caster.vp_spent,cost_before+2)
+        self.assertEqual(len(d.short_toxins),0)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertIn("warded-legacy",d.toxins.exposure_ids)
+        self.assertEqual(len(entries(e,"g44_ward_intercepted")),1)
+        self.assertEqual(len(entries(e,"g4_toxin_prevented")),1)
+        whole_round(e)
+        c.advance_exploration(36)
+        self.assertEqual(e.actors["victim"].hp,hp_before)
+        self.assertFalse(entries(e,"g4_toxin_tick"))
+        with self.assertRaisesRegex(ValueError,"Toxin exposure key already processed"):
+            d.toxins.apply("victim","TX-MY",exposure_key="warded-legacy",
+                           source="test:verified_puncture",route="injection",
+                           delivery_verified=True,residual_piercing_hp=1,
+                           resistance_die=1)
+        e.check()
+
+    def test_44_invalid_legacy_delivery_does_not_consume_ward(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="ward")
+        with self.assertRaisesRegex(UnresolvedDecision,"verified delivery"):
+            d.schedule_hemotoxin("victim",exposure_key="not-delivered",
+                                 actual_exposure=False,
+                                 resistance_total=None,wound_location_roll=None)
+        self.assertTrue(v.effects[effect]["active"])
+        self.assertFalse(entries(e,"g44_ward_intercepted"))
+        self.assertNotIn("not-delivered",d.toxins.exposure_ids)
+        result=d.schedule_hemotoxin("victim",exposure_key="real-delivery",
+                     actual_exposure=True)
+        self.assertEqual(result["outcome"],"prevented")
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertEqual(len(entries(e,"g44_ward_intercepted")),1)
+        e.check()
+
+    def test_45_legacy_existing_or_duplicate_id_preserves_ward(self):
+        e,d,v,c=scene()
+        d.schedule_hemotoxin("victim",exposure_key="active-legacy",
+                             actual_exposure=True,resistance_total=9,
+                             wound_location_roll=10)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="ward")
+        with self.assertRaisesRegex(UnresolvedDecision,"nonstack/ward"):
+            d.schedule_hemotoxin("victim",exposure_key="fresh-on-active",
+                                 actual_exposure=True)
+        with self.assertRaisesRegex(ValueError,"Duplicate toxin exposure"):
+            d.schedule_hemotoxin("victim",exposure_key="active-legacy",
+                                 actual_exposure=True)
+        self.assertTrue(v.effects[effect]["active"])
+        self.assertFalse(entries(e,"g44_ward_intercepted"))
+        self.assertEqual(len(d.short_toxins),1)
+        self.assertEqual(d.short_toxins[0]["left"],5)
+        e.check()
+
+    def test_46_unwarded_legacy_still_requires_resistance_and_wound_roll(self):
+        e,d,v,c=scene()
+        with self.assertRaisesRegex(UnresolvedDecision,"natural resistance"):
+            d.schedule_hemotoxin("victim",exposure_key="unrolled",
+                                 actual_exposure=True)
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location d20"):
+            d.schedule_hemotoxin("victim",exposure_key="no-wound-die",
+                                 actual_exposure=True,resistance_total=9)
+        self.assertFalse(d.short_toxins)
+        self.assertNotIn("unrolled",d.toxins.exposure_ids)
+        d.schedule_hemotoxin("victim",exposure_key="authored",
+                             actual_exposure=True,resistance_total=12,
+                             wound_location_roll=10)
+        self.assertEqual((len(d.short_toxins),d.short_toxins[0]["left"]),(1,3))
+        initial_hp=e.actors["victim"].hp
+        c.advance_exploration(6)
+        self.assertEqual(e.actors["victim"].hp,initial_hp-1)
+        self.assertEqual(d.short_toxins[0]["applied"],1)
+        self.assertFalse(entries(e,"g4_toxin_prevented"))
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
