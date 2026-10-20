@@ -1,0 +1,40 @@
+# B06 G5 — Soldier/Sentry Encounter Integration v0
+
+> **Executable narrow I1/I2 source-bound melee-and-exit scenes**, not a full party-vs-opponent combat generalization or a CR certificate. Runtime: [G5 source melee and fixed scenes](../../scripts/b06_soldier_sentry_g5_v0.py), [14 focused verification tests](../../tests/test_b06_soldier_sentry_g5_v0.py). Earlier foundations remain [G0 native initiative/defenses](b06-g0-shared-encounter-state-and-event-ledger-v0.md), [G1 geometry](b06-g1-native-movement-footprint-contact-v0.md), [G3 spell state](b06-g3-projected-spells-vp-maintenance-v0.md), [G4 damage](b06-g4-damage-wounds-dying-recovery-v0.md), and [G4.5 continuation](b06-g45-wound-continuation-bridge-v0.md). Refer to the [B06 encounter readiness audit](b06-encounter-integration-readiness-audit-v0.md) for the broader gate.
+
+## Source and procedure
+
+This v0 supports **one-square ordinary melee** from the existing verified Soldier `B06-EN-02` sword `B06-AT-03`, and Sentry `B06-EN-01` normal/enhanced swords `B06-AT-01/02`. No independently invented PC offensive attack profile, Hunter manoeuvre, Fire Exaltation, NPC Focus progression, offensive AI policy, unknown terrain, or new damage rules. A generic `SourceMelee` also permits these source attackers against another benchmark creature, including a meaningful Sentry vs shield Soldier Guard check.
+
+**Source-and-time pipeline:**
+
+1. G1 **current actual melee contact**, 1×1 footprint and explicit opposing teams are preflighted before consuming AP or defenses. G3 checks that the actual Sentry Reserve matches the declared normal/enhanced profile.
+2. G0 `declare_sequence()` commits **all** paid Physical Action slots, names every profile and target, assigns each Guard/Dodge/Take Hit **before** dice, and stores exact source action, defense and declaration indices. A held shield Guard is an actual consumed per-round resource; Dodge pressure is recorded in order. No separate or free G5 AP.
+3. G5 accepts an explicit **d20 source attack face**, the printed fixture's `attack_roll.total_bonus`, and that exact G0 defense value. **Natural 1 misses**; melee **Take Hit** receives damage unless natural 1; an attack against Guard or Dodge must **beat** the chosen defense. Natural 20 follows the canonical **one confirmation** ladder: failed Guard/Dodge confirmation Strong +1d4, successful Critical +2d4, confirmation natural20 Devastating +2d4 plus separately qualified wound; Take Hit starts Critical and upgrades to Devastating only on confirmation natural20.
+4. The genuine G0 `response_window()` logs trigger rechecks, with a source-attested **explicit** `decline_all` spontaneous policy for these narrow fixed scenes. A matching reserved Interception is **unresolved**, not silently suppressed or consumed; changed Guard requiring fallback, cancelled geometry, missing player response or missing die is likewise not auto-filled.
+5. On **real hits only**, G5 delegates to G4.5's already source-and-AP-bound `verified_profile_hit`, which owns only the verified bridge, and to G4's real typed Armor/Penetration, Fire HP, direct Vigor, wound and terminal mechanics. Misses do not apply damage or fabricate wounds. Every action has one `g5_melee_resolved` result, and a consumed G0 action can never damage twice.
+6. Each repeatable scene retains the exact source digests, AP/VP/Vigor/HP and selected dice, defense, critical, contact, result and terminal movement evidence. Missing decisions remain unresolved rather than winning by fiat. Report snapshots are detached from the authoritative ledger.
+
+## I1 — Soldier vs L3 Low Life Priest (bounded exit objective)
+
+`run_i1(seed=...)` initializes the ordinary human Soldier against a verified L3 Low Priest A physical proxy in a fixed 8×5 open corridor. An actual source sword sequence tests Guard and natural-1 failure. The Priest has a genuine G0 Step 2 / movement turn and reaches the **predeclared (0,2) exit square** through two G1 legal movement steps under the explicit policy that the Soldier **declines eligible Movement Opportunities**. The actor's last real translation plus independently specified G5 policy is attested as withdrawal through G4.5 and logged as `g5_terminal_exit`. It is a **true narrow scene exit terminal**, **not** a Soldier death, a victory based on HP reaching zero, an assertion that the actor outran a Hunter, or a certificate for a multi-person party fight.
+
+Further G5 tests independently run a shield-bearing Soldier's Guard18 against a Sentry attack, maintaining actual armor and Guard capacity rather than treating the Soldier only as an attacker.
+
+## I2 — Firebound Sentry cold vs prepared (two separately run source starts)
+
+`run_i2(state="cold_start"|"prepared_start",seed=...)` instantiates the source-approved Sentry's actual actor/VP snapshot, opposed by the same L3 Low Priest A physical proxy in the open corridor.
+
+- **Cold:** real own-turn **Projection30** and **3 Committed VP** establish the Chosen Sword Reserve; only **12 AP remain**, less than the **20 AP** sword strike. The Priest's intervening real turn, Round End, Round Begin and next Sentry Step 2 must occur **before** any enhanced attack. No instant no-cost Fire strike.
+- **Prepared:** starts with the exact authored **3 Available / 3 Committed / 0 Spent VP** and source-linked enhanced sword; the first own turn may make a normal **20 AP** attack immediately without a second projection cost.
+- Both modes use `B06-AT-02` with one source sword packet (Armor after Penetration), **separate Fire HP** without physical Armor, and a separately rolled direct-Vigor rider; there is no free persistent Burning or Fire Exaltation. A scripted victim withdrawal later provides a narrow terminal objective with genuine G1 exit evidence.
+
+Separate tests prove Guard versus sword, two precommitted Dodge defenses (Dodge pressure), natural-20 Take Hit Critical/Devastating and Guard Strong confirmation, full VP/AP payment, profile-state mismatch rejection and independent packet mitigation.
+
+## Certified evidence vs open gates
+
+This PR provides **repeatable bounded I1/I2 terminal-exit witnesses** and **actual source-verified G5 ordinary melee opposed hits/misses** rather than G4.5's earlier externally assumed Boolean contacts. It does not certify full I1/I2 diverse-party fights or imply success rates, tactical AI, a full Guard-loss fallback, loaded G1 Interception attack effects, a genuine enemy defeat, a general opponent escape/pursuit contest, all High Scholar/Life Priest spells in dynamic opposition, or any Hunter G6/G7 calibration. **An HP0 actor is Dying, not defeated by automatic terminal policy.**
+
+To close the wider G5 pack gate, add more legal player offensive profiles and response policies, completed harm/death/retreat branches for the full required party roles, and genuine spell/protection + repeatable exit/failure branches. Until then `complete_party_pack_certified=False`, and **0/12** Focus identities remain end-to-end certified.
+
+**Frozen historical census remains untouched:** 32 Phase 3 cases × 128 seeds = 4,096 first-stop trials, 22 original `wound_unresolved` records unchanged. All Phase 3 / Hunter CR claims remain separately pending.
