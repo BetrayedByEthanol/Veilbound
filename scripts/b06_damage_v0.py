@@ -13,6 +13,7 @@ from scripts.b06_encounter_state_v0 import (
 )
 from scripts.b06_world_clock_v0 import WorldClock
 from scripts.b06_mundane_toxins_v0 import MundaneToxins
+from scripts.b06_hunter_venom_endurance_v0 import HunterVenomEndurance
 
 
 ARMOR = {
@@ -73,6 +74,7 @@ class DamageState:
         # a toxin, including when initiative starts or ends.
         self.clock = WorldClock(self,recovery_phase_seconds=recovery_phase_seconds)
         self.toxins = MundaneToxins(self)
+        self.venom = HunterVenomEndurance(self)
         encounter.g4 = self
         encounter.log("g4_damage_state_installed")
         encounter.check()
@@ -650,6 +652,7 @@ class DamageState:
             if t["recipient"]==actor_id and t["left"]:
                 self._toxin_step(t)
         self.toxins.on_turn_step3(actor_id)
+        self.venom.on_turn_step3(actor_id)
 
     def advance_exploration(self,seconds):
         """Advance the shared G4.2 chronology; never create a phantom turn."""
