@@ -494,7 +494,12 @@ class Encounter:
             self.g4.on_turn_start(actor_id)
         a.ap_remaining = (0 if a.hp <= 0 or a.dead
                           else a.ap_total - a.blink_debt_due)
-        a.mp_remaining = 12
+        # Exact named ordinary-MP impairments change the newly established
+        # own-turn allowance; neither virtual toxin intervals nor another
+        # creature's turn can grant an extra movement refresh.
+        mp_penalty=(self.g4.toxins.modifier(actor_id,"mp")
+                    if self.g4 is not None else 0)
+        a.mp_remaining = max(0,12+mp_penalty)
         a.blink_debt_due = a.blink_debt_next
         a.blink_debt_next = 0
         self.log("turn_resources", actor=actor_id, ap=a.ap_remaining,
@@ -594,7 +599,10 @@ class Encounter:
             a.guard_remaining -= 1
             value = a.guard_value
         elif choice == "dodge":
-            value = 10 + min(a.agility, 4) + a.awareness - a.dodge_pressure
+            # Neurotoxin affects Dodge only, never source Agility or Guard.
+            toxin_dodge = (self.g4.toxins.modifier(actor_id,"dodge")
+                           if self.g4 is not None else 0)
+            value = 10 + min(a.agility, 4) + a.awareness - a.dodge_pressure + toxin_dodge
             a.dodge_pressure += 2
         else:
             value = None  # Take Hit is not an invented guaranteed-hit melee roll.

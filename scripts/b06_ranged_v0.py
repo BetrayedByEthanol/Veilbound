@@ -379,7 +379,10 @@ class RangedCombat:
                 raise UnresolvedDecision("Prone Dodge requires explicit physical capability")
             evasion=actor.ap_total//actor.physical_ap - 1
             pressure=(actor.dodge_pressure if prior_pressure is None else prior_pressure)
-            value=10+min(actor.agility,4)+actor.awareness+evasion+range_diff+obstruction+position_bonus-pressure
+            # Explicit Neurotoxin Dodge-only modifier, supplied by G4.3;
+            # source Agility, Guard and accumulated Dodge Pressure stay intact.
+            toxin_dodge=getattr(actor,"toxin_modifiers",{}).get("dodge",0)
+            value=10+min(actor.agility,4)+actor.awareness+evasion+range_diff+obstruction+position_bonus-pressure+toxin_dodge
             base=value-obstruction
             if commit:
                 actor.dodge_pressure+=2
