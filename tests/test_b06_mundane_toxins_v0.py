@@ -3,6 +3,7 @@ import unittest
 
 from scripts.b06_encounter_state_v0 import (
     Encounter, RegenerationChoice, UnresolvedDecision, party_actor,
+    enemy_actor,
 )
 from scripts.b06_damage_v0 import DamageState
 from scripts.b06_mundane_toxins_v0 import PROFILES
@@ -19,14 +20,24 @@ def scene(*,phase=None):
 
 
 def exposure(t,profile,key,*,die=1,ward=None,delivery=True,
-             piercing=1,breach=False,route=None):
+             piercing=1,breach=False,route=None,rolls=None):
     required=PROFILES[profile][1]
+    if profile in ("TX-HM","TX-NC"):
+        # Independent precommitted d20 per FUTURE damaging packet, not a
+        # single exposure die replayed on a second HP=0 wound crossing.
+        vit=dict(t.e.actors["hero"].source.abilities)["Vitality"]
+        # A missing resistance die is rejected before these matter.
+        count=PROFILES[profile][3 if (type(die) is int and
+                  die+vit>=(12 if PROFILES[profile][0]=="Moderate" else 10))
+                                else 2]-(2 if profile=="TX-NC" else 0)
+        rolls=(tuple(range(10,10+count)) if rolls is None else rolls)
     return t.apply("hero",profile,exposure_key=key,source="fiction:verified:"+key,
                    route=required if route is None else route,
                    delivery_verified=delivery,breach_verified=breach,
                    residual_piercing_hp=(piercing if required=="injection" else 0),
                    resistance_die=die,preventive_ward=ward,
-                   wound_location_roll=10)
+                   wound_location_roll=10 if profile=="TX-CY" else None,
+                   wound_location_rolls=rolls)
 
 
 def events(e,kind):
@@ -339,6 +350,122 @@ class G43Toxins(unittest.TestCase):
             t.stop_authorized("hero",reason="free_cure",authorized=False)
         self.assertEqual(t.active("hero")["key"],"valid")
         e.check()
+
+
+    def test_23_enemy_json_lowercase_vitality_on_all_three_fixtures(self):
+        for source_id,state,occupied in (
+            ("B06-EN-01","cold_start",((1,1),)),
+            ("B06-EN-02",None,((1,1),)),
+            ("B06-EN-03",None,((1,1),(2,1)))):
+            with self.subTest(source_id=source_id):
+                enemy=enemy_actor(source_id,"foe","enemy",
+                                  start_state=state,occupied=occupied)
+                attributes=dict(enemy.source.abilities)
+                self.assertIn("vitality",attributes)
+                self.assertNotIn("Vitality",attributes)
+                e=Encounter([enemy],{"foe":100},seed=437,
+                            scenario="G4.3-enemy-resistance",policy="explicit")
+                d=DamageState(e);e.begin_round()
+                result=d.toxins.apply("foe","TX-NE",
+                      exposure_key="foe-neuro",source="attested:sting",
+                      route="injection",delivery_verified=True,
+                      residual_piercing_hp=1,resistance_die=11)
+                expected=11+attributes["vitality"]
+                self.assertEqual(result["resistance_total"],expected)
+                self.assertEqual(result["resolution"],
+                     "Reduced" if expected>=12 else "Full")
+                self.assertEqual(d.toxins.active("foe")["profile"],"TX-NE")
+                self.assertEqual(len(events(e,"g43_toxin_accepted")),1)
+                e.check()
+
+    def test_24_expired_legacy_key_cannot_be_reused_by_unified_path(self):
+        e,a,d,t,c=scene()
+        d.schedule_hemotoxin("hero",exposure_key="old-finished",
+                             actual_exposure=True,resistance_total=12,
+                             wound_location_roll=10)
+        d.advance_exploration(18)
+        self.assertEqual(d.short_toxins[0]["left"],0)
+        self.assertIsNone(t.active("hero"))
+        before=(len(t.exposure_ids),len(events(e,"g43_toxin_accepted")),
+                len(events(e,"g43_exposure_rejected")))
+        with self.assertRaisesRegex(ValueError,"Toxin exposure key already processed"):
+            exposure(t,"TX-MY","old-finished")
+        self.assertEqual((len(t.exposure_ids),
+                          len(events(e,"g43_toxin_accepted")),
+                          len(events(e,"g43_exposure_rejected"))),before)
+        self.assertIsNone(t.active("hero"))
+        self.assertEqual(len(d.short_toxins),1)
+        # Fresh identity is still valid after the previous toxin has ended.
+        outcome=exposure(t,"TX-MY","fresh")
+        self.assertEqual(outcome["outcome"],"accepted")
+        e.check()
+
+    def test_25_crossing_uses_distinct_packet_rolls_after_real_repair(self):
+        for profile in ("TX-HM","TX-NC"):
+            with self.subTest(profile=profile):
+                e,a,d,t,c=scene()
+                a.hp=1
+                rolls=(1,20,14,16,18) if profile=="TX-HM" else (1,20,14)
+                exposure(t,profile,"repeat",rolls=rolls)
+                if profile=="TX-NC":
+                    # The two non-damaging intervals do not consume rolls.
+                    d.advance_exploration(12)
+                    self.assertEqual(a.hp,1)
+                    self.assertEqual(t.active("hero")["applied"],0)
+                d.advance_exploration(6)
+                first=a.wounds[-1]
+                self.assertEqual((a.hp,first.location),(0,"Head / neck"))
+                self.assertEqual(first.source_event,"toxin:repeat:packet:1")
+                # Exactly five independently paid and successfully delivered
+                # Primary heals can repair this Serious wound at 2 each.
+                # One paid Secondary then returns 1 HP above the threshold.
+                for _ in range(5):
+                    d.resolve_heal("hero",contribution="Primary",
+                                   vigor_amount=0,source="test:paid_external_heal")
+                self.assertEqual((first.progress,a.hp),(10,0))
+                d.resolve_heal("hero",contribution="Secondary",vigor_amount=0,
+                               source="test:paid_external_heal")
+                self.assertEqual(a.hp,1)
+                d.advance_exploration(6)
+                self.assertEqual(a.hp,0)
+                self.assertEqual(len(a.wounds),2)
+                second=a.wounds[1]
+                self.assertEqual(second.location,"Hand / extremity")
+                self.assertEqual(second.source_event,"toxin:repeat:packet:2")
+                self.assertNotEqual(first.source_event,second.source_event)
+                self.assertEqual(t.active("hero")["applied"],2)
+                e.check()
+
+    def test_26_recurring_hp_requires_independent_precommitted_rolls(self):
+        for profile in ("TX-HM","TX-NC"):
+            with self.subTest(profile=profile):
+                e,a,d,t,c=scene()
+                required=5 if profile=="TX-HM" else 3
+                baseline=(len(t.exposure_ids),len(events(e,"g43_toxin_accepted")),
+                          len(c.events))
+                for supplied in (None,(10,),tuple([10]*(required-1)),
+                                 tuple([10]*(required-1)+[0]),
+                                 tuple([10]*(required-1)+[True])):
+                    with self.subTest(rolls=supplied):
+                        with self.assertRaisesRegex(
+                                UnresolvedDecision,
+                                "independent wound-location d20 per future HP packet"):
+                            t.apply("hero",profile,exposure_key="bad-rolls",
+                                    source="attested:source",route="injection",
+                                    delivery_verified=True,
+                                    residual_piercing_hp=1,resistance_die=1,
+                                    wound_location_rolls=supplied)
+                        self.assertIsNone(t.active("hero"))
+                        self.assertEqual((len(t.exposure_ids),
+                                          len(events(e,"g43_toxin_accepted")),
+                                          len(c.events)),baseline)
+                with self.assertRaisesRegex(
+                        UnresolvedDecision,"independent wound-location d20"):
+                    t.apply("hero",profile,exposure_key="scalar-only",
+                            source="attested:source",route="injection",
+                            delivery_verified=True,residual_piercing_hp=1,
+                            resistance_die=1,wound_location_roll=10)
+                e.check()
 
 if __name__=="__main__":
     unittest.main()
