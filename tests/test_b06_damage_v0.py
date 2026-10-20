@@ -23,11 +23,11 @@ def pc(role="F",ident="caster",point=(1,2),team="party",level=3):
     return party_actor(role,level,ident,team,occupied=(point,))
 
 
-def scene(*actors,spatial=False):
+def scene(*actors,spatial=False,walls=()):
     e=Encounter(list(actors),{a.id:100-i for i,a in enumerate(actors)},
                 seed=404,scenario="B06-G4",policy="explicit_verified_delivery")
     if spatial:
-        GridMovement(e,width=16,height=7)
+        GridMovement(e,width=16,height=7,walls=walls)
         RangedCombat(e)
     g3=SpellState(e)
     g4=DamageState(e)
@@ -163,18 +163,25 @@ class G4IntegrationTests(unittest.TestCase):
         self.assertFalse(g.active("caster","Stone Skin"))
         e.check()
 
-    def test_real_g3_flame_pending_event_consumed_once(self):
+    def test_real_g3_flame_hit_is_applied_synchronously_and_once(self):
         f=pc();t=pc("R","target",(3,2),"enemy")
         e,g,d=scene(f,t,spatial=True)
         e.start_turn("caster")
         shot=g.cast_flame("caster","target",tier=1,face=12,
                           vigor_die=5,hand_available=True)
-        self.assertEqual(shot["outcome"],"direct_hit_pending_G4")
-        index=e.ledger[-1]["index"]
-        result=d.apply_flame("caster","target",ledger_index=index)
-        self.assertEqual((result["hp_loss"],result["vigor_loss"]),(2,4))
+        self.assertEqual(shot["outcome"],"direct_hit_resolved_G4")
+        self.assertEqual((shot["g4_damage"]["hp_loss"],
+                          shot["g4_damage"]["vigor_loss"]),(2,4))
+        self.assertEqual((t.hp,t.vigor),(t.hp_max-2,t.vigor_max-4))
+        launch=next(v for v in e.ledger if v["kind"]=="g3_flame_launched")
+        impact=next(v for v in e.ledger if v["kind"]=="g4_damage_applied")
+        self.assertEqual(impact["index"],launch["index"]+1)
         with self.assertRaisesRegex(ValueError,"consumed"):
-            d.apply_flame("caster","target",ledger_index=index)
+            d.apply_flame("caster","target",ledger_index=launch["index"])
+        e.end_turn()
+        e.start_turn("target",regen_choice=RegenerationChoice(hp=2))
+        self.assertEqual(t.hp,t.hp_max)
+        self.assertEqual(t.vigor,t.vigor_max-6)
         e.check()
 
     def test_g4_primary_heal_of_dying_target_uses_repair_not_regen(self):
@@ -268,6 +275,149 @@ class G4IntegrationTests(unittest.TestCase):
         self.assertEqual((t.vigor,t.vp_spent),(t.vigor_max-1,2))
         self.assertEqual(t.vp_available+t.vp_committed+t.vp_spent,t.vp_max)
         e.check()
+
+
+    def test_flame_cannot_consume_a_historical_g3_only_launch(self):
+        f=pc();t=pc("R","target",(3,2),"enemy")
+        e=Encounter([f,t],{"caster":100,"target":99},
+                    seed=405,scenario="late-G4-install",policy="source")
+        GridMovement(e,width=16,height=7)
+        RangedCombat(e)
+        g=SpellState(e)
+        e.begin_round()
+        e.start_turn("caster")
+        shot=g.cast_flame("caster","target",tier=1,face=12,
+                          vigor_die=5,hand_available=True)
+        self.assertEqual(shot["outcome"],"direct_hit_pending_G4")
+        launch=e.ledger[-1]["index"]
+        e.end_turn()
+        d=DamageState(e)
+        with self.assertRaisesRegex(ValueError,"original launch"):
+            d.apply_flame("caster","target",ledger_index=launch)
+        self.assertEqual((t.hp,t.vigor),(t.hp_max,t.vigor_max))
+        e.check()
+
+    def test_flame_wound_is_preflighted_then_resolved_before_next_step(self):
+        f=pc();t=pc("R","target",(3,2),"enemy")
+        t.hp=1
+        e,g,d=scene(f,t,spatial=True)
+        e.start_turn("caster")
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location"):
+            g.cast_flame("caster","target",tier=1,face=12,
+                         vigor_die=5,hand_available=True)
+        self.assertEqual((t.hp,f.vp_spent),(1,0))
+        # An already-committed attempt lost AP but neither launched nor paid
+        # VP. Supply the actual d20 for a fresh legal declared cast.
+        shot=g.cast_flame("caster","target",tier=1,face=12,
+                          vigor_die=5,hand_available=True,wound_location_roll=13)
+        self.assertEqual(shot["outcome"],"direct_hit_resolved_G4")
+        self.assertEqual((t.hp,t.wounds[0].location),(-1,"Arm"))
+        self.assertEqual(len(t.wounds),1)
+        self.assertTrue(any(v["kind"]=="g4_wound_created" for v in e.ledger))
+        e.check()
+
+    def test_carried_g4_wound_ids_remain_unique_with_new_encounter_damage(self):
+        t=sentry();t.hp=1
+        t.wounds=[Wound("G4-W0001",10,9),Wound("G4-W0007",20,0)]
+        other=pc("F","other",(1,2))
+        other.wounds=[Wound("G4-W0020",10,0)]
+        e,g,d=scene(t,other)
+        d.apply_damage("sentry",(DamagePacket("hp","Fire",2),),
+                       event_key="new-hit",cause="confirmed",
+                       wound_location_roll=16)
+        self.assertEqual(t.wounds[-1].ident,"G4-W0021")
+        self.assertEqual(len({w.ident for w in t.wounds}),3)
+        restored=d.resolve_heal("sentry",contribution="Primary",
+                                vigor_amount=0,wound_id="G4-W0021")
+        self.assertEqual(restored["repair_progress"],2)
+        self.assertEqual([w.progress for w in t.wounds],[9,0,2])
+        e.start_turn("sentry",regen_choice=RegenerationChoice(
+            cancel_dying_loss=True,repair=3))
+        self.assertEqual([w.progress for w in t.wounds],[10,2,2])
+        e.check()
+
+    def test_heal_committed_response_requires_live_delivery_policy(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        e,g,d=scene(r,t)
+        e.start_turn("caster")
+        with self.assertRaisesRegex(UnresolvedDecision,"live Basic Heal delivery_check"):
+            d.cast_basic_heal("caster","patient",die=1,
+                              hand_available=True,in_range=True,
+                              unobstructed=True,on_committed=lambda x:None)
+        self.assertEqual((r.ap_remaining,r.vp_spent),(42,0))
+        e.check()
+
+    def test_heal_committed_response_removes_caster_hand_before_vp(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp-=2;t.vigor-=8
+        e,g,d=scene(r,t)
+        e.start_turn("caster")
+        hand={"free":True}
+        def disarm(_encounter):
+            hand["free"]=False
+        check=lambda _e,_c,_r:(hand["free"],True,True)
+        result=d.cast_basic_heal("caster","patient",die=8,
+                                 hand_available=True,in_range=True,unobstructed=True,
+                                 on_committed=disarm,delivery_check=check)
+        self.assertIsNone(result)
+        self.assertEqual((r.ap_remaining,r.vp_spent),(12,0))
+        self.assertEqual((t.hp,t.vigor),(t.hp_max-2,t.vigor_max-8))
+        self.assertEqual(
+            [ev["detail"]["cause"] for ev in e.ledger
+             if ev["kind"]=="g4_heal_interrupted"],["hand_unavailable"])
+        e.check()
+
+    def test_heal_committed_response_moving_target_out_of_range_cancels(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp-=2;t.vigor-=8
+        e,g,d=scene(r,t,spatial=True)
+        e.start_turn("caster")
+        def move_after_commit(_encounter):
+            t.occupied=((7,2),)
+        result=d.cast_basic_heal(
+            "caster","patient",die=1,hand_available=True,in_range=True,
+            unobstructed=True,on_committed=move_after_commit,
+            delivery_check=lambda _e,_c,_r:(True,True,True))
+        self.assertIsNone(result)
+        self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),
+                         (12,0,t.hp_max-2))
+        self.assertTrue(any(v["kind"]=="g4_heal_interrupted" and
+                            v["detail"]["cause"]=="delivery_out_of_range"
+                            for v in e.ledger))
+        e.check()
+
+    def test_heal_committed_response_new_wall_obstruction_cancels(self):
+        r=pc("R");t=pc("F","patient",(1,4))
+        t.hp-=2
+        e,g,d=scene(r,t,spatial=True,walls=((2,3),))
+        e.start_turn("caster")
+        def redirect(_encounter):
+            t.occupied=((3,3),)
+        out=d.cast_basic_heal(
+            "caster","patient",die=1,hand_available=True,in_range=True,
+            unobstructed=True,on_committed=redirect,
+            delivery_check=lambda _e,_c,_r:(True,True,True))
+        self.assertIsNone(out)
+        self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),(12,0,t.hp_max-2))
+        self.assertTrue(any(v["kind"]=="g4_heal_interrupted" and
+                            v["detail"]["cause"]=="delivery_obstructed"
+                            for v in e.ledger))
+        e.check()
+
+    def test_heal_unchanged_delivery_after_response_still_applies_once(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp-=2;t.vigor-=8
+        e,g,d=scene(r,t,spatial=True)
+        e.start_turn("caster")
+        out=d.cast_basic_heal(
+            "caster","patient",die=1,hand_available=True,in_range=True,
+            unobstructed=True,on_committed=lambda _e:None,
+            delivery_check=lambda _e,_c,_r:(True,True,True))
+        self.assertEqual((out["hp_restored"],out["spent_vp"]),(2,2))
+        self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),
+                         (12,2,t.hp_max))
+        e.check()
+
 
 
 if __name__=="__main__":
