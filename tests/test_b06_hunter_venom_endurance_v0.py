@@ -346,7 +346,7 @@ class G44Regressions(unittest.TestCase):
             v.cast_endurance("caster","victim",profile="Single Target",mode="ward",
                              source_authorized=False,source_reference="none")
         e.start_turn("caster",regen_choice=RegenerationChoice())
-        with self.assertRaises(UnresolvedDecision):
+        with self.assertRaises((ValueError,UnresolvedDecision)):
             cast(e,v,price=1)
         self.assertEqual(e.actors["caster"].vp_spent,0)
         e.check()

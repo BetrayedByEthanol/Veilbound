@@ -67,7 +67,7 @@ class HunterVenomEndurance:
         v["covered"]=True
         v["phase"]=0
         self.e.log("g44_suppression_unit",effect=v["id"],recipient=v["recipient"],
-                   source_toxin=v["bound_key"],kind=kind,remaining=v["units"])
+                   source_toxin=v["bound_key"],unit_kind=kind,remaining=v["units"])
         self.toxins._synchronize(v["recipient"])
         return True
 
