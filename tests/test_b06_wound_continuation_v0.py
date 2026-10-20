@@ -274,5 +274,34 @@ class WoundContinuationTests(unittest.TestCase):
         e.check()
 
 
+
+    def test_11_historical_committed_action_cannot_be_spent_next_round(self):
+        e,d,b=scene()
+        stale=begin_attack(e,b)
+        b.end_current_turn()
+        b.start_next_turn(RegenerationChoice())
+        b.end_current_turn()
+        b.begin_next_round()
+        b.start_next_turn(RegenerationChoice())
+        current=len(e.ledger)
+        e.spend_ap("soldier","physical",label="G5:fresh_action")
+        before=(e.actors["sentry"].hp,len(e.actors["sentry"].wounds))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "genuine committed Physical Action"):
+            hit(e,b,stale,source_event="stale-previous-round",
+                critical="normal",critical_dice=(),die_face=3,
+                wound_location_roll=None)
+        self.assertEqual((e.actors["sentry"].hp,
+                          len(e.actors["sentry"].wounds)),before)
+        self.assertEqual(len(b.report()["verified_hits"]),0)
+        r=hit(e,b,current,source_event="new-actual-hit",
+              critical="normal",critical_dice=(),die_face=3,
+              wound_location_roll=None)
+        self.assertEqual(r["hp_loss"],6)
+        self.assertEqual(len(b.report()["verified_hits"]),1)
+        self.assertEqual(b.report()["verified_hits"][0]["action_index"],current)
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
