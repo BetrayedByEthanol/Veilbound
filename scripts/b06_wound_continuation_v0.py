@@ -3,6 +3,7 @@
 This bridge *observes* native G0/G4 steps. It never invents contact,
 critical confirmation, cure, withdrawal geometry or a new Regeneration Step.
 """
+from copy import deepcopy
 from functools import lru_cache
 from hashlib import sha256
 import json
@@ -242,7 +243,7 @@ class WoundContinuation:
 
 
 @lru_cache(maxsize=1)
-def historical_phase3_wound_witnesses():
+def _cached_historical_phase3_wound_witnesses():
     """Re-identify EXACTLY 22 frozen Phase3 first stops, never re-adjudicate.
 
     Source trial only publishes first-stop outcomes, not complete G5
@@ -278,3 +279,13 @@ def historical_phase3_wound_witnesses():
     if len(witnesses)!=22:
         raise AssertionError("Frozen Phase3 has changed: expected 22 first-stop witnesses")
     return tuple(witnesses)
+
+
+def historical_phase3_wound_witnesses():
+    """Return independent witness records; never expose mutable cached data.
+
+    The 4,096 original trials are computed only on the first call. Both
+    record dictionaries and nested authority lists are deep-copied on
+    every public read, preserving source tuples and fixed evidence.
+    """
+    return deepcopy(_cached_historical_phase3_wound_witnesses())
