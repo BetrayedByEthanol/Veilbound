@@ -12,6 +12,7 @@ from scripts.b06_encounter_state_v0 import (
     ENEMIES, ROOT, RegenerationChoice, UnresolvedDecision, Wound, _integer,
 )
 from scripts.b06_world_clock_v0 import WorldClock
+from scripts.b06_mundane_toxins_v0 import MundaneToxins
 
 
 ARMOR = {
@@ -71,6 +72,7 @@ class DamageState:
         # The independent six-hour phase exists for each actor even without
         # a toxin, including when initiative starts or ends.
         self.clock = WorldClock(self,recovery_phase_seconds=recovery_phase_seconds)
+        self.toxins = MundaneToxins(self)
         encounter.g4 = self
         encounter.log("g4_damage_state_installed")
         encounter.check()
@@ -509,7 +511,9 @@ class DamageState:
             e.regen_done.add(a.id)
             e.log("regeneration_dead",actor=a.id)
             return
-        throughput=a.regen+(e.g3.regen_throughput(a.id) if e.g3 is not None else 0)
+        throughput=max(0,a.regen
+                       +(e.g3.regen_throughput(a.id) if e.g3 is not None else 0)
+                       +self.toxins.modifier(a.id,"regen_throughput"))
         incomplete=[w for w in a.wounds if w.progress < w.requirement]
         repairable=[w for w in incomplete if w.repairable]
         missing=(a.hp<a.hp_max or bool(repairable))
@@ -609,6 +613,10 @@ class DamageState:
         # unresolved location choice interrupts an already-paid G0 Step 2.
         if type(wound_location_roll) is not int or not 1<=wound_location_roll<=20:
             raise UnresolvedDecision("Provide real possible-crossing wound-location d20")
+        if self.toxins.active(recipient) is not None:
+            raise UnresolvedDecision("One active mundane toxin per recipient, including legacy TX-HM")
+        if exposure_key in self.toxins.exposure_ids:
+            raise ValueError("Toxin exposure key already processed")
         if any(t["key"]==exposure_key for t in self.short_toxins):
             raise ValueError("Duplicate toxin exposure")
         # This bounded primitive does not decide stacking with already-live
@@ -641,6 +649,7 @@ class DamageState:
         for t in self.short_toxins:
             if t["recipient"]==actor_id and t["left"]:
                 self._toxin_step(t)
+        self.toxins.on_turn_step3(actor_id)
 
     def advance_exploration(self,seconds):
         """Advance the shared G4.2 chronology; never create a phantom turn."""

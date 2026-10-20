@@ -171,11 +171,17 @@ class WorldClock:
                        phase=ev.phase,original_order=ev.original_order,
                        world_seconds=self.world_seconds,
                        round_begin=boundary_round)
+            # G4.3 consumes source-owned markers, not arbitrary story markers.
+            self.g4.toxins.on_milestone(ev)
             return
         a = self.e.actors[ev.actor_id]
         vigor = max(1,(a.vigor_max+2)//4) if a.vigor_max else 0
         vp = max(1,(a.vp_max+2)//4) if a.vp_max else 0
-        actual_vigor = 0 if a.dead else min(vigor,a.vigor_max-a.vigor)
+        # Hepatotoxin can intercept THIS already-earned checkpoint, never
+        # schedule a second one or decrease VP Recovery.
+        reduction=self.g4.toxins.recovery_penalty(ev)
+        actual_vigor = 0 if a.dead else min(max(0,vigor-reduction),
+                                           a.vigor_max-a.vigor)
         actual_vp = 0 if a.dead else min(vp,a.vp_spent)
         a.vigor += actual_vigor
         a.vp_spent -= actual_vp
@@ -184,7 +190,8 @@ class WorldClock:
                    checkpoint_id=ev.ident,actor_source=ev.actor_source,
                    world_seconds=self.world_seconds,
                    round_begin=boundary_round,
-                   vigor=actual_vigor,spent_vp_recovered=actual_vp)
+                   vigor=actual_vigor,spent_vp_recovered=actual_vp,
+                   toxin_recovery_reduction=reduction)
         # A consumed checkpoint remains forever; only its successor can
         # award a subsequent quarter-max amount.
         if not a.dead:
@@ -196,13 +203,17 @@ class WorldClock:
                if ev.due_seconds is not None
                and ev.due_seconds <= self.world_seconds]
         for ev in sorted(due,key=self._sort_key):
-            self._complete(ev)
+            # A real Recovery may end TX-HE and cancel its same-instant
+            # maximum-expiry marker while processing this due snapshot.
+            if not ev.consumed and not ev.canceled:
+                self._complete(ev)
 
     def _due_round(self, round_number):
         due = [ev for ev in self._pending()
                if ev.due_round is not None and ev.due_round <= round_number]
         for ev in sorted(due,key=self._sort_key):
-            self._complete(ev,boundary_round=round_number)
+            if not ev.consumed and not ev.canceled:
+                self._complete(ev,boundary_round=round_number)
 
     def advance_exploration(self, seconds):
         """Advance actual seconds in chronological pieces, including TX-HM."""
@@ -224,17 +235,22 @@ class WorldClock:
             for toxin in self.g4.short_toxins:
                 if toxin["left"]:
                     next_seconds = min(next_seconds,6-toxin["phase"])
+            g43_limit=self.g4.toxins.exploration_step_limit()
+            if g43_limit is not None:
+                next_seconds=min(next_seconds,g43_limit)
             if next_seconds:
                 self.world_seconds += next_seconds
                 remaining -= next_seconds
                 for toxin in self.g4.short_toxins:
                     if toxin["left"]:
                         toxin["phase"] += next_seconds
+                self.g4.toxins.exploration_advance(next_seconds)
             # Native short-toxin intervals are hazard-only; never fake Step 2.
             for toxin in self.g4.short_toxins:
                 if toxin["left"] and toxin["phase"] >= 6:
                     toxin["phase"] -= 6
                     self.g4._toxin_step(toxin)
+            self.g4.toxins.exploration_resolve()
             self._due_exploration()
         self.e.log("g42_exploration_advanced",from_seconds=start,
                    to_seconds=self.world_seconds,seconds=seconds)
