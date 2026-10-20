@@ -53,6 +53,68 @@ class WoundContinuation:
                 "world_seconds":self.d.clock.world_seconds,
                 "actors":{k:_actor_state(a) for k,a in self.e.actors.items()}}
 
+    def _bound_attack_declaration(self,attacker,target,profile_id,action_index):
+        """Bind a paid G0 action to its original target/profile declaration.
+
+        G0's declare_sequence authorizes ordinary attack reservations; a
+        generic physical spend (e.g. Interception reserve) never does.
+        Full sequences precommit every profile/AP before rolling, so the
+        matching source action is the corresponding ordered slot rather
+        than simply the most recent physical action in the ledger.
+        """
+        ledger=self.e.ledger
+        action=ledger[action_index]
+        declarations=[ev for ev in ledger[action_index+1:]
+                      if ev["kind"]=="attack_sequence_committed" and
+                      ev["round"]==self.e.round and ev["turn"]==attacker]
+        if not declarations:
+            raise UnresolvedDecision(
+                "G0 source-bound attack sequence declaration required")
+        declaration=declarations[0]
+        details=declaration["detail"]
+        profiles=details.get("profiles")
+        defenses=details.get("defenses")
+        if (details.get("attacker")!=attacker or
+                details.get("target")!=target or
+                not isinstance(profiles,list) or
+                not isinstance(defenses,list) or
+                len(profiles)!=len(defenses) or not profiles):
+            raise UnresolvedDecision(
+                "Committed attack declaration does not match target/profile")
+        # The N most recent actor Physical Actions before G0's sequence
+        # marker must be its N ordered, exact profile-index payments.
+        # G1 bookkeeping can occur between those AP events.
+        paid=[ev for ev in ledger[:declaration["index"]]
+              if ev["kind"]=="action_committed" and
+              ev["round"]==self.e.round and ev["turn"]==attacker and
+              ev["detail"].get("actor")==attacker]
+        paid=paid[-len(profiles):]
+        if (len(paid)!=len(profiles) or
+                any(ev["detail"].get("action_class")!="physical" or
+                    ev["detail"].get("label")!=f"sequence:{p}:{i}"
+                    for i,(ev,p) in enumerate(zip(paid,profiles)))):
+            raise UnresolvedDecision(
+                "Paid actions do not match committed attack sequence")
+        positions=[i for i,ev in enumerate(paid)
+                   if ev["index"]==action_index]
+        if (len(positions)!=1 or profiles[positions[0]]!=profile_id):
+            raise UnresolvedDecision(
+                "Committed attack action does not match declared target/profile")
+        # The old committed sequence cannot be revived after beginning a
+        # second action/sequence, even while the attacker remains current.
+        if any(ev["kind"] in ("action_committed",
+                              "attack_sequence_committed",
+                              "turn_end","round_begin")
+               for ev in ledger[declaration["index"]+1:]):
+            raise UnresolvedDecision(
+                "Physical hit must consume its current live attack sequence")
+        # Per-action consumption survives reopening the bridge.
+        if any(ev["kind"]=="g45_attested_hit" and
+               ev["detail"].get("action_index")==action_index
+               for ev in ledger):
+            raise ValueError("G0 attack action already consumed in encounter")
+        return declaration["index"],positions[0]
+
     def verified_profile_hit(self,attacker,target,profile_id,*,action_index,
                              source_event,contact_reference,defense_reference,
                              contact_verified,defense_verified,
@@ -91,15 +153,10 @@ class WoundContinuation:
                 or self.e.pending_regeneration is not None
                 or self.e.actors[attacker].hp<=0):
             raise UnresolvedDecision("Current attacker needs genuine committed Physical Action")
-        # The AP reservation cannot be resurrected on a later Physical
-        # Action in this same turn or after another independently resolved
-        # profile hit. Defense/Interception logs between commitment and
-        # final resolution remain permitted.
-        if any(x["kind"] in ("action_committed","g4_profile_hit",
-                            "turn_end","round_begin")
-               for x in self.e.ledger[action_index+1:]):
-            raise UnresolvedDecision("Physical hit must consume its current live action")
-        # G0 supplied the AP cost; G4 supplies source JSON attack packets,
+        declaration_index,profile_index=self._bound_attack_declaration(
+            attacker,target,profile_id,action_index)
+        # G0 supplied the exact sequence payment and target/profile binding;
+        # G4 supplies source JSON attack packets,
         # mitigation, exact one-event wound and native effects.
         result=self.d.apply_profile_hit(
             attacker,target,profile_id,die_face=die_face,
@@ -110,6 +167,8 @@ class WoundContinuation:
         self.e.log("g45_attested_hit",source_event=source_event,
                    attacker=attacker,target=target,profile=profile_id,
                    action_index=action_index,
+                   sequence_declaration_index=declaration_index,
+                   declared_profile_index=profile_index,
                    contact_reference=contact_reference,
                    defense_reference=defense_reference,
                    attacker_source=self.e.actors[attacker].source.digest,
