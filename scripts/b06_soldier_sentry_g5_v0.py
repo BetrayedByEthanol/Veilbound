@@ -156,18 +156,63 @@ class SourceMelee:
         if not e.g1.melee_contact(attacker,target):
             raise UnresolvedDecision("Actual G1 contact lost before attack roll")
         p=sequence["profiles"][slot]
-        bonus=self._profile(attacker,p)
+        action=e.ledger[action_index]
         native=e.ledger[declaration]
-        d=e.ledger[defense_index]
+        # Every outcome, INCLUDING natural-1 misses, must consume an action
+        # committed for this exact live turn. Without this preflight a stale
+        # sequence could log a new-round miss without having paid new AP.
+        if (action["kind"]!="action_committed"
+                or action["round"]!=e.round or action["turn"]!=attacker
+                or action["detail"].get("actor")!=attacker
+                or action["detail"].get("action_class")!="physical"
+                or native["round"]!=e.round or native["turn"]!=attacker):
+            raise UnresolvedDecision(
+                "G5 attack action/declaration must belong to current round and turn")
+        # Reuse G4.5's canonical paid sequence binding for BOTH hit and miss.
+        # Its returned position prevents relabeling one paid slot as another
+        # even when a multi-attack sequence repeats the same profile.
+        bound_declaration,bound_slot=self.bridge._bound_attack_declaration(
+            attacker,target,p,action_index)
+        if bound_declaration!=declaration or bound_slot!=slot:
+            raise UnresolvedDecision(
+                "G5 action index does not match declared attack slot")
         if (native["kind"]!="attack_sequence_committed"
                 or native["detail"].get("attacker")!=attacker
                 or native["detail"].get("target")!=target
                 or native["detail"].get("profiles")!=list(sequence["profiles"])
-                or native["detail"].get("defenses")!=[
-                    e.ledger[i]["detail"].get("defense") for i in sequence["defenses"]]
-                or d["kind"]!="defense_assigned"
-                or d["detail"].get("actor")!=target):
+                or len(sequence["defenses"])!=len(sequence["profiles"])):
             raise UnresolvedDecision("G0 pre-roll declaration or defense mismatched")
+        # G0 emits one defense_assigned per committed profile, immediately
+        # after attack_sequence_committed and in profile order. Rebind every
+        # supplied event index to this exact declaration AND canonical slot.
+        # Merely comparing labels is not enough: consecutive Dodge values
+        # differ because Dodge Pressure is paid at declaration.
+        assigned=[]
+        for i,declared_defense in enumerate(native["detail"].get("defenses",())):
+            canonical_index=declaration+1+i
+            if (canonical_index>=len(e.ledger)
+                    or type(sequence["defenses"][i]) is not int
+                    or sequence["defenses"][i]!=canonical_index):
+                raise UnresolvedDecision(
+                    "G0 assigned defense event does not match declared slot")
+            ev=e.ledger[canonical_index]
+            if (ev["kind"]!="defense_assigned"
+                    or ev["round"]!=e.round or ev["turn"]!=attacker
+                    or ev["detail"].get("actor")!=target
+                    or ev["detail"].get("attack_key")!=f"{attacker}:{target}:{i}"
+                    or ev["detail"].get("defense")!=declared_defense):
+                raise UnresolvedDecision(
+                    "G0 assigned defense event does not match declared slot")
+            assigned.append(ev)
+        if (len(assigned)!=len(sequence["profiles"])
+                or native["detail"]["defenses"]!=[
+                    event["detail"]["defense"] for event in assigned]):
+            raise UnresolvedDecision("G0 pre-roll declaration or defense mismatched")
+        d=assigned[slot]
+        if d["index"]!=defense_index:
+            raise UnresolvedDecision(
+                "G0 assigned defense event does not match declared slot")
+        bonus=self._profile(attacker,p)
         defense=d["detail"]["defense"]
         value=d["detail"]["defense_value"]
         if (defense=="guard" and (
