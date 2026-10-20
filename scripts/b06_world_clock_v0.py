@@ -160,7 +160,12 @@ class WorldClock:
     @staticmethod
     def _sort_key(ev):
         due = ev.due_seconds if ev.due_seconds is not None else ev.due_round
-        return due, ev.original_order, PHASE_ORDER[ev.phase], ev.serial
+        # Coalesced Round Begin deadlines must first honor fixed Endurance
+        # 'before_toxin' expiry, even when its original instant was later
+        # than a toxin pulse. Preserve the original chronological ordering
+        # of all OTHER events (including Recovery and ordinary milestones).
+        expiry_first = 0 if ev.phase == "before_toxin" else 1
+        return due, expiry_first, ev.original_order, PHASE_ORDER[ev.phase], ev.serial
 
     def _complete(self, ev, *, boundary_round=None):
         if ev.consumed or ev.canceled:

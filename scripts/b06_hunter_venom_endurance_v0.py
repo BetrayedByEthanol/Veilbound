@@ -114,6 +114,37 @@ class HunterVenomEndurance:
             self._end(v,"units_exhausted")
         return True
 
+    def prevent_legacy_hemotoxin(self,t):
+        """Protect the still-supported G4 TX-HM adapter's real pending tick.
+
+        Legacy entries are deliberately not copied into G4.3 instances:
+        their local elapsed phase, consumed packet count and source key
+        remain owned by DamageState.short_toxins.
+        """
+        if t["left"]<=0 or self.e.actors[t["recipient"]].dead:
+            return False
+        v=self.for_recipient(t["recipient"])
+        if (v is None or v["mode"]!="suppression"
+                or v["bound_key"]!=t["key"] or not v["bound_legacy"]):
+            return False
+        if not self._spend(v,"legacy_TX_HM_hp"):
+            return False
+        v["covered"]=False
+        self.e.log("g44_toxin_packet_prevented",recipient=t["recipient"],
+                   key=t["key"],packet=t["applied"]+1,
+                   resource="hp",legacy=True)
+        if v["units"]==0:
+            self._end(v,"units_exhausted")
+        return True
+
+    def on_legacy_hemotoxin_end(self,t):
+        if t["left"]:
+            return
+        v=self.for_recipient(t["recipient"])
+        if (v is not None and v["mode"]=="suppression"
+                and v["bound_legacy"] and v["bound_key"]==t["key"]):
+            self._end(v,"bound_toxin_ended")
+
     def prevent_recovery(self,t):
         v=self.for_recipient(t["recipient"])
         if v is None or v["mode"]!="suppression" or v["bound_key"]!=t["key"]:
@@ -411,19 +442,27 @@ class HunterVenomEndurance:
         source="endurance:"+ident
         v={"id":ident,"caster":caster,"recipient":recipient,"mode":mode,
            "source_reference":source_reference,"source":source,"active":True,
-           "expiry":event,"bound_key":None,"units":0,"covered":False,
+           "expiry":event,"bound_key":None,"bound_legacy":False,
+           "units":0,"covered":False,
            "phase":0,"long":False,"cost":price}
         if mode=="suppression":
             t=self.toxins.active(recipient)
+            # Older verified TX-HM schedules are still legal and use a
+            # separate retained hazard record. They are exclusively bound
+            # only when there is no live unified instance.
+            legacy=(next((x for x in self.d.short_toxins
+                         if x["recipient"]==recipient and x["left"]>0),None)
+                    if t is None else None)
             viable=(t is not None and t["profile"] in COVERED
-                    and t["profile"]!="TX-CY")
+                    and t["profile"]!="TX-CY") or legacy is not None
             if viable:
-                v["bound_key"]=t["key"]
+                v["bound_key"]=t["key"] if t is not None else legacy["key"]
+                v["bound_legacy"]=legacy is not None
                 v["units"]=min(5,3+max(0,raw_vc)//2)
-                v["long"]=t["profile"] in CONTINUOUS_LONG
-                if t["profile"] in CONTINUOUS_SHORT or (
+                v["long"]=t is not None and t["profile"] in CONTINUOUS_LONG
+                if t is not None and (t["profile"] in CONTINUOUS_SHORT or (
                         t["profile"] in CONTINUOUS_LONG and (
-                            t["profile"]!=HUNTER or t["stage"]>0)):
+                            t["profile"]!=HUNTER or t["stage"]>0))):
                     self.effects[ident]=v
                     self._spend(v,"initial_continuous_interval")
         self.effects[ident]=v

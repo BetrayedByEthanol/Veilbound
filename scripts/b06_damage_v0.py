@@ -644,14 +644,19 @@ class DamageState:
             return
         number=t["applied"]+1
         if not self._actor(t["recipient"]).dead:
-            self.apply_damage(t["recipient"],(DamagePacket("hp","Toxin",1),),
-                              event_key=f"toxin:{t['key']}:{number}",
-                              cause="TX-HM:scheduled_hp_tick",
-                              wound_location_roll=t["wound_location_roll"])
+            # The legacy clock owns this actual tick. Endurance may cover
+            # its HP packet, never create a parallel unified TX-HM schedule.
+            if not self.venom.prevent_legacy_hemotoxin(t):
+                self.apply_damage(t["recipient"],(DamagePacket("hp","Toxin",1),),
+                                  event_key=f"toxin:{t['key']}:{number}",
+                                  cause="TX-HM:scheduled_hp_tick",
+                                  wound_location_roll=t["wound_location_roll"])
         t["applied"]=number
         t["left"]-=1
         self.e.log("g4_toxin_tick",recipient=t["recipient"],
                    profile="TX-HM",key=t["key"],remaining=t["left"])
+        if t["left"]==0:
+            self.venom.on_legacy_hemotoxin_end(t)
 
     def on_turn_start(self,actor_id):
         """Step 3 after real G0 regeneration, before establishing turn AP."""
