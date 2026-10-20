@@ -962,7 +962,8 @@ class B06G3Test(unittest.TestCase):
                         spontaneous=(choice,),
                         on_spontaneous=lambda ev,t,r:
                             g.resolve_reactive_stone("caster",t,r)))
-                kwargs=({"heal_tier":1,"heal_die":4,"hand_available":True}
+                kwargs=({"heal_tier":1,"heal_die":4,"hand_available":True,
+                         "hand_check":lambda _e,_c:True}
                         if secondary=="Basic Heal" else {})
                 out=g.cast_scholar_composite(
                     "caster",secondary,on_committed=incoming_stone,**kwargs)
