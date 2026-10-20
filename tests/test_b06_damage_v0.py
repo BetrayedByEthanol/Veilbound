@@ -175,7 +175,11 @@ class G4IntegrationTests(unittest.TestCase):
         self.assertEqual((t.hp,t.vigor),(t.hp_max-2,t.vigor_max-4))
         launch=next(v for v in e.ledger if v["kind"]=="g3_flame_launched")
         impact=next(v for v in e.ledger if v["kind"]=="g4_damage_applied")
-        self.assertEqual(impact["index"],launch["index"]+1)
+        # The actual Vigor packet's G3 Shelter accounting is logged
+        # within synchronous damage resolution, never a separate turn/step.
+        intervening=[v["kind"] for v in e.ledger[
+            launch["index"]+1:impact["index"]]]
+        self.assertEqual(intervening,["g3_shelter_packet"])
         with self.assertRaisesRegex(ValueError,"consumed"):
             d.apply_flame("caster","target",ledger_index=launch["index"])
         e.end_turn()
