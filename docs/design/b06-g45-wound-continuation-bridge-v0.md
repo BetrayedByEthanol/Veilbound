@@ -29,7 +29,7 @@ Actual independently paid Basic Heal and its external repair component are still
 
 ## Frozen Phase 3 wound-stop register (G4A-13)
 
-The function `historical_phase3_wound_witnesses()` re-executes the *original* immutable [Phase 3 source trial](../../scripts/b06_hunter_tactical_diversity_v0.py) over all **32 authored cells ×128 seeds**, selects its **22** `wound_unresolved` **first stopping events**, and emits **22 separate keyed evidence records** with the original six-dimensional scenario/seed tuple, the original trial result digest, source terminal and HP/contact-route projection. Each entry retains the explicit classification:
+The function `historical_phase3_wound_witnesses()` re-executes the *original* immutable [Phase 3 source trial](../../scripts/b06_hunter_tactical_diversity_v0.py) over all **32 authored cells ×128 seeds**, selects its **22** `wound_unresolved` **first stopping events**, and emits **22 separate keyed evidence records** with the original six-dimensional scenario/seed tuple, the original trial result digest, source terminal and HP/contact-route projection. The expensive 4,096-trial reconstruction is cached **privately**; each public read returns a **deep copy** of the 22 records, including nested authority lists, so experiments may annotate their results without mutating subsequently returned evidence. Source tuples remain tuples and record content retains its original provenance. Each entry retains the explicit classification:
 
 `unresolved_G5_critical_confirmation_and_wound_location`
 

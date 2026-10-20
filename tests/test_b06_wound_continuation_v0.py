@@ -421,5 +421,42 @@ class WoundContinuationTests(unittest.TestCase):
         self.assertIsNone(bridge.report()["winner"])
         e.check()
 
+    def test_15_cached_witness_results_are_independent_deep_copies(self):
+        from copy import deepcopy
+
+        first=historical_phase3_wound_witnesses()
+        baseline=deepcopy(first)
+        self.assertEqual(len(first),22)
+        self.assertIsInstance(first,tuple)
+        self.assertIsInstance(first[0]["source_tuple"],tuple)
+        self.assertFalse(first[0]["encounter_certified"])
+        self.assertEqual(len(first[0]["next_required_authority"]),4)
+
+        # A caller may freely annotate an experimental copy, including
+        # nested collections, without rewriting the frozen shared evidence.
+        first[0]["encounter_certified"]=True
+        first[0]["witness_key"]="tampered"
+        first[0]["next_required_authority"][0]="fabricated policy"
+        first[0]["next_required_authority"].append("invented outcome")
+        first[1]["g4_damage_replayed"]=True
+        first[1]["next_required_authority"].clear()
+
+        second=historical_phase3_wound_witnesses()
+        third=historical_phase3_wound_witnesses()
+        self.assertEqual(second,baseline)
+        self.assertEqual(third,baseline)
+        self.assertIsNot(first,second)
+        self.assertIsNot(second,third)
+        self.assertIsNot(first[0],second[0])
+        self.assertIsNot(first[0]["next_required_authority"],
+                         second[0]["next_required_authority"])
+        self.assertFalse(second[0]["encounter_certified"])
+        self.assertFalse(second[1]["g4_damage_replayed"])
+        self.assertEqual(len({r["witness_key"] for r in second}),22)
+        # Mutating the second result must not mutate the first or third.
+        second[2]["next_required_authority"].pop()
+        self.assertEqual(third[2],baseline[2])
+
+
 if __name__=="__main__":
     unittest.main()
