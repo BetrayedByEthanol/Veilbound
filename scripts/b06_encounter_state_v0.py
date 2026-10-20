@@ -54,6 +54,10 @@ class Wound:
     requirement: int
     progress: int = 0
     repairable: bool = True
+    severity: str | None = None
+    location: str | None = None
+    trauma: str | None = None
+    source_event: str | None = None
 
     def __post_init__(self):
         _integer(self.requirement, "wound requirement", 1)
@@ -67,6 +71,7 @@ class RegenerationChoice:
     hp: int = 0
     repair: int = 0
     cancel_dying_loss: bool = False
+    wound_allocations: tuple = ()  # G4 only: non-Dying ((wound_id, amount), ...)
 
 
 @dataclass
@@ -322,6 +327,7 @@ class Encounter:
         self.g1 = None  # Optional native physical grid; G0-only stays supported.
         self.g2 = None  # Optional G2 ranged executor; never adds phantom shots.
         self.g3 = None  # Optional source-bound spell state; G0-only is unchanged.
+        self.g4 = None  # Optional injury executor; G0/G3 stand-alone paths unchanged.
         rank = {v: i for i, v in enumerate(tie_order)}
         def priority(a):
             return (-initiative_scores[a.id], -a.awareness, -a.agility,
@@ -379,6 +385,8 @@ class Encounter:
         self.check()
 
     def _regenerate(self, a, choice):
+        if self.g4 is not None:
+            return self.g4.regenerate(a, choice)
         if a.id in self.regen_done:
             raise ValueError("Regeneration Step already resolved this round")
         if a.dead:
@@ -476,7 +484,10 @@ class Encounter:
         # NOT revive expired reservations or append a duplicate expiry event.
         self._regenerate(a, regen_choice)
         self.pending_regeneration = None
-        # External spell/hazard consequences remain G3/G4; no automatic ticks.
+        # G4 handles genuine Step 3 scheduled toxin harm after the sole
+        # Step 2 regeneration, before Step 4 establishes Turn resources.
+        if self.g4 is not None:
+            self.g4.on_turn_start(actor_id)
         a.ap_remaining = (0 if a.hp <= 0 or a.dead
                           else a.ap_total - a.blink_debt_due)
         a.mp_remaining = 12
