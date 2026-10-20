@@ -8,7 +8,7 @@ from scripts.b06_movement_v0 import GridMovement
 from scripts.b06_spells_v0 import SpellState
 from scripts.b06_damage_v0 import DamageState
 from scripts.b06_soldier_sentry_g5_v0 import (
-    SourceMelee, fixed_scene, run_i1, run_i2)
+    SourceMelee, SceneExit, fixed_scene, run_i1, run_i2)
 
 
 def crossed_scene(*,state="prepared_start"):
@@ -261,6 +261,108 @@ class G5SoldierSentryTests(unittest.TestCase):
             scene.resolve(seq,0,attack_face=10)
         self.assertEqual(e.actors["front"].hp,12)
         self.assertEqual(len(scene.report()["attacks"]),0)
+        e.check()
+
+    def test_15_confirmation_natural_one_fails_with_dodge_below_attack_bonus(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        # A fifth native Dodge has Defense 6, below the Sentry's +7.
+        for i in range(4):
+            e.defense("front","dodge",attack_key=f"pressure:{i}")
+        seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("dodge",))
+        self.assertEqual(e.ledger[seq["defenses"][0]]["detail"]["defense_value"],6)
+        r=scene.resolve(seq,0,attack_face=20,confirmation_face=1,
+                        critical_dice=(3,),damage_face=1,vigor_die=4)
+        self.assertEqual(r["outcome"],"hit")
+        self.assertEqual(r["critical"],"strong")
+        self.assertEqual(r["damage"]["hp_loss"],9)
+        self.assertFalse(e.actors["front"].wounds)
+        self.assertEqual(scene.report()["attacks"][0]["critical"],"strong")
+        e.check()
+
+    def test_16_confirmation_two_still_succeeds_above_low_dodge(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        for i in range(4):
+            e.defense("front","dodge",attack_key=f"pressure:{i}")
+        seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("dodge",))
+        self.assertEqual(e.ledger[seq["defenses"][0]]["detail"]["defense_value"],6)
+        r=scene.resolve(seq,0,attack_face=20,confirmation_face=2,
+                        critical_dice=(3,4),damage_face=1,vigor_die=4,
+                        wound_location_roll=14)
+        self.assertEqual(r["outcome"],"hit")
+        self.assertEqual(r["critical"],"critical")
+        self.assertEqual(r["damage"]["hp_loss"],13)
+        self.assertEqual(len(e.actors["front"].wounds),1)
+        e.check()
+
+    def test_17_cannot_relabel_interior_step_as_withdrawal(self):
+        scene=fixed_scene("I1")
+        e=scene.e
+        self.assertEqual(scene.scene_exit.square,(0,2))
+        self.assertEqual(scene.scene_exit.policy_id,
+                         "G5:open-corridor:exit-front")
+        scene.bridge.start_next_turn(RegenerationChoice())
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        self.assertTrue(e.g1.step("front",(-1,0),responses=lambda _:()))
+        self.assertEqual(e.actors["front"].occupied,((1,2),))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "has not reached scene-authored exit"):
+            scene.withdraw("front")
+        with self.assertRaises(TypeError):
+            scene.withdraw("front",exit_square=(1,2),
+                           policy_id="fabricated-exit")
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        self.assertTrue(e.g1.step("front",(-1,0),responses=lambda _:()))
+        with self.assertRaisesRegex(UnresolvedDecision,"Actor does not match"):
+            scene.withdraw("foe")
+        outcome=scene.withdraw("front")
+        self.assertEqual(outcome["status"],"withdrawal_attested")
+        self.assertEqual(scene.report()["ending"],"withdrawal_attested")
+        terminal=[x["detail"] for x in e.ledger if x["kind"]=="g5_terminal_exit"]
+        self.assertEqual(len(terminal),1)
+        self.assertEqual(terminal[0]["at"],[0,2])
+        self.assertEqual(terminal[0]["policy"],scene.scene_exit.policy_id)
+        with self.assertRaisesRegex(ValueError,"already attested"):
+            scene.withdraw("front")
+        e.check()
+
+    def test_18_generic_scene_without_authored_exit_cannot_withdraw(self):
+        e,scene=crossed_scene()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        self.assertTrue(e.g1.step("sentry",(-1,0),responses=lambda _:()))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "No scene-authored exit policy"):
+            scene.withdraw("sentry")
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        self.assertFalse([x for x in e.ledger if x["kind"]=="g5_terminal_exit"])
+        e.check()
+
+    def test_19_reject_malformed_or_interior_scene_exit_contract(self):
+        e,scene=crossed_scene()
+        before=len(e.ledger)
+        wrongs=(
+            SceneExit(e.scenario,e.g1.scene_id,e.objective,
+                      "sentry",(2,2),"G5:pretend"),
+            SceneExit("different",e.g1.scene_id,e.objective,
+                      "sentry",(0,2),"G5:pretend"),
+            SceneExit(e.scenario,e.g1.scene_id,"other-objective",
+                      "sentry",(0,2),"G5:pretend"),
+            SceneExit(e.scenario,e.g1.scene_id,e.objective,
+                      "unknown",(0,2),"G5:pretend"),
+        )
+        for entry in wrongs:
+            with self.subTest(entry=entry):
+                with self.assertRaisesRegex(ValueError,
+                                            "Scene exit must match source scene"):
+                    SourceMelee(e,scene_exit=entry)
+        self.assertEqual(len(e.ledger),before)
+        self.assertIsNone(scene.scene_exit)
         e.check()
 
 if __name__=="__main__":
