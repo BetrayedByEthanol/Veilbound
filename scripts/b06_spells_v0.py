@@ -181,7 +181,7 @@ class SpellState:
                 raise ValueError("Invalid component Used Tier")
             if type(heal_die) is not int or not 1<=heal_die<=6:
                 raise UnresolvedDecision("Explicit legal d6 Heal Secondary roll required")
-            if a.wounds or a.hp<=0:
+            if a.hp<=0 or (a.wounds and self.e.g4 is None):
                 raise UnresolvedDecision("Dying/wound application belongs in G4")
             spent=2*heal_tier
             committed=reserve
@@ -208,7 +208,7 @@ class SpellState:
             return None
         if (a.hp<=0 or a.vp_available<spent+committed
                 or (secondary=="Basic Heal" and (
-                    hand_available is not True or a.wounds))
+                    hand_available is not True or (a.wounds and self.e.g4 is None)))
                 or (secondary=="Vital Shelter" and
                     any(v.kind.endswith("Shelter") and v.recipient==caster
                         for v in self.effects.values()))):
@@ -221,8 +221,16 @@ class SpellState:
         if secondary=="Basic Heal":
             restored_hp=min(1,a.hp_max-a.hp)
             restored_vigor=min(2+ceil(heal_die*heal_tier/6),a.vigor_max-a.vigor)
-            a.hp+=restored_hp
-            a.vigor+=restored_vigor
+            if self.e.g4 is not None:
+                applied=self.e.g4.resolve_heal(
+                    caster,contribution="Secondary",
+                    vigor_amount=2+ceil(heal_die*heal_tier/6),
+                    source="g3:composite_secondary")
+                restored_hp=applied["hp_restored"]
+                restored_vigor=applied["vigor_restored"]
+            else:
+                a.hp+=restored_hp
+                a.vigor+=restored_vigor
             self.e.log("g3_basic_heal_secondary_once",caster=caster,host=host.ident,
                        tier=heal_tier,hp=restored_hp,vigor=restored_vigor,
                        die=heal_die,regen_debit=0)
@@ -369,7 +377,7 @@ class SpellState:
             raise UnresolvedDecision("Explicit actual Heal Primary d8 required")
         if hand_available is not True:
             raise ValueError("Basic Heal needs genuinely available hand")
-        if a.wounds or a.hp<=0:
+        if a.hp<=0 or (a.wounds and self.e.g4 is None):
             raise UnresolvedDecision("Wound or Dying recipient requires G4")
         cost=2*tier
         self._funds(a,cost,0)
@@ -380,8 +388,15 @@ class SpellState:
         self._pay(caster,cost,0,label="g3:self_basic_heal")
         hp=min(2,a.hp_max-a.hp)
         vigor=min(4+ceil(die*tier/3),a.vigor_max-a.vigor)
-        a.hp+=hp
-        a.vigor+=vigor
+        if self.e.g4 is not None:
+            applied=self.e.g4.resolve_heal(
+                caster,contribution="Primary",vigor_amount=4+ceil(die*tier/3),
+                source="g3:self_basic_heal")
+            hp=applied["hp_restored"]
+            vigor=applied["vigor_restored"]
+        else:
+            a.hp+=hp
+            a.vigor+=vigor
         self.e.log("g3_basic_heal_primary_once",caster=caster,recipient=caster,
                    tier=tier,die=die,hp=hp,vigor=vigor,
                    regen_debit=0,spent_vp=cost)
