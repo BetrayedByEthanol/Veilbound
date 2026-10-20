@@ -680,5 +680,96 @@ class G44Regressions(unittest.TestCase):
         self.assertEqual(v.for_recipient("victim"),None)
         e.check()
 
+
+    def test_36_tx_en_step3_carries_five_exploration_seconds(self):
+        # At Step 3 the first protected interval ends, but that Step is
+        # not an extra six elapsed world seconds. Its existing 5s remainder
+        # must follow the next paid interval through mode conversion.
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-EN",exposure_key="en-phase",
+                       source="test:verified_ingestion",route="ingestion",
+                       delivery_verified=True,resistance_die=1)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="suppression")
+        whole_round(e)  # buys next interval, phase 0 and one unit remains
+        self.assertEqual((v.effects[effect]["units"],
+                          v.effects[effect]["phase"]),(1,0))
+        c.advance_exploration(5)
+        self.assertEqual(v.effects[effect]["phase"],5)
+        c.enter_initiative()
+        e.begin_round()
+        whole_round(e)  # genuine recipient Step 3 buys last unit
+        self.assertEqual((v.effects[effect]["units"],
+                          v.effects[effect]["phase"],
+                          v.effects[effect]["covered"]),(0,5,True))
+        self.assertEqual(d.toxins.modifier("victim","physical_exertion"),0)
+        c.leave_initiative()
+        self.assertTrue(v.effects[effect]["active"])
+        c.advance_exploration(1)
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertEqual(d.toxins.modifier("victim","physical_exertion"),-1)
+        self.assertIsNotNone(d.toxins.active("victim"))
+        self.assertEqual(len([x for x in entries(e,"g44_suppression_unit")
+                              if x["effect"]==effect]),3)
+        e.check()
+
+    def test_37_hunter_step3_preserves_shorter_fractional_remainders(self):
+        # Both small and large partial intervals must finish at precisely
+        # (6-phase) actual exploration seconds after a real Step 3.
+        for partial in (1,5):
+            with self.subTest(partial=partial):
+                e,d,v,c=scene()
+                result,_=bite(e,d,v,key="hunter-phase")
+                self.assertEqual(result["resolution"],"Full")
+                c.advance_exploration(600)
+                self.assertEqual(d.toxins.active("victim")["stage"],1)
+                e.start_turn("caster",regen_choice=RegenerationChoice())
+                effect=cast(e,v,mode="suppression")
+                whole_round(e)
+                self.assertEqual(v.effects[effect]["units"],1)
+                c.advance_exploration(partial)
+                self.assertEqual(v.effects[effect]["phase"],partial)
+                c.enter_initiative()
+                e.begin_round()
+                whole_round(e)
+                self.assertEqual((v.effects[effect]["phase"],
+                                  v.effects[effect]["units"]),
+                                 (partial,0))
+                self.assertTrue(v.effects[effect]["covered"])
+                c.leave_initiative()
+                self.assertEqual(d.toxins.modifier("victim","mp"),0)
+                c.advance_exploration(5-partial)
+                self.assertTrue(v.effects[effect]["active"])
+                self.assertEqual(v.effects[effect]["phase"],5)
+                c.advance_exploration(1)
+                self.assertFalse(v.effects[effect]["active"])
+                self.assertEqual(d.toxins.modifier("victim","mp"),-2)
+                self.assertEqual(d.toxins.active("victim")["stage"],1)
+                self.assertEqual(len([x for x in entries(e,"g44_suppression_unit")
+                                      if x["effect"]==effect]),3)
+                e.check()
+
+    def test_38_exploration_long_boundary_still_resets_phase(self):
+        # The fractional carry rule applies to Step 3 only. A real complete
+        # six-second exploration interval starts the next at phase zero.
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-EN",exposure_key="en-full-interval",
+                       source="test:verified_ingestion",route="ingestion",
+                       delivery_verified=True,resistance_die=1)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="suppression")
+        whole_round(e)
+        self.assertEqual(v.effects[effect]["units"],1)
+        c.advance_exploration(6)
+        self.assertEqual((v.effects[effect]["units"],
+                          v.effects[effect]["phase"],
+                          v.effects[effect]["covered"]),(0,0,True))
+        c.advance_exploration(5)
+        self.assertTrue(v.effects[effect]["active"])
+        c.advance_exploration(1)
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertEqual(d.toxins.modifier("victim","physical_exertion"),-1)
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
