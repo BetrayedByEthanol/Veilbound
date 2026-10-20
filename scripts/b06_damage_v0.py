@@ -622,19 +622,27 @@ class DamageState:
             raise UnresolvedDecision("No toxin without verified delivery")
         if not isinstance(exposure_key,str) or not exposure_key:
             raise ValueError("Stable exposure key required")
-        if self.toxins.active(recipient) is not None:
-            raise UnresolvedDecision("One active mundane toxin per recipient, including legacy TX-HM")
         if exposure_key in self.toxins.exposure_ids:
             raise ValueError("Toxin exposure key already processed")
         if any(t["key"]==exposure_key for t in self.short_toxins):
             raise ValueError("Duplicate toxin exposure")
-        # Refuse same-grade duplicate active TX-HM BEFORE touching any Ward.
-        if any(t["recipient"]==recipient and t["left"] for t in self.short_toxins):
-            raise UnresolvedDecision("Source-specific toxin nonstack/ward resolution needed")
-        # This old exposure adapter remains supported: a live, valid
-        # Moderate TX-HM qualifies for the same one-use Endurance Ward as
-        # all unified mundane profiles. No resistance die, packet rolls or
-        # toxin milestones are consumed/created when the Ward intercepts.
+        # Apply the shared printed-grade one-instance gate BEFORE any Ward
+        # or natural resistance. This legacy profile is Moderate: an
+        # existing Moderate (unified or legacy) wins an equal-grade tie.
+        prior=self.toxins.active(recipient)
+        legacy=next((t for t in self.short_toxins
+                     if t["recipient"]==recipient and t["left"]>0),None)
+        if (prior is not None and prior["grade"]=="Moderate") or legacy is not None:
+            active_key=prior["key"] if prior is not None else legacy["key"]
+            self.toxins.exposure_ids.add(exposure_key)
+            self.e.log("g4_toxin_ignored",recipient=recipient,profile="TX-HM",
+                       key=exposure_key,active=active_key,
+                       reason="equal_or_lower_printed_grade")
+            return {"outcome":"ignored","active":active_key}
+        # A valid legacy Moderate exposure can replace a unified Minor
+        # only AFTER Ward eligibility and an independent successful
+        # natural-result/wound-roll preflight. A Ward instead consumes
+        # this higher-grade candidate and preserves the original Minor.
         if self.venom.intercept(recipient,"Moderate"):
             self.toxins.exposure_ids.add(exposure_key)
             self.e.log("g4_toxin_prevented",recipient=recipient,
@@ -652,6 +660,8 @@ class DamageState:
         t={"key":exposure_key,"recipient":recipient,
            "left":3 if resistance_total>=12 else 5,
            "phase":0,"applied":0,"wound_location_roll":wound_location_roll}
+        if prior is not None:
+            self.toxins._expire(prior,"higher_printed_grade_replaced")
         self.short_toxins.append(t)
         self.e.log("g4_toxin_scheduled",recipient=recipient,profile="TX-HM",
                    key=exposure_key,ticks=t["left"],resistance_total=resistance_total)

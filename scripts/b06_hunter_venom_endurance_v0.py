@@ -286,16 +286,20 @@ class HunterVenomEndurance:
                        exposure_key=exposure_key,hit_index=profile_hit_index)
             return {"outcome":"not_delivered"}
         old=self.toxins.active(recipient)
-        if old is not None and old["grade"]=="Moderate":
+        legacy=next((x for x in self.d.short_toxins
+                     if x["recipient"]==recipient and x["left"]>0),None)
+        # TX-HM scheduled through the retained G4 adapter is also a
+        # printed Moderate toxin occupying this exact one-instance slot.
+        # Equal-grade re-exposure must be ignored before Ward or resistance,
+        # and must still consume the real Bite and stable exposure keys.
+        if (old is not None and old["grade"]=="Moderate") or legacy is not None:
+            active_key=old["key"] if old is not None else legacy["key"]
             self.hit_keys.add(profile_hit_index)
             self.hunter_keys.add(exposure_key)
             self.toxins.exposure_ids.add(exposure_key)
             self.e.log("g44_hunter_ignored",recipient=recipient,
-                       key=exposure_key,active=old["key"])
-            return {"outcome":"ignored","active":old["key"]}
-        if old is None and any(x["recipient"]==recipient and x["left"]
-                               for x in self.d.short_toxins):
-            raise UnresolvedDecision("Legacy toxin active; no parallel Hunter instance")
+                       key=exposure_key,active=active_key)
+            return {"outcome":"ignored","active":active_key}
         if self.intercept(recipient,"Moderate"):
             self.hit_keys.add(profile_hit_index)
             self.hunter_keys.add(exposure_key)
