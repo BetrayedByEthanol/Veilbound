@@ -1,0 +1,355 @@
+"""G4.4 Hunter timing and Venom Endurance bounded executable regression."""
+import unittest
+from scripts.b06_encounter_state_v0 import (
+    Encounter, RegenerationChoice, party_actor, enemy_actor, UnresolvedDecision)
+from scripts.b06_damage_v0 import DamageState
+from scripts.b06_hunter_venom_endurance_v0 import HUNTER
+
+
+def scene(*,target_role="F",with_caster=True):
+    victim=party_actor(target_role,3,"victim","party",occupied=((3,1),))
+    hunter=enemy_actor("B06-EN-03","hunter","enemy",
+                       occupied=((6,1),(5,1)))
+    roster=[victim,hunter]
+    scores={"victim":80,"hunter":70}
+    if with_caster:
+        priest=party_actor("A",3,"caster","party",occupied=((1,1),))
+        roster.insert(0,priest);scores["caster"]=100
+    e=Encounter(roster,scores,seed=444,scenario="G4.4",
+                policy="source_attested")
+    d=DamageState(e)
+    e.begin_round()
+    return e,d,d.venom,d.clock
+
+
+def hit(e,d,*,profile="B06-AT-04",die=3,target="victim"):
+    out=d.apply_profile_hit("hunter",target,profile,
+                            die_face=die,confirmed_hit=True,
+                            wound_location_roll=8)
+    assert e.ledger[-1]["kind"]=="g4_profile_hit"
+    return e.ledger[-1]["index"],out
+
+
+def bite(e,d,v,*,key="bite",face=1,profile="B06-AT-04",die=3):
+    index,damage=hit(e,d,profile=profile,die=die)
+    effect=v.apply_bite("hunter","victim",profile_hit_index=index,
+                        exposure_key=key,resistance_die=face)
+    return effect,damage
+
+
+def cast(e,v,*,mode="ward",recipient="victim",price=2,**kwargs):
+    return v.cast_endurance("caster",recipient,profile="Single Target",
+                             mode=mode,source_authorized=True,
+                             source_reference="test:independently_attested_Life_Prayer",
+                             ordinary_cost=price,**kwargs)
+
+
+def whole_round(e):
+    if e.current is not None:e.end_turn()
+    for who in e.order[e.cursor:]:
+        e.start_turn(who,regen_choice=RegenerationChoice())
+        e.end_turn()
+
+
+def entries(e,kind):
+    return [x["detail"] for x in e.ledger if x["kind"]==kind]
+
+
+class G44Regressions(unittest.TestCase):
+    def test_01_hunter_full_stages_no_direct_damage_or_saves(self):
+        e,d,v,c=scene()
+        result,damage=bite(e,d,v,face=1)
+        self.assertEqual(result["outcome"],"accepted")
+        self.assertTrue(damage["injection_eligible"])
+        t=d.toxins.active("victim")
+        self.assertEqual(t["profile"],HUNTER)
+        self.assertEqual(t["stage"],0)
+        self.assertEqual(d.toxins.modifier("victim","mp"),0)
+        remaining=e.actors["victim"].hp
+        c.advance_exploration(599)
+        self.assertEqual(t["stage"],0)
+        c.advance_exploration(1)
+        self.assertEqual((t["stage"],d.toxins.modifier("victim","mp"),
+                          d.toxins.modifier("victim","muscular_strength")),(1,-2,-1))
+        c.advance_exploration(1200)
+        self.assertEqual((t["stage"],d.toxins.modifier("victim","mp"),
+                          d.toxins.modifier("victim","muscular_strength")),(2,-4,-2))
+        c.advance_exploration(5400)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertEqual(d.toxins.modifier("victim","mp"),0)
+        self.assertEqual(e.actors["victim"].hp,remaining)
+        self.assertEqual(len(entries(e,"g44_hunter_milestone")),3)
+        self.assertEqual(len(entries(e,"g44_hunter_accepted")),1)
+        e.check()
+
+    def test_02_reduced_tie_no_escalation_and_60min_expiry(self):
+        e,d,v,c=scene()
+        raw=dict(e.actors["victim"].source.abilities)["Vitality"]
+        rolled=12-raw
+        self.assertTrue(1<=rolled<=20)
+        o,_=bite(e,d,v,face=rolled)
+        self.assertEqual(o["resolution"],"Reduced")
+        self.assertEqual(len(d.toxins.active("victim")["markers"]),2)
+        c.advance_exploration(600)
+        self.assertEqual(d.toxins.modifier("victim","mp"),-2)
+        c.advance_exploration(3000)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertEqual([x["stage"] for x in entries(e,"g44_hunter_milestone")],[1,1])
+        e.check()
+
+    def test_03_bite_armor_gate_nonpiercing_and_horn_never_envenom(self):
+        e,d,v,c=scene(target_role="B")
+        i,damage=hit(e,d,die=1)
+        self.assertFalse(damage["injection_eligible"])
+        o=v.apply_bite("hunter","victim",profile_hit_index=i,
+                       exposure_key="stopped",resistance_die=None)
+        self.assertEqual(o["outcome"],"not_delivered")
+        self.assertIsNone(d.toxins.active("victim"))
+        i,_=hit(e,d,profile="B06-AT-05",die=1)
+        with self.assertRaises(UnresolvedDecision):
+            v.apply_bite("hunter","victim",profile_hit_index=i,
+                         exposure_key="horn",resistance_die=11)
+        self.assertIsNone(d.toxins.active("victim"))
+        e.check()
+
+    def test_04_pounce_bite_one_entry_and_no_immediate_stage(self):
+        e,d,v,c=scene()
+        o,_=bite(e,d,v,key="pounce",profile="B06-AT-06")
+        self.assertEqual(o["outcome"],"accepted")
+        self.assertEqual(d.toxins.active("victim")["stage"],0)
+        self.assertEqual(d.toxins.modifier("victim","muscular_strength"),0)
+        self.assertEqual(len(entries(e,"g44_hunter_accepted")),1)
+        e.check()
+
+    def test_05_same_grade_repeat_does_not_reset_milestones_or_save(self):
+        e,d,v,c=scene()
+        bite(e,d,v,key="first")
+        c.advance_exploration(900)
+        t=d.toxins.active("victim")
+        first_markers=tuple(t["markers"])
+        other,damage=bite(e,d,v,key="second",face=20)
+        self.assertEqual(other["outcome"],"ignored")
+        self.assertEqual(d.toxins.active("victim")["markers"],list(first_markers))
+        self.assertEqual(d.toxins.active("victim")["result"],"Full")
+        self.assertTrue(damage["hp_loss"]>0)
+        c.advance_exploration(900)
+        self.assertEqual(d.toxins.active("victim")["stage"],2)
+        e.check()
+
+    def test_06_initiative_exposure_exact_round_labels_and_exit(self):
+        e,d,v,c=scene()
+        c.enter_initiative()
+        bite(e,d,v)
+        t=d.toxins.active("victim")
+        self.assertEqual([c.events[x].due_round for x in t["markers"]],
+                         [101,301,1201])
+        whole_round(e)
+        c.leave_initiative()
+        self.assertEqual([c.events[x].due_seconds for x in t["markers"]],
+                         [588,1788,7188])
+        c.advance_exploration(588)
+        self.assertEqual(t["stage"],1)
+        c.advance_exploration(1200)
+        self.assertEqual(t["stage"],2)
+        e.check()
+
+    def test_07_exploration_to_initiative_each_milestone_independent(self):
+        e,d,v,c=scene()
+        bite(e,d,v)
+        c.advance_exploration(598)
+        c.enter_initiative()
+        t=d.toxins.active("victim")
+        self.assertEqual(c.events[t["markers"][0]].due_round,1)
+        self.assertEqual(t["stage"],1)  # q0 resolves before actions
+        self.assertEqual(c.events[t["markers"][1]].due_round,201)
+        self.assertEqual(c.events[t["markers"][2]].due_round,1101)
+        e.check()
+
+    def test_08_ward_stops_valid_bite_before_resistance_not_physical_hp(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v)
+        self.assertIsNotNone(eid)
+        whole_round(e)
+        result,damage=bite(e,d,v,face=None)
+        self.assertEqual(result["outcome"],"prevented")
+        self.assertTrue(damage["hp_loss"]>0)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(len(entries(e,"g44_ward_intercepted")),1)
+        e.check()
+
+    def test_09_ward_does_not_spend_on_blocked_bite_or_same_grade(self):
+        e,d,v,c=scene(target_role="B")
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v)
+        whole_round(e)
+        index,_=hit(e,d,die=1)
+        r=v.apply_bite("hunter","victim",profile_hit_index=index,
+                       exposure_key="no-puncture")
+        self.assertEqual(r["outcome"],"not_delivered")
+        self.assertTrue(v.effects[eid]["active"])
+        # Independently present a Minor and then a different Minor;
+        # catalog nonstacking precedes any Ward attempt.
+        o=d.toxins.apply("victim","TX-MY",exposure_key="minor",
+                          source="test:minor",route="injection",
+                          delivery_verified=True,residual_piercing_hp=1,
+                          resistance_die=1)
+        self.assertEqual(o["outcome"],"prevented")
+        self.assertFalse(v.effects[eid]["active"])
+        e.check()
+
+    def test_10_suppression_before_hunter_onset_zero_units_then_first(self):
+        e,d,v,c=scene()
+        bite(e,d,v)
+        c.advance_exploration(599)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,mode="suppression")
+        self.assertEqual(v.effects[eid]["units"],3)
+        self.assertFalse(v.effects[eid]["covered"])
+        whole_round(e)
+        c.advance_exploration(1)
+        self.assertEqual(d.toxins.active("victim")["stage"],1)
+        self.assertEqual(v.effects[eid]["units"],2)
+        self.assertEqual(d.toxins.modifier("victim","mp"),0)
+        c.advance_exploration(6)
+        self.assertEqual(v.effects[eid]["units"],1)
+        c.advance_exploration(12)
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(d.toxins.modifier("victim","mp"),-2)
+        e.check()
+
+    def test_11_suppression_stage2_does_not_consume_extra_unit(self):
+        e,d,v,c=scene()
+        bite(e,d,v)
+        c.advance_exploration(1799)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,mode="suppression")
+        self.assertEqual(v.effects[eid]["units"],2)
+        whole_round(e)
+        c.advance_exploration(1)
+        self.assertEqual(d.toxins.active("victim")["stage"],2)
+        # The real victim Step 3 in whole_round() already purchased the
+        # second interval. Escalation itself buys no further unit.
+        self.assertEqual(v.effects[eid]["units"],1)
+        self.assertEqual(d.toxins.modifier("victim","mp"),0)
+        c.advance_exploration(17)
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(d.toxins.modifier("victim","mp"),-4)
+        e.check()
+
+    def test_12_fixed_ward_expires_at_one_minute_without_refund(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        start=e.actors["caster"].vp_spent
+        eid=cast(e,v)
+        whole_round(e)
+        c.advance_exploration(60)
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(e.actors["caster"].vp_spent-start,2)
+        e.check()
+
+    def test_13_expiry_at_round_r_plus_10_prior_to_same_boundary(self):
+        e,d,v,c=scene()
+        c.enter_initiative()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v)
+        self.assertEqual(c.events[v.effects[eid]["expiry"]].due_round,11)
+        self.assertEqual(c.events[v.effects[eid]["expiry"]].phase,"before_toxin")
+        whole_round(e)
+        for _ in range(10):
+            e.begin_round()
+            whole_round(e)
+        self.assertFalse(v.effects[eid]["active"])
+        e.check()
+
+    def test_14_suppression_blocks_nephro_packet_before_vigor_shield(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-NP",exposure_key="kidney",
+                       source="test:valid-ingestion",route="ingestion",
+                       delivery_verified=True,resistance_die=1)
+        c.advance_exploration(3570)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,mode="suppression")
+        whole_round(e)
+        before=e.actors["victim"].vigor
+        c.advance_exploration(30)
+        self.assertEqual(e.actors["victim"].vigor,before)
+        self.assertEqual(v.effects[eid]["units"],2)
+        self.assertEqual(d.toxins.active("victim")["remaining"],3)
+        e.check()
+
+    def test_15_suppression_stops_three_future_hemotoxin_packets(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-HM",exposure_key="hem",
+                      source="test:verified-puncture",route="injection",
+                      delivery_verified=True,residual_piercing_hp=1,
+                      resistance_die=1,wound_location_rolls=(1,2,3,4,5))
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,mode="suppression")
+        whole_round(e)  # victim's genuine Step 3 consumes packet one
+        c.advance_exploration(24)
+        self.assertEqual(e.actors["victim"].hp,e.actors["victim"].hp_max-2)
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertEqual(len(entries(e,"g44_toxin_packet_prevented")),3)
+        e.check()
+
+    def test_16_fixed_spell_no_useful_toxin_still_spends_vp(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        before=e.actors["caster"].vp_available
+        eid=cast(e,v,mode="suppression")
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(e.actors["caster"].vp_available,before-2)
+        e.check()
+
+    def test_17_contested_tie_resists_but_pays_valid_cast(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,unopposed=False,intrusion_totals=(15,15))
+        self.assertIsNone(eid)
+        self.assertEqual(e.actors["caster"].vp_spent,2)
+        self.assertFalse(v.effects)
+        e.check()
+
+    def test_18_interrupted_cast_spends_ap_not_vp(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        a=e.actors["caster"]
+        before=(a.ap_remaining,a.vp_spent)
+        # Post-commit recipient moves outside range.
+        def move(enc):
+            enc.actors["victim"].occupied=((12,1),)
+        eid=cast(e,v,on_committed=move)
+        self.assertIsNone(eid)
+        self.assertEqual(a.ap_remaining,before[0]-30)
+        self.assertEqual(a.vp_spent,before[1])
+        e.check()
+
+    def test_19_suppression_depleted_does_not_stop_original_stages(self):
+        e,d,v,c=scene()
+        bite(e,d,v)
+        c.advance_exploration(900)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,mode="suppression")
+        whole_round(e)
+        c.advance_exploration(18)
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(d.toxins.modifier("victim","muscular_strength"),-1)
+        self.assertEqual(d.toxins.active("victim")["stage"],1)
+        e.check()
+
+    def test_20_no_free_activation_or_foreign_source(self):
+        e,d,v,c=scene()
+        with self.assertRaises((ValueError,UnresolvedDecision)):
+            v.cast_endurance("caster","victim",profile="Single Target",mode="ward",
+                             source_authorized=False,source_reference="none")
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        with self.assertRaises(UnresolvedDecision):
+            cast(e,v,price=1)
+        self.assertEqual(e.actors["caster"].vp_spent,0)
+        e.check()
+
+if __name__=="__main__":
+    unittest.main()
