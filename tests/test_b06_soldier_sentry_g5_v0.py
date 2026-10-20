@@ -365,5 +365,108 @@ class G5SoldierSentryTests(unittest.TestCase):
         self.assertIsNone(scene.scene_exit)
         e.check()
 
+
+    def test_20_stale_sequence_miss_rejected_after_turn_and_round_refresh(self):
+        scene=fixed_scene("I1")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        stale=scene.declare("foe","front",profiles=("B06-AT-03",),
+                            defenses=("guard",))
+        self.assertEqual(e.ledger[stale["declaration"]]["round"],1)
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        scene.bridge.end_current_turn()
+        scene.bridge.begin_next_round()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        self.assertEqual((e.round,e.current),(2,"foe"))
+        before=(e.actors["front"].hp,e.actors["front"].guard_remaining,
+                e.actors["foe"].ap_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "must belong to current round and turn"):
+            scene.resolve(stale,0,attack_face=1)
+        self.assertEqual(
+            (e.actors["front"].hp,e.actors["front"].guard_remaining,
+             e.actors["foe"].ap_remaining,len(e.ledger)),before)
+        self.assertFalse([x for x in e.ledger if x["kind"]=="g5_melee_resolved"])
+        self.assertFalse([x for x in e.ledger if x["kind"]=="g5_melee_roll"])
+        # Failure must not consume this round's real AP. A newly declared
+        # sequence CAN legally produce the same natural-one miss now.
+        fresh=scene.declare("foe","front",profiles=("B06-AT-03",),
+                            defenses=("guard",))
+        r=scene.resolve(fresh,0,attack_face=1)
+        self.assertEqual(r["outcome"],"miss")
+        self.assertEqual(e.ledger[fresh["declaration"]]["round"],2)
+        self.assertEqual(len(scene.report()["attacks"]),1)
+        self.assertEqual(e.actors["front"].hp,12)
+        e.check()
+
+    def test_21_swapped_dodges_cannot_reverse_precommitted_pressure(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("dodge","dodge"))
+        original_indices=seq["defenses"]
+        self.assertEqual(
+            [e.ledger[i]["detail"]["defense_value"] for i in original_indices],
+            [14,12])
+        self.assertEqual(
+            [e.ledger[i]["detail"]["attack_key"] for i in original_indices],
+            ["foe:front:0","foe:front:1"])
+        tampered=dict(seq)
+        tampered["defenses"]=tuple(reversed(original_indices))
+        before=(e.actors["front"].hp,e.actors["front"].vigor,
+                e.actors["front"].dodge_pressure,
+                e.actors["foe"].ap_remaining,len(e.ledger))
+        # Face 6 + Sentry bonus 7 = 13: legitimate slot 0 MISSES
+        # Dodge14, while wrong swapped Dodge12 would falsely deal damage.
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "assigned defense event does not match declared slot"):
+            scene.resolve(tampered,0,attack_face=6,damage_face=1,vigor_die=4)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "assigned defense event does not match declared slot"):
+            scene.resolve(tampered,1,attack_face=6,damage_face=1,vigor_die=4)
+        self.assertEqual(
+            (e.actors["front"].hp,e.actors["front"].vigor,
+             e.actors["front"].dodge_pressure,
+             e.actors["foe"].ap_remaining,len(e.ledger)),before)
+        self.assertFalse(scene.report()["attacks"])
+        first=scene.resolve(seq,0,attack_face=6)
+        second=scene.resolve(seq,1,attack_face=6,damage_face=1,vigor_die=4)
+        self.assertEqual(first["outcome"],"miss")
+        self.assertEqual(first["defense_value"],14)
+        self.assertEqual(second["outcome"],"hit")
+        self.assertEqual(second["defense_value"],12)
+        self.assertEqual(second["attack_total"],13)
+        self.assertEqual(len(scene.report()["attacks"]),2)
+        e.check()
+
+    def test_22_swapped_paid_slots_cannot_alias_matching_profiles(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        swapped=dict(seq)
+        swapped["actions"]=tuple(reversed(seq["actions"]))
+        before=(e.actors["front"].hp,e.actors["front"].vigor,
+                e.actors["foe"].ap_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "action index does not match declared attack slot"):
+            scene.resolve(swapped,0,attack_face=1)
+        self.assertEqual(
+            (e.actors["front"].hp,e.actors["front"].vigor,
+             e.actors["foe"].ap_remaining,len(e.ledger)),before)
+        self.assertFalse(scene.report()["attacks"])
+        # Ordinary misses must each consume ONLY their own source slot.
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(scene.resolve(seq,1,attack_face=1)["outcome"],"miss")
+        self.assertEqual(
+            [x["action_index"] for x in scene.report()["attacks"]],
+            list(seq["actions"]))
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
