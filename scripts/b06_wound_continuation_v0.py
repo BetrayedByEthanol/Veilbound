@@ -40,7 +40,6 @@ class WoundContinuation:
         self.d=encounter.g4
         self.start=len(encounter.ledger)
         self.seen_actions=set()
-        self.source_events=set()
         self.outcomes=[]
         self.start_state={k:_actor_state(v) for k,v in encounter.actors.items()}
         self.e.log("g45_continuation_opened",
@@ -68,8 +67,13 @@ class WoundContinuation:
             raise UnresolvedDecision("Stable G5 contact/defense source refs required")
         if contact_verified is not True or defense_verified is not True:
             raise UnresolvedDecision("G5 confirmed contact and defense required")
-        if source_event in self.source_events:
-            raise ValueError("Source event already consumed")
+        # The encounter's immutable serialized ledger is the shared
+        # provenance registry. Another WoundContinuation instance must
+        # never allow a previously accepted external source ID again.
+        if any(ev["kind"]=="g45_attested_hit" and
+               ev["detail"].get("source_event")==source_event
+               for ev in self.e.ledger):
+            raise ValueError("Source event already consumed in encounter")
         if type(action_index) is not int or action_index<self.start or (
                 action_index>=len(self.e.ledger)):
             raise UnresolvedDecision("G0 in-scene Physical Action index required")
@@ -101,7 +105,6 @@ class WoundContinuation:
             confirmed_hit=True,critical=critical,
             critical_dice=critical_dice,vigor_die=vigor_die,
             wound_location_roll=wound_location_roll)
-        self.source_events.add(source_event)
         self.seen_actions.add(action_index)
         self.e.log("g45_attested_hit",source_event=source_event,
                    attacker=attacker,target=target,profile=profile_id,
@@ -177,8 +180,37 @@ class WoundContinuation:
                 self.start<=movement_event_index<len(self.e.ledger)):
             raise UnresolvedDecision("Actual in-scene G1 movement evidence required")
         ev=self.e.ledger[movement_event_index]
-        if not ev["kind"].startswith("g1_") or ev["detail"].get("actor")!=actor_id:
-            raise UnresolvedDecision("Claimed withdrawal has no actor-linked G1 movement evidence")
+        facts=ev["detail"]
+        # G1's prefix also covers MP reservation expiry, canceled steps,
+        # segment breaks, pivots and pending responses. None establishes
+        # a completed positional translation for a legal withdrawal.
+        completed_step=(
+            ev["kind"]=="g1_movement_step" and
+            facts.get("step_kind") in ("orthogonal","diagonal") and
+            facts.get("old")!=facts.get("new") and
+            facts.get("old") is not None and facts.get("new") is not None)
+        # Allied transit commits atomically and is signaled by its
+        # final route-completion event, not an intermediate ally cell.
+        # Require its complete contiguous source route, not an unrelated
+        # previous transit step followed by an invented finish marker.
+        count=facts.get("steps")
+        route=(self.e.ledger[movement_event_index-count:movement_event_index]
+               if type(count) is int and count>0
+               and movement_event_index-count>=self.start else ())
+        completed_transit=(
+            ev["kind"]=="g1_allied_transit_finished" and
+            len(route)==count and
+            all(step["kind"]=="g1_allied_transit_step" and
+                step["detail"].get("actor")==actor_id and
+                step["detail"].get("old")!=step["detail"].get("new")
+                for step in route) and
+            all(route[i]["detail"].get("new")==route[i+1]["detail"].get("old")
+                for i in range(len(route)-1)) and
+            sum(step["detail"].get("cost",0) for step in route)==facts.get("cost"))
+        if (facts.get("actor")!=actor_id or
+                not (completed_step or completed_transit)):
+            raise UnresolvedDecision(
+                "Claimed withdrawal has no completed actor-linked G1 translation")
         item={"status":"withdrawal_attested","actor":actor_id,
               "movement_event_index":movement_event_index,
               "exit_policy_reference":exit_policy_reference,
