@@ -462,5 +462,85 @@ class G44Regressions(unittest.TestCase):
         self.assertEqual(d.toxins.active("victim")["remaining"],3)
         e.check()
 
+
+    def test_27_range_accepts_hunter_head_when_rear_sorts_lower(self):
+        e,d,v,c=scene()
+        hunter=e.actors["hunter"]
+        self.assertEqual(hunter.footprint,("head","rear"))
+        self.assertEqual(hunter.reference_cell_id,"head")
+        # The rear is lexicographically closer to origin, but one square
+        # FARTHER from the caster. The authored head is at exact range 3.
+        hunter.occupied=((4,1),(3,1))
+        e.actors["caster"].occupied=((7,1),)
+        e.actors["victim"].occupied=((11,1),)
+        self.assertEqual(hunter.reference_square(),(4,1))
+        self.assertEqual(min(hunter.occupied),(3,1))
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,recipient="hunter")
+        self.assertIsNotNone(effect)
+        self.assertTrue(v.effects[effect]["active"])
+        self.assertEqual(v.effects[effect]["recipient"],"hunter")
+        e.check()
+
+    def test_28_range_rejects_hunter_head_when_rear_would_be_in_range(self):
+        e,d,v,c=scene()
+        hunter=e.actors["hunter"]
+        e.actors["victim"].occupied=((11,1),)
+        # The rear at x=4 is in range 3, but the source reference head
+        # at x=5 is 4 squares away and cannot be chosen by re-sorting.
+        hunter.occupied=((5,1),(4,1))
+        self.assertEqual(hunter.reference_square(),(5,1))
+        self.assertEqual(min(hunter.occupied),(4,1))
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        a=e.actors["caster"]
+        ap,spent,available=a.ap_remaining,a.vp_spent,a.vp_available
+        with self.assertRaisesRegex(ValueError,
+                                    "Invalid declaration-time Venom Endurance delivery"):
+            cast(e,v,recipient="hunter")
+        self.assertEqual((a.ap_remaining,a.vp_spent,a.vp_available),
+                         (ap,spent,available))
+        self.assertFalse(v.effects)
+        e.check()
+
+    def test_29_post_commit_pivot_rechecks_head_not_rear(self):
+        e,d,v,c=scene()
+        hunter=e.actors["hunter"]
+        e.actors["victim"].occupied=((11,1),)
+        hunter.occupied=((4,1),(5,1))
+        self.assertEqual(hunter.reference_square(),(4,1))
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        a=e.actors["caster"]
+        ap,spent,available=a.ap_remaining,a.vp_spent,a.vp_available
+        def pivot(enc):
+            # Source IDs do not change during a legal 180-degree pivot.
+            enc.actors["hunter"].occupied=((5,1),(4,1))
+        result=cast(e,v,recipient="hunter",on_committed=pivot)
+        self.assertIsNone(result)
+        self.assertEqual(hunter.reference_square(),(5,1))
+        self.assertEqual(hunter.reference_cell_id,"head")
+        self.assertEqual((a.ap_remaining,a.vp_spent,a.vp_available),
+                         (ap-30,spent,available))
+        self.assertFalse(v.effects)
+        self.assertEqual(entries(e,"g44_endurance_interrupted")[-1]["vp_spent"],0)
+        e.check()
+
+    def test_30_legacy_fallback_cell_chosen_once_not_after_pivot(self):
+        actor=party_actor("F",3,"legacy","party",occupied=((6,1),))
+        # An explicitly modeled legacy two-cell actor with no stored
+        # authored reference selects a deterministic original ID ONCE.
+        actor.footprint=("front","tail")
+        actor.occupied=((6,1),(5,1))
+        actor.reference_cell_id=None
+        actor.validate()
+        self.assertEqual(actor.reference_cell_id,"tail")
+        self.assertEqual(actor.reference_square(),(5,1))
+        actor.occupied=((4,1),(5,1))
+        self.assertEqual(actor.reference_square(),(5,1))
+        actor.validate()
+        self.assertEqual(actor.reference_cell_id,"tail")
+        actor.reference_cell_id="unknown"
+        with self.assertRaisesRegex(ValueError,"Reference cell"):
+            actor.validate()
+
 if __name__=="__main__":
     unittest.main()
