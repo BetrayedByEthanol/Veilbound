@@ -53,7 +53,7 @@ class MundaneToxins:
             return 0
         if venom is not None and t["profile"]==venom.HUNTER:
             return venom.hunter_penalties(t).get(use,0)
-        return PENALTIES.get(t["profile"],{}).get(use,0
+        return PENALTIES.get(t["profile"],{}).get(use,0)
 
     def _synchronize(self, actor_id):
         actor = self.e.actors[actor_id]
