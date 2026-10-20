@@ -168,6 +168,13 @@ class SourceMelee:
                 or native["round"]!=e.round or native["turn"]!=attacker):
             raise UnresolvedDecision(
                 "G5 attack action/declaration must belong to current round and turn")
+        # An explicitly reserved G0 Interception is a more specific
+        # unresolved blocker than a later unrelated Physical Action spend.
+        # Check it before evaluating the sequence's live-action window,
+        # without consuming the reservation or opening its response window.
+        trigger_key=f"g5:melee:{action_index}"
+        if any(r.trigger_key==trigger_key for r in e.reservations):
+            raise UnresolvedDecision("Reserved Interception needs explicit G5 resolution")
         # Reuse G4.5's canonical paid sequence binding for BOTH hit and miss.
         # Its returned position prevents relabeling one paid slot as another
         # even when a multi-attack sequence repeats the same profile.
@@ -256,9 +263,6 @@ class SourceMelee:
         # the trigger. This bounded policy explicitly DECLINES all eligible
         # spontaneous responses, but never silently consumes a reserved
         # Interception, whose effect executor is not part of G5 v0.
-        trigger_key=f"g5:melee:{action_index}"
-        if any(r.trigger_key==trigger_key for r in e.reservations):
-            raise UnresolvedDecision("Reserved Interception needs explicit G5 resolution")
         trigger=Trigger(trigger_key,attacker,target)
         def recheck(e,tr):
             tr.legal=(e.current==attacker
