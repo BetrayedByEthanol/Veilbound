@@ -187,7 +187,9 @@ class B06G3Test(unittest.TestCase):
             event.actors["caster"].hp=0
         out=g.cast_scholar_composite("caster","Basic Heal",heal_tier=1,
                                     heal_die=1,hand_available=True,
-                                    on_committed=suppress)
+                                    on_committed=suppress,
+                                    hand_check=lambda _e,_c:True,
+                                    restoration_check=lambda _e,_c,_r:())
         self.assertIsNone(out)
         self.assertEqual((f.ap_remaining,f.vp_available,f.vp_committed,f.vp_spent),
                          (10,6,0,0))
@@ -961,7 +963,9 @@ class B06G3Test(unittest.TestCase):
                         spontaneous=(choice,),
                         on_spontaneous=lambda ev,t,r:
                             g.resolve_reactive_stone("caster",t,r)))
-                kwargs=({"heal_tier":1,"heal_die":4,"hand_available":True}
+                kwargs=({"heal_tier":1,"heal_die":4,"hand_available":True,
+                         "hand_check":lambda _e,_c:True,
+                         "restoration_check":lambda _e,_c,_r:()}
                         if secondary=="Basic Heal" else {})
                 out=g.cast_scholar_composite(
                     "caster",secondary,on_committed=incoming_stone,**kwargs)
@@ -1076,6 +1080,219 @@ class B06G3Test(unittest.TestCase):
                 g.resolve_reactive_stone("caster",tr,r)))
         self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
         e.check()
+
+    def test_65_self_heal_requires_fresh_hand_check_if_responses_exist(self):
+        f=pc("F",3)
+        f.hp-=2
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        before=(f.ap_remaining,f.vp_available,f.hp)
+        with self.assertRaisesRegex(UnresolvedDecision,"live hand_check"):
+            g.cast_self_basic_heal("caster",die=1,hand_available=True,
+                                   on_committed=lambda _e:None)
+        self.assertEqual((f.ap_remaining,f.vp_available,f.hp),before)
+        e.check()
+
+    def test_66_self_heal_disarmed_during_commit_spends_no_vp(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=10
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        hand={"free":True}
+        def take_hand(_e):
+            hand["free"]=False
+        result=g.cast_self_basic_heal(
+            "caster",tier=1,die=8,hand_available=True,
+            on_committed=take_hand,
+            hand_check=lambda _e,_c:hand["free"],
+            restoration_check=lambda _e,_c,_r:())
+        self.assertIsNone(result)
+        self.assertEqual((f.ap_remaining,f.vp_spent,f.vp_committed),(22,0,0))
+        self.assertEqual((f.hp,f.vigor),(f.hp_max-2,f.vigor_max-10))
+        self.assertTrue(any(x["kind"]=="g3_cast_interrupted" for x in e.ledger))
+        e.check()
+
+    def test_67_composite_heal_disarmed_after_commit_has_no_host(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=9
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        hand={"free":True}
+        def lose_hand(_e):
+            hand["free"]=False
+        result=g.cast_scholar_composite(
+            "caster","Basic Heal",heal_tier=2,heal_die=6,
+            hand_available=True,on_committed=lose_hand,
+            hand_check=lambda _e,_c:hand["free"],
+            restoration_check=lambda _e,_c,_r:())
+        self.assertIsNone(result)
+        self.assertEqual((f.ap_remaining,f.vp_spent,f.vp_committed),(22,0,0))
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_68_unchanged_hand_after_commit_heals_once(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=9
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        host=g.cast_scholar_composite(
+            "caster","Basic Heal",heal_die=6,hand_available=True,
+            on_committed=lambda _e:None,hand_check=lambda _e,_c:True,
+            restoration_check=lambda _e,_c,_r:())
+        self.assertIsNotNone(host)
+        self.assertEqual((f.hp,f.vigor),(f.hp_max-1,f.vigor_max-6))
+        self.assertEqual((f.vp_spent,f.vp_committed),(2,6))
+        e.check()
+
+    def test_69_committed_heal_requires_live_ward_check_even_if_initially_clear(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=7
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        prior=(f.ap_remaining,f.vp_available,f.hp,f.vigor)
+        with self.assertRaisesRegex(UnresolvedDecision,"live restoration_check"):
+            g.cast_self_basic_heal("caster",die=1,hand_available=True,
+                on_committed=lambda _e:None,hand_check=lambda _e,_c:True)
+        with self.assertRaisesRegex(UnresolvedDecision,"live restoration_check"):
+            g.cast_scholar_composite("caster","Basic Heal",heal_die=1,
+                hand_available=True,on_committed=lambda _e:None,
+                hand_check=lambda _e,_c:True)
+        self.assertEqual((f.ap_remaining,f.vp_available,f.hp,f.vigor),prior)
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_70_new_post_commit_ward_without_g4_is_unresolved_not_applied(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=7
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        def ward(ev):
+            ev.actors["caster"].conditions.append("vigor")
+        check=lambda ev,_c,_r:tuple(ev.actors["caster"].conditions)
+        out=g.cast_self_basic_heal("caster",die=1,hand_available=True,
+             on_committed=ward,hand_check=lambda _e,_c:True,
+             restoration_check=check)
+        self.assertIsNone(out)
+        self.assertEqual((f.hp,f.vigor,f.vp_spent,f.ap_remaining),
+                         (f.hp_max-2,f.vigor_max-7,0,22))
+        self.assertTrue(any(x["kind"]=="g3_cast_interrupted" and
+                            x["detail"]["cause"]=="restoration_blocks_require_G4"
+                            for x in e.ledger))
+        e.check()
+
+
+    def test_71_g3_only_self_heal_after_dynamic_ward_expires_during_commit(self):
+        f=pc("F",3);f.hp-=2;f.vigor=0;f.conditions.append("vigor")
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        seen=[]
+        def expire(ev):
+            ev.actors["caster"].conditions.remove("vigor")
+        def check(ev,_caster,_recipient):
+            state=tuple(ev.actors["caster"].conditions)
+            seen.append(state)
+            return state
+        out=g.cast_self_basic_heal(
+            "caster",die=8,hand_available=True,
+            on_committed=expire,hand_check=lambda _e,_c:True,
+            restoration_check=check)
+        self.assertEqual(seen,[("vigor",),()])
+        self.assertEqual(out,{"hp_restored":2,"vigor_restored":7,"spent_vp":2})
+        self.assertEqual((f.hp,f.vigor,f.vp_spent,f.ap_remaining),
+                         (f.hp_max,7,2,22))
+        self.assertFalse(f.conditions)
+        e.check()
+
+    def test_72_g3_only_composite_after_dynamic_ward_expires_during_commit(self):
+        f=pc("F",3);f.hp-=2;f.vigor=0;f.conditions.append("vigor")
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        seen=[]
+        def expire(ev):
+            ev.actors["caster"].conditions.remove("vigor")
+        def check(ev,_caster,_recipient):
+            state=tuple(ev.actors["caster"].conditions)
+            seen.append(state)
+            return state
+        host=g.cast_scholar_composite(
+            "caster","Basic Heal",heal_die=6,hand_available=True,
+            on_committed=expire,hand_check=lambda _e,_c:True,
+            restoration_check=check)
+        self.assertIsNotNone(host)
+        self.assertEqual(seen,[("vigor",),()])
+        self.assertEqual((f.hp,f.vigor,f.vp_spent,f.vp_committed,f.ap_remaining),
+                         (f.hp_max-1,3,2,6,22))
+        self.assertEqual(len(spell_events(e,"g3_basic_heal_secondary_once")),1)
+        self.assertFalse(f.conditions)
+        e.check()
+
+    def test_73_g3_only_persistent_dynamic_ward_blocks_after_commit(self):
+        for kind in ("Self","Composite"):
+            with self.subTest(kind=kind):
+                f=pc("F",3);f.hp-=2;f.vigor=0
+                f.conditions.append("vigor")
+                e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+                seen=[]
+                def check(ev,_caster,_recipient):
+                    state=tuple(ev.actors["caster"].conditions)
+                    seen.append(state)
+                    return state
+                if kind=="Self":
+                    out=g.cast_self_basic_heal(
+                        "caster",die=8,hand_available=True,
+                        on_committed=lambda _e:None,
+                        hand_check=lambda _e,_c:True,restoration_check=check)
+                else:
+                    out=g.cast_scholar_composite(
+                        "caster","Basic Heal",heal_die=6,hand_available=True,
+                        on_committed=lambda _e:None,
+                        hand_check=lambda _e,_c:True,restoration_check=check)
+                self.assertIsNone(out)
+                self.assertEqual(seen,[("vigor",),("vigor",)])
+                self.assertEqual((f.hp,f.vigor,f.vp_spent,f.vp_committed,
+                                  f.ap_remaining),(f.hp_max-2,0,0,0,22))
+                self.assertFalse(g.effects)
+                interruption=spell_events(e,"g3_cast_interrupted")[-1]["detail"]
+                self.assertEqual(interruption["cause"],
+                                 "restoration_blocks_require_G4")
+                e.check()
+
+    def test_74_declared_block_still_rejected_before_responses_without_g4(self):
+        for kind in ("Self","Composite"):
+            with self.subTest(kind=kind):
+                f=pc("F",3);f.hp-=2;f.vigor=0
+                f.conditions.append("vigor")
+                e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+                fired=[]
+                def expire(ev):
+                    fired.append(True)
+                    ev.actors["caster"].conditions.remove("vigor")
+                check=lambda ev,_c,_r:tuple(ev.actors["caster"].conditions)
+                kwargs=dict(hand_available=True,on_committed=expire,
+                            hand_check=lambda _e,_c:True,
+                            restoration_check=check,
+                            blocked_restoration=("vigor",))
+                before=(f.ap_remaining,f.vp_available)
+                with self.assertRaisesRegex(UnresolvedDecision,
+                                            "Selective healing blocks require G4"):
+                    if kind=="Self":
+                        g.cast_self_basic_heal("caster",die=8,**kwargs)
+                    else:
+                        g.cast_scholar_composite(
+                            "caster","Basic Heal",heal_die=6,**kwargs)
+                self.assertFalse(fired)
+                self.assertEqual((f.ap_remaining,f.vp_available),before)
+                self.assertEqual(f.conditions,["vigor"])
+                self.assertFalse(g.effects)
+                e.check()
+
+    def test_75_dynamic_block_without_response_still_rejects_before_ap(self):
+        for kind in ("Self","Composite"):
+            with self.subTest(kind=kind):
+                f=pc("F",3);f.hp-=2;f.vigor=0
+                f.conditions.append("vigor")
+                e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+                check=lambda ev,_c,_r:tuple(ev.actors["caster"].conditions)
+                before=(f.ap_remaining,f.vp_available)
+                with self.assertRaisesRegex(UnresolvedDecision,
+                                            "Selective healing blocks require G4"):
+                    if kind=="Self":
+                        g.cast_self_basic_heal(
+                            "caster",die=8,hand_available=True,
+                            restoration_check=check)
+                    else:
+                        g.cast_scholar_composite(
+                            "caster","Basic Heal",heal_die=6,
+                            hand_available=True,restoration_check=check)
+                self.assertEqual((f.ap_remaining,f.vp_available),before)
+                e.check()
 
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):
         f=pc("F");t=pc("R",3,"target",(3,2),"enemy")

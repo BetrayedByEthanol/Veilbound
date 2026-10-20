@@ -345,8 +345,36 @@ class DamageState:
                    injection_eligible=result["injection_eligible"])
         return result
 
+    @staticmethod
+    def _validate_heal_blocks(blocked_components):
+        """Require explicit per-component adjudication, never infer a blanket block."""
+        if not isinstance(blocked_components,(tuple,list,frozenset)):
+            raise ValueError("Healing blocks must be an explicit component collection")
+        blocks=tuple(blocked_components)
+        if (any(type(x) is not str for x in blocks)
+                or len(set(blocks))!=len(blocks)
+                or any(x not in ("vigor","hp","repair") for x in blocks)):
+            raise UnresolvedDecision("Unknown or repeated healing component prohibition")
+        return frozenset(blocks)
+
+    @staticmethod
+    def live_heal_blocks(encounter,caster,recipient,declared,restoration_check):
+        """Re-read independently attested active blocks at the real application.
+
+        Always run this *after* committed responses, even if the initial
+        declaration had zero blocks. A static declared prohibition remains
+        in force; a live check can add newly established prohibitions.
+        """
+        blocks=DamageState._validate_heal_blocks(declared)
+        if restoration_check is not None:
+            if not callable(restoration_check):
+                raise ValueError("Basic Heal restoration_check must be callable")
+            blocks |= DamageState._validate_heal_blocks(
+                restoration_check(encounter,caster,recipient))
+        return blocks
+
     def resolve_heal(self, recipient, *, contribution, vigor_amount,
-                     wound_id=None, source="Basic Heal"):
+                     wound_id=None, source="Basic Heal",blocked_components=()):
         """One already paid and successfully delivered Basic Heal contribution."""
         a = self._actor(recipient)
         if a.dead:
@@ -356,6 +384,7 @@ class DamageState:
         if contribution not in ("Primary", "Secondary"):
             raise ValueError("Only actually authored Basic Heal contributions")
         _integer(vigor_amount, "heal Vigor packet")
+        blocks=self._validate_heal_blocks(blocked_components)
         amount = 2 if contribution=="Primary" else 1
         old_hp, old_vigor = a.hp, a.vigor
         progress = 0
@@ -368,19 +397,26 @@ class DamageState:
                     raise ValueError("Selected wound is not an unfinished repairable wound")
             else:
                 chosen = repairable[0] if repairable else None
-            if chosen is not None:
+            if chosen is not None and "repair" not in blocks:
                 progress = min(amount, chosen.requirement - chosen.progress)
                 chosen.progress += progress
                 amount -= progress
             if any(w.progress < w.requirement for w in a.wounds):
                 amount = 0
-        # Non-Dying Heal never adds Repair Progress, even when wounded.
+        # A ward may independently prohibit direct HP, direct external Repair,
+        # or external Vigor. Do not let blocked repair points spill into HP.
+        # Non-Dying Heal never adds Repair Progress even when wounded.
+        if "hp" in blocks:
+            amount=0
+        if "vigor" in blocks:
+            vigor_amount=0
         a.hp = min(a.hp_max, a.hp + amount)
         a.vigor = min(a.vigor_max, a.vigor + vigor_amount)
         self.e.log("g4_basic_heal_applied", recipient=recipient, source=source,
                    contribution=contribution, wound_id=(chosen.ident if old_hp<=0 and chosen else None),
                    direct_repair=progress, hp_restored=a.hp-old_hp,
-                   vigor_restored=a.vigor-old_vigor, regen_debit=0)
+                   vigor_restored=a.vigor-old_vigor, regen_debit=0,
+                   blocked_components=sorted(blocks))
         self.e.check()
         return {"hp_restored":a.hp-old_hp,"vigor_restored":a.vigor-old_vigor,
                 "repair_progress":progress}
@@ -388,7 +424,8 @@ class DamageState:
     def cast_basic_heal(self, caster, recipient, *, tier=1, die,
                         hand_available=False, unobstructed=False,
                         in_range=False, unopposed=True, wound_id=None,
-                        on_committed=None, delivery_check=None):
+                        on_committed=None, delivery_check=None,
+                        blocked_restoration=(),restoration_check=None):
         """Authorised F/R Primary, including Dying allies; no invented contest."""
         g3 = self.e.g3
         if g3 is None:
@@ -403,6 +440,13 @@ class DamageState:
         if on_committed is not None and delivery_check is None:
             raise UnresolvedDecision(
                 "Committed responses require live Basic Heal delivery_check")
+        if on_committed is not None and restoration_check is None:
+            raise UnresolvedDecision(
+                "Committed Basic Heal requires live restoration_check")
+        # Neither an empty declaration snapshot nor a guessed absence of wards
+        # is sufficient when responses can establish new protections.
+        self.live_heal_blocks(self.e,caster,recipient,blocked_restoration,
+                              restoration_check)
         preflight=self._heal_delivery_issue(
             caster,recipient,hand_available=hand_available,
             in_range=in_range,unobstructed=unobstructed,
@@ -434,6 +478,10 @@ class DamageState:
             caster,recipient,hand_available=hand_available,
             in_range=in_range,unobstructed=unobstructed,
             delivery_check=delivery_check)
+        # The live check is unconditional: a new prohibition might have been
+        # created by committed responses even when no initial block existed.
+        blocks=self.live_heal_blocks(self.e,caster,recipient,
+                                      blocked_restoration,restoration_check)
         if (actor.hp<=0 or actor.vp_available<cost or target.dead
                 or selected_invalid or postflight is not None):
             self.e.log("g4_heal_interrupted",caster=caster,recipient=recipient,
@@ -442,8 +490,10 @@ class DamageState:
             return None
         g3._pay(caster,cost,0,label="g4:basic_heal_primary")
         result=self.resolve_heal(recipient,contribution="Primary",
-                                 vigor_amount=4+ceil(die*tier/3),
-                                 wound_id=wound_id,source="g4:paid_primary")
+                                 vigor_amount=4+ceil(die*tier/3)+g3.heal_vc(actor),
+                                 wound_id=wound_id,
+                                 blocked_components=blocks,
+                                 source="g4:paid_primary")
         result["spent_vp"]=cost
         return result
 

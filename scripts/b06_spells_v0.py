@@ -2,14 +2,16 @@
 
 F High Scholar L1-3, R Low Life Bow Priest and Firebound Sentry are adapted
 from their exact B05/EN source fixtures. A/B are physical proxies, not silently
-complete Priest spellbooks. Damage packets are delivered, never applied to G4
-HP/Vigor/wounds. An unresolved magical or physical choice must be supplied.
+complete Priest spellbooks. Without G4, Flame produces pending packets. With G4 attached, confirmed
+ordinary direct-hit Flame damage is resolved synchronously. An unresolved
+magical or physical choice must be supplied.
 """
 from dataclasses import dataclass
 from math import ceil
 
 from scripts.b05_high_scholar_fire_l1_l3_v0 import FORMULAS, profile as scholar
 from scripts.b06_encounter_state_v0 import Response, UnresolvedDecision
+from scripts.b06_damage_v0 import DamageState
 
 
 @dataclass
@@ -112,6 +114,28 @@ class SpellState:
         if committed:
             self.e.spend_vp(caster,committed,mode="committed",label=label)
 
+    @staticmethod
+    def heal_vc(actor):
+        """Basic Heal adds nonnegative *raw* VC, once; no level multiplier."""
+        raw=dict(actor.source.abilities).get("Veil Control")
+        if type(raw) is not int:
+            raise UnresolvedDecision("Basic Heal requires sourced raw Veil Control")
+        return max(0,raw)
+
+    def _heal_hand_valid(self,caster,*,hand_available,hand_check):
+        # The declaration-time assertion is not authority after committed
+        # responses. A real on_committed callback must expose current hand state.
+        if hand_available is not True:
+            return False
+        if hand_check is None:
+            return True
+        if not callable(hand_check):
+            raise ValueError("Basic Heal hand_check must be callable")
+        current=hand_check(self.e,caster)
+        if type(current) is not bool:
+            raise ValueError("Basic Heal hand_check must return bool")
+        return current
+
     def _commit(self,caster,*,on_committed=None,label):
         self.e.spend_ap(caster,"projection",label=label)
         if on_committed is not None:
@@ -168,15 +192,35 @@ class SpellState:
         return p
 
     def cast_scholar_composite(self,caster,secondary,*,heal_tier=1,heal_die=None,
-                               hand_available=False,on_committed=None):
+                               hand_available=False,on_committed=None,
+                               hand_check=None,blocked_restoration=(),
+                               restoration_check=None):
         a=self._own(caster,20)
         p=self._formula(a,secondary)
         if self.active(caster,"Stone Skin"):
             raise ValueError("Only one Stone Skin instance per caster")
         reserve=(a.vp_max+2)//3
         if secondary=="Basic Heal":
-            if hand_available is not True:
+            if on_committed is not None and hand_check is None:
+                raise UnresolvedDecision("Committed Basic Heal needs live hand_check")
+            if not self._heal_hand_valid(caster,hand_available=hand_available,
+                                         hand_check=hand_check):
                 raise ValueError("Basic Heal requires functioning available hand")
+            if on_committed is not None and restoration_check is None:
+                raise UnresolvedDecision(
+                    "Committed Basic Heal requires live restoration_check")
+            declared_blocks=DamageState._validate_heal_blocks(blocked_restoration)
+            initial_blocks=DamageState.live_heal_blocks(
+                self.e,caster,caster,blocked_restoration,restoration_check)
+            # Declared prohibitions persist. A *dynamic* ward present at
+            # declaration may expire during committed responses; in G3-only
+            # scenes, reject it only if it survives the post-commit recheck.
+            if (self.e.g4 is None and
+                    (declared_blocks or (on_committed is None and initial_blocks))):
+                raise UnresolvedDecision("Selective healing blocks require G4")
+        elif blocked_restoration:
+            raise ValueError("Restoration blocks only apply to Basic Heal")
+        if secondary=="Basic Heal":
             if heal_tier not in (1,2) or heal_tier>p["max_used_tier"]:
                 raise ValueError("Invalid component Used Tier")
             if type(heal_die) is not int or not 1<=heal_die<=6:
@@ -208,7 +252,10 @@ class SpellState:
             return None
         if (a.hp<=0 or a.vp_available<spent+committed
                 or (secondary=="Basic Heal" and (
-                    hand_available is not True or (a.wounds and self.e.g4 is None)))
+                    not self._heal_hand_valid(
+                        caster,hand_available=hand_available,
+                        hand_check=hand_check)
+                    or (a.wounds and self.e.g4 is None)))
                 or (secondary=="Vital Shelter" and
                     any(v.kind.endswith("Shelter") and v.recipient==caster
                         for v in self.effects.values()))):
@@ -216,15 +263,26 @@ class SpellState:
                        spell_kind="Composite",secondary=secondary,
                        cause="post_commit_source_or_resources",vp_spent=0)
             return None
+        # Recheck the actual restoration policy after the response window,
+        # including when there were NO blocks at declaration.
+        live_blocks=(DamageState.live_heal_blocks(
+            self.e,caster,caster,blocked_restoration,restoration_check)
+            if secondary=="Basic Heal" else frozenset())
+        if live_blocks and self.e.g4 is None:
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Composite",secondary=secondary,
+                       cause="restoration_blocks_require_G4",vp_spent=0)
+            return None
         self._pay(caster,spent,committed,label="g3:composite:"+secondary)
         host=self._new_effect(caster,"Stone Skin",caster,reserve,resistance=2)
         if secondary=="Basic Heal":
             restored_hp=min(1,a.hp_max-a.hp)
-            restored_vigor=min(2+ceil(heal_die*heal_tier/6),a.vigor_max-a.vigor)
+            restorative_vigor=2+ceil(heal_die*heal_tier/6)+self.heal_vc(a)
+            restored_vigor=min(restorative_vigor,a.vigor_max-a.vigor)
             if self.e.g4 is not None:
                 applied=self.e.g4.resolve_heal(
-                    caster,contribution="Secondary",
-                    vigor_amount=2+ceil(heal_die*heal_tier/6),
+                    caster,contribution="Secondary",vigor_amount=restorative_vigor,
+                    blocked_components=live_blocks,
                     source="g3:composite_secondary")
                 restored_hp=applied["hp_restored"]
                 restored_vigor=applied["vigor_restored"]
@@ -366,7 +424,8 @@ class SpellState:
         return effect
 
     def cast_self_basic_heal(self,caster,*,tier=1,die,hand_available=False,
-                             on_committed=None):
+                             on_committed=None,hand_check=None,
+                             blocked_restoration=(),restoration_check=None):
         """Independent Primary; non-Dying self only, G4 owns wound allocation."""
         a=self._own(caster,20 if self.e.actors[caster].source.source_id=="F" else 30)
         if a.source.source_id not in ("F","R"):
@@ -375,22 +434,50 @@ class SpellState:
             raise ValueError("Invalid Basic Heal Used Tier")
         if type(die) is not int or not 1<=die<=8:
             raise UnresolvedDecision("Explicit actual Heal Primary d8 required")
-        if hand_available is not True:
+        if on_committed is not None and hand_check is None:
+            raise UnresolvedDecision("Committed Basic Heal needs live hand_check")
+        if not self._heal_hand_valid(caster,hand_available=hand_available,
+                                     hand_check=hand_check):
             raise ValueError("Basic Heal needs genuinely available hand")
+        if on_committed is not None and restoration_check is None:
+            raise UnresolvedDecision(
+                "Committed Basic Heal requires live restoration_check")
+        declared_blocks=DamageState._validate_heal_blocks(blocked_restoration)
+        initial_blocks=DamageState.live_heal_blocks(
+            self.e,caster,caster,blocked_restoration,restoration_check)
+        # Keep persistent declared prohibitions fail-closed; allow an
+        # independently attested dynamic ward to expire in the response
+        # window, then enforce its *current* state before any VP is paid.
+        if (self.e.g4 is None and
+                (declared_blocks or (on_committed is None and initial_blocks))):
+            raise UnresolvedDecision("Selective healing blocks require G4")
         if a.hp<=0 or (a.wounds and self.e.g4 is None):
             raise UnresolvedDecision("Wound or Dying recipient requires G4")
         cost=2*tier
         self._funds(a,cost,0)
         self._commit(caster,on_committed=on_committed,label="g3:self_basic_heal")
-        if a.hp<=0 or a.vp_available<cost:
-            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Basic Heal")
+        if (a.hp<=0 or a.vp_available<cost
+                or not self._heal_hand_valid(caster,hand_available=hand_available,
+                                             hand_check=hand_check)
+                or (a.wounds and self.e.g4 is None)):
+            self.e.log("g3_cast_interrupted",caster=caster,spell_kind="Basic Heal",
+                       cause="post_commit_hand_source_or_resources",vp_spent=0)
+            return None
+        live_blocks=DamageState.live_heal_blocks(
+            self.e,caster,caster,blocked_restoration,restoration_check)
+        if live_blocks and self.e.g4 is None:
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Basic Heal",
+                       cause="restoration_blocks_require_G4",vp_spent=0)
             return None
         self._pay(caster,cost,0,label="g3:self_basic_heal")
+        restorative_vigor=4+ceil(die*tier/3)+self.heal_vc(a)
         hp=min(2,a.hp_max-a.hp)
-        vigor=min(4+ceil(die*tier/3),a.vigor_max-a.vigor)
+        vigor=min(restorative_vigor,a.vigor_max-a.vigor)
         if self.e.g4 is not None:
             applied=self.e.g4.resolve_heal(
-                caster,contribution="Primary",vigor_amount=4+ceil(die*tier/3),
+                caster,contribution="Primary",vigor_amount=restorative_vigor,
+                blocked_components=live_blocks,
                 source="g3:self_basic_heal")
             hp=applied["hp_restored"]
             vigor=applied["vigor_restored"]
