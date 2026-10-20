@@ -11,6 +11,7 @@ import json
 from scripts.b06_encounter_state_v0 import (
     ENEMIES, ROOT, RegenerationChoice, UnresolvedDecision, Wound, _integer,
 )
+from scripts.b06_world_clock_v0 import WorldClock
 
 
 ARMOR = {
@@ -52,7 +53,7 @@ class DamagePacket:
 
 
 class DamageState:
-    def __init__(self, encounter):
+    def __init__(self, encounter, *, recovery_phase_seconds=None):
         if getattr(encounter, "g4", None) is not None:
             raise ValueError("G4 already installed")
         self.e = encounter
@@ -67,7 +68,9 @@ class DamageState:
             (int(s[4:]) for s in existing
              if s.startswith("G4-W") and s[4:].isdigit()), default=0)
         self.short_toxins = []
-        self.elapsed_recovery_seconds = 0
+        # The independent six-hour phase exists for each actor even without
+        # a toxin, including when initiative starts or ends.
+        self.clock = WorldClock(self,recovery_phase_seconds=recovery_phase_seconds)
         encounter.g4 = self
         encounter.log("g4_damage_state_installed")
         encounter.check()
@@ -640,33 +643,5 @@ class DamageState:
                 self._toxin_step(t)
 
     def advance_exploration(self,seconds):
-        """Only elapsed time; no virtual natural regeneration or Dying tick."""
-        _integer(seconds,"exploration seconds")
-        if self.e.current is not None or (
-                self.e.round and self.e.cursor not in (0,len(self.e.order))):
-            raise ValueError("Enter exploration only between full initiative rounds")
-        for t in self.short_toxins:
-            if t["left"]==0:
-                continue
-            elapsed=t["phase"]+seconds
-            due=elapsed//6
-            t["phase"]=elapsed%6
-            for _ in range(min(due,t["left"])):
-                self._toxin_step(t)
-        self.elapsed_recovery_seconds+=seconds
-        recovery_intervals=self.elapsed_recovery_seconds//21600
-        self.elapsed_recovery_seconds%=21600
-        for _ in range(recovery_intervals):
-            for a in self.e.actors.values():
-                if a.dead:
-                    continue
-                vigor_amount=max(1,(a.vigor_max+2)//4) if a.vigor_max else 0
-                vp_amount=max(1,(a.vp_max+2)//4) if a.vp_max else 0
-                actual_vigor=min(vigor_amount,a.vigor_max-a.vigor)
-                actual_vp=min(vp_amount,a.vp_spent)
-                a.vigor+=actual_vigor
-                a.vp_spent-=actual_vp
-                a.vp_available+=actual_vp
-                self.e.log("g4_six_hour_recovery",actor=a.id,
-                           vigor=actual_vigor,spent_vp_recovered=actual_vp)
-        self.e.check()
+        """Advance the shared G4.2 chronology; never create a phantom turn."""
+        return self.clock.advance_exploration(seconds)

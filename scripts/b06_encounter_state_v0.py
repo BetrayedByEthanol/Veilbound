@@ -382,6 +382,10 @@ class Encounter:
         self.log("round_begin", refreshed=list(self.order))
         if self.g3 is not None:
             self.g3.on_round_begin()
+        # G4.2 absolute long milestones and independently earned 6h
+        # Recovery resolve only at genuine Round Begin; no ghost own turns.
+        if self.g4 is not None:
+            self.g4.clock.on_round_begin(self.round)
         self.check()
 
     def _regenerate(self, a, choice):
