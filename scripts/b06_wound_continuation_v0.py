@@ -224,7 +224,8 @@ class WoundContinuation:
               "round":self.e.round,"ledger_at":len(self.e.ledger)}
         self.outcomes.append(item)
         self.e.log("g45_unresolved_stop",**item)
-        return item
+        # The caller may annotate its own copy, never the retained outcome.
+        return deepcopy(item)
 
     def attest_withdrawal(self,actor_id,*,movement_event_index,
                           exit_policy_reference,independently_verified):
@@ -277,12 +278,17 @@ class WoundContinuation:
               "round":self.e.round}
         self.outcomes.append(item)
         self.e.log("g45_withdrawal_attested",**item)
-        return item
+        return deepcopy(item)
 
     def report(self):
-        """Audit evidence, not an automatically claimed winner or CR."""
+        """Detached audit snapshot; callers cannot rewrite G0/G4/G4.5 ledger.
+
+        Copy the *whole* report: nested wound/hit result/target-state
+        dictionaries, start state and retained explicit outcomes must all
+        be independent of the authoritative encounter and this bridge.
+        """
         events=self.e.ledger[self.start:]
-        return {"status":"bounded_continuation",
+        return deepcopy({"status":"bounded_continuation",
                 "scene":self.e.scenario,"policy":self.e.policy,
                 "source_actor_states":self.start_state,
                 "current":self.snapshot(),
@@ -298,7 +304,7 @@ class WoundContinuation:
                 "recorded_dead":[k for k,a in self.e.actors.items() if a.dead],
                 "event_index_range":[self.start,len(self.e.ledger)-1],
                 "complete_encounter_certified":False,
-                "winner":None,"challenge_rating":None}
+                "winner":None,"challenge_rating":None})
 
 
 @lru_cache(maxsize=1)
