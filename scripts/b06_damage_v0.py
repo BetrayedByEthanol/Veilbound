@@ -357,6 +357,22 @@ class DamageState:
             raise UnresolvedDecision("Unknown or repeated healing component prohibition")
         return frozenset(blocks)
 
+    @staticmethod
+    def live_heal_blocks(encounter,caster,recipient,declared,restoration_check):
+        """Re-read independently attested active blocks at the real application.
+
+        Always run this *after* committed responses, even if the initial
+        declaration had zero blocks. A static declared prohibition remains
+        in force; a live check can add newly established prohibitions.
+        """
+        blocks=DamageState._validate_heal_blocks(declared)
+        if restoration_check is not None:
+            if not callable(restoration_check):
+                raise ValueError("Basic Heal restoration_check must be callable")
+            blocks |= DamageState._validate_heal_blocks(
+                restoration_check(encounter,caster,recipient))
+        return blocks
+
     def resolve_heal(self, recipient, *, contribution, vigor_amount,
                      wound_id=None, source="Basic Heal",blocked_components=()):
         """One already paid and successfully delivered Basic Heal contribution."""
@@ -409,7 +425,7 @@ class DamageState:
                         hand_available=False, unobstructed=False,
                         in_range=False, unopposed=True, wound_id=None,
                         on_committed=None, delivery_check=None,
-                        blocked_restoration=()):
+                        blocked_restoration=(),restoration_check=None):
         """Authorised F/R Primary, including Dying allies; no invented contest."""
         g3 = self.e.g3
         if g3 is None:
@@ -421,16 +437,16 @@ class DamageState:
             raise ValueError("Invalid Heal Used Tier")
         if type(die) is not int or not 1<=die<=8:
             raise ValueError("Explicit legal d8 required")
-        blocks=self._validate_heal_blocks(blocked_restoration)
         if on_committed is not None and delivery_check is None:
             raise UnresolvedDecision(
                 "Committed responses require live Basic Heal delivery_check")
-        # External inhibitions are an independently source-adjudicated snapshot
-        # at effect application; no arbitrary condition/ward interpreter exists
-        # in G4. Responding effects that can change it require a later policy.
-        if on_committed is not None and blocks:
+        if on_committed is not None and restoration_check is None:
             raise UnresolvedDecision(
-                "Responsive restoration ward state requires live adjudication")
+                "Committed Basic Heal requires live restoration_check")
+        # Neither an empty declaration snapshot nor a guessed absence of wards
+        # is sufficient when responses can establish new protections.
+        self.live_heal_blocks(self.e,caster,recipient,blocked_restoration,
+                              restoration_check)
         preflight=self._heal_delivery_issue(
             caster,recipient,hand_available=hand_available,
             in_range=in_range,unobstructed=unobstructed,
@@ -462,6 +478,10 @@ class DamageState:
             caster,recipient,hand_available=hand_available,
             in_range=in_range,unobstructed=unobstructed,
             delivery_check=delivery_check)
+        # The live check is unconditional: a new prohibition might have been
+        # created by committed responses even when no initial block existed.
+        blocks=self.live_heal_blocks(self.e,caster,recipient,
+                                      blocked_restoration,restoration_check)
         if (actor.hp<=0 or actor.vp_available<cost or target.dead
                 or selected_invalid or postflight is not None):
             self.e.log("g4_heal_interrupted",caster=caster,recipient=recipient,
