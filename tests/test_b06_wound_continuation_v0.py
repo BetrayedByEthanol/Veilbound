@@ -28,10 +28,12 @@ def scene(*,soldier=True,sentry=True):
     return e,d,WoundContinuation(e)
 
 
-def begin_attack(e,bridge):
+def begin_attack(e,bridge,*,target="sentry"):
     bridge.start_next_turn(RegenerationChoice())
     idx=len(e.ledger)
-    e.spend_ap("soldier","physical",label="G5:attested_sword_thrust")
+    # G0's actual declaration locks the attacker, target, profile, AP and
+    # pre-roll defense. A free-form spend_ap label is NOT an attack.
+    e.declare_sequence("soldier",target,("B06-AT-03",),("take_hit",))
     return idx
 
 
@@ -247,7 +249,7 @@ class WoundContinuationTests(unittest.TestCase):
         b=WoundContinuation(e)
         b.start_next_turn(RegenerationChoice())
         action_index=len(e.ledger)
-        e.spend_ap("soldier","physical",label="G5:verified_sword")
+        e.declare_sequence("soldier","front",("B06-AT-03",),("take_hit",))
         attack=b.verified_profile_hit("soldier","front","B06-AT-03",
                    action_index=action_index,source_event="I1:source_hit:1",
                    contact_reference="G5:I1:external_contact:1",
@@ -285,7 +287,7 @@ class WoundContinuationTests(unittest.TestCase):
         b.begin_next_round()
         b.start_next_turn(RegenerationChoice())
         current=len(e.ledger)
-        e.spend_ap("soldier","physical",label="G5:fresh_action")
+        e.declare_sequence("soldier","sentry",("B06-AT-03",),("take_hit",))
         before=(e.actors["sentry"].hp,len(e.actors["sentry"].wounds))
         with self.assertRaisesRegex(UnresolvedDecision,
                                     "genuine committed Physical Action"):
@@ -319,7 +321,7 @@ class WoundContinuationTests(unittest.TestCase):
         later=WoundContinuation(e)
         later.start_next_turn(RegenerationChoice())
         next_index=len(e.ledger)
-        e.spend_ap("soldier","physical",label="G5:later_verified_sword")
+        e.declare_sequence("soldier","sentry",("B06-AT-03",),("take_hit",))
         prior=(e.actors["sentry"].hp, e.actors["sentry"].vigor,
                len(e.actors["sentry"].wounds),
                sum(x["kind"]=="g4_damage_applied" for x in e.ledger))
@@ -457,6 +459,142 @@ class WoundContinuationTests(unittest.TestCase):
         second[2]["next_required_authority"].pop()
         self.assertEqual(third[2],baseline[2])
 
+
+
+    def test_16_interception_reservation_is_not_a_paid_attack(self):
+        e,d,b=scene()
+        b.start_next_turn(RegenerationChoice())
+        idx=len(e.ledger)
+        e.reserve("soldier","future-window","protect-ally",
+                  action_kind="physical")
+        self.assertEqual(e.ledger[idx]["detail"]["action_class"],"physical")
+        self.assertTrue(any(x["kind"]=="interception_reserved"
+                            for x in e.ledger[idx+1:]))
+        before=(e.actors["sentry"].hp,e.actors["sentry"].vigor,
+                len(e.actors["sentry"].wounds),e.actors["soldier"].ap_remaining,
+                len(e.reservations))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "source-bound attack sequence declaration"):
+            hit(e,b,idx,source_event="not-an-attack",
+                critical="normal",critical_dice=(),die_face=3,
+                wound_location_roll=None)
+        self.assertEqual(
+            (e.actors["sentry"].hp,e.actors["sentry"].vigor,
+             len(e.actors["sentry"].wounds),e.actors["soldier"].ap_remaining,
+             len(e.reservations)),before)
+        self.assertEqual(len(b.report()["verified_hits"]),0)
+        self.assertEqual(e.reservations[0].label,"protect-ally")
+        self.assertFalse(any(x["kind"]=="g4_profile_hit" for x in e.ledger))
+        e.check()
+
+    def test_17_arbitrary_spend_label_cannot_impersonate_source_sequence(self):
+        e,d,b=scene()
+        b.start_next_turn(RegenerationChoice())
+        idx=len(e.ledger)
+        e.spend_ap("soldier","physical",label="sequence:B06-AT-03:0")
+        before=(e.actors["sentry"].hp,len(e.actors["sentry"].wounds))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "source-bound attack sequence declaration"):
+            hit(e,b,idx,source_event="label-spoof",
+                critical="normal",critical_dice=(),die_face=3,
+                wound_location_roll=None)
+        self.assertEqual((e.actors["sentry"].hp,
+                          len(e.actors["sentry"].wounds)),before)
+        self.assertFalse(b.report()["verified_hits"])
+        e.check()
+
+    def test_18_declaration_target_must_match_resolved_target(self):
+        e,d,b=scene()
+        idx=begin_attack(e,b)
+        before=(e.actors["sentry"].hp,e.actors["soldier"].hp)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "declaration does not match target/profile"):
+            b.verified_profile_hit(
+                "soldier","soldier","B06-AT-03",action_index=idx,
+                source_event="wrong-target",
+                contact_reference="G5:own-sword",defense_reference="G5:self",
+                contact_verified=True,defense_verified=True,die_face=3,
+                critical="normal",critical_dice=())
+        self.assertEqual((e.actors["sentry"].hp,e.actors["soldier"].hp),before)
+        self.assertFalse(b.report()["verified_hits"])
+        good=hit(e,b,idx,source_event="correct-target",
+                 critical="normal",critical_dice=(),die_face=3,
+                 wound_location_roll=None)
+        self.assertEqual(good["hp_loss"],6)
+        e.check()
+
+    def test_19_declaration_profile_must_match_resolved_profile(self):
+        e,d,b=scene()
+        idx=begin_attack(e,b)
+        before=(e.actors["sentry"].hp,e.actors["sentry"].vigor)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "does not match declared target/profile"):
+            b.verified_profile_hit(
+                "soldier","sentry","B06-AT-01",action_index=idx,
+                source_event="wrong-profile",
+                contact_reference="G5:wrong-profile",
+                defense_reference="G5:take-hit",
+                contact_verified=True,defense_verified=True,die_face=3,
+                critical="normal",critical_dice=())
+        self.assertEqual((e.actors["sentry"].hp,e.actors["sentry"].vigor),
+                         before)
+        good=hit(e,b,idx,source_event="right-profile",
+                 critical="normal",critical_dice=(),die_face=3,
+                 wound_location_roll=None)
+        self.assertEqual(good["hp_loss"],6)
+        self.assertFalse(any(x["detail"].get("source_event")=="wrong-profile"
+                             for x in e.ledger if x["kind"]=="g45_attested_hit"))
+        e.check()
+
+    def test_20_two_attacks_in_one_source_sequence_bind_separate_payments(self):
+        sentry=enemy_actor("B06-EN-01","sentry","party",
+                            start_state="cold_start",occupied=((3,2),))
+        soldier=enemy_actor("B06-EN-02","soldier","enemy",
+                             occupied=((4,2),))
+        e=Encounter([sentry,soldier],{"sentry":100,"soldier":90},
+                    seed=456,scenario="G45-double-sentry-sequence",
+                    policy="independently_attested_G5_hits")
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        b=WoundContinuation(e)
+        b.start_next_turn(RegenerationChoice())
+        initial_ap=sentry.ap_remaining
+        before=len(e.ledger)
+        e.declare_sequence("sentry","soldier",
+                           ("B06-AT-01","B06-AT-01"),
+                           ("take_hit","take_hit"))
+        actions=[x for x in e.ledger[before:]
+                 if x["kind"]=="action_committed"]
+        self.assertEqual(len(actions),2)
+        self.assertEqual(sentry.ap_remaining,initial_ap-40)
+        for i,action in enumerate(actions):
+            result=b.verified_profile_hit(
+                "sentry","soldier","B06-AT-01",
+                action_index=action["index"],source_event=f"two-hit-{i}",
+                contact_reference=f"G5:contact:{i}",
+                defense_reference=f"G5:defense:{i}",
+                contact_verified=True,defense_verified=True,
+                die_face=1,critical="normal",critical_dice=())
+            self.assertEqual(result["hp_loss"],2)
+        self.assertEqual(soldier.hp,soldier.hp_max-4)
+        self.assertEqual(sentry.ap_remaining,initial_ap-40)
+        hits=b.report()["verified_hits"]
+        self.assertEqual([h["declared_profile_index"] for h in hits],[0,1])
+        self.assertEqual([h["action_index"] for h in hits],
+                         [a["index"] for a in actions])
+        self.assertEqual(hits[0]["sequence_declaration_index"],
+                         hits[1]["sequence_declaration_index"])
+        with self.assertRaisesRegex(ValueError,"already consumed"):
+            b.verified_profile_hit(
+                "sentry","soldier","B06-AT-01",
+                action_index=actions[0]["index"],source_event="third-hit",
+                contact_reference="G5:no-duplicate",
+                defense_reference="G5:no-duplicate",
+                contact_verified=True,defense_verified=True,
+                die_face=1,critical="normal",critical_dice=())
+        self.assertEqual(len(b.report()["verified_hits"]),2)
+        e.check()
 
 if __name__=="__main__":
     unittest.main()
