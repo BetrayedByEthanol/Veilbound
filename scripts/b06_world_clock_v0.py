@@ -74,8 +74,13 @@ class WorldClock:
     def _schedule_recovery(self, actor_id, delay, *, completed_round=None):
         a = self.e.actors[actor_id]
         number = self.recovery_serial[actor_id]
-        self.recovery_serial[actor_id] += 1
         ident = f"recovery:{actor_id}:{number}"
+        # Recovery IDs are clock-owned across the ENTIRE checkpoint series,
+        # including checkpoints which have not yet been constructed.
+        # Never replace an existing event or advance the serial on collision.
+        if ident in self.events:
+            raise ValueError("Recovery checkpoint ID collision")
+        self.recovery_serial[actor_id] += 1
         if self.mode == "exploration":
             deadline = self.world_seconds + delay
             due_seconds, due_round = deadline, None
@@ -106,6 +111,8 @@ class WorldClock:
             raise ValueError("Unknown milestone actor")
         if not isinstance(event_id,str) or not event_id:
             raise ValueError("Stable nonempty milestone ID required")
+        if event_id.startswith("recovery:"):
+            raise ValueError("Recovery checkpoint ID namespace is reserved")
         if not isinstance(source,str) or not source:
             raise ValueError("Milestone must identify its source")
         if phase not in ("before_recovery","after_recovery"):
@@ -263,7 +270,11 @@ class WorldClock:
         if self.mode != "initiative" or self.e.current is not None or (
                 self.e.round and self.e.cursor not in (0,len(self.e.order))):
             raise ValueError("Initiative exit requires a round boundary")
-        current = self.e.round if self.e.round else self.entry_round
+        # Entering just after Round C finishes preselects label C+1,
+        # but Encounter.round still stores C until begin_round() is called.
+        # The *active entry label*, not the stale completed round, is the
+        # earliest valid exit label for E-C-1 conservative conversion.
+        current = max(self.entry_round, self.e.round)
         self.mode = "exploration"
         self.entry_round = None
         for ev in self._pending():
