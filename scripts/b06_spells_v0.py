@@ -181,7 +181,7 @@ class SpellState:
                 raise ValueError("Invalid component Used Tier")
             if type(heal_die) is not int or not 1<=heal_die<=6:
                 raise UnresolvedDecision("Explicit legal d6 Heal Secondary roll required")
-            if a.wounds or a.hp<=0:
+            if a.hp<=0 or (a.wounds and self.e.g4 is None):
                 raise UnresolvedDecision("Dying/wound application belongs in G4")
             spent=2*heal_tier
             committed=reserve
@@ -208,7 +208,7 @@ class SpellState:
             return None
         if (a.hp<=0 or a.vp_available<spent+committed
                 or (secondary=="Basic Heal" and (
-                    hand_available is not True or a.wounds))
+                    hand_available is not True or (a.wounds and self.e.g4 is None)))
                 or (secondary=="Vital Shelter" and
                     any(v.kind.endswith("Shelter") and v.recipient==caster
                         for v in self.effects.values()))):
@@ -221,8 +221,16 @@ class SpellState:
         if secondary=="Basic Heal":
             restored_hp=min(1,a.hp_max-a.hp)
             restored_vigor=min(2+ceil(heal_die*heal_tier/6),a.vigor_max-a.vigor)
-            a.hp+=restored_hp
-            a.vigor+=restored_vigor
+            if self.e.g4 is not None:
+                applied=self.e.g4.resolve_heal(
+                    caster,contribution="Secondary",
+                    vigor_amount=2+ceil(heal_die*heal_tier/6),
+                    source="g3:composite_secondary")
+                restored_hp=applied["hp_restored"]
+                restored_vigor=applied["vigor_restored"]
+            else:
+                a.hp+=restored_hp
+                a.vigor+=restored_vigor
             self.e.log("g3_basic_heal_secondary_once",caster=caster,host=host.ident,
                        tier=heal_tier,hp=restored_hp,vigor=restored_vigor,
                        die=heal_die,regen_debit=0)
@@ -369,7 +377,7 @@ class SpellState:
             raise UnresolvedDecision("Explicit actual Heal Primary d8 required")
         if hand_available is not True:
             raise ValueError("Basic Heal needs genuinely available hand")
-        if a.wounds or a.hp<=0:
+        if a.hp<=0 or (a.wounds and self.e.g4 is None):
             raise UnresolvedDecision("Wound or Dying recipient requires G4")
         cost=2*tier
         self._funds(a,cost,0)
@@ -380,8 +388,15 @@ class SpellState:
         self._pay(caster,cost,0,label="g3:self_basic_heal")
         hp=min(2,a.hp_max-a.hp)
         vigor=min(4+ceil(die*tier/3),a.vigor_max-a.vigor)
-        a.hp+=hp
-        a.vigor+=vigor
+        if self.e.g4 is not None:
+            applied=self.e.g4.resolve_heal(
+                caster,contribution="Primary",vigor_amount=4+ceil(die*tier/3),
+                source="g3:self_basic_heal")
+            hp=applied["hp_restored"]
+            vigor=applied["vigor_restored"]
+        else:
+            a.hp+=hp
+            a.vigor+=vigor
         self.e.log("g3_basic_heal_primary_once",caster=caster,recipient=caster,
                    tier=tier,die=die,hp=hp,vigor=vigor,
                    regen_debit=0,spent_vp=cost)
@@ -535,8 +550,9 @@ class SpellState:
     def cast_flame(self,caster,target,*,tier,face,vigor_die,
                    defense="take_hit",aware=False,hand_available=False,
                    on_committed=None,exposures=(),origin=None,target_cell=None,
-                   prone_cover_policy=(),prone_dodge_feasible=False):
-        """Bounded direct clear/cover-only F Thrown Flame; no G4 HP mutations.
+                   prone_cover_policy=(),prone_dodge_feasible=False,
+                   wound_location_roll=None):
+        """Bounded clear/cover-only F Flame; G4 resolves direct hits in this call.
 
         Mixed living-screen destination/scatter and full opportunity/Reaction
         response need the G2 general-projectile adapter, deferred to G3+G5.
@@ -592,7 +608,7 @@ class SpellState:
         try:
             position=self.e.g2._prone_position(
                 victim,refreshed.distance,refreshed.cover,prone_cover_policy)
-            self.e.g2._defense_value(
+            _,preflight_defense=self.e.g2._defense_value(
                 victim,defense,0,refreshed.cover,
                 position_bonus=position,
                 prone_dodge_feasible=prone_dodge_feasible)
@@ -601,6 +617,11 @@ class SpellState:
                        spell_kind="Thrown Flame",
                        cause="post_commit_defense_unusable",reason=str(error))
             return {"outcome":"interrupted_before_launch","vp_spent":0}
+        # Preflight an actual wound location before Spent VP or the target's
+        # defense is committed. A qualifying G4 hit must resolve *now*, not
+        # leave a paid hit with a missing later adjudication choice.
+        if (self.e.g4 is not None and 1<face<20 and face+5>preflight_defense):
+            self.e.g4.preflight_flame_wound(target,wound_location_roll)
         self._pay(caster,price,0,label="g3:thrown_flame:T"+str(tier))
         # No callback or geometry mutation occurs between the pure final
         # validation and this one native G2 defensive-resource commitment.
@@ -629,5 +650,13 @@ class SpellState:
                 "packets_pending_g4":packets}
         self.e.log("g3_flame_launched",caster=caster,target=target,
                    tier=tier,primary_face=face,die=vigor_die,**result)
+        if self.e.g4 is not None and outcome=="direct_hit_pending_G4":
+            # The launch ledger index is a one-use damage capability. Consume
+            # synchronously, before regeneration or changing resistances.
+            applied=self.e.g4.apply_flame(
+                caster,target,ledger_index=self.e.ledger[-1]["index"],
+                wound_location_roll=wound_location_roll)
+            result["outcome"]="direct_hit_resolved_G4"
+            result["g4_damage"]=applied
         self.e.check()
         return result
