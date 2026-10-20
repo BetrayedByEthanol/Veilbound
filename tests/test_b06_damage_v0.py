@@ -37,7 +37,7 @@ def scene(*actors,spatial=False):
 
 class G4IntegrationTests(unittest.TestCase):
     def test_physical_armor_and_critical_dice_on_primary_only(self):
-        s=soldier(); t=sentry()
+        s=soldier(); t=sentry(point=(4,2))
         e,g,d=scene(s,t)
         r=d.apply_profile_hit("soldier","sentry","B06-AT-03",
                               die_face=6,confirmed_hit=True)
