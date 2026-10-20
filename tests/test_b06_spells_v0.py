@@ -187,7 +187,8 @@ class B06G3Test(unittest.TestCase):
             event.actors["caster"].hp=0
         out=g.cast_scholar_composite("caster","Basic Heal",heal_tier=1,
                                     heal_die=1,hand_available=True,
-                                    on_committed=suppress)
+                                    on_committed=suppress,
+                                    hand_check=lambda _e,_c:True)
         self.assertIsNone(out)
         self.assertEqual((f.ap_remaining,f.vp_available,f.vp_committed,f.vp_spent),
                          (10,6,0,0))
@@ -1075,6 +1076,59 @@ class B06G3Test(unittest.TestCase):
             on_spontaneous=lambda ev,tr,r:
                 g.resolve_reactive_stone("caster",tr,r)))
         self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        e.check()
+
+    def test_65_self_heal_requires_fresh_hand_check_if_responses_exist(self):
+        f=pc("F",3)
+        f.hp-=2
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        before=(f.ap_remaining,f.vp_available,f.hp)
+        with self.assertRaisesRegex(UnresolvedDecision,"live hand_check"):
+            g.cast_self_basic_heal("caster",die=1,hand_available=True,
+                                   on_committed=lambda _e:None)
+        self.assertEqual((f.ap_remaining,f.vp_available,f.hp),before)
+        e.check()
+
+    def test_66_self_heal_disarmed_during_commit_spends_no_vp(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=10
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        hand={"free":True}
+        def take_hand(_e):
+            hand["free"]=False
+        result=g.cast_self_basic_heal(
+            "caster",tier=1,die=8,hand_available=True,
+            on_committed=take_hand,
+            hand_check=lambda _e,_c:hand["free"])
+        self.assertIsNone(result)
+        self.assertEqual((f.ap_remaining,f.vp_spent,f.vp_committed),(22,0,0))
+        self.assertEqual((f.hp,f.vigor),(f.hp_max-2,f.vigor_max-10))
+        self.assertTrue(any(x["kind"]=="g3_cast_interrupted" for x in e.ledger))
+        e.check()
+
+    def test_67_composite_heal_disarmed_after_commit_has_no_host(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=9
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        hand={"free":True}
+        def lose_hand(_e):
+            hand["free"]=False
+        result=g.cast_scholar_composite(
+            "caster","Basic Heal",heal_tier=2,heal_die=6,
+            hand_available=True,on_committed=lose_hand,
+            hand_check=lambda _e,_c:hand["free"])
+        self.assertIsNone(result)
+        self.assertEqual((f.ap_remaining,f.vp_spent,f.vp_committed),(22,0,0))
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_68_unchanged_hand_after_commit_heals_once(self):
+        f=pc("F",3);f.hp-=2;f.vigor-=9
+        e,g=game(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        host=g.cast_scholar_composite(
+            "caster","Basic Heal",heal_die=6,hand_available=True,
+            on_committed=lambda _e:None,hand_check=lambda _e,_c:True)
+        self.assertIsNotNone(host)
+        self.assertEqual((f.hp,f.vigor),(f.hp_max-1,f.vigor_max-6))
+        self.assertEqual((f.vp_spent,f.vp_committed),(2,6))
         e.check()
 
     def test_27_only_legal_flame_vp_after_activation_not_rejected_line(self):

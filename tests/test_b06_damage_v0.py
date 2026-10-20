@@ -1,5 +1,7 @@
 """Deterministic acceptance for B06 G4 injury and recovery integration."""
 import unittest
+from dataclasses import replace
+from math import ceil
 
 from scripts.b06_encounter_state_v0 import (
     Encounter, RegenerationChoice, UnresolvedDecision, Wound,
@@ -33,6 +35,13 @@ def scene(*actors,spatial=False,walls=()):
     g4=DamageState(e)
     e.begin_round()
     return e,g3,g4
+
+
+def synthetic_vc(actor, raw):
+    """Test-only formula witness; NOT an authored alternative F/R build."""
+    fields=dict(actor.source.abilities)
+    fields["Veil Control"]=raw
+    actor.source=replace(actor.source,abilities=tuple(sorted(fields.items())))
 
 
 class G4IntegrationTests(unittest.TestCase):
@@ -420,6 +429,175 @@ class G4IntegrationTests(unittest.TestCase):
         self.assertEqual((out["hp_restored"],out["spent_vp"]),(2,2))
         self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),
                          (12,2,t.hp_max))
+        e.check()
+
+
+
+    def test_g41_survival_only_debits_one_throughput_and_one_vigor(self):
+        t=sentry();t.hp=0;t.vigor=1;t.regen=1
+        t.wounds=[Wound("carried",10,2)]
+        e,g,d=scene(t)
+        e.start_turn("sentry",regen_choice=RegenerationChoice(
+            cancel_dying_loss=True))
+        self.assertEqual((t.hp,t.vigor,t.wounds[0].progress),(0,0,2))
+        log=next(v for v in e.ledger if v["kind"]=="regeneration_step")
+        self.assertEqual((log["detail"]["throughput_spent"],
+                          log["detail"]["repair_points"],
+                          log["detail"]["hp_restored"]),(1,0,0))
+        self.assertEqual(len(e.regen_done),1)
+        e.check()
+        z=sentry();z.hp=0;z.vigor=0;z.regen=1
+        e2,g2,d2=scene(z)
+        e2.start_turn("sentry")
+        self.assertEqual((z.hp,z.vigor),(-1,0))
+        e2.check()
+
+    def test_g41_primary_vc_source_formula_tier_two_and_caps(self):
+        r=pc("R");synthetic_vc(r,3)
+        t=pc("F","patient",(2,2));t.hp-=2;t.vigor=0
+        e,g,d=scene(r,t)
+        e.start_turn("caster")
+        out=d.cast_basic_heal("caster","patient",tier=2,die=8,
+                              hand_available=True,in_range=True,unobstructed=True)
+        self.assertEqual((out["hp_restored"],out["vigor_restored"],out["spent_vp"]),
+                         (2,4+ceil(8*2/3)+3,4))
+        self.assertEqual((t.hp,t.vigor),(t.hp_max,13))
+        self.assertEqual((r.ap_remaining,r.vp_spent),(12,4))
+        self.assertEqual(e.regen_done,{"caster"})
+        e.check()
+
+    def test_g41_negative_vc_contributes_zero_to_self_primary(self):
+        f=pc();synthetic_vc(f,-4);f.hp-=3;f.vigor=0
+        e,g,d=scene(f)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        out=g.cast_self_basic_heal("caster",tier=1,die=8,hand_available=True)
+        self.assertEqual(out["vigor_restored"],4+ceil(8/3))
+        self.assertEqual((f.vp_spent,f.hp),(2,f.hp_max-1))
+        e.check()
+
+    def test_g41_self_primary_and_composite_secondary_use_nonzero_vc(self):
+        f=pc();synthetic_vc(f,4);f.hp-=4;f.vigor=0
+        e,g,d=scene(f)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        primary=g.cast_self_basic_heal("caster",tier=1,die=8,
+                                      hand_available=True)
+        self.assertEqual(primary["vigor_restored"],4+ceil(8/3)+4)
+        secondary=g.cast_scholar_composite("caster","Basic Heal",
+                         heal_tier=1,heal_die=6,hand_available=True)
+        self.assertEqual((f.vigor,f.hp),(4+ceil(8/3)+4+2+ceil(6/6)+4,
+                                         f.hp_max-1))
+        self.assertEqual((f.vp_spent,f.vp_committed),(4,6))
+        self.assertEqual(sum(v["kind"]=="g4_basic_heal_applied" for v in e.ledger),2)
+        e.check()
+
+    def test_g41_vigor_only_healing_block_preserves_direct_hp(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp-=2;t.vigor=0
+        e,g,d=scene(r,t);e.start_turn("caster")
+        out=d.cast_basic_heal("caster","patient",die=8,hand_available=True,
+                              in_range=True,unobstructed=True,
+                              blocked_restoration=("vigor",))
+        self.assertEqual((out["hp_restored"],out["vigor_restored"]),(2,0))
+        self.assertEqual((r.vp_spent,t.hp,t.vigor),(2,t.hp_max,0))
+        self.assertEqual(e.regen_done,{"caster"})
+        e.check()
+
+    def test_g41_direct_hp_block_does_not_prevent_dying_repair(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp=0;t.vigor=0;t.wounds=[Wound("only",10,9)]
+        e,g,d=scene(r,t);e.start_turn("caster")
+        out=d.cast_basic_heal("caster","patient",die=1,hand_available=True,
+                              in_range=True,unobstructed=True,
+                              blocked_restoration=("hp",))
+        self.assertEqual((out["repair_progress"],out["hp_restored"]),(1,0))
+        self.assertEqual(t.hp,0)
+        self.assertEqual(t.wounds[0].progress,10)
+        self.assertGreater(t.vigor,0)
+        e.check()
+
+    def test_g41_repair_block_does_not_prevent_external_vigor(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp=0;t.vigor=0;t.wounds=[Wound("only",10,9)]
+        e,g,d=scene(r,t);e.start_turn("caster")
+        out=d.cast_basic_heal("caster","patient",die=1,hand_available=True,
+                              in_range=True,unobstructed=True,
+                              blocked_restoration=("repair",))
+        self.assertEqual((out["repair_progress"],out["hp_restored"]),(0,0))
+        self.assertEqual(t.wounds[0].progress,9)
+        self.assertGreater(t.vigor,0)
+        self.assertEqual(r.vp_spent,2)
+        e.check()
+
+    def test_g41_g3_self_and_composite_respect_vigor_only_block(self):
+        f=pc();f.hp-=4;f.vigor=0
+        e,g,d=scene(f)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        first=g.cast_self_basic_heal("caster",die=8,hand_available=True,
+                                    blocked_restoration=("vigor",))
+        self.assertEqual((first["hp_restored"],first["vigor_restored"]),(2,0))
+        host=g.cast_scholar_composite("caster","Basic Heal",heal_die=6,
+                hand_available=True,blocked_restoration=("vigor",))
+        self.assertIsNotNone(host)
+        self.assertEqual((f.hp,f.vigor),(f.hp_max-1,0))
+        self.assertEqual((f.vp_spent,f.vp_committed),(4,6))
+        e.check()
+
+    def test_g41_g3_rejects_unknown_blocks_before_composite_host(self):
+        f=pc();f.hp-=2;f.vigor-=8
+        e,g,d=scene(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        before=(f.ap_remaining,f.vp_available)
+        with self.assertRaisesRegex(UnresolvedDecision,"Unknown or repeated"):
+            g.cast_scholar_composite("caster","Basic Heal",heal_die=1,
+                hand_available=True,blocked_restoration=("unresolved_magic",))
+        self.assertEqual((f.ap_remaining,f.vp_available),before)
+        self.assertFalse(g.effects)
+        e.check()
+
+    def test_g41_unknown_healing_restriction_rejects_before_ap(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        e,g,d=scene(r,t);e.start_turn("caster")
+        with self.assertRaisesRegex(UnresolvedDecision,"Unknown or repeated"):
+            d.cast_basic_heal("caster","patient",die=1,hand_available=True,
+                              in_range=True,unobstructed=True,
+                              blocked_restoration=("all_healing",))
+        self.assertEqual((r.ap_remaining,r.vp_spent),(42,0))
+        with self.assertRaisesRegex(UnresolvedDecision,"Responsive restoration"):
+            d.cast_basic_heal("caster","patient",die=1,hand_available=True,
+                              in_range=True,unobstructed=True,
+                              blocked_restoration=("vigor",),
+                              on_committed=lambda _e:None,
+                              delivery_check=lambda _e,_c,_r:(True,True,True))
+        self.assertEqual((r.ap_remaining,r.vp_spent),(42,0))
+        e.check()
+
+    def test_g41_committed_caster_moves_beyond_healing_range(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp-=2
+        e,g,d=scene(r,t,spatial=True);e.start_turn("caster")
+        def reposition(_e):
+            r.occupied=((8,2),)
+        out=d.cast_basic_heal("caster","patient",die=1,hand_available=True,
+                     in_range=True,unobstructed=True,
+                     on_committed=reposition,
+                     delivery_check=lambda _e,_c,_r:(True,True,True))
+        self.assertIsNone(out)
+        self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),(12,0,t.hp_max-2))
+        self.assertTrue(any(v["kind"]=="g4_heal_interrupted" and
+                            v["detail"]["cause"]=="delivery_out_of_range"
+                            for v in e.ledger))
+        e.check()
+
+    def test_g41_non_dying_named_wound_allocations_and_no_double_regen(self):
+        t=sentry();t.hp=t.hp_max-3;t.vigor=6
+        t.wounds=[Wound("first",10,1),Wound("second",20,1)]
+        e,g,d=scene(t)
+        e.start_turn("sentry",regen_choice=RegenerationChoice(
+            hp=1,repair=2,wound_allocations=(("second",1),("first",1))))
+        self.assertEqual((t.hp,t.vigor),(t.hp_max-2,3))
+        self.assertEqual([w.progress for w in t.wounds],[2,2])
+        with self.assertRaisesRegex(ValueError,"No resolved open turn|already"):
+            e.start_turn("sentry",regen_choice=RegenerationChoice(hp=1))
+        self.assertEqual(len([v for v in e.ledger if v["kind"]=="regeneration_step"]),1)
         e.check()
 
 
