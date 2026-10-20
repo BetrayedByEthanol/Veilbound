@@ -42,6 +42,16 @@ class HunterVenomEndurance:
                 return v
         return None
 
+    def on_recipient_death(self,recipient):
+        """End all fixed protection on the actual G4 death transition.
+
+        This is invoked at damage/Dying commit, not deferred until a caller
+        happens to query the expired recipient or the caster's next cast.
+        """
+        for v in list(self.effects.values()):
+            if v["active"] and v["recipient"]==recipient:
+                self._end(v,"recipient_dead")
+
     def covering(self,t):
         v=self.for_recipient(t["recipient"])
         return bool(v is not None and v["mode"]=="suppression"
@@ -210,6 +220,13 @@ class HunterVenomEndurance:
             raise UnresolvedDecision("Only genuine resolved Hunter Bite/Pounce source qualifies")
         if profile_hit_index in self.hit_keys:
             raise ValueError("One venom application per actual Hunter Bite event")
+        # Exposure is a synchronous part of this physical Bite's resolution.
+        # Once any intervening encounter/clock event is recorded, historical
+        # Bite results cannot be re-used under a later Ward/nonstack state or
+        # restart their original 10/30/60/120-minute clock.
+        if profile_hit_index != len(self.e.ledger)-1:
+            raise UnresolvedDecision(
+                "Hunter venom must consume the latest Bite event synchronously")
         if type(breach_verified) is not bool:
             raise ValueError("Breach adjudication must be bool")
         if self.e.actors[recipient].dead:

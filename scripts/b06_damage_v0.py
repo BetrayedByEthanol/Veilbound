@@ -238,6 +238,10 @@ class DamageState:
                              "raw":p.raw, "mitigated":n, "armor_rule":p.armor_rule}
                             for p,n in zip(packets,resolved)],
                    vigor_details=vigor_details, wound=severity, dead=a.dead)
+        if a.dead and before_hp > -a.hp_max:
+            # Recipient death ends fixed Venom Endurance immediately, even
+            # when there is no later toxin check or caster interaction.
+            self.venom.on_recipient_death(recipient)
         self.e.check()
         return {"hp_loss": before_hp-a.hp, "vigor_loss": before_vigor-a.vigor,
                 "wound": severity, "dead": a.dead,
@@ -597,6 +601,9 @@ class DamageState:
               repair_points=choice.repair if not a.dead else 0,
               throughput_spent=debit if not a.dead else 0,
               wound_allocations=list(allocation),dead=a.dead)
+        if a.dead and hp_before > -a.hp_max:
+            # Native Step 2 Dying loss is another real death transition.
+            self.venom.on_recipient_death(a.id)
         e.check()
 
     def schedule_hemotoxin(self, recipient, *, exposure_key,
