@@ -282,5 +282,94 @@ class G42ClockTests(unittest.TestCase):
         e.check()
 
 
+    def test_17_exit_before_entry_round_begins_uses_entry_label(self):
+        a=pc();a.vigor-=5
+        e,d,c=scene(a,phases={"hero":8})
+        c.schedule_milestone("hero",event_id="next:14",
+                             source="authored:future",delay_seconds=14)
+        # Complete round 1, then enter round-label 2 without begin_round(2).
+        e.start_turn("hero",regen_choice=RegenerationChoice())
+        e.end_turn()
+        self.assertEqual((e.round,e.cursor),(1,len(e.order)))
+        c.enter_initiative()
+        self.assertEqual(c.entry_round,2)
+        self.assertEqual((c.events["recovery:hero:1"].due_round,
+                          c.events["next:14"].due_round),(3,4))
+        self.assertEqual(len(events(e,"g4_six_hour_recovery")),0)
+        c.leave_initiative()
+        # For E=3 and active C=2, E-C-1=0: Recovery due immediately.
+        # E=4 instead retains 6 seconds, not 12.
+        self.assertEqual(events(e,"g42_initiative_exited")[-1]["round_label"],2)
+        self.assertEqual(len(events(e,"g4_six_hour_recovery")),1)
+        self.assertEqual(events(e,"g4_six_hour_recovery")[0]["checkpoint_id"],
+                         "recovery:hero:1")
+        self.assertTrue(c.events["recovery:hero:1"].consumed)
+        self.assertEqual(c.events["next:14"].due_seconds,6)
+        self.assertFalse(c.events["next:14"].consumed)
+        d.advance_exploration(5)
+        self.assertFalse(c.events["next:14"].consumed)
+        d.advance_exploration(1)
+        self.assertEqual(len(events(e,"g42_milestone_due")),1)
+        self.assertEqual(events(e,"g42_milestone_due")[0]["event_id"],
+                         "next:14")
+        # Consumed IDs cannot replay on any later zero-time mode switch.
+        c.enter_initiative()
+        c.leave_initiative()
+        self.assertEqual(len(events(e,"g4_six_hour_recovery")),1)
+        self.assertEqual(len(events(e,"g42_milestone_due")),1)
+        e.check()
+
+    def test_18_future_recovery_namespace_is_not_available_to_milestones(self):
+        a=pc();a.vigor-=5
+        e,d,c=scene(a,phases={"hero":2})
+        self.assertIn("recovery:hero:1",c.events)
+        self.assertNotIn("recovery:hero:2",c.events)
+        before=(len(c.events),c.sequence,c.recovery_serial["hero"],
+                len(e.ledger))
+        for reserved in ("recovery:hero:2","recovery:hero:999",
+                         "recovery:other:2","recovery:"):
+            with self.subTest(event_id=reserved):
+                with self.assertRaisesRegex(ValueError,
+                                            "Recovery checkpoint ID namespace"):
+                    c.schedule_milestone("hero",event_id=reserved,
+                                         source="authored:forged",delay_seconds=2)
+                self.assertNotIn(reserved,c.events)
+                self.assertEqual((len(c.events),c.sequence,
+                                  c.recovery_serial["hero"],len(e.ledger)),before)
+        marker=c.schedule_milestone("hero",event_id="story:marker",
+                                     source="authored:story",delay_seconds=2)
+        d.advance_exploration(2)
+        self.assertTrue(marker.consumed)
+        self.assertTrue(c.events["recovery:hero:1"].consumed)
+        self.assertIn("recovery:hero:2",c.events)
+        self.assertEqual(c.events["recovery:hero:2"].kind,"recovery")
+        self.assertEqual(c.events["recovery:hero:2"].ident,"recovery:hero:2")
+        self.assertFalse(c.events["recovery:hero:2"].consumed)
+        self.assertEqual(c.events["recovery:hero:2"].due_seconds,SIX_HOURS+2)
+        self.assertEqual(len(events(e,"g4_six_hour_recovery")),1)
+        self.assertEqual(len(events(e,"g42_milestone_due")),1)
+        self.assertEqual(events(e,"g42_milestone_due")[0]["event_id"],
+                         "story:marker")
+        e.check()
+
+    def test_19_recovery_namespace_rejected_inside_initiative_as_well(self):
+        a=pc();e,d,c=scene(a,phases={"hero":1})
+        c.enter_initiative()
+        self.assertTrue(c.events["recovery:hero:1"].consumed)
+        self.assertEqual(c.events["recovery:hero:2"].due_round,3601)
+        before=(len(c.events),c.sequence,c.recovery_serial["hero"])
+        with self.assertRaisesRegex(ValueError,"Recovery checkpoint ID namespace"):
+            c.schedule_milestone("hero",event_id="recovery:hero:3",
+                                 source="authored:poison",delay_seconds=600)
+        self.assertEqual((len(c.events),c.sequence,
+                          c.recovery_serial["hero"]),before)
+        self.assertNotIn("recovery:hero:3",c.events)
+        c.schedule_milestone("hero",event_id="tox:milestone",
+                             source="authored:poison",delay_seconds=600)
+        self.assertEqual(c.events["tox:milestone"].due_round,101)
+        self.assertEqual(c.events["recovery:hero:2"].due_round,3601)
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
