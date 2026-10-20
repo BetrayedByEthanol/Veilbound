@@ -225,6 +225,7 @@ class HunterVenomEndurance:
         if not valid:
             self.hit_keys.add(profile_hit_index)
             self.hunter_keys.add(exposure_key)
+            self.toxins.exposure_ids.add(exposure_key)
             self.e.log("g44_hunter_not_delivered",attacker=attacker,recipient=recipient,
                        exposure_key=exposure_key,hit_index=profile_hit_index)
             return {"outcome":"not_delivered"}
@@ -232,6 +233,7 @@ class HunterVenomEndurance:
         if old is not None and old["grade"]=="Moderate":
             self.hit_keys.add(profile_hit_index)
             self.hunter_keys.add(exposure_key)
+            self.toxins.exposure_ids.add(exposure_key)
             self.e.log("g44_hunter_ignored",recipient=recipient,
                        key=exposure_key,active=old["key"])
             return {"outcome":"ignored","active":old["key"]}
@@ -241,6 +243,7 @@ class HunterVenomEndurance:
         if self.intercept(recipient,"Moderate"):
             self.hit_keys.add(profile_hit_index)
             self.hunter_keys.add(exposure_key)
+            self.toxins.exposure_ids.add(exposure_key)
             self.e.log("g44_hunter_prevented",recipient=recipient,key=exposure_key)
             return {"outcome":"prevented"}
         if type(resistance_die) is not int or not 1<=resistance_die<=20:
@@ -336,6 +339,13 @@ class HunterVenomEndurance:
                 any(type(x) is not int for x in intrusion_totals)):
             raise UnresolvedDecision(
                 "Resisted +8 Intrusion contest must be independently attested")
+        raw_vc=None
+        if mode=="suppression":
+            abilities=dict(a.source.abilities)
+            raw_vc=abilities.get("Veil Control",abilities.get("veil_control"))
+            if type(raw_vc) is not int:
+                raise UnresolvedDecision(
+                    "Caster raw Veil Control required before AP/VP commit")
         price=ordinary_cost+int(open_invocation)
         if a.vp_available<price:
             raise ValueError("Insufficient Available VP for locked effective price")
@@ -352,7 +362,11 @@ class HunterVenomEndurance:
         self.e.spend_ap(caster,action,label="venom_endurance:"+mode)
         if on_committed is not None:
             on_committed(self.e)
-        if a.hp<=0 or a.dead or b.dead or a.vp_available<price or not legal_delivery():
+        if (a.hp<=0 or a.dead or b.dead or a.vp_available<price
+                or any(x["active"] and (x["caster"]==caster or
+                                       x["recipient"]==recipient)
+                       for x in self.effects.values())
+                or not legal_delivery()):
             self.e.log("g44_endurance_interrupted",caster=caster,recipient=recipient,
                        mode=mode,ap_spent=needed,vp_spent=0)
             return None
@@ -376,11 +390,7 @@ class HunterVenomEndurance:
                     and t["profile"]!="TX-CY")
             if viable:
                 v["bound_key"]=t["key"]
-                vc=dict(a.source.abilities)
-                raw=vc.get("Veil Control",vc.get("veil_control"))
-                if type(raw) is not int:
-                    raise UnresolvedDecision("Caster raw Veil Control required")
-                v["units"]=min(5,3+max(0,raw)//2)
+                v["units"]=min(5,3+max(0,raw_vc)//2)
                 v["long"]=t["profile"] in CONTINUOUS_LONG
                 if t["profile"] in CONTINUOUS_SHORT or (
                         t["profile"] in CONTINUOUS_LONG and (
