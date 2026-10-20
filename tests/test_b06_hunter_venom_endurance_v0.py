@@ -771,5 +771,125 @@ class G44Regressions(unittest.TestCase):
         self.assertEqual(d.toxins.modifier("victim","physical_exertion"),-1)
         e.check()
 
+
+    def test_39_coalesced_q0_endurance_expiry_precedes_earlier_nephro_pulse(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-NP",exposure_key="pulse-at-3600",
+                       source="test:verified_ingestion",route="ingestion",
+                       delivery_verified=True,resistance_die=1)
+        c.advance_exploration(3543)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="suppression")
+        whole_round(e)
+        pulse=d.toxins.active("victim")["marker"]
+        expiry=v.effects[effect]["expiry"]
+        self.assertEqual(c.events[pulse].due_seconds,3600)
+        self.assertEqual(c.events[expiry].due_seconds,3603)
+        self.assertLess(c.events[pulse].original_order,
+                        c.events[expiry].original_order)
+        c.advance_exploration(55)
+        vigor_before=e.actors["victim"].vigor
+        self.assertEqual(c.world_seconds,3598)
+        c.enter_initiative()  # both q0 at same next Round Begin
+        self.assertTrue(c.events[expiry].consumed)
+        self.assertTrue(c.events[pulse].consumed)
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertEqual(e.actors["victim"].vigor,vigor_before-1)
+        self.assertEqual(v.effects[effect]["units"],3)
+        self.assertFalse(entries(e,"g44_toxin_packet_prevented"))
+        due=[x["event_id"] for x in entries(e,"g42_milestone_due")
+             if x["event_id"] in (pulse,expiry)]
+        self.assertEqual(due,[expiry,pulse])
+        self.assertEqual(len(entries(e,"g44_suppression_unit")),0)
+        e.check()
+
+    def test_40_coalesced_future_round_endurance_expiry_precedes_pulse(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-NP",exposure_key="pulse-q1",
+                       source="test:verified_ingestion",route="ingestion",
+                       delivery_verified=True,resistance_die=1)
+        c.advance_exploration(3543)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="suppression")
+        whole_round(e)
+        pulse=d.toxins.active("victim")["marker"]
+        expiry=v.effects[effect]["expiry"]
+        c.advance_exploration(49)   # T=3592; remaining 8 and 11 -> q=1
+        c.enter_initiative()
+        self.assertFalse(c.events[pulse].consumed)
+        self.assertFalse(c.events[expiry].consumed)
+        self.assertEqual(c.events[pulse].due_round,c.events[expiry].due_round)
+        e.begin_round()
+        whole_round(e)
+        vigor_before=e.actors["victim"].vigor
+        e.begin_round()  # both events due at Round Begin
+        self.assertEqual(e.actors["victim"].vigor,vigor_before-1)
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertFalse(entries(e,"g44_toxin_packet_prevented"))
+        self.assertEqual([x["event_id"] for x in entries(e,"g42_milestone_due")
+                          if x["event_id"] in (pulse,expiry)], [expiry,pulse])
+        e.check()
+
+    def test_41_legacy_hemotoxin_suppression_exact_budget_and_native_ticks(self):
+        e,d,v,c=scene()
+        d.schedule_hemotoxin("victim",exposure_key="legacy-full",
+                             actual_exposure=True,resistance_total=9,
+                             wound_location_roll=10)
+        legacy=d.short_toxins[0]
+        self.assertEqual(legacy["left"],5)
+        self.assertIsNone(d.toxins.active("victim"))
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="suppression")
+        self.assertTrue(v.effects[effect]["active"])
+        self.assertTrue(v.effects[effect]["bound_legacy"])
+        self.assertEqual(v.effects[effect]["bound_key"],"legacy-full")
+        self.assertEqual(v.effects[effect]["units"],3)
+        self.assertEqual(len(d.short_toxins),1)
+        whole_round(e)
+        self.assertEqual((legacy["applied"],legacy["left"],
+                          v.effects[effect]["units"]),(1,4,2))
+        c.advance_exploration(12)
+        self.assertEqual((legacy["applied"],legacy["left"],
+                          v.effects[effect]["units"]),(3,2,0))
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertEqual(e.actors["victim"].hp,e.actors["victim"].hp_max)
+        c.advance_exploration(12)
+        self.assertEqual((legacy["applied"],legacy["left"]),(5,0))
+        self.assertEqual(e.actors["victim"].hp,e.actors["victim"].hp_max-2)
+        prevented=[x for x in entries(e,"g44_toxin_packet_prevented")
+                   if x["key"]=="legacy-full"]
+        self.assertEqual([x["packet"] for x in prevented],[1,2,3])
+        self.assertTrue(all(x["legacy"] for x in prevented))
+        self.assertEqual(len(entries(e,"g4_toxin_tick")),5)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertEqual(len(d.short_toxins),1)
+        e.check()
+
+    def test_42_legacy_reduced_toxin_expires_with_unused_suppression(self):
+        from dataclasses import replace
+        e,d,v,c=scene()
+        a=e.actors["caster"]
+        a.source=replace(a.source,abilities=tuple(
+            (k,4 if k=="Veil Control" else n) for k,n in a.source.abilities))
+        d.schedule_hemotoxin("victim",exposure_key="legacy-reduced",
+                             actual_exposure=True,resistance_total=12,
+                             wound_location_roll=10)
+        legacy=d.short_toxins[0]
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="suppression")
+        self.assertEqual(v.effects[effect]["units"],5)
+        whole_round(e)
+        c.advance_exploration(12)
+        self.assertEqual((legacy["left"],legacy["applied"]),(0,3))
+        self.assertFalse(v.effects[effect]["active"])
+        self.assertEqual(v.effects[effect]["units"],2)
+        self.assertEqual(
+            [x["reason"] for x in entries(e,"g44_endurance_ended")
+             if x["effect"]==effect],["bound_toxin_ended"])
+        self.assertEqual(e.actors["victim"].hp,e.actors["victim"].hp_max)
+        self.assertTrue(c.events[v.effects[effect]["expiry"]].canceled)
+        self.assertEqual(len(entries(e,"g44_toxin_packet_prevented")),3)
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
