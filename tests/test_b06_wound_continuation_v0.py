@@ -596,5 +596,111 @@ class WoundContinuationTests(unittest.TestCase):
         self.assertEqual(len(b.report()["verified_hits"]),2)
         e.check()
 
+
+    def test_21_mutating_report_hit_cannot_reuse_consumed_source_id(self):
+        e,d,first=scene()
+        idx=begin_attack(e,first)
+        hit(e,first,idx,source_event="stable-G5-evidence")
+        self.assertEqual(len(e.actors["sentry"].wounds),1)
+        source_hit=next(x for x in e.ledger
+                        if x["kind"]=="g45_attested_hit")
+        original_serialized=e.serialize()
+        baseline=first.report()
+        self.assertEqual(baseline["verified_hits"][0]["source_event"],
+                         "stable-G5-evidence")
+        self.assertEqual(len(baseline["wound_creation_events"]),1)
+        self.assertEqual(len(baseline["verified_hits"][0]
+                             ["target_state"]["wounds"]),1)
+        # Corrupt every mutable path exposed by an audit report. In
+        # particular, changing source_event previously rewrote the
+        # encounter ledger's uniqueness registry in place.
+        baseline["verified_hits"][0]["source_event"]="fabricated-other-id"
+        baseline["verified_hits"][0]["target_state"]["wounds"][0]["progress"]=999
+        baseline["verified_hits"][0]["actual_result"]["hp_loss"]=999
+        baseline["wound_creation_events"][0]["fake_wound"]=True
+        baseline["source_actor_states"]["sentry"]["hp"]=-999
+        baseline["current"]["actors"]["sentry"]["wounds"][0]["progress"]=999
+        self.assertEqual(e.serialize(),original_serialized)
+        self.assertEqual(source_hit["detail"]["source_event"],
+                         "stable-G5-evidence")
+        second=first.report()
+        self.assertEqual(second["verified_hits"][0]["source_event"],
+                         "stable-G5-evidence")
+        self.assertNotIn("fake_wound",second["wound_creation_events"][0])
+        self.assertEqual(second["verified_hits"][0]["actual_result"]["hp_loss"],6)
+        self.assertEqual(second["verified_hits"][0]["target_state"]
+                         ["wounds"][0]["progress"],0)
+        self.assertEqual(second["current"]["actors"]["sentry"]
+                         ["wounds"][0]["progress"],0)
+        self.assertEqual(second["source_actor_states"]["sentry"]["hp"],12)
+        self.assertIsNot(second["verified_hits"][0],
+                         baseline["verified_hits"][0])
+
+        first.end_current_turn()
+        first.start_next_turn(RegenerationChoice())
+        first.end_current_turn()
+        first.begin_next_round()
+        later=WoundContinuation(e)
+        later.start_next_turn(RegenerationChoice())
+        fresh=len(e.ledger)
+        e.declare_sequence("soldier","sentry",("B06-AT-03",),("take_hit",))
+        before=(e.actors["sentry"].hp,len(e.actors["sentry"].wounds),
+                sum(x["kind"]=="g4_damage_applied" for x in e.ledger))
+        with self.assertRaisesRegex(ValueError,
+                                    "Source event already consumed in encounter"):
+            hit(e,later,fresh,source_event="stable-G5-evidence",
+                critical="normal",critical_dice=(),die_face=1,
+                wound_location_roll=None)
+        self.assertEqual((e.actors["sentry"].hp,
+                          len(e.actors["sentry"].wounds),
+                          sum(x["kind"]=="g4_damage_applied"
+                              for x in e.ledger)),before)
+        self.assertFalse(later.report()["verified_hits"])
+        e.check()
+
+    def test_22_report_and_returned_outcomes_do_not_mutate_internal_state(self):
+        e,d,b=scene(soldier=False)
+        movement=GridMovement(e,width=12,height=8)
+        b.start_next_turn(RegenerationChoice())
+        unresolved=b.mark_unresolved("g5_retreat_geometry",
+            source_reference="G5:original",
+            detail="Await source-backed legal retreat")
+        self.assertTrue(movement.step("sentry",(1,0)))
+        movement_index=len(e.ledger)-1
+        withdrawal=b.attest_withdrawal(
+            "sentry",movement_event_index=movement_index,
+            exit_policy_reference="G6:original",
+            independently_verified=True)
+        original_ledger=e.serialize()
+        # Both public method return values must also be detached, not
+        # only copies that happen to be assembled in report().
+        unresolved["category"]="fabricated"
+        unresolved["source_reference"]="rewritten"
+        withdrawal["status"]="victory"
+        withdrawal["exit_policy_reference"]="fabricated"
+        self.assertEqual(e.serialize(),original_ledger)
+        fresh=b.report()
+        self.assertEqual([x["status"] for x in fresh["explicit_outcomes"]],
+                         ["unresolved","withdrawal_attested"])
+        self.assertEqual(fresh["explicit_outcomes"][0]["source_reference"],
+                         "G5:original")
+        self.assertEqual(fresh["explicit_outcomes"][1]["exit_policy_reference"],
+                         "G6:original")
+        fresh["explicit_outcomes"][0]["category"]="corrupted-in-report"
+        fresh["explicit_outcomes"][1]["status"]="victory"
+        fresh["source_actor_states"]["sentry"]["wounds"].append(
+            {"id":"invented-report-only"})
+        next_report=b.report()
+        self.assertEqual(next_report["explicit_outcomes"][0]["category"],
+                         "g5_retreat_geometry")
+        self.assertEqual(next_report["explicit_outcomes"][1]["status"],
+                         "withdrawal_attested")
+        self.assertFalse(next_report["source_actor_states"]["sentry"]["wounds"])
+        self.assertEqual(e.serialize(),original_ledger)
+        self.assertFalse(next_report["complete_encounter_certified"])
+        self.assertIsNone(next_report["winner"])
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
