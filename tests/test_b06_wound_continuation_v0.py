@@ -5,6 +5,7 @@ from scripts.b06_encounter_state_v0 import (
     Encounter, RegenerationChoice, UnresolvedDecision, Wound,
     enemy_actor, party_actor)
 from scripts.b06_damage_v0 import DamageState, DamagePacket
+from scripts.b06_movement_v0 import GridMovement
 from scripts.b06_spells_v0 import SpellState
 from scripts.b06_wound_continuation_v0 import (
     WoundContinuation, historical_phase3_wound_witnesses)
@@ -302,6 +303,123 @@ class WoundContinuationTests(unittest.TestCase):
         self.assertEqual(b.report()["verified_hits"][0]["action_index"],current)
         e.check()
 
+
+
+    def test_12_duplicate_source_event_rejected_across_bridge_instances(self):
+        e,d,first=scene()
+        initial=begin_attack(e,first)
+        first_hit=hit(e,first,initial,source_event="shared-external-evidence",
+                      critical="normal",critical_dice=(),die_face=1,
+                      wound_location_roll=None)
+        self.assertEqual(first_hit["hp_loss"],4)
+        first.end_current_turn()
+        first.start_next_turn(RegenerationChoice())
+        first.end_current_turn()
+        first.begin_next_round()
+        later=WoundContinuation(e)
+        later.start_next_turn(RegenerationChoice())
+        next_index=len(e.ledger)
+        e.spend_ap("soldier","physical",label="G5:later_verified_sword")
+        prior=(e.actors["sentry"].hp, e.actors["sentry"].vigor,
+               len(e.actors["sentry"].wounds),
+               sum(x["kind"]=="g4_damage_applied" for x in e.ledger))
+        with self.assertRaisesRegex(ValueError,
+                                    "Source event already consumed in encounter"):
+            hit(e,later,next_index,source_event="shared-external-evidence",
+                critical="normal",critical_dice=(),die_face=1,
+                wound_location_roll=None)
+        self.assertEqual(
+            (e.actors["sentry"].hp, e.actors["sentry"].vigor,
+             len(e.actors["sentry"].wounds),
+             sum(x["kind"]=="g4_damage_applied" for x in e.ledger)),prior)
+        self.assertFalse(later.report()["verified_hits"])
+        self.assertEqual(sum(x["kind"]=="g45_attested_hit" and
+                             x["detail"]["source_event"]=="shared-external-evidence"
+                             for x in e.ledger),1)
+        # Failed duplicate does not consume the new legally committed action.
+        legal=hit(e,later,next_index,source_event="new-external-evidence",
+                  critical="normal",critical_dice=(),die_face=1,
+                  wound_location_roll=None)
+        self.assertEqual(legal["hp_loss"],4)
+        self.assertEqual(len(later.report()["verified_hits"]),1)
+        e.check()
+
+    def test_13_g1_cancelled_reserved_and_pivot_not_withdrawal(self):
+        e,d,b=scene(soldier=False)
+        movement=GridMovement(e,width=12,height=8)
+        b.start_next_turn(RegenerationChoice())
+        original=e.actors["sentry"].occupied
+        # These G1 ledger kinds are meaningful, but do not demonstrate
+        # displacement. They must not be usable to fabricate an exit.
+        bad=[
+            ("g1_reserved_mp_expired",{"label":"unused","returned_mp":3}),
+            ("g1_step_cancelled",{"trigger":"cancelled","reason":"blocked"}),
+            ("g1_segment_break",{"reason":"new_segment"}),
+            ("g1_movement_step",{"old":original,"new":original,
+                                  "step_kind":"pivot"}),
+        ]
+        for kind,facts in bad:
+            index=len(e.ledger)
+            e.log(kind,actor="sentry",**facts)
+            with self.subTest(kind=kind):
+                with self.assertRaisesRegex(UnresolvedDecision,
+                                            "no completed actor-linked G1 translation"):
+                    b.attest_withdrawal("sentry",
+                        movement_event_index=index,
+                        exit_policy_reference="G6:verified_boundary_exit",
+                        independently_verified=True)
+        self.assertEqual(b.report()["explicit_outcomes"],[])
+        self.assertEqual(e.actors["sentry"].occupied,original)
+        self.assertTrue(movement.step("sentry",(1,0)))
+        idx=len(e.ledger)-1
+        self.assertEqual(e.ledger[idx]["kind"],"g1_movement_step")
+        valid=b.attest_withdrawal("sentry",movement_event_index=idx,
+                   exit_policy_reference="G6:verified_boundary_exit",
+                   independently_verified=True)
+        self.assertEqual(valid["status"],"withdrawal_attested")
+        self.assertEqual(b.report()["explicit_outcomes"],[valid])
+        e.check()
+
+    def test_14_allied_transit_requires_atomic_route_finish(self):
+        sentry=enemy_actor("B06-EN-01","sentry","party",
+                           start_state="cold_start",occupied=((1,1),))
+        ally=party_actor("A",3,"ally","party",occupied=((2,1),))
+        e=Encounter([sentry,ally],{"sentry":100,"ally":90},
+                    seed=452,scenario="G45-G1-completed-route",
+                    policy="attested_departure_not_victory")
+        SpellState(e)
+        DamageState(e)
+        movement=GridMovement(e,width=12,height=8)
+        e.begin_round()
+        bridge=WoundContinuation(e)
+        bridge.start_next_turn(RegenerationChoice())
+        self.assertTrue(movement.move_route("sentry",((1,0),(1,0))))
+        transit=[x for x in e.ledger if x["kind"]=="g1_allied_transit_step"]
+        self.assertEqual(len(transit),2)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "no completed actor-linked G1 translation"):
+            bridge.attest_withdrawal("sentry",
+                movement_event_index=transit[-1]["index"],
+                exit_policy_reference="G6:actual_exit_policy",
+                independently_verified=True)
+        finished=next(x for x in e.ledger
+                      if x["kind"]=="g1_allied_transit_finished")
+        self.assertEqual(sentry.occupied,((3,1),))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "no completed actor-linked G1 translation"):
+            bridge.attest_withdrawal("ally",
+                movement_event_index=finished["index"],
+                exit_policy_reference="G6:actual_exit_policy",
+                independently_verified=True)
+        success=bridge.attest_withdrawal("sentry",
+                movement_event_index=finished["index"],
+                exit_policy_reference="G6:actual_exit_policy",
+                independently_verified=True)
+        self.assertEqual(success["status"],"withdrawal_attested")
+        self.assertEqual(success["movement_event_index"],finished["index"])
+        self.assertEqual(len(bridge.report()["explicit_outcomes"]),1)
+        self.assertIsNone(bridge.report()["winner"])
+        e.check()
 
 if __name__=="__main__":
     unittest.main()
