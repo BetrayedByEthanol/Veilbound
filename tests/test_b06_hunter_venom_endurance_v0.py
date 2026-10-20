@@ -351,5 +351,116 @@ class G44Regressions(unittest.TestCase):
         self.assertEqual(e.actors["caster"].vp_spent,0)
         e.check()
 
+
+    def test_21_rejected_hunter_key_is_reserved_across_all_toxin_paths(self):
+        e,d,v,c=scene(target_role="B")
+        index,damage=hit(e,d,die=1)
+        self.assertFalse(damage["injection_eligible"])
+        result=v.apply_bite("hunter","victim",profile_hit_index=index,
+                            exposure_key="rejected-hunter")
+        self.assertEqual(result["outcome"],"not_delivered")
+        with self.assertRaisesRegex(ValueError,"Toxin exposure key already processed"):
+            d.toxins.apply("victim","TX-MY",exposure_key="rejected-hunter",
+                           source="test:independently_attested",
+                           route="injection",delivery_verified=True,
+                           residual_piercing_hp=1,resistance_die=1)
+        self.assertIsNone(d.toxins.active("victim"))
+        e.check()
+
+    def test_22_missing_sourced_raw_vc_rejected_before_cast_resources(self):
+        from dataclasses import replace
+        e,d,v,c=scene()
+        a=e.actors["caster"]
+        a.source=replace(a.source,abilities=tuple((k,n) for k,n
+                        in a.source.abilities if k!="Veil Control"))
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        before=(a.ap_remaining,a.vp_spent,len(v.effects))
+        with self.assertRaisesRegex(UnresolvedDecision,"raw Veil Control"):
+            cast(e,v,mode="suppression")
+        self.assertEqual((a.ap_remaining,a.vp_spent,len(v.effects)),before)
+        e.check()
+
+    def test_23_hepato_suppression_preserves_genuine_recovery_and_vp(self):
+        e,d,v,c=scene()
+        target=e.actors["victim"]
+        target.vigor-=10
+        target.vp_spent=4
+        target.vp_available-=4
+        c.advance_exploration(21570)
+        d.toxins.apply("victim","TX-HE",exposure_key="liver",
+                        source="test:verified_ingestion",route="ingestion",
+                        delivery_verified=True,resistance_die=1)
+        original=c.events["recovery:victim:1"]
+        self.assertFalse(original.consumed)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        effect=cast(e,v,mode="suppression")
+        whole_round(e)
+        c.advance_exploration(30)
+        self.assertTrue(original.consumed)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertFalse(v.effects[effect]["active"])
+        recovered=entries(e,"g4_six_hour_recovery")
+        actual=next(x for x in recovered if x["actor"]=="victim")
+        self.assertEqual(actual["toxin_recovery_reduction"],0)
+        self.assertEqual(actual["vigor"],max(1,(target.vigor_max+2)//4))
+        self.assertGreater(actual["spent_vp_recovered"],0)
+        self.assertEqual(len(entries(e,"g43_hepatotoxin_recovery")),1)
+        e.check()
+
+    def test_24_same_grade_ignored_before_ward_consumption(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-MY",exposure_key="old-minor",
+                        source="test:verified_injection",route="injection",
+                        delivery_verified=True,residual_piercing_hp=1,
+                        resistance_die=1)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v)
+        whole_round(e)
+        result=d.toxins.apply("victim","TX-DE",exposure_key="same-minor",
+                              source="test:verified_contact",route="contact",
+                              delivery_verified=True,resistance_die=None)
+        self.assertEqual(result["outcome"],"ignored")
+        self.assertTrue(v.effects[eid]["active"])
+        self.assertEqual(d.toxins.active("victim")["key"],"old-minor")
+        self.assertFalse(entries(e,"g44_ward_intercepted"))
+        e.check()
+
+    def test_25_continuous_neuro_protects_whole_local_intervals(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-NE",exposure_key="nerve",
+                        source="test:verified_injection",route="injection",
+                        delivery_verified=True,residual_piercing_hp=1,
+                        resistance_die=1)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,mode="suppression")
+        self.assertEqual(v.effects[eid]["units"],2)
+        self.assertEqual(d.toxins.modifier("victim","dodge"),0)
+        whole_round(e)
+        # Actual Step 3 completed the initial toxin-local interval.
+        self.assertEqual(v.effects[eid]["units"],1)
+        c.advance_exploration(12)
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(d.toxins.modifier("victim","dodge"),-2)
+        self.assertIsNotNone(d.toxins.active("victim"))
+        self.assertEqual(d.toxins.active("victim")["left"],2)
+        e.check()
+
+    def test_26_fixed_expiry_precedes_same_second_nephro_pulse(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-NP",exposure_key="timed-nephro",
+                        source="test:verified_ingestion",route="ingestion",
+                        delivery_verified=True,resistance_die=1)
+        c.advance_exploration(3540)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        eid=cast(e,v,mode="suppression")
+        whole_round(e)
+        vigor=e.actors["victim"].vigor
+        c.advance_exploration(60)
+        self.assertFalse(v.effects[eid]["active"])
+        self.assertEqual(e.actors["victim"].vigor,vigor-1)
+        self.assertEqual(len(entries(e,"g44_toxin_packet_prevented")),0)
+        self.assertEqual(d.toxins.active("victim")["remaining"],3)
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
