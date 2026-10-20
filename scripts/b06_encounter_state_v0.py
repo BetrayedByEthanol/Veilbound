@@ -117,6 +117,21 @@ class Actor:
     blink_debt_due: int = 0
     blink_debt_next: int = 0
     dead: bool = False
+    # Immutable anatomical selection once sourced (or frozen at initial setup).
+    # Indexes of footprint and occupied correspond across all legal pivots.
+    reference_cell_id: str | None = None
+
+    def reference_square(self):
+        """Return the fixed body-local reference cell's CURRENT world square."""
+        if not self.footprint or len(self.occupied) != len(self.footprint):
+            raise ValueError("Actor requires a complete fixed footprint")
+        if self.reference_cell_id is None:
+            # Legacy fallback is selected ONCE, never re-sorted on a pivot.
+            self.reference_cell_id = self.footprint[
+                self.occupied.index(min(self.occupied))]
+        if self.reference_cell_id not in self.footprint:
+            raise ValueError("Reference cell is not part of authored footprint")
+        return self.occupied[self.footprint.index(self.reference_cell_id)]
 
     def validate(self):
         for name in ("hp_max", "vigor_max", "vp_max", "vigor",
@@ -137,10 +152,13 @@ class Actor:
             raise ValueError("Round/turn capacity exceeded")
         if self.dead != (self.hp <= -self.hp_max):
             raise ValueError("Dead status disagrees with HP threshold")
+        if not self.footprint or len(set(self.footprint)) != len(self.footprint):
+            raise ValueError("Unique source footprint cell IDs required")
         if len(self.occupied) != len(self.footprint):
             raise ValueError("Explicit static footprint cells required")
         if len(set(self.occupied)) != len(self.occupied):
             raise ValueError("Actor's occupied squares overlap")
+        self.reference_square()  # Validate/freeze source or one-time legacy ID.
         if self.guard_instrument is None and self.guard_value is not None:
             raise ValueError("Guard value without instrument")
         for w in self.wounds:
@@ -184,6 +202,7 @@ def enemy_actor(source_id, actor_id, team, *, start_state=None, occupied):
                   r["physical_action_ap"], r["projection_action_ap"],
                   d["guard_instrument"], d["guard_base"], d["guard_capacity"],
                   footprint=footprint, occupied=tuple(tuple(p) for p in occupied),
+                  reference_cell_id=shape.get("reference_cell_id"),
                   ready_guard=(d["guard_instrument"] is not None),
                   maintained=list(init["active_effects"]))
     actor.validate()

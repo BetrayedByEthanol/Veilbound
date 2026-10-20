@@ -318,7 +318,11 @@ class HunterVenomEndurance:
                 return False
             if not a.occupied or not b.occupied:
                 raise UnresolvedDecision("Explicit source occupied reference cells required")
-            p=min(a.occupied);q=min(b.occupied)
+            # The reference is a permanent body-local ID, not the current
+            # lexicographically smallest world cell. In particular Hunter's
+            # head stays the reference even when rear sorts before head.
+            p=a.reference_square()
+            q=b.reference_square()
             axes=sorted([abs(x-y) for x,y in zip(
                 tuple(p)+(0,)*(3-len(p)),tuple(q)+(0,)*(3-len(q)))],reverse=True)
             if axes[0]+axes[1]/2+axes[2]/2>3:
