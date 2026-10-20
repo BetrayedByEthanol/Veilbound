@@ -371,5 +371,40 @@ class G42ClockTests(unittest.TestCase):
         e.check()
 
 
+    def test_20_exit_after_round_completes_while_already_in_initiative(self):
+        a=pc();a.vigor-=5
+        e,d,c=scene(a,phases={"hero":13})
+        c.schedule_milestone("hero",event_id="after:19",
+                             source="authored:later",delay_seconds=19)
+        # Unlike test_17, initiative starts in *unfinished* round 1.
+        # A real round then finishes without a new begin_round() call.
+        self.assertEqual((e.round,e.cursor),(1,0))
+        c.enter_initiative()
+        self.assertEqual(c.entry_round,1)
+        self.assertEqual((c.events["recovery:hero:1"].due_round,
+                          c.events["after:19"].due_round),(3,4))
+        e.start_turn("hero",regen_choice=RegenerationChoice())
+        e.end_turn()
+        self.assertEqual((e.round,e.cursor),(1,len(e.order)))
+        self.assertFalse(c.events["recovery:hero:1"].consumed)
+        c.leave_initiative()
+        # Active exit label is 2, not stale Encounter.round=1 and not
+        # original entry label 1. E=3 resolves immediately; E=4 waits 6s.
+        self.assertEqual(events(e,"g42_initiative_exited")[-1]["round_label"],2)
+        self.assertTrue(c.events["recovery:hero:1"].consumed)
+        self.assertEqual(len(events(e,"g4_six_hour_recovery")),1)
+        self.assertEqual(events(e,"g4_six_hour_recovery")[0]["checkpoint_id"],
+                         "recovery:hero:1")
+        self.assertEqual(c.events["after:19"].due_seconds,6)
+        self.assertFalse(c.events["after:19"].consumed)
+        d.advance_exploration(5)
+        self.assertFalse(c.events["after:19"].consumed)
+        d.advance_exploration(1)
+        self.assertEqual(len(events(e,"g42_milestone_due")),1)
+        self.assertTrue(c.events["after:19"].consumed)
+        self.assertEqual(len(events(e,"g4_six_hour_recovery")),1)
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
