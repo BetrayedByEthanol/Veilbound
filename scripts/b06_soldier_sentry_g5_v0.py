@@ -5,6 +5,7 @@ Hunter contact, victory-from-zero-HP or implicit dice. G0/G1/G3/G4/G4.5
 remain authoritative for their separate costs and state transitions.
 """
 from copy import deepcopy
+from dataclasses import dataclass
 import json
 
 from scripts.b06_encounter_state_v0 import (
@@ -22,6 +23,22 @@ def _face(value,sides,label):
     return value
 
 
+@dataclass(frozen=True)
+class SceneExit:
+    """Independent, immutable scene declaration, not a withdrawal claim.
+
+    A scene author must bind an actor to a map-border exit and exact exit
+    policy before opening the G5 adapter; callers cannot choose new exits
+    or policies at withdrawal time.
+    """
+    encounter_scene: str
+    grid_scene: str
+    objective: str
+    actor_id: str
+    square: tuple
+    policy_id: str
+
+
 class SourceMelee:
     """Resolve ordinary 1x1 Soldier/Sentry sword sequences in genuine G0 time.
 
@@ -30,11 +47,38 @@ class SourceMelee:
     a declared, reproducible policy/input and retained in the event ledger.
     G5 does not choose a player defense, roll, or tactical response itself.
     """
-    def __init__(self,encounter):
+    def __init__(self,encounter,*,scene_exit=None):
         if any(getattr(encounter,x,None) is None for x in ("g1","g3","g4")):
             raise ValueError("Install native G1, G3 and G4 before G5")
+        if scene_exit is not None:
+            if not isinstance(scene_exit,SceneExit):
+                raise ValueError("A source-authored SceneExit is required")
+            g=encounter.g1
+            square=scene_exit.square
+            if (scene_exit.encounter_scene!=encounter.scenario
+                    or scene_exit.grid_scene!=g.scene_id
+                    or scene_exit.objective!=encounter.objective
+                    or scene_exit.actor_id not in encounter.actors
+                    or not isinstance(square,tuple) or len(square)!=2
+                    or any(type(v) is not int for v in square)
+                    or not g.inside(square)
+                    or not (square[0] in (0,g.width-1)
+                            or square[1] in (0,g.height-1))
+                    or not isinstance(scene_exit.policy_id,str)
+                    or not scene_exit.policy_id):
+                raise ValueError("Scene exit must match source scene, border and objective")
+            if len(encounter.actors[scene_exit.actor_id].occupied)!=1:
+                raise ValueError("G5 scene exit requires a one-square actor")
         self.e=encounter
+        self.scene_exit=scene_exit
         self.bridge=WoundContinuation(encounter)
+        if scene_exit is not None:
+            encounter.log("g5_scene_exit_authored",
+                          encounter_scene=scene_exit.encounter_scene,
+                          grid_scene=scene_exit.grid_scene,
+                          objective=scene_exit.objective,
+                          actor=scene_exit.actor_id,
+                          square=scene_exit.square,policy=scene_exit.policy_id)
 
     def _profile(self,attacker,profile_id):
         a=self.e.actors[attacker]
@@ -148,7 +192,10 @@ class SourceMelee:
                 critical="devastating" if confirmation_face==20 else "critical"
             elif confirmation_face==20:
                 critical="devastating"
-            elif confirmation_face+bonus>value:
+            elif confirmation_face!=1 and confirmation_face+bonus>value:
+                # Canonical natural 1 is an automatic miss for the
+                # confirmation attack, regardless of high source bonus or
+                # reduced Dodge Defense from accumulated Dodge Pressure.
                 critical="critical"
             else:
                 critical="strong"
@@ -208,25 +255,41 @@ class SourceMelee:
                 "attack_total":total,"damage":deepcopy(result),
                 "action_index":action_index}
 
-    def withdraw(self,actor_id,*,exit_square,policy_id):
-        """Require actual G1 movement to an authored open-grid exit."""
+    def withdraw(self,actor_id):
+        """Only a prior scene-authored border exit can end this encounter.
+
+        No caller-selected exit_square or policy_id is accepted at withdrawal
+        time. Independent authority derives from the immutable scene setup,
+        combined with a native, completed G1 movement step at that square.
+        """
+        policy=self.scene_exit
+        if policy is None:
+            raise UnresolvedDecision("No scene-authored exit policy for G5 withdrawal")
+        if actor_id!=policy.actor_id:
+            raise UnresolvedDecision("Actor does not match scene-authored exit policy")
+        if (self.e.scenario!=policy.encounter_scene or
+                self.e.objective!=policy.objective or
+                self.e.g1.scene_id!=policy.grid_scene):
+            raise UnresolvedDecision("Scene-authored exit context has changed")
         a=self.e.actors[actor_id]
-        if len(a.occupied)!=1 or a.occupied[0]!=tuple(exit_square):
-            raise UnresolvedDecision("Actor must reach declared exit square")
-        if not isinstance(policy_id,str) or not policy_id:
-            raise UnresolvedDecision("Independent exit policy ID required")
+        if len(a.occupied)!=1 or a.occupied[0]!=policy.square:
+            raise UnresolvedDecision("Actor has not reached scene-authored exit square")
+        if any(x["kind"]=="g5_terminal_exit" and
+               x["detail"].get("actor")==actor_id
+               for x in self.e.ledger):
+            raise ValueError("Scene exit already attested")
         steps=[x for x in self.e.ledger[self.bridge.start:]
                if x["kind"]=="g1_movement_step"
                and x["detail"].get("actor")==actor_id
                and x["detail"].get("step_kind") in ("orthogonal","diagonal")]
-        if not steps or tuple(steps[-1]["detail"]["new"][0])!=a.occupied[0]:
-            raise UnresolvedDecision("Actual final G1 step to authored exit required")
+        if not steps or tuple(steps[-1]["detail"]["new"][0])!=policy.square:
+            raise UnresolvedDecision("Actual final G1 step to scene-authored exit required")
         evidence=self.bridge.attest_withdrawal(
             actor_id,movement_event_index=steps[-1]["index"],
-            exit_policy_reference=policy_id,
+            exit_policy_reference=policy.policy_id,
             independently_verified=True)
         self.e.log("g5_terminal_exit",actor=actor_id,
-                   at=a.occupied[0],policy=policy_id,
+                   at=policy.square,policy=policy.policy_id,
                    movement_index=steps[-1]["index"])
         return evidence
 
@@ -270,7 +333,11 @@ def fixed_scene(pack,*,sentry_state=None,seed=501):
     SpellState(e)
     DamageState(e)
     e.begin_round()
-    return SourceMelee(e)
+    # Only the I1/I2 author selects the exit policy. Caller attempts to
+    # withdraw from arbitrary interior cells cannot rewrite this contract.
+    scene_exit=SceneExit(e.scenario,e.g1.scene_id,e.objective,
+                         "front",(0,2),"G5:open-corridor:exit-front")
+    return SourceMelee(e,scene_exit=scene_exit)
 
 
 def _retreat_on_turn(scene):
@@ -283,8 +350,7 @@ def _retreat_on_turn(scene):
     for _ in range(2):
         if not e.g1.step("front",(-1,0),responses=lambda eligible: ()):
             raise UnresolvedDecision("Declared exit step was canceled")
-    scene.withdraw("front",exit_square=(0,2),
-                   policy_id="G5:open-corridor:exit-front")
+    scene.withdraw("front")
     scene.bridge.end_current_turn()
 
 
