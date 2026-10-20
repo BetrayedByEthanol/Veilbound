@@ -270,11 +270,11 @@ class WorldClock:
         if self.mode != "initiative" or self.e.current is not None or (
                 self.e.round and self.e.cursor not in (0,len(self.e.order))):
             raise ValueError("Initiative exit requires a round boundary")
-        # Entering just after Round C finishes preselects label C+1,
-        # but Encounter.round still stores C until begin_round() is called.
-        # The *active entry label*, not the stale completed round, is the
-        # earliest valid exit label for E-C-1 conservative conversion.
-        current = max(self.entry_round, self.e.round)
+        # At a completed round boundary Encounter.round still names the
+        # completed round until begin_round() is called. _round_label()
+        # consistently advances to the *next* label, whether initiative
+        # was just entered or remained active throughout that round.
+        current = self._round_label()
         self.mode = "exploration"
         self.entry_round = None
         for ev in self._pending():
