@@ -550,8 +550,9 @@ class SpellState:
     def cast_flame(self,caster,target,*,tier,face,vigor_die,
                    defense="take_hit",aware=False,hand_available=False,
                    on_committed=None,exposures=(),origin=None,target_cell=None,
-                   prone_cover_policy=(),prone_dodge_feasible=False):
-        """Bounded direct clear/cover-only F Thrown Flame; no G4 HP mutations.
+                   prone_cover_policy=(),prone_dodge_feasible=False,
+                   wound_location_roll=None):
+        """Bounded clear/cover-only F Flame; G4 resolves direct hits in this call.
 
         Mixed living-screen destination/scatter and full opportunity/Reaction
         response need the G2 general-projectile adapter, deferred to G3+G5.
@@ -607,7 +608,7 @@ class SpellState:
         try:
             position=self.e.g2._prone_position(
                 victim,refreshed.distance,refreshed.cover,prone_cover_policy)
-            self.e.g2._defense_value(
+            _,preflight_defense=self.e.g2._defense_value(
                 victim,defense,0,refreshed.cover,
                 position_bonus=position,
                 prone_dodge_feasible=prone_dodge_feasible)
@@ -616,6 +617,11 @@ class SpellState:
                        spell_kind="Thrown Flame",
                        cause="post_commit_defense_unusable",reason=str(error))
             return {"outcome":"interrupted_before_launch","vp_spent":0}
+        # Preflight an actual wound location before Spent VP or the target's
+        # defense is committed. A qualifying G4 hit must resolve *now*, not
+        # leave a paid hit with a missing later adjudication choice.
+        if (self.e.g4 is not None and 1<face<20 and face+5>preflight_defense):
+            self.e.g4.preflight_flame_wound(target,wound_location_roll)
         self._pay(caster,price,0,label="g3:thrown_flame:T"+str(tier))
         # No callback or geometry mutation occurs between the pure final
         # validation and this one native G2 defensive-resource commitment.
@@ -644,5 +650,13 @@ class SpellState:
                 "packets_pending_g4":packets}
         self.e.log("g3_flame_launched",caster=caster,target=target,
                    tier=tier,primary_face=face,die=vigor_die,**result)
+        if self.e.g4 is not None and outcome=="direct_hit_pending_G4":
+            # The launch ledger index is a one-use damage capability. Consume
+            # synchronously, before regeneration or changing resistances.
+            applied=self.e.g4.apply_flame(
+                caster,target,ledger_index=self.e.ledger[-1]["index"],
+                wound_location_roll=wound_location_roll)
+            result["outcome"]="direct_hit_resolved_G4"
+            result["g4_damage"]=applied
         self.e.check()
         return result

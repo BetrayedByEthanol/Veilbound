@@ -57,7 +57,15 @@ class DamageState:
             raise ValueError("G4 already installed")
         self.e = encounter
         self.used_events = set()
-        self.next_wound = 0
+        # Actors may carry wounds across encounters. Resume beyond *all*
+        # recorded G4 identifiers, including wounds belonging to other actors.
+        existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
+        if any(len({w.ident for w in a.wounds}) != len(a.wounds)
+               for a in encounter.actors.values()):
+            raise ValueError("Carried wound IDs must be unique per actor")
+        self.next_wound = max(
+            (int(s[4:]) for s in existing
+             if s.startswith("G4-W") and s[4:].isdigit()), default=0)
         self.short_toxins = []
         self.elapsed_recovery_seconds = 0
         encounter.g4 = self
@@ -68,6 +76,46 @@ class DamageState:
         if actor_id not in self.e.actors:
             raise ValueError("Unknown damage recipient")
         return self.e.actors[actor_id]
+
+    def _heal_delivery_issue(self,caster,recipient,*,hand_available,in_range,
+                             unobstructed,delivery_check):
+        """Live Basic Heal hand/path check; re-run after paid AP responses."""
+        if delivery_check is not None:
+            if not callable(delivery_check):
+                raise ValueError("Basic Heal delivery_check must be callable")
+            state=delivery_check(self.e,caster,recipient)
+            if (not isinstance(state,(tuple,list)) or len(state)!=3
+                    or any(type(v) is not bool for v in state)):
+                raise ValueError("Basic Heal delivery_check must return three booleans")
+            hand_available=hand_available and state[0]
+            in_range=in_range and state[1]
+            unobstructed=unobstructed and state[2]
+        if hand_available is not True:
+            return "hand_unavailable"
+        if recipient==caster:
+            return None
+        if in_range is not True:
+            return "delivery_out_of_range"
+        if unobstructed is not True:
+            return "delivery_obstructed"
+        # Also independently recheck current G1 geometry if installed.
+        if self.e.g1 is not None:
+            a,b=self._actor(caster),self._actor(recipient)
+            if len(a.occupied)!=1 or len(b.occupied)!=1:
+                raise UnresolvedDecision("Basic Heal multicell air path needs explicit adjudication")
+            origin,dest=a.occupied[0],b.occupied[0]
+            dist=max(abs(origin[0]-dest[0]),abs(origin[1]-dest[1]))
+            if dist>3:
+                return "delivery_out_of_range"
+            if dist==0:
+                return "delivery_overlap_invalid"
+            from scripts.b06_ranged_v0 import RangedCombat
+            cells,corners=RangedCombat._ray(origin,dest)
+            walls=self.e.g1.walls
+            if (any(c in walls for c in cells[1:-1])
+                    or any(u in walls or v in walls for u,v in corners)):
+                return "delivery_obstructed"
+        return None
 
     def _armor(self, a):
         if a.source.source_id in ENEMIES:
@@ -140,8 +188,16 @@ class DamageState:
         # Set the threshold flag before any VP-release hook can validate G0.
         a.dead = a.hp <= -a.hp_max
         if creates_wound:
-            self.next_wound += 1
-            a.wounds.append(Wound(f"G4-W{self.next_wound:04d}",
+            # Reserve a stable ID that cannot alias any carried or previously
+            # issued wound, even after a second encounter / new DamageState.
+            used_ids = {w.ident for actor in self.e.actors.values()
+                        for w in actor.wounds}
+            while True:
+                self.next_wound += 1
+                wound_id = f"G4-W{self.next_wound:04d}"
+                if wound_id not in used_ids:
+                    break
+            a.wounds.append(Wound(wound_id,
                                   WOUND_BANDS[severity], severity=severity,
                                   location=location, trauma=wound_trauma,
                                   source_event=event_key))
@@ -180,14 +236,28 @@ class DamageState:
                 "wound": severity, "dead": a.dead,
                 "hp_packets": [n for p,n in zip(packets,resolved) if p.resource=="hp"]}
 
+    def preflight_flame_wound(self, recipient, wound_location_roll):
+        """Require a wound die before paying for a G3 Flame that will cross 0."""
+        a=self._actor(recipient)
+        hp_loss=self._mitigate_hp(a,DamagePacket("hp","Fire",2))
+        after=max(-a.hp_max,a.hp-hp_loss)
+        if a.hp>0 and after<=0 and after>-a.hp_max:
+            if type(wound_location_roll) is not int or not 1<=wound_location_roll<=20:
+                raise UnresolvedDecision("Actual wound-location d20 required before Flame VP payment")
+
     def apply_flame(self, caster, target, *, ledger_index, wound_location_roll=None):
-        """Consume exactly one genuine pending direct hit from G3, not a caller's dict."""
+        """Consume *only* the just-launched G3 direct hit synchronously."""
         if self.e.g3 is None:
             raise ValueError("G3 needed for Thrown Flame")
         _integer(ledger_index, "G3 ledger index")
-        if ledger_index >= len(self.e.ledger):
-            raise ValueError("G3 result index not present")
+        event_key=f"g3-flame-ledger:{ledger_index}"
+        if event_key in self.used_events:
+            raise ValueError("Damaging event already consumed")
+        if ledger_index!=len(self.e.ledger)-1 or self.e.current!=caster:
+            raise ValueError("Flame damage must resolve at its original launch")
         ev = self.e.ledger[ledger_index]
+        if ev["round"]!=self.e.round or ev["turn"]!=caster:
+            raise ValueError("Flame launch no longer belongs to current turn")
         d = ev["detail"]
         if (ev["kind"] != "g3_flame_launched" or d.get("caster") != caster
                 or d.get("target") != target
@@ -199,7 +269,7 @@ class DamageState:
         return self.apply_damage(target, (
             DamagePacket("hp", "Fire", pending["fire_hp"]),
             DamagePacket("vigor", "Direct Vigor", pending["vigor"])),
-            event_key=f"g3-flame-ledger:{ledger_index}", cause="g3:thrown_flame",
+            event_key=event_key, cause="g3:thrown_flame",
             wound_location_roll=wound_location_roll)
 
     def apply_profile_hit(self, attacker, target, profile_id, *,
@@ -318,7 +388,7 @@ class DamageState:
     def cast_basic_heal(self, caster, recipient, *, tier=1, die,
                         hand_available=False, unobstructed=False,
                         in_range=False, unopposed=True, wound_id=None,
-                        on_committed=None):
+                        on_committed=None, delivery_check=None):
         """Authorised F/R Primary, including Dying allies; no invented contest."""
         g3 = self.e.g3
         if g3 is None:
@@ -330,10 +400,18 @@ class DamageState:
             raise ValueError("Invalid Heal Used Tier")
         if type(die) is not int or not 1<=die<=8:
             raise ValueError("Explicit legal d8 required")
-        if hand_available is not True:
+        if on_committed is not None and delivery_check is None:
+            raise UnresolvedDecision(
+                "Committed responses require live Basic Heal delivery_check")
+        preflight=self._heal_delivery_issue(
+            caster,recipient,hand_available=hand_available,
+            in_range=in_range,unobstructed=unobstructed,
+            delivery_check=delivery_check)
+        if preflight=="hand_unavailable":
             raise ValueError("Available functioning hand required")
-        if recipient != caster and (unobstructed is not True or in_range is not True):
-            raise UnresolvedDecision("Single Target needs independently verified 3-square visible air path")
+        if preflight is not None:
+            raise UnresolvedDecision(
+                "Single Target needs current visible 3-square unobstructed air path: "+preflight)
         if unopposed is not True:
             raise UnresolvedDecision("Intrusion +8 resistance outcome requires separate valid contest")
         target = self._actor(recipient)
@@ -350,8 +428,17 @@ class DamageState:
             target.hp > 0 or not any(
                 w.ident == wound_id and w.repairable and w.progress < w.requirement
                 for w in target.wounds))
-        if (actor.hp<=0 or actor.vp_available<cost or target.dead or selected_invalid):
-            self.e.log("g4_heal_interrupted",caster=caster,recipient=recipient,spent_vp=0)
+        # A committed response can change the hand or magical delivery
+        # geometry. A stale initial assertion cannot spend healing VP.
+        postflight=self._heal_delivery_issue(
+            caster,recipient,hand_available=hand_available,
+            in_range=in_range,unobstructed=unobstructed,
+            delivery_check=delivery_check)
+        if (actor.hp<=0 or actor.vp_available<cost or target.dead
+                or selected_invalid or postflight is not None):
+            self.e.log("g4_heal_interrupted",caster=caster,recipient=recipient,
+                       cause=postflight or "post_commit_source_or_resources",
+                       spent_vp=0)
             return None
         g3._pay(caster,cost,0,label="g4:basic_heal_primary")
         result=self.resolve_heal(recipient,contribution="Primary",
