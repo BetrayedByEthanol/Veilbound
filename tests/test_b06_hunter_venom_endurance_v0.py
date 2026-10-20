@@ -948,9 +948,10 @@ class G44Regressions(unittest.TestCase):
                              wound_location_roll=10)
         e.start_turn("caster",regen_choice=RegenerationChoice())
         effect=cast(e,v,mode="ward")
-        with self.assertRaisesRegex(UnresolvedDecision,"nonstack/ward"):
-            d.schedule_hemotoxin("victim",exposure_key="fresh-on-active",
-                                 actual_exposure=True)
+        ignored=d.schedule_hemotoxin("victim",exposure_key="fresh-on-active",
+                                      actual_exposure=True)
+        self.assertEqual(ignored,{"outcome":"ignored","active":"active-legacy"})
+        self.assertIn("fresh-on-active",d.toxins.exposure_ids)
         with self.assertRaisesRegex(ValueError,"Duplicate toxin exposure"):
             d.schedule_hemotoxin("victim",exposure_key="active-legacy",
                                  actual_exposure=True)
@@ -979,6 +980,118 @@ class G44Regressions(unittest.TestCase):
         self.assertEqual(e.actors["victim"].hp,initial_hp-1)
         self.assertEqual(d.short_toxins[0]["applied"],1)
         self.assertFalse(entries(e,"g4_toxin_prevented"))
+        e.check()
+
+
+    def test_47_higher_grade_legacy_hemotoxin_ward_preserves_unified_minor(self):
+        e,d,v,c=scene()
+        first=d.toxins.apply("victim","TX-MY",exposure_key="minor-before-legacy",
+                      source="test:verified_puncture",route="injection",
+                      delivery_verified=True,residual_piercing_hp=1,
+                      resistance_die=1)
+        self.assertEqual(first["outcome"],"accepted")
+        existing=d.toxins.active("victim")
+        self.assertEqual(existing["grade"],"Minor")
+        original_left=existing["left"]
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        ward=cast(e,v,mode="ward")
+        before=(len(d.short_toxins),e.actors["victim"].hp,
+                e.actors["victim"].vigor)
+        result=d.schedule_hemotoxin("victim",
+                      exposure_key="warded-legacy-higher-grade",
+                      actual_exposure=True,
+                      resistance_total=None,wound_location_roll=None)
+        self.assertEqual(result,{"outcome":"prevented"})
+        self.assertFalse(v.effects[ward]["active"])
+        self.assertIs(d.toxins.active("victim"),existing)
+        self.assertTrue(existing["active"])
+        self.assertEqual(existing["left"],original_left)
+        self.assertEqual((len(d.short_toxins),e.actors["victim"].hp,
+                          e.actors["victim"].vigor),before)
+        self.assertIn("warded-legacy-higher-grade",d.toxins.exposure_ids)
+        self.assertEqual(len(entries(e,"g44_ward_intercepted")),1)
+        self.assertFalse(entries(e,"g4_toxin_scheduled"))
+        self.assertFalse(entries(e,"g43_toxin_ended"))
+        e.check()
+
+    def test_48_higher_grade_legacy_replaces_minor_only_after_complete_preflight(self):
+        e,d,v,c=scene()
+        d.toxins.apply("victim","TX-MY",exposure_key="minor-replaced",
+                      source="test:verified_puncture",route="injection",
+                      delivery_verified=True,residual_piercing_hp=1,
+                      resistance_die=1)
+        old=d.toxins.active("victim")
+        self.assertEqual(old["grade"],"Minor")
+        with self.assertRaisesRegex(UnresolvedDecision,"natural resistance"):
+            d.schedule_hemotoxin("victim",exposure_key="candidate",
+                                 actual_exposure=True)
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location d20"):
+            d.schedule_hemotoxin("victim",exposure_key="candidate",
+                                 actual_exposure=True,resistance_total=9)
+        self.assertTrue(old["active"])
+        self.assertFalse(d.short_toxins)
+        self.assertNotIn("candidate",d.toxins.exposure_ids)
+        d.schedule_hemotoxin("victim",exposure_key="candidate",
+                             actual_exposure=True,resistance_total=9,
+                             wound_location_roll=11)
+        self.assertFalse(old["active"])
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertEqual((len(d.short_toxins),d.short_toxins[0]["left"]),(1,5))
+        self.assertEqual(d.short_toxins[0]["key"],"candidate")
+        self.assertEqual(len(entries(e,"g43_toxin_ended")),1)
+        self.assertEqual(entries(e,"g43_toxin_ended")[0]["reason"],
+                         "higher_printed_grade_replaced")
+        self.assertFalse(entries(e,"g44_ward_intercepted"))
+        e.check()
+
+    def test_49_hunter_bite_ignored_by_active_legacy_moderate_before_ward(self):
+        e,d,v,c=scene()
+        d.schedule_hemotoxin("victim",exposure_key="old-legacy-moderate",
+                             actual_exposure=True,resistance_total=9,
+                             wound_location_roll=10)
+        legacy=d.short_toxins[0]
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        ward=cast(e,v,mode="ward")
+        idx,physical=hit(e,d,profile="B06-AT-04",die=3)
+        self.assertTrue(physical["injection_eligible"])
+        remaining=legacy["left"]
+        result=v.apply_bite("hunter","victim",profile_hit_index=idx,
+                            exposure_key="equal-hunter",resistance_die=None)
+        self.assertEqual(result,{"outcome":"ignored",
+                                 "active":"old-legacy-moderate"})
+        self.assertTrue(v.effects[ward]["active"])
+        self.assertEqual(legacy["left"],remaining)
+        self.assertIn(idx,v.hit_keys)
+        self.assertIn("equal-hunter",v.hunter_keys)
+        self.assertIn("equal-hunter",d.toxins.exposure_ids)
+        self.assertFalse(entries(e,"g44_hunter_accepted"))
+        self.assertFalse(entries(e,"g44_hunter_prevented"))
+        self.assertFalse(entries(e,"g44_ward_intercepted"))
+        self.assertEqual(entries(e,"g44_hunter_ignored")[0]["active"],
+                         "old-legacy-moderate")
+        self.assertEqual(len([key for key in c.events
+                              if key.startswith("hunter:")]),0)
+        with self.assertRaisesRegex(ValueError,"One venom application"):
+            v.apply_bite("hunter","victim",profile_hit_index=idx,
+                         exposure_key="equal-hunter",resistance_die=19)
+        e.check()
+
+    def test_50_hunter_equal_grade_legacy_ignore_without_ward_or_roll(self):
+        e,d,v,c=scene()
+        d.schedule_hemotoxin("victim",exposure_key="legacy-prior",
+                             actual_exposure=True,resistance_total=12,
+                             wound_location_roll=10)
+        old=d.short_toxins[0]
+        idx,_=hit(e,d,profile="B06-AT-06",die=3)
+        result=v.apply_bite("hunter","victim",profile_hit_index=idx,
+                            exposure_key="new-hunter",resistance_die=None)
+        self.assertEqual(result["outcome"],"ignored")
+        self.assertEqual(result["active"],old["key"])
+        self.assertEqual((old["left"],old["applied"]),(3,0))
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertIn("new-hunter",d.toxins.exposure_ids)
+        self.assertFalse(entries(e,"g44_hunter_accepted"))
+        self.assertFalse(entries(e,"g44_ward_intercepted"))
         e.check()
 
 if __name__=="__main__":
