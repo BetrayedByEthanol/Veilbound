@@ -95,17 +95,25 @@ class MundaneToxins:
         from scripts.b06_damage_v0 import DamagePacket
         if self.e.actors[t["recipient"]].dead:
             return
-        t["applied"] += 1
+        # Every future HP packet owns a separately rolled d20, indexed
+        # by its actual packet identity. A repaired target may cross 0 HP
+        # AGAIN while the same toxin is active: never replay an earlier die.
+        packet_number=t["applied"]+1
+        roll=(t["wound_rolls"][packet_number-1]
+              if resource=="hp" else None)
         self.d.apply_damage(t["recipient"],
                  (DamagePacket(resource,"Toxin",amount),),
-                 event_key=f"toxin:{t['key']}:packet:{t['applied']}",
+                 event_key=f"toxin:{t['key']}:packet:{packet_number}",
                  cause=t["profile"]+":scheduled_"+resource,
-                 wound_location_roll=t["wound_roll"])
+                 wound_location_roll=roll)
+        # Only commit an applied-packet count once G4 damage succeeds.
+        t["applied"]=packet_number
 
     def apply(self,recipient,profile,*,exposure_key,source,route,
               delivery_verified,breach_verified=False,residual_piercing_hp=0,
               resistance_die=None,resistance_modifier=0,
-              preventive_ward=None,wound_location_roll=None):
+              preventive_ward=None,wound_location_roll=None,
+              wound_location_rolls=None):
         """Delivery -> one-instance gate -> independently valid ward -> save.
 
         No roll or ward is consumed on failed exposure or an ignored grade.
@@ -118,7 +126,10 @@ class MundaneToxins:
         grade,required,full,reduced,clock_type=PROFILES[profile]
         if not isinstance(exposure_key,str) or not exposure_key:
             raise ValueError("Stable toxin exposure key required")
-        if exposure_key in self.exposure_ids:
+        # Legacy G4 TX-HM retains every historical exposure, even after
+        # all its ticks completed. Keys are unique across BOTH executors.
+        if (exposure_key in self.exposure_ids or
+                any(x["key"]==exposure_key for x in self.d.short_toxins)):
             raise ValueError("Toxin exposure key already processed")
         if not isinstance(source,str) or not source:
             raise ValueError("Independent toxin source must be identified")
@@ -158,23 +169,46 @@ class MundaneToxins:
             raise UnresolvedDecision("One actual d20 Vitality resistance required")
         if type(resistance_modifier) is not int:
             raise ValueError("Explicit resistance modifier must be integer")
-        if profile in ("TX-HM","TX-NC","TX-CY") and (
-                type(wound_location_roll) is not int
-                or not 1<=wound_location_roll<=20):
-            raise UnresolvedDecision("Future HP crossing requires actual wound-location d20")
-        vitality=dict(self.e.actors[recipient].source.abilities).get("Vitality")
+        abilities=dict(self.e.actors[recipient].source.abilities)
+        # Player source snapshots use "Vitality"; JSON-backed enemies use
+        # "vitality". Do not quietly substitute a zero ability.
+        vitality=abilities.get("Vitality",abilities.get("vitality"))
         if type(vitality) is not int:
             raise UnresolvedDecision("Recipient has no sourced Vitality")
         total=resistance_die+vitality+resistance_modifier
         mode="Reduced" if total>=DC[grade] else "Full"
         units=reduced if mode=="Reduced" else full
+        if profile in ("TX-HM","TX-NC"):
+            # Precommit an independently rolled die to EACH future damaging
+            # packet, not merely to the exposure or first possible wound.
+            # TX-NC's first two local intervals are delay-only.
+            count=units-(2 if profile=="TX-NC" else 0)
+            if (not isinstance(wound_location_rolls,(tuple,list))
+                    or len(wound_location_rolls)!=count
+                    or any(type(n) is not int or not 1<=n<=20
+                           for n in wound_location_rolls)):
+                raise UnresolvedDecision(
+                    "Require an independent wound-location d20 per future HP packet")
+            if wound_location_roll is not None:
+                raise ValueError("Recurring HP toxin uses packet-specific wound_location_rolls")
+            rolls=tuple(wound_location_rolls)
+        elif profile=="TX-CY":
+            if type(wound_location_roll) is not int or not 1<=wound_location_roll<=20:
+                raise UnresolvedDecision("Immediate HP toxin requires actual wound-location d20")
+            if wound_location_rolls is not None:
+                raise ValueError("Immediate HP toxin has one wound-location roll")
+            rolls=(wound_location_roll,)
+        else:
+            if wound_location_rolls is not None:
+                raise ValueError("Only HP-toxin packets accept wound-location rolls")
+            rolls=()
         tag="mundane:"+profile+":"+exposure_key
         t={"recipient":recipient,"key":exposure_key,"profile":profile,
            "grade":grade,"source":source,"source_tag":tag,
            "result":mode,"resistance_total":total,
            "phase":0,"left":units if clock_type=="short" else 0,
            "remaining":units if clock_type=="long" else 0,
-           "wound_roll":wound_location_roll,"applied":0,
+           "wound_rolls":rolls,"applied":0,
            "active":True,"marker":None,"serial":0,
            "clock":clock_type,"recovery_id":None}
         if prior is not None:
