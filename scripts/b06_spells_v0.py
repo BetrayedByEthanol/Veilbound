@@ -209,9 +209,14 @@ class SpellState:
             if on_committed is not None and restoration_check is None:
                 raise UnresolvedDecision(
                     "Committed Basic Heal requires live restoration_check")
+            declared_blocks=DamageState._validate_heal_blocks(blocked_restoration)
             initial_blocks=DamageState.live_heal_blocks(
                 self.e,caster,caster,blocked_restoration,restoration_check)
-            if initial_blocks and self.e.g4 is None:
+            # Declared prohibitions persist. A *dynamic* ward present at
+            # declaration may expire during committed responses; in G3-only
+            # scenes, reject it only if it survives the post-commit recheck.
+            if (self.e.g4 is None and
+                    (declared_blocks or (on_committed is None and initial_blocks))):
                 raise UnresolvedDecision("Selective healing blocks require G4")
         elif blocked_restoration:
             raise ValueError("Restoration blocks only apply to Basic Heal")
@@ -437,9 +442,14 @@ class SpellState:
         if on_committed is not None and restoration_check is None:
             raise UnresolvedDecision(
                 "Committed Basic Heal requires live restoration_check")
+        declared_blocks=DamageState._validate_heal_blocks(blocked_restoration)
         initial_blocks=DamageState.live_heal_blocks(
             self.e,caster,caster,blocked_restoration,restoration_check)
-        if initial_blocks and self.e.g4 is None:
+        # Keep persistent declared prohibitions fail-closed; allow an
+        # independently attested dynamic ward to expire in the response
+        # window, then enforce its *current* state before any VP is paid.
+        if (self.e.g4 is None and
+                (declared_blocks or (on_committed is None and initial_blocks))):
             raise UnresolvedDecision("Selective healing blocks require G4")
         if a.hp<=0 or (a.wounds and self.e.g4 is None):
             raise UnresolvedDecision("Wound or Dying recipient requires G4")
