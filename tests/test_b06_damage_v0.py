@@ -371,7 +371,8 @@ class G4IntegrationTests(unittest.TestCase):
         check=lambda _e,_c,_r:(hand["free"],True,True)
         result=d.cast_basic_heal("caster","patient",die=8,
                                  hand_available=True,in_range=True,unobstructed=True,
-                                 on_committed=disarm,delivery_check=check)
+                                 on_committed=disarm,delivery_check=check,
+                                 restoration_check=lambda _e,_c,_r:())
         self.assertIsNone(result)
         self.assertEqual((r.ap_remaining,r.vp_spent),(12,0))
         self.assertEqual((t.hp,t.vigor),(t.hp_max-2,t.vigor_max-8))
@@ -390,7 +391,8 @@ class G4IntegrationTests(unittest.TestCase):
         result=d.cast_basic_heal(
             "caster","patient",die=1,hand_available=True,in_range=True,
             unobstructed=True,on_committed=move_after_commit,
-            delivery_check=lambda _e,_c,_r:(True,True,True))
+            delivery_check=lambda _e,_c,_r:(True,True,True),
+            restoration_check=lambda _e,_c,_r:())
         self.assertIsNone(result)
         self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),
                          (12,0,t.hp_max-2))
@@ -409,7 +411,8 @@ class G4IntegrationTests(unittest.TestCase):
         out=d.cast_basic_heal(
             "caster","patient",die=1,hand_available=True,in_range=True,
             unobstructed=True,on_committed=redirect,
-            delivery_check=lambda _e,_c,_r:(True,True,True))
+            delivery_check=lambda _e,_c,_r:(True,True,True),
+            restoration_check=lambda _e,_c,_r:())
         self.assertIsNone(out)
         self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),(12,0,t.hp_max-2))
         self.assertTrue(any(v["kind"]=="g4_heal_interrupted" and
@@ -425,7 +428,8 @@ class G4IntegrationTests(unittest.TestCase):
         out=d.cast_basic_heal(
             "caster","patient",die=1,hand_available=True,in_range=True,
             unobstructed=True,on_committed=lambda _e:None,
-            delivery_check=lambda _e,_c,_r:(True,True,True))
+            delivery_check=lambda _e,_c,_r:(True,True,True),
+            restoration_check=lambda _e,_c,_r:())
         self.assertEqual((out["hp_restored"],out["spent_vp"]),(2,2))
         self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),
                          (12,2,t.hp_max))
@@ -561,7 +565,7 @@ class G4IntegrationTests(unittest.TestCase):
                               in_range=True,unobstructed=True,
                               blocked_restoration=("all_healing",))
         self.assertEqual((r.ap_remaining,r.vp_spent),(42,0))
-        with self.assertRaisesRegex(UnresolvedDecision,"Responsive restoration"):
+        with self.assertRaisesRegex(UnresolvedDecision,"live restoration_check"):
             d.cast_basic_heal("caster","patient",die=1,hand_available=True,
                               in_range=True,unobstructed=True,
                               blocked_restoration=("vigor",),
@@ -579,12 +583,119 @@ class G4IntegrationTests(unittest.TestCase):
         out=d.cast_basic_heal("caster","patient",die=1,hand_available=True,
                      in_range=True,unobstructed=True,
                      on_committed=reposition,
-                     delivery_check=lambda _e,_c,_r:(True,True,True))
+                     delivery_check=lambda _e,_c,_r:(True,True,True),
+            restoration_check=lambda _e,_c,_r:())
         self.assertIsNone(out)
         self.assertEqual((r.ap_remaining,r.vp_spent,t.hp),(12,0,t.hp_max-2))
         self.assertTrue(any(v["kind"]=="g4_heal_interrupted" and
                             v["detail"]["cause"]=="delivery_out_of_range"
                             for v in e.ledger))
+        e.check()
+
+    def test_g41_new_ward_after_ap_blocks_only_current_vigor_component(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp-=2;t.vigor=0
+        e,g,d=scene(r,t,spatial=True);e.start_turn("caster")
+        calls=[]
+        def ward_created(event):
+            event.actors["patient"].conditions.append("vigor")
+        def live_blocks(event,_caster,recipient):
+            current=tuple(event.actors[recipient].conditions)
+            calls.append(current)
+            return current
+        out=d.cast_basic_heal(
+            "caster","patient",die=8,hand_available=True,in_range=True,
+            unobstructed=True,on_committed=ward_created,
+            delivery_check=lambda _e,_c,_r:(True,True,True),
+            restoration_check=live_blocks)
+        self.assertEqual(calls,[(),("vigor",)])
+        self.assertEqual((out["hp_restored"],out["vigor_restored"],
+                          out["spent_vp"]),(2,0,2))
+        self.assertEqual((t.hp,t.vigor,r.ap_remaining,r.vp_spent),
+                         (t.hp_max,0,12,2))
+        applied=[v["detail"] for v in e.ledger
+                 if v["kind"]=="g4_basic_heal_applied"]
+        self.assertEqual(applied[-1]["blocked_components"],["vigor"])
+        e.check()
+
+    def test_g41_empty_declaration_without_live_ward_checker_is_unresolved(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        e,g,d=scene(r,t);e.start_turn("caster")
+        before=(r.ap_remaining,r.vp_spent,t.hp,t.vigor)
+        with self.assertRaisesRegex(UnresolvedDecision,"live restoration_check"):
+            d.cast_basic_heal(
+                "caster","patient",die=1,hand_available=True,in_range=True,
+                unobstructed=True,on_committed=lambda ev:
+                    ev.actors["patient"].conditions.append("vigor"),
+                delivery_check=lambda _e,_c,_r:(True,True,True))
+        self.assertEqual((r.ap_remaining,r.vp_spent,t.hp,t.vigor),before)
+        self.assertFalse(t.conditions)
+        e.check()
+
+    def test_g41_self_new_ward_after_ap_blocks_vigor_only(self):
+        f=pc();f.hp-=2;f.vigor=0
+        e,g,d=scene(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        checks=[]
+        def ward_created(ev):
+            ev.actors["caster"].conditions.append("vigor")
+        def check(ev,_c,_r):
+            v=tuple(ev.actors["caster"].conditions)
+            checks.append(v)
+            return v
+        out=g.cast_self_basic_heal(
+            "caster",die=8,hand_available=True,
+            on_committed=ward_created,
+            hand_check=lambda _e,_c:True,
+            restoration_check=check)
+        self.assertEqual(checks,[(),("vigor",)])
+        self.assertEqual((out["hp_restored"],out["vigor_restored"],
+                          out["spent_vp"]),(2,0,2))
+        self.assertEqual((f.hp,f.vigor,f.vp_spent),
+                         (f.hp_max,0,2))
+        e.check()
+
+    def test_g41_composite_new_ward_after_ap_blocks_secondary_vigor(self):
+        f=pc();f.hp-=2;f.vigor=0
+        e,g,d=scene(f);e.start_turn("caster",regen_choice=RegenerationChoice())
+        checks=[]
+        def ward_created(ev):
+            ev.actors["caster"].conditions.append("vigor")
+        def check(ev,_c,_r):
+            v=tuple(ev.actors["caster"].conditions)
+            checks.append(v)
+            return v
+        host=g.cast_scholar_composite(
+            "caster","Basic Heal",heal_die=6,hand_available=True,
+            on_committed=ward_created,hand_check=lambda _e,_c:True,
+            restoration_check=check)
+        self.assertIsNotNone(host)
+        self.assertEqual(checks,[(),("vigor",)])
+        self.assertEqual((f.hp,f.vigor,f.vp_spent,f.vp_committed),
+                         (f.hp_max-1,0,2,6))
+        applied=[v["detail"] for v in e.ledger
+                 if v["kind"]=="g4_basic_heal_applied"]
+        self.assertEqual(applied[-1]["blocked_components"],["vigor"])
+        e.check()
+
+    def test_g41_response_removing_dynamic_block_restores_now_eligible_vigor(self):
+        r=pc("R");t=pc("F","patient",(2,2))
+        t.hp-=2;t.vigor=0;t.conditions.append("vigor")
+        e,g,d=scene(r,t);e.start_turn("caster")
+        seen=[]
+        def clear_ward(ev):
+            ev.actors["patient"].conditions.remove("vigor")
+        def check(ev,_c,_r):
+            v=tuple(ev.actors["patient"].conditions)
+            seen.append(v)
+            return v
+        out=d.cast_basic_heal(
+            "caster","patient",die=8,hand_available=True,in_range=True,
+            unobstructed=True,on_committed=clear_ward,
+            delivery_check=lambda _e,_c,_r:(True,True,True),
+            restoration_check=check)
+        self.assertEqual(seen,[("vigor",),()])
+        self.assertEqual((out["hp_restored"],out["vigor_restored"]),(2,7))
+        self.assertEqual(t.vigor,7)
         e.check()
 
     def test_g41_non_dying_named_wound_allocations_and_no_double_regen(self):
