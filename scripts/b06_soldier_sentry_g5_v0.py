@@ -1,0 +1,336 @@
+"""B06 G5 v0: source-bound Soldier/Sentry melee and narrow terminal scenes.
+
+No generic AI, unsupported Opportunity effects, protective intervention,
+Hunter contact, victory-from-zero-HP or implicit dice. G0/G1/G3/G4/G4.5
+remain authoritative for their separate costs and state transitions.
+"""
+from copy import deepcopy
+import json
+
+from scripts.b06_encounter_state_v0 import (
+    Encounter, RegenerationChoice, Trigger, UnresolvedDecision,
+    ROOT, enemy_actor, party_actor)
+from scripts.b06_movement_v0 import GridMovement
+from scripts.b06_spells_v0 import SpellState
+from scripts.b06_damage_v0 import DamageState
+from scripts.b06_wound_continuation_v0 import WoundContinuation
+
+
+def _face(value,sides,label):
+    if type(value) is not int or not 1<=value<=sides:
+        raise UnresolvedDecision(f"Explicit {label} d{sides} face required")
+    return value
+
+
+class SourceMelee:
+    """Resolve ordinary 1x1 Soldier/Sentry sword sequences in genuine G0 time.
+
+    This adapter makes hit and defense adjudication real instead of taking
+    G4.5's external confirmed-hit flag on faith. Every provided die face is
+    a declared, reproducible policy/input and retained in the event ledger.
+    G5 does not choose a player defense, roll, or tactical response itself.
+    """
+    def __init__(self,encounter):
+        if any(getattr(encounter,x,None) is None for x in ("g1","g3","g4")):
+            raise ValueError("Install native G1, G3 and G4 before G5")
+        self.e=encounter
+        self.bridge=WoundContinuation(encounter)
+
+    def _profile(self,attacker,profile_id):
+        a=self.e.actors[attacker]
+        if a.source.source_id not in ("B06-EN-01","B06-EN-02"):
+            raise UnresolvedDecision("G5 v0 only resolves sourced Soldier/Sentry melee")
+        if profile_id not in a.source.attack_profiles:
+            raise ValueError("Attack profile does not belong to attacker")
+        obj=json.loads((ROOT/a.source.path).read_text(encoding="utf-8"))
+        matches=[p for p in obj["attack_profiles"] if p["id"]==profile_id]
+        if len(matches)!=1 or matches[0]["range_class"]!="melee":
+            raise UnresolvedDecision("Missing source ordinary-melee attack profile")
+        if a.source.source_id=="B06-EN-01" and (
+                self.e.g3.sentry_profile(attacker)!=profile_id):
+            raise ValueError("Sentry profile must match actually wielded Reserve")
+        bonus=matches[0]["attack_roll"]["total_bonus"]
+        if type(bonus) is not int:
+            raise UnresolvedDecision("Sourced attack bonus required")
+        return bonus
+
+    def declare(self,attacker,target,*,profiles,defenses):
+        e=self.e
+        if target not in e.actors or attacker not in e.actors or attacker==target:
+            raise ValueError("Distinct existing attacker and target required")
+        a,t=e.actors[attacker],e.actors[target]
+        if a.team==t.team:
+            raise ValueError("Cannot declare enemy sword against ally")
+        if len(a.occupied)!=1 or len(t.occupied)!=1:
+            raise UnresolvedDecision("G5 v0 only supports 1x1 melee contact")
+        if not e.g1.melee_contact(attacker,target):
+            raise UnresolvedDecision("G1 current actual melee contact required")
+        profiles=tuple(profiles)
+        defenses=tuple(defenses)
+        if not profiles or len(profiles)!=len(defenses):
+            raise ValueError("Complete physical sequence and defenses required")
+        bonuses=[self._profile(attacker,p) for p in profiles]
+        before=len(e.ledger)
+        e.declare_sequence(attacker,target,profiles,defenses)
+        changes=e.ledger[before:]
+        paid=[x for x in changes if x["kind"]=="action_committed"]
+        declared=[x for x in changes if x["kind"]=="attack_sequence_committed"]
+        assigned=[x for x in changes if x["kind"]=="defense_assigned"]
+        if len(paid)!=len(profiles) or len(assigned)!=len(profiles) or len(declared)!=1:
+            raise AssertionError("Native G0 sequence ledger incomplete")
+        e.log("g5_melee_sequence_attested",attacker=attacker,target=target,
+              source_digest=a.source.digest,profiles=profiles,
+              action_indices=[x["index"] for x in paid],
+              defense_indices=[x["index"] for x in assigned],
+              declaration_index=declared[0]["index"],
+              source_bonuses=bonuses)
+        return {"attacker":attacker,"target":target,
+                "profiles":profiles,"actions":tuple(x["index"] for x in paid),
+                "defenses":tuple(x["index"] for x in assigned),
+                "declaration":declared[0]["index"]}
+
+    def resolve(self,sequence,slot,*,attack_face,damage_face=None,
+                confirmation_face=None,critical_dice=(),vigor_die=None,
+                wound_location_roll=None,spontaneous_policy="decline_all"):
+        e=self.e
+        attacker,target=sequence["attacker"],sequence["target"]
+        if type(slot) is not int or slot not in range(len(sequence["profiles"])):
+            raise ValueError("Source attack slot required")
+        if spontaneous_policy!="decline_all":
+            raise UnresolvedDecision("Nontrivial Reaction/Interception requires separate G5 authority")
+        action_index=sequence["actions"][slot]
+        defense_index=sequence["defenses"][slot]
+        declaration=sequence["declaration"]
+        if any(type(i) is not int or i<0 or i>=len(e.ledger)
+               for i in (action_index,defense_index,declaration)):
+            raise ValueError("No valid native G0 source indices")
+        if e.current!=attacker or e.pending_regeneration is not None:
+            raise ValueError("Only current live attack sequence can resolve")
+        if any(x["kind"]=="g5_melee_resolved" and
+               x["detail"].get("action_index")==action_index for x in e.ledger):
+            raise ValueError("G5 action already resolved")
+        if not e.g1.melee_contact(attacker,target):
+            raise UnresolvedDecision("Actual G1 contact lost before attack roll")
+        p=sequence["profiles"][slot]
+        bonus=self._profile(attacker,p)
+        native=e.ledger[declaration]
+        d=e.ledger[defense_index]
+        if (native["kind"]!="attack_sequence_committed"
+                or native["detail"].get("attacker")!=attacker
+                or native["detail"].get("target")!=target
+                or native["detail"].get("profiles")!=list(sequence["profiles"])
+                or native["detail"].get("defenses")!=[
+                    e.ledger[i]["detail"].get("defense") for i in sequence["defenses"]]
+                or d["kind"]!="defense_assigned"
+                or d["detail"].get("actor")!=target):
+            raise UnresolvedDecision("G0 pre-roll declaration or defense mismatched")
+        defense=d["detail"]["defense"]
+        value=d["detail"]["defense_value"]
+        if (defense=="guard" and (
+                not e.actors[target].ready_guard or
+                not e.actors[target].guard_instrument)):
+            raise UnresolvedDecision("Changed Guard requires native defensive fallback")
+        if e.actors[target].dead:
+            raise UnresolvedDecision("Target already dead, no further live attack")
+        attack_face=_face(attack_face,20,"initial melee attack")
+        if attack_face==20:
+            confirmation_face=_face(confirmation_face,20,"critical confirmation")
+        elif confirmation_face is not None:
+            raise ValueError("No confirmation roll without natural 20")
+        if type(critical_dice) not in (tuple,list):
+            raise ValueError("Explicit canonical critical dice required")
+        total=attack_face+bonus
+        hit=False if attack_face==1 else (
+            True if defense=="take_hit" or attack_face==20 else total>value)
+        critical="normal"
+        if hit and attack_face==20:
+            if defense=="take_hit":
+                critical="devastating" if confirmation_face==20 else "critical"
+            elif confirmation_face==20:
+                critical="devastating"
+            elif confirmation_face+bonus>value:
+                critical="critical"
+            else:
+                critical="strong"
+        expected={"normal":0,"strong":1,"critical":2,"devastating":2}[critical]
+        if (len(critical_dice)!=expected or any(
+                type(x) is not int or not 1<=x<=4 for x in critical_dice)):
+            raise ValueError("Exact critical d4 faces required")
+        if hit:
+            _face(damage_face,6,"source sword damage")
+        elif damage_face is not None:
+            raise ValueError("Damage dice cannot be used for a miss")
+        # The native G0 response executor opens, rechecks, closes and logs
+        # the trigger. This bounded policy explicitly DECLINES all eligible
+        # spontaneous responses, but never silently consumes a reserved
+        # Interception, whose effect executor is not part of G5 v0.
+        trigger_key=f"g5:melee:{action_index}"
+        if any(r.trigger_key==trigger_key for r in e.reservations):
+            raise UnresolvedDecision("Reserved Interception needs explicit G5 resolution")
+        trigger=Trigger(trigger_key,attacker,target)
+        def recheck(e,tr):
+            tr.legal=(e.current==attacker
+                      and not e.actors[attacker].dead
+                      and e.actors[attacker].hp>0
+                      and not e.actors[target].dead
+                      and e.g1.melee_contact(attacker,target))
+        valid=e.response_window(trigger,on_interception=lambda *args: None,
+                                spontaneous=(),after_interceptions=recheck)
+        if not valid:
+            e.log("g5_melee_cancelled",action_index=action_index,
+                  trigger=trigger_key)
+            raise UnresolvedDecision("Attack trigger canceled before roll")
+        e.log("g5_melee_roll",action_index=action_index,
+              declaration_index=declaration,slot=slot,
+              attacker=attacker,target=target,profile=p,
+              defense=defense,defense_value=value,attack_face=attack_face,
+              attack_bonus=bonus,attack_total=total,
+              confirmation_face=confirmation_face,critical=critical,
+              hit=hit,spontaneous_policy=spontaneous_policy)
+        result=None
+        if hit:
+            result=self.bridge.verified_profile_hit(
+                attacker,target,p,action_index=action_index,
+                source_event=f"g5:source:{e.seed}:{action_index}",
+                contact_reference=trigger_key,
+                defense_reference=f"g0:defense:{defense_index}",
+                contact_verified=True,defense_verified=True,
+                die_face=damage_face,critical=critical,
+                critical_dice=tuple(critical_dice),vigor_die=vigor_die,
+                wound_location_roll=wound_location_roll)
+        e.log("g5_melee_resolved",action_index=action_index,
+              attacker=attacker,target=target,profile=p,
+              outcome="hit" if hit else "miss",
+              damage=result,critical=critical)
+        e.check()
+        return {"outcome":"hit" if hit else "miss","critical":critical,
+                "defense":defense,"defense_value":value,
+                "attack_total":total,"damage":deepcopy(result),
+                "action_index":action_index}
+
+    def withdraw(self,actor_id,*,exit_square,policy_id):
+        """Require actual G1 movement to an authored open-grid exit."""
+        a=self.e.actors[actor_id]
+        if len(a.occupied)!=1 or a.occupied[0]!=tuple(exit_square):
+            raise UnresolvedDecision("Actor must reach declared exit square")
+        if not isinstance(policy_id,str) or not policy_id:
+            raise UnresolvedDecision("Independent exit policy ID required")
+        steps=[x for x in self.e.ledger[self.bridge.start:]
+               if x["kind"]=="g1_movement_step"
+               and x["detail"].get("actor")==actor_id
+               and x["detail"].get("step_kind") in ("orthogonal","diagonal")]
+        if not steps or tuple(steps[-1]["detail"]["new"][0])!=a.occupied[0]:
+            raise UnresolvedDecision("Actual final G1 step to authored exit required")
+        evidence=self.bridge.attest_withdrawal(
+            actor_id,movement_event_index=steps[-1]["index"],
+            exit_policy_reference=policy_id,
+            independently_verified=True)
+        self.e.log("g5_terminal_exit",actor=actor_id,
+                   at=a.occupied[0],policy=policy_id,
+                   movement_index=steps[-1]["index"])
+        return evidence
+
+    def report(self):
+        evidence=self.bridge.report()
+        return {"scene":self.e.scenario,"seed":self.e.seed,
+                "objective":self.e.objective,
+                "source_provenance":evidence["source_actor_states"],
+                "ending":(
+                    "withdrawal_attested" if any(
+                        x["kind"]=="g5_terminal_exit"
+                        for x in self.e.ledger[self.bridge.start:])
+                    else "death_attested" if any(a.dead for a in self.e.actors.values())
+                    else "unresolved"),
+                "outcomes":deepcopy(evidence["explicit_outcomes"]),
+                "attacks":deepcopy([x["detail"] for x in self.e.ledger
+                    if x["kind"]=="g5_melee_resolved"]),
+                "wounds":deepcopy(evidence["wound_creation_events"]),
+                "current":evidence["current"],
+                "complete_party_pack_certified":False,
+                "hunter_cr":None}
+
+
+def fixed_scene(pack,*,sentry_state=None,seed=501):
+    """A single source-derived L3 Priest A witness opposing one benchmark foe."""
+    if pack not in ("I1","I2"):
+        raise ValueError("Only I1 Soldier or I2 Sentry defined")
+    if pack=="I1":
+        opponent=enemy_actor("B06-EN-02","foe","enemy",occupied=((3,2),))
+    else:
+        opponent=enemy_actor("B06-EN-01","foe","enemy",
+                             start_state=sentry_state or "cold_start",
+                             occupied=((3,2),))
+    front=party_actor("A",3,"front","party",occupied=((2,2),))
+    e=Encounter([opponent,front],{"foe":30,"front":20},seed=seed,
+                scenario=f"B06-{pack}:"+(
+                    opponent.source.start_state or "ordinary_start"),
+                objective="front_reaches_verified_exit",
+                policy="fixed_dice_declared_guard_or_take_hit_decline_responses")
+    GridMovement(e,width=8,height=5,scene_id="G5-open-corridor")
+    SpellState(e)
+    DamageState(e)
+    e.begin_round()
+    return SourceMelee(e)
+
+
+def _retreat_on_turn(scene):
+    e=scene.e
+    scene.bridge.start_next_turn(RegenerationChoice())
+    if e.current!="front":
+        raise AssertionError("Exit turn expected front")
+    # This is an explicit G5 scenario policy, not inferred AI:
+    # all eligible Movement Opportunities are declined.
+    for _ in range(2):
+        if not e.g1.step("front",(-1,0),responses=lambda eligible: ()):
+            raise UnresolvedDecision("Declared exit step was canceled")
+    scene.withdraw("front",exit_square=(0,2),
+                   policy_id="G5:open-corridor:exit-front")
+    scene.bridge.end_current_turn()
+
+
+def run_i1(*,seed=501):
+    """I1 opponent Soldier Guard counterplay + actual Priest exit terminal."""
+    scene=fixed_scene("I1",seed=seed)
+    e=scene.e
+    scene.bridge.start_next_turn(RegenerationChoice())
+    sequence=scene.declare("foe","front",profiles=("B06-AT-03",),
+                           defenses=("guard",))
+    outcome=scene.resolve(sequence,0,attack_face=1)
+    scene.bridge.end_current_turn()
+    _retreat_on_turn(scene)
+    report=scene.report()
+    if report["ending"]!="withdrawal_attested":
+        raise AssertionError("I1 scripted exit requires genuine terminal movement")
+    report["i1_first_attack"]=outcome
+    return report
+
+
+def run_i2(*,state,seed=502):
+    """I2 cold pays Projection then later enchants, prepared starts enchanted."""
+    if state not in ("cold_start","prepared_start"):
+        raise ValueError("Specify one of both source Sentry starts")
+    scene=fixed_scene("I2",sentry_state=state,seed=seed)
+    e=scene.e
+    scene.bridge.start_next_turn(RegenerationChoice())
+    if state=="cold_start":
+        if e.g3.cast_sentry_reserve("foe") is None:
+            raise UnresolvedDecision("Sentry cast failed")
+        if e.actors["foe"].ap_remaining>=e.actors["foe"].physical_ap:
+            raise AssertionError("Cold sentry cannot attack after Projection30")
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        scene.bridge.end_current_turn()
+        scene.bridge.begin_next_round()
+        scene.bridge.start_next_turn(RegenerationChoice())
+    seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                      defenses=("take_hit",))
+    outcome=scene.resolve(seq,0,attack_face=11,damage_face=4,
+                          vigor_die=4)
+    scene.bridge.end_current_turn()
+    _retreat_on_turn(scene)
+    report=scene.report()
+    if report["ending"]!="withdrawal_attested":
+        raise AssertionError("I2 scripted exit requires genuine terminal movement")
+    report["i2_first_hit"]=outcome
+    report["start_state"]=state
+    return report
