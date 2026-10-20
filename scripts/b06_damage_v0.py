@@ -607,31 +607,48 @@ class DamageState:
         e.check()
 
     def schedule_hemotoxin(self, recipient, *, exposure_key,
-                            actual_exposure, resistance_total,
-                            wound_location_roll):
-        """TX-HM after independently verified actual exposure and natural check."""
-        self._actor(recipient)
+                            actual_exposure, resistance_total=None,
+                            wound_location_roll=None):
+        """Legacy verified TX-HM: eligibility -> Ward -> natural result.
+
+        A real preventive Ward stops delivery BEFORE the natural check and
+        packet-specific wound-roll preflight. Without one, the old bounded
+        source-attested resistance and wound-roll requirements still apply.
+        """
+        a=self._actor(recipient)
+        if a.dead:
+            raise ValueError("Dead recipient cannot receive mundane toxin")
         if actual_exposure is not True:
             raise UnresolvedDecision("No toxin without verified delivery")
-        if type(resistance_total) is not int:
-            raise UnresolvedDecision("Explicit natural resistance result required")
         if not isinstance(exposure_key,str) or not exposure_key:
             raise ValueError("Stable exposure key required")
-        # Precommitted actual d20 is available if a later packet crosses 0.
-        # This avoids silently consuming an overdue Step 3 packet while an
-        # unresolved location choice interrupts an already-paid G0 Step 2.
-        if type(wound_location_roll) is not int or not 1<=wound_location_roll<=20:
-            raise UnresolvedDecision("Provide real possible-crossing wound-location d20")
         if self.toxins.active(recipient) is not None:
             raise UnresolvedDecision("One active mundane toxin per recipient, including legacy TX-HM")
         if exposure_key in self.toxins.exposure_ids:
             raise ValueError("Toxin exposure key already processed")
         if any(t["key"]==exposure_key for t in self.short_toxins):
             raise ValueError("Duplicate toxin exposure")
-        # This bounded primitive does not decide stacking with already-live
-        # other toxin families or Venom Endurance: refuse duplicate active TX-HM.
+        # Refuse same-grade duplicate active TX-HM BEFORE touching any Ward.
         if any(t["recipient"]==recipient and t["left"] for t in self.short_toxins):
             raise UnresolvedDecision("Source-specific toxin nonstack/ward resolution needed")
+        # This old exposure adapter remains supported: a live, valid
+        # Moderate TX-HM qualifies for the same one-use Endurance Ward as
+        # all unified mundane profiles. No resistance die, packet rolls or
+        # toxin milestones are consumed/created when the Ward intercepts.
+        if self.venom.intercept(recipient,"Moderate"):
+            self.toxins.exposure_ids.add(exposure_key)
+            self.e.log("g4_toxin_prevented",recipient=recipient,
+                       profile="TX-HM",key=exposure_key,
+                       source="venom_endurance:ward")
+            self.e.check()
+            return {"outcome":"prevented"}
+        if type(resistance_total) is not int:
+            raise UnresolvedDecision("Explicit natural resistance result required")
+        # Precommitted actual d20 is available if a later packet crosses 0.
+        # This avoids silently consuming an overdue Step 3 packet while an
+        # unresolved location choice interrupts an already-paid G0 Step 2.
+        if type(wound_location_roll) is not int or not 1<=wound_location_roll<=20:
+            raise UnresolvedDecision("Provide real possible-crossing wound-location d20")
         t={"key":exposure_key,"recipient":recipient,
            "left":3 if resistance_total>=12 else 5,
            "phase":0,"applied":0,"wound_location_roll":wound_location_roll}
