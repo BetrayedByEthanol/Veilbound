@@ -171,8 +171,11 @@ class G42ClockTests(unittest.TestCase):
         c.enter_initiative()
         e.start_turn("hero",regen_choice=RegenerationChoice());e.end_turn()
         c.leave_initiative()
-        self.assertEqual(c.events["out:37"].due_seconds,30)
-        d.advance_exploration(29)
+        # Round 1 is completed; the exit label is 2, not stale 1:
+        # E=7 => 6*(7-2-1)=24s.
+        self.assertEqual(events(e,"g42_initiative_exited")[-1]["round_label"],2)
+        self.assertEqual(c.events["out:37"].due_seconds,24)
+        d.advance_exploration(23)
         self.assertFalse(c.events["out:37"].consumed)
         d.advance_exploration(1)
         self.assertEqual(len(events(e,"g42_milestone_due")),1)
@@ -221,7 +224,10 @@ class G42ClockTests(unittest.TestCase):
         self.assertFalse(c.events["future"].consumed)
         e.start_turn("hero",regen_choice=RegenerationChoice());e.end_turn()
         c.leave_initiative()
-        self.assertEqual(c.events["future"].due_seconds,594)
+        # Scheduled at round 1, exit after round 1 completed:
+        # active exit label 2 and E=101 => 6*(101-2-1)=588s.
+        self.assertEqual(events(e,"g42_initiative_exited")[-1]["round_label"],2)
+        self.assertEqual(c.events["future"].due_seconds,588)
         e.check()
 
     def test_13_source_identity_cancellation_and_no_id_reuse(self):
