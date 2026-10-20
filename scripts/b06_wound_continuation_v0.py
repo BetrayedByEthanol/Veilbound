@@ -80,10 +80,20 @@ class WoundContinuation:
         if (action["kind"]!="action_committed"
                 or facts.get("actor")!=attacker
                 or facts.get("action_class")!="physical"
+                or action["round"]!=self.e.round
+                or action["turn"]!=attacker
                 or self.e.current!=attacker
                 or self.e.pending_regeneration is not None
                 or self.e.actors[attacker].hp<=0):
             raise UnresolvedDecision("Current attacker needs genuine committed Physical Action")
+        # The AP reservation cannot be resurrected on a later Physical
+        # Action in this same turn or after another independently resolved
+        # profile hit. Defense/Interception logs between commitment and
+        # final resolution remain permitted.
+        if any(x["kind"] in ("action_committed","g4_profile_hit",
+                            "turn_end","round_begin")
+               for x in self.e.ledger[action_index+1:]):
+            raise UnresolvedDecision("Physical hit must consume its current live action")
         # G0 supplied the AP cost; G4 supplies source JSON attack packets,
         # mitigation, exact one-event wound and native effects.
         result=self.d.apply_profile_hit(
