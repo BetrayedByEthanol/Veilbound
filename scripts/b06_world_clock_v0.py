@@ -11,7 +11,8 @@ from scripts.b06_encounter_state_v0 import UnresolvedDecision, _integer
 
 SIX_HOURS = 21600
 ROUND_SECONDS_SURROGATE = 6  # conversion only; NOT a duration of a combat round
-PHASE_ORDER = {"before_recovery": 0, "recovery": 1, "after_recovery": 2}
+PHASE_ORDER = {"before_toxin": -1, "before_recovery": 0,
+               "recovery": 1, "after_recovery": 2}
 
 
 @dataclass
@@ -115,8 +116,8 @@ class WorldClock:
             raise ValueError("Recovery checkpoint ID namespace is reserved")
         if not isinstance(source,str) or not source:
             raise ValueError("Milestone must identify its source")
-        if phase not in ("before_recovery","after_recovery"):
-            raise ValueError("Marker must explicitly precede or follow Recovery at true ties")
+        if phase not in ("before_toxin","before_recovery","after_recovery"):
+            raise ValueError("Marker must specify an authored tie phase")
         _integer(delay_seconds,"milestone delay",1)
         if event_id in self.events:
             raise ValueError("Milestone ID already used; consumed IDs cannot be reused")
@@ -159,7 +160,12 @@ class WorldClock:
     @staticmethod
     def _sort_key(ev):
         due = ev.due_seconds if ev.due_seconds is not None else ev.due_round
-        return due, ev.original_order, PHASE_ORDER[ev.phase], ev.serial
+        # Coalesced Round Begin deadlines must first honor fixed Endurance
+        # 'before_toxin' expiry, even when its original instant was later
+        # than a toxin pulse. Preserve the original chronological ordering
+        # of all OTHER events (including Recovery and ordinary milestones).
+        expiry_first = 0 if ev.phase == "before_toxin" else 1
+        return due, expiry_first, ev.original_order, PHASE_ORDER[ev.phase], ev.serial
 
     def _complete(self, ev, *, boundary_round=None):
         if ev.consumed or ev.canceled:
@@ -172,6 +178,7 @@ class WorldClock:
                        world_seconds=self.world_seconds,
                        round_begin=boundary_round)
             # G4.3 consumes source-owned markers, not arbitrary story markers.
+            self.g4.venom.on_milestone(ev)
             self.g4.toxins.on_milestone(ev)
             return
         a = self.e.actors[ev.actor_id]
@@ -238,6 +245,9 @@ class WorldClock:
             g43_limit=self.g4.toxins.exploration_step_limit()
             if g43_limit is not None:
                 next_seconds=min(next_seconds,g43_limit)
+            g44_limit=self.g4.venom.long_step_limit()
+            if g44_limit is not None:
+                next_seconds=min(next_seconds,g44_limit)
             if next_seconds:
                 self.world_seconds += next_seconds
                 remaining -= next_seconds
@@ -245,13 +255,17 @@ class WorldClock:
                     if toxin["left"]:
                         toxin["phase"] += next_seconds
                 self.g4.toxins.exploration_advance(next_seconds)
+                self.g4.venom.exploration_advance(next_seconds)
             # Native short-toxin intervals are hazard-only; never fake Step 2.
             for toxin in self.g4.short_toxins:
                 if toxin["left"] and toxin["phase"] >= 6:
                     toxin["phase"] -= 6
                     self.g4._toxin_step(toxin)
             self.g4.toxins.exploration_resolve()
+            # A newly due Hunter stage/expiry is resolved before deciding
+            # whether to fund the NEXT six-second suppression interval.
             self._due_exploration()
+            self.g4.venom.after_exploration_boundary()
         self.e.log("g42_exploration_advanced",from_seconds=start,
                    to_seconds=self.world_seconds,seconds=seconds)
         self.e.check()

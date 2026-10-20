@@ -316,15 +316,26 @@ class G43Toxins(unittest.TestCase):
     def test_20_legacy_hemotoxin_cannot_coexist_with_new_instance(self):
         e,a,d,t,c=scene()
         exposure(t,"TX-NE","new-neuro")
-        with self.assertRaises(UnresolvedDecision):
-            d.schedule_hemotoxin("hero",exposure_key="old-thorn",
-                 actual_exposure=True,resistance_total=9,
-                 wound_location_roll=10)
+        original=t.active("hero")
+        self.assertEqual(original["grade"],"Moderate")
+        ignored=d.schedule_hemotoxin("hero",exposure_key="old-thorn",
+                  actual_exposure=True,resistance_total=None,
+                  wound_location_roll=None)
+        self.assertEqual(ignored,{"outcome":"ignored","active":"new-neuro"})
+        self.assertIs(t.active("hero"),original)
         self.assertFalse(d.short_toxins)
+        self.assertIn("old-thorn",t.exposure_ids)
         t.stop_authorized("hero",reason="external_independent_cure",
                           authorized=True)
-        d.schedule_hemotoxin("hero",exposure_key="old-thorn",
+        # A previously ignored exposure key cannot be replayed even
+        # after the first instance ends; a NEW real exposure is legal.
+        with self.assertRaisesRegex(ValueError,"already processed"):
+            d.schedule_hemotoxin("hero",exposure_key="old-thorn",
+                 actual_exposure=True,resistance_total=9,wound_location_roll=10)
+        d.schedule_hemotoxin("hero",exposure_key="fresh-thorn",
              actual_exposure=True,resistance_total=9,wound_location_roll=10)
+        self.assertEqual(len(d.short_toxins),1)
+        self.assertIsNone(t.active("hero"))
         with self.assertRaises(UnresolvedDecision):
             exposure(t,"TX-MY","another")
         e.check()

@@ -13,6 +13,7 @@ from scripts.b06_encounter_state_v0 import (
 )
 from scripts.b06_world_clock_v0 import WorldClock
 from scripts.b06_mundane_toxins_v0 import MundaneToxins
+from scripts.b06_hunter_venom_endurance_v0 import HunterVenomEndurance
 
 
 ARMOR = {
@@ -73,6 +74,7 @@ class DamageState:
         # a toxin, including when initiative starts or ends.
         self.clock = WorldClock(self,recovery_phase_seconds=recovery_phase_seconds)
         self.toxins = MundaneToxins(self)
+        self.venom = HunterVenomEndurance(self)
         encounter.g4 = self
         encounter.log("g4_damage_state_installed")
         encounter.check()
@@ -236,6 +238,10 @@ class DamageState:
                              "raw":p.raw, "mitigated":n, "armor_rule":p.armor_rule}
                             for p,n in zip(packets,resolved)],
                    vigor_details=vigor_details, wound=severity, dead=a.dead)
+        if a.dead and before_hp > -a.hp_max:
+            # Recipient death ends fixed Venom Endurance immediately, even
+            # when there is no later toxin check or caster interaction.
+            self.venom.on_recipient_death(recipient)
         self.e.check()
         return {"hp_loss": before_hp-a.hp, "vigor_loss": before_vigor-a.vigor,
                 "wound": severity, "dead": a.dead,
@@ -595,37 +601,67 @@ class DamageState:
               repair_points=choice.repair if not a.dead else 0,
               throughput_spent=debit if not a.dead else 0,
               wound_allocations=list(allocation),dead=a.dead)
+        if a.dead and hp_before > -a.hp_max:
+            # Native Step 2 Dying loss is another real death transition.
+            self.venom.on_recipient_death(a.id)
         e.check()
 
     def schedule_hemotoxin(self, recipient, *, exposure_key,
-                            actual_exposure, resistance_total,
-                            wound_location_roll):
-        """TX-HM after independently verified actual exposure and natural check."""
-        self._actor(recipient)
+                            actual_exposure, resistance_total=None,
+                            wound_location_roll=None):
+        """Legacy verified TX-HM: eligibility -> Ward -> natural result.
+
+        A real preventive Ward stops delivery BEFORE the natural check and
+        packet-specific wound-roll preflight. Without one, the old bounded
+        source-attested resistance and wound-roll requirements still apply.
+        """
+        a=self._actor(recipient)
+        if a.dead:
+            raise ValueError("Dead recipient cannot receive mundane toxin")
         if actual_exposure is not True:
             raise UnresolvedDecision("No toxin without verified delivery")
-        if type(resistance_total) is not int:
-            raise UnresolvedDecision("Explicit natural resistance result required")
         if not isinstance(exposure_key,str) or not exposure_key:
             raise ValueError("Stable exposure key required")
+        if exposure_key in self.toxins.exposure_ids:
+            raise ValueError("Toxin exposure key already processed")
+        if any(t["key"]==exposure_key for t in self.short_toxins):
+            raise ValueError("Duplicate toxin exposure")
+        # Apply the shared printed-grade one-instance gate BEFORE any Ward
+        # or natural resistance. This legacy profile is Moderate: an
+        # existing Moderate (unified or legacy) wins an equal-grade tie.
+        prior=self.toxins.active(recipient)
+        legacy=next((t for t in self.short_toxins
+                     if t["recipient"]==recipient and t["left"]>0),None)
+        if (prior is not None and prior["grade"]=="Moderate") or legacy is not None:
+            active_key=prior["key"] if prior is not None else legacy["key"]
+            self.toxins.exposure_ids.add(exposure_key)
+            self.e.log("g4_toxin_ignored",recipient=recipient,profile="TX-HM",
+                       key=exposure_key,active=active_key,
+                       reason="equal_or_lower_printed_grade")
+            return {"outcome":"ignored","active":active_key}
+        # A valid legacy Moderate exposure can replace a unified Minor
+        # only AFTER Ward eligibility and an independent successful
+        # natural-result/wound-roll preflight. A Ward instead consumes
+        # this higher-grade candidate and preserves the original Minor.
+        if self.venom.intercept(recipient,"Moderate"):
+            self.toxins.exposure_ids.add(exposure_key)
+            self.e.log("g4_toxin_prevented",recipient=recipient,
+                       profile="TX-HM",key=exposure_key,
+                       source="venom_endurance:ward")
+            self.e.check()
+            return {"outcome":"prevented"}
+        if type(resistance_total) is not int:
+            raise UnresolvedDecision("Explicit natural resistance result required")
         # Precommitted actual d20 is available if a later packet crosses 0.
         # This avoids silently consuming an overdue Step 3 packet while an
         # unresolved location choice interrupts an already-paid G0 Step 2.
         if type(wound_location_roll) is not int or not 1<=wound_location_roll<=20:
             raise UnresolvedDecision("Provide real possible-crossing wound-location d20")
-        if self.toxins.active(recipient) is not None:
-            raise UnresolvedDecision("One active mundane toxin per recipient, including legacy TX-HM")
-        if exposure_key in self.toxins.exposure_ids:
-            raise ValueError("Toxin exposure key already processed")
-        if any(t["key"]==exposure_key for t in self.short_toxins):
-            raise ValueError("Duplicate toxin exposure")
-        # This bounded primitive does not decide stacking with already-live
-        # other toxin families or Venom Endurance: refuse duplicate active TX-HM.
-        if any(t["recipient"]==recipient and t["left"] for t in self.short_toxins):
-            raise UnresolvedDecision("Source-specific toxin nonstack/ward resolution needed")
         t={"key":exposure_key,"recipient":recipient,
            "left":3 if resistance_total>=12 else 5,
            "phase":0,"applied":0,"wound_location_roll":wound_location_roll}
+        if prior is not None:
+            self.toxins._expire(prior,"higher_printed_grade_replaced")
         self.short_toxins.append(t)
         self.e.log("g4_toxin_scheduled",recipient=recipient,profile="TX-HM",
                    key=exposure_key,ticks=t["left"],resistance_total=resistance_total)
@@ -635,14 +671,19 @@ class DamageState:
             return
         number=t["applied"]+1
         if not self._actor(t["recipient"]).dead:
-            self.apply_damage(t["recipient"],(DamagePacket("hp","Toxin",1),),
-                              event_key=f"toxin:{t['key']}:{number}",
-                              cause="TX-HM:scheduled_hp_tick",
-                              wound_location_roll=t["wound_location_roll"])
+            # The legacy clock owns this actual tick. Endurance may cover
+            # its HP packet, never create a parallel unified TX-HM schedule.
+            if not self.venom.prevent_legacy_hemotoxin(t):
+                self.apply_damage(t["recipient"],(DamagePacket("hp","Toxin",1),),
+                                  event_key=f"toxin:{t['key']}:{number}",
+                                  cause="TX-HM:scheduled_hp_tick",
+                                  wound_location_roll=t["wound_location_roll"])
         t["applied"]=number
         t["left"]-=1
         self.e.log("g4_toxin_tick",recipient=t["recipient"],
                    profile="TX-HM",key=t["key"],remaining=t["left"])
+        if t["left"]==0:
+            self.venom.on_legacy_hemotoxin_end(t)
 
     def on_turn_start(self,actor_id):
         """Step 3 after real G0 regeneration, before establishing turn AP."""
@@ -650,6 +691,7 @@ class DamageState:
             if t["recipient"]==actor_id and t["left"]:
                 self._toxin_step(t)
         self.toxins.on_turn_step3(actor_id)
+        self.venom.on_turn_step3(actor_id)
 
     def advance_exploration(self,seconds):
         """Advance the shared G4.2 chronology; never create a phantom turn."""

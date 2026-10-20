@@ -46,13 +46,29 @@ class MundaneToxins:
 
     def modifier(self, actor_id, use):
         t = self.active(actor_id)
-        return PENALTIES.get(t["profile"],{}).get(use,0) if t else 0
+        if t is None:
+            return 0
+        venom=getattr(self.d,"venom",None)
+        if venom is not None and venom.covering(t):
+            return 0
+        if venom is not None and t["profile"]==venom.HUNTER:
+            return venom.hunter_penalties(t).get(use,0)
+        return PENALTIES.get(t["profile"],{}).get(use,0)
 
     def _synchronize(self, actor_id):
         actor = self.e.actors[actor_id]
         previous = getattr(actor,"toxin_modifiers",{})
         t = self.active(actor_id)
-        current = dict(PENALTIES.get(t["profile"],{})) if t else {}
+        if t is None:
+            current={}
+        else:
+            venom=getattr(self.d,"venom",None)
+            if venom is not None and t["profile"]==venom.HUNTER:
+                current=venom.hunter_penalties(t)
+            else:
+                current=dict(PENALTIES.get(t["profile"],{}))
+            if venom is not None and venom.covering(t):
+                current={}
         actor.toxin_modifiers = current
         # An effect becoming active during an already established turn may
         # consume currently remaining ordinary movement; ending never refunds
@@ -65,6 +81,13 @@ class MundaneToxins:
         if not t["active"]:
             return
         t["active"] = False
+        venom=getattr(self.d,"venom",None)
+        if venom is not None:
+            venom.on_toxin_end(t)
+            for ident in t.get("markers",()):
+                ev=self.clock.events.get(ident)
+                if ev and not ev.consumed and not ev.canceled:
+                    self.clock.cancel_milestone(ident,source=t["source_tag"])
         marker = t.get("marker")
         if marker is not None:
             ev = self.clock.events.get(marker)
@@ -94,6 +117,12 @@ class MundaneToxins:
     def _hit(self,t,resource,amount):
         from scripts.b06_damage_v0 import DamagePacket
         if self.e.actors[t["recipient"]].dead:
+            return
+        venom=getattr(self.d,"venom",None)
+        if venom is not None and venom.prevent_discrete(t,resource,amount):
+            t["applied"]+=1
+            self.e.log("g44_toxin_packet_prevented",recipient=t["recipient"],
+                       key=t["key"],packet=t["applied"],resource=resource)
             return
         # Every future HP packet owns a separately rolled d20, indexed
         # by its actual packet identity. A repaired target may cross 0 HP
@@ -154,6 +183,13 @@ class MundaneToxins:
                        profile=profile,key=exposure_key,
                        active=prior["key"],reason="equal_or_lower_printed_grade")
             return {"outcome":"ignored","active":prior["key"]}
+        venom=getattr(self.d,"venom",None)
+        if venom is not None and venom.intercept(recipient,grade):
+            self.exposure_ids.add(exposure_key)
+            self.e.log("g43_exposure_prevented",recipient=recipient,
+                       profile=profile,key=exposure_key,
+                       source="venom_endurance:ward")
+            return {"outcome":"prevented"}
         if preventive_ward is not None:
             if not callable(preventive_ward):
                 raise ValueError("Preventive ward must be an attested callback")
@@ -250,6 +286,8 @@ class MundaneToxins:
                    key=t["key"],profile=profile,remaining=t["left"])
         if t["left"]==0:
             self._expire(t,"short_duration_completed")
+        elif getattr(self.d,"venom",None) is not None:
+            self.d.venom.after_short_interval(t)
 
     def on_turn_step3(self,actor_id):
         t=self.active(actor_id)
@@ -279,6 +317,9 @@ class MundaneToxins:
         if t is None or t["profile"]!="TX-HE" or t["recovery_id"]!=ev.ident:
             return 0
         reduction=2 if t["result"]=="Full" else 1
+        venom=getattr(self.d,"venom",None)
+        if venom is not None and venom.prevent_recovery(t):
+            reduction=0
         self.e.log("g43_hepatotoxin_recovery",recipient=t["recipient"],
                    exposure_key=t["key"],checkpoint_id=ev.ident,
                    reduction=reduction)
