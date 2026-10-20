@@ -2,7 +2,7 @@
 import unittest
 from scripts.b06_encounter_state_v0 import (
     Encounter, RegenerationChoice, party_actor, enemy_actor, UnresolvedDecision)
-from scripts.b06_damage_v0 import DamageState
+from scripts.b06_damage_v0 import DamageState, DamagePacket
 from scripts.b06_hunter_venom_endurance_v0 import HUNTER
 
 
@@ -541,6 +541,138 @@ class G44Regressions(unittest.TestCase):
         actor.reference_cell_id="unknown"
         with self.assertRaisesRegex(ValueError,"Reference cell"):
             actor.validate()
+
+
+    def test_31_stale_bite_after_exploration_cannot_reanchor_or_use_late_ward(self):
+        e,d,v,c=scene()
+        hit_index,physical=hit(e,d)
+        self.assertGreater(physical["hp_loss"],0)
+        victim_hp=e.actors["victim"].hp
+        # The first Bite is already five minutes old. A Ward cast NOW
+        # cannot retroactively prevent exposure at its original impact.
+        c.advance_exploration(300)
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        ward=cast(e,v)
+        whole_round(e)
+        pending_before=set(c.events)
+        with self.assertRaisesRegex(
+                UnresolvedDecision,"latest Bite event synchronously"):
+            v.apply_bite("hunter","victim",
+                         profile_hit_index=hit_index,
+                         exposure_key="retroactive",resistance_die=1)
+        self.assertEqual(e.actors["victim"].hp,victim_hp)
+        self.assertEqual(set(c.events),pending_before)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertTrue(v.effects[ward]["active"])
+        self.assertFalse(entries(e,"g44_hunter_accepted"))
+        self.assertFalse(entries(e,"g44_ward_intercepted"))
+        self.assertNotIn("retroactive",d.toxins.exposure_ids)
+        # A NEW verified physical Bite may still consume that valid Ward.
+        fresh,_=hit(e,d)
+        prevented=v.apply_bite("hunter","victim",
+                    profile_hit_index=fresh,
+                    exposure_key="new-bite",resistance_die=None)
+        self.assertEqual(prevented["outcome"],"prevented")
+        self.assertFalse(v.effects[ward]["active"])
+        self.assertIsNone(d.toxins.active("victim"))
+        e.check()
+
+    def test_32_stale_bite_after_round_boundary_rejected(self):
+        e,d,v,c=scene()
+        hit_index,_=hit(e,d)
+        whole_round(e)
+        e.begin_round()
+        with self.assertRaisesRegex(
+                UnresolvedDecision,"latest Bite event synchronously"):
+            v.apply_bite("hunter","victim",
+                         profile_hit_index=hit_index,
+                         exposure_key="next-round",resistance_die=1)
+        self.assertFalse(entries(e,"g44_hunter_accepted"))
+        self.assertNotIn("next-round",d.toxins.exposure_ids)
+        self.assertIsNone(d.toxins.active("victim"))
+        self.assertEqual(len([x for x in c.events
+                              if x.startswith("hunter:")]),0)
+        e.check()
+
+    def test_33_unrelated_same_instant_ledger_event_ends_bite_window(self):
+        e,d,v,c=scene()
+        hit_index,_=hit(e,d)
+        e.log("fixture_independent_action",description="no time elapsed")
+        with self.assertRaisesRegex(
+                UnresolvedDecision,"latest Bite event synchronously"):
+            v.apply_bite("hunter","victim",
+                         profile_hit_index=hit_index,
+                         exposure_key="intervening",resistance_die=1)
+        self.assertNotIn(hit_index,v.hit_keys)
+        self.assertIsNone(d.toxins.active("victim"))
+        e.check()
+
+    def test_34_unrelated_lethal_g4_damage_ends_ward_immediately(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        initial_spent=e.actors["caster"].vp_spent
+        ward=cast(e,v)
+        expiry=v.effects[ward]["expiry"]
+        self.assertTrue(v.effects[ward]["active"])
+        victim=e.actors["victim"]
+        d.apply_damage("victim",
+             (DamagePacket("hp","Crush",victim.hp_max*2),),
+             event_key="fixture:lethal_other_source",
+             cause="independently_confirmed_unrelated_attack")
+        self.assertTrue(victim.dead)
+        self.assertFalse(v.effects[ward]["active"])
+        self.assertTrue(c.events[expiry].canceled)
+        ended=[x for x in entries(e,"g44_endurance_ended")
+               if x["effect"]==ward]
+        self.assertEqual(len(ended),1)
+        self.assertEqual(ended[0]["reason"],"recipient_dead")
+        self.assertEqual(e.actors["caster"].vp_spent,initial_spent+2)
+        damage_idx=next(x["index"] for x in e.ledger
+                        if x["kind"]=="g4_damage_applied"
+                        and x["detail"]["event_key"]=="fixture:lethal_other_source")
+        end_idx=next(x["index"] for x in e.ledger
+                     if x["kind"]=="g44_endurance_ended"
+                     and x["detail"]["effect"]==ward)
+        self.assertLess(damage_idx,end_idx)
+        # Death releases the per-caster slot before any toxin query or
+        # scheduled expiry. The same caster may protect a living new target.
+        whole_round(e)
+        e.begin_round()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        new_ward=cast(e,v,recipient="caster")
+        self.assertIsNotNone(new_ward)
+        self.assertTrue(v.effects[new_ward]["active"])
+        self.assertNotEqual(new_ward,ward)
+        e.check()
+
+    def test_35_natural_dying_step_death_ends_suppression_immediately(self):
+        e,d,v,c=scene()
+        e.start_turn("caster",regen_choice=RegenerationChoice())
+        d.toxins.apply("victim","TX-NE",
+             exposure_key="already-exposed",source="fixture:verified_injection",
+             route="injection",delivery_verified=True,
+             residual_piercing_hp=1,resistance_die=1)
+        suppression=cast(e,v,mode="suppression")
+        self.assertTrue(v.effects[suppression]["active"])
+        victim=e.actors["victim"]
+        damage=victim.hp_max*2-1
+        d.apply_damage("victim",(DamagePacket("hp","Crush",damage),),
+             event_key="fixture:near_lethal",
+             cause="independently_confirmed_dying_attack",
+             wound_location_roll=10)
+        self.assertEqual(victim.hp,-victim.hp_max+1)
+        self.assertFalse(victim.dead)
+        self.assertTrue(v.effects[suppression]["active"])
+        e.end_turn()
+        e.start_turn("victim",regen_choice=RegenerationChoice())
+        self.assertTrue(victim.dead)
+        self.assertFalse(v.effects[suppression]["active"])
+        self.assertEqual(
+            [x["reason"] for x in entries(e,"g44_endurance_ended")
+             if x["effect"]==suppression],["recipient_dead"])
+        self.assertTrue(c.events[v.effects[suppression]["expiry"]].canceled)
+        self.assertEqual(v.for_recipient("victim"),None)
+        e.check()
 
 if __name__=="__main__":
     unittest.main()
