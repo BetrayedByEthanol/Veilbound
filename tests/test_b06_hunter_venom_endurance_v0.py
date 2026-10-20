@@ -615,8 +615,12 @@ class G44Regressions(unittest.TestCase):
         expiry=v.effects[ward]["expiry"]
         self.assertTrue(v.effects[ward]["active"])
         victim=e.actors["victim"]
+        # A physical Crush packet uses the source's normal weapon Armor
+        # rule. Include that actual Armor in the independently rolled raw
+        # fixture so the confirmed post-mitigation HP damage is lethal.
         d.apply_damage("victim",
-             (DamagePacket("hp","Crush",victim.hp_max*2),),
+             (DamagePacket("hp","Crush",victim.hp_max*2+d._armor(victim),
+                           armor_rule="weapon"),),
              event_key="fixture:lethal_other_source",
              cause="independently_confirmed_unrelated_attack")
         self.assertTrue(victim.dead)
@@ -656,7 +660,9 @@ class G44Regressions(unittest.TestCase):
         self.assertTrue(v.effects[suppression]["active"])
         victim=e.actors["victim"]
         damage=victim.hp_max*2-1
-        d.apply_damage("victim",(DamagePacket("hp","Crush",damage),),
+        d.apply_damage("victim",
+             (DamagePacket("hp","Crush",damage+d._armor(victim),
+                           armor_rule="weapon"),),
              event_key="fixture:near_lethal",
              cause="independently_confirmed_dying_attack",
              wound_location_roll=10)
