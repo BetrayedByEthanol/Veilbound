@@ -70,12 +70,15 @@ class HunterVenomEndurance:
                    recipient=v["recipient"],reason=reason,unused_units=v["units"])
         self.toxins._synchronize(v["recipient"])
 
-    def _spend(self,v,kind):
+    def _spend(self,v,kind,*,phase=0):
         if not v["active"] or v["units"]<=0:
             return False
         v["units"]-=1
         v["covered"]=True
-        v["phase"]=0
+        # On a genuine Step 3, preserve the actual exploration remainder
+        # that belongs to the newly funded long suppression interval.
+        # Initial and wholly exploration-funded intervals begin at zero.
+        v["phase"]=phase
         self.e.log("g44_suppression_unit",effect=v["id"],recipient=v["recipient"],
                    source_toxin=v["bound_key"],unit_kind=kind,remaining=v["units"])
         self.toxins._synchronize(v["recipient"])
@@ -154,9 +157,14 @@ class HunterVenomEndurance:
             if v["active"] and v["mode"]=="suppression" and v["covered"] and v["long"]:
                 v["phase"]+=seconds
 
-    def _long_boundary(self,v):
+    def _long_boundary(self,v,*,from_step3=False):
         if not v["active"] or not v["covered"] or not v["long"]:
             return
+        # Completing a six-second EXPLORATION interval consumes its entire
+        # elapsed clock. A genuine Step 3 closes the current interval without
+        # creating elapsed seconds: carry 1..5 already elapsed exploration
+        # seconds into the next paid local interval instead of losing them.
+        next_phase=v["phase"] if from_step3 else 0
         v["phase"]=0
         v["covered"]=False
         t=self.toxins.active(v["recipient"])
@@ -164,7 +172,7 @@ class HunterVenomEndurance:
             self._end(v,"bound_toxin_ended")
         elif t["profile"]!=HUNTER or self.hunter_penalties(t):
             if v["units"] and v["active"]:
-                self._spend(v,"next_long_interval")
+                self._spend(v,"next_long_interval",phase=next_phase)
             else:
                 self._end(v,"units_exhausted")
         self.toxins._synchronize(v["recipient"])
@@ -177,7 +185,7 @@ class HunterVenomEndurance:
     def on_turn_step3(self,recipient):
         for v in list(self.effects.values()):
             if v["active"] and v["recipient"]==recipient and v["mode"]=="suppression" and v["long"] and v["covered"]:
-                self._long_boundary(v)
+                self._long_boundary(v,from_step3=True)
 
     def on_milestone(self,ev):
         if ev.source.startswith("endurance:"):
