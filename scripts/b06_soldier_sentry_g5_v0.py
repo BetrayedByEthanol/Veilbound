@@ -110,6 +110,17 @@ class SourceMelee:
                                     "slot":slot,"action_index":index})
         return tuple(pending)
 
+    def assert_sequence_declaration_allowed(self,actor_id):
+        """One pending G5 Attack Sequence per actor, regardless of target.
+
+        G0 normally locks one ordinary sequence only *per target*. G5 must
+        close all pre-paid slots before declaring another target's sequence,
+        or a later action invalidates G4.5's old live-action binding.
+        """
+        if self.pending_attack_slots(actor_id):
+            raise UnresolvedDecision(
+                "Complete pending G5 Attack Sequence before declaring another")
+
     def assert_turn_completion_allowed(self,actor_id):
         """G0 calls before END TURN consumes resources or advances cursor."""
         if self.pending_attack_slots(actor_id):
@@ -163,6 +174,9 @@ class SourceMelee:
     def declare(self,attacker,target,*,profiles,defenses,
                 prone_dodge_feasible=None):
         e=self.e
+        # Reject before ANY declaration cost, chosen defense or roll. A
+        # second target cannot invalidate a still-open earlier sequence.
+        self.assert_sequence_declaration_allowed(attacker)
         if target not in e.actors or attacker not in e.actors or attacker==target:
             raise ValueError("Distinct existing attacker and target required")
         a,t=e.actors[attacker],e.actors[target]
@@ -205,6 +219,27 @@ class SourceMelee:
                 "profiles":profiles,"actions":tuple(x["index"] for x in paid),
                 "defenses":tuple(x["index"] for x in assigned),
                 "declaration":declared[0]["index"]}
+
+    def _cancel_remaining_after_fatal_hit(self,attacker,target,declaration,slot):
+        """Lose already-paid later slots when this very sequence killed target.
+
+        The hit and target death are native G4 events; this only closes
+        subsequently impossible G5 slots with explicit ledger evidence.
+        Neither their AP nor their pre-assigned defense resources return.
+        """
+        if not self.e.actors[target].dead:
+            return
+        for pending in self.pending_attack_slots(attacker):
+            if (pending["declaration_index"]!=declaration
+                    or pending["slot"]<=slot):
+                continue
+            self.e.log(
+                "g5_melee_cancelled",
+                action_index=pending["action_index"],
+                declaration_index=declaration,
+                slot=pending["slot"],attacker=attacker,target=target,
+                reason="target_dead_after_prior_slot",
+                ap_refunded=0,defense_commitments_refunded=False)
 
     def resolve(self,sequence,slot,*,attack_face,damage_face=None,
                 confirmation_face=None,critical_dice=(),vigor_die=None,
@@ -261,6 +296,9 @@ class SourceMelee:
         if any(x["kind"]=="g5_melee_resolved" and
                x["detail"].get("action_index")==action_index for x in e.ledger):
             raise ValueError("G5 action already resolved")
+        if any(x["kind"]=="g5_melee_cancelled" and
+               x["detail"].get("action_index")==action_index for x in e.ledger):
+            raise ValueError("G5 action already cancelled")
         # Both source indices AND earlier outcomes come from the native
         # declaration. A caller cannot substitute an older resolved index.
         for prior in native_actions[:slot]:
@@ -469,6 +507,12 @@ class SourceMelee:
               attacker=attacker,target=target,profile=p,
               outcome="hit" if hit else "miss",
               damage=result,critical=critical)
+        # A prior fatal hit ends the actual target's ability to receive
+        # another living encounter hit. The G0-paid follow-up slots are
+        # lost, not left permanently pending or silently refunded.
+        if hit and e.actors[target].dead:
+            self._cancel_remaining_after_fatal_hit(
+                attacker,target,declaration,slot)
         e.check()
         return {"outcome":"hit" if hit else "miss","critical":critical,
                 "defense":defense,"defense_value":value,

@@ -639,6 +639,11 @@ class Encounter:
     def declare_sequence(self, attacker, target, profiles, defenses):
         if self.current != attacker or self.pending_regeneration is not None:
             raise ValueError("Only ready current actor declares ordinary sequence")
+        # G5's source-bound AP slots cannot be superseded by a second
+        # target's G0 sequence. Guard the native entry point as well as
+        # SourceMelee.declare(), before spending AP or defender resources.
+        if getattr(self,"g5",None) is not None:
+            self.g5.assert_sequence_declaration_allowed(attacker)
         a, t = self.actors[attacker], self.actors[target]
         # A same-turn 0-HP crossing can invalidate an attacker after Turn AP
         # was established. Rejection MUST precede the sequence lock and all
