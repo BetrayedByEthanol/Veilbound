@@ -336,6 +336,20 @@ class SourceMelee:
             raise UnresolvedDecision("Retarget/decline requires an intact pending suffix")
         return suffix
 
+    def _paid_target_unavailable(self,attacker,target_id):
+        """Only genuine source targeting illegality unlocks a paid suffix.
+
+        A non-dead creature with HP <= 0 is still an attackable Dying
+        target. Its precommitted active Guard/Dodge falls back to Take Hit
+        during resolve(); unconsciousness alone never grants a redirect
+        or refund of the already paid attacks.
+        """
+        actor=self.e.actors[attacker]
+        target=self.e.actors[target_id]
+        return (target.dead or target.team==actor.team
+                or len(actor.occupied)!=1 or len(target.occupied)!=1
+                or not self.e.g1.melee_contact(attacker,target_id))
+
     def retarget_remaining(self,sequence,new_target,*,defenses,
                            prone_dodge_feasible=None,prone_guard_feasible=None):
         """Redirect already-funded suffix; only NEW defender resources are paid.
@@ -352,8 +366,7 @@ class SourceMelee:
         original=sequence["target"]
         prior_target,_=self._current_target_for_slot(
             sequence["declaration"],suffix[0]["action_index"],original)
-        if (e.actors[prior_target].hp>0 and
-                e.g1.melee_contact(attacker,prior_target)):
+        if not self._paid_target_unavailable(attacker,prior_target):
             raise UnresolvedDecision("Original target remains legal for paid follow-ups")
         if new_target not in e.actors or new_target==attacker or (
                 e.actors[new_target].team==e.actors[attacker].team):
@@ -420,8 +433,8 @@ class SourceMelee:
             raise UnresolvedDecision("Decline must be made by live current attacker")
         prior,_=self._current_target_for_slot(
             sequence["declaration"],suffix[0]["action_index"],sequence["target"])
-        if reason!="target_unavailable" or (e.actors[prior].hp>0 and
-                e.g1.melee_contact(attacker,prior)):
+        if reason!="target_unavailable" or not self._paid_target_unavailable(
+                attacker,prior):
             raise UnresolvedDecision("Explicit decline requires an unavailable target")
         for entry in suffix:
             e.log("g5_melee_cancelled",attacker=attacker,target=prior,
