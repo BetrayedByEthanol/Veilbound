@@ -688,8 +688,11 @@ class Encounter:
         # The profile catalogue is not itself an eligibility grant. Special
         # Pounce/Horn Drive require G1 manoeuvre/contact state, and an enhanced
         # Sentry sword profile requires its actually active Chosen Reserve.
-        if a.source.source_id == "B06-EN-03":
-            raise UnresolvedDecision("Hunter attack needs G1 physical contact and manoeuvre validation")
+        if a.source.source_id == "B06-EN-03" and not (
+                getattr(self, "g5", None) is not None
+                and self.g5._native_sequence_authorized
+                and all(p in ("B06-AT-04", "B06-AT-05") for p in profiles)):
+            raise UnresolvedDecision("Hunter attack needs G6 verified frontal contact and manoeuvre validation")
         for profile_id, required, inactive in a.source.attack_requirements:
             if profile_id not in profiles:
                 continue

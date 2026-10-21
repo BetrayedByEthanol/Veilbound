@@ -183,10 +183,18 @@ class SourceMelee:
                         "Complete committed G5 Attack Sequence before movement")
             return
 
+    def _contact(self,attacker,target):
+        a=self.e.actors[attacker]
+        return self.e.g1.melee_contact(
+            attacker,target,hunter_front=(a.source.source_id=="B06-EN-03"))
+
     def _profile(self,attacker,profile_id):
         a=self.e.actors[attacker]
-        if a.source.source_id not in ("B06-EN-01","B06-EN-02"):
-            raise UnresolvedDecision("G5 v0 only resolves sourced Soldier/Sentry melee")
+        if a.source.source_id not in ("B06-EN-01","B06-EN-02","B06-EN-03"):
+            raise UnresolvedDecision("G5/G6 only resolves sourced enemy melee")
+        if (a.source.source_id=="B06-EN-03"
+                and profile_id not in ("B06-AT-04","B06-AT-05")):
+            raise UnresolvedDecision("G6 Pounce and Horn Drive need their own commitment path")
         if profile_id not in a.source.attack_profiles:
             raise ValueError("Attack profile does not belong to attacker")
         obj=json.loads((ROOT/a.source.path).read_text(encoding="utf-8"))
@@ -213,9 +221,13 @@ class SourceMelee:
         a,t=e.actors[attacker],e.actors[target]
         if a.team==t.team:
             raise ValueError("Cannot declare enemy sword against ally")
-        if len(a.occupied)!=1 or len(t.occupied)!=1:
-            raise UnresolvedDecision("G5 v0 only supports 1x1 melee contact")
-        if not e.g1.melee_contact(attacker,target):
+        if len(t.occupied)!=1 or (
+                len(a.occupied)!=1 and not (
+                    a.source.source_id=="B06-EN-03"
+                    and a.footprint==("head","rear")
+                    and len(a.occupied)==2)):
+            raise UnresolvedDecision("G5/G6 needs sourced 1x1 or Hunter 1x2 contact")
+        if not self._contact(attacker,target):
             raise UnresolvedDecision("G1 current actual melee contact required")
         profiles=tuple(profiles)
         defenses=tuple(defenses)
@@ -455,13 +467,18 @@ class SourceMelee:
 
     def resolve(self,sequence,slot,*,attack_face,damage_face=None,
                 confirmation_face=None,critical_dice=(),vigor_die=None,
-                wound_location_roll=None,spontaneous_policy="decline_all"):
+                wound_location_roll=None,spontaneous_policy="decline_all",
+                venom_resistance_die=None,venom_resistance_modifier=0):
         e=self.e
         attacker,target=sequence["attacker"],sequence["target"]
         if type(slot) is not int or slot not in range(len(sequence["profiles"])):
             raise ValueError("Source attack slot required")
         if spontaneous_policy!="decline_all":
             raise UnresolvedDecision("Nontrivial Reaction/Interception requires separate G5 authority")
+        if venom_resistance_die is not None:
+            _face(venom_resistance_die,20,"Hunter venom resistance")
+        if type(venom_resistance_modifier) is not int:
+            raise ValueError("Venom resistance modifier must be integer")
         action_index=sequence["actions"][slot]
         defense_index=sequence["defenses"][slot]
         declaration=sequence["declaration"]
@@ -542,7 +559,7 @@ class SourceMelee:
         # separately committed G5 redirection may redirect this paid suffix.
         target,rebound=self._current_target_for_slot(
             declaration,action_index,target)
-        if not e.g1.melee_contact(attacker,target):
+        if not self._contact(attacker,target):
             raise UnresolvedDecision("Actual G1 contact lost before attack roll")
         p=native_profiles[slot]
         action=e.ledger[action_index]
@@ -723,16 +740,30 @@ class SourceMelee:
         if (len(critical_dice)!=expected or any(
                 type(x) is not int or not 1<=x<=4 for x in critical_dice)):
             raise ValueError("Exact critical d4 faces required")
+        venom_exposure_key=None
         if hit:
-            _face(damage_face,6,"source sword damage")
+            _face(damage_face,6,"source melee damage")
             # G4 owns the exact profile's typed packets, source Vigor die,
             # resistance/Armor calculation and wound-location requirement.
             # Run that preflight BEFORE response windows or roll logs, so
             # invalid missing dice cannot lead to contradictory retries.
-            e.g4.preflight_profile_hit(
+            predicted=e.g4.preflight_profile_hit(
                 attacker,target,p,die_face=damage_face,
                 critical=critical,critical_dice=tuple(critical_dice),
                 vigor_die=vigor_die,wound_location_roll=wound_location_roll)
+            if p=="B06-AT-04":
+                venom_exposure_key=f"g6:bite:{e.seed}:{action_index}"
+                if predicted["hp_after"]>-e.actors[target].hp_max:
+                    e.g4.venom.validate_exposure_key(venom_exposure_key)
+                _,_,packets=e.g4._profile_hit_packets(
+                    attacker,target,p,die_face=damage_face,
+                    critical=critical,critical_dice=tuple(critical_dice))
+                if (e.g4._mitigate_hp(e.actors[target],packets[0])>0
+                        and predicted["hp_after"]>-e.actors[target].hp_max
+                        and e.g4.venom.bite_resistance_required(target)
+                        and venom_resistance_die is None):
+                    raise UnresolvedDecision(
+                        "Potential puncturing Hunter Bite requires precommitted venom d20")
         elif damage_face is not None:
             raise ValueError("Damage dice cannot be used for a miss")
         if dying_fallback:
@@ -751,7 +782,7 @@ class SourceMelee:
                       and not e.actors[attacker].dead
                       and e.actors[attacker].hp>0
                       and not e.actors[target].dead
-                      and e.g1.melee_contact(attacker,target))
+                      and self._contact(attacker,target))
         valid=e.response_window(trigger,on_interception=lambda *args: None,
                                 spontaneous=(),after_interceptions=recheck)
         if not valid:
@@ -769,6 +800,13 @@ class SourceMelee:
               hit=hit,spontaneous_policy=spontaneous_policy)
         result=None
         if hit:
+            def after_damage(damage):
+                if p=="B06-AT-04" and not e.actors[target].dead:
+                    damage["venom"]=e.g4.venom.apply_bite(
+                        attacker,target,profile_hit_index=len(e.ledger)-1,
+                        exposure_key=venom_exposure_key,
+                        resistance_die=venom_resistance_die,
+                        resistance_modifier=venom_resistance_modifier)
             result=self.bridge.verified_profile_hit(
                 attacker,target,p,action_index=action_index,
                 source_event=f"g5:source:{e.seed}:{action_index}",
@@ -777,7 +815,8 @@ class SourceMelee:
                 contact_verified=True,defense_verified=True,
                 die_face=damage_face,critical=critical,
                 critical_dice=tuple(critical_dice),vigor_die=vigor_die,
-                wound_location_roll=wound_location_roll)
+                wound_location_roll=wound_location_roll,
+                on_damage=after_damage if p=="B06-AT-04" else None)
         e.log("g5_melee_resolved",action_index=action_index,
               attacker=attacker,target=target,profile=p,
               outcome="hit" if hit else "miss",

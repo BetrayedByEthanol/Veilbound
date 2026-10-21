@@ -138,7 +138,8 @@ class WoundContinuation:
                              source_event,contact_reference,defense_reference,
                              contact_verified,defense_verified,
                              die_face,critical="normal",critical_dice=(),
-                             vigor_die=None,wound_location_roll=None):
+                             vigor_die=None,wound_location_roll=None,
+                             on_damage=None):
         """Consume a *real* G0 Physical Action and an external G5 attestation.
 
         The caller, NOT G4.5, must have resolved contact, defense and critical
@@ -149,6 +150,11 @@ class WoundContinuation:
             raise UnresolvedDecision("Stable G5 contact/defense source refs required")
         if contact_verified is not True or defense_verified is not True:
             raise UnresolvedDecision("G5 confirmed contact and defense required")
+        # A malformed caller hook must not leave irreversible G4 damage,
+        # a spent source action or a missing G4.5 provenance record.
+        # Validate before the first stateful damage operation.
+        if on_damage is not None and not callable(on_damage):
+            raise TypeError("G5 post-damage hook must be callable")
         # The encounter's immutable serialized ledger is the shared
         # provenance registry. Another WoundContinuation instance must
         # never allow a previously accepted external source ID again.
@@ -183,6 +189,11 @@ class WoundContinuation:
             critical_dice=critical_dice,vigor_die=vigor_die,
             wound_location_roll=wound_location_roll)
         self.seen_actions.add(action_index)
+        # A Hunter Bite's delivered toxin must consume the newest G4 hit
+        # synchronously, before G4.5 appends its own provenance event.
+        # Only the resolved G5 adapter supplies this optional callback.
+        if on_damage is not None:
+            on_damage(result)
         self.e.log("g45_attested_hit",source_event=source_event,
                    attacker=attacker,target=target,profile=profile_id,
                    action_index=action_index,
