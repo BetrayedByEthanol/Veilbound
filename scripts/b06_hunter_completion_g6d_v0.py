@@ -67,6 +67,14 @@ class HunterCompletion:
             raise ValueError("Insufficient sourced arrow or Physical AP")
         if (shooter,target) in e.seen_sequences:
             raise ValueError("Second same-target ordinary Bow sequence not allowed")
+        # G2 otherwise derives its response key inside _shot AFTER spending
+        # physical AP. Explicitly bind the one-shot key now and refuse a
+        # live Interception before any source cost or G2 mutation.
+        shot_trigger=(f"g6d:bow:{e.seed}:{e.round}:"
+                      f"{shooter}:{target}:one_shot")
+        if any(r.trigger_key==shot_trigger for r in e.reservations):
+            raise UnresolvedDecision(
+                "G6-D Bow matching Interception requires an authenticated route executor")
         lane=e.g2.lane(shooter,target,target_cell=target_cell)
         if lane.screens or lane.cover or lane.blocked:
             raise UnresolvedDecision("G6-D Bow requires clear lane without Living Screens/Cover")
@@ -113,16 +121,20 @@ class HunterCompletion:
         start=len(e.ledger)
         result=e.g2.bow_sequence(shooter,target,(
             ShotChoice(defense="take_hit",primary_face=primary_face,
-                       target_cell=target_cell),
+                       target_cell=target_cell,trigger_key=shot_trigger),
         ))
         # All source events MUST come from this ONE real G2 sequence.
         added=e.ledger[start:]
         commitments=[v for v in added if v["kind"]=="action_committed"
                      and v["detail"].get("actor")==shooter]
         declared=[v for v in added if v["kind"]=="g2_bow_sequence_committed"]
+        windows=[v for v in added if v["kind"]=="response_window_open"]
+        intercepted=[v for v in added if v["kind"]=="interception_released"]
         launched=[v for v in added if v["kind"]=="g2_bow_launched"]
         resolved=[v for v in added if v["kind"]=="g2_bow_shot_resolved"]
         if (len(commitments)!=1 or len(declared)!=1
+                or len(windows)!=1 or intercepted
+                or windows[0]["detail"].get("trigger")!=shot_trigger
                 or len(launched)!=1 or len(resolved)!=1 or len(result)!=1
                 or commitments[0]["detail"].get("label")!=f"g2:bow:{target}:0"
                 or declared[0]["detail"].get("shooter")!=shooter

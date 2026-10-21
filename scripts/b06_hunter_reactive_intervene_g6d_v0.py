@@ -38,6 +38,20 @@ class ReactiveHunterProtection:
         self.c,self.e=combat,e
         self.prepared={}
 
+    def _prune_expired_prepared(self):
+        """Discard G6-D offers only after their native G0/G1 expiry.
+
+        At the Guardian's next Turn Start G0 expires the reservation and
+        G1 discards unused reserved MP. Those sunk costs are never
+        refunded. A partial native reservation/motion mismatch is
+        *not* a normal expiry and must remain ineligible for reuse.
+        """
+        active={r.label for r in self.e.reservations}
+        stored=self.e.g1.motion
+        for label in tuple(self.prepared):
+            if label not in active and label not in stored:
+                del self.prepared[label]
+
     def _eligibility(self,attacker,ward,protector,method):
         e=self.e
         h,w,p=(e.actors[x] for x in (attacker,ward,protector))
@@ -89,6 +103,7 @@ class ReactiveHunterProtection:
         if (type(trigger_key) is not str or
                 trigger_key!=f"g6d:prepared:{hunter_id}:{ward_id}:next_bite"):
             raise UnresolvedDecision("Prepared trigger must name next Hunter Bite against ward")
+        self._prune_expired_prepared()
         if any(v.trigger_key==trigger_key for v in self.prepared.values()):
             raise ValueError("One pending prepared protection per named incoming Bite")
         delta=tuple(delta)
@@ -136,6 +151,7 @@ class ReactiveHunterProtection:
             raise ValueError("Protector resolves during current Hunter attack only")
         prepared=None
         if prepared_label is not None:
+            self._prune_expired_prepared()
             if type(prepared_label) is not str or prepared_label not in self.prepared:
                 raise UnresolvedDecision("No genuine prior Prepared Intervene reservation")
             prepared=self.prepared[prepared_label]
