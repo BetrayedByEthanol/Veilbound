@@ -2012,5 +2012,89 @@ class G5SoldierSentryTests(unittest.TestCase):
         self.assertEqual(movement.next_reservation,1)
         e.check()
 
+
+    def test_71_dying_contact_blocks_paid_suffix_retarget_and_decline(self):
+        """A first nonfatal HP crossing changes defense, NOT target legality.
+
+        Test both 0 and negative HP and both precommitted active defenses.
+        The eligible adjacent second opponent must not receive paid attacks
+        until genuine original-target illegality occurs.
+        """
+        for original_hp in (6,5):
+            for defense in ("guard","dodge"):
+                with self.subTest(original_hp=original_hp,defense=defense):
+                    sentry=enemy_actor("B06-EN-01","sentry","enemy",
+                        start_state="prepared_start",occupied=((3,2),))
+                    original=party_actor("A",3,"original","party",
+                                         occupied=((2,2),))
+                    replacement=party_actor("A",3,"replacement","party",
+                                            occupied=((3,3),))
+                    e=Encounter([sentry,original,replacement],
+                        {"sentry":30,"original":20,"replacement":10},
+                        seed=9271,scenario="G5-dying-still-legal-target",
+                        objective="paid_suffix_stays_on_dying_target",
+                        policy="fixed_dice_declared_defense")
+                    GridMovement(e,width=8,height=5)
+                    SpellState(e)
+                    DamageState(e)
+                    e.begin_round()
+                    scene=SourceMelee(e)
+                    original.hp=original_hp
+                    scene.bridge.start_next_turn(RegenerationChoice())
+                    seq=scene.declare("sentry","original",
+                        profiles=("B06-AT-02","B06-AT-02"),
+                        defenses=("take_hit",defense))
+                    ap_paid=sentry.ap_remaining
+                    guard_paid=original.guard_remaining
+                    dodge_paid=original.dodge_pressure
+                    first=scene.resolve(seq,0,attack_face=11,
+                        damage_face=1,vigor_die=4,wound_location_roll=10)
+                    self.assertEqual(first["outcome"],"hit")
+                    self.assertEqual(first["damage"]["hp_loss"],6)
+                    self.assertEqual(original.hp,original_hp-6)
+                    self.assertLessEqual(original.hp,0)
+                    self.assertFalse(original.dead)
+                    self.assertTrue(e.g1.melee_contact("sentry","original"))
+                    self.assertTrue(e.g1.melee_contact("sentry","replacement"))
+                    self.assertEqual(len(scene.pending_attack_slots("sentry")),1)
+                    before=e.serialize()
+                    replacement_before=(replacement.guard_remaining,
+                                        replacement.dodge_pressure,
+                                        replacement.hp)
+                    with self.assertRaisesRegex(UnresolvedDecision,
+                                                "Original target remains legal"):
+                        scene.retarget_remaining(seq,"replacement",
+                                                 defenses=("take_hit",))
+                    self.assertEqual(e.serialize(),before)
+                    with self.assertRaisesRegex(UnresolvedDecision,
+                                                "unavailable target"):
+                        scene.decline_remaining(seq)
+                    self.assertEqual(e.serialize(),before)
+                    self.assertEqual(
+                        (replacement.guard_remaining,
+                         replacement.dodge_pressure,replacement.hp),
+                         replacement_before)
+                    self.assertEqual(len(scene.pending_attack_slots("sentry")),1)
+                    self.assertFalse(any(x["kind"]=="g5_melee_retarget_committed"
+                                         for x in e.ledger))
+                    second=scene.resolve(seq,1,attack_face=2,
+                                         damage_face=1,vigor_die=4)
+                    self.assertEqual(second["outcome"],"hit")
+                    self.assertEqual(second["defense"],"take_hit")
+                    self.assertEqual(second["declared_defense"],defense)
+                    self.assertEqual(second["damage"]["hp_loss"],6)
+                    self.assertEqual(original.hp,original_hp-12)
+                    self.assertEqual(replacement.hp,replacement.hp_max)
+                    self.assertEqual(sentry.ap_remaining,ap_paid)
+                    self.assertEqual(original.guard_remaining,guard_paid)
+                    self.assertEqual(original.dodge_pressure,dodge_paid)
+                    self.assertFalse(scene.pending_attack_slots("sentry"))
+                    self.assertEqual([x["detail"]["target"] for x in e.ledger
+                        if x["kind"]=="g5_melee_resolved"],
+                        ["original","original"])
+                    scene.bridge.end_current_turn()
+                    e.check()
+
+
 if __name__=="__main__":
     unittest.main()
