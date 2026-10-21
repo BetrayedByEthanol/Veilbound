@@ -358,6 +358,24 @@ class SourceMelee:
             raise UnresolvedDecision("Retarget/decline requires an intact pending suffix")
         return suffix
 
+    def _supported_suffix_target(self,attacker,target_id):
+        """G5/G6-B source-authorized target footprint for a paid suffix.
+
+        A/B proxy attacks have *only* the sourced Hunter as a legal target,
+        including after any redirection; generic Soldier/Sentry attacks
+        retain their one-square target support. The Hunter's anatomical
+        two-square body is never itself a reason to abandon paid attacks.
+        """
+        actor=self.e.actors[attacker]
+        target=self.e.actors[target_id]
+        if len(actor.occupied)!=1:
+            return False
+        if target.source.source_id=="B06-EN-03":
+            return (target.footprint==("head","rear")
+                    and len(target.occupied)==2)
+        return (actor.source.source_id not in ("A","B")
+                and len(target.occupied)==1)
+
     def _paid_target_unavailable(self,attacker,target_id):
         """Only genuine source targeting illegality unlocks a paid suffix.
 
@@ -369,8 +387,8 @@ class SourceMelee:
         actor=self.e.actors[attacker]
         target=self.e.actors[target_id]
         return (target.dead or target.team==actor.team
-                or len(actor.occupied)!=1 or len(target.occupied)!=1
-                or not self.e.g1.melee_contact(attacker,target_id))
+                or not self._supported_suffix_target(attacker,target_id)
+                or not self._contact(attacker,target_id))
 
     def retarget_remaining(self,sequence,new_target,*,defenses,
                            prone_dodge_feasible=None,prone_guard_feasible=None):
@@ -394,13 +412,16 @@ class SourceMelee:
                 e.actors[new_target].team==e.actors[attacker].team):
             raise ValueError("New target must be a distinct opposing creature")
         target=e.actors[new_target]
-        # A living Dying creature (HP <= 0 but not dead) is still a
-        # legal melee target; only the active Guard/Dodge choices are lost.
-        # The already-paid suffix can be redirected to it using Take Hit.
-        if target.dead or len(target.occupied)!=1 or (
-                len(e.actors[attacker].occupied)!=1
-                or not e.g1.melee_contact(attacker,new_target)):
-            raise UnresolvedDecision("Redirect target needs genuine live 1x1 G1 contact")
+        # The G6-B A/B player attack cannot escape its Hunter-only target
+        # scope through a previously funded G5 suffix. Check source AND
+        # anatomical shape before committing newly assigned defenses.
+        # A living Dying creature remains an eligible attack target.
+        if not self._supported_suffix_target(attacker,new_target):
+            raise UnresolvedDecision(
+                "Paid suffix requires source-authorized target footprint "
+                "(A/B only against Hunter)")
+        if target.dead or not self._contact(attacker,new_target):
+            raise UnresolvedDecision("Redirect target needs genuine live G1 contact")
         if (attacker,new_target) in e.seen_sequences:
             raise UnresolvedDecision("Retarget cannot reopen a previously attacked target")
         defenses=tuple(defenses)
