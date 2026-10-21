@@ -187,7 +187,8 @@ class SourceMelee:
         return bonus
 
     def declare(self,attacker,target,*,profiles,defenses,
-                prone_dodge_feasible=None,prone_guard_feasible=None):
+                prone_dodge_feasible=None,prone_guard_feasible=None,
+                prone_attack_feasible=None):
         e=self.e
         # Reject before ANY declaration cost, chosen defense or roll. A
         # second target cannot invalidate a still-open earlier sequence.
@@ -205,6 +206,15 @@ class SourceMelee:
         defenses=tuple(defenses)
         if not profiles or len(profiles)!=len(defenses):
             raise ValueError("Complete physical sequence and defenses required")
+        # The Prone -2 accuracy penalty does not make an otherwise unusable
+        # sword attack legal. The actual required weapon/limb mechanics
+        # must be affirmatively attested BEFORE any native sequence AP or
+        # defender Guard/Dodge is committed. Merely holding a sword does
+        # not establish that its attack can be made from this posture.
+        if (any(str(c).lower()=="prone" for c in a.conditions) and
+                prone_attack_feasible is not True):
+            raise UnresolvedDecision(
+                "Prone sword attack requires explicit physical feasibility before commitment")
         # A Prone creature may Dodge only when actual repositioning is
         # physically possible. G0 does not know the map/posture feasibility
         # and would otherwise debit Dodge Pressure on an illegal choice.
@@ -239,6 +249,7 @@ class SourceMelee:
               declaration_index=declared[0]["index"],
               prone_dodge_feasible=prone_dodge_feasible is True,
               prone_guard_feasible=prone_guard_feasible is True,
+              prone_attack_feasible=prone_attack_feasible is True,
               source_bonuses=bonuses)
         return {"attacker":attacker,"target":target,
                 "profiles":profiles,"actions":tuple(x["index"] for x in paid),
@@ -432,6 +443,19 @@ class SourceMelee:
                     attested["detail"].get("prone_guard_feasible") is not True):
                 raise UnresolvedDecision(
                     "Prone Guard requires explicit instrument feasibility before resolution")
+        # The attacker may have become Prone after paying for the
+        # sequence. Never turn an unattested sword action into a legal
+        # hit simply by applying its -2 modifier. Retain the already
+        # committed slot until a separately supported resolution exists.
+        if any(str(c).lower()=="prone" for c in e.actors[attacker].conditions):
+            attested=next((ev for ev in e.ledger[declaration+1:]
+                           if ev["kind"]=="g5_melee_sequence_attested"
+                           and ev["detail"].get("declaration_index")==declaration),
+                          None)
+            if (attested is None or
+                    attested["detail"].get("prone_attack_feasible") is not True):
+                raise UnresolvedDecision(
+                    "Prone sword attack requires explicit physical feasibility before resolution")
         source_bonus=self._profile(attacker,p)
         # Live Prone positioning changes melee accuracy, NOT source training.
         # Two Prone creatures do not each receive a reciprocal +2.
