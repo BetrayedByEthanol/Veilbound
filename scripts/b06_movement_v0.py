@@ -520,8 +520,12 @@ class GridMovement:
         key=f"g6:stand:{actor_id}:{len(e.ledger)}"
         if any(r.trigger_key==key for r in e.reservations):
             raise UnresolvedDecision("Standing Interception effect is not yet executable")
+        # A multi-square creature offers a Standing Opportunity when any
+        # occupied body cell is threatened. Deduplicate each source even if
+        # it threatens both Hunter cells; preserve a stable ledger ordering.
         threats=tuple(sorted(x.id for x in e.actors.values()
-                            if x.team!=a.team and self.threatens(x.id,a.occupied[0])))
+                            if x.team!=a.team and any(
+                                self.threatens(x.id,cell) for cell in a.occupied)))
         a.mp_remaining-=4
         self.break_segment(actor_id,reason="stand_begins")
         e.log("g6_stand_started",actor=actor_id,mp_spent=4,

@@ -740,6 +740,7 @@ class SourceMelee:
         if (len(critical_dice)!=expected or any(
                 type(x) is not int or not 1<=x<=4 for x in critical_dice)):
             raise ValueError("Exact critical d4 faces required")
+        venom_exposure_key=None
         if hit:
             _face(damage_face,6,"source melee damage")
             # G4 owns the exact profile's typed packets, source Vigor die,
@@ -751,6 +752,9 @@ class SourceMelee:
                 critical=critical,critical_dice=tuple(critical_dice),
                 vigor_die=vigor_die,wound_location_roll=wound_location_roll)
             if p=="B06-AT-04":
+                venom_exposure_key=f"g6:bite:{e.seed}:{action_index}"
+                if predicted["hp_after"]>-e.actors[target].hp_max:
+                    e.g4.venom.validate_exposure_key(venom_exposure_key)
                 _,_,packets=e.g4._profile_hit_packets(
                     attacker,target,p,die_face=damage_face,
                     critical=critical,critical_dice=tuple(critical_dice))
@@ -800,7 +804,7 @@ class SourceMelee:
                 if p=="B06-AT-04" and not e.actors[target].dead:
                     damage["venom"]=e.g4.venom.apply_bite(
                         attacker,target,profile_hit_index=len(e.ledger)-1,
-                        exposure_key=f"g6:bite:{e.seed}:{action_index}",
+                        exposure_key=venom_exposure_key,
                         resistance_die=venom_resistance_die,
                         resistance_modifier=venom_resistance_modifier)
             result=self.bridge.verified_profile_hit(

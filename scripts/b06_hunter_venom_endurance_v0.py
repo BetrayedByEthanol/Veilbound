@@ -261,6 +261,22 @@ class HunterVenomEndurance:
                        and v["mode"]=="ward"
                        for v in self.effects.values())
 
+    def validate_exposure_key(self,exposure_key):
+        """Read-only shared key preflight for native Bite and Pounce.
+
+        The G6 attack executor checks this *before* irreversibly applying
+        its G4 profile hit. apply_bite repeats this exact check at the
+        synchronous G4.4 delivery boundary, so both paths reject keys
+        occupied by unified toxins, prior Hunter exposures or legacy TX-HM.
+        Do not claim the key here: a missed/canceled attack cannot reserve
+        a toxin identity without genuine delivery adjudication.
+        """
+        if (not isinstance(exposure_key,str) or not exposure_key
+                or exposure_key in self.toxins.exposure_ids
+                or exposure_key in self.hunter_keys
+                or any(x["key"]==exposure_key for x in self.d.short_toxins)):
+            raise ValueError("New stable unused toxin exposure key required")
+
     def apply_bite(self,attacker,recipient,*,profile_hit_index,exposure_key,
                    resistance_die=None,resistance_modifier=0,breach_verified=False):
         """Use one actual G4 Hunter Bite/Pounce ledger, never a claimed hit."""
@@ -289,11 +305,7 @@ class HunterVenomEndurance:
             raise ValueError("Breach adjudication must be bool")
         if self.e.actors[recipient].dead:
             raise ValueError("Dead recipient cannot receive Hunter venom")
-        if (not isinstance(exposure_key,str) or not exposure_key
-                or exposure_key in self.toxins.exposure_ids
-                or exposure_key in self.hunter_keys
-                or any(x["key"]==exposure_key for x in self.d.short_toxins)):
-            raise ValueError("New stable unused toxin exposure key required")
+        self.validate_exposure_key(exposure_key)
         # An independent non-puncture route cannot be inferred merely
         # because some other HP packet of the Bite caused injury.
         valid=bool(facts["injection_eligible"] or breach_verified)

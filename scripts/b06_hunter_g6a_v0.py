@@ -214,12 +214,16 @@ class HunterCombat(SourceMelee):
             raise ValueError("Pounce critical dice count mismatched")
         for face in critical_dice:
             _face(face, 4, "Pounce critical")
+        venom_exposure_key=None
         if hit:
             _face(damage_face, 6, "Pounce Bite damage")
             predicted=e.g4.preflight_profile_hit(
                 hunter, target, "B06-AT-06", die_face=damage_face,
                 critical=critical, critical_dice=tuple(critical_dice),
                 wound_location_roll=wound_location_roll)
+            venom_exposure_key=f"g6:pounce:{e.seed}:{d['action_index']}"
+            if predicted["hp_after"] > -t.hp_max:
+                e.g4.venom.validate_exposure_key(venom_exposure_key)
             _, _, packets = e.g4._profile_hit_packets(
                 hunter, target, "B06-AT-06", die_face=damage_face,
                 critical=critical, critical_dice=tuple(critical_dice))
@@ -266,7 +270,7 @@ class HunterCombat(SourceMelee):
                     hunter, target, profile_hit_index=next(
                         x["index"] for x in reversed(e.ledger)
                         if x["kind"] == "g4_profile_hit"),
-                    exposure_key=f"g6:pounce:{e.seed}:{d['action_index']}",
+                    exposure_key=venom_exposure_key,
                     resistance_die=venom_resistance_die,
                     resistance_modifier=venom_resistance_modifier)
             self.bridge.seen_actions.add(d["action_index"])
