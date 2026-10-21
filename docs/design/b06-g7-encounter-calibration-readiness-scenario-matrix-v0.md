@@ -51,14 +51,25 @@ extra attack is assigned to the blocked cells.</text>
 | Status | Cells | Exact scope |
 |---|---:|---|
 | `fixed_native_window` | **4** | L2/L3 × 3/4 PCs, warned clear, A head-forward, declined optional responses. Native two-round G6-C witnesses exist |
-| `component_verified_only` | **8** | Same 4 setups × Reactive Shield or Prepared Body. A/B source-bound G6-D protection is independently tested but **not composed into the G6-C multi-round party runner** |
-| `blocked_not_executable` | **36** | Ambush, B as head-forward defender, or both, with the remaining policy variations; the missing entry-specific executor and defense policy are named in the row |
+| `component_verified_only` | **2** | **L3, four PCs, warned-clear, A head-forward:** Reactive Shield or Prepared Body are independently exercised by the source G6-D protection regression fixtures. They are **not composed into a G6-C mixed-party encounter** |
+| `blocked_not_executable` | **42** | All forest ambush or B head-forward variants **plus six warned-clear A-front protective variants** at L2/P3, L2/P4, or L3/P3 that have **no tested G6-D protective witness for that exact level/party size** |
 
-In other words: **4 fixed choice encounters witnessed, 8 combinations
-with separately verified response components, 36 currently blocked**.
+In other words: **4 fixed-choice encounter windows witnessed, 2 configurations
+with separately verified response components, 42 currently blocked**.
 These are not 48 combat outcomes, and none is a stochastic calibration
 sample. A component-only status does not imply the entire encounter
-can run under that policy.
+can run under that policy. The only qualifying protection evidence is
+[`tests/test_b06_hunter_reactive_intervene_g6d_v0.py`](../../tests/test_b06_hunter_reactive_intervene_g6d_v0.py),
+whose native `witness()` and `prepared_witness()` construct
+`mixed_scene(size=4, level=3)`. **No G7 protection variant is
+executed by the G7 readiness runner**: the matrix cites those prior
+regression tests, while the six G7 source replays cover only G6-C
+declined-defense windows and G6-D Bow finishing terminals. All
+six untested level/party-size protection combinations carry the
+`G6D_protection_component_not_verified_at_level_party_size` gate.
+The `component_evidence_ref` field records the exact regression
+source on the two verified-component rows; `component_evidence_replayed`
+is `false` for every matrix row.
 
 All rows have a stable, unique `scenario_id`, explicit build-source
 IDs, the missing-authority gate list, `calibration_samples: 0`,
