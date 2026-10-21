@@ -2096,5 +2096,154 @@ class G5SoldierSentryTests(unittest.TestCase):
                     e.check()
 
 
+
+    def test_72_paid_suffix_retargets_living_dying_opponent_with_take_hit(self):
+        """Only the original target's actual death unlocks the paid suffix.
+
+        A distinct, adjacent replacement at zero or negative HP remains
+        targetable but cannot actively Guard or Dodge.
+        """
+        for new_hp in (0,-1):
+            with self.subTest(replacement_hp=new_hp):
+                sentry=enemy_actor("B06-EN-01","sentry","enemy",
+                    start_state="prepared_start",occupied=((3,2),))
+                original=party_actor("A",3,"original","party",
+                    occupied=((2,2),))
+                replacement=party_actor("A",3,"replacement","party",
+                    occupied=((3,3),))
+                e=Encounter([sentry,original,replacement],
+                    {"sentry":30,"original":20,"replacement":10},
+                    seed=9272,scenario="G5-dying-paid-suffix-recipient",
+                    objective="retarget_nonfatal_dying_opponent",
+                    policy="fully_committed_retarget_take_hit")
+                GridMovement(e,width=8,height=5)
+                SpellState(e)
+                d=DamageState(e)
+                e.begin_round()
+                scene=SourceMelee(e)
+                # A genuine G4 injury establishes the Dying replacement.
+                d.apply_damage("replacement",
+                    (DamagePacket("hp","Fire",12-new_hp),),
+                    event_key=f"g5:replacement-dying:{new_hp}",
+                    cause="attested_prior_external_fire",
+                    wound_location_roll=10)
+                self.assertEqual(replacement.hp,new_hp)
+                self.assertFalse(replacement.dead)
+                self.assertEqual(len(replacement.wounds),1)
+                self.assertTrue(e.g1.melee_contact("sentry","replacement"))
+                original.hp=1
+                scene.bridge.start_next_turn(RegenerationChoice())
+                seq=scene.declare("sentry","original",
+                    profiles=("B06-AT-02","B06-AT-02"),
+                    defenses=("take_hit","guard"))
+                paid_ap=sentry.ap_remaining
+                old_guard=original.guard_remaining
+                original_hit=scene.resolve(seq,0,attack_face=20,
+                    confirmation_face=20,critical_dice=(4,4),
+                    damage_face=6,vigor_die=4)
+                self.assertTrue(original_hit["damage"]["dead"])
+                self.assertEqual(len(scene.pending_attack_slots("sentry")),1)
+                other_resources=(replacement.guard_remaining,
+                                 replacement.dodge_pressure,
+                                 replacement.vigor)
+                redirect=scene.retarget_remaining(
+                    seq,"replacement",defenses=("take_hit",))
+                self.assertEqual(redirect["action_indices"],
+                                 (seq["actions"][1],))
+                self.assertEqual(sentry.ap_remaining,paid_ap)
+                self.assertEqual(original.guard_remaining,old_guard)
+                self.assertEqual((replacement.guard_remaining,
+                                  replacement.dodge_pressure,
+                                  replacement.vigor),other_resources)
+                assigned=e.ledger[redirect["defense_indices"][0]]
+                self.assertEqual(assigned["kind"],"defense_assigned")
+                self.assertEqual(assigned["detail"]["actor"],"replacement")
+                self.assertEqual(assigned["detail"]["defense"],"take_hit")
+                follow=scene.resolve(seq,1,attack_face=11,
+                    damage_face=4,vigor_die=4)
+                self.assertEqual(follow["outcome"],"hit")
+                self.assertEqual(follow["defense"],"take_hit")
+                self.assertEqual(follow["declared_defense"],"take_hit")
+                self.assertEqual(follow["action_index"],seq["actions"][1])
+                self.assertEqual(follow["damage"]["hp_loss"],9)
+                self.assertEqual(replacement.hp,new_hp-9)
+                self.assertFalse(replacement.dead)
+                self.assertEqual(sentry.ap_remaining,paid_ap)
+                self.assertEqual(original.guard_remaining,old_guard)
+                self.assertFalse(scene.pending_attack_slots("sentry"))
+                self.assertEqual([x["detail"]["target"] for x in e.ledger
+                    if x["kind"]=="g5_melee_resolved"],
+                    ["original","replacement"])
+                scene.bridge.end_current_turn()
+                e.check()
+
+    def test_73_dying_redirect_rejects_active_defenses_before_any_spend(self):
+        """Guard/Dodge are illegal on a new living Dying target.
+
+        Invalid preflight must not consume AP, target lock, original or
+        replacement Guard/Dodge or any new defense/redirect ledger event.
+        """
+        for new_hp in (0,-1):
+            for invalid_defense in ("guard","dodge"):
+                with self.subTest(replacement_hp=new_hp,
+                                  defense=invalid_defense):
+                    sentry=enemy_actor("B06-EN-01","sentry","enemy",
+                        start_state="prepared_start",occupied=((3,2),))
+                    original=party_actor("A",3,"original","party",
+                        occupied=((2,2),))
+                    replacement=party_actor("A",3,"replacement","party",
+                        occupied=((3,3),))
+                    e=Encounter([sentry,original,replacement],
+                        {"sentry":30,"original":20,"replacement":10},
+                        seed=9273,scenario="G5-no-dying-redirect-defense",
+                        objective="paid_action_preflight",
+                        policy="explicit_new_defense")
+                    GridMovement(e,width=8,height=5)
+                    SpellState(e)
+                    d=DamageState(e)
+                    e.begin_round()
+                    scene=SourceMelee(e)
+                    d.apply_damage("replacement",
+                        (DamagePacket("hp","Fire",12-new_hp),),
+                        event_key=f"g5:dying-defense:{new_hp}",
+                        cause="attested_prior_external_fire",
+                        wound_location_roll=10)
+                    original.hp=1
+                    scene.bridge.start_next_turn(RegenerationChoice())
+                    seq=scene.declare("sentry","original",
+                        profiles=("B06-AT-02","B06-AT-02"),
+                        defenses=("take_hit","guard"))
+                    scene.resolve(seq,0,attack_face=20,
+                        confirmation_face=20,critical_dice=(4,4),
+                        damage_face=6,vigor_die=4)
+                    before=e.serialize()
+                    resources=(sentry.ap_remaining,original.guard_remaining,
+                        replacement.guard_remaining,
+                        replacement.dodge_pressure,
+                        replacement.vigor)
+                    with self.assertRaisesRegex(ValueError,
+                        "Dying redirect target requires Take Hit"):
+                        scene.retarget_remaining(seq,"replacement",
+                            defenses=(invalid_defense,))
+                    self.assertEqual(e.serialize(),before)
+                    self.assertEqual((sentry.ap_remaining,
+                        original.guard_remaining,replacement.guard_remaining,
+                        replacement.dodge_pressure,replacement.vigor),
+                        resources)
+                    self.assertFalse(any(
+                        event["kind"]=="g5_melee_retarget_committed"
+                        for event in e.ledger))
+                    self.assertEqual(len(scene.pending_attack_slots("sentry")),1)
+                    # A valid correction consumes the paid suffix, not
+                    # another AP payment or a fresh Attack Sequence.
+                    scene.retarget_remaining(seq,"replacement",
+                        defenses=("take_hit",))
+                    scene.resolve(seq,1,attack_face=11,damage_face=1,
+                                  vigor_die=4)
+                    self.assertFalse(scene.pending_attack_slots("sentry"))
+                    scene.bridge.end_current_turn()
+                    e.check()
+
+
 if __name__=="__main__":
     unittest.main()
