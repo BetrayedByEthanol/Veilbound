@@ -236,5 +236,162 @@ class HunterG6ATests(unittest.TestCase):
         self.assertIsNone(report["hunter_cr"])
 
 
+    def test_17_repeated_normal_bite_ignores_moderate_without_second_save(self):
+        e,c=setup(front=(3,2))
+        first=c.declare("hunter","prey",profiles=("B06-AT-04",),
+                        defenses=("take_hit",))
+        accepted=c.resolve(first,0,attack_face=10,damage_face=1,
+                           venom_resistance_die=1)
+        self.assertEqual(accepted["damage"]["venom"]["outcome"],"accepted")
+        old=e.g4.toxins.active("prey")
+        original_key,original_markers=old["key"],tuple(old["markers"])
+        c.bridge.end_current_turn()
+        c.bridge.start_next_turn(RegenerationChoice(hp=2))
+        c.bridge.end_current_turn()
+        c.bridge.begin_next_round()
+        c.bridge.start_next_turn(RegenerationChoice())
+        second=c.declare("hunter","prey",profiles=("B06-AT-04",),
+                         defenses=("take_hit",))
+        # The second bite punctures, but the first Moderate poison owns
+        # the one-instance slot. A second resistance d20 is not rolled.
+        repeated=c.resolve(second,0,attack_face=10,damage_face=1)
+        self.assertEqual(repeated["outcome"],"hit")
+        self.assertEqual(repeated["damage"]["venom"],
+                         {"outcome":"ignored","active":original_key})
+        self.assertEqual(len(events(e,"g44_hunter_accepted")),1)
+        self.assertEqual(len(events(e,"g44_hunter_ignored")),1)
+        self.assertEqual(tuple(e.g4.toxins.active("prey")["markers"]),
+                         original_markers)
+        self.assertFalse(c.pending_attack_slots("hunter"))
+        e.check()
+
+    def test_18_pounce_ignores_legacy_moderate_hemotoxin_without_save(self):
+        e,c=setup()
+        e.g4.schedule_hemotoxin(
+            "prey",exposure_key="existing-hm",actual_exposure=True,
+            resistance_total=10,wound_location_roll=8)
+        self.assertEqual(e.g4.short_toxins[0]["key"],"existing-hm")
+        result=c.pounce("hunter","prey",((1,0),)*3,
+                        attack_face=10,damage_face=1,
+                        balance_hunter_face=1,balance_defender_face=20,
+                        balance_ability="Strength")
+        self.assertEqual(result["bite"],"hit")
+        self.assertEqual(result["damage"]["venom"],
+                         {"outcome":"ignored","active":"existing-hm"})
+        self.assertEqual(result["balance"],"held")
+        self.assertEqual(len(events(e,"g44_hunter_accepted")),0)
+        self.assertEqual(len(events(e,"g44_hunter_ignored")),1)
+        self.assertEqual(len(e.g4.short_toxins),1)
+        e.check()
+
+    def test_19_prepared_ward_prevents_bite_without_unused_save(self):
+        e,c=setup(front=(3,2))
+        c.bridge.end_current_turn()
+        c.bridge.start_next_turn(RegenerationChoice())
+        ward=e.g4.venom.cast_endurance(
+            "prey","prey",profile="Self",mode="ward",
+            source_authorized=True,
+            source_reference="test:independently_attested_life_prayer")
+        self.assertIsNotNone(ward)
+        c.bridge.end_current_turn()
+        c.bridge.begin_next_round()
+        c.bridge.start_next_turn(RegenerationChoice())
+        s=c.declare("hunter","prey",profiles=("B06-AT-04",),
+                    defenses=("take_hit",))
+        result=c.resolve(s,0,attack_face=10,damage_face=1)
+        self.assertEqual(result["damage"]["venom"]["outcome"],"prevented")
+        self.assertEqual(len(events(e,"g44_ward_intercepted")),1)
+        self.assertEqual(len(events(e,"g44_hunter_accepted")),0)
+        self.assertFalse(e.g4.venom.effects[ward]["active"])
+        e.check()
+
+    def test_20_active_pounce_prone_suspends_crawl_and_requires_stand(self):
+        from scripts.b06_encounter_state_v0 import RegenerationChoice
+        h=enemy_actor("B06-EN-03","hunter","enemy",
+                      occupied=((2,2),(1,2)))
+        prey=party_actor("A",3,"prey","party",occupied=((6,2),))
+        e=Encounter([h,prey],{"hunter":30,"prey":20},
+                    seed=880,scenario="G6-prone-pounce")
+        g=GridMovement(e,width=12,height=6)
+        e.begin_round()
+        e.start_turn("hunter",regen_choice=RegenerationChoice())
+        g.start_pounce("hunter","prey")
+        for _ in range(3):
+            self.assertTrue(g.step("hunter",(1,0)))
+        self.assertEqual(g.pounce.steps,3)
+        h.conditions.append("Prone")
+        before=(h.occupied,h.mp_remaining,h.ap_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"Standing, not Crawl"):
+            g.crawl_step("hunter",(1,0))
+        self.assertEqual((h.occupied,h.mp_remaining,h.ap_remaining,len(e.ledger)),
+                         before)
+        with self.assertRaisesRegex(ValueError,"must Stand"):
+            g.pounce_contact()
+        self.assertTrue(g.stand("hunter"))
+        self.assertEqual(g.pounce.steps,0)
+        self.assertEqual(g.pounce.spent_mp,10)  # 6 old + 4 Stand
+        self.assertEqual((h.mp_remaining,h.ap_remaining),(14,42))
+        self.assertEqual(len(events(e,"g1_pounce_runup_reset")),1)
+        with self.assertRaisesRegex(ValueError,"three translated"):
+            g.pounce_contact()
+        self.assertEqual(h.ap_remaining,42)
+        g.pounce_abort()
+        self.assertEqual(h.mp_remaining,8)  # Remaining 18-MP Rapid allowance
+        e.check()
+
+    def test_21_aborted_pounce_prone_cannot_crawl_using_rapid_pool(self):
+        h=enemy_actor("B06-EN-03","hunter","enemy",
+                      occupied=((2,2),(1,2)))
+        prey=party_actor("A",3,"prey","party",occupied=((6,2),))
+        e=Encounter([h,prey],{"hunter":30,"prey":20},
+                    seed=881,scenario="G6-prone-rapid")
+        g=GridMovement(e,width=12,height=6)
+        e.begin_round()
+        e.start_turn("hunter",regen_choice=RegenerationChoice())
+        g.start_pounce("hunter","prey")
+        self.assertTrue(g.step("hunter",(1,0)))
+        g.pounce_abort()
+        self.assertEqual(h.mp_remaining,16)
+        self.assertIn("hunter",g.rapid_heading)
+        h.conditions.append("Prone")
+        before=(h.occupied,h.mp_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"Standing, not Crawl"):
+            g.crawl_step("hunter",(1,0))
+        self.assertEqual((h.occupied,h.mp_remaining,len(e.ledger)),before)
+        self.assertTrue(g.stand("hunter"))
+        self.assertEqual(h.mp_remaining,12)
+        self.assertIn("hunter",g.rapid_heading)
+        self.assertTrue(g.step("hunter",(1,0)))
+        self.assertEqual(h.mp_remaining,10)
+        e.check()
+
+    def test_22_three_new_charge_steps_after_stand_preserve_ap_and_mp(self):
+        h=enemy_actor("B06-EN-03","hunter","enemy",
+                      occupied=((2,2),(1,2)))
+        prey=party_actor("A",3,"prey","party",occupied=((9,2),))
+        e=Encounter([h,prey],{"hunter":30,"prey":20},
+                    seed=882,scenario="G6-restarted-runup")
+        g=GridMovement(e,width=12,height=6)
+        e.begin_round()
+        e.start_turn("hunter",regen_choice=RegenerationChoice())
+        g.start_pounce("hunter","prey")
+        for _ in range(3):
+            self.assertTrue(g.step("hunter",(1,0)))
+        h.conditions.append("Prone")
+        self.assertTrue(g.stand("hunter"))
+        self.assertEqual((g.pounce.steps,g.pounce.spent_mp),(0,10))
+        for i in range(3):
+            self.assertTrue(g.step("hunter",(1,0)))
+            self.assertEqual(g.pounce.steps,i+1)
+        self.assertEqual(g.pounce.spent_mp,16)
+        self.assertEqual(h.ap_remaining,42)
+        self.assertTrue(g.pounce_contact(defense="take_hit"))
+        self.assertEqual(h.ap_remaining,18)
+        self.assertEqual(h.mp_remaining,0)
+        self.assertEqual(len(events(e,"action_committed")),1)
+        self.assertEqual(len(events(e,"g1_pounce_bite_committed")),1)
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
