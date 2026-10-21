@@ -532,6 +532,12 @@ class Encounter:
     def end_turn(self):
         if self.current is None or self.pending_regeneration is not None:
             raise ValueError("No resolved open turn")
+        # G5 precommits every sequence slot. Never let a caller bypass
+        # SourceMelee by ending G0 directly (or through a G4.5 bridge)
+        # and thereby erase a paid but still unresolved attack. The
+        # optional hook must run BEFORE round/turn/resources mutate.
+        if getattr(self, "g5", None) is not None:
+            self.g5.assert_turn_completion_allowed(self.current)
         a = self.actors[self.current]
         if self.g1 is not None and self.g1.pounce is not None and self.g1.pounce.hunter_id == a.id:
             raise ValueError("Resolve or explicitly abort ongoing Pounce before turn end")

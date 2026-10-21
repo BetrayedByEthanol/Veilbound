@@ -83,6 +83,40 @@ class SourceMelee:
                           actor=scene_exit.actor_id,
                           square=scene_exit.square,policy=scene_exit.policy_id)
 
+    def pending_attack_slots(self,actor_id=None):
+        """Read the authoritative encounter ledger, never caller receipts.
+
+        A paid slot is unresolved until its exact G5 action index has a
+        later native outcome (resolved or explicitly trigger-cancelled).
+        Look across ALL prior turns/rounds for terminal validation:
+        silently missing an enemy attack cannot be cured by Round Begin.
+        """
+        pending=[]
+        ledger=self.e.ledger
+        for committed in ledger:
+            if committed["kind"]!="g5_melee_sequence_attested":
+                continue
+            d=committed["detail"]
+            if actor_id is not None and d.get("attacker")!=actor_id:
+                continue
+            for slot,index in enumerate(d["action_indices"]):
+                if not any(outcome["index"]>committed["index"]
+                           and outcome["kind"] in (
+                               "g5_melee_resolved","g5_melee_cancelled")
+                           and outcome["detail"].get("action_index")==index
+                           for outcome in ledger):
+                    pending.append({"attacker":d["attacker"],
+                                    "declaration_index":d["declaration_index"],
+                                    "slot":slot,"action_index":index})
+        return tuple(pending)
+
+    def assert_turn_completion_allowed(self,actor_id):
+        """G0 calls before END TURN consumes resources or advances cursor."""
+        if self.pending_attack_slots(actor_id):
+            raise UnresolvedDecision(
+                "Resolve or explicitly cancel every committed G5 attack slot "
+                "before ending the attacker turn")
+
     def assert_movement_allowed(self,actor_id):
         """No ordinary G1 movement while this actor's paid G5 sequence is open.
 
@@ -450,6 +484,13 @@ class SourceMelee:
         time. Independent authority derives from the immutable scene setup,
         combined with a native, completed G1 movement step at that square.
         """
+        # Terminal evidence must not hide ANY unpaid-for-but-unresolved
+        # source attack, even if a caller somehow bypassed the G0 end-turn
+        # hook, or another actor/round subsequently took a turn.
+        if self.pending_attack_slots():
+            raise UnresolvedDecision(
+                "Cannot attest G5 terminal withdrawal with unresolved "
+                "committed attack slots")
         policy=self.scene_exit
         if policy is None:
             raise UnresolvedDecision("No scene-authored exit policy for G5 withdrawal")
@@ -488,16 +529,19 @@ class SourceMelee:
 
     def report(self):
         evidence=self.bridge.report()
+        pending=self.pending_attack_slots()
         return {"scene":self.e.scenario,"seed":self.e.seed,
                 "objective":self.e.objective,
                 "source_provenance":evidence["source_actor_states"],
                 "ending":(
-                    "withdrawal_attested" if any(
+                    "unresolved" if pending
+                    else "withdrawal_attested" if any(
                         x["kind"]=="g5_terminal_exit"
                         for x in self.e.ledger[self.bridge.start:])
                     else "death_attested" if any(a.dead for a in self.e.actors.values())
                     else "unresolved"),
                 "outcomes":deepcopy(evidence["explicit_outcomes"]),
+                "unresolved_attack_slots":deepcopy(pending),
                 "attacks":deepcopy([x["detail"] for x in self.e.ledger
                     if x["kind"]=="g5_melee_resolved"]),
                 "wounds":deepcopy(evidence["wound_creation_events"]),
