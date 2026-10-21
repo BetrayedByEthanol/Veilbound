@@ -468,5 +468,163 @@ class G5SoldierSentryTests(unittest.TestCase):
             list(seq["actions"]))
         e.check()
 
+
+    def test_23_sequence_must_resolve_slots_in_declared_order(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        before=(e.actors["front"].hp,e.actors["front"].vigor,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "Resolve or lose earlier declared attack slots first"):
+            scene.resolve(seq,1,attack_face=1)
+        self.assertEqual((e.actors["front"].hp,e.actors["front"].vigor,
+                          len(e.ledger)),before)
+        self.assertFalse(scene.report()["attacks"])
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(scene.resolve(seq,1,attack_face=1)["outcome"],"miss")
+        self.assertEqual([a["action_index"] for a in scene.report()["attacks"]],
+                         list(seq["actions"]))
+        e.check()
+
+    def test_24_dying_disables_later_precommitted_guard_and_dodge(self):
+        for second_defense in ("guard","dodge"):
+            with self.subTest(second_defense=second_defense):
+                scene=fixed_scene("I2",sentry_state="prepared_start")
+                e=scene.e
+                e.actors["front"].hp=6
+                scene.bridge.start_next_turn(RegenerationChoice())
+                seq=scene.declare("foe","front",
+                        profiles=("B06-AT-02","B06-AT-02"),
+                        defenses=("take_hit",second_defense))
+                guard=e.actors["front"].guard_remaining
+                pressure=e.actors["front"].dodge_pressure
+                first=scene.resolve(seq,0,attack_face=11,damage_face=1,
+                                    vigor_die=4,wound_location_roll=10)
+                self.assertEqual(first["damage"]["hp_loss"],6)
+                self.assertEqual(e.actors["front"].hp,0)
+                self.assertFalse(e.actors["front"].dead)
+                # Attack 2+7=9 cannot beat the precommitted active defense,
+                # but an unconscious defender can only Take Hit.
+                second=scene.resolve(seq,1,attack_face=2,damage_face=1,
+                                     vigor_die=4)
+                self.assertEqual(second["outcome"],"hit")
+                self.assertEqual(second["defense"],"take_hit")
+                self.assertEqual(second["declared_defense"],second_defense)
+                self.assertIsNone(second["defense_value"])
+                self.assertEqual(e.actors["front"].hp,-6)
+                self.assertEqual(e.actors["front"].guard_remaining,guard)
+                self.assertEqual(e.actors["front"].dodge_pressure,pressure)
+                fallback=[x for x in e.ledger
+                          if x["kind"]=="g5_defense_unavailable_fallback"]
+                self.assertEqual(len(fallback),1)
+                self.assertEqual(fallback[0]["detail"]["declared"],second_defense)
+                self.assertEqual(fallback[0]["detail"]["resolved"],"take_hit")
+                self.assertEqual(len(e.actors["front"].wounds),1)
+                e.check()
+
+    def test_25_missing_enchanted_vigor_die_does_not_commit_roll_or_response(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02",),defenses=("take_hit",))
+        before=(e.actors["front"].hp,e.actors["front"].vigor,len(e.ledger))
+        for die in (None,0,7,"4"):
+            with self.subTest(vigor_die=die):
+                with self.assertRaisesRegex(ValueError,
+                                            "enchanted-sword d6"):
+                    scene.resolve(seq,0,attack_face=11,damage_face=4,
+                                  vigor_die=die)
+                self.assertEqual((e.actors["front"].hp,
+                                  e.actors["front"].vigor,len(e.ledger)),before)
+        self.assertFalse([x for x in e.ledger if x["kind"] in (
+            "g5_melee_roll","g5_melee_resolved","response_window_open")])
+        # An invalid, unrecorded dice proposal does not spend the committed
+        # attack: a genuine legal miss may still be resolved exactly once.
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(len(scene.report()["attacks"]),1)
+        e.check()
+
+    def test_26_missing_wound_location_preflight_keeps_attack_unrolled(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        e.actors["front"].hp=9
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02",),defenses=("take_hit",))
+        prior=(e.actors["front"].hp,len(e.actors["front"].wounds),
+               len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "wound-location d20 required"):
+            scene.resolve(seq,0,attack_face=11,damage_face=4,vigor_die=4)
+        self.assertEqual((e.actors["front"].hp,
+                          len(e.actors["front"].wounds),
+                          len(e.ledger)),prior)
+        self.assertFalse([x for x in e.ledger if x["kind"]=="g5_melee_roll"])
+        result=scene.resolve(seq,0,attack_face=11,damage_face=4,
+                             vigor_die=4,wound_location_roll=14)
+        self.assertEqual(result["damage"]["hp_loss"],9)
+        self.assertEqual(e.actors["front"].hp,0)
+        self.assertEqual(len(e.actors["front"].wounds),1)
+        self.assertEqual(sum(x["kind"]=="g5_melee_roll" for x in e.ledger),1)
+        e.check()
+
+    def test_27_live_prone_bonus_and_penalty_control_melee_and_confirmation(self):
+        for attacker_prone,target_prone,expected_modifier,face,expected in (
+            (False,True,2,10,"hit"),
+            (True,False,-2,12,"miss"),
+            (True,True,-2,12,"miss"),
+            (False,False,0,12,"hit"),
+        ):
+            with self.subTest(attacker_prone=attacker_prone,
+                              target_prone=target_prone):
+                e,scene=crossed_scene()
+                if attacker_prone:
+                    e.actors["sentry"].conditions.append("Prone")
+                if target_prone:
+                    e.actors["soldier"].conditions.append("Prone")
+                scene.bridge.start_next_turn(RegenerationChoice())
+                seq=scene.declare("sentry","soldier",
+                                  profiles=("B06-AT-02",),defenses=("guard",))
+                result=scene.resolve(seq,0,attack_face=face,
+                   damage_face=1 if expected=="hit" else None,
+                   vigor_die=4 if expected=="hit" else None)
+                self.assertEqual(result["prone_modifier"],expected_modifier)
+                self.assertEqual(result["outcome"],expected)
+                self.assertEqual(result["attack_total"],face+7+expected_modifier)
+                roll=next(x["detail"] for x in e.ledger
+                          if x["kind"]=="g5_melee_roll")
+                self.assertEqual(roll["source_attack_bonus"],7)
+                self.assertEqual(roll["prone_modifier"],expected_modifier)
+                e.check()
+
+    def test_28_prone_applies_to_natural20_guard_confirmation_too(self):
+        for attacker_prone,target_prone,confirmation,expected in (
+            (False,True,10,"critical"),
+            (True,False,10,"strong"),
+            (True,True,10,"strong"),
+        ):
+            with self.subTest(attacker_prone=attacker_prone,
+                              target_prone=target_prone):
+                e,scene=crossed_scene()
+                if attacker_prone:
+                    e.actors["sentry"].conditions.append("Prone")
+                if target_prone:
+                    e.actors["soldier"].conditions.append("Prone")
+                scene.bridge.start_next_turn(RegenerationChoice())
+                seq=scene.declare("sentry","soldier",
+                          profiles=("B06-AT-02",),defenses=("guard",))
+                critical_dice=(1,1) if expected=="critical" else (1,)
+                result=scene.resolve(seq,0,attack_face=20,
+                          confirmation_face=confirmation,
+                          critical_dice=critical_dice,damage_face=1,
+                          vigor_die=4,wound_location_roll=None)
+                self.assertEqual(result["critical"],expected)
+                self.assertEqual(e.actors["soldier"].wounds,[])
+                e.check()
+
 if __name__=="__main__":
     unittest.main()
