@@ -294,7 +294,8 @@ class HunterCombat(SourceMelee):
                 balance_result = "automatic_unable_to_contest"
                 t.conditions.append("Prone")
             else:
-                pressure = balance_hunter_face + 4
+                pressure = (balance_hunter_face + 4 +
+                            e.g4.toxins.modifier(hunter, "muscular_strength"))
                 resistance = (balance_defender_face + defender_modifier +
                               e.g4.toxins.modifier(target, "muscular_strength")
                               if balance_ability == "Strength" else
@@ -337,7 +338,8 @@ class HunterCombat(SourceMelee):
             raise ValueError("Horn Drive requires a standing front-adjacent prey")
         pressure_face = _face(pressure_face, 20, "Horn Drive pressure")
         resistance_face = _face(resistance_face, 20, "Horn Drive resistance")
-        pressure = pressure_face + self._ability(h, "Strength")
+        pressure = (pressure_face + self._ability(h, "Strength") +
+                    e.g4.toxins.modifier(hunter_id, "muscular_strength"))
         resist = (resistance_face + self._ability(t, "Strength") + 2 +
                   e.g4.toxins.modifier(target_id, "muscular_strength"))
         forward = (h.occupied[0][0]-h.occupied[1][0],
