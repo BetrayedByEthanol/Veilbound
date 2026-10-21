@@ -10,9 +10,24 @@ This path logs distinct protected-hit provenance, NOT a fictional G4.5
 ordinary-target proof: Body Take Hit intentionally changes recipient.
 """
 from copy import deepcopy
+from dataclasses import dataclass
 
 from scripts.b06_encounter_state_v0 import Response, Trigger, UnresolvedDecision
 from scripts.b06_soldier_sentry_g5_v0 import _face
+
+
+@dataclass(frozen=True)
+class PreparedBite:
+    actor_id: str
+    ward_id: str
+    hunter_id: str
+    method: str
+    trigger_key: str
+    label: str
+    delta: tuple
+    final_cell: tuple
+    reserved_mp: int
+    source_digest: str
 
 
 class ReactiveHunterProtection:
@@ -21,6 +36,7 @@ class ReactiveHunterProtection:
         if e.g1 is None or e.g3 is None or e.g4 is None or e.g5 is not combat:
             raise UnresolvedDecision("Protective Hunter Bite requires live G1/G4/G5")
         self.c,self.e=combat,e
+        self.prepared={}
 
     def _eligibility(self,attacker,ward,protector,method):
         e=self.e
@@ -51,10 +67,61 @@ class ReactiveHunterProtection:
             raise ValueError("Ready Shield and normal Guard capacity required")
         return h,w,p
 
+    def prepare(self,protector_id,ward_id,*,method,delta,trigger_key):
+        """Precommit one actual G1 MP Interception and protective choice.
+
+        The route is frozen on the Guardian's own turn, before the future
+        Bite action ID exists. This scenario uses exactly one unthreatened
+        cardinal movement step. The future response MUST release this
+        exact G0 reservation; no free spontaneous Reaction substitutes it.
+        """
+        e=self.e
+        hunters=[a.id for a in e.actors.values()
+                 if a.source.source_id=="B06-EN-03"]
+        if len(hunters)!=1 or protector_id not in e.actors or ward_id not in e.actors:
+            raise UnresolvedDecision("One sourced Hunter and two PCs required")
+        hunter_id=hunters[0]
+        p=e.actors[protector_id]
+        if (e.current!=protector_id or e.pending_regeneration is not None
+                or p.source.source_id!="B"
+                or method not in ("shield_guard","body_take_hit")):
+            raise UnresolvedDecision("Only source Guardian on own ready turn may prepare")
+        if (type(trigger_key) is not str or
+                trigger_key!=f"g6d:prepared:{hunter_id}:{ward_id}:next_bite"):
+            raise UnresolvedDecision("Prepared trigger must name next Hunter Bite against ward")
+        if any(v.trigger_key==trigger_key for v in self.prepared.values()):
+            raise ValueError("One pending prepared protection per named incoming Bite")
+        delta=tuple(delta)
+        if delta not in ((1,0),(-1,0),(0,1),(0,-1)):
+            raise UnresolvedDecision("Bounded Prepared Intervene needs one cardinal step")
+        destination,cost,kind,allies=e.g1.preview(protector_id,delta=delta)
+        if (kind!="orthogonal" or allies
+                or e.g1._threats(protector_id,destination,False)):
+            raise UnresolvedDecision("Prepared route needs safe legal unthreatened step")
+        before=p.occupied
+        try:
+            p.occupied=destination
+            self._eligibility(hunter_id,ward_id,protector_id,method)
+        finally:
+            p.occupied=before
+        if p.mp_remaining<cost:
+            raise ValueError("Insufficient MP to precommit prepared route")
+        label=e.g1.reserve_movement(protector_id,trigger_key,cost,
+                                    label=f"protect:{ward_id}:{method}")
+        self.prepared[label]=PreparedBite(
+            protector_id,ward_id,hunter_id,method,trigger_key,label,
+            delta,destination[0],cost,p.source.digest)
+        e.log("g6d_prepared_protection_reserved",
+              actor=protector_id,ward=ward_id,hunter=hunter_id,
+              method=method,trigger=trigger_key,
+              label=label,delta=delta,final_cell=destination[0],
+              mp_reserved=cost,source_digest=p.source.digest)
+        return label
+
     def resolve(self,sequence,*,protector_id,method,attack_face,
                 damage_face=None,confirmation_face=None,critical_dice=(),
                 wound_location_roll=None,venom_resistance_die=None,
-                venom_resistance_modifier=0):
+                venom_resistance_modifier=0,prepared_label=None):
         e,c=self.e,self.c
         if (type(sequence) is not dict or sequence.get("profiles")!=("B06-AT-04",)
                 or len(sequence.get("actions",()))!=1
@@ -67,9 +134,37 @@ class ReactiveHunterProtection:
             raise ValueError("Distinct source actors required")
         if e.current!=attacker or e.pending_regeneration is not None:
             raise ValueError("Protector resolves during current Hunter attack only")
-        h,w,p=self._eligibility(attacker,ward,protector_id,method)
-        if not p.reaction_available:
-            raise ValueError("Guardian Reaction unavailable")
+        prepared=None
+        if prepared_label is not None:
+            if type(prepared_label) is not str or prepared_label not in self.prepared:
+                raise UnresolvedDecision("No genuine prior Prepared Intervene reservation")
+            prepared=self.prepared[prepared_label]
+            if (prepared.actor_id!=protector_id or prepared.ward_id!=ward
+                    or prepared.hunter_id!=attacker or prepared.method!=method
+                    or prepared.source_digest!=e.actors[protector_id].source.digest):
+                raise UnresolvedDecision("Prepared reservation changed ward/method/source")
+            p=e.actors[protector_id]
+            before=p.occupied
+            try:
+                p.occupied=(prepared.final_cell,)
+                h,w,p=self._eligibility(attacker,ward,protector_id,method)
+            finally:
+                p.occupied=before
+            matching=[r for r in e.reservations
+                      if r.label==prepared.label
+                      and r.trigger_key==prepared.trigger_key
+                      and r.actor_id==protector_id]
+            reservation=e.g1.motion.get(prepared.label)
+            if (len(matching)!=1 or reservation is None
+                    or reservation.reserved_mp!=prepared.reserved_mp
+                    or reservation.steps!=0 or reservation.spent_mp!=0
+                    or any(r.trigger_key==prepared.trigger_key
+                           and r.label!=prepared.label for r in e.reservations)):
+                raise UnresolvedDecision("Prepared G1 saved MP or trigger provenance invalid")
+        else:
+            h,w,p=self._eligibility(attacker,ward,protector_id,method)
+            if not p.reaction_available:
+                raise ValueError("Guardian Reaction unavailable")
         if type(venom_resistance_modifier) is not int:
             raise ValueError("Venom resistance modifier must be integer")
         if venom_resistance_die is not None:
@@ -112,9 +207,10 @@ class ReactiveHunterProtection:
                        and x["detail"].get("action_index")==action_index
                        for x in e.ledger)):
             raise UnresolvedDecision("Bite slot already used or another pending attack")
-        key=f"g5:melee:{action_index}"
-        if any(r.trigger_key==key for r in e.reservations):
-            raise UnresolvedDecision("Prepared Intervene needs native MP movement executor")
+        key=(prepared.trigger_key if prepared is not None
+             else f"g5:melee:{action_index}")
+        if prepared is None and any(r.trigger_key==key for r in e.reservations):
+            raise UnresolvedDecision("Reserved Interception needs explicit executor")
         declared=d["detail"]["defense"]
         original_defense="take_hit" if w.hp<=0 else declared
         original_value=(None if original_defense=="take_hit"
@@ -177,14 +273,47 @@ class ReactiveHunterProtection:
         elif damage_face is not None or wound_location_roll is not None:
             raise ValueError("Stopped/missed Bite cannot invent damage or a wound")
         trigger=Trigger(key,attacker,ward)
-        choice=Response(protector_id,"reaction",
-                        f"g6d:reactive:{method}:{action_index}")
+        choice=(None if prepared is not None else
+                Response(protector_id,"reaction",
+                         f"g6d:reactive:{method}:{action_index}"))
         live=[]
         def recheck(encounter,tr):
             tr.legal=(encounter.current==attacker and
                       c._contact(attacker,ward) and
                       encounter.actors[attacker].hp>0 and
                       not encounter.actors[ward].dead)
+            if tr.legal and prepared is not None:
+                # A prepared movement is the ONLY conditional protection
+                # authority after it really reaches the original attack.
+                self._eligibility(attacker,ward,protector_id,method)
+        def on_interception(encounter,tr,res):
+            if (prepared is None or res.label!=prepared.label
+                    or res.actor_id!=protector_id
+                    or tr.key!=prepared.trigger_key):
+                raise UnresolvedDecision("Unrecognized source MP Interception")
+            entry=e.g1.motion.pop(res.label,None)
+            if entry is None or entry.steps!=0 or entry.spent_mp!=0:
+                raise UnresolvedDecision("Prepared MP already consumed")
+            released=next((x for x in reversed(e.ledger)
+                           if x["kind"]=="interception_released"
+                           and x["detail"].get("actor")==protector_id
+                           and x["detail"].get("trigger")==key
+                           and x["detail"].get("label")==res.label),None)
+            if released is None:
+                raise UnresolvedDecision("G0 never released promised MP reservation")
+            moved=e.g1._movement(
+                protector_id,delta=prepared.delta,reserved=entry,
+                trigger_key=f"{key}:saved_mp_step",responses=())
+            if (moved is not True or entry.steps!=1
+                    or entry.spent_mp!=prepared.reserved_mp
+                    or e.actors[protector_id].occupied!=(prepared.final_cell,)):
+                raise UnresolvedDecision("Prepared protector failed original G1 move")
+            self._eligibility(attacker,ward,protector_id,method)
+            e.log("g6d_prepared_protection_arrived",
+                  actor=protector_id,ward=ward,trigger=key,
+                  release_index=released["index"],
+                  mp_spent=entry.spent_mp,steps=entry.steps)
+            live.append(released["index"])
         def on_response(encounter,tr,response):
             if not encounter.is_live_spontaneous(tr,response) or response!=choice:
                 raise UnresolvedDecision("Protection requires live G0 Reaction")
@@ -197,11 +326,15 @@ class ReactiveHunterProtection:
             if receipt is None:
                 raise UnresolvedDecision("No native Reaction payment evidence")
             live.append(receipt["index"])
-        valid=e.response_window(trigger,on_interception=lambda *args: None,
-                                spontaneous=(choice,),on_spontaneous=on_response,
-                                after_interceptions=recheck)
+        valid=e.response_window(
+            trigger,on_interception=on_interception,
+            spontaneous=() if prepared is not None else (choice,),
+            on_spontaneous=None if prepared is not None else on_response,
+            after_interceptions=recheck)
         if not valid or len(live)!=1:
-            raise UnresolvedDecision("Protective response did not reach live original Bite")
+            raise UnresolvedDecision("Protection did not reach live original Bite")
+        if prepared is not None:
+            del self.prepared[prepared.label]
         shield_event=None
         if method=="shield_guard" and original_hit:
             defense_before=len(e.ledger)
@@ -217,7 +350,8 @@ class ReactiveHunterProtection:
               attack_face=face,source_attack_bonus=source_bonus,
               attack_bonus=source_bonus,attack_total=total,
               confirmation_face=confirm,critical=critical,
-              hit=hit,spontaneous_policy="g6d:reactive_intervene")
+              hit=hit,spontaneous_policy=("g6d:prepared_intervene"
+                    if prepared is not None else "g6d:reactive_intervene"))
         damage=None
         if hit:
             damage=e.g4.apply_profile_hit(
@@ -234,7 +368,10 @@ class ReactiveHunterProtection:
         e.log("g6d_protective_bite_attested",
               action_index=action_index,declaration_index=declaration,
               ward_defense_index=defense_index,
-              reaction_index=live[0],shield_defense_index=shield_event,
+              reaction_index=live[0] if prepared is None else None,
+              interception_index=live[0] if prepared is not None else None,
+              activation="prepared" if prepared is not None else "reactive",
+              shield_defense_index=shield_event,
               attacker=attacker,ward=ward,protector=protector_id,
               method=method,original_hit=original_hit,
               original_defense=original_defense,
@@ -255,5 +392,7 @@ class ReactiveHunterProtection:
                 "original_hit":original_hit,"critical":critical,
                 "recipient":recipient if hit else None,
                 "damage":deepcopy(damage),
-                "reaction_index":live[0],"shield_defense_index":shield_event,
+                "reaction_index":live[0] if prepared is None else None,
+                "interception_index":live[0] if prepared is not None else None,
+                "shield_defense_index":shield_event,
                 "action_index":action_index}
