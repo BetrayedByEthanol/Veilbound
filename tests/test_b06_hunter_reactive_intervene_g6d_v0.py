@@ -19,6 +19,37 @@ def logged(e,kind):
     return [x for x in e.ledger if x["kind"]==kind]
 
 
+def prepared_witness(*,method="shield_guard"):
+    """One actually reserved B own-turn MP step, released next Hunter turn."""
+    combat=mixed_scene(size=4,level=3,seed=655)
+    e=combat.e
+    protector=ReactiveHunterProtection(combat)
+    combat.bridge.start_next_turn(RegenerationChoice())
+    original=combat.declare(
+        "hunter","vanguard",profiles=("B06-AT-04",),defenses=("guard",))
+    combat.resolve(original,0,attack_face=1)
+    combat.bridge.end_current_turn()
+    combat.bridge.start_next_turn(RegenerationChoice())
+    combat.bridge.end_current_turn()
+    combat.bridge.start_next_turn(RegenerationChoice())
+    assert e.current=="guardian"
+    assert e.g1.step("guardian",(1,0),responses=())
+    label=protector.prepare(
+        "guardian","vanguard",method=method,delta=(-1,0),
+        trigger_key="g6d:prepared:hunter:vanguard:next_bite")
+    combat.bridge.end_current_turn()
+    for ident in ("archer","scholar"):
+        combat.bridge.start_next_turn(RegenerationChoice())
+        assert e.current==ident
+        combat.bridge.end_current_turn()
+    combat.bridge.begin_next_round()
+    combat.bridge.start_next_turn(RegenerationChoice())
+    assert e.current=="hunter"
+    seq=combat.declare(
+        "hunter","vanguard",profiles=("B06-AT-04",),defenses=("dodge",))
+    return combat,protector,seq,label
+
+
 class ReactiveHunterInterveneTests(unittest.TestCase):
     def test_01_reactive_shield_stops_would_hit_for_one_guard_and_reaction(self):
         combat,protection,seq=witness()
@@ -168,6 +199,103 @@ class ReactiveHunterInterveneTests(unittest.TestCase):
                                method="shield_guard",attack_face=10)
         self.assertEqual(len(logged(e,"g5_melee_resolved")),1)
         combat.bridge.end_current_turn()
+        e.check()
+
+
+    def test_11_prepared_shield_releases_real_mp_and_preserves_reaction(self):
+        combat,protect,seq,label=prepared_witness()
+        e=combat.e
+        p=e.actors["guardian"]
+        self.assertTrue(p.reaction_available)
+        before_guard=p.guard_remaining
+        before_mp=p.mp_remaining
+        self.assertEqual(p.occupied,((4,3),))
+        r=protect.resolve(seq,protector_id="guardian",
+                          method="shield_guard",prepared_label=label,
+                          attack_face=10)
+        self.assertEqual(r["outcome"],"shield_stopped")
+        self.assertIsNone(r["reaction_index"])
+        self.assertIsNotNone(r["interception_index"])
+        self.assertTrue(p.reaction_available)
+        self.assertEqual(p.guard_remaining,before_guard-1)
+        self.assertEqual(p.mp_remaining,before_mp)
+        self.assertEqual(p.occupied,((3,3),))
+        self.assertEqual(len(logged(e,"g1_movement_step")
+                             ),2)
+        self.assertEqual(len(logged(e,"interception_released")),1)
+        att=logged(e,"g6d_protective_bite_attested")[-1]["detail"]
+        self.assertEqual(att["activation"],"prepared")
+        self.assertIsNone(att["reaction_index"])
+        self.assertEqual(att["interception_index"],r["interception_index"])
+        self.assertFalse(combat.pending_attack_slots("hunter"))
+        e.check()
+
+    def test_12_prepared_body_receives_real_bite_without_spending_reaction(self):
+        combat,protect,seq,label=prepared_witness(method="body_take_hit")
+        e=combat.e
+        p=e.actors["guardian"]
+        before=(e.actors["vanguard"].hp,p.hp,p.guard_remaining)
+        r=protect.resolve(seq,protector_id="guardian",
+                          method="body_take_hit",prepared_label=label,
+                          attack_face=10,damage_face=6,
+                          venom_resistance_die=20)
+        self.assertEqual(r["outcome"],"body_hit")
+        self.assertEqual(r["recipient"],"guardian")
+        self.assertEqual((e.actors["vanguard"].hp,p.hp,p.guard_remaining),
+                         (before[0],before[1]-5,before[2]))
+        self.assertTrue(p.reaction_available)
+        self.assertIsNotNone(r["interception_index"])
+        self.assertIsNone(r["reaction_index"])
+        self.assertEqual(len(logged(e,"g4_profile_hit")),1)
+        e.check()
+
+    def test_13_prepared_binding_rejects_wrong_method_before_mp_release(self):
+        combat,protect,seq,label=prepared_witness()
+        e=combat.e
+        before=(len(e.ledger),e.actors["guardian"].occupied,
+                len(e.reservations),e.actors["guardian"].reaction_available)
+        with self.assertRaisesRegex(UnresolvedDecision,"changed ward/method"):
+            protect.resolve(seq,protector_id="guardian",
+                            method="body_take_hit",prepared_label=label,
+                            attack_face=10,damage_face=6,
+                            venom_resistance_die=20)
+        self.assertEqual((len(e.ledger),e.actors["guardian"].occupied,
+                          len(e.reservations),
+                          e.actors["guardian"].reaction_available),before)
+        self.assertFalse(logged(e,"interception_released"))
+        e.check()
+
+    def test_14_prepared_without_authentic_reservation_cannot_spend_mp(self):
+        combat,protect,seq,label=prepared_witness()
+        e=combat.e
+        before=(len(e.ledger),e.actors["guardian"].occupied,
+                len(e.reservations))
+        with self.assertRaisesRegex(UnresolvedDecision,"genuine prior"):
+            protect.resolve(seq,protector_id="guardian",
+                            method="shield_guard",
+                            prepared_label="G1-MP:999:forged",
+                            attack_face=10)
+        self.assertEqual((len(e.ledger),e.actors["guardian"].occupied,
+                          len(e.reservations)),before)
+        e.check()
+
+    def test_15_illegal_prepared_route_rejected_before_reservation_spend(self):
+        combat=mixed_scene(size=4,level=3,seed=656)
+        e=combat.e
+        protect=ReactiveHunterProtection(combat)
+        for ident in ("hunter","vanguard"):
+            combat.bridge.start_next_turn(RegenerationChoice())
+            combat.bridge.end_current_turn()
+        combat.bridge.start_next_turn(RegenerationChoice())
+        p=e.actors["guardian"]
+        before=(p.mp_remaining,len(e.reservations),len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"physically cover"):
+            protect.prepare(
+                "guardian","vanguard",method="shield_guard",
+                delta=(1,0),
+                trigger_key="g6d:prepared:hunter:vanguard:next_bite")
+        self.assertEqual((p.mp_remaining,len(e.reservations),len(e.ledger)),
+                         before)
         e.check()
 
 

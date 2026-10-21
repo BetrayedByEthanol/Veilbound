@@ -1,8 +1,8 @@
 # B06 G6-D — Encounter Completion and Missing Combat Integration v0
 
-> **G6-D first executable slice:** native G2 Bow contact → G4 physical
+> **G6-D bounded integration:** native G2 Bow contact → G4 physical
 > HP/critical/wounds, and a source-attested four-PC Hunter-death terminal.
-> This is **not** full protective Reaction coverage, all projected
+> This is **not** full multi-geometry protective coverage, all projected
 > projectile types, or a completed difficulty/CR certification. Do not
 > treat these outstanding interfaces as if they were already executable.
 
@@ -107,17 +107,48 @@ A/B/head-forward contact scene with a direct, physically reachable
 melee path. It does not generalize a magical/area/arrow protector,
 multi-attack chain, alternate NPC/body geometry, or a prepared route.
 
-**Prepared Protective Intervene remains outstanding**. Moving the
-protector using reserved MP before the original attack's final line
-check needs a distinct G1 Movement Interception executor, live
-post-movement eligibility, and conditional Guard/Body effects.
-The Reactive pathway must not be used to grant free movement, to
-recycle a spent Reaction or to treat an earlier historical response
-as current protection.
+### Prepared Intervene — source-bound single-step case
+
+The same [protector adapter](../../scripts/b06_hunter_reactive_intervene_g6d_v0.py)
+now supports **one authored Prepared Intervene route** against the
+next Hunter Bite on Vanguard A. On Guardian B's own turn,
+`prepare()` must specify its ward, fixed **Shield Guard or Body Take
+Hit**, the exact meaningful next-Bite trigger, and one lawful
+**cardinal G1 movement step** into an independently checked protective
+position. It uses genuine `G1.reserve_movement()`, committing the
+positive route MP immediately. It requires an uncontested destination
+without an Opportunity: nested attacks and threatened prepared routes
+require a later source-attested resolver. The feature does not bundle
+a free physical action or Reaction.
+
+When the original paid G5 Hunter Bite is declared on the later round,
+`resolve(prepared_label=...)` verifies the **same** immutable
+reservation label, Guardian source digest, predeclared method/ward,
+saved MP and original attack payment. Native G0 releases the reserved
+Movement Interception **before** spontaneous responses; G1
+`_movement(...,reserved=entry)` executes and logs exactly one actual
+step. The adapter then rechecks the actual protective reach and
+applies the **same conditional Shield Guard versus Body Take Hit**
+resolution, including the one natural-20 critical procedure and true
+G4/venom recipient. The Guardian's Reaction is **preserved**.
+Precommitted MP is never refunded or spent again at release. One
+reservation cannot protect two attacks.
+
+This is a deliberately bounded, otherwise-uncontested source case,
+**not a general-purpose prepared movement engine**. The unresolved
+cases include route interruption/Opportunities, lost shield or changed
+geometry between reservation and release (which must eventually
+fall back without offering a new defense), multi-step routes, more
+than one protector, Bow/area delivery, and timing when the originally
+declared attack is cancelled. These must not silently gain free
+protective movement or a transferred hit.
+
+The Reactive pathway must not grant free movement, recycle a spent
+Reaction, or treat a historical response as current protection.
 
 A bounded four-PC Hunter death terminal is a genuine outcome
 witness, but **complete mixed-party encounter certification remains
-false**: full Bow lanes, Prepared Intervene and broader reactive geometry, true party tactical
+false**: full Bow lanes, broader Intervene geometry and response interruption, true party tactical
 choice/withdrawal paths, alternative adverse conditions and
 calibration still need testing. **No Hunter CR has been assigned.**
 The original signed Phase 3 4096-trial audit remains untouched.
