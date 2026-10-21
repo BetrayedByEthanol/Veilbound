@@ -118,7 +118,8 @@ class G6BTests(unittest.TestCase):
                       defenses=("guard",))
         self.assertEqual(e.actors["a"].ap_remaining,ap)
         self.assertFalse(events(e,"attack_sequence_committed"))
-        self.assertEqual(e.actors["hunter"].guard_remaining,0)
+        self.assertEqual(e.actors["hunter"].guard_remaining,1)
+        self.assertIsNone(e.actors["hunter"].guard_instrument)
         e.check()
 
     def test_06_player_wound_requires_precommitted_location_before_roll(self):
@@ -202,22 +203,29 @@ class G6BTests(unittest.TestCase):
         e.check()
 
     def test_11_invalid_opportunity_rejected_before_reaction_or_movement(self):
-        e,c=scene()
+        # The PC is deliberately too far away to threaten *any* Hunter
+        # departure cell. A sidestep that leaves a threatened cell can
+        # legitimately provoke even when the mover stays adjacent.
+        e,c=scene(a_pos=(7,2))
         original=(e.actors["hunter"].occupied,
                   e.actors["a"].reaction_available,
                   e.actors["a"].opportunity_used,len(e.ledger))
         with self.assertRaises(UnresolvedDecision):
-            c.step_with_opportunity("hunter",(0,-1),"a",attack_face=12,
+            c.step_with_opportunity("hunter",(-1,0),"a",attack_face=12,
                                     damage_face=2)
         self.assertEqual((e.actors["hunter"].occupied,
                           e.actors["a"].reaction_available,
                           e.actors["a"].opportunity_used,len(e.ledger)),original)
-        with self.assertRaises(UnresolvedDecision):
-            c.step_with_opportunity("hunter",(-1,0),"a",
-                                    defense="guard",attack_face=10,
-                                    damage_face=2)
-        self.assertEqual(e.actors["a"].opportunity_used,0)
         e.check()
+
+        normal,combat=scene()
+        with self.assertRaises(UnresolvedDecision):
+            combat.step_with_opportunity("hunter",(-1,0),"a",
+                                         defense="guard",attack_face=10,
+                                         damage_face=2)
+        self.assertEqual(normal.actors["a"].opportunity_used,0)
+        self.assertTrue(normal.actors["a"].reaction_available)
+        normal.check()
 
     def test_12_missing_wound_roll_blocks_response_before_reaction_spend(self):
         e,c=scene()
