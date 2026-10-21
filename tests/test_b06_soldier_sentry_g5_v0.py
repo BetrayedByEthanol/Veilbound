@@ -600,7 +600,8 @@ class G5SoldierSentryTests(unittest.TestCase):
                     e.actors["soldier"].conditions.append("Prone")
                 scene.bridge.start_next_turn(RegenerationChoice())
                 seq=scene.declare("sentry","soldier",
-                                  profiles=("B06-AT-02",),defenses=("guard",))
+                                  profiles=("B06-AT-02",),defenses=("guard",),
+                                  prone_guard_feasible=target_prone)
                 result=scene.resolve(seq,0,attack_face=face,
                    damage_face=1 if expected=="hit" else None,
                    vigor_die=4 if expected=="hit" else None)
@@ -628,7 +629,8 @@ class G5SoldierSentryTests(unittest.TestCase):
                     e.actors["soldier"].conditions.append("Prone")
                 scene.bridge.start_next_turn(RegenerationChoice())
                 seq=scene.declare("sentry","soldier",
-                          profiles=("B06-AT-02",),defenses=("guard",))
+                          profiles=("B06-AT-02",),defenses=("guard",),
+                          prone_guard_feasible=target_prone)
                 critical_dice=(1,1) if expected=="critical" else (1,)
                 result=scene.resolve(seq,0,attack_face=20,
                           confirmation_face=confirmation,
@@ -1113,6 +1115,120 @@ class G5SoldierSentryTests(unittest.TestCase):
         self.assertFalse(scene.report()["unresolved_attack_slots"])
         scene.bridge.end_current_turn()
         self.assertEqual(e.cursor,1)
+        e.check()
+
+
+
+    def test_43_direct_g0_declaration_does_not_strand_paid_g5_attack(self):
+        scene=fixed_scene("I1",seed=9243)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        foe,front=e.actors["foe"],e.actors["front"]
+        before=(foe.ap_remaining,front.guard_remaining,
+                front.dodge_pressure,len(e.ledger),set(e.seen_sequences))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "G5 requires SourceMelee.declare"):
+            e.declare_sequence("foe","front",("B06-AT-03",),("guard",))
+        self.assertEqual((foe.ap_remaining,front.guard_remaining,
+                          front.dodge_pressure,len(e.ledger),
+                          set(e.seen_sequences)),before)
+        self.assertFalse(scene.pending_attack_slots())
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        self.assertEqual(scene.report()["attacks"],[])
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("guard",))
+        self.assertEqual(len(scene.pending_attack_slots()),1)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "committed G5 attack slot"):
+            e.end_turn()
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots())
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        for _ in range(2):
+            self.assertTrue(e.g1.step("front",(-1,0),
+                                     responses=lambda eligible:()))
+        self.assertEqual(scene.withdraw("front")["status"],
+                         "withdrawal_attested")
+        self.assertEqual(scene.report()["ending"],"withdrawal_attested")
+        self.assertEqual(len(scene.report()["attacks"]),1)
+        e.check()
+
+    def test_44_prone_guard_requires_feasible_instrument_before_payment(self):
+        scene=fixed_scene("I1",seed=9244)
+        e=scene.e
+        front=e.actors["front"]
+        front.conditions.append("Prone")
+        scene.bridge.start_next_turn(RegenerationChoice())
+        foe=e.actors["foe"]
+        before=(foe.ap_remaining,front.guard_remaining,
+                front.dodge_pressure,len(e.ledger),
+                set(e.seen_sequences))
+        for feasible in (None,False):
+            with self.subTest(feasible=feasible):
+                with self.assertRaisesRegex(UnresolvedDecision,
+                    "Prone Guard requires explicit instrument feasibility"):
+                    scene.declare("foe","front",
+                                  profiles=("B06-AT-03",),defenses=("guard",),
+                                  prone_guard_feasible=feasible)
+                self.assertEqual(
+                    (foe.ap_remaining,front.guard_remaining,
+                     front.dodge_pressure,len(e.ledger),
+                     set(e.seen_sequences)),before)
+        self.assertFalse(scene.pending_attack_slots())
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("guard",),prone_guard_feasible=True)
+        self.assertEqual(foe.ap_remaining,before[0]-foe.physical_ap)
+        self.assertEqual(front.guard_remaining,before[1]-1)
+        attested=next(x["detail"] for x in e.ledger
+                      if x["kind"]=="g5_melee_sequence_attested")
+        self.assertTrue(attested["prone_guard_feasible"])
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(front.hp,front.hp_max)
+        e.check()
+
+    def test_45_newly_prone_guard_requires_precommitted_feasibility(self):
+        scene=fixed_scene("I1",seed=9245)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("guard",))
+        front,foe=e.actors["front"],e.actors["foe"]
+        front.conditions.append("Prone")
+        before=(front.hp,front.guard_remaining,foe.ap_remaining,
+                len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                        "Prone Guard requires explicit instrument feasibility"):
+            scene.resolve(seq,0,attack_face=14,damage_face=4)
+        self.assertEqual((front.hp,front.guard_remaining,
+                          foe.ap_remaining,len(e.ledger)),before)
+        self.assertFalse(any(x["kind"] in ("g5_melee_roll","g5_melee_resolved")
+                             for x in e.ledger))
+        self.assertEqual(len(scene.pending_attack_slots()),1)
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        e.check()
+
+    def test_46_failed_adapter_declaration_resets_native_gate(self):
+        scene=fixed_scene("I2",sentry_state="cold_start",seed=9246)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        with self.assertRaisesRegex(ValueError,"Sentry profile"):
+            scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("guard",))
+        self.assertFalse(scene._native_sequence_authorized)
+        before=(e.actors["foe"].ap_remaining,
+                e.actors["front"].guard_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "G5 requires SourceMelee.declare"):
+            e.declare_sequence("foe","front",("B06-AT-01",),("guard",))
+        self.assertEqual((e.actors["foe"].ap_remaining,
+                          e.actors["front"].guard_remaining,len(e.ledger)),
+                         before)
+        seq=scene.declare("foe","front",profiles=("B06-AT-01",),
+                          defenses=("guard",))
+        self.assertFalse(scene._native_sequence_authorized)
+        self.assertEqual(len(scene.pending_attack_slots()),1)
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
         e.check()
 
 
