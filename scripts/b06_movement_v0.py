@@ -160,7 +160,8 @@ class GridMovement:
         return any(self.threatens(attacker_id,c) for c in t.occupied)
 
     def preview(self, actor_id, *, delta=None, pivot=None, clockwise=None,
-                cautious=False, reserved=False, ally_transit=False):
+                cautious=False, reserved=False, ally_transit=False,
+                crawl=False):
         a = self.e.actors[actor_id]
         old = a.occupied
         if delta is not None and pivot is not None:
@@ -178,7 +179,8 @@ class GridMovement:
                     if all(self._solid(c, actor_id) for c in blockers):
                         raise ValueError("Blocked diagonal corner / body sweep")
             kind = "diagonal" if dx and dy else "orthogonal"
-            base = (3 if kind == "diagonal" else 2) * (2 if cautious else 1)
+            base = (3 if kind == "diagonal" else 2) * (
+                1 + int(cautious) + int(crawl))
             cell_costs = [base + TERRAIN.get(self.terrain.get(c, "normal"), 0)
                           for c in dest]
             cost = (sum(cell_costs) + len(cell_costs) - 1) // len(cell_costs)
@@ -287,7 +289,8 @@ class GridMovement:
 
     def _movement(self, actor_id, *, delta=None, pivot=None, clockwise=None,
                   cautious=False, reserved=None, trigger_key=None,
-                  responses=(), interceptor_routes=None, on_response=None):
+                  responses=(), interceptor_routes=None, on_response=None,
+                  crawl=False):
         a = self.e.actors[actor_id]
         if a.hp <= 0 or a.dead:
             raise ValueError("Incapacitated creature cannot voluntarily move")
@@ -296,8 +299,12 @@ class GridMovement:
         # This v0 has no G5 response-authorized attacker movement path.
         if getattr(self.e,"g5",None) is not None:
             self.e.g5.assert_movement_allowed(actor_id)
-        if any(str(status).lower() == "prone" for status in a.conditions):
-            raise UnresolvedDecision("Prone locomotion requires Crawl/Stand executor")
+        prone = any(str(status).lower() == "prone" for status in a.conditions)
+        if prone != crawl:
+            raise UnresolvedDecision(
+                "Prone actor must Crawl; standing actor must use ordinary movement")
+        if crawl and (pivot is not None or reserved is not None):
+            raise UnresolvedDecision("Crawl permits voluntary one-square translation only")
         if reserved is None and (self.e.current != actor_id or self.e.pending_regeneration):
             raise ValueError("Normal movement requires ready current actor turn")
         if reserved is not None and self.e.current == actor_id:
@@ -311,7 +318,7 @@ class GridMovement:
                 raise ValueError("Aborted Pounce retains fixed Rapid Advance heading")
         dest, cost, kind, allies = self.preview(
             actor_id, delta=delta, pivot=pivot, clockwise=clockwise,
-            cautious=cautious)
+            cautious=cautious, crawl=crawl)
         if self._budget(actor_id, reserved) < cost:
             raise ValueError("Insufficient movement MP")
         initial = a.occupied
@@ -435,7 +442,7 @@ class GridMovement:
         try:
             latest, new_cost, _, _ = self.preview(
                 actor_id, delta=delta, pivot=pivot, clockwise=clockwise,
-                cautious=cautious)
+                cautious=cautious, crawl=crawl)
         except (ValueError, UnresolvedDecision):
             self.e.log("g1_step_cancelled", actor=actor_id, trigger=key,
                        reason="destination_changed_after_response", mp_charged=0)
@@ -463,7 +470,8 @@ class GridMovement:
         self.e.log("g1_movement_step", actor=actor_id,
                    old=initial, new=latest, step_kind=kind,
                    direction=delta, pivot_anchor=pivot, clockwise=clockwise,
-                   cautious=cautious, cost=cost, mp_remaining=self._budget(actor_id, reserved),
+                   cautious=cautious, crawl=crawl, cost=cost,
+                   mp_remaining=self._budget(actor_id, reserved),
                    opportunity_sources=decided_sources, segment=self.segment[actor_id],
                    reserved=bool(reserved))
         self.e.check()
@@ -474,6 +482,53 @@ class GridMovement:
 
     def pivot(self, actor_id, anchor, *, clockwise, **kwargs):
         return self._movement(actor_id, pivot=anchor, clockwise=clockwise, **kwargs)
+
+    def crawl_step(self, actor_id, delta, *, cautious=False, **kwargs):
+        """One source-priced Prone step: 2x base, or 3x if Cautious."""
+        return self._movement(actor_id, delta=tuple(delta), crawl=True,
+                              cautious=cautious, **kwargs)
+
+    def stand(self, actor_id, *, spontaneous_policy="decline_all"):
+        """Spend 4 MP before the Standing Opportunity; no virtual interruption.
+
+        Only the bounded expressly declined response policy is executable.
+        Attacks chosen in the Standing Opportunity need G6-B source authority.
+        """
+        e=self.e
+        a=e.actors[actor_id]
+        if e.current!=actor_id or e.pending_regeneration is not None:
+            raise ValueError("Stand requires genuine current turn")
+        if getattr(e,"g5",None) is not None:
+            e.g5.assert_movement_allowed(actor_id)
+        if a.dead or a.hp<=0 or not any(
+                str(x).lower()=="prone" for x in a.conditions):
+            raise ValueError("Only conscious Prone actor can Stand")
+        if a.mp_remaining<4:
+            raise ValueError("Stand requires 4 current MP")
+        if spontaneous_policy!="decline_all":
+            raise UnresolvedDecision("Chosen Standing Opportunity requires attack executor")
+        key=f"g6:stand:{actor_id}:{len(e.ledger)}"
+        if any(r.trigger_key==key for r in e.reservations):
+            raise UnresolvedDecision("Standing Interception effect is not yet executable")
+        threats=tuple(sorted(x.id for x in e.actors.values()
+                            if x.team!=a.team and self.threatens(x.id,a.occupied[0])))
+        a.mp_remaining-=4
+        self.break_segment(actor_id,reason="stand_begins")
+        e.log("g6_stand_started",actor=actor_id,mp_spent=4,
+              opportunity_sources=threats,policy=spontaneous_policy)
+        tr=Trigger(key,actor_id,actor_id)
+        def recheck(encounter,trigger):
+            trigger.legal=(a.hp>0 and not a.dead and any(
+                str(x).lower()=="prone" for x in a.conditions))
+        live=e.response_window(tr,on_interception=lambda *args: None,
+                               spontaneous=(),after_interceptions=recheck)
+        if not live:
+            e.log("g6_stand_interrupted",actor=actor_id,mp_spent=4)
+            return False
+        a.conditions=[x for x in a.conditions if str(x).lower()!="prone"]
+        e.log("g6_stand_completed",actor=actor_id,mp_remaining=a.mp_remaining)
+        e.check()
+        return True
 
     def move_route(self, actor_id, deltas, *, cautious=False):
         """Atomic no-response continuous allied transit; otherwise ordinary steps.
@@ -609,6 +664,9 @@ class GridMovement:
         return required_steps, spent
 
     def start_pounce(self, hunter_id, target_id):
+        if getattr(self.e,"g5",None) is not None and not getattr(
+                self.e.g5,"_g6_pounce_authorized",False):
+            raise UnresolvedDecision("Attached G6 requires authenticated Pounce entry")
         a = self.e.actors[hunter_id]
         if self.pounce is not None or hunter_id in self.rapid_heading:
             raise ValueError("Pounce already active or this turn's Charge was aborted")
@@ -647,6 +705,9 @@ class GridMovement:
     def pounce_contact(self, *, defense="take_hit", interceptor_routes=None,
                        responses=(), on_response=None, trigger_key=None,
                        final_target_id=None):
+        if getattr(self.e,"g5",None) is not None and not getattr(
+                self.e.g5,"_g6_pounce_authorized",False):
+            raise UnresolvedDecision("Attached G6 requires authenticated Pounce contact")
         run = self.pounce
         if run is None:
             raise ValueError("No Pounce approach")

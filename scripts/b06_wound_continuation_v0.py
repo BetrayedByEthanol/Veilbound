@@ -138,7 +138,8 @@ class WoundContinuation:
                              source_event,contact_reference,defense_reference,
                              contact_verified,defense_verified,
                              die_face,critical="normal",critical_dice=(),
-                             vigor_die=None,wound_location_roll=None):
+                             vigor_die=None,wound_location_roll=None,
+                             on_damage=None):
         """Consume a *real* G0 Physical Action and an external G5 attestation.
 
         The caller, NOT G4.5, must have resolved contact, defense and critical
@@ -183,6 +184,13 @@ class WoundContinuation:
             critical_dice=critical_dice,vigor_die=vigor_die,
             wound_location_roll=wound_location_roll)
         self.seen_actions.add(action_index)
+        # A Hunter Bite's delivered toxin must consume the newest G4 hit
+        # synchronously, before G4.5 appends its own provenance event.
+        # Only the resolved G5 adapter supplies this optional callback.
+        if on_damage is not None:
+            if not callable(on_damage):
+                raise TypeError("G5 post-damage hook must be callable")
+            on_damage(result)
         self.e.log("g45_attested_hit",source_event=source_event,
                    attacker=attacker,target=target,profile=profile_id,
                    action_index=action_index,
