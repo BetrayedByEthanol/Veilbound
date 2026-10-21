@@ -365,6 +365,11 @@ class SourceMelee:
                 self.e.g1.scene_id!=policy.grid_scene):
             raise UnresolvedDecision("Scene-authored exit context has changed")
         a=self.e.actors[actor_id]
+        # A completed move is not an automatic escape: subsequent harm can
+        # leave the actor unconscious at the same authored border square.
+        # Eligibility is checked at the actual terminal attestation time.
+        if a.hp<=0 or a.dead:
+            raise ValueError("Dying/dead actor cannot withdraw")
         if len(a.occupied)!=1 or a.occupied[0]!=policy.square:
             raise UnresolvedDecision("Actor has not reached scene-authored exit square")
         if any(x["kind"]=="g5_terminal_exit" and

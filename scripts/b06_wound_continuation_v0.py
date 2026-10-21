@@ -232,8 +232,11 @@ class WoundContinuation:
         """Record a legal exit, never infer escape from a low HP value."""
         if actor_id not in self.e.actors:
             raise ValueError("Unknown actor")
-        if self.e.actors[actor_id].dead:
-            raise ValueError("Dead actor cannot withdraw")
+        # A genuine earlier G1 step does not authorize withdrawal after
+        # the actor falls unconscious before the exit is attested.
+        a=self.e.actors[actor_id]
+        if a.hp<=0 or a.dead:
+            raise ValueError("Dying/dead actor cannot withdraw")
         if independently_verified is not True or not isinstance(
                 exit_policy_reference,str) or not exit_policy_reference:
             raise UnresolvedDecision("G5/G6 exit policy and confirmation required")
