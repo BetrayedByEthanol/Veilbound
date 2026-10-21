@@ -186,6 +186,13 @@ class HunterCombat(SourceMelee):
         if t.hp <= 0 and defense != "take_hit":
             # Ordinary G5 retains a paid defense, falling back to Take Hit.
             defense, value = "take_hit", None
+        elif (defense == "guard" and
+              (not t.ready_guard or not t.guard_instrument)):
+            # A Guard committed at contact is not proof that it remains
+            # wielded/ready after intervening legal response effects.
+            # Match G5: retain the paid slot until an authored fallback.
+            raise UnresolvedDecision(
+                "Changed Guard requires native defensive fallback")
         attack_face = _face(attack_face, 20, "Pounce Bite")
         bonus = 6
         total = attack_face + bonus
@@ -335,6 +342,37 @@ class HunterCombat(SourceMelee):
         if any(r.trigger_key == f"g6:horn_drive:{hunter_id}:{target_id}"
                for r in e.reservations):
             raise UnresolvedDecision("Prepared Close-Contact response requires separate executor")
+        # A successful Shove advances the Hunter's entire rigid body.
+        # That exit can provoke THIRD-PARTY Movement Opportunities even
+        # though the victim's forced shift itself is not a G1 MP step.
+        # G6-A has no source-attested Opportunity attack executor for that
+        # compound movement. Refuse this contested advance BEFORE AP,
+        # response windows or geometry mutate; never silently teleport
+        # the Hunter past an opponent's live threat.
+        if pressure > resist and e.g1.valid_footprint(t, (destination,)):
+            old_target=t.occupied
+            next_h=(old_target[0], h.occupied[0])
+            t.occupied=(destination,)
+            try:
+                advance_legal=e.g1.valid_footprint(h, next_h)
+            finally:
+                t.occupied=old_target
+            if advance_legal:
+                departure=set(h.occupied)-set(next_h)
+                # spend_ap() starts a fresh G1 movement segment. Inspect
+                # all threats, even those marked provoked in the previous
+                # segment: _threats() alone would use stale segment flags.
+                third_party=tuple(
+                    oid for oid in e.order
+                    if oid not in (hunter_id, target_id)
+                    and e.actors[oid].team != h.team
+                    and any(e.g1.threatens(oid, square)
+                            for square in departure))
+                if third_party:
+                    raise UnresolvedDecision(
+                        "Third-party Movement Opportunities require a "
+                        "source-attested Horn Drive advance executor: "
+                        + ", ".join(third_party))
         e.spend_ap(hunter_id, "physical", label="g6:horn_drive")
         action_index = next(x["index"] for x in reversed(e.ledger)
                             if x["kind"] == "action_committed"
