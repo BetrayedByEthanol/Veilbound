@@ -1624,5 +1624,144 @@ class G5SoldierSentryTests(unittest.TestCase):
         e.check()
 
 
+    def test_60_independent_g4_death_cancels_every_paid_sentry_slot(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9460)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("dodge","dodge"))
+        self.assertEqual(len(scene.pending_attack_slots("foe")),2)
+        self.assertEqual(e.actors["front"].dodge_pressure,4)
+        # An independently sourced Fire packet interrupts the sentry
+        # after both Physical20 actions have already been paid.
+        e.g4.apply_damage("foe",(DamagePacket("hp","Fire",24),),
+                          event_key="G5:independent:fatal-sentry",
+                          cause="independently_confirmed_fire")
+        foe=e.actors["foe"]
+        self.assertTrue(foe.dead)
+        self.assertEqual(foe.hp,-foe.hp_max)
+        self.assertEqual(foe.ap_remaining,0)
+        self.assertEqual(e.actors["front"].dodge_pressure,4)
+        self.assertFalse(scene.pending_attack_slots())
+        cancellations=[x for x in e.ledger if x["kind"]=="g5_melee_cancelled"
+                        and x["detail"].get("attacker")=="foe"]
+        self.assertEqual([x["detail"]["action_index"] for x in cancellations],
+                         list(seq["actions"]))
+        self.assertTrue(all(x["detail"]["reason"]==
+                            "attacker_dead_before_resolution"
+                            and x["detail"]["damage_event_key"]==
+                            "G5:independent:fatal-sentry"
+                            and x["detail"]["ap_refunded"]==0
+                            and x["detail"]["defense_commitments_refunded"] is False
+                            for x in cancellations))
+        self.assertEqual(scene.report()["ending"],"death_attested")
+        self.assertFalse(scene.report()["unresolved_attack_slots"])
+        before=len(e.ledger)
+        with self.assertRaisesRegex(UnresolvedDecision,"Attacker incapacitated"):
+            scene.resolve(seq,0,attack_face=11,damage_face=4,vigor_die=4)
+        self.assertEqual(len(e.ledger),before)
+        self.assertEqual(e.actors["front"].hp,12)
+        self.assertFalse(any(x["kind"]=="g5_melee_roll" for x in e.ledger))
+        scene.bridge.end_current_turn()
+        self.assertEqual(e.current,None)
+        e.check()
+
+    def test_61_independent_g4_dying_cancels_soldier_without_fake_death(self):
+        scene=fixed_scene("I1",seed=9461)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-03",),defenses=("guard",))
+        front=e.actors["front"]
+        committed_guard=front.guard_remaining
+        e.g4.apply_damage("foe",(DamagePacket("hp","Fire",12),),
+                          event_key="G5:independent:dying-soldier",
+                          cause="independently_confirmed_fire",
+                          wound_location_roll=11)
+        foe=e.actors["foe"]
+        self.assertEqual(foe.hp,0)
+        self.assertFalse(foe.dead)
+        self.assertFalse(scene.pending_attack_slots())
+        self.assertEqual(front.guard_remaining,committed_guard)
+        cancels=[x for x in e.ledger if x["kind"]=="g5_melee_cancelled"]
+        self.assertEqual(len(cancels),1)
+        self.assertEqual(cancels[0]["detail"]["action_index"],seq["actions"][0])
+        self.assertEqual(cancels[0]["detail"]["reason"],
+                         "attacker_dying_before_resolution")
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        before=len(e.ledger)
+        self.assertEqual(scene.cancel_incapacitated_attacker("foe"),())
+        self.assertEqual(len(e.ledger),before)
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        self.assertEqual(front.hp,12)
+        e.check()
+
+    def test_62_allied_transit_finish_is_legal_authored_exit_evidence(self):
+        front=party_actor("A",3,"front","party",occupied=((1,2),))
+        ally=party_actor("B",3,"ally","party",occupied=((2,2),))
+        foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((0,4),))
+        e=Encounter([front,ally,foe],
+                    {"front":30,"ally":20,"foe":10},
+                    seed=9462,scenario="G5-allied-exit",
+                    objective="front_exits_authorized_border",
+                    policy="G1:clear_atomic_ally_transit")
+        GridMovement(e,width=4,height=5,scene_id="G5-allied-route-map")
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        policy=SceneExit(e.scenario,e.g1.scene_id,e.objective,
+                         "front",(3,2),"G5:author-approved-allied-exit")
+        scene=SourceMelee(e,scene_exit=policy)
+        scene.bridge.start_next_turn(RegenerationChoice())
+        self.assertTrue(e.g1.move_route("front",((1,0),(1,0))))
+        self.assertEqual(front.occupied,((3,2),))
+        self.assertFalse(any(x["kind"]=="g1_movement_step"
+                             and x["detail"].get("actor")=="front"
+                             for x in e.ledger))
+        finished=[x for x in e.ledger if
+                  x["kind"]=="g1_allied_transit_finished"]
+        self.assertEqual(len(finished),1)
+        result=scene.withdraw("front")
+        self.assertEqual(result["status"],"withdrawal_attested")
+        self.assertEqual(result["movement_event_index"],finished[0]["index"])
+        self.assertEqual(scene.report()["ending"],"withdrawal_attested")
+        self.assertFalse(scene.report()["unresolved_attack_slots"])
+        self.assertEqual([x["detail"]["movement_index"] for x in e.ledger
+                          if x["kind"]=="g5_terminal_exit"],
+                         [finished[0]["index"]])
+        e.check()
+
+    def test_63_allied_transit_requires_last_completed_proof_at_exit(self):
+        front=party_actor("A",3,"front","party",occupied=((1,2),))
+        ally=party_actor("B",3,"ally","party",occupied=((2,2),))
+        foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((0,4),))
+        e=Encounter([front,ally,foe],
+                    {"front":30,"ally":20,"foe":10},
+                    seed=9463,scenario="G5-allied-exit-control",
+                    objective="front_exits_authorized_border")
+        GridMovement(e,width=4,height=5,scene_id="G5-allied-route-control")
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        policy=SceneExit(e.scenario,e.g1.scene_id,e.objective,
+                         "front",(3,2),"G5:author-approved-allied-exit")
+        scene=SourceMelee(e,scene_exit=policy)
+        scene.bridge.start_next_turn(RegenerationChoice())
+        self.assertTrue(e.g1.move_route("front",((1,0),(1,0))))
+        self.assertTrue(e.g1.step("front",(0,1),responses=lambda eligible:()))
+        self.assertEqual(front.occupied,((3,3),))
+        # Even a previously completed route to the exit cannot establish
+        # an exit after the actor has moved back into the interior.
+        before=e.serialize()
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "has not reached scene-authored exit square"):
+            scene.withdraw("front")
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
