@@ -599,6 +599,16 @@ class SpellState:
         if (self.e.current!=caster or
                 self.e.pending_regeneration is not None):
             raise ValueError("Voluntary release only at legal own-turn decision")
+        # Voluntary effect release costs no AP, so the central G0 spend_ap
+        # gate cannot protect an already-paid G5 attack sequence here.
+        # In particular, releasing the Sentry's Sword Reserve would remove
+        # the required enhanced profile and strand an otherwise valid
+        # committed attack. Keep the current effect and VP reservation
+        # until *all* paid slots have resolved or been legally cancelled.
+        if (getattr(self.e,"g5",None) is not None and
+                self.e.g5.pending_attack_slots(caster)):
+            raise UnresolvedDecision(
+                "Complete pending G5 Attack Sequence before voluntary effect release")
         found=self.active(caster,kind)
         if len(found)!=1:
             raise ValueError("Exactly one active named effect required")

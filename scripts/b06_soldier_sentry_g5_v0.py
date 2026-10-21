@@ -71,6 +71,18 @@ class SourceMelee:
                 raise ValueError("G5 scene exit requires a one-square actor")
         if getattr(encounter,"g5",None) is not None:
             raise ValueError("G5 melee already attached to encounter")
+        # Native G0 supports declarations independently of this adapter.
+        # An earlier attack_sequence_committed has already spent AP and
+        # assigned defenses, but has no G5-attested action slots. Importing
+        # it would require reconstructing previously resolved choices and
+        # legal effects; accepting it would let native end_turn silently
+        # discard the paid attack. Attach G5 *before* the first sequence.
+        # Reject prior-round records as well: we cannot certify their
+        # completion merely from a turn boundary.
+        if any(ev["kind"]=="attack_sequence_committed"
+               for ev in encounter.ledger):
+            raise UnresolvedDecision(
+                "Attach G5 before any untracked native Attack Sequence")
         self.e=encounter
         self.scene_exit=scene_exit
         # Authorize only this adapter's synchronous native G0 declaration.
