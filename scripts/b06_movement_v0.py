@@ -545,6 +545,12 @@ class GridMovement:
     def reserve_movement(self, actor_id, trigger_key, mp, *, label):
         if self.e.current != actor_id or self.e.pending_regeneration:
             raise ValueError("Reserve MP on ready own turn only")
+        # MP reservation is another own-turn resource decision. Its entry
+        # point must obey the same G5 sequence completion gate as ordinary
+        # translation and continuous movement, before reserving any MP or
+        # registering a future Interception with G0.
+        if getattr(self.e,"g5",None) is not None:
+            self.e.g5.assert_movement_allowed(actor_id)
         if self.pounce is not None and self.pounce.hunter_id == actor_id:
             raise ValueError("Pounce prohibits new Movement Interception reservations")
         if actor_id in self.rapid_heading:
