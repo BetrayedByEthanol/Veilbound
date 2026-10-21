@@ -131,8 +131,11 @@ class HunterCompletion:
                 or resolved[0]["detail"].get("shooter")!=shooter
                 or resolved[0]["detail"].get("intended")!=target
                 or resolved[0]["detail"].get("primary_face")!=primary_face
-                or result[0]!=dict((k,v) for k,v in resolved[0]["detail"].items()
-                                   if k!="note")):
+                # G2's authoritative ledger adds delivery identity and a
+                # descriptive note; its returned result contains just the
+                # shot outcome, which must otherwise match *exactly*.
+                or result[0]!={k:v for k,v in resolved[0]["detail"].items()
+                               if k not in ("note","shooter","intended")}):
             raise UnresolvedDecision("Missing exact source G2 paid launched shot provenance")
         expected_outcome=("critical_confirmation_pending_G5" if primary_face==20
                           else "intended_hit_pending_G5" if hit else
