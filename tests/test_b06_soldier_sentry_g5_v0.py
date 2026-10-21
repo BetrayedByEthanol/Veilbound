@@ -373,6 +373,12 @@ class G5SoldierSentryTests(unittest.TestCase):
         stale=scene.declare("foe","front",profiles=("B06-AT-03",),
                             defenses=("guard",))
         self.assertEqual(e.ledger[stale["declaration"]]["round"],1)
+        # Round rollover is illegal until this paid first-round attack has
+        # genuinely resolved or its trigger has been explicitly cancelled.
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "committed G5 attack slot"):
+            scene.bridge.end_current_turn()
+        self.assertEqual(scene.resolve(stale,0,attack_face=1)["outcome"],"miss")
         scene.bridge.end_current_turn()
         scene.bridge.start_next_turn(RegenerationChoice())
         scene.bridge.end_current_turn()
@@ -387,8 +393,10 @@ class G5SoldierSentryTests(unittest.TestCase):
         self.assertEqual(
             (e.actors["front"].hp,e.actors["front"].guard_remaining,
              e.actors["foe"].ap_remaining,len(e.ledger)),before)
-        self.assertFalse([x for x in e.ledger if x["kind"]=="g5_melee_resolved"])
-        self.assertFalse([x for x in e.ledger if x["kind"]=="g5_melee_roll"])
+        self.assertEqual(
+            len([x for x in e.ledger if x["kind"]=="g5_melee_resolved"]),1)
+        self.assertEqual(
+            len([x for x in e.ledger if x["kind"]=="g5_melee_roll"]),1)
         # Failure must not consume this round's real AP. A newly declared
         # sequence CAN legally produce the same natural-one miss now.
         fresh=scene.declare("foe","front",profiles=("B06-AT-03",),
@@ -396,7 +404,9 @@ class G5SoldierSentryTests(unittest.TestCase):
         r=scene.resolve(fresh,0,attack_face=1)
         self.assertEqual(r["outcome"],"miss")
         self.assertEqual(e.ledger[fresh["declaration"]]["round"],2)
-        self.assertEqual(len(scene.report()["attacks"]),1)
+        self.assertEqual(len(scene.report()["attacks"]),2)
+        self.assertEqual([a["outcome"] for a in scene.report()["attacks"]],
+                         ["miss","miss"])
         self.assertEqual(e.actors["front"].hp,12)
         e.check()
 
@@ -866,6 +876,114 @@ class G5SoldierSentryTests(unittest.TestCase):
         self.assertEqual((e.actors["front"].hp,e.actors["foe"].ap_remaining,
                           e.actors["front"].dodge_pressure),pre)
         self.assertFalse(any(x["kind"]=="g5_melee_roll" for x in e.ledger))
+        e.check()
+
+
+    def test_37_i1_paid_unresolved_attack_blocks_native_turn_end_and_exit(self):
+        scene=fixed_scene("I1",seed=9137)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-03",),defenses=("guard",))
+        before=(e.current,e.cursor,e.round,
+                e.actors["foe"].ap_remaining,
+                e.actors["front"].guard_remaining,len(e.ledger))
+        # This is the exact prior false terminal: caller attempts to
+        # silently end the paid but unrolled Soldier turn, then escape.
+        for end in (scene.bridge.end_current_turn,e.end_turn):
+            with self.assertRaisesRegex(UnresolvedDecision,
+                                        "committed G5 attack slot"):
+                end()
+            self.assertEqual((e.current,e.cursor,e.round,
+                              e.actors["foe"].ap_remaining,
+                              e.actors["front"].guard_remaining,
+                              len(e.ledger)),before)
+        outstanding=scene.pending_attack_slots()
+        self.assertEqual(len(outstanding),1)
+        self.assertEqual(outstanding[0]["action_index"],seq["actions"][0])
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        self.assertEqual(len(scene.report()["unresolved_attack_slots"]),1)
+        self.assertFalse(scene.report()["attacks"])
+        self.assertFalse(any(x["kind"]=="turn_end" and
+                             x["detail"].get("actor")=="foe" for x in e.ledger))
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots())
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        for _ in range(2):
+            self.assertTrue(e.g1.step("front",(-1,0),
+                                     responses=lambda eligible:()))
+        withdrawal=scene.withdraw("front")
+        self.assertEqual(withdrawal["status"],"withdrawal_attested")
+        self.assertEqual(scene.report()["ending"],"withdrawal_attested")
+        self.assertEqual(len(scene.report()["attacks"]),1)
+        self.assertFalse(scene.report()["unresolved_attack_slots"])
+        scene.bridge.end_current_turn()
+        e.check()
+
+    def test_38_terminal_withdrawal_checks_pending_enemy_slots_globally(self):
+        front=party_actor("A",3,"front","party",occupied=((0,1),))
+        foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((1,2),))
+        e=Encounter([front,foe],{"front":30,"foe":20},
+                    seed=9138,scenario="G5-withdrawal-pending",
+                    objective="front_verified_border_exit",
+                    policy="explicit_no_automatic_interruption")
+        GridMovement(e,width=8,height=5,scene_id="G5-pending-exit-map")
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        exit_policy=SceneExit(e.scenario,e.g1.scene_id,e.objective,
+                              "front",(0,2),"G5:independently_authored_exit")
+        scene=SourceMelee(e,scene_exit=exit_policy)
+        scene.bridge.start_next_turn(RegenerationChoice())
+        self.assertTrue(e.g1.step("front",(0,1),
+                                  responses=lambda eligible:()))
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("take_hit",))
+        before=(len(e.ledger),front.hp,foe.ap_remaining)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "terminal withdrawal with unresolved"):
+            scene.withdraw("front")
+        self.assertEqual((len(e.ledger),front.hp,foe.ap_remaining),before)
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        self.assertEqual(len(scene.report()["unresolved_attack_slots"]),1)
+        self.assertFalse(any(x["kind"] in ("g45_withdrawal_attested",
+                                           "g5_terminal_exit") for x in e.ledger))
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        scene.bridge.end_current_turn()
+        self.assertFalse(scene.pending_attack_slots())
+        result=scene.withdraw("front")
+        self.assertEqual(result["status"],"withdrawal_attested")
+        self.assertEqual(scene.report()["ending"],"withdrawal_attested")
+        self.assertEqual(len(scene.report()["attacks"]),1)
+        e.check()
+
+    def test_39_multi_attack_turn_cannot_end_between_resolved_slots(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9139)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        self.assertEqual(len(scene.pending_attack_slots()),2)
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        self.assertEqual(scene.pending_attack_slots()[0]["slot"],1)
+        held=(e.current,e.cursor,e.actors["foe"].ap_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "committed G5 attack slot"):
+            e.end_turn()
+        self.assertEqual((e.current,e.cursor,
+                          e.actors["foe"].ap_remaining,len(e.ledger)),held)
+        self.assertEqual(scene.resolve(seq,1,attack_face=1)["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots("foe"))
+        scene.bridge.end_current_turn()
+        self.assertEqual(e.current,None)
+        self.assertEqual(e.cursor,1)
+        self.assertEqual([a["outcome"] for a in scene.report()["attacks"]],
+                         ["miss","miss"])
         e.check()
 
 if __name__=="__main__":
