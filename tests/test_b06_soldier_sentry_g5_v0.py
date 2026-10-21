@@ -608,7 +608,8 @@ class G5SoldierSentryTests(unittest.TestCase):
                 scene.bridge.start_next_turn(RegenerationChoice())
                 seq=scene.declare("sentry","soldier",
                                   profiles=("B06-AT-02",),defenses=("guard",),
-                                  prone_guard_feasible=target_prone)
+                                  prone_guard_feasible=target_prone,
+                                  prone_attack_feasible=attacker_prone)
                 result=scene.resolve(seq,0,attack_face=face,
                    damage_face=1 if expected=="hit" else None,
                    vigor_die=4 if expected=="hit" else None)
@@ -637,7 +638,8 @@ class G5SoldierSentryTests(unittest.TestCase):
                 scene.bridge.start_next_turn(RegenerationChoice())
                 seq=scene.declare("sentry","soldier",
                           profiles=("B06-AT-02",),defenses=("guard",),
-                          prone_guard_feasible=target_prone)
+                          prone_guard_feasible=target_prone,
+                          prone_attack_feasible=attacker_prone)
                 critical_dice=(1,1) if expected=="critical" else (1,)
                 result=scene.resolve(seq,0,attack_face=20,
                           confirmation_face=confirmation,
@@ -1343,6 +1345,95 @@ class G5SoldierSentryTests(unittest.TestCase):
             [x["detail"]["outcome"] for x in e.ledger
              if x["kind"]=="g5_melee_resolved"],["miss","miss"])
         e.check()
+
+
+
+    def test_50_prone_soldier_and_sentry_require_feasible_sword_before_ap(self):
+        for pack,state,profile in (
+            ("I1",None,"B06-AT-03"),
+            ("I2","prepared_start","B06-AT-02"),
+        ):
+            with self.subTest(pack=pack,state=state):
+                scene=fixed_scene(pack,sentry_state=state)
+                e=scene.e
+                foe,front=e.actors["foe"],e.actors["front"]
+                foe.conditions.append("Prone")
+                scene.bridge.start_next_turn(RegenerationChoice())
+                before=(foe.ap_remaining,front.guard_remaining,
+                        front.dodge_pressure,len(e.ledger),
+                        set(e.seen_sequences))
+                for feasible in (None,False):
+                    with self.subTest(feasible=feasible):
+                        with self.assertRaisesRegex(UnresolvedDecision,
+                                "Prone sword attack requires explicit physical feasibility"):
+                            scene.declare("foe","front",
+                                profiles=(profile,),defenses=("guard",),
+                                prone_attack_feasible=feasible)
+                        self.assertEqual(
+                            (foe.ap_remaining,front.guard_remaining,
+                             front.dodge_pressure,len(e.ledger),
+                             set(e.seen_sequences)),before)
+                        self.assertFalse(scene.pending_attack_slots())
+                self.assertFalse(any(x["kind"]=="g5_melee_sequence_attested"
+                                     for x in e.ledger))
+                e.check()
+
+    def test_51_attested_prone_sword_uses_real_minus_two_on_hit(self):
+        e,scene=crossed_scene()
+        sentry,soldier=e.actors["sentry"],e.actors["soldier"]
+        sentry.conditions.append("Prone")
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("sentry","soldier",
+                          profiles=("B06-AT-02",),defenses=("guard",),
+                          prone_attack_feasible=True)
+        attestation=next(x["detail"] for x in e.ledger
+                         if x["kind"]=="g5_melee_sequence_attested")
+        self.assertTrue(attestation["prone_attack_feasible"])
+        self.assertEqual(sentry.ap_remaining,22)
+        self.assertEqual(soldier.guard_remaining,soldier.guard_capacity-1)
+        result=scene.resolve(seq,0,attack_face=14,damage_face=1,
+                             vigor_die=4)
+        self.assertEqual(result["outcome"],"hit")
+        self.assertEqual(result["prone_modifier"],-2)
+        self.assertEqual(result["attack_total"],14+7-2)
+        self.assertLess(soldier.hp,soldier.hp_max)
+        roll=next(x["detail"] for x in e.ledger
+                  if x["kind"]=="g5_melee_roll")
+        self.assertEqual(roll["source_attack_bonus"],7)
+        self.assertEqual(roll["prone_modifier"],-2)
+        self.assertEqual(len(scene.report()["attacks"]),1)
+        e.check()
+
+    def test_52_newly_prone_attacker_needs_precommitted_feasibility(self):
+        for predeclared in (None,True):
+            with self.subTest(predeclared=predeclared):
+                e,scene=crossed_scene()
+                scene.bridge.start_next_turn(RegenerationChoice())
+                seq=scene.declare("sentry","soldier",
+                     profiles=("B06-AT-02",),defenses=("guard",),
+                     prone_attack_feasible=predeclared)
+                sentry,soldier=e.actors["sentry"],e.actors["soldier"]
+                sentry.conditions.append("Prone")
+                before=(sentry.ap_remaining,soldier.guard_remaining,
+                        soldier.hp,soldier.vigor,len(e.ledger))
+                if predeclared is None:
+                    with self.assertRaisesRegex(UnresolvedDecision,
+                              "Prone sword attack requires explicit physical feasibility"):
+                        scene.resolve(seq,0,attack_face=14,damage_face=1,
+                                      vigor_die=4)
+                    self.assertEqual(
+                        (sentry.ap_remaining,soldier.guard_remaining,
+                         soldier.hp,soldier.vigor,len(e.ledger)),before)
+                    self.assertFalse(any(x["kind"] in
+                        ("g5_melee_roll","g5_melee_resolved") for x in e.ledger))
+                    self.assertEqual(len(scene.pending_attack_slots()),1)
+                else:
+                    resolved=scene.resolve(seq,0,attack_face=14,
+                                           damage_face=1,vigor_die=4)
+                    self.assertEqual(resolved["outcome"],"hit")
+                    self.assertEqual(resolved["prone_modifier"],-2)
+                    self.assertFalse(scene.pending_attack_slots())
+                e.check()
 
 
 if __name__=="__main__":
