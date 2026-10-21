@@ -372,7 +372,10 @@ class SourceMelee:
                 e.actors[new_target].team==e.actors[attacker].team):
             raise ValueError("New target must be a distinct opposing creature")
         target=e.actors[new_target]
-        if target.dead or target.hp<=0 or len(target.occupied)!=1 or (
+        # A living Dying creature (HP <= 0 but not dead) is still a
+        # legal melee target; only the active Guard/Dodge choices are lost.
+        # The already-paid suffix can be redirected to it using Take Hit.
+        if target.dead or len(target.occupied)!=1 or (
                 len(e.actors[attacker].occupied)!=1
                 or not e.g1.melee_contact(attacker,new_target)):
             raise UnresolvedDecision("Redirect target needs genuine live 1x1 G1 contact")
@@ -382,6 +385,11 @@ class SourceMelee:
         if len(defenses)!=len(suffix) or any(x not in
                 ("take_hit","guard","dodge") for x in defenses):
             raise ValueError("One valid newly assigned defense per funded remaining profile")
+        # Recheck Dying at the NEW target before calling G0 defense().
+        # Mixed/active response declarations may not spend a Guard or
+        # advance Dodge Pressure on someone unable to defend actively.
+        if target.hp<=0 and any(choice!="take_hit" for choice in defenses):
+            raise ValueError("Dying redirect target requires Take Hit for every paid follow-up")
         if (defenses.count("guard")>target.guard_remaining
                 or ("guard" in defenses and
                     (not target.ready_guard or not target.guard_instrument or
