@@ -150,13 +150,47 @@ class SourceMelee:
             raise ValueError("No valid native G0 source indices")
         if e.current!=attacker or e.pending_regeneration is not None:
             raise ValueError("Only current live attack sequence can resolve")
+        native=e.ledger[declaration]
+        if native["round"]!=e.round or native["turn"]!=attacker:
+            raise UnresolvedDecision(
+                "G5 attack action/declaration must belong to current round and turn")
+        # Reconstruct EVERY payment from the canonical G0 declaration,
+        # including earlier slots. The public sequence result is a mutable
+        # convenience receipt, never an authority for attack ordering.
+        # A prior-round resolved action ID must not masquerade as this
+        # round's already-resolved slot and unlock a later Dodge12 attack.
+        native_profiles=native["detail"].get("profiles")
+        if (native["kind"]!="attack_sequence_committed"
+                or native["detail"].get("attacker")!=attacker
+                or native["detail"].get("target")!=target
+                or not isinstance(native_profiles,list) or not native_profiles
+                or native_profiles!=list(sequence["profiles"])):
+            raise UnresolvedDecision("G0 pre-roll declaration or defense mismatched")
+        payments=[ev for ev in e.ledger[:declaration]
+                  if ev["kind"]=="action_committed"
+                  and ev["round"]==native["round"]
+                  and ev["turn"]==attacker
+                  and ev["detail"].get("actor")==attacker]
+        payments=payments[-len(native_profiles):]
+        if (len(payments)!=len(native_profiles) or
+                any(ev["detail"].get("action_class")!="physical" or
+                    ev["detail"].get("label")!=f"sequence:{profile}:{i}"
+                    for i,(ev,profile) in enumerate(
+                        zip(payments,native_profiles)))):
+            raise UnresolvedDecision("G0 native attack sequence payments mismatched")
+        native_actions=tuple(ev["index"] for ev in payments)
+        if (len(sequence["actions"])!=len(native_actions)
+                or any(type(idx) is not int for idx in sequence["actions"])
+                or tuple(sequence["actions"])!=native_actions):
+            raise UnresolvedDecision(
+                "G5 action index does not match declared attack slot")
+        action_index=native_actions[slot]
         if any(x["kind"]=="g5_melee_resolved" and
                x["detail"].get("action_index")==action_index for x in e.ledger):
             raise ValueError("G5 action already resolved")
-        # A committed multi-attack sequence is resolved in declared order.
-        # Earlier slots are final only when their actual G5 resolution or
-        # explicit lost-action cancellation is recorded in the ledger.
-        for prior in sequence["actions"][:slot]:
+        # Both source indices AND earlier outcomes come from the native
+        # declaration. A caller cannot substitute an older resolved index.
+        for prior in native_actions[:slot]:
             if not any(x["kind"] in ("g5_melee_resolved","g5_melee_cancelled")
                        and x["detail"].get("action_index")==prior
                        for x in e.ledger):
@@ -164,9 +198,8 @@ class SourceMelee:
                     "Resolve or lose earlier declared attack slots first")
         if not e.g1.melee_contact(attacker,target):
             raise UnresolvedDecision("Actual G1 contact lost before attack roll")
-        p=sequence["profiles"][slot]
+        p=native_profiles[slot]
         action=e.ledger[action_index]
-        native=e.ledger[declaration]
         # Every outcome, INCLUDING natural-1 misses, must consume an action
         # committed for this exact live turn. Without this preflight a stale
         # sequence could log a new-round miss without having paid new AP.
