@@ -561,6 +561,15 @@ class Encounter:
     def spend_ap(self, actor_id, kind, *, label):
         if self.current != actor_id or self.pending_regeneration is not None:
             raise ValueError("Only ready current actor may spend Turn AP")
+        # G5 pays all ordinary Attack Sequence slots up front. A later
+        # Physical/Projection/General/Full spend (including reserve()) must
+        # not supersede any unresolved slot: G4.5 would reject that now-stale
+        # action and the turn completion gate would leave the scene stranded.
+        # During declare_sequence the G5 attestation is not created until
+        # all canonical G0 payments and defenses have been committed, so
+        # this hook permits those original payments but blocks later ones.
+        if getattr(self, "g5", None) is not None:
+            self.g5.assert_ap_commitment_allowed(actor_id)
         a = self.actors[actor_id]
         if a.dead or a.hp <= 0:
             raise ValueError("Dying/dead actors cannot take ordinary voluntary actions")

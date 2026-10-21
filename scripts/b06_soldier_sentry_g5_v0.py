@@ -124,6 +124,18 @@ class SourceMelee:
             raise UnresolvedDecision(
                 "Complete pending G5 Attack Sequence before declaring another")
 
+    def assert_ap_commitment_allowed(self,actor_id):
+        """G0 spend_ap gate for ALL new own-turn costs, including reserve().
+
+        Native declare_sequence() pays every initial profile before its G5
+        sequence attestation exists. Once attested, no other on-turn AP spend
+        may invalidate an unresolved action; completion restores normal
+        spending for any remaining AP in that turn.
+        """
+        if self.pending_attack_slots(actor_id):
+            raise UnresolvedDecision(
+                "Complete pending G5 Attack Sequence before committing Turn AP")
+
     def assert_turn_completion_allowed(self,actor_id):
         """G0 calls before END TURN consumes resources or advances cursor."""
         if self.pending_attack_slots(actor_id):
