@@ -190,8 +190,12 @@ class SourceMelee:
 
     def _profile(self,attacker,profile_id):
         a=self.e.actors[attacker]
+        if a.source.source_id in ("A","B"):
+            from scripts.b06_player_offense_g6b_v0 import party_weapon_profile
+            profile,bonus=party_weapon_profile(a,profile_id)
+            return bonus
         if a.source.source_id not in ("B06-EN-01","B06-EN-02","B06-EN-03"):
-            raise UnresolvedDecision("G5/G6 only resolves sourced enemy melee")
+            raise UnresolvedDecision("G5/G6 only resolves sourced enemy or A/B melee")
         if (a.source.source_id=="B06-EN-03"
                 and profile_id not in ("B06-AT-04","B06-AT-05")):
             raise UnresolvedDecision("G6 Pounce and Horn Drive need their own commitment path")
@@ -221,12 +225,18 @@ class SourceMelee:
         a,t=e.actors[attacker],e.actors[target]
         if a.team==t.team:
             raise ValueError("Cannot declare enemy sword against ally")
-        if len(t.occupied)!=1 or (
-                len(a.occupied)!=1 and not (
-                    a.source.source_id=="B06-EN-03"
-                    and a.footprint==("head","rear")
-                    and len(a.occupied)==2)):
-            raise UnresolvedDecision("G5/G6 needs sourced 1x1 or Hunter 1x2 contact")
+        if a.source.source_id in ("A","B") and t.source.source_id!="B06-EN-03":
+            raise UnresolvedDecision("Bounded G6-B player melee only targets the Hunter")
+        target_supported=(len(t.occupied)==1 or
+                          (t.source.source_id=="B06-EN-03"
+                           and t.footprint==("head","rear")
+                           and len(t.occupied)==2))
+        attacker_supported=(len(a.occupied)==1 or
+                           (a.source.source_id=="B06-EN-03"
+                            and a.footprint==("head","rear")
+                            and len(a.occupied)==2))
+        if not target_supported or not attacker_supported:
+            raise UnresolvedDecision("G5/G6B requires sourced one-square or Hunter body contact")
         if not self._contact(attacker,target):
             raise UnresolvedDecision("G1 current actual melee contact required")
         profiles=tuple(profiles)
@@ -348,6 +358,24 @@ class SourceMelee:
             raise UnresolvedDecision("Retarget/decline requires an intact pending suffix")
         return suffix
 
+    def _supported_suffix_target(self,attacker,target_id):
+        """G5/G6-B source-authorized target footprint for a paid suffix.
+
+        A/B proxy attacks have *only* the sourced Hunter as a legal target,
+        including after any redirection; generic Soldier/Sentry attacks
+        retain their one-square target support. The Hunter's anatomical
+        two-square body is never itself a reason to abandon paid attacks.
+        """
+        actor=self.e.actors[attacker]
+        target=self.e.actors[target_id]
+        if len(actor.occupied)!=1:
+            return False
+        if target.source.source_id=="B06-EN-03":
+            return (target.footprint==("head","rear")
+                    and len(target.occupied)==2)
+        return (actor.source.source_id not in ("A","B")
+                and len(target.occupied)==1)
+
     def _paid_target_unavailable(self,attacker,target_id):
         """Only genuine source targeting illegality unlocks a paid suffix.
 
@@ -359,8 +387,8 @@ class SourceMelee:
         actor=self.e.actors[attacker]
         target=self.e.actors[target_id]
         return (target.dead or target.team==actor.team
-                or len(actor.occupied)!=1 or len(target.occupied)!=1
-                or not self.e.g1.melee_contact(attacker,target_id))
+                or not self._supported_suffix_target(attacker,target_id)
+                or not self._contact(attacker,target_id))
 
     def retarget_remaining(self,sequence,new_target,*,defenses,
                            prone_dodge_feasible=None,prone_guard_feasible=None):
@@ -384,13 +412,20 @@ class SourceMelee:
                 e.actors[new_target].team==e.actors[attacker].team):
             raise ValueError("New target must be a distinct opposing creature")
         target=e.actors[new_target]
-        # A living Dying creature (HP <= 0 but not dead) is still a
-        # legal melee target; only the active Guard/Dodge choices are lost.
-        # The already-paid suffix can be redirected to it using Take Hit.
-        if target.dead or len(target.occupied)!=1 or (
-                len(e.actors[attacker].occupied)!=1
-                or not e.g1.melee_contact(attacker,new_target)):
-            raise UnresolvedDecision("Redirect target needs genuine live 1x1 G1 contact")
+        # The G6-B A/B player attack cannot escape its Hunter-only target
+        # scope through a previously funded G5 suffix. Check source AND
+        # anatomical shape before committing newly assigned defenses.
+        # A living Dying creature remains an eligible attack target.
+        if not self._supported_suffix_target(attacker,new_target):
+            raise UnresolvedDecision(
+                "Paid suffix requires source-authorized target footprint "
+                "(A/B only against Hunter)")
+        if target.dead or not self._contact(attacker,new_target):
+            # Keep the previously verified one-square G5 diagnostic while
+            # recognizing the Hunter's independently supported 1x2 body.
+            label=("1x1" if len(target.occupied)==1 else "Hunter")
+            raise UnresolvedDecision(
+                f"Redirect target needs genuine live {label} G1 contact")
         if (attacker,new_target) in e.seen_sequences:
             raise UnresolvedDecision("Retarget cannot reopen a previously attacked target")
         defenses=tuple(defenses)

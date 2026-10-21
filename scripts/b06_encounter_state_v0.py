@@ -272,7 +272,8 @@ def party_actor(role, level, actor_id, team, *, occupied):
         source = Source(path, role, _fingerprint(path), "B05_UNBUFFED_PHYSICAL_PROXY",
                         tuple(zip(keys, ability_array)),
                         (("Sword", 2),) if role == "A" else (("Mace", 2),),
-                        gear, (), f"L{level}-physical-proxy")
+                        gear, ("B06-PC-A-SWORD",) if role=="A" else
+                        ("B06-PC-B-MACE",), f"L{level}-physical-proxy")
         ap = 30 + 6 * (level - 1)
         # B gets Combat Awareness +2 only after L2; A gets Guard Reserve
         # only after L2. The Phase 1/2 physical role constants are L2/L3.
