@@ -670,5 +670,63 @@ class HunterG6ATests(unittest.TestCase):
                 e.check()
 
 
+    def test_32_pounce_strength_pressure_respects_hunter_muscle_toxin(self):
+        # A's Strength +2: 11+2=13. Clean Hunter 10+4=14 wins;
+        # a real TX-MY -1 makes it 13 vs 13, which holds standing.
+        clean,clean_combat=setup()
+        clean_result=clean_combat.pounce(
+            "hunter","prey",((1,0),)*3,
+            attack_face=1,balance_hunter_face=10,
+            balance_defender_face=11,balance_ability="Strength")
+        self.assertEqual(clean_result["balance"],"prone")
+        self.assertEqual(events(clean,"g6_pounce_balance")[-1]["detail"]["pressure"],14)
+        clean.check()
+
+        poisoned,combat=setup()
+        receipt=combat.begin_pounce("hunter","prey",((1,0),)*3)
+        applied=poisoned.g4.toxins.apply(
+            "hunter","TX-MY",exposure_key="hunter-muscle-pounce",
+            source="test:independently_verified_injection",
+            route="injection",delivery_verified=True,
+            residual_piercing_hp=1,resistance_die=1)
+        self.assertEqual(applied["outcome"],"accepted")
+        self.assertEqual(poisoned.g4.toxins.modifier(
+            "hunter","muscular_strength"),-1)
+        outcome=combat.resolve_pounce(
+            receipt,attack_face=1,balance_hunter_face=10,
+            balance_defender_face=11,balance_ability="Strength")
+        self.assertEqual(outcome["balance"],"held")
+        self.assertEqual(events(poisoned,"g6_pounce_balance")[-1]["detail"]["pressure"],13)
+        self.assertNotIn("Prone",poisoned.actors["prey"].conditions)
+        poisoned.check()
+
+    def test_33_horn_drive_strength_pressure_respects_hunter_muscle_toxin(self):
+        # Hunter Strength +4, prey Strength +2 plus Hold Ground +2:
+        # clean 10+4=14 beats 9+2+2=13; TX-MY -1 makes a tie.
+        clean,clean_combat=setup(front=(3,2))
+        first=clean_combat.horn_drive(
+            "hunter","prey",pressure_face=10,resistance_face=9)
+        self.assertEqual(first["outcome"],"shoved")
+        self.assertEqual(events(clean,"g6_horn_drive_resolved")[-1]["detail"]["pressure"],14)
+        clean.check()
+
+        poisoned,combat=setup(front=(3,2))
+        applied=poisoned.g4.toxins.apply(
+            "hunter","TX-MY",exposure_key="hunter-muscle-horn",
+            source="test:independently_verified_injection",
+            route="injection",delivery_verified=True,
+            residual_piercing_hp=1,resistance_die=1)
+        self.assertEqual(applied["outcome"],"accepted")
+        self.assertEqual(poisoned.g4.toxins.modifier(
+            "hunter","muscular_strength"),-1)
+        outcome=combat.horn_drive(
+            "hunter","prey",pressure_face=10,resistance_face=9)
+        self.assertEqual(outcome["outcome"],"resisted")
+        self.assertEqual(events(poisoned,"g6_horn_drive_resolved")[-1]["detail"]["pressure"],13)
+        self.assertEqual(poisoned.actors["prey"].occupied,((3,2),))
+        self.assertEqual(poisoned.actors["hunter"].occupied,((2,2),(1,2)))
+        poisoned.check()
+
+
 if __name__=="__main__":
     unittest.main()

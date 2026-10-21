@@ -63,6 +63,12 @@ The following remain **outside G6-A**: generic Hunter AI or target-switching pol
 - A Standing creature is threatened if **any occupied footprint square** is within an opposing source's actual G1 threatened reach. The Standing Opportunity log contains each threatening actor once in sorted stable order, even if that actor reaches multiple cells. In particular, a Prone 1×2 Hunter Standing while only its rear is threatened records the source; this does not grant rear-facing Hunter *attacks*, whose head-only threat policy is unchanged.
 - Regression coverage uses a legitimate preexisting legacy TX-HM exposure deliberately carrying each generated key and asserts that a failed normal/Pounce resolution is side-effect-free and repeatably rejected before any damage, plus rear-only, both-cell and distinct front/rear Standing threats.
 
+## Codex review — muscle penalties and post-damage hook preflight
+
+- Both Strength-based Hunter contest totals use the source's base pressure **plus the Hunter's own current** `muscular_strength` toxin modifier: Pounce Balance uses d20 + 4 + modifier; Horn Drive uses d20 + sourced Strength + modifier. The target's independently applicable modifier is unchanged. Equal totals remain a defender hold, never a Hunter win.
+- G4.5 rejects a supplied non-callable `on_damage` hook **before** `apply_profile_hit()` or `seen_actions` mutation. An invalid hook cannot create an orphaned wound or use the real source action; after rejection, the same valid paid action can resolve once with a genuine callable hook. Valid post-damage callbacks still run synchronously after the G4 hit, before the G4.5 attestation.
+- Regression witnesses: poison the Hunter with a *real* accepted TX-MY (-1 `muscular_strength`) between Pounce contact and Balance or before Horn Drive, and verify both clean wins become tied holds; reject malformed damage callbacks without touching HP, Vigor, injuries, source action identity or the ledger, then retry successfully.
+
 ## Validation
 
 ```sh

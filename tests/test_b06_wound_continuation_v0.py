@@ -736,5 +736,37 @@ class WoundContinuationTests(unittest.TestCase):
                 self.assertFalse(b.report()["complete_encounter_certified"])
                 e.check()
 
+    def test_24_noncallable_damage_hook_rejected_before_any_irreversible_hit(self):
+        e,d,bridge=scene()
+        idx=begin_attack(e,bridge)
+        target=e.actors["sentry"]
+        before=(target.hp,target.vigor,len(target.wounds),
+                len(e.ledger),len(d.used_events),
+                set(bridge.seen_actions))
+        with self.assertRaisesRegex(TypeError,"post-damage hook"):
+            hit(e,bridge,idx,on_damage=object())
+        self.assertEqual((target.hp,target.vigor,len(target.wounds),
+                          len(e.ledger),len(d.used_events),
+                          set(bridge.seen_actions)),before)
+        self.assertFalse(any(x["kind"] in ("g4_profile_hit",
+                              "g45_attested_hit") for x in e.ledger))
+        e.check()
+        # The same genuine paid G0 slot and stable source event can
+        # now be resolved once with a valid synchronous callback.
+        observed=[]
+        result=hit(e,bridge,idx,
+                   on_damage=lambda damage: observed.append(
+                       (damage["hp_loss"],e.ledger[-1]["kind"])))
+        self.assertEqual(result["hp_loss"],6)
+        self.assertEqual(observed,[(6,"g4_profile_hit")])
+        self.assertEqual(len(d.used_events),1)
+        self.assertIn(idx,bridge.seen_actions)
+        self.assertEqual(len([x for x in e.ledger
+                              if x["kind"]=="g45_attested_hit"]),1)
+        with self.assertRaises(ValueError):
+            hit(e,bridge,idx,on_damage=lambda damage: None)
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
