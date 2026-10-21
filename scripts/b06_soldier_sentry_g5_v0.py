@@ -153,6 +153,15 @@ class SourceMelee:
         if any(x["kind"]=="g5_melee_resolved" and
                x["detail"].get("action_index")==action_index for x in e.ledger):
             raise ValueError("G5 action already resolved")
+        # A committed multi-attack sequence is resolved in declared order.
+        # Earlier slots are final only when their actual G5 resolution or
+        # explicit lost-action cancellation is recorded in the ledger.
+        for prior in sequence["actions"][:slot]:
+            if not any(x["kind"] in ("g5_melee_resolved","g5_melee_cancelled")
+                       and x["detail"].get("action_index")==prior
+                       for x in e.ledger):
+                raise UnresolvedDecision(
+                    "Resolve or lose earlier declared attack slots first")
         if not e.g1.melee_contact(attacker,target):
             raise UnresolvedDecision("Actual G1 contact lost before attack roll")
         p=sequence["profiles"][slot]
@@ -219,15 +228,32 @@ class SourceMelee:
         if d["index"]!=defense_index:
             raise UnresolvedDecision(
                 "G0 assigned defense event does not match declared slot")
-        bonus=self._profile(attacker,p)
-        defense=d["detail"]["defense"]
+        source_bonus=self._profile(attacker,p)
+        # Live Prone positioning changes melee accuracy, NOT source training.
+        # Two Prone creatures do not each receive a reciprocal +2.
+        attacking_prone=any(str(c).lower()=="prone"
+                            for c in e.actors[attacker].conditions)
+        target_prone=any(str(c).lower()=="prone"
+                         for c in e.actors[target].conditions)
+        prone_modifier=(-2 if attacking_prone else 2 if target_prone else 0)
+        bonus=source_bonus+prone_modifier
+        declared_defense=d["detail"]["defense"]
+        defense=declared_defense
         value=d["detail"]["defense_value"]
-        if (defense=="guard" and (
+        if e.actors[target].dead:
+            raise UnresolvedDecision("Target already dead, no further live attack")
+        # Defense was genuinely committed pre-roll, but a subsequently
+        # Dying creature cannot actively Guard or Dodge a later attack.
+        # Keep the already spent Guard/Dodge pressure; use Take Hit instead.
+        dying_fallback=(e.actors[target].hp<=0
+                        and declared_defense in ("guard","dodge"))
+        if dying_fallback:
+            defense="take_hit"
+            value=None
+        elif (defense=="guard" and (
                 not e.actors[target].ready_guard or
                 not e.actors[target].guard_instrument)):
             raise UnresolvedDecision("Changed Guard requires native defensive fallback")
-        if e.actors[target].dead:
-            raise UnresolvedDecision("Target already dead, no further live attack")
         attack_face=_face(attack_face,20,"initial melee attack")
         if attack_face==20:
             confirmation_face=_face(confirmation_face,20,"critical confirmation")
@@ -257,8 +283,22 @@ class SourceMelee:
             raise ValueError("Exact critical d4 faces required")
         if hit:
             _face(damage_face,6,"source sword damage")
+            # G4 owns the exact profile's typed packets, source Vigor die,
+            # resistance/Armor calculation and wound-location requirement.
+            # Run that preflight BEFORE response windows or roll logs, so
+            # invalid missing dice cannot lead to contradictory retries.
+            e.g4.preflight_profile_hit(
+                attacker,target,p,die_face=damage_face,
+                critical=critical,critical_dice=tuple(critical_dice),
+                vigor_die=vigor_die,wound_location_roll=wound_location_roll)
         elif damage_face is not None:
             raise ValueError("Damage dice cannot be used for a miss")
+        if dying_fallback:
+            e.log("g5_defense_unavailable_fallback",attacker=attacker,
+                  target=target,action_index=action_index,
+                  declared=declared_defense,resolved="take_hit",
+                  reason="target_dying_after_prior_sequence_slot",
+                  guard_and_dodge_commitments_retained=True)
         # The native G0 response executor opens, rechecks, closes and logs
         # the trigger. This bounded policy explicitly DECLINES all eligible
         # spontaneous responses, but never silently consumes a reserved
@@ -279,7 +319,9 @@ class SourceMelee:
         e.log("g5_melee_roll",action_index=action_index,
               declaration_index=declaration,slot=slot,
               attacker=attacker,target=target,profile=p,
-              defense=defense,defense_value=value,attack_face=attack_face,
+              defense=defense,declared_defense=declared_defense,
+              defense_value=value,attack_face=attack_face,
+              source_attack_bonus=source_bonus,prone_modifier=prone_modifier,
               attack_bonus=bonus,attack_total=total,
               confirmation_face=confirmation_face,critical=critical,
               hit=hit,spontaneous_policy=spontaneous_policy)
@@ -301,6 +343,8 @@ class SourceMelee:
         e.check()
         return {"outcome":"hit" if hit else "miss","critical":critical,
                 "defense":defense,"defense_value":value,
+                "declared_defense":declared_defense,
+                "prone_modifier":prone_modifier,
                 "attack_total":total,"damage":deepcopy(result),
                 "action_index":action_index}
 
