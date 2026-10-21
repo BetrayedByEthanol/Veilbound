@@ -244,6 +244,14 @@ class SourceMelee:
                 prone_guard_feasible is not True):
             raise UnresolvedDecision(
                 "Prone Guard requires explicit instrument feasibility before commitment")
+        # G0 assigns Guard after charging all sequence AP. A formerly ready
+        # defender may have lost its actual instrument independently; that
+        # must reject here, before any action, sequence lock or Guard is
+        # committed. G0 repeats this preflight for callers without G5.
+        if "guard" in defenses and (
+                not t.guard_instrument or not t.ready_guard
+                or t.guard_value is None):
+            raise ValueError("Cannot Guard without ready legal instrument/capacity")
         bonuses=[self._profile(attacker,p) for p in profiles]
         before=len(e.ledger)
         self._native_sequence_authorized=True

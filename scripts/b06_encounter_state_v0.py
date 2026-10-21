@@ -703,8 +703,14 @@ class Encounter:
             raise ValueError("Invalid defense declaration")
         if t.hp <= 0 and any(d != "take_hit" for d in defenses):
             raise ValueError("Dying/dead target cannot actively defend a sequence")
+        # Validate the actual Guard instrument before any Attack Sequence
+        # AP is paid, the target is locked, or defenses are assigned.
+        # Encounter.defense() independently checks this too, but waiting
+        # until that call would strand a paid, untracked sequence.
         if defenses.count("guard") > t.guard_remaining or (
-            "guard" in defenses and (t.guard_value is None or not t.ready_guard)):
+            "guard" in defenses and (
+                t.guard_value is None or not t.ready_guard
+                or not t.guard_instrument)):
             raise ValueError("Insufficient legal Guard assignments")
         self.seen_sequences.add((attacker, target))
         for i, p in enumerate(profiles):
