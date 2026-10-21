@@ -564,8 +564,9 @@ class SourceMelee:
             ev=e.ledger[canonical_index]
             if (ev["kind"]!="defense_assigned"
                     or ev["round"]!=e.round or ev["turn"]!=attacker
-                    or ev["detail"].get("actor")!=target
-                    or ev["detail"].get("attack_key")!=f"{attacker}:{target}:{i}"
+                    or ev["detail"].get("actor")!=sequence["target"]
+                    or ev["detail"].get("attack_key")!=
+                    f"{attacker}:{sequence['target']}:{i}"
                     or ev["detail"].get("defense")!=declared_defense):
                 raise UnresolvedDecision(
                     "G0 assigned defense event does not match declared slot")
