@@ -73,6 +73,9 @@ class SourceMelee:
             raise ValueError("G5 melee already attached to encounter")
         self.e=encounter
         self.scene_exit=scene_exit
+        # Authorize only this adapter's synchronous native G0 declaration.
+        # Standalone Encounter.declare_sequence cannot strand paid slots.
+        self._native_sequence_authorized=False
         self.bridge=WoundContinuation(encounter)
         encounter.g5=self
         if scene_exit is not None:
@@ -172,7 +175,7 @@ class SourceMelee:
         return bonus
 
     def declare(self,attacker,target,*,profiles,defenses,
-                prone_dodge_feasible=None):
+                prone_dodge_feasible=None,prone_guard_feasible=None):
         e=self.e
         # Reject before ANY declaration cost, chosen defense or roll. A
         # second target cannot invalidate a still-open earlier sequence.
@@ -199,9 +202,18 @@ class SourceMelee:
                 prone_dodge_feasible is not True):
             raise UnresolvedDecision(
                 "Prone Dodge requires explicit physical capability before commitment")
+        if ("guard" in defenses and
+                any(str(c).lower()=="prone" for c in t.conditions) and
+                prone_guard_feasible is not True):
+            raise UnresolvedDecision(
+                "Prone Guard requires explicit instrument feasibility before commitment")
         bonuses=[self._profile(attacker,p) for p in profiles]
         before=len(e.ledger)
-        e.declare_sequence(attacker,target,profiles,defenses)
+        self._native_sequence_authorized=True
+        try:
+            e.declare_sequence(attacker,target,profiles,defenses)
+        finally:
+            self._native_sequence_authorized=False
         changes=e.ledger[before:]
         paid=[x for x in changes if x["kind"]=="action_committed"]
         declared=[x for x in changes if x["kind"]=="attack_sequence_committed"]
@@ -214,6 +226,7 @@ class SourceMelee:
               defense_indices=[x["index"] for x in assigned],
               declaration_index=declared[0]["index"],
               prone_dodge_feasible=prone_dodge_feasible is True,
+              prone_guard_feasible=prone_guard_feasible is True,
               source_bonuses=bonuses)
         return {"attacker":attacker,"target":target,
                 "profiles":profiles,"actions":tuple(x["index"] for x in paid),
@@ -395,6 +408,18 @@ class SourceMelee:
                     attested["detail"].get("prone_dodge_feasible") is not True):
                 raise UnresolvedDecision(
                     "Prone Dodge requires explicit physical capability before resolution")
+        if (d["detail"]["defense"]=="guard"
+                and e.actors[target].hp>0 and not e.actors[target].dead
+                and any(str(c).lower()=="prone"
+                        for c in e.actors[target].conditions)):
+            attested=next((ev for ev in e.ledger[declaration+1:]
+                           if ev["kind"]=="g5_melee_sequence_attested"
+                           and ev["detail"].get("declaration_index")==declaration),
+                          None)
+            if (attested is None or
+                    attested["detail"].get("prone_guard_feasible") is not True):
+                raise UnresolvedDecision(
+                    "Prone Guard requires explicit instrument feasibility before resolution")
         source_bonus=self._profile(attacker,p)
         # Live Prone positioning changes melee accuracy, NOT source training.
         # Two Prone creatures do not each receive a reciprocal +2.

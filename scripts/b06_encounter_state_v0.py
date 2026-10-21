@@ -644,6 +644,13 @@ class Encounter:
         # SourceMelee.declare(), before spending AP or defender resources.
         if getattr(self,"g5",None) is not None:
             self.g5.assert_sequence_declaration_allowed(attacker)
+            # Native G0 has no post-commit G5 attestation callback.
+            # A direct declaration would pay AP/Guard then escape the
+            # G5 pending-slot/end-turn gate. Only the G5 adapter may
+            # enter this synchronous declaration window.
+            if not self.g5._native_sequence_authorized:
+                raise UnresolvedDecision(
+                    "G5 requires SourceMelee.declare for tracked attack sequences")
         a, t = self.actors[attacker], self.actors[target]
         # A same-turn 0-HP crossing can invalidate an attacker after Turn AP
         # was established. Rejection MUST precede the sequence lock and all
