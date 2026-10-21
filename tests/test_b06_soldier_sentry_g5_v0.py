@@ -749,5 +749,124 @@ class G5SoldierSentryTests(unittest.TestCase):
                          list(current["actions"]))
         e.check()
 
+
+    def test_32_g5_precommitted_attack_blocks_g1_movement_until_resolved(self):
+        scene=fixed_scene("I1",seed=9032)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("take_hit",))
+        foe=e.actors["foe"]
+        before=(foe.occupied,foe.mp_remaining,len(e.ledger))
+        for attempt in (
+            lambda:e.g1.step("foe",(0,-1),responses=lambda eligible:()),
+            lambda:e.g1.move_route("foe",((0,-1),)),
+        ):
+            with self.subTest(attempt=attempt):
+                with self.assertRaisesRegex(
+                        UnresolvedDecision,"Complete committed G5 Attack Sequence"):
+                    attempt()
+                self.assertEqual(
+                    (foe.occupied,foe.mp_remaining,len(e.ledger)),before)
+        self.assertTrue(e.g1.melee_contact("foe","front"))
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertTrue(e.g1.step("foe",(0,-1),
+                                   responses=lambda eligible:()))
+        self.assertEqual(foe.occupied,((3,1),))
+        self.assertEqual(foe.mp_remaining,before[1]-2)
+        e.check()
+
+    def test_33_g5_multi_slot_movement_block_persists_between_hits(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9033)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        foe=e.actors["foe"]
+        before=(foe.occupied,foe.mp_remaining,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "Complete committed G5 Attack Sequence"):
+            e.g1.step("foe",(0,-1),responses=lambda eligible:())
+        self.assertEqual((foe.occupied,foe.mp_remaining,len(e.ledger)),before)
+        self.assertEqual(scene.resolve(seq,1,attack_face=1)["outcome"],"miss")
+        self.assertTrue(e.g1.step("foe",(0,-1),
+                                  responses=lambda eligible:()))
+        self.assertEqual(foe.occupied,((3,1),))
+        e.check()
+
+    def test_34_g5_resolution_rejects_unauthorized_post_declaration_movement(self):
+        scene=fixed_scene("I1",seed=9034)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("take_hit",))
+        before=(e.actors["front"].hp,len(scene.report()["attacks"]))
+        # Defense in depth if another integration bypasses G1's proactive
+        # preflight and commits translation directly to the source ledger.
+        e.log("g1_movement_step",actor="foe",old=((3,2),),new=((3,1),),
+              step_kind="orthogonal",cost=2)
+        with self.assertRaisesRegex(
+                UnresolvedDecision,
+                "Committed G5 Attack Sequence cannot interleave movement"):
+            scene.resolve(seq,0,attack_face=1)
+        self.assertEqual((e.actors["front"].hp,
+                          len(scene.report()["attacks"])),before)
+        self.assertFalse(any(x["kind"]=="g5_melee_roll" for x in e.ledger))
+        e.check()
+
+    def test_35_prone_dodge_needs_feasibility_before_g0_commit(self):
+        scene=fixed_scene("I1",seed=9035)
+        e=scene.e
+        e.actors["front"].conditions.append("Prone")
+        scene.bridge.start_next_turn(RegenerationChoice())
+        foe=e.actors["foe"]
+        front=e.actors["front"]
+        before=(foe.ap_remaining,front.dodge_pressure,
+                front.guard_remaining,len(e.ledger))
+        for feasible in (None,False):
+            with self.subTest(feasible=feasible):
+                with self.assertRaisesRegex(
+                        UnresolvedDecision,
+                        "Prone Dodge requires explicit physical capability"):
+                    scene.declare("foe","front",profiles=("B06-AT-03",),
+                                  defenses=("dodge",),
+                                  prone_dodge_feasible=feasible)
+                self.assertEqual(
+                    (foe.ap_remaining,front.dodge_pressure,
+                     front.guard_remaining,len(e.ledger)),before)
+        self.assertFalse(e.seen_sequences)
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("dodge",),prone_dodge_feasible=True)
+        self.assertEqual(front.dodge_pressure,2)
+        self.assertEqual(foe.ap_remaining,before[0]-foe.physical_ap)
+        self.assertTrue(any(x["kind"]=="g5_melee_sequence_attested"
+                            and x["detail"]["prone_dodge_feasible"]
+                            for x in e.ledger))
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        e.check()
+
+    def test_36_newly_prone_dodge_requires_capability_at_resolution(self):
+        scene=fixed_scene("I1",seed=9036)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",profiles=("B06-AT-03",),
+                          defenses=("dodge",))
+        pre=(e.actors["front"].hp,
+             e.actors["foe"].ap_remaining,
+             e.actors["front"].dodge_pressure)
+        e.actors["front"].conditions.append("Prone")
+        ledger_before=len(e.ledger)
+        with self.assertRaisesRegex(
+                UnresolvedDecision,
+                "Prone Dodge requires explicit physical capability"):
+            scene.resolve(seq,0,attack_face=1)
+        self.assertEqual(len(e.ledger),ledger_before)
+        self.assertEqual((e.actors["front"].hp,e.actors["foe"].ap_remaining,
+                          e.actors["front"].dodge_pressure),pre)
+        self.assertFalse(any(x["kind"]=="g5_melee_roll" for x in e.ledger))
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
