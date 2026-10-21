@@ -299,26 +299,130 @@ class SourceMelee:
             cancelled.append(pending["action_index"])
         return tuple(cancelled)
 
-    def _cancel_remaining_after_fatal_hit(self,attacker,target,declaration,slot):
-        """Lose already-paid later slots when this very sequence killed target.
+    def _current_target_for_slot(self,declaration,action_index,original_target):
+        """The last genuine paid-suffix retarget controls this exact action."""
+        bindings=[ev for ev in self.e.ledger
+                  if ev["kind"]=="g5_melee_retarget_committed"
+                  and ev["detail"].get("declaration_index")==declaration
+                  and action_index in ev["detail"].get("action_indices",())]
+        if not bindings:
+            return original_target,None
+        chosen=bindings[-1]["detail"]
+        return chosen["target"],chosen
 
-        The hit and target death are native G4 events; this only closes
-        subsequently impossible G5 slots with explicit ledger evidence.
-        Neither their AP nor their pre-assigned defense resources return.
+    def _pending_suffix(self,sequence):
+        """Only the still-unresolved ordered suffix can be redirected."""
+        declaration=sequence["declaration"]
+        native=self.e.ledger[declaration]
+        if (native["kind"]!="attack_sequence_committed"
+                or native["detail"].get("attacker")!=sequence["attacker"]
+                or native["detail"].get("target")!=sequence["target"]
+                or native["detail"].get("profiles")!=list(sequence["profiles"])):
+            raise UnresolvedDecision("G0 committed sequence no longer matches original declaration")
+        actions=tuple(sequence["actions"])
+        pending=self.pending_attack_slots(sequence["attacker"])
+        suffix=[p for p in pending if p["declaration_index"]==declaration]
+        if not suffix:
+            raise ValueError("No remaining paid G5 attack slots")
+        if [p["action_index"] for p in suffix]!=list(actions[suffix[0]["slot"]:]):
+            raise UnresolvedDecision("Retarget/decline requires an intact pending suffix")
+        return suffix
+
+    def retarget_remaining(self,sequence,new_target,*,defenses,
+                           prone_dodge_feasible=None,prone_guard_feasible=None):
+        """Redirect already-funded suffix; only NEW defender resources are paid.
+
+        Original profiles and payment IDs never change; only a previously
+        unattacked eligible target receives newly selected pre-roll defenses.
         """
-        if not self.e.actors[target].dead:
-            return
-        for pending in self.pending_attack_slots(attacker):
-            if (pending["declaration_index"]!=declaration
-                    or pending["slot"]<=slot):
-                continue
-            self.e.log(
-                "g5_melee_cancelled",
-                action_index=pending["action_index"],
-                declaration_index=declaration,
-                slot=pending["slot"],attacker=attacker,target=target,
-                reason="target_dead_after_prior_slot",
-                ap_refunded=0,defense_commitments_refunded=False)
+        e=self.e
+        attacker=sequence["attacker"]
+        suffix=self._pending_suffix(sequence)
+        if e.current!=attacker or e.pending_regeneration is not None or (
+                e.actors[attacker].hp<=0):
+            raise UnresolvedDecision("Retarget requires a live current attacker")
+        original=sequence["target"]
+        prior_target,_=self._current_target_for_slot(
+            sequence["declaration"],suffix[0]["action_index"],original)
+        if (e.actors[prior_target].hp>0 and
+                e.g1.melee_contact(attacker,prior_target)):
+            raise UnresolvedDecision("Original target remains legal for paid follow-ups")
+        if new_target not in e.actors or new_target==attacker or (
+                e.actors[new_target].team==e.actors[attacker].team):
+            raise ValueError("New target must be a distinct opposing creature")
+        target=e.actors[new_target]
+        if target.dead or target.hp<=0 or len(target.occupied)!=1 or (
+                len(e.actors[attacker].occupied)!=1
+                or not e.g1.melee_contact(attacker,new_target)):
+            raise UnresolvedDecision("Redirect target needs genuine live 1x1 G1 contact")
+        if (attacker,new_target) in e.seen_sequences:
+            raise UnresolvedDecision("Retarget cannot reopen a previously attacked target")
+        defenses=tuple(defenses)
+        if len(defenses)!=len(suffix) or any(x not in
+                ("take_hit","guard","dodge") for x in defenses):
+            raise ValueError("One valid newly assigned defense per funded remaining profile")
+        if (defenses.count("guard")>target.guard_remaining
+                or ("guard" in defenses and
+                    (not target.ready_guard or not target.guard_instrument or
+                     target.guard_value is None))):
+            raise ValueError("Retarget defender has insufficient legal Guard")
+        if ("dodge" in defenses and
+                any(str(x).lower()=="prone" for x in target.conditions)
+                and prone_dodge_feasible is not True):
+            raise UnresolvedDecision("Retarget Prone Dodge requires physical feasibility")
+        if ("guard" in defenses and
+                any(str(x).lower()=="prone" for x in target.conditions)
+                and prone_guard_feasible is not True):
+            raise UnresolvedDecision("Retarget Prone Guard requires instrument feasibility")
+        # Validate all fixed original profiles before paying ANY newly chosen
+        # defense; the redirect cannot change weapon/effect eligibility.
+        for entry in suffix:
+            self._profile(attacker,sequence["profiles"][entry["slot"]])
+        start=len(e.ledger)
+        for entry,choice in zip(suffix,defenses):
+            e.defense(new_target,choice,
+                      attack_key=f"{attacker}:{new_target}:redirect:{sequence['declaration']}:{entry['slot']}")
+        assigned=[ev["index"] for ev in e.ledger[start:]
+                  if ev["kind"]=="defense_assigned"]
+        if len(assigned)!=len(suffix):
+            raise AssertionError("G0 redirected defense allocation incomplete")
+        e.seen_sequences.add((attacker,new_target))
+        e.log("g5_melee_retarget_committed",
+              attacker=attacker,original_target=original,
+              from_target=prior_target,target=new_target,
+              declaration_index=sequence["declaration"],
+              start_slot=suffix[0]["slot"],
+              profiles=[sequence["profiles"][x["slot"]] for x in suffix],
+              action_indices=[x["action_index"] for x in suffix],
+              defense_indices=assigned,defenses=defenses,
+              prone_dodge_feasible=prone_dodge_feasible is True,
+              prone_guard_feasible=prone_guard_feasible is True,
+              ap_spent=0,old_defense_commitments_refunded=False)
+        e.check()
+        return {"target":new_target,"action_indices":tuple(x["action_index"] for x in suffix),
+                "defense_indices":tuple(assigned)}
+
+    def decline_remaining(self,sequence,*,reason="target_unavailable"):
+        """Explicitly abandon the still-paid suffix; never auto-cancel on kill."""
+        suffix=self._pending_suffix(sequence)
+        e=self.e
+        attacker=sequence["attacker"]
+        if e.current!=attacker or e.pending_regeneration is not None or (
+                e.actors[attacker].hp<=0):
+            raise UnresolvedDecision("Decline must be made by live current attacker")
+        prior,_=self._current_target_for_slot(
+            sequence["declaration"],suffix[0]["action_index"],sequence["target"])
+        if reason!="target_unavailable" or (e.actors[prior].hp>0 and
+                e.g1.melee_contact(attacker,prior)):
+            raise UnresolvedDecision("Explicit decline requires an unavailable target")
+        for entry in suffix:
+            e.log("g5_melee_cancelled",attacker=attacker,target=prior,
+                  action_index=entry["action_index"],
+                  declaration_index=sequence["declaration"],
+                  slot=entry["slot"],reason="explicit_decline_target_unavailable",
+                  ap_refunded=0,defense_commitments_refunded=False)
+        e.check()
+        return tuple(x["action_index"] for x in suffix)
 
     def resolve(self,sequence,slot,*,attack_face,damage_face=None,
                 confirmation_face=None,critical_dice=(),vigor_die=None,
@@ -405,6 +509,10 @@ class SourceMelee:
                for x in e.ledger[declaration+1:]):
             raise UnresolvedDecision(
                 "Committed G5 Attack Sequence cannot interleave movement")
+        # The original G0 target/profile receipt remains unchanged; a
+        # separately committed G5 redirection may redirect this paid suffix.
+        target,rebound=self._current_target_for_slot(
+            declaration,action_index,target)
         if not e.g1.melee_contact(attacker,target):
             raise UnresolvedDecision("Actual G1 contact lost before attack roll")
         p=native_profiles[slot]
@@ -436,7 +544,7 @@ class SourceMelee:
                 "G5 action index does not match declared attack slot")
         if (native["kind"]!="attack_sequence_committed"
                 or native["detail"].get("attacker")!=attacker
-                or native["detail"].get("target")!=target
+                or native["detail"].get("target")!=sequence["target"]
                 or native["detail"].get("profiles")!=list(sequence["profiles"])
                 or len(sequence["defenses"])!=len(sequence["profiles"])):
             raise UnresolvedDecision("G0 pre-roll declaration or defense mismatched")
@@ -467,7 +575,23 @@ class SourceMelee:
                     event["detail"]["defense"] for event in assigned]):
             raise UnresolvedDecision("G0 pre-roll declaration or defense mismatched")
         d=assigned[slot]
-        if d["index"]!=defense_index:
+        if rebound is not None:
+            positions=[i for i,index in enumerate(rebound["action_indices"])
+                       if index==action_index]
+            if len(positions)!=1:
+                raise UnresolvedDecision("Retargeted attack slot not found")
+            position=positions[0]
+            defense_index=rebound["defense_indices"][position]
+            if type(defense_index) is not int or not 0<=defense_index<len(e.ledger):
+                raise UnresolvedDecision("Retargeted defender has no source defense")
+            d=e.ledger[defense_index]
+            if (d["kind"]!="defense_assigned" or d["round"]!=e.round
+                    or d["detail"].get("actor")!=target
+                    or d["detail"].get("defense")!=rebound["defenses"][position]
+                    or d["detail"].get("attack_key")!=
+                    f"{attacker}:{target}:redirect:{declaration}:{slot}"):
+                raise UnresolvedDecision("Retargeted defense does not match paid slot")
+        elif d["index"]!=defense_index:
             raise UnresolvedDecision(
                 "G0 assigned defense event does not match declared slot")
         if (d["detail"]["defense"]=="dodge"
@@ -477,8 +601,13 @@ class SourceMelee:
                            if ev["kind"]=="g5_melee_sequence_attested"
                            and ev["detail"].get("declaration_index")==declaration),
                           None)
-            if (attested is None or
-                    attested["detail"].get("prone_dodge_feasible") is not True):
+            if (rebound is not None and
+                    rebound.get("prone_dodge_feasible") is not True):
+                raise UnresolvedDecision(
+                    "Retarget Prone Dodge needs precommitted physical feasibility")
+            if (rebound is None and
+                    (attested is None or
+                     attested["detail"].get("prone_dodge_feasible") is not True)):
                 raise UnresolvedDecision(
                     "Prone Dodge requires explicit physical capability before resolution")
         if (d["detail"]["defense"]=="guard"
@@ -489,8 +618,13 @@ class SourceMelee:
                            if ev["kind"]=="g5_melee_sequence_attested"
                            and ev["detail"].get("declaration_index")==declaration),
                           None)
-            if (attested is None or
-                    attested["detail"].get("prone_guard_feasible") is not True):
+            if (rebound is not None and
+                    rebound.get("prone_guard_feasible") is not True):
+                raise UnresolvedDecision(
+                    "Retarget Prone Guard needs precommitted instrument feasibility")
+            if (rebound is None and
+                    (attested is None or
+                     attested["detail"].get("prone_guard_feasible") is not True)):
                 raise UnresolvedDecision(
                     "Prone Guard requires explicit instrument feasibility before resolution")
         # The attacker may have become Prone after paying for the
@@ -618,12 +752,9 @@ class SourceMelee:
               attacker=attacker,target=target,profile=p,
               outcome="hit" if hit else "miss",
               damage=result,critical=critical)
-        # A prior fatal hit ends the actual target's ability to receive
-        # another living encounter hit. The G0-paid follow-up slots are
-        # lost, not left permanently pending or silently refunded.
-        if hit and e.actors[target].dead:
-            self._cancel_remaining_after_fatal_hit(
-                attacker,target,declaration,slot)
+        # Even a fatal first hit retains any remaining paid slots.
+        # The caller must redirect them to a new legal target, or explicitly
+        # decline when the original target is no longer available.
         e.check()
         return {"outcome":"hit" if hit else "miss","critical":critical,
                 "defense":defense,"defense_value":value,
