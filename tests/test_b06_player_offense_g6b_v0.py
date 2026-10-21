@@ -6,7 +6,7 @@ from scripts.b06_encounter_state_v0 import (
 )
 from scripts.b06_movement_v0 import GridMovement
 from scripts.b06_spells_v0 import SpellState
-from scripts.b06_damage_v0 import DamageState
+from scripts.b06_damage_v0 import DamageState, DamagePacket
 from scripts.b06_player_offense_g6b_v0 import (
     PlayerHunterCombat, PARTY_MELEE, party_weapon_profile,
 )
@@ -36,6 +36,35 @@ def go_to(e,c,actor_id):
             c.bridge.end_current_turn()
         if e.current is None:
             c.bridge.start_next_turn(RegenerationChoice())
+
+
+
+def suffix_scene(*,role="A",alternate_hunter=False):
+    """Genuine native sequence with one adjacent non-Hunter redirect decoy."""
+    actors=[
+        enemy_actor("B06-EN-03","hunter","enemy",
+                    occupied=((4,2),(3,2))),
+        enemy_actor("B06-EN-02","soldier","enemy",
+                    occupied=((5,3),)),
+        party_actor(role,3,"hero","party",occupied=((5,2),)),
+    ]
+    scores={"hunter":40,"soldier":10,"hero":20}
+    if alternate_hunter:
+        actors.append(enemy_actor("B06-EN-03","second_hunter","enemy",
+                                  occupied=((6,2),(7,2))))
+        scores["second_hunter"]=30
+    e=Encounter(actors,scores,seed=968,
+                scenario="G6-B-paid-suffix",
+                objective="source_bound_hunter_suffix")
+    GridMovement(e,width=12,height=8)
+    SpellState(e)
+    DamageState(e)
+    e.begin_round()
+    combat=PlayerHunterCombat(e)
+    combat.bridge.start_next_turn(RegenerationChoice())
+    go_to(e,combat,"hero")
+    return e,combat
+
 
 
 def events(e,kind):
@@ -254,6 +283,116 @@ class G6BTests(unittest.TestCase):
             c.step_with_opportunity("hunter",(-1,0),"a",
                                     attack_face=10,damage_face=1)
         self.assertEqual(len(events(e,"g6b_opportunity_resolved")),1)
+        e.check()
+
+
+    def test_14_live_two_cell_hunter_keeps_paid_a_sword_suffix(self):
+        e,c=suffix_scene()
+        seq=c.declare("hero","hunter",profiles=("B06-PC-A-SWORD",)*2,
+                      defenses=("take_hit","take_hit"))
+        first=c.resolve(seq,0,attack_face=1)
+        self.assertEqual(first["outcome"],"miss")
+        self.assertFalse(c._paid_target_unavailable("hero","hunter"))
+        before=(len(e.ledger),e.actors["soldier"].dodge_pressure,
+                e.actors["hero"].ap_remaining,
+                tuple(c.pending_attack_slots("hero")))
+        with self.assertRaisesRegex(UnresolvedDecision,"remains legal"):
+            c.retarget_remaining(seq,"soldier",defenses=("dodge",))
+        with self.assertRaisesRegex(UnresolvedDecision,"unavailable target"):
+            c.decline_remaining(seq)
+        self.assertEqual((len(e.ledger),e.actors["soldier"].dodge_pressure,
+                          e.actors["hero"].ap_remaining,
+                          tuple(c.pending_attack_slots("hero"))),before)
+        second=c.resolve(seq,1,attack_face=10,damage_face=1)
+        self.assertEqual(second["outcome"],"hit")
+        self.assertEqual(second["damage"]["hp_loss"],4)
+        self.assertEqual(e.actors["hunter"].hp,10)
+        self.assertFalse(events(e,"g5_melee_retarget_committed"))
+        self.assertFalse(events(e,"g5_melee_cancelled"))
+        e.check()
+
+    def test_15_dying_two_cell_hunter_keeps_paid_b_mace_suffix(self):
+        e,c=suffix_scene(role="B")
+        e.actors["hunter"].hp=1
+        seq=c.declare("hero","hunter",profiles=("B06-PC-B-MACE",)*2,
+                      defenses=("take_hit","take_hit"))
+        first=c.resolve(seq,0,attack_face=10,damage_face=1,
+                        wound_location_roll=8)
+        self.assertEqual(first["damage"]["hp_loss"],7)
+        self.assertLessEqual(e.actors["hunter"].hp,0)
+        self.assertFalse(e.actors["hunter"].dead)
+        self.assertFalse(c._paid_target_unavailable("hero","hunter"))
+        before=(len(e.ledger),e.actors["soldier"].dodge_pressure,
+                e.actors["hero"].ap_remaining)
+        with self.assertRaisesRegex(UnresolvedDecision,"remains legal"):
+            c.retarget_remaining(seq,"soldier",defenses=("dodge",))
+        with self.assertRaisesRegex(UnresolvedDecision,"unavailable target"):
+            c.decline_remaining(seq)
+        self.assertEqual((len(e.ledger),e.actors["soldier"].dodge_pressure,
+                          e.actors["hero"].ap_remaining),before)
+        second=c.resolve(seq,1,attack_face=1)
+        self.assertEqual(second["outcome"],"miss")
+        self.assertFalse(c.pending_attack_slots("hero"))
+        e.check()
+
+    def test_16_dead_hunter_cannot_redirect_paid_a_slot_to_soldier(self):
+        e,c=suffix_scene()
+        e.actors["hunter"].hp=1
+        seq=c.declare("hero","hunter",profiles=("B06-PC-A-SWORD",)*2,
+                      defenses=("take_hit","take_hit"))
+        c.resolve(seq,0,attack_face=10,damage_face=1,
+                  wound_location_roll=8)
+        # An independently confirmed lethal G4 event now makes the
+        # originally declared Hunter genuinely unavailable.
+        e.g4.apply_damage(
+            "hunter",(DamagePacket("hp","Toxin",20),),
+            event_key="g6b:test:separate_lethal_toxin",
+            cause="test:independently_confirmed_toxin")
+        self.assertTrue(e.actors["hunter"].dead)
+        self.assertTrue(c._paid_target_unavailable("hero","hunter"))
+        before=(len(e.ledger),e.actors["soldier"].dodge_pressure,
+                e.actors["soldier"].guard_remaining,
+                tuple(c.pending_attack_slots("hero")))
+        with self.assertRaisesRegex(UnresolvedDecision,"source-authorized"):
+            c.retarget_remaining(seq,"soldier",defenses=("dodge",))
+        self.assertEqual((len(e.ledger),e.actors["soldier"].dodge_pressure,
+                          e.actors["soldier"].guard_remaining,
+                          tuple(c.pending_attack_slots("hero"))),before)
+        self.assertFalse(events(e,"g5_melee_retarget_committed"))
+        # An explicitly declined, already-paid suffix is still legal
+        # against a genuinely unavailable/dead Hunter, without AP refund.
+        ap=e.actors["hero"].ap_remaining
+        self.assertEqual(c.decline_remaining(seq),
+                         (seq["actions"][1],))
+        self.assertEqual(e.actors["hero"].ap_remaining,ap)
+        self.assertFalse(c.pending_attack_slots("hero"))
+        e.check()
+
+    def test_17_unavailable_hunter_retargets_only_another_live_hunter(self):
+        e,c=suffix_scene(role="B",alternate_hunter=True)
+        e.actors["hunter"].hp=1
+        seq=c.declare("hero","hunter",profiles=("B06-PC-B-MACE",)*2,
+                      defenses=("take_hit","take_hit"))
+        c.resolve(seq,0,attack_face=10,damage_face=1,
+                  wound_location_roll=8)
+        e.g4.apply_damage(
+            "hunter",(DamagePacket("hp","Toxin",20),),
+            event_key="g6b:test:second_lethal_toxin",
+            cause="test:independently_confirmed_toxin")
+        self.assertTrue(e.actors["hunter"].dead)
+        before_ap=e.actors["hero"].ap_remaining
+        reassigned=c.retarget_remaining(
+            seq,"second_hunter",defenses=("take_hit",))
+        self.assertEqual(reassigned["action_indices"],(seq["actions"][1],))
+        self.assertEqual(e.actors["hero"].ap_remaining,before_ap)
+        second=c.resolve(seq,1,attack_face=10,damage_face=1)
+        self.assertEqual(second["outcome"],"hit")
+        self.assertEqual(second["damage"]["hp_loss"],7)
+        self.assertEqual(e.actors["second_hunter"].hp,7)
+        self.assertFalse(c.pending_attack_slots("hero"))
+        self.assertEqual(events(e,"g5_melee_resolved")[-1]["detail"]["target"],
+                         "second_hunter")
+        self.assertEqual(len(events(e,"g5_melee_retarget_committed")),1)
         e.check()
 
 

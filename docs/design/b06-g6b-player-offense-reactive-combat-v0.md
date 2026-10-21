@@ -44,6 +44,26 @@ logs the actual paid G0 action. No separate side ledger or instant-kill
 claim is accepted. Player targets other than the source Hunter remain
 outside this executor.
 
+### Paid-suffix target integrity (Codex review)
+
+The inherited G5 `_paid_target_unavailable()` recognizes a **living,
+sourced 1×2 Hunter** as legal while its G1 melee contact persists, even
+when that Hunter is Dying and can only Take Hit. Two anatomical cells
+never alone unlock `retarget_remaining()` or `decline_remaining()`.
+The check is shared by both APIs and preserves original AP and already
+committed Guard/Dodge choices when an unauthorized change is rejected.
+
+If the original Hunter really becomes unavailable (e.g., genuinely
+dead or no longer in melee contact), A/B players may redirect an intact
+prepaid suffix **only to another legal, frontal-or-adjacent 1×2 Hunter
+source** using one new pre-roll defense per remaining slot. A nearby
+1×1 Soldier/Sentry is not a substitute target, including when the
+original Hunter has died; this is validated before new Guard/Dodge
+resources or G5 redirection provenance can be created. Genuine dead
+or unreachable targets still permit an **explicit** decline of remaining
+paid slots without AP/defense refunds. Generic source-authorized enemy
+one-square suffix behavior is preserved.
+
 ## One genuine PC Opportunity during Hunter movement
 
 `PlayerHunterCombat.step_with_opportunity(hunter, delta, pc, ...)` offers
