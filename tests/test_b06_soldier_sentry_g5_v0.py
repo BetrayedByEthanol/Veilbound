@@ -1933,5 +1933,84 @@ class G5SoldierSentryTests(unittest.TestCase):
         g.bridge.end_current_turn()
         e.check()
 
+
+    def test_69_mp_reservation_waits_for_every_paid_g5_sequence_slot(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9069)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        attacker=e.actors["foe"]
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        self.assertEqual(len(scene.pending_attack_slots("foe")),2)
+        self.assertEqual(attacker.ap_remaining,2)
+
+        def prove_reservation_rejected():
+            # Snapshot all native and G1 bookkeeping before the attempt.
+            before=(attacker.mp_remaining,attacker.ap_remaining,
+                    attacker.occupied,e.serialize(),len(e.reservations),
+                    dict(e.g1.motion),e.g1.next_reservation,
+                    tuple(scene.pending_attack_slots("foe")))
+            with self.assertRaisesRegex(
+                    UnresolvedDecision,
+                    "Complete committed G5 Attack Sequence before movement"):
+                e.g1.reserve_movement("foe","later-movement-trigger",4,
+                                      label="delayed-interception")
+            self.assertEqual(
+                (attacker.mp_remaining,attacker.ap_remaining,
+                 attacker.occupied,e.serialize(),len(e.reservations),
+                 dict(e.g1.motion),e.g1.next_reservation,
+                 tuple(scene.pending_attack_slots("foe"))),before)
+            self.assertFalse(any(x["kind"]=="g1_movement_mp_reserved"
+                                 for x in e.ledger))
+
+        # Cannot reserve immediately after the declaration...
+        prove_reservation_rejected()
+        # ...or after observing a first attack result while its pre-paid
+        # second profile/defense is still committed and unresolved.
+        first=scene.resolve(seq,0,attack_face=1)
+        self.assertEqual(first["outcome"],"miss")
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        prove_reservation_rejected()
+
+        # The same valid reservation becomes legal as soon as the ordered
+        # sequence is fully resolved. Only this call may mutate MP/registry.
+        second=scene.resolve(seq,1,attack_face=1)
+        self.assertEqual(second["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots("foe"))
+        before_mp=attacker.mp_remaining
+        before_ledger=len(e.ledger)
+        token=e.g1.reserve_movement("foe","later-movement-trigger",4,
+                                     label="delayed-interception")
+        self.assertEqual(attacker.mp_remaining,before_mp-4)
+        self.assertEqual(e.g1.next_reservation,1)
+        self.assertIn(token,e.g1.motion)
+        self.assertEqual(e.g1.motion[token].reserved_mp,4)
+        self.assertEqual(len(e.reservations),1)
+        self.assertEqual(e.reservations[0].trigger_key,"later-movement-trigger")
+        self.assertEqual(e.ledger[before_ledger]["kind"],
+                         "g1_movement_mp_reserved")
+        scene.bridge.end_current_turn()
+        e.check()
+
+    def test_70_ordinary_g1_mp_reservation_remains_legal_without_g5(self):
+        soldier=enemy_actor("B06-EN-02","soldier","enemy",
+                            occupied=((3,2),))
+        e=Encounter([soldier],{"soldier":30},seed=9070,
+                    scenario="G1-no-G5-regression")
+        movement=GridMovement(e,width=8,height=5)
+        e.begin_round()
+        e.start_turn("soldier",regen_choice=RegenerationChoice())
+        self.assertIsNone(getattr(e,"g5",None))
+        before=soldier.mp_remaining
+        token=movement.reserve_movement("soldier","G1:independent",3,
+                                        label="standalone-reserve")
+        self.assertEqual(soldier.mp_remaining,before-3)
+        self.assertEqual(len(e.reservations),1)
+        self.assertIn(token,movement.motion)
+        self.assertEqual(movement.motion[token].reserved_mp,3)
+        self.assertEqual(movement.next_reservation,1)
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
