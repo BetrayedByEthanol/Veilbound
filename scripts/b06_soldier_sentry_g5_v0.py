@@ -69,9 +69,12 @@ class SourceMelee:
                 raise ValueError("Scene exit must match source scene, border and objective")
             if len(encounter.actors[scene_exit.actor_id].occupied)!=1:
                 raise ValueError("G5 scene exit requires a one-square actor")
+        if getattr(encounter,"g5",None) is not None:
+            raise ValueError("G5 melee already attached to encounter")
         self.e=encounter
         self.scene_exit=scene_exit
         self.bridge=WoundContinuation(encounter)
+        encounter.g5=self
         if scene_exit is not None:
             encounter.log("g5_scene_exit_authored",
                           encounter_scene=scene_exit.encounter_scene,
@@ -79,6 +82,31 @@ class SourceMelee:
                           objective=scene_exit.objective,
                           actor=scene_exit.actor_id,
                           square=scene_exit.square,policy=scene_exit.policy_id)
+
+    def assert_movement_allowed(self,actor_id):
+        """No ordinary G1 movement while this actor's paid G5 sequence is open.
+
+        Authoritative G5 ledger markers track the *entire* precommitted
+        sequence. Only a future separately adjudicated attack-response
+        path may authorize movement inside its own live window; this v0
+        has no such response policy.
+        """
+        if self.e.current!=actor_id:
+            return
+        for ev in reversed(self.e.ledger):
+            if (ev["kind"]!="g5_melee_sequence_attested"
+                    or ev["round"]!=self.e.round
+                    or ev["turn"]!=actor_id
+                    or ev["detail"].get("attacker")!=actor_id):
+                continue
+            actions=ev["detail"]["action_indices"]
+            for index in actions:
+                if not any(x["kind"] in ("g5_melee_resolved","g5_melee_cancelled")
+                           and x["detail"].get("action_index")==index
+                           for x in self.e.ledger[ev["index"]+1:]):
+                    raise UnresolvedDecision(
+                        "Complete committed G5 Attack Sequence before movement")
+            return
 
     def _profile(self,attacker,profile_id):
         a=self.e.actors[attacker]
@@ -98,7 +126,8 @@ class SourceMelee:
             raise UnresolvedDecision("Sourced attack bonus required")
         return bonus
 
-    def declare(self,attacker,target,*,profiles,defenses):
+    def declare(self,attacker,target,*,profiles,defenses,
+                prone_dodge_feasible=None):
         e=self.e
         if target not in e.actors or attacker not in e.actors or attacker==target:
             raise ValueError("Distinct existing attacker and target required")
@@ -113,6 +142,15 @@ class SourceMelee:
         defenses=tuple(defenses)
         if not profiles or len(profiles)!=len(defenses):
             raise ValueError("Complete physical sequence and defenses required")
+        # A Prone creature may Dodge only when actual repositioning is
+        # physically possible. G0 does not know the map/posture feasibility
+        # and would otherwise debit Dodge Pressure on an illegal choice.
+        # Never infer feasibility from the condition "Prone" alone.
+        if ("dodge" in defenses and
+                any(str(c).lower()=="prone" for c in t.conditions) and
+                prone_dodge_feasible is not True):
+            raise UnresolvedDecision(
+                "Prone Dodge requires explicit physical capability before commitment")
         bonuses=[self._profile(attacker,p) for p in profiles]
         before=len(e.ledger)
         e.declare_sequence(attacker,target,profiles,defenses)
@@ -127,6 +165,7 @@ class SourceMelee:
               action_indices=[x["index"] for x in paid],
               defense_indices=[x["index"] for x in assigned],
               declaration_index=declared[0]["index"],
+              prone_dodge_feasible=prone_dodge_feasible is True,
               source_bonuses=bonuses)
         return {"attacker":attacker,"target":target,
                 "profiles":profiles,"actions":tuple(x["index"] for x in paid),
@@ -196,6 +235,18 @@ class SourceMelee:
                        for x in e.ledger):
                 raise UnresolvedDecision(
                     "Resolve or lose earlier declared attack slots first")
+        # Any completed G1 movement by the attacker since the native
+        # declaration would be an illegal interleaving of turn resources,
+        # even if the new position stays adjacent. This additionally
+        # protects against direct G1 entry points bypassing our proactive
+        # movement guard. No response-authorized movement exists in G5 v0.
+        if any(x["kind"] in ("g1_movement_step",
+                             "g1_allied_transit_step",
+                             "g1_allied_transit_finished")
+               and x["detail"].get("actor")==attacker
+               for x in e.ledger[declaration+1:]):
+            raise UnresolvedDecision(
+                "Committed G5 Attack Sequence cannot interleave movement")
         if not e.g1.melee_contact(attacker,target):
             raise UnresolvedDecision("Actual G1 contact lost before attack roll")
         p=native_profiles[slot]
@@ -261,6 +312,17 @@ class SourceMelee:
         if d["index"]!=defense_index:
             raise UnresolvedDecision(
                 "G0 assigned defense event does not match declared slot")
+        if (d["detail"]["defense"]=="dodge"
+                and any(str(c).lower()=="prone"
+                        for c in e.actors[target].conditions)):
+            attested=next((ev for ev in e.ledger[declaration+1:]
+                           if ev["kind"]=="g5_melee_sequence_attested"
+                           and ev["detail"].get("declaration_index")==declaration),
+                          None)
+            if (attested is None or
+                    attested["detail"].get("prone_dodge_feasible") is not True):
+                raise UnresolvedDecision(
+                    "Prone Dodge requires explicit physical capability before resolution")
         source_bonus=self._profile(attacker,p)
         # Live Prone positioning changes melee accuracy, NOT source training.
         # Two Prone creatures do not each receive a reciprocal +2.
