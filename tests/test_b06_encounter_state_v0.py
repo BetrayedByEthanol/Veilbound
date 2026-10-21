@@ -608,5 +608,42 @@ class G0LedgerTests(unittest.TestCase):
         self.assertEqual(kinds[-1], "trigger_ready_to_resolve")
 
 
+
+    def test_guard_instrument_preflight_before_native_sequence_payment(self):
+        attacker=soldier()
+        defender=sentry("cold_start")
+        e=scene(attacker,defender,
+                score={"soldier":20,"sentry":10})
+        e.begin_round()
+        e.start_turn("soldier")
+        self.assertTrue(defender.ready_guard)
+        original=defender.guard_instrument
+        self.assertTrue(original)
+        self.assertIsNotNone(defender.guard_value)
+        defender.guard_instrument=None
+        original_ledger=e.serialize()
+        original_state=(attacker.ap_remaining,defender.guard_remaining,
+                        defender.dodge_pressure,set(e.seen_sequences))
+        with self.assertRaisesRegex(ValueError,
+                                    "Insufficient legal Guard assignments"):
+            e.declare_sequence("soldier","sentry",
+                               ("B06-AT-03",),("guard",))
+        self.assertEqual(e.serialize(),original_ledger)
+        self.assertEqual((attacker.ap_remaining,defender.guard_remaining,
+                          defender.dodge_pressure,set(e.seen_sequences)),
+                         original_state)
+        self.assertFalse(any(ev["kind"]=="action_committed"
+                             for ev in e.ledger))
+        # G0 itself must not poison its target lock or spend AP on a
+        # delayed Guard validation failure, even when G5 is unattached.
+        defender.guard_instrument=original
+        e.declare_sequence("soldier","sentry",("B06-AT-03",),("guard",))
+        self.assertEqual(attacker.ap_remaining,18)
+        self.assertEqual(defender.guard_remaining,
+                         original_state[1]-1)
+        self.assertEqual(len([x for x in e.ledger
+                              if x["kind"]=="attack_sequence_committed"]),1)
+        e.check()
+
 if __name__ == "__main__":
     unittest.main()

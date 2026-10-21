@@ -1863,5 +1863,75 @@ class G5SoldierSentryTests(unittest.TestCase):
         e.check()
 
 
+
+    def test_67_lost_guard_instrument_preflight_preserves_paid_sequence(self):
+        e,g=crossed_scene()
+        g.bridge.start_next_turn(RegenerationChoice())
+        attacker=e.actors["sentry"]
+        defender=e.actors["soldier"]
+        self.assertTrue(defender.ready_guard)
+        self.assertIsNotNone(defender.guard_value)
+        instrument=defender.guard_instrument
+        self.assertTrue(instrument)
+        # The Guard is still marked ready, but the actual instrument has
+        # been lost independently before the sequence is declared.
+        defender.guard_instrument=None
+        before=e.serialize()
+        resources=(attacker.ap_remaining,defender.guard_remaining,
+                   defender.dodge_pressure,set(e.seen_sequences))
+        with self.assertRaisesRegex(
+            ValueError,"Cannot Guard without ready legal instrument"):
+            g.declare("sentry","soldier",
+                      profiles=("B06-AT-02","B06-AT-02"),
+                      defenses=("take_hit","guard"))
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual((attacker.ap_remaining,defender.guard_remaining,
+                          defender.dodge_pressure,set(e.seen_sequences)),
+                         resources)
+        self.assertFalse(g.pending_attack_slots())
+        self.assertFalse(g.report()["attacks"])
+        self.assertFalse(any(x["kind"] in (
+            "action_committed","attack_sequence_committed",
+            "defense_assigned","g5_melee_sequence_attested")
+            for x in e.ledger))
+        # Restoration permits precisely one normally paid, fully tracked
+        # two-slot sequence against the same target on the same own turn.
+        defender.guard_instrument=instrument
+        sequence=g.declare("sentry","soldier",
+                            profiles=("B06-AT-02","B06-AT-02"),
+                            defenses=("take_hit","guard"))
+        self.assertEqual(attacker.ap_remaining,resources[0]-40)
+        self.assertEqual(defender.guard_remaining,resources[1]-1)
+        self.assertEqual(len(g.pending_attack_slots()),2)
+        self.assertEqual(g.resolve(sequence,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(g.resolve(sequence,1,attack_face=1)["outcome"],"miss")
+        self.assertFalse(g.pending_attack_slots())
+        g.bridge.end_current_turn()
+        e.check()
+
+    def test_68_lost_guard_in_first_slot_also_rejects_without_payment(self):
+        e,g=crossed_scene()
+        g.bridge.start_next_turn(RegenerationChoice())
+        attacker=e.actors["sentry"]
+        defender=e.actors["soldier"]
+        saved=defender.guard_instrument
+        self.assertTrue(defender.ready_guard)
+        defender.guard_instrument=None
+        before=(e.serialize(),attacker.ap_remaining,
+                defender.guard_remaining,set(e.seen_sequences))
+        with self.assertRaisesRegex(
+            ValueError,"Cannot Guard without ready legal instrument"):
+            g.declare("sentry","soldier",
+                      profiles=("B06-AT-02",),defenses=("guard",))
+        self.assertEqual((e.serialize(),attacker.ap_remaining,
+                          defender.guard_remaining,set(e.seen_sequences)),before)
+        self.assertFalse(g.pending_attack_slots())
+        defender.guard_instrument=saved
+        seq=g.declare("sentry","soldier",
+                      profiles=("B06-AT-02",),defenses=("guard",))
+        self.assertEqual(g.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        g.bridge.end_current_turn()
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
