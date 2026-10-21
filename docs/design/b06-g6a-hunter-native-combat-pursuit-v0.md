@@ -57,6 +57,12 @@ The following remain **outside G6-A**: generic Hunter AI or target-switching pol
 - Resisted Horn Drive and blocked destination in the same three-actor arrangement: retain their normal paid non-movement outcomes without inventing Movement Opportunities.
 - Pounce Guard lost after commitment: verify both `ready_guard=False` and `guard_instrument=None` independently block the roll while preserving the paid pending attack; restoring a legal Guard permits the one genuine resolution.
 
+## Codex review — exposure-key and full-footprint Standing safeguards
+
+- Both native normal Bite (AT-04) and paid Pounce Bite (AT-06) preflight their deterministic `g6:bite:{seed}:{action_index}` / `g6:pounce:{seed}:{action_index}` toxin exposure IDs **before** the irreversible G4 hit, G5/G6 attack roll ledger, or G4.5 action consumption. G4.4 uses the **same shared read-only key validator** synchronously at toxin delivery. Real toxin identifiers from either unified exposures, legacy TX-HM or previous Hunter Bite delivery cannot alias a newly delivered Bite. A rejected alias preserves HP, Vigor, the pending action receipt and the existing exposure; retry cannot duplicate the damage. Lethal physical hits with no live venom delivery remain legal without consuming an unneeded exposure identity.
+- A Standing creature is threatened if **any occupied footprint square** is within an opposing source's actual G1 threatened reach. The Standing Opportunity log contains each threatening actor once in sorted stable order, even if that actor reaches multiple cells. In particular, a Prone 1×2 Hunter Standing while only its rear is threatened records the source; this does not grant rear-facing Hunter *attacks*, whose head-only threat policy is unchanged.
+- Regression coverage uses a legitimate preexisting legacy TX-HM exposure deliberately carrying each generated key and asserts that a failed normal/Pounce resolution is side-effect-free and repeatably rejected before any damage, plus rear-only, both-cell and distinct front/rear Standing threats.
+
 ## Validation
 
 ```sh

@@ -586,5 +586,89 @@ class HunterG6ATests(unittest.TestCase):
 
 
 
+    def test_29_normal_bite_duplicate_legitimate_toxin_key_preflight_is_atomic(self):
+        e,c=setup(front=(3,2))
+        sequence=c.declare("hunter","prey",profiles=("B06-AT-04",),
+                           defenses=("take_hit",))
+        action_index=sequence["actions"][0]
+        poison_key=f"g6:bite:{e.seed}:{action_index}"
+        # A different genuine TX-HM exposure previously claimed precisely
+        # the generated Bite key. G4.4 must reject it BEFORE G4 damages prey.
+        e.g4.schedule_hemotoxin(
+            "prey",exposure_key=poison_key,actual_exposure=True,
+            resistance_total=10,wound_location_roll=8)
+        before=(e.actors["prey"].hp,e.actors["prey"].vigor,
+                e.actors["hunter"].ap_remaining,len(e.ledger))
+        for _ in range(2):
+            with self.assertRaisesRegex(ValueError,"unused toxin exposure key"):
+                c.resolve(sequence,0,attack_face=10,damage_face=1)
+            self.assertEqual((e.actors["prey"].hp,e.actors["prey"].vigor,
+                              e.actors["hunter"].ap_remaining,len(e.ledger)),before)
+        self.assertEqual(len(c.pending_attack_slots("hunter")),1)
+        self.assertFalse(events(e,"g4_profile_hit"))
+        self.assertFalse(events(e,"g5_melee_roll"))
+        self.assertFalse(events(e,"g45_attested_hit"))
+        self.assertFalse(c.bridge.seen_actions)
+        self.assertEqual(e.g4.short_toxins[0]["key"],poison_key)
+        e.check()
+
+    def test_30_pounce_duplicate_legitimate_toxin_key_preflight_is_atomic(self):
+        e,c=setup()
+        receipt=c.begin_pounce("hunter","prey",((1,0),)*3)
+        action_index=receipt["action_index"]
+        poison_key=f"g6:pounce:{e.seed}:{action_index}"
+        e.g4.schedule_hemotoxin(
+            "prey",exposure_key=poison_key,actual_exposure=True,
+            resistance_total=10,wound_location_roll=8)
+        before=(e.actors["prey"].hp,e.actors["prey"].vigor,
+                e.actors["hunter"].ap_remaining,len(e.ledger))
+        for _ in range(2):
+            with self.assertRaisesRegex(ValueError,"unused toxin exposure key"):
+                c.resolve_pounce(receipt,attack_face=10,damage_face=1,
+                                 balance_hunter_face=1,balance_defender_face=20,
+                                 balance_ability="Strength")
+            self.assertEqual((e.actors["prey"].hp,e.actors["prey"].vigor,
+                              e.actors["hunter"].ap_remaining,len(e.ledger)),before)
+        self.assertEqual(len(c.pending_attack_slots("hunter")),1)
+        self.assertFalse(events(e,"g6_pounce_melee_roll"))
+        self.assertFalse(events(e,"g4_profile_hit"))
+        self.assertFalse(events(e,"g45_attested_hit"))
+        self.assertNotIn(action_index,c.bridge.seen_actions)
+        e.check()
+
+    def test_31_stand_checks_rear_and_all_occupied_hunter_cells(self):
+        # Each source only needs to threaten ONE cell; sources threatening
+        # both are still recorded exactly once and in stable sorted order.
+        for positions,expected in (
+                ({"rear":(1,2)},("rear",)),
+                ({"both":(2,3)},("both",)),
+                ({"rear":(1,2),"front":(4,2)},("front","rear"))):
+            with self.subTest(positions=positions):
+                hunter=enemy_actor("B06-EN-03","hunter","enemy",
+                                   occupied=((3,2),(2,2)))
+                others=[party_actor("A",3,ident,"party",occupied=(square,))
+                        for ident,square in positions.items()]
+                ranks={"hunter":30}
+                ranks.update({ident:20-i for i,ident in enumerate(positions)})
+                e=Encounter([hunter,*others],ranks,seed=901,
+                            scenario="G6-Stand-full-footprint-threat")
+                g=GridMovement(e,width=8,height=6)
+                e.begin_round()
+                e.start_turn("hunter",regen_choice=RegenerationChoice())
+                hunter.conditions.append("Prone")
+                for ident,square in positions.items():
+                    self.assertTrue(any(g.threatens(ident,cell)
+                                        for cell in hunter.occupied))
+                if "rear" in positions:
+                    self.assertTrue(g.threatens("rear",hunter.occupied[1]))
+                    self.assertFalse(g.threatens("rear",hunter.occupied[0]))
+                self.assertTrue(g.stand("hunter"))
+                self.assertEqual(events(e,"g6_stand_started")[-1]["detail"]
+                                 ["opportunity_sources"],expected)
+                self.assertEqual(hunter.mp_remaining,8)
+                self.assertEqual(len(events(e,"g6_stand_completed")),1)
+                e.check()
+
+
 if __name__=="__main__":
     unittest.main()
