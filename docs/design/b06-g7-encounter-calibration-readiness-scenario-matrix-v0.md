@@ -172,7 +172,7 @@ python -m scripts.b06_g7_calibration_readiness_v0 > /tmp/b06-g7-readiness.json
 # Fast 48-cell scope and readiness gates without native re-execution
 python -m scripts.b06_g7_calibration_readiness_v0 --manifest-only
 
-# 22 G7 source/coverage/CI/interval/fail-closed tests
+# 24 G7 source/coverage/CI/interval/fail-closed tests
 python -m unittest discover -s tests -p 'test_b06_g7_calibration_readiness_v0.py' -v
 python -m unittest discover -s tests -v
 ```
