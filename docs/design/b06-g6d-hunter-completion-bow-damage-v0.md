@@ -66,19 +66,58 @@ safety, nor a universal victory condition.
 
 ## Remaining G6-D work / certification limits
 
-**Reactive and Prepared Protective Intervene are still outstanding**:
-a legal Reaction or reserved MP must be consumed in the original
-attack window, geometry/physical eligibility and Shield Guard versus
-Body Take Hit must be verified, and a natural-20 confirmation must
-occur exactly once against the correct defender. Do not graft these
-onto G5 hit resolution or G2 projectile impacts without an
-independent source-bound transfer provenance. A successful
-Protective Intervene cannot be invented from ordinary Duck/Dodge,
-an earlier Reaction event or a stated fictional ally position.
+## Native Reactive Intervene — source-bounded Hunter Bite
+
+[Reactive protector](../../scripts/b06_hunter_reactive_intervene_g6d_v0.py)
+now implements **one** paid Hunter `B06-AT-04` Bite against the
+L2/L3 A Restorative Vanguard with a neighboring B Preservation Guardian.
+The ordinary G5 declaration pays its one Physical Action and locks the
+ward's original Guard/Dodge/Take Hit before any d20. The separate
+source-bound protected-resolution path checks that **same** G0
+payment, one-slot G5 attestation, defense record, Hunter's real
+head-forward contact and guardian's current adjacent physical
+position. It opens the original `g5:melee:<paid-index>` native G0
+spontaneous response window; the Guardian commits exactly one normal
+`Reaction`, with no invented movement or extra AP. A previous
+Opportunity-activated Reaction cannot be recycled.
+
+**Shield Guard** requires the Guardian's ready actual shield and a
+remaining normal Guard use. One Guard use is spent **only when** the
+original Bite would hit; a miss still spends Reaction but consumes
+zero Guard. For a non-natural-20 hit, the original attack total is
+compared against the Guardian's actual Shield Guard value (without
+stacking ward defense). A stop makes no damage or venom packet; a
+failed shield lets the original ward take the genuine G4 profile hit.
+
+**Body Take Hit** transfers only an otherwise-successful, originally
+declared Bite to the Guardian, without a new accuracy roll or a
+second defensive choice. Armor, genuine G4 wound/HP, and venom are
+resolved on the Guardian; the ward's already-paid defense is
+retained. A natural 20 performs **one** critical confirmation:
+against Shield Defense for Shield Guard, or against the ward's
+original defense for Body Take Hit. One custom
+`g6d_protective_bite_attested` record binds the original paid action,
+G0 Reaction debit, optional conditional Guard use and actual damage
+recipient. The body transfer is **not mislabeled a G4.5 original-target
+hit**; the G5 paid slot is closed exactly once by its normal resolved
+event. All wound/venom dice are preflighted before the Reaction costs.
+
+This v0 **only** covers a single ordinary Hunter Bite in the verified
+A/B/head-forward contact scene with a direct, physically reachable
+melee path. It does not generalize a magical/area/arrow protector,
+multi-attack chain, alternate NPC/body geometry, or a prepared route.
+
+**Prepared Protective Intervene remains outstanding**. Moving the
+protector using reserved MP before the original attack's final line
+check needs a distinct G1 Movement Interception executor, live
+post-movement eligibility, and conditional Guard/Body effects.
+The Reactive pathway must not be used to grant free movement, to
+recycle a spent Reaction or to treat an earlier historical response
+as current protection.
 
 A bounded four-PC Hunter death terminal is a genuine outcome
 witness, but **complete mixed-party encounter certification remains
-false**: full Bow lanes, Protective Intervene, true party tactical
+false**: full Bow lanes, Prepared Intervene and broader reactive geometry, true party tactical
 choice/withdrawal paths, alternative adverse conditions and
 calibration still need testing. **No Hunter CR has been assigned.**
 The original signed Phase 3 4096-trial audit remains untouched.
