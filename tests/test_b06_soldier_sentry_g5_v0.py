@@ -424,8 +424,10 @@ class G5SoldierSentryTests(unittest.TestCase):
         with self.assertRaisesRegex(UnresolvedDecision,
                                     "assigned defense event does not match declared slot"):
             scene.resolve(tampered,0,attack_face=6,damage_face=1,vigor_die=4)
+        # Slot 1 is not yet legal even before validating its swapped
+        # defense: declared order requires slot 0 to be final first.
         with self.assertRaisesRegex(UnresolvedDecision,
-                                    "assigned defense event does not match declared slot"):
+                                    "Resolve or lose earlier declared attack slots first"):
             scene.resolve(tampered,1,attack_face=6,damage_face=1,vigor_die=4)
         self.assertEqual(
             (e.actors["front"].hp,e.actors["front"].vigor,
