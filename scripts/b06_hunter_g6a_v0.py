@@ -209,7 +209,7 @@ class HunterCombat(SourceMelee):
             _face(face, 4, "Pounce critical")
         if hit:
             _face(damage_face, 6, "Pounce Bite damage")
-            e.g4.preflight_profile_hit(
+            predicted=e.g4.preflight_profile_hit(
                 hunter, target, "B06-AT-06", die_face=damage_face,
                 critical=critical, critical_dice=tuple(critical_dice),
                 wound_location_roll=wound_location_roll)
@@ -217,6 +217,8 @@ class HunterCombat(SourceMelee):
                 hunter, target, "B06-AT-06", die_face=damage_face,
                 critical=critical, critical_dice=tuple(critical_dice))
             if (e.g4._mitigate_hp(t, packets[0]) > 0 and
+                    predicted["hp_after"] > -t.hp_max and
+                    e.g4.venom.bite_resistance_required(target) and
                     venom_resistance_die is None):
                 raise UnresolvedDecision("Potential puncture requires committed venom resistance d20")
         elif damage_face is not None:

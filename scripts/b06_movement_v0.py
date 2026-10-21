@@ -305,6 +305,11 @@ class GridMovement:
                 "Prone actor must Crawl; standing actor must use ordinary movement")
         if crawl and (pivot is not None or reserved is not None):
             raise UnresolvedDecision("Crawl permits voluntary one-square translation only")
+        if crawl and ((self.pounce is not None and
+                       self.pounce.hunter_id==actor_id)
+                      or actor_id in self.rapid_heading):
+            raise UnresolvedDecision(
+                "Suspended Pounce/Rapid Advance MP may fund Standing, not Crawl")
         if reserved is None and (self.e.current != actor_id or self.e.pending_regeneration):
             raise ValueError("Normal movement requires ready current actor turn")
         if reserved is not None and self.e.current == actor_id:
@@ -526,6 +531,18 @@ class GridMovement:
             e.log("g6_stand_interrupted",actor=actor_id,mp_spent=4)
             return False
         a.conditions=[x for x in a.conditions if str(x).lower()!="prone"]
+        if self.pounce is not None and self.pounce.hunter_id==actor_id:
+            run=self.pounce
+            previous_steps=run.steps
+            # Standing uses the SAME fast-movement allowance; it counts
+            # toward the cutoff, but never commits AP by itself. The three
+            # required translated Charge steps must begin anew after Stand.
+            run.spent_mp+=4
+            run.steps=0
+            e.log("g1_pounce_runup_reset",hunter=actor_id,
+                  previous_steps=previous_steps,new_steps=0,
+                  total_mp_spent=run.spent_mp,
+                  ap_committed=run.committed,reason="standing_completed")
         e.log("g6_stand_completed",actor=actor_id,mp_remaining=a.mp_remaining)
         e.check()
         return True
@@ -712,6 +729,8 @@ class GridMovement:
         if run is None:
             raise ValueError("No Pounce approach")
         a = self.e.actors[run.hunter_id]
+        if any(str(x).lower()=="prone" for x in a.conditions):
+            raise ValueError("Prone Hunter must Stand before Pounce contact")
         selected_id = run.target_id if final_target_id is None else final_target_id
         if selected_id not in self.e.actors:
             raise ValueError("Unknown Pounce contact target")

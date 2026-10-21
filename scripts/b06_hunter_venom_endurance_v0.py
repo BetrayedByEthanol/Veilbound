@@ -242,6 +242,25 @@ class HunterVenomEndurance:
                    active=t["active"],original_order=ev.original_order)
         self.toxins._synchronize(ev.actor_id)
 
+    def bite_resistance_required(self,recipient):
+        """Read-only G6 preflight for a *potentially puncturing* Bite.
+
+        An active Moderate toxin (unified or legacy TX-HM) ignores this
+        exposure, and a live preventive Venom Endurance Ward intercepts it
+        before any natural resistance. Do not consume either resource here:
+        apply_bite remains the only synchronous source of those outcomes.
+        """
+        if recipient not in self.e.actors:
+            raise ValueError("Known Hunter venom recipient required")
+        prior=self.toxins.active(recipient)
+        legacy=any(t["recipient"]==recipient and t["left"]>0
+                   for t in self.d.short_toxins)
+        if (prior is not None and prior["grade"]=="Moderate") or legacy:
+            return False
+        return not any(v["active"] and v["recipient"]==recipient
+                       and v["mode"]=="ward"
+                       for v in self.effects.values())
+
     def apply_bite(self,attacker,recipient,*,profile_hit_index,exposure_key,
                    resistance_die=None,resistance_modifier=0,breach_verified=False):
         """Use one actual G4 Hunter Bite/Pounce ledger, never a claimed hit."""

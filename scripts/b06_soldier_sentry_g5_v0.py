@@ -746,7 +746,7 @@ class SourceMelee:
             # resistance/Armor calculation and wound-location requirement.
             # Run that preflight BEFORE response windows or roll logs, so
             # invalid missing dice cannot lead to contradictory retries.
-            e.g4.preflight_profile_hit(
+            predicted=e.g4.preflight_profile_hit(
                 attacker,target,p,die_face=damage_face,
                 critical=critical,critical_dice=tuple(critical_dice),
                 vigor_die=vigor_die,wound_location_roll=wound_location_roll)
@@ -755,7 +755,8 @@ class SourceMelee:
                     attacker,target,p,die_face=damage_face,
                     critical=critical,critical_dice=tuple(critical_dice))
                 if (e.g4._mitigate_hp(e.actors[target],packets[0])>0
-                        and not e.actors[target].dead
+                        and predicted["hp_after"]>-e.actors[target].hp_max
+                        and e.g4.venom.bite_resistance_required(target)
                         and venom_resistance_die is None):
                     raise UnresolvedDecision(
                         "Potential puncturing Hunter Bite requires precommitted venom d20")
