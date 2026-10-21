@@ -176,8 +176,27 @@ class SpellState:
             raise ValueError("Not a Firebound Sentry")
         if not self._sentry_wielded(a):
             raise ValueError("Unwielded sword cannot deliver a sword attack")
-        active=bool(self.active(caster,"Sentry Sword Reserve"))
-        return "B06-AT-02" if active else "B06-AT-01"
+        active=self.active(caster,"Sentry Sword Reserve")
+        if not active:
+            if "B06-FIRE-RESERVE-01" in a.maintained:
+                raise ValueError("Sentry source Reserve lacks live G3 effect")
+            return "B06-AT-01"
+        # Enhanced Fire/Vigor is legal only while this exact *funded*
+        # Chosen sword reservation still owns 3 Committed VP. The general
+        # release_vp guard prevents accidental refunds; this independent
+        # profile preflight fails closed if actor/effect state was corrupted.
+        if len(active)!=1:
+            raise ValueError("Sentry has multiple active Sword Reserves")
+        effect=active[0]
+        owned=sum(v.committed for v in self.effects.values()
+                  if v.caster==caster)
+        if (effect.ident!="B06-FIRE-RESERVE-01"
+                or effect.ident not in a.maintained
+                or effect.committed!=3 or not effect.chosen
+                or effect.anchor!="Sword" or effect.recipient!=caster
+                or owned>a.vp_committed):
+            raise ValueError("Sentry Sword Reserve lacks funded Committed VP")
+        return "B06-AT-02"
 
     def _formula(self,a,secondary):
         if a.source.source_id!="F":
@@ -599,6 +618,16 @@ class SpellState:
         if (self.e.current!=caster or
                 self.e.pending_regeneration is not None):
             raise ValueError("Voluntary release only at legal own-turn decision")
+        # Voluntary effect release costs no AP, so the central G0 spend_ap
+        # gate cannot protect an already-paid G5 attack sequence here.
+        # In particular, releasing the Sentry's Sword Reserve would remove
+        # the required enhanced profile and strand an otherwise valid
+        # committed attack. Keep the current effect and VP reservation
+        # until *all* paid slots have resolved or been legally cancelled.
+        if (getattr(self.e,"g5",None) is not None and
+                self.e.g5.pending_attack_slots(caster)):
+            raise UnresolvedDecision(
+                "Complete pending G5 Attack Sequence before voluntary effect release")
         found=self.active(caster,kind)
         if len(found)!=1:
             raise ValueError("Exactly one active named effect required")

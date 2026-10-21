@@ -532,6 +532,12 @@ class Encounter:
     def end_turn(self):
         if self.current is None or self.pending_regeneration is not None:
             raise ValueError("No resolved open turn")
+        # G5 precommits every sequence slot. Never let a caller bypass
+        # SourceMelee by ending G0 directly (or through a G4.5 bridge)
+        # and thereby erase a paid but still unresolved attack. The
+        # optional hook must run BEFORE round/turn/resources mutate.
+        if getattr(self, "g5", None) is not None:
+            self.g5.assert_turn_completion_allowed(self.current)
         a = self.actors[self.current]
         if self.g1 is not None and self.g1.pounce is not None and self.g1.pounce.hunter_id == a.id:
             raise ValueError("Resolve or explicitly abort ongoing Pounce before turn end")
@@ -555,6 +561,15 @@ class Encounter:
     def spend_ap(self, actor_id, kind, *, label):
         if self.current != actor_id or self.pending_regeneration is not None:
             raise ValueError("Only ready current actor may spend Turn AP")
+        # G5 pays all ordinary Attack Sequence slots up front. A later
+        # Physical/Projection/General/Full spend (including reserve()) must
+        # not supersede any unresolved slot: G4.5 would reject that now-stale
+        # action and the turn completion gate would leave the scene stranded.
+        # During declare_sequence the G5 attestation is not created until
+        # all canonical G0 payments and defenses have been committed, so
+        # this hook permits those original payments but blocks later ones.
+        if getattr(self, "g5", None) is not None:
+            self.g5.assert_ap_commitment_allowed(actor_id)
         a = self.actors[actor_id]
         if a.dead or a.hp <= 0:
             raise ValueError("Dying/dead actors cannot take ordinary voluntary actions")
@@ -598,6 +613,19 @@ class Encounter:
         _integer(points, "release", 1)
         if points > a.vp_committed:
             raise ValueError("Cannot refund Spent VP")
+        # G3 owns the VP committed to each *still active* effect. Refunding
+        # that share through this generic G0 entry point would leave a
+        # paid spell in place with no reservation, including the Sentry's
+        # enhanced sword. G3._end removes the effect BEFORE refunding its
+        # committed VP, so legitimate expiration, sword break, and voluntary
+        # release keep their existing source-driven timing.
+        if self.g3 is not None:
+            owned = sum(effect.committed for effect in self.g3.effects.values()
+                        if effect.caster == actor_id)
+            if owned < 0 or owned > a.vp_committed:
+                raise ValueError("Active G3 effect has invalid committed VP funding")
+            if a.vp_committed - points < owned:
+                raise ValueError("Cannot refund VP owned by active G3 effects")
         a.vp_committed -= points
         a.vp_available += points
         self.log("vp_release", actor=actor_id, points=points, label=label)
@@ -633,6 +661,18 @@ class Encounter:
     def declare_sequence(self, attacker, target, profiles, defenses):
         if self.current != attacker or self.pending_regeneration is not None:
             raise ValueError("Only ready current actor declares ordinary sequence")
+        # G5's source-bound AP slots cannot be superseded by a second
+        # target's G0 sequence. Guard the native entry point as well as
+        # SourceMelee.declare(), before spending AP or defender resources.
+        if getattr(self,"g5",None) is not None:
+            self.g5.assert_sequence_declaration_allowed(attacker)
+            # Native G0 has no post-commit G5 attestation callback.
+            # A direct declaration would pay AP/Guard then escape the
+            # G5 pending-slot/end-turn gate. Only the G5 adapter may
+            # enter this synchronous declaration window.
+            if not self.g5._native_sequence_authorized:
+                raise UnresolvedDecision(
+                    "G5 requires SourceMelee.declare for tracked attack sequences")
         a, t = self.actors[attacker], self.actors[target]
         # A same-turn 0-HP crossing can invalidate an attacker after Turn AP
         # was established. Rejection MUST precede the sequence lock and all
@@ -663,8 +703,14 @@ class Encounter:
             raise ValueError("Invalid defense declaration")
         if t.hp <= 0 and any(d != "take_hit" for d in defenses):
             raise ValueError("Dying/dead target cannot actively defend a sequence")
+        # Validate the actual Guard instrument before any Attack Sequence
+        # AP is paid, the target is locked, or defenses are assigned.
+        # Encounter.defense() independently checks this too, but waiting
+        # until that call would strand a paid, untracked sequence.
         if defenses.count("guard") > t.guard_remaining or (
-            "guard" in defenses and (t.guard_value is None or not t.ready_guard)):
+            "guard" in defenses and (
+                t.guard_value is None or not t.ready_guard
+                or not t.guard_instrument)):
             raise ValueError("Insufficient legal Guard assignments")
         self.seen_sequences.add((attacker, target))
         for i, p in enumerate(profiles):

@@ -1306,5 +1306,32 @@ class B06G3Test(unittest.TestCase):
         e.check()
 
 
+
+    def test_76_active_stone_owns_vp_but_unowned_committed_share_can_refund(self):
+        f=pc("F",3)
+        e,g=game(f)
+        e.start_turn("caster")
+        effect=g.cast_stone("caster")
+        self.assertIsNotNone(effect)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        # An independent G0 commitment can still be released while the
+        # Stone host retains its own six source-backed Committed VP.
+        e.spend_vp("caster",2,mode="committed",label="independent:unowned")
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(10,8,0))
+        original=e.serialize()
+        with self.assertRaisesRegex(ValueError,
+                                    "Cannot refund VP owned by active G3 effects"):
+            e.release_vp("caster",3,label="bypass:stone-host")
+        self.assertEqual(e.serialize(),original)
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(10,8,0))
+        e.release_vp("caster",2,label="independent:unowned")
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(12,6,0))
+        self.assertEqual(len(g.active("caster","Stone Skin")),1)
+        g.release("caster","Stone Skin")
+        self.assertEqual((f.vp_available,f.vp_committed,f.vp_spent),(18,0,0))
+        self.assertEqual(g.active("caster","Stone Skin"),[])
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()

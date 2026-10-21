@@ -291,6 +291,11 @@ class GridMovement:
         a = self.e.actors[actor_id]
         if a.hp <= 0 or a.dead:
             raise ValueError("Incapacitated creature cannot voluntarily move")
+        # G5 ordinary melee precommits every attack before its first roll.
+        # A normal mover cannot spend MP between unresolved attack slots.
+        # This v0 has no G5 response-authorized attacker movement path.
+        if getattr(self.e,"g5",None) is not None:
+            self.e.g5.assert_movement_allowed(actor_id)
         if any(str(status).lower() == "prone" for status in a.conditions):
             raise UnresolvedDecision("Prone locomotion requires Crawl/Stand executor")
         if reserved is None and (self.e.current != actor_id or self.e.pending_regeneration):
@@ -484,6 +489,8 @@ class GridMovement:
             raise ValueError("Nonempty declared route required")
         if a.dead or a.hp <= 0:
             raise ValueError("Incapacitated creature cannot voluntarily move")
+        if getattr(self.e,"g5",None) is not None:
+            self.e.g5.assert_movement_allowed(actor_id)
         if any(str(x).lower() == "prone" for x in a.conditions):
             raise UnresolvedDecision("Prone locomotion requires Crawl/Stand executor")
         if self.pounce and self.pounce.hunter_id == actor_id:
@@ -538,6 +545,12 @@ class GridMovement:
     def reserve_movement(self, actor_id, trigger_key, mp, *, label):
         if self.e.current != actor_id or self.e.pending_regeneration:
             raise ValueError("Reserve MP on ready own turn only")
+        # MP reservation is another own-turn resource decision. Its entry
+        # point must obey the same G5 sequence completion gate as ordinary
+        # translation and continuous movement, before reserving any MP or
+        # registering a future Interception with G0.
+        if getattr(self.e,"g5",None) is not None:
+            self.e.g5.assert_movement_allowed(actor_id)
         if self.pounce is not None and self.pounce.hunter_id == actor_id:
             raise ValueError("Pounce prohibits new Movement Interception reservations")
         if actor_id in self.rapid_heading:

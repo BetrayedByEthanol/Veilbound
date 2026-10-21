@@ -75,7 +75,6 @@ class WoundContinuation:
         profiles=details.get("profiles")
         defenses=details.get("defenses")
         if (details.get("attacker")!=attacker or
-                details.get("target")!=target or
                 not isinstance(profiles,list) or
                 not isinstance(defenses,list) or
                 len(profiles)!=len(defenses) or not profiles):
@@ -100,6 +99,26 @@ class WoundContinuation:
         if (len(positions)!=1 or profiles[positions[0]]!=profile_id):
             raise UnresolvedDecision(
                 "Committed attack action does not match declared target/profile")
+        # G5 is the sole explicit retarget authority for a G0-paid suffix.
+        # No invented second AP payment or free target reassignment: the
+        # last source-attested redirect for this exact action must match.
+        redirects=[ev["detail"] for ev in ledger
+                   if ev["kind"]=="g5_melee_retarget_committed"
+                   and ev["detail"].get("declaration_index")==declaration["index"]
+                   and action_index in ev["detail"].get("action_indices",())]
+        actual_target=(redirects[-1]["target"] if redirects
+                       else details.get("target"))
+        if actual_target!=target:
+            raise UnresolvedDecision(
+                "Committed attack declaration does not match target/profile")
+        if redirects:
+            chosen=redirects[-1]
+            i=chosen["action_indices"].index(action_index)
+            if (chosen.get("attacker")!=attacker
+                    or chosen.get("original_target")!=details.get("target")
+                    or chosen.get("profiles",())[i]!=profile_id
+                    or (attacker,target) not in self.e.seen_sequences):
+                raise UnresolvedDecision("Retarget lacks legal G5 paid-suffix authority")
         # The old committed sequence cannot be revived after beginning a
         # second action/sequence, even while the attacker remains current.
         if any(ev["kind"] in ("action_committed",
@@ -232,8 +251,11 @@ class WoundContinuation:
         """Record a legal exit, never infer escape from a low HP value."""
         if actor_id not in self.e.actors:
             raise ValueError("Unknown actor")
-        if self.e.actors[actor_id].dead:
-            raise ValueError("Dead actor cannot withdraw")
+        # A genuine earlier G1 step does not authorize withdrawal after
+        # the actor falls unconscious before the exit is attested.
+        a=self.e.actors[actor_id]
+        if a.hp<=0 or a.dead:
+            raise ValueError("Dying/dead actor cannot withdraw")
         if independently_verified is not True or not isinstance(
                 exit_policy_reference,str) or not exit_policy_reference:
             raise UnresolvedDecision("G5/G6 exit policy and confirmation required")

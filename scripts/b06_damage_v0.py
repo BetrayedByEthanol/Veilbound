@@ -238,6 +238,13 @@ class DamageState:
                              "raw":p.raw, "mitigated":n, "armor_rule":p.armor_rule}
                             for p,n in zip(packets,resolved)],
                    vigor_details=vigor_details, wound=severity, dead=a.dead)
+        # Independently resolved G4 damage can incapacitate an attacker
+        # *after* G0 has paid and declared a G5 multi-slot sword sequence.
+        # Close every remaining paid slot at the real damage boundary,
+        # before any subsequent G5 resolve/contact or native turn-end gate.
+        if a.hp<=0 and getattr(self.e,"g5",None) is not None:
+            self.e.g5.cancel_incapacitated_attacker(
+                recipient,damage_event_key=event_key)
         if a.dead and before_hp > -a.hp_max:
             # Recipient death ends fixed Venom Endurance immediately, even
             # when there is no later toxin check or caster interaction.
@@ -283,19 +290,13 @@ class DamageState:
             event_key=event_key, cause="g3:thrown_flame",
             wound_location_roll=wound_location_roll)
 
-    def apply_profile_hit(self, attacker, target, profile_id, *,
-                          die_face, confirmed_hit, critical="normal",
-                          critical_dice=(), vigor_die=None, wound_location_roll=None):
-        """Post-G5 attack-result adapter for exact B06 enemy JSON damage profiles.
-
-        The caller must have independently adjudicated hit, legal contact,
-        responses, and any critical confirmation. No AP or defense is added.
-        """
+    def _profile_hit_packets(self, attacker, target, profile_id, *,
+                             die_face, critical="normal",
+                             critical_dice=(), vigor_die=None):
+        """Source-derived packets and input validation only; never mutate G4."""
         source = self._actor(attacker)
         if source.source.source_id not in ENEMIES:
             raise UnresolvedDecision("Only exact B06 enemy attack profiles supported")
-        if confirmed_hit is not True:
-            raise UnresolvedDecision("G5 must independently confirm hit/contact")
         obj = json.loads((ROOT / source.source.path).read_text(encoding="utf-8"))
         profs = [p for p in obj["attack_profiles"] if p["id"] == profile_id]
         if len(profs) != 1 or profs[0]["primary_hp_packet"] is None:
@@ -340,6 +341,56 @@ class DamageState:
             elif extra["kind"] != "hp":
                 raise UnresolvedDecision("Unsupported extra damage resource")
             packets.append(DamagePacket(extra["kind"],extra["damage_type"],raw))
+        return p,main,tuple(packets)
+
+    def preflight_profile_hit(self, attacker, target, profile_id, *,
+                              die_face, critical="normal",
+                              critical_dice=(), vigor_die=None,
+                              wound_location_roll=None):
+        """Validate exact live G4 inputs before G5 commits any dice/result.
+
+        Includes all source-specific extra packets and effective Armor/
+        resistance, so 0-HP crossing and Devastating wound locations are
+        checked against the SAME calculation used in actual application.
+        """
+        p,main,packets=self._profile_hit_packets(
+            attacker,target,profile_id,die_face=die_face,
+            critical=critical,critical_dice=critical_dice,
+            vigor_die=vigor_die)
+        victim=self._actor(target)
+        if victim.dead:
+            raise ValueError("Dead recipient cannot receive live encounter damage")
+        hp_loss=sum(self._mitigate_hp(victim,packet)
+                    for packet in packets if packet.resource=="hp")
+        hp_after=max(-victim.hp_max,victim.hp-hp_loss)
+        creates_wound=(victim.hp>0 and hp_after<=0
+                       or critical=="devastating") and hp_after>-victim.hp_max
+        if creates_wound and (type(wound_location_roll) is not int
+                              or not 1<=wound_location_roll<=20):
+            raise UnresolvedDecision(
+                "Actual wound-location d20 required before G5 roll commit")
+        return {"hp_after":hp_after,"wound_required":bool(creates_wound),
+                "hp_packet_count":sum(x.resource=="hp" for x in packets),
+                "vigor_packet_count":sum(x.resource=="vigor" for x in packets)}
+
+    def apply_profile_hit(self, attacker, target, profile_id, *,
+                          die_face, confirmed_hit, critical="normal",
+                          critical_dice=(), vigor_die=None, wound_location_roll=None):
+        """Post-G5 attack-result adapter for exact B06 enemy JSON damage profiles.
+
+        The caller must have independently adjudicated hit, legal contact,
+        responses, and any critical confirmation. No AP or defense is added.
+        """
+        if confirmed_hit is not True:
+            raise UnresolvedDecision("G5 must independently confirm hit/contact")
+        self.preflight_profile_hit(
+            attacker,target,profile_id,die_face=die_face,
+            critical=critical,critical_dice=critical_dice,
+            vigor_die=vigor_die,wound_location_roll=wound_location_roll)
+        p,main,packets=self._profile_hit_packets(
+            attacker,target,profile_id,die_face=die_face,
+            critical=critical,critical_dice=critical_dice,
+            vigor_die=vigor_die)
         result = self.apply_damage(
             target, packets,
             event_key=f"g4:profile:{attacker}:{target}:{profile_id}:{len(self.e.ledger)}",
@@ -355,7 +406,6 @@ class DamageState:
                    profile=profile_id, critical=critical,
                    injection_eligible=result["injection_eligible"])
         return result
-
     @staticmethod
     def _validate_heal_blocks(blocked_components):
         """Require explicit per-component adjudication, never infer a blanket block."""
