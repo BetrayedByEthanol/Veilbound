@@ -1540,5 +1540,89 @@ class G5SoldierSentryTests(unittest.TestCase):
         scene.bridge.end_current_turn()
         e.check()
 
+
+    def test_57_raw_vp_release_cannot_unfund_pending_enhanced_sword(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9357)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        a=e.actors["foe"]
+        seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        before=e.serialize()
+        original=(a.ap_remaining,a.vp_available,a.vp_committed,a.vp_spent,
+                  tuple(a.maintained),len(scene.pending_attack_slots("foe")))
+        with self.assertRaisesRegex(ValueError,
+                                    "Cannot refund VP owned by active G3 effects"):
+            e.release_vp("foe",3,label="bypass:prepared-reserve")
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual(
+            (a.ap_remaining,a.vp_available,a.vp_committed,a.vp_spent,
+             tuple(a.maintained),len(scene.pending_attack_slots("foe"))),
+            original)
+        self.assertEqual(e.g3.sentry_profile("foe"),"B06-AT-02")
+        result=scene.resolve(seq,0,attack_face=11,damage_face=4,vigor_die=4)
+        self.assertEqual(result["outcome"],"hit")
+        self.assertEqual(result["damage"]["hp_loss"],9)
+        self.assertEqual(result["damage"]["vigor_loss"],2)
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(3,3,0))
+        # Legitimate G3 release still refunds the originally committed
+        # three points, now that the declared attack has been resolved.
+        e.g3.release("foe","Sentry Sword Reserve")
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(6,0,0))
+        self.assertEqual(e.g3.sentry_profile("foe"),"B06-AT-01")
+        e.check()
+
+    def test_58_cold_cast_raw_release_rejected_but_real_release_succeeds(self):
+        scene=fixed_scene("I2",sentry_state="cold_start",seed=9358)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        a=e.actors["foe"]
+        effect=e.g3.cast_sentry_reserve("foe")
+        self.assertIsNotNone(effect)
+        self.assertEqual(e.g3.sentry_profile("foe"),"B06-AT-02")
+        original=e.serialize()
+        before=(a.ap_remaining,a.vp_available,a.vp_committed,a.vp_spent)
+        with self.assertRaisesRegex(ValueError,
+                                    "Cannot refund VP owned by active G3 effects"):
+            e.release_vp("foe",3,label="bypass:cold-cast")
+        self.assertEqual(e.serialize(),original)
+        self.assertEqual((a.ap_remaining,a.vp_available,a.vp_committed,
+                          a.vp_spent),before)
+        self.assertEqual(before,(12,3,3,0))
+        e.g3.release("foe","Sentry Sword Reserve")
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(6,0,0))
+        self.assertEqual(e.g3.sentry_profile("foe"),"B06-AT-01")
+        self.assertEqual(len(e.g3.active("foe","Sentry Sword Reserve")),0)
+        e.check()
+
+    def test_59_enhanced_profile_requires_live_funded_effect(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9359)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        a=e.actors["foe"]
+        original=(a.vp_available,a.vp_committed)
+        # Simulate a corrupted actor snapshot that still conserves VP
+        # while retaining the old SpellEffect. Even without a direct
+        # release_vp call, G5 must never use an unfunded Fire profile.
+        a.vp_available,a.vp_committed=(6,0)
+        self.assertEqual(a.vp_available+a.vp_committed+a.vp_spent,a.vp_max)
+        before=(a.ap_remaining,e.actors["front"].hp,len(e.ledger))
+        with self.assertRaisesRegex(ValueError,
+                                    "Sentry Sword Reserve lacks funded Committed VP"):
+            e.g3.sentry_profile("foe")
+        with self.assertRaisesRegex(ValueError,
+                                    "Sentry Sword Reserve lacks funded Committed VP"):
+            scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        self.assertEqual((a.ap_remaining,e.actors["front"].hp,len(e.ledger)),
+                         before)
+        a.vp_available,a.vp_committed=original
+        self.assertEqual(e.g3.sentry_profile("foe"),"B06-AT-02")
+        seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
