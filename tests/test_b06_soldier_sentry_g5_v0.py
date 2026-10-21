@@ -1436,5 +1436,109 @@ class G5SoldierSentryTests(unittest.TestCase):
                 e.check()
 
 
+
+    def test_53_attach_g5_rejects_already_paid_untracked_g0_sequence(self):
+        foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((3,2),))
+        front=party_actor("A",3,"front","party",occupied=((2,2),))
+        e=Encounter([foe,front],{"foe":30,"front":20},
+                    seed=9353,scenario="G5-late-attach-native-sequence",
+                    objective="source_bound_only",
+                    policy="no_untracked_attack_payment")
+        GridMovement(e,width=8,height=5)
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        e.start_turn("foe",regen_choice=RegenerationChoice())
+        e.declare_sequence("foe","front",("B06-AT-03",),("guard",))
+        self.assertEqual(foe.ap_remaining,18)
+        self.assertEqual(front.guard_remaining,front.guard_capacity-1)
+        before=e.serialize()
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "Attach G5 before any untracked native Attack Sequence"):
+            SourceMelee(e)
+        self.assertEqual(e.serialize(),before)
+        self.assertIsNone(getattr(e,"g5",None))
+        self.assertFalse(any(x["kind"]=="g45_continuation_opened"
+                             for x in e.ledger))
+        self.assertEqual(foe.ap_remaining,18)
+        self.assertEqual(front.guard_remaining,front.guard_capacity-1)
+        e.check()
+
+    def test_54_attach_after_prior_native_sequence_round_still_rejected(self):
+        foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((3,2),))
+        front=party_actor("A",3,"front","party",occupied=((2,2),))
+        e=Encounter([foe,front],{"foe":30,"front":20},
+                    seed=9354,scenario="G5-late-attach-prior-round",
+                    policy="no_unverified_historical_attack")
+        GridMovement(e,width=8,height=5)
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        e.start_turn("foe",regen_choice=RegenerationChoice())
+        e.declare_sequence("foe","front",("B06-AT-03",),("take_hit",))
+        e.end_turn()  # Untracked native G0 cannot prove attack resolution.
+        e.start_turn("front",regen_choice=RegenerationChoice())
+        e.end_turn()
+        e.begin_round()
+        before=e.serialize()
+        with self.assertRaisesRegex(UnresolvedDecision,"untracked native Attack Sequence"):
+            SourceMelee(e)
+        self.assertEqual(e.serialize(),before)
+        self.assertIsNone(getattr(e,"g5",None))
+        e.check()
+
+    def test_55_voluntary_sentry_release_blocked_until_paid_attack_resolves(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9355)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        a=e.actors["foe"]
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(3,3,0))
+        seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        before=e.serialize()
+        resources=(a.ap_remaining,a.vp_available,a.vp_committed,a.vp_spent,
+                   tuple(a.maintained))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "Complete pending G5 Attack Sequence"):
+            e.g3.release("foe","Sentry Sword Reserve")
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual((a.ap_remaining,a.vp_available,a.vp_committed,
+                          a.vp_spent,tuple(a.maintained)),resources)
+        self.assertEqual(len(e.g3.active("foe","Sentry Sword Reserve")),1)
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots("foe"))
+        e.g3.release("foe","Sentry Sword Reserve")
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(6,0,0))
+        self.assertFalse(e.g3.active("foe","Sentry Sword Reserve"))
+        self.assertEqual(e.g3.sentry_profile("foe"),"B06-AT-01")
+        self.assertEqual(sum(x["kind"]=="g3_effect_ended" for x in e.ledger),1)
+        scene.bridge.end_current_turn()
+        e.check()
+
+    def test_56_mid_sequence_release_rejected_until_all_slots_resolved(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9356)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        a=e.actors["foe"]
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        self.assertEqual(len(scene.pending_attack_slots("foe")),2)
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        before=e.serialize()
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "Complete pending G5 Attack Sequence"):
+            e.g3.release("foe","Sentry Sword Reserve")
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(3,3,0))
+        self.assertEqual(scene.resolve(seq,1,attack_face=1)["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots("foe"))
+        e.g3.release("foe","Sentry Sword Reserve")
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(6,0,0))
+        scene.bridge.end_current_turn()
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
