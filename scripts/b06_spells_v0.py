@@ -176,8 +176,27 @@ class SpellState:
             raise ValueError("Not a Firebound Sentry")
         if not self._sentry_wielded(a):
             raise ValueError("Unwielded sword cannot deliver a sword attack")
-        active=bool(self.active(caster,"Sentry Sword Reserve"))
-        return "B06-AT-02" if active else "B06-AT-01"
+        active=self.active(caster,"Sentry Sword Reserve")
+        if not active:
+            if "B06-FIRE-RESERVE-01" in a.maintained:
+                raise ValueError("Sentry source Reserve lacks live G3 effect")
+            return "B06-AT-01"
+        # Enhanced Fire/Vigor is legal only while this exact *funded*
+        # Chosen sword reservation still owns 3 Committed VP. The general
+        # release_vp guard prevents accidental refunds; this independent
+        # profile preflight fails closed if actor/effect state was corrupted.
+        if len(active)!=1:
+            raise ValueError("Sentry has multiple active Sword Reserves")
+        effect=active[0]
+        owned=sum(v.committed for v in self.effects.values()
+                  if v.caster==caster)
+        if (effect.ident!="B06-FIRE-RESERVE-01"
+                or effect.ident not in a.maintained
+                or effect.committed!=3 or not effect.chosen
+                or effect.anchor!="Sword" or effect.recipient!=caster
+                or owned>a.vp_committed):
+            raise ValueError("Sentry Sword Reserve lacks funded Committed VP")
+        return "B06-AT-02"
 
     def _formula(self,a,secondary):
         if a.source.source_id!="F":

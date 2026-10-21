@@ -613,6 +613,19 @@ class Encounter:
         _integer(points, "release", 1)
         if points > a.vp_committed:
             raise ValueError("Cannot refund Spent VP")
+        # G3 owns the VP committed to each *still active* effect. Refunding
+        # that share through this generic G0 entry point would leave a
+        # paid spell in place with no reservation, including the Sentry's
+        # enhanced sword. G3._end removes the effect BEFORE refunding its
+        # committed VP, so legitimate expiration, sword break, and voluntary
+        # release keep their existing source-driven timing.
+        if self.g3 is not None:
+            owned = sum(effect.committed for effect in self.g3.effects.values()
+                        if effect.caster == actor_id)
+            if owned < 0 or owned > a.vp_committed:
+                raise ValueError("Active G3 effect has invalid committed VP funding")
+            if a.vp_committed - points < owned:
+                raise ValueError("Cannot refund VP owned by active G3 effects")
         a.vp_committed -= points
         a.vp_available += points
         self.log("vp_release", actor=actor_id, points=points, label=label)
