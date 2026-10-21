@@ -150,6 +150,9 @@ class SourceMelee:
 
     def assert_turn_completion_allowed(self,actor_id):
         """G0 calls before END TURN consumes resources or advances cursor."""
+        # Defensive backstop if a source-owned death was applied outside a
+        # usual G4 hit callback; healthy unresolved slots still block.
+        self.cancel_incapacitated_attacker(actor_id)
         if self.pending_attack_slots(actor_id):
             raise UnresolvedDecision(
                 "Resolve or explicitly cancel every committed G5 attack slot "
@@ -268,6 +271,34 @@ class SourceMelee:
                 "defenses":tuple(x["index"] for x in assigned),
                 "declaration":declared[0]["index"]}
 
+    def cancel_incapacitated_attacker(self,actor_id,*,damage_event_key=None):
+        """Close committed G0-paid attacks lost to actual G4 incapacitation.
+
+        The G4 damage hook calls this immediately after logging the native
+        damage event. Unlike a response-window failure, an attacker now at
+        HP <= 0 can never deliver its pending ordinary sword strikes.
+        Neither AP nor assigned Guard/Dodge resources are refunded.
+        Repeated calls are idempotent because the ledger owns pending slots.
+        """
+        a=self.e.actors[actor_id]
+        if a.hp>0 and not a.dead:
+            return ()
+        cancelled=[]
+        for pending in self.pending_attack_slots(actor_id):
+            declaration=self.e.ledger[pending["declaration_index"]]
+            target=declaration["detail"]["target"]
+            self.e.log("g5_melee_cancelled",
+                       action_index=pending["action_index"],
+                       declaration_index=pending["declaration_index"],
+                       slot=pending["slot"],attacker=actor_id,target=target,
+                       reason="attacker_dead_before_resolution" if a.dead
+                              else "attacker_dying_before_resolution",
+                       damage_event_key=damage_event_key,
+                       attacker_hp=a.hp,attacker_dead=a.dead,
+                       ap_refunded=0,defense_commitments_refunded=False)
+            cancelled.append(pending["action_index"])
+        return tuple(cancelled)
+
     def _cancel_remaining_after_fatal_hit(self,attacker,target,declaration,slot):
         """Lose already-paid later slots when this very sequence killed target.
 
@@ -306,6 +337,13 @@ class SourceMelee:
             raise ValueError("No valid native G0 source indices")
         if e.current!=attacker or e.pending_regeneration is not None:
             raise ValueError("Only current live attack sequence can resolve")
+        # A prior genuine damage event may have removed the attacker after
+        # payment. Cancel these *specific* paid slots before the G1 contact
+        # gate (which would otherwise report a permanent unresolved attack).
+        if e.actors[attacker].hp<=0 or e.actors[attacker].dead:
+            self.cancel_incapacitated_attacker(attacker)
+            raise UnresolvedDecision(
+                "Attacker incapacitated; remaining G5 sequence slots cancelled")
         native=e.ledger[declaration]
         if native["round"]!=e.round or native["turn"]!=attacker:
             raise UnresolvedDecision(
@@ -629,19 +667,43 @@ class SourceMelee:
                x["detail"].get("actor")==actor_id
                for x in self.e.ledger):
             raise ValueError("Scene exit already attested")
-        steps=[x for x in self.e.ledger[self.bridge.start:]
-               if x["kind"]=="g1_movement_step"
-               and x["detail"].get("actor")==actor_id
-               and x["detail"].get("step_kind") in ("orthogonal","diagonal")]
-        if not steps or tuple(steps[-1]["detail"]["new"][0])!=policy.square:
-            raise UnresolvedDecision("Actual final G1 step to scene-authored exit required")
+        # A completed normal translation or *finished* atomic allied
+        # transit may arrive at the authored border. Intermediate transit
+        # steps are never terminal evidence, even if they visit that square.
+        arrivals=[x for x in self.e.ledger[self.bridge.start:]
+                  if x["detail"].get("actor")==actor_id and
+                  (x["kind"]=="g1_allied_transit_finished" or
+                   (x["kind"]=="g1_movement_step" and
+                    x["detail"].get("step_kind") in
+                        ("orthogonal","diagonal")))]
+        if not arrivals:
+            raise UnresolvedDecision(
+                "Actual completed G1 movement to scene-authored exit required")
+        last=arrivals[-1]
+        if last["kind"]=="g1_movement_step":
+            final=last["detail"].get("new")
+        else:
+            # G1's route-finish record contains count/cost, not coordinates.
+            # Its immediate preceding source step supplies the final
+            # position; G4.5 independently verifies the entire contiguous
+            # paid route before accepting this finish event.
+            previous=(self.e.ledger[last["index"]-1]
+                      if last["index"]>self.bridge.start else None)
+            final=(previous["detail"].get("new")
+                   if previous is not None and
+                   previous["kind"]=="g1_allied_transit_step" and
+                   previous["detail"].get("actor")==actor_id else None)
+        if (not isinstance(final,(tuple,list)) or len(final)!=1 or
+                tuple(final[0])!=policy.square):
+            raise UnresolvedDecision(
+                "Actual final G1 movement to scene-authored exit required")
         evidence=self.bridge.attest_withdrawal(
-            actor_id,movement_event_index=steps[-1]["index"],
+            actor_id,movement_event_index=last["index"],
             exit_policy_reference=policy.policy_id,
             independently_verified=True)
         self.e.log("g5_terminal_exit",actor=actor_id,
                    at=policy.square,policy=policy.policy_id,
-                   movement_index=steps[-1]["index"])
+                   movement_index=last["index"])
         return evidence
 
     def report(self):

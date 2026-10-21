@@ -238,6 +238,13 @@ class DamageState:
                              "raw":p.raw, "mitigated":n, "armor_rule":p.armor_rule}
                             for p,n in zip(packets,resolved)],
                    vigor_details=vigor_details, wound=severity, dead=a.dead)
+        # Independently resolved G4 damage can incapacitate an attacker
+        # *after* G0 has paid and declared a G5 multi-slot sword sequence.
+        # Close every remaining paid slot at the real damage boundary,
+        # before any subsequent G5 resolve/contact or native turn-end gate.
+        if a.hp<=0 and getattr(self.e,"g5",None) is not None:
+            self.e.g5.cancel_incapacitated_attacker(
+                recipient,damage_event_key=event_key)
         if a.dead and before_hp > -a.hp_max:
             # Recipient death ends fixed Venom Endurance immediately, even
             # when there is no later toxin check or caster interaction.
