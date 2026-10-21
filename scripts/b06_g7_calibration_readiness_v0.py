@@ -20,6 +20,14 @@ PARTY_SIZES = (3, 4)
 OPENINGS = ("warned_clear", "forest_ambush")
 FRONTS = ("A_head_forward", "B_head_forward")
 POLICIES = ("decline_all", "reactive_shield", "prepared_body")
+# Exact G6-D protective test fixture: tests/test_b06_hunter_reactive_intervene_g6d_v0.py
+# All of its reactive and prepared witnesses call mixed_scene(size=4,level=3).
+# G7 does not replay these components; it may only cite their scoped tests.
+PROTECTION_WITNESSED = frozenset({
+    (3, 4, "reactive_shield"),
+    (3, 4, "prepared_body"),
+})
+PROTECTION_EVIDENCE = "tests/test_b06_hunter_reactive_intervene_g6d_v0.py"
 SOURCES = {3: ("A", "B", "R"), 4: ("A", "B", "R", "F")}
 ACTORS = {3: ("hunter", "vanguard", "guardian", "archer"),
           4: ("hunter", "vanguard", "guardian", "archer", "scholar")}
@@ -52,9 +60,12 @@ def scenario_matrix():
             gaps.append("integrate_native_G6D_reactive_shield_into_party_run")
         if policy=="prepared_body":
             gaps.append("integrate_native_G6D_prepared_MP_route_into_party_run")
+        if (policy!="decline_all" and
+                (level,size,policy) not in PROTECTION_WITNESSED):
+            gaps.append("G6D_protection_component_not_verified_at_level_party_size")
         witnessed=not gaps
         component=(opening=="warned_clear" and front=="A_head_forward"
-                   and policy!="decline_all")
+                   and (level,size,policy) in PROTECTION_WITNESSED)
         status=("fixed_native_window" if witnessed else
                 "component_verified_only" if component else
                 "blocked_not_executable")
@@ -70,6 +81,8 @@ def scenario_matrix():
             "native_fixed_window_executable":witnessed,
             "complete_encounter_certified":False,
             "component_only":component,
+            "component_evidence_ref":PROTECTION_EVIDENCE if component else None,
+            "component_evidence_replayed":False,
             "known_missing_authority":gaps,
             "frozen_historical_phase3_not_a_comparator":True,
             "calibration_samples":0,
@@ -232,7 +245,7 @@ def build_readiness_report(*,replay=True):
     if (summary["planned_cells"]!=48 or
             (summary["native_fixed_window_cells"],
              summary["component_only_cells"],summary["blocked_cells"])
-            !=(4,8,36)):
+            !=(4,2,42)):
         raise AssertionError("G7 scenario coverage unexpectedly changed")
     return {
         "version":"B06-G7-calibration-readiness-v0",

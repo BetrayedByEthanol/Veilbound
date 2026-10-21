@@ -29,13 +29,16 @@ class G7MatrixTests(unittest.TestCase):
     def test_02_explicit_native_component_and_blocked_evidence(self):
         counts=Counter(x["status"] for x in self.matrix)
         self.assertEqual(counts,{"fixed_native_window":4,
-                                 "component_verified_only":8,
-                                 "blocked_not_executable":36})
+                                 "component_verified_only":2,
+                                 "blocked_not_executable":42})
         for row in self.matrix:
             self.assertEqual(row["native_fixed_window_executable"],
                              row["status"]=="fixed_native_window")
             self.assertEqual(row["component_only"],
                              row["status"]=="component_verified_only")
+            self.assertEqual(row["component_evidence_ref"],
+                             g7.PROTECTION_EVIDENCE if row["component_only"] else None)
+            self.assertIs(row["component_evidence_replayed"],False)
             self.assertEqual(row["known_missing_authority"]==[],
                              row["status"]=="fixed_native_window")
             self.assertIsNone(row["success_rate"])
@@ -75,7 +78,7 @@ class G7MatrixTests(unittest.TestCase):
     def test_06_shield_and_prepared_body_are_components_not_party_trials(self):
         protected=[x for x in self.matrix if x["policy"]!="decline_all"]
         self.assertEqual(len(protected),32)
-        self.assertEqual(sum(x["component_only"] for x in protected),8)
+        self.assertEqual(sum(x["component_only"] for x in protected),2)
         self.assertFalse(any(x["native_fixed_window_executable"] for x in protected))
         for x in protected:
             self.assertTrue(any("integrate_native_G6D_" in g
@@ -239,6 +242,54 @@ class G7MatrixTests(unittest.TestCase):
         self.assertIsNone(self.report["future_inference_policy"]["current_win_probability"])
         self.assertTrue(all(row["success_rate"] is None
                             for row in self.report["matrix"]))
+
+
+    def test_23_protection_evidence_is_exactly_native_p4_l3_fixture(self):
+        verified=[x for x in self.matrix if x["component_only"]]
+        self.assertEqual(len(verified),2)
+        self.assertEqual(
+            {(x["level"],x["party_size"],x["opening"],
+              x["frontline"],x["policy"]) for x in verified},
+            {(3,4,"warned_clear","A_head_forward","reactive_shield"),
+             (3,4,"warned_clear","A_head_forward","prepared_body")})
+        self.assertEqual(
+            g7.PROTECTION_WITNESSED,
+            frozenset({(3,4,"reactive_shield"),(3,4,"prepared_body")}))
+        self.assertEqual(
+            {x["component_evidence_ref"] for x in verified},
+            {"tests/test_b06_hunter_reactive_intervene_g6d_v0.py"})
+        self.assertTrue(all(x["component_evidence_replayed"] is False
+                            for x in verified))
+
+    def test_24_other_six_clear_a_front_protective_cases_are_unverified(self):
+        requested=[x for x in self.matrix
+                   if x["opening"]=="warned_clear"
+                   and x["frontline"]=="A_head_forward"
+                   and x["policy"]!="decline_all"]
+        self.assertEqual(len(requested),8)
+        unverified=[x for x in requested if not x["component_only"]]
+        self.assertEqual(len(unverified),6)
+        self.assertEqual(
+            {(x["level"],x["party_size"],x["policy"])
+             for x in unverified},
+            {(2,3,"reactive_shield"),(2,3,"prepared_body"),
+             (2,4,"reactive_shield"),(2,4,"prepared_body"),
+             (3,3,"reactive_shield"),(3,3,"prepared_body")})
+        for row in unverified:
+            self.assertEqual(row["status"],"blocked_not_executable")
+            self.assertIn(
+                "G6D_protection_component_not_verified_at_level_party_size",
+                row["known_missing_authority"])
+            self.assertIsNone(row["component_evidence_ref"])
+            self.assertFalse(row["component_evidence_replayed"])
+        summary=self.report["summary"]
+        self.assertEqual(
+            (summary["planned_cells"],summary["native_fixed_window_cells"],
+             summary["component_only_cells"],summary["blocked_cells"]),
+            (48,4,2,42))
+        self.assertEqual(
+            sum(x["component_only"] for x in self.report["matrix"]),
+            summary["component_only_cells"])
 
 
 if __name__=="__main__":
