@@ -176,10 +176,17 @@ class G5SoldierSentryTests(unittest.TestCase):
         scene=fixed_scene("I2",sentry_state="prepared_start")
         e=scene.e
         scene.bridge.start_next_turn(RegenerationChoice())
+        # A genuine pre-existing G0 reservation is legal. Its 20-AP
+        # payment logs action_committed, G1 segment_break, then
+        # interception_reserved BEFORE the separately paid attack.
+        # A NEW reservation after declare() is rejected by G5's AP gate.
+        expected_action_index=len(e.ledger)+3
+        e.reserve("foe",f"g5:melee:{expected_action_index}","deferred",
+                  action_kind="physical")
         seq=scene.declare("foe","front",profiles=("B06-AT-02",),
                           defenses=("take_hit",))
-        e.reserve("foe",f"g5:melee:{seq['actions'][0]}","deferred",
-                  action_kind="physical")
+        self.assertEqual(seq["actions"][0],expected_action_index)
+        self.assertEqual(e.actors["foe"].ap_remaining,2)
         before=(e.actors["front"].hp,len(e.reservations))
         with self.assertRaisesRegex(UnresolvedDecision,"Reserved Interception"):
             scene.resolve(seq,0,attack_face=11,damage_face=4,vigor_die=4)
