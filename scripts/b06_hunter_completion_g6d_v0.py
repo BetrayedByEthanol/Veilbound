@@ -169,6 +169,7 @@ class HunterCompletion:
               action_index=commitments[0]["index"],
               launch_index=launched[0]["index"],
               original_outcome=result[0]["outcome"],
+              shot_trigger=shot_trigger,
               outcome="hit" if hit else "miss",
               attack_face=primary_face,attack_total=total,
               defense_value=defense_value,confirmation_face=confirmation_face,

@@ -339,7 +339,7 @@ class ReactiveHunterInterveneTests(unittest.TestCase):
             trigger_key=trigger)
         self.assertNotEqual(old_label,new_label)
         self.assertNotIn(old_label,protect.prepared)
-        self.assertEqual(set(protect.prepared),(new_label,))
+        self.assertEqual(set(protect.prepared),{new_label})
         self.assertIn(new_label,e.g1.motion)
         self.assertEqual(p.mp_remaining,previous_mp-2)
         self.assertEqual(len([r for r in e.reservations
