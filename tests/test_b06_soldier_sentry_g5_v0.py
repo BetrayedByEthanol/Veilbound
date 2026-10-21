@@ -6,7 +6,7 @@ from scripts.b06_encounter_state_v0 import (
     enemy_actor, party_actor)
 from scripts.b06_movement_v0 import GridMovement
 from scripts.b06_spells_v0 import SpellState
-from scripts.b06_damage_v0 import DamageState
+from scripts.b06_damage_v0 import DamageState, DamagePacket
 from scripts.b06_soldier_sentry_g5_v0 import (
     SourceMelee, SceneExit, fixed_scene, run_i1, run_i2)
 
@@ -626,6 +626,50 @@ class G5SoldierSentryTests(unittest.TestCase):
                           vigor_die=4,wound_location_roll=None)
                 self.assertEqual(result["critical"],expected)
                 self.assertEqual(e.actors["soldier"].wounds,[])
+                e.check()
+
+
+    def test_29_dying_at_authored_exit_cannot_be_attested_as_withdrawal(self):
+        for damage,expected_hp in ((12,0),(13,-1)):
+            with self.subTest(hp_after=expected_hp):
+                scene=fixed_scene("I1",seed=7029+damage)
+                e=scene.e
+                scene.bridge.start_next_turn(RegenerationChoice())
+                scene.bridge.end_current_turn()
+                scene.bridge.start_next_turn(RegenerationChoice())
+                # These are real G1 movements; the actor initially reaches
+                # the policy-authorized edge while still conscious.
+                for _ in range(2):
+                    self.assertTrue(e.g1.step("front",(-1,0),
+                                              responses=lambda _:()))
+                a=e.actors["front"]
+                self.assertEqual(a.occupied,(scene.scene_exit.square,))
+                self.assertEqual(a.hp,12)
+                step=next(x for x in reversed(e.ledger)
+                          if x["kind"]=="g1_movement_step")
+                self.assertEqual(step["detail"]["actor"],"front")
+                # The source-confirmed harm is later than the actual
+                # movement step, but BEFORE the terminal attestation.
+                result=e.g4.apply_damage(
+                    "front",(DamagePacket("hp","Fire",damage),),
+                    event_key=f"g5:exit-post-step-harm:{damage}",
+                    cause="independently_confirmed_exit_harm",
+                    wound_location_roll=11)
+                self.assertEqual(result["hp_loss"],damage)
+                self.assertEqual(a.hp,expected_hp)
+                self.assertFalse(a.dead)
+                self.assertEqual(len(a.wounds),1)
+                before=e.serialize()
+                with self.assertRaisesRegex(ValueError,
+                                             "Dying/dead actor cannot withdraw"):
+                    scene.withdraw("front")
+                self.assertEqual(e.serialize(),before)
+                self.assertEqual(scene.report()["ending"],"unresolved")
+                self.assertEqual(scene.report()["outcomes"],[])
+                self.assertFalse(any(x["kind"] in
+                    ("g45_withdrawal_attested","g5_terminal_exit")
+                    for x in e.ledger))
+                self.assertFalse(scene.report()["complete_party_pack_certified"])
                 e.check()
 
 if __name__=="__main__":

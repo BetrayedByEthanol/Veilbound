@@ -702,5 +702,39 @@ class WoundContinuationTests(unittest.TestCase):
         e.check()
 
 
+
+    def test_23_dying_after_real_movement_blocks_direct_withdrawal_evidence(self):
+        for damage,expected_hp in ((12,0),(13,-1)):
+            with self.subTest(hp_after=expected_hp):
+                e,d,b=scene(soldier=False)
+                movement=GridMovement(e,width=12,height=8)
+                b.start_next_turn(RegenerationChoice())
+                self.assertTrue(movement.step("sentry",(1,0)))
+                step=next(x for x in reversed(e.ledger)
+                          if x["kind"]=="g1_movement_step")
+                self.assertEqual(step["detail"]["actor"],"sentry")
+                self.assertEqual(e.actors["sentry"].hp,12)
+                result=d.apply_damage(
+                    "sentry",(DamagePacket("hp","Fire",damage),),
+                    event_key=f"g45:after-g1-harm:{damage}",
+                    cause="independently_confirmed_post_move_harm",
+                    wound_location_roll=11)
+                self.assertEqual(result["hp_loss"],damage)
+                self.assertEqual(e.actors["sentry"].hp,expected_hp)
+                self.assertFalse(e.actors["sentry"].dead)
+                before=e.serialize()
+                with self.assertRaisesRegex(
+                    ValueError,"Dying/dead actor cannot withdraw"):
+                    b.attest_withdrawal(
+                        "sentry",movement_event_index=step["index"],
+                        exit_policy_reference="G6:independently_authorized_exit",
+                        independently_verified=True)
+                self.assertEqual(e.serialize(),before)
+                self.assertEqual(b.report()["explicit_outcomes"],[])
+                self.assertFalse(any(x["kind"]=="g45_withdrawal_attested"
+                                     for x in e.ledger))
+                self.assertFalse(b.report()["complete_encounter_certified"])
+                e.check()
+
 if __name__=="__main__":
     unittest.main()
