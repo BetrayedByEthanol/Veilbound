@@ -155,9 +155,7 @@ class HunterG6ATests(unittest.TestCase):
         out=c.pounce("hunter","prey",((1,0),)*3,
                      attack_face=10,damage_face=1,
                      wound_location_roll=8,
-                     venom_resistance_die=1,
-                     balance_hunter_face=1,balance_defender_face=20,
-                     balance_ability="Agility")
+                     venom_resistance_die=1)
         self.assertTrue(e.actors["prey"].hp<=0)
         self.assertEqual(out["balance"],"automatic_unable_to_contest")
         self.assertIn("Prone",e.actors["prey"].conditions)
@@ -390,6 +388,94 @@ class HunterG6ATests(unittest.TestCase):
         self.assertEqual(h.mp_remaining,0)
         self.assertEqual(len(events(e,"action_committed")),1)
         self.assertEqual(len(events(e,"g1_pounce_bite_committed")),1)
+        e.check()
+
+
+    def test_23_hunter_rear_and_side_departs_do_not_offer_opportunities(self):
+        from scripts.b06_encounter_state_v0 import Response
+        # The generic multi-cell reach set contains rear and side cells,
+        # but only the anatomical head-forward square has Bite/Horn authority.
+        head,rear=(4,2),(3,2)
+        for start,direction,eligible in (
+                ((2,2),(0,-1),False),  # rear-facing square
+                ((4,3),(0,1),False),   # adjacent to Hunter's head side
+                ((3,3),(0,1),False),   # adjacent to Hunter's rear side
+                ((5,2),(1,0),True)):  # exactly head-forward
+            with self.subTest(departure=start):
+                h=enemy_actor("B06-EN-03","hunter","enemy",
+                              occupied=(head,rear))
+                prey=party_actor("A",3,"prey","party",occupied=(start,))
+                e=Encounter([h,prey],{"prey":30,"hunter":20},
+                            seed=607,scenario="G6-anatomical-threat")
+                g=GridMovement(e,width=10,height=6)
+                e.begin_round()
+                e.start_turn("prey",regen_choice=RegenerationChoice())
+                new=((start[0]+direction[0],start[1]+direction[1]),)
+                self.assertEqual(start in g.reach("hunter"),True)
+                self.assertEqual(g.threatens("hunter",start),eligible)
+                self.assertEqual(g._threats("prey",new,False),
+                                 ("hunter",) if eligible else ())
+                source=Response("hunter","opportunity","real natural attack")
+                if eligible:
+                    self.assertTrue(g.step("prey",direction,
+                                           responses=(source,)))
+                    self.assertEqual(h.opportunity_used,1)
+                    self.assertFalse(h.reaction_available)
+                    self.assertEqual(len(events(e,"g1_movement_opportunity_pending")),1)
+                else:
+                    before=(prey.occupied,prey.mp_remaining,
+                            h.reaction_available,h.opportunity_used,len(e.ledger))
+                    with self.assertRaisesRegex(ValueError,"not eligible"):
+                        g.step("prey",direction,responses=(source,))
+                    self.assertEqual((prey.occupied,prey.mp_remaining,
+                                      h.reaction_available,h.opportunity_used,len(e.ledger)),
+                                     before)
+                    self.assertTrue(g.step("prey",direction))
+                    self.assertEqual(h.opportunity_used,0)
+                    self.assertTrue(h.reaction_available)
+                    self.assertFalse(events(e,"g1_movement_opportunity_pending"))
+                e.check()
+
+    def test_24_lethal_pounce_bite_skips_unused_balance_choices(self):
+        e,c=setup()
+        victim=e.actors["prey"]
+        # An already-Dying but not Dead victim remains a legal Take Hit
+        # target. This real puncturing Bite reaches the death threshold.
+        victim.hp=-victim.hp_max+1
+        out=c.pounce("hunter","prey",((1,0),)*3,
+                     attack_face=10,damage_face=1)
+        self.assertEqual(out["bite"],"hit")
+        self.assertTrue(out["damage"]["dead"])
+        self.assertTrue(victim.dead)
+        self.assertEqual(out["balance"],"not_applicable")
+        self.assertFalse(events(e,"g6_pounce_balance"))
+        self.assertFalse(events(e,"g6_pounce_prone"))
+        self.assertFalse(events(e,"g44_hunter_accepted"))
+        self.assertEqual(len(events(e,"g6_pounce_resolved")),1)
+        self.assertFalse(c.pending_attack_slots("hunter"))
+        e.check()
+
+    def test_25_healthy_pounce_requires_real_balance_dice_before_roll(self):
+        e,c=setup()
+        receipt=c.begin_pounce("hunter","prey",((1,0),)*3)
+        before=(e.actors["prey"].hp,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"Pounce pressure"):
+            c.resolve_pounce(receipt,attack_face=1,
+                             balance_ability="Strength")
+        with self.assertRaisesRegex(UnresolvedDecision,"Pounce resistance"):
+            c.resolve_pounce(receipt,attack_face=1,
+                             balance_ability="Strength",
+                             balance_hunter_face=2)
+        self.assertEqual((e.actors["prey"].hp,len(e.ledger)),before)
+        self.assertFalse(events(e,"g6_pounce_melee_roll"))
+        self.assertEqual(len(c.pending_attack_slots("hunter")),1)
+        out=c.resolve_pounce(receipt,attack_face=1,
+                             balance_ability="Strength",
+                             balance_hunter_face=2,
+                             balance_defender_face=20)
+        self.assertEqual(out["bite"],"miss")
+        self.assertEqual(out["balance"],"held")
+        self.assertEqual(len(events(e,"g6_pounce_balance")),1)
         e.check()
 
 
