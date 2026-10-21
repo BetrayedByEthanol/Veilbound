@@ -1079,7 +1079,7 @@ class G5SoldierSentryTests(unittest.TestCase):
         g.bridge.end_current_turn()
         e.check()
 
-    def test_42_fatal_first_hit_cancels_paid_later_slots_without_refund(self):
+    def test_42_fatal_first_hit_retains_paid_followup_until_declined(self):
         scene=fixed_scene("I2",sentry_state="prepared_start",seed=9242)
         e=scene.e
         front=e.actors["front"]
@@ -1088,44 +1088,40 @@ class G5SoldierSentryTests(unittest.TestCase):
         seq=scene.declare("foe","front",
                           profiles=("B06-AT-02","B06-AT-02"),
                           defenses=("take_hit","guard"))
-        self.assertEqual(len(scene.pending_attack_slots("foe")),2)
         remaining_ap=e.actors["foe"].ap_remaining
         remaining_guard=front.guard_remaining
-        self.assertEqual(remaining_ap,2)
-        self.assertEqual(remaining_guard,front.guard_capacity-1)
+        self.assertEqual((remaining_ap,remaining_guard),
+                         (2,front.guard_capacity-1))
         first=scene.resolve(seq,0,attack_face=20,confirmation_face=20,
                             critical_dice=(4,4),damage_face=6,vigor_die=4)
-        self.assertEqual(first["outcome"],"hit")
         self.assertTrue(first["damage"]["dead"])
         self.assertTrue(front.dead)
         self.assertEqual(front.hp,-front.hp_max)
-        self.assertEqual(len(scene.report()["attacks"]),1)
-        self.assertFalse(scene.pending_attack_slots("foe"))
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        self.assertEqual(scene.pending_attack_slots("foe")[0]["action_index"],
+                         seq["actions"][1])
+        self.assertFalse(any(x["kind"]=="g5_melee_cancelled" for x in e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"committed G5 attack slot"):
+            scene.bridge.end_current_turn()
+        self.assertEqual(scene.report()["ending"],"unresolved")
+        before=(front.hp,e.actors["foe"].ap_remaining,
+                front.guard_remaining)
+        declined=scene.decline_remaining(seq)
+        self.assertEqual(declined,(seq["actions"][1],))
+        self.assertFalse(scene.pending_attack_slots())
+        self.assertEqual((front.hp,e.actors["foe"].ap_remaining,
+                          front.guard_remaining),before)
         cancelled=[x for x in e.ledger if x["kind"]=="g5_melee_cancelled"]
         self.assertEqual(len(cancelled),1)
-        self.assertEqual(cancelled[0]["detail"]["action_index"],
-                         seq["actions"][1])
-        self.assertEqual(cancelled[0]["detail"]["declaration_index"],
-                         seq["declaration"])
-        self.assertEqual(cancelled[0]["detail"]["slot"],1)
         self.assertEqual(cancelled[0]["detail"]["reason"],
-                         "target_dead_after_prior_slot")
+                         "explicit_decline_target_unavailable")
         self.assertEqual(cancelled[0]["detail"]["ap_refunded"],0)
         self.assertFalse(cancelled[0]["detail"]["defense_commitments_refunded"])
-        self.assertEqual(e.actors["foe"].ap_remaining,remaining_ap)
-        self.assertEqual(front.guard_remaining,remaining_guard)
-        self.assertEqual(sum(x["kind"]=="g5_melee_roll" for x in e.ledger),1)
-        self.assertEqual(sum(x["kind"]=="g4_profile_hit" for x in e.ledger),1)
-        before=e.serialize()
-        with self.assertRaisesRegex(ValueError,"G5 action already cancelled"):
+        with self.assertRaisesRegex(ValueError,"already cancelled"):
             scene.resolve(seq,1,attack_face=1)
-        self.assertEqual(e.serialize(),before)
         self.assertEqual(scene.report()["ending"],"death_attested")
-        self.assertFalse(scene.report()["unresolved_attack_slots"])
         scene.bridge.end_current_turn()
-        self.assertEqual(e.cursor,1)
         e.check()
-
 
 
     def test_43_direct_g0_declaration_does_not_strand_paid_g5_attack(self):
@@ -1760,6 +1756,110 @@ class G5SoldierSentryTests(unittest.TestCase):
             scene.withdraw("front")
         self.assertEqual(e.serialize(),before)
         self.assertEqual(scene.report()["ending"],"unresolved")
+        e.check()
+
+
+
+    def test_64_fatal_first_sentry_hit_retargets_funded_second_to_new_foe(self):
+        sentry=enemy_actor("B06-EN-01","sentry","enemy",
+                           start_state="prepared_start",occupied=((3,2),))
+        first=party_actor("A",3,"first","party",occupied=((2,2),))
+        second=party_actor("A",3,"second","party",occupied=((3,3),))
+        e=Encounter([sentry,first,second],
+                    {"sentry":30,"first":20,"second":10},
+                    seed=9264,scenario="G5-paid-suffix-retarget",
+                    objective="source_retarg_proof",policy="precommitted_dice")
+        GridMovement(e,width=8,height=5)
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        scene=SourceMelee(e)
+        first.hp=1
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("sentry","first",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","guard"))
+        ap_after_payment=sentry.ap_remaining
+        guard_after_payment=first.guard_remaining
+        self.assertEqual(ap_after_payment,2)
+        fatal=scene.resolve(seq,0,attack_face=20,confirmation_face=20,
+                            critical_dice=(4,4),damage_face=6,vigor_die=4)
+        self.assertTrue(fatal["damage"]["dead"])
+        self.assertTrue(first.dead)
+        self.assertEqual(len(scene.pending_attack_slots("sentry")),1)
+        with self.assertRaisesRegex(UnresolvedDecision,"contact"):
+            scene.resolve(seq,1,attack_face=11,damage_face=4,vigor_die=4)
+        retarget=scene.retarget_remaining(
+            seq,"second",defenses=("take_hit",))
+        self.assertEqual(retarget["action_indices"],(seq["actions"][1],))
+        self.assertEqual(sentry.ap_remaining,ap_after_payment)
+        self.assertEqual(first.guard_remaining,guard_after_payment)
+        self.assertEqual(e.actors["second"].guard_remaining,
+                         e.actors["second"].guard_capacity)
+        follow=scene.resolve(seq,1,attack_face=11,damage_face=4,vigor_die=4)
+        self.assertEqual(follow["outcome"],"hit")
+        self.assertEqual(follow["action_index"],seq["actions"][1])
+        self.assertEqual(follow["damage"]["hp_loss"],9)
+        self.assertEqual(second.hp,second.hp_max-9)
+        self.assertEqual(second.vigor,second.vigor_max-2)
+        self.assertFalse(scene.pending_attack_slots())
+        self.assertEqual(sentry.ap_remaining,ap_after_payment)
+        redirect=[x for x in e.ledger if x["kind"]=="g5_melee_retarget_committed"]
+        self.assertEqual(len(redirect),1)
+        self.assertEqual(redirect[0]["detail"]["profiles"],["B06-AT-02"])
+        self.assertEqual(redirect[0]["detail"]["ap_spent"],0)
+        self.assertFalse(redirect[0]["detail"]["old_defense_commitments_refunded"])
+        self.assertEqual([x["detail"]["target"] for x in e.ledger
+                          if x["kind"]=="g5_melee_resolved"],
+                         ["first","second"])
+        scene.bridge.end_current_turn()
+        e.check()
+
+    def test_65_illegal_retarget_rejected_before_new_defense_spend(self):
+        sentry=enemy_actor("B06-EN-01","sentry","enemy",
+                           start_state="prepared_start",occupied=((3,2),))
+        first=party_actor("A",3,"first","party",occupied=((2,2),))
+        distant=party_actor("A",3,"distant","party",occupied=((7,3),))
+        e=Encounter([sentry,first,distant],
+                    {"sentry":30,"first":20,"distant":10},
+                    seed=9265,scenario="G5-no-free-redirection")
+        GridMovement(e,width=8,height=5)
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        scene=SourceMelee(e)
+        first.hp=1
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("sentry","first",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        scene.resolve(seq,0,attack_face=20,confirmation_face=20,
+                      critical_dice=(4,4),damage_face=6,vigor_die=4)
+        before=e.serialize()
+        with self.assertRaisesRegex(UnresolvedDecision,"genuine live 1x1 G1 contact"):
+            scene.retarget_remaining(seq,"distant",defenses=("dodge",))
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual(len(scene.pending_attack_slots()),1)
+        scene.decline_remaining(seq)
+        scene.bridge.end_current_turn()
+        e.check()
+
+    def test_66_decline_disallowed_while_original_target_is_legal(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        miss=scene.resolve(seq,0,attack_face=1)
+        self.assertEqual(miss["outcome"],"miss")
+        before=e.serialize()
+        with self.assertRaisesRegex(UnresolvedDecision,"unavailable target"):
+            scene.decline_remaining(seq)
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        scene.resolve(seq,1,attack_face=1)
+        scene.bridge.end_current_turn()
         e.check()
 
 
