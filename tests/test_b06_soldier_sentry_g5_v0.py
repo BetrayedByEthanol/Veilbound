@@ -672,5 +672,82 @@ class G5SoldierSentryTests(unittest.TestCase):
                 self.assertFalse(scene.report()["complete_party_pack_certified"])
                 e.check()
 
+
+    def test_30_prior_round_resolved_action_does_not_unlock_new_dodge_slot(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        old=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        historical=old["actions"][0]
+        self.assertEqual(scene.resolve(old,0,attack_face=1)["outcome"],"miss")
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        scene.bridge.end_current_turn()
+        scene.bridge.begin_next_round()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        current=scene.declare("foe","front",
+                              profiles=("B06-AT-02","B06-AT-02"),
+                              defenses=("dodge","dodge"))
+        self.assertEqual([e.ledger[i]["detail"]["defense_value"]
+                          for i in current["defenses"]],[14,12])
+        self.assertNotEqual(historical,current["actions"][0])
+        forged=dict(current)
+        forged["actions"]=(historical,current["actions"][1])
+        before=(e.actors["front"].hp,e.actors["front"].vigor,
+                e.actors["front"].dodge_pressure,
+                e.actors["foe"].ap_remaining,len(e.ledger))
+        # 6+7=13 misses first Dodge14 and beats second Dodge12.
+        # Replacing the first index with an old completed slot must not
+        # allow resolution at the artificially favorable later defense.
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "action index does not match declared attack slot"):
+            scene.resolve(forged,1,attack_face=6,damage_face=1,vigor_die=4)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "Resolve or lose earlier declared attack slots first"):
+            scene.resolve(current,1,attack_face=6,damage_face=1,vigor_die=4)
+        self.assertEqual((e.actors["front"].hp,e.actors["front"].vigor,
+                          e.actors["front"].dodge_pressure,
+                          e.actors["foe"].ap_remaining,len(e.ledger)),before)
+        self.assertFalse(any(x["kind"]=="g5_melee_resolved" and
+                             x["detail"]["action_index"]==current["actions"][1]
+                             for x in e.ledger))
+        first=scene.resolve(current,0,attack_face=6)
+        second=scene.resolve(current,1,attack_face=6,damage_face=1,vigor_die=4)
+        self.assertEqual((first["outcome"],first["defense_value"]),("miss",14))
+        self.assertEqual((second["outcome"],second["defense_value"]),("hit",12))
+        self.assertEqual(second["attack_total"],13)
+        self.assertEqual((e.actors["front"].hp,e.actors["front"].vigor),(6,34))
+        e.check()
+
+    def test_31_tampered_prior_slot_rejected_even_after_current_slot_resolves(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start")
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        old=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        self.assertEqual(scene.resolve(old,0,attack_face=1)["outcome"],"miss")
+        scene.bridge.end_current_turn()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        scene.bridge.end_current_turn()
+        scene.bridge.begin_next_round()
+        scene.bridge.start_next_turn(RegenerationChoice())
+        current=scene.declare("foe","front",
+                              profiles=("B06-AT-02","B06-AT-02"),
+                              defenses=("take_hit","take_hit"))
+        self.assertEqual(scene.resolve(current,0,attack_face=1)["outcome"],"miss")
+        forged=dict(current)
+        forged["actions"]=(old["actions"][0],current["actions"][1])
+        before=(e.actors["front"].hp,e.actors["front"].vigor,len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "action index does not match declared attack slot"):
+            scene.resolve(forged,1,attack_face=1)
+        self.assertEqual((e.actors["front"].hp,e.actors["front"].vigor,
+                          len(e.ledger)),before)
+        self.assertEqual(scene.resolve(current,1,attack_face=1)["outcome"],"miss")
+        self.assertEqual([x["action_index"] for x in scene.report()["attacks"]][-2:],
+                         list(current["actions"]))
+        e.check()
+
 if __name__=="__main__":
     unittest.main()
