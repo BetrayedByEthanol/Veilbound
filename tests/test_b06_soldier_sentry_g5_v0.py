@@ -1232,5 +1232,111 @@ class G5SoldierSentryTests(unittest.TestCase):
         e.check()
 
 
+
+    def test_47_pending_sentry_slot_blocks_physical_reservation_before_commit(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9247)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        foe=e.actors["foe"]
+        self.assertEqual(foe.ap_remaining,22)
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        original=e.serialize()
+        reserved=list(e.reservations)
+        state=(foe.ap_remaining,foe.mp_remaining,
+               e.actors["front"].guard_remaining,
+               e.actors["front"].dodge_pressure,
+               set(e.seen_sequences))
+        with self.assertRaisesRegex(
+            UnresolvedDecision,
+            "Complete pending G5 Attack Sequence before committing Turn AP"):
+            e.reserve("foe","future-interception","later-defense",
+                      action_kind="physical")
+        self.assertEqual(e.serialize(),original)
+        self.assertEqual(e.reservations,reserved)
+        self.assertEqual(
+            (foe.ap_remaining,foe.mp_remaining,
+             e.actors["front"].guard_remaining,
+             e.actors["front"].dodge_pressure,
+             set(e.seen_sequences)),state)
+        self.assertFalse(any(x["kind"]=="interception_reserved"
+                             for x in e.ledger))
+        # An invalid reservation must not make the original attack stale.
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots("foe"))
+        # The remaining 22 AP may now fund an actual separate reservation.
+        e.reserve("foe","later-window","later-defense",
+                  action_kind="physical")
+        self.assertEqual(foe.ap_remaining,2)
+        self.assertEqual(len(e.reservations),1)
+        scene.bridge.end_current_turn()
+        self.assertEqual(e.cursor,1)
+        e.check()
+
+    def test_48_every_own_turn_ap_class_and_reserve_kind_are_blocked(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9248)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",profiles=("B06-AT-02",),
+                          defenses=("take_hit",))
+        foe=e.actors["foe"]
+        before=e.serialize()
+        before_state=(foe.ap_remaining,foe.mp_remaining,
+                      len(e.reservations),len(scene.pending_attack_slots("foe")))
+        attempts=[
+            lambda:e.spend_ap("foe","physical",label="other-sword"),
+            lambda:e.spend_ap("foe","projection",label="other-spell"),
+            lambda:e.spend_ap("foe","general",label="other-action"),
+            lambda:e.spend_ap("foe","full",label="other-full-action"),
+            lambda:e.reserve("foe","other-window","physical-guard",
+                             action_kind="physical"),
+            lambda:e.reserve("foe","other-window","general-guard",
+                             action_kind="general"),
+            lambda:e.g3._commit("foe",label="g3:unexpected_projection"),
+        ]
+        for attempt in attempts:
+            with self.subTest(attempt=attempt):
+                with self.assertRaisesRegex(
+                    UnresolvedDecision,
+                    "Complete pending G5 Attack Sequence before committing Turn AP"):
+                    attempt()
+                self.assertEqual(e.serialize(),before)
+                self.assertEqual((foe.ap_remaining,foe.mp_remaining,
+                                  len(e.reservations),
+                                  len(scene.pending_attack_slots("foe"))),
+                                 before_state)
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        scene.bridge.end_current_turn()
+        e.check()
+
+    def test_49_partially_resolved_multi_slot_blocks_ap_until_last_hit(self):
+        scene=fixed_scene("I2",sentry_state="prepared_start",seed=9249)
+        e=scene.e
+        scene.bridge.start_next_turn(RegenerationChoice())
+        seq=scene.declare("foe","front",
+                          profiles=("B06-AT-02","B06-AT-02"),
+                          defenses=("take_hit","take_hit"))
+        self.assertEqual(e.actors["foe"].ap_remaining,2)
+        self.assertEqual(len(scene.pending_attack_slots("foe")),2)
+        self.assertEqual(scene.resolve(seq,0,attack_face=1)["outcome"],"miss")
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        before=e.serialize()
+        with self.assertRaisesRegex(
+            UnresolvedDecision,
+            "Complete pending G5 Attack Sequence before committing Turn AP"):
+            e.reserve("foe","interrupt-other","reserve-second-attack")
+        self.assertEqual(e.serialize(),before)
+        self.assertEqual(len(scene.pending_attack_slots("foe")),1)
+        self.assertEqual(scene.resolve(seq,1,attack_face=1)["outcome"],"miss")
+        self.assertFalse(scene.pending_attack_slots())
+        scene.bridge.end_current_turn()
+        self.assertEqual(e.cursor,1)
+        self.assertEqual(
+            [x["detail"]["outcome"] for x in e.ledger
+             if x["kind"]=="g5_melee_resolved"],["miss","miss"])
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
