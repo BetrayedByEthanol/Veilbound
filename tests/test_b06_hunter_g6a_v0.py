@@ -479,5 +479,112 @@ class HunterG6ATests(unittest.TestCase):
         e.check()
 
 
+    def test_26_horn_drive_third_party_threat_is_unresolved_before_ap(self):
+        hunter=enemy_actor("B06-EN-03","hunter","enemy",
+                           occupied=((2,2),(1,2)))
+        prey=party_actor("A",3,"prey","party",occupied=((3,2),))
+        witness=party_actor("B",3,"witness","party",occupied=((0,2),))
+        e=Encounter([hunter,prey,witness],
+                    {"hunter":30,"prey":20,"witness":10},
+                    seed=909,scenario="G6-Horn-Drive-third-party")
+        g=GridMovement(e,width=8,height=5)
+        SpellState(e)
+        DamageState(e)
+        e.begin_round()
+        c=HunterCombat(e)
+        c.bridge.start_next_turn(RegenerationChoice())
+        # Hunter head would enter (3,2), rear (2,2), abandoning (1,2).
+        # An opposing armed PC can legally threaten that departed rear cell.
+        self.assertEqual(g._threats("hunter",((3,2),(2,2)),False),
+                         ("witness",))
+        before=(hunter.occupied,prey.occupied,witness.occupied,
+                hunter.ap_remaining,prey.hp,len(e.ledger),
+                witness.reaction_available,witness.opportunity_used)
+        with self.assertRaisesRegex(UnresolvedDecision,
+                                    "Third-party Movement Opportunities"):
+            c.horn_drive("hunter","prey",
+                         pressure_face=18,resistance_face=1)
+        self.assertEqual((hunter.occupied,prey.occupied,witness.occupied,
+                          hunter.ap_remaining,prey.hp,len(e.ledger),
+                          witness.reaction_available,witness.opportunity_used),
+                         before)
+        self.assertFalse(events(e,"g6_horn_drive_committed"))
+        self.assertFalse(events(e,"g6_horn_drive_resolved"))
+        e.check()
+
+    def test_27_no_horn_drive_advance_does_not_create_phantom_opportunity(self):
+        def scenario(*,wall=False):
+            hunter=enemy_actor("B06-EN-03","hunter","enemy",
+                               occupied=((2,2),(1,2)))
+            prey=party_actor("A",3,"prey","party",occupied=((3,2),))
+            witness=party_actor("B",3,"witness","party",
+                                occupied=((0,2),))
+            e=Encounter([hunter,prey,witness],
+                        {"hunter":30,"prey":20,"witness":10},
+                        seed=910,scenario="G6-Horn-Drive-no-advance")
+            GridMovement(e,width=8,height=5,
+                         walls=((4,2),) if wall else ())
+            SpellState(e)
+            DamageState(e)
+            e.begin_round()
+            c=HunterCombat(e)
+            c.bridge.start_next_turn(RegenerationChoice())
+            return e,c
+        for wall,pressure,resistance,expected in (
+                (False,1,20,"resisted"),
+                (True,18,1,"blocked_destination")):
+            with self.subTest(expected=expected):
+                e,c=scenario(wall=wall)
+                out=c.horn_drive("hunter","prey",
+                                 pressure_face=pressure,
+                                 resistance_face=resistance)
+                self.assertEqual(out["outcome"],expected)
+                self.assertEqual(e.actors["prey"].occupied,((3,2),))
+                self.assertEqual(e.actors["hunter"].occupied,
+                                 ((2,2),(1,2)))
+                self.assertEqual(e.actors["hunter"].ap_remaining,18)
+                self.assertTrue(e.actors["witness"].reaction_available)
+                self.assertEqual(e.actors["witness"].opportunity_used,0)
+                self.assertFalse(events(e,"g1_movement_opportunity_pending"))
+                e.check()
+
+    def test_28_pounce_stale_guard_must_not_block_bite(self):
+        # Match ordinary G5's post-commit Guard preflight for both
+        # removing a readied stance and losing the actual instrument.
+        for change in ("ready_guard","guard_instrument"):
+            with self.subTest(change=change):
+                e,c=setup()
+                receipt=c.begin_pounce("hunter","prey",
+                                       ((1,0),)*3,defense="guard")
+                t=e.actors["prey"]
+                original=getattr(t,change)
+                self.assertTrue(t.ready_guard)
+                self.assertIsNotNone(t.guard_instrument)
+                setattr(t,change,False if change=="ready_guard" else None)
+                before=(len(e.ledger),t.hp,t.vigor,
+                        e.actors["hunter"].ap_remaining,
+                        t.guard_remaining)
+                with self.assertRaisesRegex(
+                        UnresolvedDecision,
+                        "Changed Guard requires native defensive fallback"):
+                    c.resolve_pounce(
+                        receipt,attack_face=2,
+                        balance_hunter_face=1,
+                        balance_defender_face=20,balance_ability="Strength")
+                self.assertEqual((len(e.ledger),t.hp,t.vigor,
+                                  e.actors["hunter"].ap_remaining,
+                                  t.guard_remaining),before)
+                self.assertFalse(events(e,"g6_pounce_melee_roll"))
+                self.assertEqual(len(c.pending_attack_slots("hunter")),1)
+                setattr(t,change,original)
+                result=c.resolve_pounce(
+                    receipt,attack_face=1,balance_hunter_face=1,
+                    balance_defender_face=20,balance_ability="Strength")
+                self.assertEqual(result["bite"],"miss")
+                self.assertFalse(c.pending_attack_slots("hunter"))
+                e.check()
+
+
+
 if __name__=="__main__":
     unittest.main()
