@@ -664,7 +664,7 @@ class HunterG6ATests(unittest.TestCase):
                     self.assertFalse(g.threatens("rear",hunter.occupied[0]))
                 self.assertTrue(g.stand("hunter"))
                 self.assertEqual(events(e,"g6_stand_started")[-1]["detail"]
-                                 ["opportunity_sources"],expected)
+                                 ["opportunity_sources"],list(expected))
                 self.assertEqual(hunter.mp_remaining,8)
                 self.assertEqual(len(events(e,"g6_stand_completed")),1)
                 e.check()
