@@ -421,7 +421,11 @@ class SourceMelee:
                 "Paid suffix requires source-authorized target footprint "
                 "(A/B only against Hunter)")
         if target.dead or not self._contact(attacker,new_target):
-            raise UnresolvedDecision("Redirect target needs genuine live G1 contact")
+            # Keep the previously verified one-square G5 diagnostic while
+            # recognizing the Hunter's independently supported 1x2 body.
+            label=("1x1" if len(target.occupied)==1 else "Hunter")
+            raise UnresolvedDecision(
+                f"Redirect target needs genuine live {label} G1 contact")
         if (attacker,new_target) in e.seen_sequences:
             raise UnresolvedDecision("Retarget cannot reopen a previously attacked target")
         defenses=tuple(defenses)
