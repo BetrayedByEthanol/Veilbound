@@ -18,6 +18,16 @@ launch, anatomical Hunter target cell, and the real G2 shot outcome
 are independently matched before G4 damage. No second Attack roll or
 another unearned action is created.
 
+The one-shot G6-D adapter now declares the **exact G2 response trigger**
+before committing AP or ammunition. A matching live G0 Movement
+Interception reservation is rejected **without releasing or consuming it**;
+G2 is passed the same explicit trigger instead of generating a new one
+after payment. The authentic G2 response-window receipt must match that
+trigger and contain **no Interception release** before its Bow-to-G4
+hit attestation is accepted. An unrelated live reservation remains intact.
+This is a deliberate no-Interception boundary, not a route policy for
+saved MP or a refund of previously committed resources.
+
 A ranged Take Hit is a **static Ranged Defense** (10 plus range
 difficulty), not melee auto-hit. Natural 1 misses; an ordinary roll
 hits only above that defense. A natural 20 has **one confirmation**
@@ -133,6 +143,17 @@ resolution, including the one natural-20 critical procedure and true
 G4/venom recipient. The Guardian's Reaction is **preserved**.
 Precommitted MP is never refunded or spent again at release. One
 reservation cannot protect two attacks.
+
+If the named next-Bite trigger **does not happen** before the Guardian's
+next own turn, G0 correctly expires the outstanding reservation and G1
+discards its saved-MP motion record, with **no refund**. The local
+`PreparedBite` record is then pruned before checking for a duplicate
+named trigger (and before using a presented prepared label). The
+Guardian may legitimately reserve the same meaningful next-Bite trigger
+again on a later turn and pays **fresh MP**. In contrast, an actually
+live native reservation still blocks a second same-trigger offer.
+A half-missing reservation/motion record is treated as an inconsistent
+native authority, not quietly reclassified as ordinary expiry.
 
 This is a deliberately bounded, otherwise-uncontested source case,
 **not a general-purpose prepared movement engine**. The unresolved

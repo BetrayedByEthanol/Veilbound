@@ -10,12 +10,18 @@ def events(e,kind):
     return [v for v in e.ledger if v["kind"]==kind]
 
 
-def shooting_scene(*,size=3,level=3):
+def shooting_scene(*,size=3,level=3,reservation=None):
     combat=mixed_scene(size=size,level=level,seed=641)
     e=combat.e
     for ident in ("hunter","vanguard","guardian"):
         combat.bridge.start_next_turn(RegenerationChoice())
         assert e.current==ident
+        if ident=="guardian" and reservation is not None:
+            trigger=(f"g6d:bow:{e.seed}:{e.round}:archer:hunter:one_shot"
+                     if reservation=="matching"
+                     else "different:authenticated-movement-trigger")
+            e.g1.reserve_movement("guardian",trigger,2,
+                                  label=f"fixture:{reservation}")
         combat.bridge.end_current_turn()
     combat.bridge.start_next_turn(RegenerationChoice())
     assert e.current=="archer"
@@ -185,6 +191,81 @@ class G6DTests(unittest.TestCase):
                          ["vanguard","guardian","archer","scholar"])
         self.assertEqual(proof[0]["detail"]["outcome"],
                          "hunter_dead_after_actual_native_combat")
+
+
+    def test_13_matching_reserved_interception_rejected_before_any_bow_cost(self):
+        for face,damage in ((12,3),(1,None),(20,4)):
+            with self.subTest(face=face):
+                combat,completion=shooting_scene(reservation="matching")
+                e=combat.e
+                archer=e.actors["archer"]
+                reservations=tuple(e.reservations)
+                label=reservations[0].label
+                motion=e.g1.motion[label]
+                before=(len(e.ledger),archer.ap_remaining,archer.ammunition,
+                        e.actors["hunter"].hp,
+                        tuple(e.reservations),tuple(e.g1.motion),
+                        motion.steps,motion.spent_mp)
+                kw={"primary_face":face,"target_cell":(3,2)}
+                if damage is not None:
+                    kw["damage_face"]=damage
+                if face==20:
+                    kw.update(confirmation_face=10,critical_dice=(2,2))
+                with self.assertRaisesRegex(UnresolvedDecision,"matching Interception"):
+                    completion.bow_hit("archer","hunter",**kw)
+                self.assertEqual(
+                    (len(e.ledger),archer.ap_remaining,archer.ammunition,
+                     e.actors["hunter"].hp,
+                     tuple(e.reservations),tuple(e.g1.motion),
+                     motion.steps,motion.spent_mp),before)
+                self.assertFalse(events(e,"g2_bow_launched"))
+                self.assertFalse(events(e,"interception_released"))
+                self.assertFalse(events(e,"g4_damage_applied"))
+                self.assertFalse(events(e,"g6d_bow_adjudicated"))
+                e.check()
+
+    def test_14_unrelated_reserved_movement_not_released_by_bow(self):
+        combat,completion=shooting_scene(reservation="unrelated")
+        e=combat.e
+        label=e.reservations[0].label
+        motion=e.g1.motion[label]
+        r=completion.bow_hit("archer","hunter",primary_face=12,
+                             damage_face=3,target_cell=(3,2))
+        self.assertEqual(r["outcome"],"hit")
+        self.assertEqual(e.actors["hunter"].hp,9)
+        self.assertEqual(len(events(e,"g6d_bow_adjudicated")),1)
+        self.assertEqual(
+            events(e,"g6d_bow_adjudicated")[0]["detail"]["shot_trigger"],
+            f"g6d:bow:{e.seed}:{e.round}:archer:hunter:one_shot")
+        self.assertEqual(
+            events(e,"response_window_open")[0]["detail"]["trigger"],
+            f"g6d:bow:{e.seed}:{e.round}:archer:hunter:one_shot")
+        self.assertFalse(events(e,"interception_released"))
+        self.assertEqual(len(e.reservations),1)
+        self.assertEqual(e.reservations[0].label,label)
+        self.assertEqual(motion.steps,0)
+        self.assertEqual(motion.spent_mp,0)
+        self.assertEqual(e.actors["archer"].ammunition,19)
+        e.check()
+
+    def test_15_matching_bow_reservation_does_not_debit_guardian_mp_twice(self):
+        combat,completion=shooting_scene(reservation="matching")
+        e=combat.e
+        original=next(r for r in e.reservations if r.actor_id=="guardian")
+        mp=e.g1.motion[original.label]
+        self.assertEqual(mp.reserved_mp,2)
+        self.assertEqual(mp.spent_mp,0)
+        self.assertEqual(mp.steps,0)
+        with self.assertRaisesRegex(UnresolvedDecision,"matching Interception"):
+            completion.bow_hit("archer","hunter",
+                               primary_face=12,damage_face=3,target_cell=(3,2))
+        self.assertTrue(any(r is original for r in e.reservations))
+        self.assertIs(e.g1.motion[original.label],mp)
+        self.assertEqual(mp.spent_mp,0)
+        self.assertEqual(mp.steps,0)
+        self.assertEqual(len(events(e,"g1_reserved_mp_expired")),0)
+        self.assertEqual(len(events(e,"g2_bow_shot_resolved")),0)
+        e.check()
 
 
 if __name__=="__main__":

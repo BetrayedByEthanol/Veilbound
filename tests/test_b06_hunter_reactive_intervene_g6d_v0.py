@@ -19,8 +19,8 @@ def logged(e,kind):
     return [x for x in e.ledger if x["kind"]==kind]
 
 
-def prepared_witness(*,method="shield_guard"):
-    """One actually reserved B own-turn MP step, released next Hunter turn."""
+def prepared_on_guardian_turn(*,method="shield_guard"):
+    """Live named MP promise while B's actual first own turn is open."""
     combat=mixed_scene(size=4,level=3,seed=655)
     e=combat.e
     protector=ReactiveHunterProtection(combat)
@@ -37,6 +37,13 @@ def prepared_witness(*,method="shield_guard"):
     label=protector.prepare(
         "guardian","vanguard",method=method,delta=(-1,0),
         trigger_key="g6d:prepared:hunter:vanguard:next_bite")
+    return combat,protector,label
+
+
+def prepared_witness(*,method="shield_guard"):
+    """One actually reserved B own-turn MP step, released next Hunter turn."""
+    combat,protector,label=prepared_on_guardian_turn(method=method)
+    e=combat.e
     combat.bridge.end_current_turn()
     for ident in ("archer","scholar"):
         combat.bridge.start_next_turn(RegenerationChoice())
@@ -296,6 +303,101 @@ class ReactiveHunterInterveneTests(unittest.TestCase):
                 trigger_key="g6d:prepared:hunter:vanguard:next_bite")
         self.assertEqual((p.mp_remaining,len(e.reservations),len(e.ledger)),
                          before)
+        e.check()
+
+
+    def test_16_expired_prepared_offer_rearms_same_trigger_with_fresh_mp(self):
+        combat,protect,old_label=prepared_on_guardian_turn()
+        e=combat.e
+        trigger="g6d:prepared:hunter:vanguard:next_bite"
+        p=e.actors["guardian"]
+        self.assertIn(old_label,protect.prepared)
+        self.assertIn(old_label,e.g1.motion)
+        original=next(r for r in e.reservations if r.label==old_label)
+        self.assertEqual(original.trigger_key,trigger)
+        combat.bridge.end_current_turn()
+        for ident in ("archer","scholar"):
+            combat.bridge.start_next_turn(RegenerationChoice())
+            combat.bridge.end_current_turn()
+        combat.bridge.begin_next_round()
+        # No intervening Bite: this MP reservation has *not* fired.
+        for ident in ("hunter","vanguard"):
+            combat.bridge.start_next_turn(RegenerationChoice())
+            combat.bridge.end_current_turn()
+        combat.bridge.start_next_turn(RegenerationChoice())
+        self.assertEqual(e.current,"guardian")
+        self.assertNotIn(old_label,e.g1.motion)
+        self.assertFalse(any(r.label==old_label for r in e.reservations))
+        self.assertEqual(len([v for v in logged(e,"g1_reserved_mp_expired")
+                              if v["detail"]["label"]==old_label]),1)
+        # G0/G1 expired native commitments, but only G6-D owns this
+        # local offer registry. It must be pruned before the duplicate gate.
+        self.assertIn(old_label,protect.prepared)
+        previous_mp=p.mp_remaining
+        new_label=protect.prepare(
+            "guardian","vanguard",method="shield_guard",delta=(-1,0),
+            trigger_key=trigger)
+        self.assertNotEqual(old_label,new_label)
+        self.assertNotIn(old_label,protect.prepared)
+        self.assertEqual(set(protect.prepared),(new_label,))
+        self.assertIn(new_label,e.g1.motion)
+        self.assertEqual(p.mp_remaining,previous_mp-2)
+        self.assertEqual(len([r for r in e.reservations
+                              if r.trigger_key==trigger]),1)
+        e.check()
+
+    def test_17_live_duplicate_remains_rejected_without_second_mp_commit(self):
+        combat,protect,label=prepared_on_guardian_turn()
+        e=combat.e
+        p=e.actors["guardian"]
+        before=(p.mp_remaining,len(e.ledger),tuple(e.reservations),
+                tuple(e.g1.motion),tuple(protect.prepared))
+        with self.assertRaisesRegex(ValueError,"One pending prepared"):
+            protect.prepare(
+                "guardian","vanguard",method="body_take_hit",delta=(-1,0),
+                trigger_key="g6d:prepared:hunter:vanguard:next_bite")
+        self.assertEqual((p.mp_remaining,len(e.ledger),tuple(e.reservations),
+                          tuple(e.g1.motion),tuple(protect.prepared)),before)
+        self.assertIn(label,e.g1.motion)
+        e.check()
+
+    def test_18_expired_label_cannot_replace_fresh_prepared_authority(self):
+        combat,protect,old=prepared_on_guardian_turn()
+        e=combat.e
+        combat.bridge.end_current_turn()
+        for ident in ("archer","scholar"):
+            combat.bridge.start_next_turn(RegenerationChoice())
+            combat.bridge.end_current_turn()
+        combat.bridge.begin_next_round()
+        for ident in ("hunter","vanguard"):
+            combat.bridge.start_next_turn(RegenerationChoice())
+            combat.bridge.end_current_turn()
+        combat.bridge.start_next_turn(RegenerationChoice())
+        new=protect.prepare("guardian","vanguard",method="shield_guard",
+                             delta=(-1,0),
+                             trigger_key="g6d:prepared:hunter:vanguard:next_bite")
+        combat.bridge.end_current_turn()
+        for ident in ("archer","scholar"):
+            combat.bridge.start_next_turn(RegenerationChoice())
+            combat.bridge.end_current_turn()
+        combat.bridge.begin_next_round()
+        combat.bridge.start_next_turn(RegenerationChoice())
+        seq=combat.declare("hunter","vanguard",
+                           profiles=("B06-AT-04",),defenses=("dodge",))
+        snapshot=(len(e.ledger),e.actors["guardian"].occupied,
+                  tuple(e.reservations),tuple(e.g1.motion))
+        with self.assertRaisesRegex(UnresolvedDecision,"genuine prior"):
+            protect.resolve(seq,protector_id="guardian",method="shield_guard",
+                            prepared_label=old,attack_face=10)
+        self.assertEqual((len(e.ledger),e.actors["guardian"].occupied,
+                          tuple(e.reservations),tuple(e.g1.motion)),snapshot)
+        self.assertIn(new,protect.prepared)
+        actual=protect.resolve(seq,protector_id="guardian",
+                               method="shield_guard",
+                               prepared_label=new,attack_face=10)
+        self.assertEqual(actual["outcome"],"shield_stopped")
+        self.assertIsNotNone(actual["interception_index"])
+        self.assertFalse(logged(e,"spontaneous_committed"))
         e.check()
 
 
