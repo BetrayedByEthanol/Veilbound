@@ -190,8 +190,12 @@ class SourceMelee:
 
     def _profile(self,attacker,profile_id):
         a=self.e.actors[attacker]
+        if a.source.source_id in ("A","B"):
+            from scripts.b06_player_offense_g6b_v0 import party_weapon_profile
+            profile,bonus=party_weapon_profile(a,profile_id)
+            return bonus
         if a.source.source_id not in ("B06-EN-01","B06-EN-02","B06-EN-03"):
-            raise UnresolvedDecision("G5/G6 only resolves sourced enemy melee")
+            raise UnresolvedDecision("G5/G6 only resolves sourced enemy or A/B melee")
         if (a.source.source_id=="B06-EN-03"
                 and profile_id not in ("B06-AT-04","B06-AT-05")):
             raise UnresolvedDecision("G6 Pounce and Horn Drive need their own commitment path")
@@ -221,12 +225,18 @@ class SourceMelee:
         a,t=e.actors[attacker],e.actors[target]
         if a.team==t.team:
             raise ValueError("Cannot declare enemy sword against ally")
-        if len(t.occupied)!=1 or (
-                len(a.occupied)!=1 and not (
-                    a.source.source_id=="B06-EN-03"
-                    and a.footprint==("head","rear")
-                    and len(a.occupied)==2)):
-            raise UnresolvedDecision("G5/G6 needs sourced 1x1 or Hunter 1x2 contact")
+        if a.source.source_id in ("A","B") and t.source.source_id!="B06-EN-03":
+            raise UnresolvedDecision("Bounded G6-B player melee only targets the Hunter")
+        target_supported=(len(t.occupied)==1 or
+                          (t.source.source_id=="B06-EN-03"
+                           and t.footprint==("head","rear")
+                           and len(t.occupied)==2))
+        attacker_supported=(len(a.occupied)==1 or
+                           (a.source.source_id=="B06-EN-03"
+                            and a.footprint==("head","rear")
+                            and len(a.occupied)==2))
+        if not target_supported or not attacker_supported:
+            raise UnresolvedDecision("G5/G6B requires sourced one-square or Hunter body contact")
         if not self._contact(attacker,target):
             raise UnresolvedDecision("G1 current actual melee contact required")
         profiles=tuple(profiles)

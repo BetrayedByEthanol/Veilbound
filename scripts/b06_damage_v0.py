@@ -295,10 +295,15 @@ class DamageState:
                              critical_dice=(), vigor_die=None):
         """Source-derived packets and input validation only; never mutate G4."""
         source = self._actor(attacker)
-        if source.source.source_id not in ENEMIES:
-            raise UnresolvedDecision("Only exact B06 enemy attack profiles supported")
-        obj = json.loads((ROOT / source.source.path).read_text(encoding="utf-8"))
-        profs = [p for p in obj["attack_profiles"] if p["id"] == profile_id]
+        if source.source.source_id in ("A","B"):
+            from scripts.b06_player_offense_g6b_v0 import party_weapon_profile
+            profile,_=party_weapon_profile(source,profile_id)
+            profs=[profile]
+        elif source.source.source_id in ENEMIES:
+            obj = json.loads((ROOT / source.source.path).read_text(encoding="utf-8"))
+            profs = [p for p in obj["attack_profiles"] if p["id"] == profile_id]
+        else:
+            raise UnresolvedDecision("Only sourced enemy or audited A/B melee damage supported")
         if len(profs) != 1 or profs[0]["primary_hp_packet"] is None:
             raise ValueError("Unknown or non-damaging source attack")
         if source.hp <= 0 or source.dead:
