@@ -227,13 +227,19 @@ class HunterCombat(SourceMelee):
             _face(venom_resistance_die, 20, "venom resistance")
         if type(venom_resistance_modifier) is not int:
             raise ValueError("Venom modifier must be source-attested integer")
-        if balance_ability not in ("Strength", "Agility"):
-            raise UnresolvedDecision("Precommitted eligible Balance method required")
-        # Preflight potential Balance inputs, even if Bite subsequently leaves
-        # defender unable to contest; unused inputs are never logged as rolls.
-        _face(balance_hunter_face, 20, "Pounce pressure")
-        _face(balance_defender_face, 20, "Pounce resistance")
-        defender_modifier = self._ability(t, balance_ability)
+        # Predict the post-Bite condition before the first irreversible
+        # roll log. A Dying prey is knocked Prone without a contest, and a
+        # dead prey cannot be subjected to one. Neither case should demand
+        # invented Balance d20s or a never-used contest ability.
+        post_bite_hp = predicted["hp_after"] if hit else t.hp
+        contest_required = post_bite_hp > 0
+        defender_modifier = None
+        if contest_required:
+            if balance_ability not in ("Strength", "Agility"):
+                raise UnresolvedDecision("Precommitted eligible Balance method required")
+            _face(balance_hunter_face, 20, "Pounce pressure")
+            _face(balance_defender_face, 20, "Pounce resistance")
+            defender_modifier = self._ability(t, balance_ability)
         e.log("g6_pounce_melee_roll", action_index=d["action_index"],
               attacker=hunter, target=target, attack_face=attack_face,
               source_bonus=bonus, attack_total=total, defense=defense,

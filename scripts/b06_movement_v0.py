@@ -144,6 +144,11 @@ class GridMovement:
 
     def threatens(self, actor_id, at):
         a = self.e.actors[actor_id]
+        if a.source.source_id == "B06-EN-03":
+            # Natural Bite/Horn only threaten the one anatomical head-forward
+            # square, never a generic adjacent cell of the head or rear.
+            # Keep reach() geometric for non-Hunter creatures and movement.
+            return self._can_melee(a) and at == self.front(actor_id)
         if self.e.g2 is not None and a.source.source_id == "R":
             return ("Dagger" in self.e.g2.wielded[actor_id]
                     and a.hp > 0 and not a.dead and at in self.reach(actor_id))
