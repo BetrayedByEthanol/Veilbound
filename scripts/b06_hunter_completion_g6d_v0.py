@@ -219,12 +219,12 @@ class HunterCompletion:
         valid_bow=bool(cause.startswith("g6d:source_bow:") and any(
             v["kind"]=="g6d_bow_adjudicated" and
             v["detail"].get("target")==hunter and
-            v["detail"].get("damage",{}).get("dead") is True
+            (v["detail"].get("damage") or {}).get("dead") is True
             for v in e.ledger))
         valid_melee=bool(cause.startswith("source-profile:") and any(
             v["kind"]=="g5_melee_resolved" and
             v["detail"].get("target")==hunter and
-            v["detail"].get("damage",{}).get("dead") is True
+            (v["detail"].get("damage") or {}).get("dead") is True
             for v in e.ledger))
         if not (valid_bow or valid_melee):
             raise UnresolvedDecision("Lethal event lacks paid source-attested combat")
