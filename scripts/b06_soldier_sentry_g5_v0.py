@@ -889,6 +889,8 @@ class SourceMelee:
             raise UnresolvedDecision(
                 "Cannot attest G5 terminal withdrawal with unresolved "
                 "committed attack slots")
+        if not self.scene_exits:
+            raise UnresolvedDecision("No scene-authored exit policy for G5 withdrawal")
         policy=next((x for x in self.scene_exits if x.actor_id==actor_id),None)
         if policy is None:
             raise UnresolvedDecision("Actor does not match a scene-authored exit policy")
