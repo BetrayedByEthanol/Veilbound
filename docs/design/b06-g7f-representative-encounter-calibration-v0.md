@@ -64,6 +64,48 @@ authoritative single-actor/whole-party exit policy. A source-valid
 `warned_control` trial can no longer be mislabeled as
 `warned_flame`, nor a forest ordinary Bite as a Pounce.
 
+### Codex P2 follow-up — native policy selection in the ledger
+
+The earlier check compared the requested cohort to mutable `scenario_id`,
+`policy_id`, `opening`, `frontline` and protection summaries, none of
+which were covered by `ledger_sha256`. In particular a `warned_control`
+observation could be relabeled `warned_flame` without changing a single
+source event, and a `protected_control` observation could be relabeled
+`reactive_shield` by forging its report metadata.
+
+**Corrected contract:** G7-F requests an explicit `calibration_policy`
+from the source-native G7-A/C/D/E runner. Before any own-turn resource
+allocation or attack, the runner checks that this cohort agrees with its
+actual execution mode and writes exactly one `g7f_policy_selected`
+native event directly into the G0 ledger, at **index 1** immediately
+after `encounter_created`. The event binds the cohort, runner, mode,
+source scenario, level, party size and seed. It is included in the
+existing `ledger_sha256` alongside all later source rolls, actions
+and outcomes; G7-F must verify the exact event fields, timing, unique
+occurrence and hash **before** admitting a report to a cohort.
+
+The runner-specific mapping keeps these policies distinct even when
+the same early-round source events happen to occur:
+`warned_control` / `warned_flame` / `warned_archer_exit`,
+`protected_control` / `reactive_shield` / `prepared_body`,
+and `forest_ordinary` / `forest_pounce`.
+Native protection receipts, when earned, additionally require the
+matching method, reactive/prepared activation, source Hunter attacker,
+A ward and B guardian; earlier G7-D source checks retain the paid
+G0 Reaction/MP and original G5 action linkage.
+
+Legacy direct G7-A/C/D/E calls without the optional G7-F instrument
+are unchanged; the original Phase 3 audit remains frozen. The policy
+ledger receipt proves **consistent native source execution relative to
+the original ledger and SHA**, not an external cryptographic signature
+or independent sampling of human strategy.
+
+New regressions reject both exact Codex relabel attacks while retaining
+their unchanged original hashes, as well as missing/late/duplicate
+policy markers and changes to marker content or native mode even if
+the caller recomputes a new hash. A native acceptance test independently
+exercises policy binding across all four runner families.
+
 The source ledger's `encounter_created.source_ids` contains exact
 initial HP, role identities and source digests. G7-F now reconstructs
 HP and death states using every native `g4_damage_applied`,
@@ -164,7 +206,7 @@ python -m scripts.b06_g7f_representative_calibration_v0 --seeds 4
 python -m scripts.b06_g7f_representative_calibration_v0 --seeds 128
 ```
 
-The 36 dedicated tests cover all 31 native policy cells, paired
+The 41 dedicated tests cover all 31 native policy cells, paired
 histories, sample accounting, CLI/hash reproducibility, and fail-closed
 source, ledger, turn, terminal, time-handoff and CR invariants. Full
 repository CI must verify the unchanged Phase 3 signature, Bow and

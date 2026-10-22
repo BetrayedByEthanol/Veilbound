@@ -32,6 +32,13 @@ def fake_source_trial(level, size, seed, policy, outcome="legal_window_cutoff"):
     ledger = [{"index": 0, "round": 0, "kind": "encounter_created",
                "detail": {"scenario": g0_scene, "seed": seed,
                           "source_ids": genesis}}]
+    # Pre-turn G0 selection from the native runner is covered by the ledger hash.
+    runner, mode = g7f._policy_binding(policy)
+    ledger.append({"index": 1, "round": 0, "turn": None,
+                   "kind": "g7f_policy_selected",
+                   "detail": {"cohort": policy, "runner": runner, "mode": mode,
+                              "scenario": g0_scene, "level": level,
+                              "party_size": size, "seed": seed}})
     if outcome == "hunter_defeat_attested":
         ledger.append({"index": len(ledger), "round": 1,
                        "kind": "g4_damage_applied",
@@ -131,7 +138,7 @@ class PureG7FTests(unittest.TestCase):
 
     def test_06_rejects_ledger_hash_tamper(self):
         report = fake_source_trial(3, 4, 0, "warned_control")
-        report["ledger"][1]["detail"]["actor"] = "guardian"
+        report["ledger"][2]["detail"]["actor"] = "guardian"
         with self.assertRaisesRegex(AssertionError, "hash"):
             g7f.attest_native(report, level=3, size=4, seed=0,
                              policy="warned_control")
@@ -146,7 +153,7 @@ class PureG7FTests(unittest.TestCase):
 
     def test_08_rejects_reordered_turns_even_with_rehashed_ledger(self):
         report = fake_source_trial(3, 4, 0, "warned_control")
-        report["ledger"][1]["detail"]["actor"] = "vanguard"
+        report["ledger"][2]["detail"]["actor"] = "vanguard"
         report["ledger_sha256"] = g7f._digest(report["ledger"])
         with self.assertRaisesRegex(AssertionError, "chronology"):
             g7f.attest_native(report, level=3, size=4, seed=0,
@@ -223,7 +230,7 @@ class PureG7FTests(unittest.TestCase):
         def fake(level, size, seed, policy):
             trial = fake_source_trial(level, size, seed, policy)
             after = 10 if policy == "forest_pounce" else 20
-            trial["ledger"].insert(1, {"index": 1, "round": 1,
+            trial["ledger"].insert(2, {"index": 1, "round": 1,
                 "kind": "g4_damage_applied",
                 "detail": {"recipient": "hunter", "hp_before": 24,
                            "hp_after": after, "dead": False}})
@@ -307,7 +314,7 @@ class PureG7FTests(unittest.TestCase):
             g7f.attest_native(report, level=3, size=4, seed=0,
                              policy="warned_control")
         report = fake_source_trial(3, 4, 0, "warned_control")
-        report["ledger"].insert(1, {"index": 0, "round": 1,
+        report["ledger"].insert(2, {"index": 0, "round": 1,
             "kind": "g4_damage_applied",
             "detail": {"recipient": "hunter", "hp_before": 12,
                        "hp_after": 10, "dead": False}})
@@ -330,7 +337,7 @@ class PureG7FTests(unittest.TestCase):
                 "recipient": "guardian", "hp_restored": 3}},
         )
         for ev in reversed(transitions):
-            report["ledger"].insert(1, {"index": 0, "round": 1, **ev})
+            report["ledger"].insert(2, {"index": 0, "round": 1, **ev})
         for i, ev in enumerate(report["ledger"]): ev["index"] = i
         report["ledger_sha256"] = g7f._digest(report["ledger"])
         report["final_state"]["guardian"]["hp"] = 20
@@ -441,8 +448,80 @@ class PureG7FTests(unittest.TestCase):
 
 
 
+    def test_37_hashed_policy_rejects_control_to_flame_relabel(self):
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        preserved = report["ledger_sha256"]
+        report["policy_id"] = g7f._policy_origin(3, 4, "warned_flame")[1]
+        with self.assertRaisesRegex(AssertionError, "Hashed native policy binding"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_flame")
+        self.assertEqual(report["ledger_sha256"], preserved)
+
+    def test_38_hashed_policy_rejects_unprotected_as_reactive(self):
+        report = fake_source_trial(3, 4, 0, "protected_control")
+        scenario, label, _, _ = g7f._policy_origin(3, 4, "reactive_shield")
+        report["scenario_id"], report["policy_id"] = scenario, label
+        report["protection"] = {"attested_protections": 0, "reactive_uses": 99}
+        with self.assertRaisesRegex(AssertionError, "Hashed native policy binding"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="reactive_shield")
+
+    def test_39_policy_receipt_must_be_unique_and_pre_turn(self):
+        for alteration in ("missing", "late", "duplicate"):
+            with self.subTest(alteration=alteration):
+                report = fake_source_trial(3, 4, 0, "warned_control")
+                ledger = report["ledger"]
+                receipt = ledger.pop(1)
+                if alteration == "late":
+                    ledger.append(receipt)
+                elif alteration == "duplicate":
+                    ledger.insert(1, receipt)
+                    ledger.insert(2, deepcopy(receipt))
+                for i, event in enumerate(ledger):
+                    event["index"] = i
+                report["ledger_sha256"] = g7f._digest(ledger)
+                with self.assertRaisesRegex(AssertionError, "Hashed native policy binding"):
+                    g7f.attest_native(report, level=3, size=4, seed=0,
+                                     policy="warned_control")
+
+    def test_40_policy_or_native_mode_mutation_is_rejected(self):
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        report["ledger"][1]["detail"]["cohort"] = "warned_flame"
+        with self.assertRaisesRegex(AssertionError, "ledger.*hash"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+        report["ledger_sha256"] = g7f._digest(report["ledger"])
+        with self.assertRaisesRegex(AssertionError, "Hashed native policy binding"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        report["ledger"][1]["detail"]["mode"] = "g7b_flame"
+        report["ledger_sha256"] = g7f._digest(report["ledger"])
+        with self.assertRaisesRegex(AssertionError, "Hashed native policy binding"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
+
 class NativeG7FTests(unittest.TestCase):
     """CI exercises real G0–G7 native adapters; no synthetic combat mocks."""
+    def test_41_native_runners_prebind_all_four_source_policy_families(self):
+        for policy in ("warned_flame", "warned_party_exit",
+                       "reactive_shield", "forest_pounce"):
+            with self.subTest(policy=policy):
+                case = g7f._native_case(3, 4, 0, policy)
+                ledger = case["ledger"]
+                runner, mode = g7f._policy_binding(policy)
+                selection = ledger[1]
+                self.assertEqual(selection["kind"], "g7f_policy_selected")
+                self.assertEqual(selection["round"], ledger[0]["round"])
+                self.assertIsNone(selection["turn"])
+                self.assertEqual(selection["detail"]["cohort"], policy)
+                self.assertEqual(selection["detail"]["runner"], runner)
+                self.assertEqual(selection["detail"]["mode"], mode)
+                self.assertEqual(case["ledger_sha256"], g7f._digest(ledger))
+                self.assertEqual(g7f.attest_native(
+                    case, level=3, size=4, seed=0, policy=policy)["policy"], policy)
+
     def test_20_run_each_real_policy_and_validate_true_native_provenance(self):
         for level, size, policy in g7f.COHORTS:
             with self.subTest(level=level, size=size, policy=policy):
