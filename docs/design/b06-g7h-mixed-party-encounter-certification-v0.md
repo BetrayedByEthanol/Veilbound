@@ -378,6 +378,32 @@ its fields, falsify `dying`, `hp_max` or `source_id`, add unexplained
 snapshot fields, or tamper with initial source data. All such trials must
 fail closed even with a recomputed ledger digest.
 
+### Codex P2 follow-up — source-derived wounds and complete exit receipt
+
+A wound's own `g4_wound_created` attributes are **not** independent
+authority. The G7-H closing-state verifier now derives whether a wound
+must exist, its Serious/Severe/Critical band and repair requirement from
+the independently authenticated source attack/critical and original
+G4 before/after HP (including the lethal `-HP max` floor). The exact
+location comes from the preauthored G7-G Bite or G6-C Flame wound d20,
+mapped through native G4 `LOCATIONS`; the trauma follows the validated
+typed source HP packet (Piercing or Fire), not an editable wound field.
+All newly minted G4 wound IDs must follow the global original
+`G4-W####` allocation sequence, with exactly one valid created/damage
+pair. Changing even a *valid* wound band, or jointly rewriting the G4
+event, G4.5/G5 result and closing snapshot, cannot downgrade a
+Devastating Hunter Bite wound.
+
+The final G7-G opposed-disengagement verification event is also checked
+by **exact whole-object equality** against native proofs: the G7-C
+terminal index, real Round-2 G1 pursuit index, both real paid Hunter Bite
+resolution indices, four independently authenticated G5 border exits,
+living Hunter closing HP/death, the authored scene-only boundary
+`authored_G7C_scene_exits_only`, and the explicitly unresolved
+post-scene-world-pursuit flag. Unrecognized or missing receipt keys fail
+closed. Neither correction broadens the witness into a general healing,
+restoration, safety, or encounter-difficulty claim.
+
 ## Execution and regression checks
 
 ```bash
