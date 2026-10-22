@@ -977,7 +977,9 @@ class G7HMixedNativeTests(unittest.TestCase):
                         resolved = next(v for v in ledger
                                         if v["kind"] == "g5_melee_resolved"
                                         and v["detail"].get("attacker") == actor
-                                        and v["detail"].get("profile") == profile)
+                                        and v["detail"].get("profile") == profile
+                                        and v["detail"].get("outcome") == "hit"
+                                        and v["detail"].get("damage") is not None)
                         resolved["detail"]["damage"]["hp_packets"] = [999]
                     trial["ledger_sha256"] = canonical_digest(ledger)
                     with self.assertRaises(AssertionError):
