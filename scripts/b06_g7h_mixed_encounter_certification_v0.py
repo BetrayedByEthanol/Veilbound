@@ -664,6 +664,252 @@ def _authored_exit_chains(ledger, terminal):
         raise AssertionError("G7-C terminal exits disagree with four native receipt chains")
     return receipts
 
+def _player_melee_hit_chains(ledger, actor, profile):
+    """Prove G6-B A/B participation from real paid G0 -> G5 -> G4 -> G4.5.
+
+    A G5 resolved summary is insufficient: source G0 declaration/defense,
+    G5 hit-producing roll, G4 damage and G4.5 verified receipt must share
+    the original physical action index and actual own-turn chronology.
+    """
+    from scripts.b06_hunter_party_exchanges_v0 import BUILD
+
+    role = {"vanguard": "A", "guardian": "B"}.get(actor)
+    expected_profile = {"A": "B06-PC-A-SWORD", "B": "B06-PC-B-MACE"}.get(role)
+    if role is None or profile != expected_profile:
+        raise AssertionError("Only the exact sourced A/B profile may certify melee")
+    seed = ledger[0]["detail"].get("seed")
+    sources = ledger[0]["detail"].get("source_ids", {})
+    attacker_source = sources.get(actor, {})
+    hunter_source = sources.get("hunter", {})
+    bonus = BUILD[role]["attack"]
+    if (attacker_source.get("source_id") != role
+            or hunter_source.get("source_id") != "B06-EN-03"
+            or type(seed) is not int):
+        raise AssertionError("A/B melee needs original source fixture identities")
+    candidates = [v for v in ledger if v["kind"] == "g5_melee_resolved"
+                  and v["detail"].get("attacker") == actor
+                  and v["detail"].get("target") == "hunter"
+                  and v["detail"].get("profile") == profile
+                  and v["detail"].get("outcome") == "hit"]
+    if not candidates:
+        raise AssertionError("A/B martial contribution needs a genuine hit")
+    proven = []
+    used_actions = set()
+    for resolved in candidates:
+        d = resolved["detail"]
+        index = d.get("action_index")
+        if (type(index) is not int or not 0 <= index < resolved["index"]
+                or index in used_actions):
+            raise AssertionError("A/B source hit has missing/reused paid action")
+        used_actions.add(index)
+        action = ledger[index]
+        if (action["kind"] != "action_committed"
+                or action["turn"] != actor
+                or action["round"] != resolved["round"]
+                or resolved["turn"] != actor
+                or action["detail"].get("actor") != actor
+                or action["detail"].get("action_class") != "physical"
+                or action["detail"].get("label") != f"sequence:{profile}:0"
+                or type(action["detail"].get("ap_spent")) is not int
+                or action["detail"]["ap_spent"] != 20
+                or any(x["kind"] == "g5_melee_cancelled"
+                       and x["detail"].get("action_index") == index
+                       for x in ledger)):
+            raise AssertionError("A/B hit did not consume its legal physical action")
+        attestations = [v for v in ledger
+                        if v["kind"] == "g5_melee_sequence_attested"
+                        and index in v["detail"].get("action_indices", ())]
+        if len(attestations) != 1:
+            raise AssertionError("A/B hit requires one authoritative G5 sequence")
+        seq = attestations[0]
+        q = seq["detail"]
+        dec_index = q.get("declaration_index")
+        defense_indices = q.get("defense_indices")
+        if (q.get("attacker") != actor or q.get("target") != "hunter"
+                or q.get("profiles") != [profile]
+                or q.get("action_indices") != [index]
+                or q.get("source_bonuses") != [bonus]
+                or q.get("source_digest") != attacker_source.get("digest")
+                or type(dec_index) is not int
+                or not index < dec_index < seq["index"] < resolved["index"]
+                or not isinstance(defense_indices, list)
+                or len(defense_indices) != 1
+                or type(defense_indices[0]) is not int
+                or not dec_index < defense_indices[0] < seq["index"]
+                or seq["round"] != resolved["round"] or seq["turn"] != actor):
+            raise AssertionError("A/B G5 sequence not bound to native payment/declaration")
+        declaration = ledger[dec_index]
+        defense = ledger[defense_indices[0]]
+        if (declaration["kind"] != "attack_sequence_committed"
+                or declaration["round"] != resolved["round"]
+                or declaration["turn"] != actor
+                or declaration["detail"].get("attacker") != actor
+                or declaration["detail"].get("target") != "hunter"
+                or declaration["detail"].get("profiles") != [profile]
+                or declaration["detail"].get("defenses") != q.get("defenses")
+                or defense["kind"] != "defense_assigned"
+                or defense["round"] != resolved["round"]
+                or defense["turn"] != actor
+                or defense["detail"].get("actor") != "hunter"
+                or defense["detail"].get("attack_key") !=
+                   f"{actor}:hunter:0"
+                or defense["detail"].get("defense") not in ("take_hit", "dodge")
+                or q.get("defenses") != [defense["detail"]["defense"]]):
+            raise AssertionError("A/B original G0 target, profile or defense altered")
+        rolls = [v for v in ledger if v["kind"] == "g5_melee_roll"
+                 and v["detail"].get("action_index") == index]
+        bridges = [v for v in ledger if v["kind"] == "g45_attested_hit"
+                   and v["detail"].get("action_index") == index]
+        if len(rolls) != 1 or len(bridges) != 1:
+            raise AssertionError("A/B paid hit must have exactly one roll and G4.5 receipt")
+        roll, bridge = rolls[0], bridges[0]
+        rd, bd = roll["detail"], bridge["detail"]
+        if (not seq["index"] < roll["index"] < bridge["index"] < resolved["index"]
+                or any(v["round"] != resolved["round"] or v["turn"] != actor
+                       for v in (roll, bridge))
+                or any(v["detail"].get("attacker") != actor
+                       or v["detail"].get("target") != "hunter"
+                       or v["detail"].get("profile") != profile
+                       for v in (roll, bridge))
+                or rd.get("declaration_index") != dec_index
+                or rd.get("slot") != 0
+                or rd.get("declared_defense") != defense["detail"]["defense"]
+                or rd.get("hit") is not True
+                or rd.get("spontaneous_policy") != "decline_all"
+                or bd.get("sequence_declaration_index") != dec_index
+                or bd.get("declared_profile_index") != 0
+                or bd.get("source_event") != f"g5:source:{seed}:{index}"
+                or bd.get("contact_reference") != f"g5:melee:{index}"
+                or bd.get("defense_reference") !=
+                   f"g0:defense:{defense_indices[0]}"
+                or bd.get("attacker_source") != attacker_source.get("digest")
+                or bd.get("target_source") != hunter_source.get("digest")
+                or not isinstance(bd.get("actual_result"), dict)
+                or bd["actual_result"] != d.get("damage")):
+            raise AssertionError("A/B G5 roll and G4.5 receipt do not bind the same hit")
+        face = rd.get("attack_face")
+        value = rd.get("defense_value")
+        chosen = rd.get("defense")
+        assigned = defense["detail"]["defense"]
+        if (type(face) is not int or not 1 <= face <= 20 or face == 1
+                or type(rd.get("source_attack_bonus")) is not int
+                or rd["source_attack_bonus"] != bonus
+                or type(rd.get("prone_modifier")) is not int
+                or rd["prone_modifier"] != 0
+                or type(rd.get("attack_bonus")) is not int
+                or rd["attack_bonus"] != bonus
+                or type(rd.get("attack_total")) is not int
+                or rd["attack_total"] != face + bonus
+                or chosen not in ("take_hit", "dodge")
+                or (chosen == assigned and value !=
+                    defense["detail"].get("defense_value"))
+                or (chosen != assigned and (
+                    chosen != "take_hit"
+                    or not any(v["kind"] == "g5_defense_unavailable_fallback"
+                               and v["detail"].get("attacker") == actor
+                               and v["detail"].get("target") == "hunter"
+                               and v["detail"].get("action_index") == index
+                               and v["detail"].get("declared") == assigned
+                               and v["detail"].get("resolved") == "take_hit"
+                               and dec_index < v["index"] < roll["index"]
+                               for v in ledger)))
+                or (chosen == "take_hit" and value is not None)
+                or (chosen == "dodge"
+                    and (type(value) is not int
+                         or (face != 20 and face + bonus <= value)))):
+            raise AssertionError("A/B recorded d20 cannot produce its claimed melee hit")
+        confirm = rd.get("confirmation_face")
+        if face == 20:
+            if type(confirm) is not int or not 1 <= confirm <= 20:
+                raise AssertionError("A/B natural-20 needs source confirmation")
+            critical = ("devastating" if confirm == 20
+                        else "critical" if chosen == "take_hit"
+                        or (confirm != 1 and confirm + bonus > value)
+                        else "strong")
+        else:
+            if confirm is not None:
+                raise AssertionError("Ordinary A/B hit cannot have confirmation")
+            critical = "normal"
+        if (rd.get("critical") != critical or d.get("critical") != critical
+                or bd.get("critical") != critical):
+            raise AssertionError("A/B critical tier cannot be relabeled")
+        damage_events = [v for v in ledger
+                         if v["kind"] == "g4_damage_applied"
+                         and roll["index"] < v["index"] < bridge["index"]
+                         and v["detail"].get("recipient") == "hunter"
+                         and v["detail"].get("cause") ==
+                             f"source-profile:{profile}"]
+        source_events = [v for v in ledger
+                         if v["kind"] == "g4_profile_hit"
+                         and roll["index"] < v["index"] < bridge["index"]
+                         and v["detail"].get("attacker") == actor
+                         and v["detail"].get("target") == "hunter"
+                         and v["detail"].get("profile") == profile]
+        if len(damage_events) != 1 or len(source_events) != 1:
+            raise AssertionError("A/B hit requires one actual native G4 source damage")
+        dmg = damage_events[0]
+        actual = bd["actual_result"]
+        if (dmg["round"] != resolved["round"] or dmg["turn"] != actor
+                or source_events[0]["round"] != resolved["round"]
+                or source_events[0]["turn"] != actor
+                or source_events[0]["detail"].get("critical") != critical
+                or not dmg["index"] < source_events[0]["index"] < bridge["index"]
+                or actual.get("hp_loss") != (
+                    dmg["detail"].get("hp_before") -
+                    dmg["detail"].get("hp_after"))
+                or actual.get("dead") is not dmg["detail"].get("dead")
+                or not isinstance(dmg["detail"].get("packets"), list)
+                or not dmg["detail"]["packets"]
+                or dmg["detail"]["packets"][0].get("resource") != "hp"):
+            raise AssertionError("A/B paid G4 damage not in attested hit chain")
+        proven.append({"action": index, "roll": roll["index"],
+                       "damage": dmg["index"], "bridge": bridge["index"],
+                       "resolved": resolved["index"]})
+    return proven
+
+
+def _flame_hit_from_defense(flame):
+    """Re-derive the certified F direct hit from the native d20 and defense.
+
+    This fixed G6-C scene has a clear Take Hit lane (G2 base/final 10).
+    A launch's editable hit-outcome string cannot turn an actual miss into
+    G4 Fire, including natural-1 auto misses and unresolved natural-20s.
+    """
+    d = flame["detail"]
+    face, base, defense = (d.get("primary_face"),
+                           d.get("base_defense"), d.get("final_defense"))
+    total = d.get("attack_total")
+    if (type(face) is not int or not 1 <= face <= 20
+            or type(base) is not int or type(defense) is not int
+            or base != 10 or defense != 10
+            or type(total) is not int or total != face + 5
+            or face == 1
+            or d.get("outcome") != "direct_hit_pending_G4"):
+        raise AssertionError("G7-H Flame lacks native clear-lane d20/defense proof")
+    if face == 20:
+        confirm = d.get("confirmation_face")
+        if type(confirm) is not int or not 1 <= confirm <= 20:
+            raise AssertionError("G7-H Flame natural-20 needs resolved confirmation")
+        tier = "devastating" if confirm == 20 else "critical"
+    else:
+        if d.get("confirmation_face") is not None or total <= defense:
+            raise AssertionError("G7-H Flame cannot deliver Fire after a source miss")
+        tier = "normal"
+    dice = d.get("critical_dice", [])
+    required = {"normal": 0, "strong": 1,
+                "critical": 2, "devastating": 2}[tier]
+    if (d.get("critical", "normal") != tier
+            or not isinstance(dice, list) or len(dice) != required
+            or any(type(v) is not int or not 1 <= v <= 4 for v in dice)
+            or type(d.get("die")) is not int or not 1 <= d["die"] <= 8):
+        raise AssertionError("G7-H Flame critical or damage faces mismatch")
+    from math import ceil
+    if d.get("packets_pending_g4") != {
+            "fire_hp": 2 + sum(dice), "vigor": 2 + ceil(d["die"] / 3)}:
+        raise AssertionError("G7-H Flame damage packets not derived from native cast")
+
+
+
 def _source_decisions(ledger, *, policy, terminal):
     events = {}
     for kind in ("g5_melee_resolved", "g6d_bow_adjudicated",
@@ -686,11 +932,10 @@ def _source_decisions(ledger, *, policy, terminal):
             raise AssertionError("Source Hunter had no genuine physical attack")
         for who, attack in (("vanguard", "B06-PC-A-SWORD"),
                             ("guardian", "B06-PC-B-MACE")):
-            if not any(e["detail"].get("attacker") == who
-                       and e["detail"].get("profile") == attack for e in melee):
-                raise AssertionError("Mixed victory omitted native A/B melee")
+            _player_melee_hit_chains(ledger, who, attack)
         rites = [x for x in events["g3_effect_established"]
                  if x["detail"].get("caster") == "archer"
+                 and x["detail"].get("recipient") == "archer"
                  and x["detail"].get("effect_kind") == "Guided Regeneration"
                  and x["detail"].get("chosen") is True
                  and x["detail"].get("committed") == 1]
@@ -723,6 +968,7 @@ def _source_decisions(ledger, *, policy, terminal):
                 for flame in flames):
             raise AssertionError("G7-H Flame source/tier/attack receipts invalid")
         for flame in flames:
+            _flame_hit_from_defense(flame)
             _spell_payment_chain(
                 ledger, flame, actor="scholar",
                 label="g3:thrown_flame:T1", ap=20,

@@ -575,5 +575,122 @@ class G7HMixedNativeTests(unittest.TestCase):
                     attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
 
 
+    def test_31_codex_p1_player_melee_needs_native_roll_and_g45_hit(self):
+        # Attack summaries and the recalculated hash are NOT enough to
+        # claim either A or B landed a sourced hit.
+        for actor in ("vanguard", "guardian"):
+            for lost in ("g5_melee_roll", "g45_attested_hit"):
+                with self.subTest(actor=actor, lost=lost):
+                    trial = self._case(POLICIES[0])
+                    evidence = [event for event in trial["ledger"]
+                                if event["kind"] == lost
+                                and event["detail"].get("attacker") == actor
+                                and event["detail"].get("target") == "hunter"]
+                    self.assertGreater(len(evidence), 0)
+                    for event in evidence:
+                        event["kind"] = "relabeled_native_receipt"
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    # Resolved G5 summaries remain untouched.
+                    self.assertTrue(any(
+                        ev["kind"] == "g5_melee_resolved"
+                        and ev["detail"].get("attacker") == actor
+                        for ev in trial["ledger"]))
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_32_codex_p1_player_melee_hit_must_bind_paid_action_and_G4(self):
+        for actor in ("vanguard", "guardian"):
+            for kind in ("action", "declaration", "damage", "profile"):
+                with self.subTest(actor=actor, corruption=kind):
+                    trial = self._case(POLICIES[0])
+                    ledger = trial["ledger"]
+                    hit = next(v for v in ledger
+                               if v["kind"] == "g5_melee_resolved"
+                               and v["detail"].get("attacker") == actor
+                               and v["detail"].get("outcome") == "hit")
+                    action_index = hit["detail"]["action_index"]
+                    native = next(v for v in ledger if v["kind"] ==
+                                  "g5_melee_sequence_attested"
+                                  and action_index in
+                                  v["detail"].get("action_indices", ()))
+                    if kind == "action":
+                        ledger[action_index]["detail"]["ap_spent"] = 0
+                    elif kind == "declaration":
+                        ledger[native["detail"]["declaration_index"]]["detail"][
+                            "target"] = "archer"
+                    elif kind == "damage":
+                        receipts = [v for v in ledger if v["kind"] ==
+                                    "g4_damage_applied" and v["turn"] == actor
+                                    and v["detail"].get("recipient") == "hunter"]
+                        self.assertGreater(len(receipts), 0)
+                        for event in receipts:
+                            event["kind"] = "relabeled_source_damage"
+                    else:
+                        receipt = next(v for v in ledger if v["kind"] ==
+                                       "g45_attested_hit"
+                                       and v["detail"].get("action_index") ==
+                                       action_index)
+                        receipt["detail"]["profile"] = "B06-AT-04"
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_33_codex_p1_player_melee_natural_one_cannot_hit(self):
+        for actor in ("vanguard", "guardian"):
+            with self.subTest(actor=actor):
+                trial = self._case(POLICIES[0])
+                roll = next(v for v in trial["ledger"]
+                            if v["kind"] == "g5_melee_roll"
+                            and v["detail"].get("attacker") == actor
+                            and v["detail"].get("hit") is True)
+                roll["detail"]["attack_face"] = 1
+                roll["detail"]["attack_total"] = 1 + roll["detail"]["attack_bonus"]
+                # Keep false source result labels and G4/G4.5 delivery.
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_34_codex_p1_chosen_guided_rite_must_be_self_targeted(self):
+        trial = self._case(POLICIES[0])
+        rites = [v for v in trial["ledger"]
+                 if v["kind"] == "g3_effect_established"
+                 and v["detail"].get("caster") == "archer"
+                 and v["detail"].get("effect_kind") == "Guided Regeneration"]
+        self.assertEqual(len(rites), 1)
+        self.assertEqual(rites[0]["detail"]["recipient"], "archer")
+        rites[0]["detail"]["recipient"] = "hunter"
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_35_codex_p1_flame_hits_must_beat_recorded_defense(self):
+        for corruption in ("both_false_hit_faces", "one_false_hit_face",
+                           "false_defense", "natural_one"):
+            with self.subTest(corruption=corruption):
+                trial = self._case(POLICIES[0])
+                flames = [v for v in trial["ledger"]
+                          if v["kind"] == "g3_flame_launched"
+                          and v["detail"].get("caster") == "scholar"]
+                self.assertEqual(len(flames), 2)
+                targets = flames if corruption == "both_false_hit_faces" else flames[:1]
+                for flame in targets:
+                    if corruption == "false_defense":
+                        flame["detail"]["final_defense"] = 25
+                    elif corruption == "natural_one":
+                        flame["detail"]["primary_face"] = 1
+                        flame["detail"]["attack_total"] = 6
+                    else:
+                        flame["detail"]["primary_face"] = 2
+                        flame["detail"]["attack_total"] = 7
+                    # Retain editable direct_hit_pending_G4 outcomes and
+                    # actually paid G3/G4 packet/VP chains unchanged.
+                    self.assertEqual(
+                        flame["detail"]["outcome"], "direct_hit_pending_G4")
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+
+
 if __name__ == "__main__":
     unittest.main()
