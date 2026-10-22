@@ -15,8 +15,9 @@ from scripts.b06_wound_continuation_v0 import _actor_state
 class HunterCombat(SourceMelee):
     """One encounter-wide G5/G6 adapter; install before any attack sequence."""
 
-    def __init__(self, encounter, *, scene_exit=None):
-        super().__init__(encounter, scene_exit=scene_exit)
+    def __init__(self, encounter, *, scene_exit=None, scene_exits=()):
+        super().__init__(encounter, scene_exit=scene_exit,
+                         scene_exits=scene_exits)
         self._g6_pounce_authorized = False
 
     def _hunter(self, hunter_id, target_id):
