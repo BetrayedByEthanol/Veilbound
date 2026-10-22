@@ -924,7 +924,7 @@ def _hunter_bite_hits(ledger, target, *, policy):
     return hits
 
 
-def _replay_native_exit_geometry(ledger):
+def _replay_native_exit_geometry(ledger, *, party_exits=True):
     """Replay EVERY G7-G G1 move against a freshly sourced G6-C grid.
 
     The movement receipts and even their recalculated SHA are input evidence,
@@ -944,7 +944,7 @@ def _replay_native_exit_geometry(ledger):
             or origin["vanguard"]["level"] not in (2, 3)):
         raise AssertionError("G7-H withdrawal needs original source start geometry")
     scene = mixed_scene(size=4, level=origin["vanguard"]["level"],
-                        seed=seed, party_exits=True)
+                        seed=seed, party_exits=party_exits)
     expected = scene.e
     grid = expected.g1
     actual_maps = [x for x in ledger if x["kind"] == "g1_map_installed"]
@@ -1030,24 +1030,26 @@ def _replay_native_exit_geometry(ledger):
             remaining[actor] -= price
             source.occupied = destination
         elif kind == "g7g_hunter_pursuit_executed":
-            # The G7-G contact Boolean is a receipt, not positional
-            # authority. Derive front = head + (head - rear) from the
-            # SOURCE-replayed rigid footprint and the target's live square.
+            # Independently derive Hunter front-line contact from its
+            # replayed anatomical footprint, even for multi-round defeat.
             target = d.get("target")
             hunter = expected.actors["hunter"]
-            if (event["round"] != 2 or event["turn"] != "hunter"
-                    or target != "vanguard"
+            if (event["turn"] != "hunter"
+                    or target not in ROSTER[1:]
                     or d.get("final_footprint") !=
                        [list(cell) for cell in hunter.occupied]
-                    or d.get("contact") is not True
-                    or grid.front("hunter") != expected.actors[target].occupied[0]):
+                    or type(d.get("contact")) is not bool
+                    or d["contact"] != (
+                        grid.front("hunter") == expected.actors[target].occupied[0])
+                    or (party_exits and (event["round"] != 2
+                                         or target != "vanguard"
+                                         or d["contact"] is not True))):
                 raise AssertionError(
                     "G7-H Hunter pursuit receipt lost actual head-forward contact")
         elif kind == "g5_melee_roll" and d.get("attacker") == "hunter":
             target = d.get("target")
-            if (target != "vanguard" or
-                    event["turn"] != "hunter" or
-                    grid.front("hunter") != expected.actors[target].occupied[0]):
+            if (target not in ROSTER[1:] or event["turn"] != "hunter"
+                    or grid.front("hunter") != expected.actors[target].occupied[0]):
                 raise AssertionError(
                     "G7-H paid Hunter Bite rolled outside replayed melee contact")
         elif kind == "g5_terminal_exit":
@@ -1608,6 +1610,100 @@ def _reconcile_victory_hunter_sequences(ledger):
     return True
 
 
+def _reconcile_complete_snapshots(ledger, initial, final, *,
+                                  policy, level, seed):
+    """Reconstruct every serialized actor field from fixture and native events.
+
+    No voluntary wound repair/Basic Heal is authored in these three packs.
+    G4 wound creation and source Step-2 receipts therefore determine the
+    complete carried wound list, in native chronological order.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+    from scripts.b06_g7a_native_terminal_census_v0 import _snapshot
+    from scripts.b06_damage_v0 import WOUND_BANDS
+
+    reference = mixed_scene(
+        size=4, level=level, seed=seed,
+        party_exits=(policy == "opposed_living_hunter_withdrawal")).e
+    source_initial = _snapshot(reference)
+    if initial != source_initial:
+        raise AssertionError("Initial actor snapshot differs from exact G6-C source fixture")
+    if (set(final) != set(ROSTER)
+            or any(not isinstance(final[actor], dict)
+                   or set(final[actor]) != set(source_initial[actor])
+                   for actor in ROSTER)):
+        raise AssertionError("Final actor snapshot has missing/extra source fields")
+
+    wounds = {actor: deepcopy(source_initial[actor]["wounds"]) for actor in ROSTER}
+    issued = set()
+    created = [ev for ev in ledger if ev["kind"] == "g4_wound_created"]
+    damages = [ev for ev in ledger if ev["kind"] == "g4_damage_applied"]
+    for w in created:
+        d = w["detail"]
+        actor, name, key = (
+            d.get("recipient"), d.get("wound"), d.get("event_key"))
+        if (actor not in wounds or not isinstance(name, str)
+                or name in issued
+                or not isinstance(key, str) or not key
+                or d.get("severity") not in WOUND_BANDS
+                or type(d.get("requirement")) is not int
+                or d["requirement"] != WOUND_BANDS[d["severity"]]
+                or not isinstance(d.get("location"), str)
+                or not isinstance(d.get("trauma"), str)):
+            raise AssertionError("G4 wound event has invalid unique native attributes")
+        matches = [ev for ev in damages
+                   if ev["detail"].get("recipient") == actor
+                   and ev["detail"].get("event_key") == key
+                   and ev["detail"].get("wound") == d["severity"]]
+        if (len(matches) != 1 or w["index"] >= matches[0]["index"]
+                or w["round"] != matches[0]["round"]
+                or w["turn"] != matches[0]["turn"]):
+            raise AssertionError("Wound creation lacks its actual synchronous G4 damage")
+        issued.add(name)
+        wounds[actor].append({
+            "id": name, "severity": d["severity"], "progress": 0,
+            "requirement": d["requirement"]})
+    for damage in damages:
+        d = damage["detail"]
+        corresponding = [w for w in created
+                         if w["detail"].get("recipient") == d.get("recipient")
+                         and w["detail"].get("event_key") == d.get("event_key")]
+        if (d.get("wound") is None) != (len(corresponding) == 0):
+            raise AssertionError("G4 wound severity must reconcile with native creation")
+        if d.get("wound") is not None and len(corresponding) != 1:
+            raise AssertionError("Damage cannot create missing/duplicated wound")
+    if any(ev["kind"] in ("g4_basic_heal_applied", "g4_wound_repaired")
+           for ev in ledger):
+        raise AssertionError("No external healing/wound repair in authored pack")
+    # Geometry is replayed from the source grid, not accepted from its
+    # editable closing snapshot, for both battle and exit policies.
+    positions = _replay_native_exit_geometry(
+        ledger, party_exits=(policy == "opposed_living_hunter_withdrawal"))
+    for actor in ROSTER:
+        state, start = final[actor], source_initial[actor]
+        expected_dying = state["hp"] <= 0 and not state["dead"]
+        arrows = (state["ammunition"] if actor == "archer"
+                  and policy == "mixed_victory_rite"
+                  else start["ammunition"])
+        expected = {
+            "source_id": start["source_id"],
+            "source_digest": start["source_digest"],
+            "hp": state["hp"], "hp_max": start["hp_max"],
+            "vigor": state["vigor"],
+            "vp_available": state["vp_available"],
+            "vp_committed": state["vp_committed"],
+            "ammunition": arrows,
+            "occupied": positions[actor],
+            "wounds": wounds[actor],
+            "dying": expected_dying,
+            "dead": state["dead"],
+        }
+        if state != expected:
+            raise AssertionError(
+                f"Closing {actor} actor snapshot contradicts source/ledger state")
+    return True
+
+
 def _source_decisions(ledger, *, policy, terminal, final_state):
     events = {}
     for kind in ("g5_melee_resolved", "g6d_bow_adjudicated",
@@ -1893,6 +1989,8 @@ def attest_trial(report, *, level, seed, policy):
     terminal = _terminal_proof(report, ledger, policy=policy, deaths=deaths)
     facts = _source_decisions(
         ledger, policy=policy, terminal=terminal, final_state=final)
+    _reconcile_complete_snapshots(
+        ledger, initial, final, policy=policy, level=level, seed=seed)
     return {"policy": policy, "outcome": TERMINALS[policy][0],
             "source_scenario_id": report["scenario_id"],
             "native_terminal_event": terminal["index"],

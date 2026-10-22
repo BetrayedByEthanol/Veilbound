@@ -348,6 +348,36 @@ fields, and forge target-selection and verification records together. These
 are strictly authentication improvements; no combat rule, dice or policy
 selection changes, and no new representative sample is claimed.
 
+### Codex follow-up — Hunter miss AP and complete actor snapshots
+
+- **P1: the missed Round-1 Hunter Bite is paid.** G7-H audits *both* original
+  victory-mode Hunter G0 physical actions against native current-turn resource
+  grants, 24-AP debit, 18-AP remainder, distinct source declarations,
+  defense-assignment receipts, and exactly one G5 roll/resolution each.
+  The authored first-round **natural 1** is a paid **miss**, not a
+  paid hit: it cannot carry G4 damage or a G4.5 hit. The already established
+  second-round hit remains independently verified through its G4/G4.5
+  outcome. Rehashing a trace with `ap_spent=0` and `ap_remaining=42`
+  on the Round-1 miss must fail.
+- **P2: authenticate every exposed actor snapshot field.** At encounter
+  creation G7-H compares the *entire* initial serialized roster against a
+  fresh exact G6-C source fixture, including maximum HP, source identity,
+  initial wounds, geometry and status. At close, the verifier enforces the
+  exact serialized field schema, derives `dying` from final HP/death,
+  preserves fixture `source_id`/`source_digest`/`hp_max`, replays all
+  actual G1 footprints in every policy, and reconstructs the complete
+  wound inventory from the unique synchronous G4 wound-creation receipts.
+  Wound identity, severity, repair requirement and initial progress
+  are checked, while the existing HP/Vigor, VP, ammunition and
+  regeneration audits still independently verify their balances.
+  No unmodeled wound repair, external heal or post-fight status is accepted.
+
+Additional regressions explicitly forge the missed Bite's AP debit,
+remaining budget, and resolution; delete a source lethal wound, alter
+its fields, falsify `dying`, `hp_max` or `source_id`, add unexplained
+snapshot fields, or tamper with initial source data. All such trials must
+fail closed even with a recomputed ledger digest.
+
 ## Execution and regression checks
 
 ```bash

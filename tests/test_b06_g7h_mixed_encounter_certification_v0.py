@@ -1443,6 +1443,63 @@ class G7HMixedNativeTests(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
 
+    def test_63_p2_every_branch_rejects_inconsistent_complete_snapshots(self):
+        for policy in POLICIES:
+            source = self._case(policy)
+            for variant in ("source_id", "hp_max", "dying",
+                            "wounds", "extra_key", "initial_dying",
+                            "initial_hp_max"):
+                with self.subTest(policy=policy, variant=variant):
+                    trial = deepcopy(source)
+                    target = trial["final_state"]["guardian"]
+                    if variant == "source_id":
+                        target["source_id"] = "forged:B"
+                    elif variant == "hp_max":
+                        target["hp_max"] += 3
+                    elif variant == "dying":
+                        target["dying"] = not target["dying"]
+                    elif variant == "wounds":
+                        # The full-wipe branch carries an actual G4 wound.
+                        # Other branches must still reject arbitrary
+                        # invented wound history.
+                        if target["wounds"]:
+                            target["wounds"].pop()
+                        else:
+                            target["wounds"].append(
+                                {"id": "G4-W9999", "severity": "Critical",
+                                 "progress": 0, "requirement": 30})
+                    elif variant == "extra_key":
+                        target["unlogged_condition"] = True
+                    elif variant == "initial_dying":
+                        trial["initial_state"]["guardian"]["dying"] = True
+                    elif variant == "initial_hp_max":
+                        trial["initial_state"]["guardian"]["hp_max"] += 1
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_64_p2_full_wound_identity_requirement_and_progress_replay(self):
+        original = self._case(POLICIES[1])
+        victims = [name for name in ("vanguard", "guardian", "archer", "scholar")
+                   if original["final_state"][name]["wounds"]]
+        self.assertTrue(victims, "G7-G loss should carry at least one G4 wound")
+        victim = victims[0]
+        for variant in ("delete", "id", "severity", "requirement", "progress"):
+            with self.subTest(victim=victim, variant=variant):
+                trial = deepcopy(original)
+                wound = trial["final_state"][victim]["wounds"][0]
+                if variant == "delete":
+                    trial["final_state"][victim]["wounds"].clear()
+                elif variant == "id":
+                    wound["id"] = "G4-W4444"
+                elif variant == "severity":
+                    wound["severity"] = "Serious" if wound["severity"] != "Serious" else "Critical"
+                elif variant == "requirement":
+                    wound["requirement"] += 1
+                else:
+                    wound["progress"] += 1
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17,
+                                 policy=POLICIES[1])
 
 
 if __name__ == "__main__":
