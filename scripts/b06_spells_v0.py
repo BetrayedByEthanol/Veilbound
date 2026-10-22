@@ -739,6 +739,11 @@ class SpellState:
         if (len(critical_dice)!=required or any(
                 type(x) is not int or not 1<=x<=4 for x in critical_dice)):
             raise ValueError("Exact Flame critical d4 faces required")
+        # The public API accepts lists, but a committed response may mutate
+        # that caller-owned list. Freeze the validated faces before both
+        # wound preflight and the on_committed callback: recorded HP damage
+        # and the launch receipt must retain exactly the declared dice.
+        critical_dice=tuple(critical_dice)
         confirmed_critical=face==20 and confirmation_face is not None
         # A confirmed direct Flame is committed as an irreversible paid
         # Projection Action below. Reject missing Devastating/zero-crossing
