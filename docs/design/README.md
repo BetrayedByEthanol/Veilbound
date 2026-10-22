@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B06 G7-A — Native End-to-End Policy and Terminal Census Infrastructure v0](b06-g7a-native-terminal-census-v0.md) — repeatable **G0–G6D source-actual**, SHA256-keyed three-round combat trials for the four warned-clear A-front L2/L3 P3/P4 cells; explicit Hunter-death attestation versus cutoffs/unsupported critical branches, with no asserted CR, survival probability or generalized policy certification.
+
 - [B06 G7 — Encounter Calibration Readiness and Scenario Matrix v0](b06-g7-encounter-calibration-readiness-scenario-matrix-v0.md) — 48 source-bounded **planned** L2/L3 Hunter cases (4 executable two-round fixed witnesses, 2 L3/P4 protection components only, 42 blocked), six actual G6-C/G6-D fixed-dice witness replays, and missing gate codes. **Not** 48 stochastic trials, a measured win rate, complete encounter certification or numeric Hunter CR; original Phase 3 digest untouched.
 
 - [B06 G5 — Soldier/Sentry Encounter Integration v0](b06-g5-soldier-sentry-encounter-integration-v0.md) — source-verified G0/G1 melee attack and defense/critical resolution, I1 Soldier and I2 cold/prepared Sentry bounded exit witnesses with actual G3/G4 effects and real G1 translation. Broader full-party encounter certification, reactive effects and G6 Hunter remain open.
