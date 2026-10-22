@@ -81,6 +81,136 @@ def _native_case(level, size, seed, policy):
                      exploration_seconds=0, include_ledger=True)
 
 
+def _policy_origin(level, size, policy):
+    """Exact source-policy contract chosen before any dice are observed."""
+    clear = f"G7-L{level}-P{size}-warned_clear-A_head_forward-decline_all"
+    if policy in ("warned_control", "warned_flame", "warned_archer_exit"):
+        mode = {"warned_control": "g7a", "warned_flame": "g7b_flame",
+                "warned_archer_exit": "g7b_archer_exit"}[policy]
+        label = ("G7A-keyed-guard-dodge-regen-clear-A-front-v0"
+                 if mode == "g7a" else f"G7B-keyed-{mode}-clear-A-front-v0")
+        return clear, label, "warned_clear", "A_head_forward"
+    if policy == "warned_party_exit":
+        return (clear, "G7C:all-party-cautious-border-exits-v0",
+                "warned_clear", "A_head_forward")
+    if policy in ("b_front", *PROTECTIVE_POLICIES):
+        mode = "control" if policy == "protected_control" else policy
+        front = "B_head_forward" if policy == "b_front" else "A_head_forward"
+        return (f"G7D-L{level}-P{size}-warned_clear-{front}-{mode}",
+                mode, "warned_clear", front)
+    mode = "pounce" if policy == "forest_pounce" else "ordinary_approach"
+    return (f"G7E-L{level}-P{size}-forest-lane-{mode}",
+            mode, "forest_ambush_geometry_only", None)
+
+
+def _validate_policy_origin(report, ledger, level, size, policy):
+    scenario_id, policy_id, opening, frontline = _policy_origin(level, size, policy)
+    if (report.get("scenario_id") != scenario_id or
+            report.get("policy_id") != policy_id or
+            report.get("opening") != opening or
+            (frontline is not None and report.get("frontline") != frontline) or
+            (frontline is None and report.get("frontline") is not None)):
+        raise AssertionError("Native scenario/policy does not match requested cohort")
+    genesis = ledger[0]
+    source = genesis["detail"]
+    expected_scene = (f"B06-G7E-forest-lane:L{level}:P{size}"
+                      if policy.startswith("forest_") else
+                      f"B06-I3-G7D:B-front:party-{size}:L{level}"
+                      if policy == "b_front" else
+                      f"B06-I3-G6C:party-{size}:L{level}")
+    if (genesis["kind"] != "encounter_created" or
+            source.get("scenario") != expected_scene or
+            source.get("seed") != report["seed"]):
+        raise AssertionError("Native G0 scene/seed does not match selected policy")
+    pounces = sum(ev["kind"] == "g6_pounce_resolved" for ev in ledger)
+    protections = [ev for ev in ledger
+                   if ev["kind"] == "g6d_protective_bite_attested"]
+    if policy.startswith("forest_"):
+        if (report.get("universal_surprise_benefit_applied") is not False or
+                report.get("exploration_seconds_requested") != 0 or
+                type(report.get("native_pounce_count")) is not int or
+                report["native_pounce_count"] != pounces or
+                pounces != int(policy == "forest_pounce" and
+                               report.get("opening_bite") is not None)):
+            raise AssertionError("Wrong forest opening/Pounce receipts for policy")
+    elif pounces:
+        raise AssertionError("Nonforest cohort cannot claim Pounce receipts")
+    archer_exits = [ev for ev in ledger
+                    if ev["kind"] == "g5_terminal_exit" and
+                    ev["detail"].get("actor") == "archer"]
+    if (report.get("outcome") == "archer_withdrawal_attested" and
+            (policy != "warned_archer_exit" or len(archer_exits) != 1)):
+        raise AssertionError("Archer exit proof belongs only to its native policy")
+    if policy not in ("warned_archer_exit", "warned_party_exit") and archer_exits:
+        raise AssertionError("Unexpected source exit in non-withdrawal cohort")
+    if (report.get("outcome") == "party_withdrawal_attested" and
+            policy != "warned_party_exit"):
+        raise AssertionError("Party withdrawal belongs only to authored G7-C exits")
+    expected_method = {"reactive_shield": "shield_guard",
+                       "prepared_body": "body_take_hit"}.get(policy)
+    if any(expected_method is None or
+           ev["detail"].get("method") != expected_method
+           for ev in protections):
+        raise AssertionError("Protective receipts do not belong to requested policy")
+    if policy in ("b_front", *PROTECTIVE_POLICIES):
+        proof = report.get("protection")
+        if (not isinstance(proof, dict) or
+                proof.get("attested_protections") != len(protections)):
+            raise AssertionError("Native G7-D protective receipt accounting mismatch")
+
+
+def _reconcile_hp_snapshots(ledger, initial, final, names, expected_sources):
+    """Derive HP changes and death from G0 genesis and G4 event transitions.
+
+    Snapshot fields are not part of ledger_sha256 and cannot be used for
+    calibration until reconciled against the native event history.
+    """
+    genesis = ledger[0]["detail"].get("source_ids")
+    if not isinstance(genesis, dict) or set(genesis) != set(names):
+        raise AssertionError("Missing G0 authenticated initial roster snapshot")
+    hp, dead = {}, {}
+    for name, source_id in zip(names, expected_sources):
+        origin = genesis[name]
+        if (not isinstance(origin, dict) or
+                origin.get("source_id") != source_id or
+                not isinstance(origin.get("digest"), str) or
+                not origin["digest"] or
+                type(origin.get("hp")) is not int or origin["hp"] <= 0 or
+                not isinstance(initial.get(name), dict) or
+                not isinstance(final.get(name), dict) or
+                initial[name].get("source_digest") != origin["digest"] or
+                final[name].get("source_digest") != origin["digest"] or
+                type(initial[name].get("hp")) is not int or
+                initial[name]["hp"] != origin["hp"] or
+                initial[name].get("dead") is not False):
+            raise AssertionError("Initial native HP/death/source disagrees with G0 genesis")
+        hp[name], dead[name] = origin["hp"], False
+    for ev in ledger[1:]:
+        kind, d = ev["kind"], ev["detail"]
+        if kind in ("g4_damage_applied", "regeneration_step"):
+            name = d.get("recipient") if kind == "g4_damage_applied" else d.get("actor")
+            if (name not in hp or
+                    type(d.get("hp_before")) is not int or
+                    type(d.get("hp_after")) is not int or
+                    type(d.get("dead")) is not bool or
+                    hp[name] != d["hp_before"] or
+                    (dead[name] and (d["hp_after"] != hp[name] or not d["dead"])) or
+                    (d["dead"] and d["hp_after"] >= 0)):
+                raise AssertionError("G4 HP/death ledger transition cannot be reconciled")
+            hp[name], dead[name] = d["hp_after"], d["dead"]
+        elif kind == "g4_basic_heal_applied":
+            name, gained = d.get("recipient"), d.get("hp_restored")
+            if name not in hp or dead[name] or type(gained) is not int or gained < 0:
+                raise AssertionError("Invalid native G4 HP healing transition")
+            hp[name] += gained
+    for name in names:
+        if (type(final[name].get("hp")) is not int or
+                type(final[name].get("dead")) is not bool or
+                (final[name]["hp"], final[name]["dead"]) !=
+                (hp[name], dead[name])):
+            raise AssertionError("Final HP/death snapshot disagrees with native G4 ledger")
+    return {n: hp[n] - genesis[n]["hp"] for n in names}, dead
+
 def attest_native(report, *, level, size, seed, policy):
     """Validate a native execution rather than trusting its summary label.
 
@@ -109,6 +239,7 @@ def attest_native(report, *, level, size, seed, policy):
     from scripts.b06_g7a_native_terminal_census_v0 import canonical_digest
     if canonical_digest(ledger) != report.get("ledger_sha256"):
         raise AssertionError("Native ledger diverges from original attested hash")
+    _validate_policy_origin(report, ledger, level, size, policy)
     names = ("hunter", "vanguard", "guardian", "archer") + (
         ("scholar",) if size == 4 else ())
     expected_sources = ("B06-EN-03", "A", "B", "R") + (
@@ -117,12 +248,16 @@ def attest_native(report, *, level, size, seed, policy):
     final = report.get("final_state")
     if (not isinstance(initial, dict) or not isinstance(final, dict) or
             set(initial) != set(names) or set(final) != set(names) or
-            any(initial[n].get("source_id") != src or
+            any(not isinstance(initial[n], dict) or
+                not isinstance(final[n], dict) or
+                initial[n].get("source_id") != src or
                 final[n].get("source_id") != src or
                 not initial[n].get("source_digest") or
                 initial[n].get("source_digest") != final[n].get("source_digest")
                 for n, src in zip(names, expected_sources))):
         raise AssertionError("Native roster or source fingerprints changed")
+    hp_changes, reconstructed_death = _reconcile_hp_snapshots(
+        ledger, initial, final, names, expected_sources)
     turns = [e["detail"].get("actor") for e in ledger if e["kind"] == "turn_end"]
     round_ends = sum(e["kind"] == "round_end" for e in ledger)
     if (turns != list(names) * (len(turns) // len(names)) +
@@ -158,10 +293,9 @@ def attest_native(report, *, level, size, seed, policy):
                               if report.get("unresolved") else None),
         "ledger_sha256": report["ledger_sha256"],
         "rounds_completed": round_ends, "turns_completed": len(turns),
-        "hunter_hp_change": final["hunter"]["hp"] - initial["hunter"]["hp"],
-        "party_hp_change": sum(final[n]["hp"] - initial[n]["hp"]
-                               for n in names[1:]),
-        "hunter_genuinely_dead": bool(final["hunter"].get("dead")),
+        "hunter_hp_change": hp_changes["hunter"],
+        "party_hp_change": sum(hp_changes[n] for n in names[1:]),
+        "hunter_genuinely_dead": reconstructed_death["hunter"],
         "genuine_pounces": sum(e["kind"] == "g6_pounce_resolved" for e in ledger),
         "genuine_protections": sum(e["kind"] == "g6d_protective_bite_attested"
                                    for e in ledger),
