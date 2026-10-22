@@ -92,7 +92,7 @@ class G7BTests(unittest.TestCase):
     def test_05_bad_confirmation_or_critical_dice_precommit_no_payment(self):
         args=[
             {"face":20,"confirmation_face":21,"critical_dice":(2,3)},
-            {"face":20,"confirmation_face":1,"critical_dice":(2,3)},
+            {"face":20,"confirmation_face":1,"critical_dice":(2,)},
             {"face":20,"confirmation_face":10,"critical_dice":(0,3)},
             {"face":12,"confirmation_face":10,"critical_dice":(2,3)},
             {"face":12,"critical_dice":(1,)},
