@@ -220,9 +220,16 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
                 elif actor=="hunter":
                     v=e.actors["vanguard"]
                     if not v.dead:
-                        choice=roll(seed,round_no,actor,"bite","defense_choice",2)
-                        defense=("guard" if choice==2 and v.guard_remaining>0
-                                 else "dodge")
+                        # Dying is not dead, but G0 forbids active defenses
+                        # before it accepts/pays the Hunter's declaration.
+                        # Select the only legal static defense *before*
+                        # the native pre-roll Guard/Dodge commitment.
+                        if v.hp<=0:
+                            defense="take_hit"
+                        else:
+                            choice=roll(seed,round_no,actor,"bite","defense_choice",2)
+                            defense=("guard" if choice==2 and v.guard_remaining>0
+                                     else "dodge")
                         _melee(combat,"hunter","vanguard","B06-AT-04",
                                defense,seed,round_no)
                 elif actor in ("vanguard","guardian"):
