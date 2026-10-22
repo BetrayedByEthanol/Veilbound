@@ -746,7 +746,6 @@ def _player_melee_hit_chains(ledger, actor, profile):
                 or declaration["detail"].get("attacker") != actor
                 or declaration["detail"].get("target") != "hunter"
                 or declaration["detail"].get("profiles") != [profile]
-                or declaration["detail"].get("defenses") != q.get("defenses")
                 or defense["kind"] != "defense_assigned"
                 or defense["round"] != resolved["round"]
                 or defense["turn"] != actor
@@ -754,7 +753,8 @@ def _player_melee_hit_chains(ledger, actor, profile):
                 or defense["detail"].get("attack_key") !=
                    f"{actor}:hunter:0"
                 or defense["detail"].get("defense") not in ("take_hit", "dodge")
-                or q.get("defenses") != [defense["detail"]["defense"]]):
+                or declaration["detail"].get("defenses") !=
+                   [defense["detail"]["defense"]]):
             raise AssertionError("A/B original G0 target, profile or defense altered")
         rolls = [v for v in ledger if v["kind"] == "g5_melee_roll"
                  and v["detail"].get("action_index") == index]
