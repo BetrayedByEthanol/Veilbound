@@ -107,6 +107,84 @@ def _terminal_proof(report, ledger, *, policy, deaths):
 
 
 
+def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
+    """Bind G6-D's victory receipt to the unique paid *lethal* Bow shot.
+
+    Rehashing an edited ledger cannot make a prior nonlethal G4 packet the
+    finishing shot. Check the original G0 payment, G2 launch/shot, native G4
+    cause+event key, G6-D summary and signed G6-D terminal as ONE chain.
+    """
+    td = terminal["detail"]
+    lethal_index = td.get("lethal_damage_index")
+    if type(lethal_index) is not int or not 0 <= lethal_index < terminal["index"]:
+        raise AssertionError("G6-D terminal must identify a prior native lethal damage index")
+    lethal = ledger[lethal_index]
+    if (lethal["kind"] != "g4_damage_applied"
+            or lethal["detail"].get("recipient") != "hunter"
+            or lethal["detail"].get("dead") is not True
+            or lethal["detail"].get("hp_after", 0) >= 0
+            or lethal["turn"] != "archer"
+            or lethal["round"] != adjudication["round"]):
+        raise AssertionError("Victory terminal points at nonlethal/non-Bow Hunter damage")
+    if len([x for x in ledger if x["kind"] == "g4_damage_applied"
+            and x["detail"].get("recipient") == "hunter"
+            and x["detail"].get("dead") is True]) != 1:
+        raise AssertionError("Victory requires one unique genuine Hunter death packet")
+    d = adjudication["detail"]
+    action_index, launch_index, shot_index = (
+        d.get("action_index"), d.get("launch_index"), d.get("shot_index"))
+    if (any(type(v) is not int for v in
+            (action_index, launch_index, shot_index))
+            or not 0 <= action_index < launch_index < shot_index
+                < lethal_index < adjudication["index"] < terminal["index"]
+            or any(ledger[i]["round"] != lethal["round"]
+                   or ledger[i]["turn"] != "archer" for i in
+                   (action_index, launch_index, shot_index))
+            or adjudication["turn"] != "archer"
+            or d.get("shooter") != "archer"
+            or d.get("target") != "hunter"
+            or d.get("outcome") != "hit"):
+        raise AssertionError("G6-D Bow completion is not one current native Archer turn")
+    action, launch, shot = (ledger[action_index], ledger[launch_index],
+                            ledger[shot_index])
+    if (action["kind"] != "action_committed"
+            or action["detail"].get("actor") != "archer"
+            or action["detail"].get("action_class") != "physical"
+            or action["detail"].get("label") != "g2:bow:hunter:0"
+            or launch["kind"] != "g2_bow_launched"
+            or launch["detail"].get("shooter") != "archer"
+            or launch["detail"].get("target") != "hunter"
+            or shot["kind"] != "g2_bow_shot_resolved"
+            or shot["detail"].get("shooter") != "archer"
+            or shot["detail"].get("intended") != "hunter"
+            or shot["detail"].get("target") != "hunter"
+            or shot["detail"].get("primary_face") != d.get("attack_face")
+            or shot["detail"].get("outcome") != d.get("original_outcome")):
+        raise AssertionError("Victory Bow lacks original G0/G2 paid shot and launch")
+    declarations = [x for x in ledger[action_index+1:launch_index]
+                    if x["kind"] == "g2_bow_sequence_committed"
+                    and x["round"] == lethal["round"]
+                    and x["turn"] == "archer"]
+    if (len(declarations) != 1
+            or declarations[0]["detail"].get("shooter") != "archer"
+            or declarations[0]["detail"].get("target") != "hunter"
+            or declarations[0]["detail"].get("profiles") != ["Bow"]
+            or declarations[0]["detail"].get("defenses") != ["take_hit"]):
+        raise AssertionError("Victory Bow missing its original one-shot G2 declaration")
+    seed = ledger[0]["detail"].get("seed")
+    if (lethal["detail"].get("cause") != f"g6d:source_bow:archer:{shot_index}"
+            or lethal["detail"].get("event_key") !=
+               f"g6d:bow:{seed}:{action_index}:{shot_index}"
+            or td.get("source_event_cause") != lethal["detail"]["cause"]
+            or d.get("shot_index") != shot_index
+            or d.get("launch_index") != launch_index
+            or (d.get("damage") or {}).get("dead") is not True
+            or d["damage"].get("hp_loss") != (
+                lethal["detail"]["hp_before"] - lethal["detail"]["hp_after"])):
+        raise AssertionError("Terminal, G4 lethal packet and G6-D Bow summary diverge")
+    return lethal
+
+
 # These four border destinations are fixed by the G6-C scene constructor,
 # NOT supplied by a terminal report or an editable exit-policy event.
 G7C_BORDER_SQUARES = {
@@ -223,8 +301,130 @@ def _hunter_bite_hits(ledger, target):
     return hits
 
 
+def _replay_native_exit_geometry(ledger):
+    """Replay EVERY G7-G G1 move against a freshly sourced G6-C grid.
+
+    The movement receipts and even their recalculated SHA are input evidence,
+    not authority for positions. Derive the initial footprints, walls and
+    movement rules from the independently constructed authored source scene;
+    recheck legality, exact movement cost/shape, continuous position and
+    remaining MP before allowing any of its border exits to certify.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+
+    genesis = ledger[0]["detail"]
+    seed = genesis.get("seed")
+    origin = genesis.get("source_ids")
+    if (type(seed) is not int or seed < 0
+            or not isinstance(origin, dict) or set(origin) != set(ROSTER)
+            or type(origin["vanguard"].get("level")) is not int
+            or origin["vanguard"]["level"] not in (2, 3)):
+        raise AssertionError("G7-H withdrawal needs original source start geometry")
+    scene = mixed_scene(size=4, level=origin["vanguard"]["level"],
+                        seed=seed, party_exits=True)
+    expected = scene.e
+    grid = expected.g1
+    actual_maps = [x for x in ledger if x["kind"] == "g1_map_installed"]
+    reference_map = next(x for x in expected.ledger
+                         if x["kind"] == "g1_map_installed")
+    if (len(actual_maps) != 1
+            or actual_maps[0]["detail"] != reference_map["detail"]):
+        raise AssertionError("G7-H G1 map must be the original authored 8x7 grid")
+    for actor in ROSTER:
+        if (origin[actor].get("source_id") !=
+                expected.actors[actor].source.source_id
+                or origin[actor].get("digest") !=
+                   expected.actors[actor].source.digest
+                or origin[actor].get("occupied") !=
+                   [list(cell) for cell in expected.actors[actor].occupied]):
+            raise AssertionError("G7-H original actor footprint altered")
+    remaining = {}
+    resource_round = {}
+    exited = set()
+    for event in ledger:
+        kind, d = event["kind"], event["detail"]
+        if kind == "turn_resources":
+            actor = d.get("actor")
+            if (actor not in ROSTER or event["turn"] != actor
+                    or type(d.get("mp")) is not int
+                    or not 0 <= d["mp"] <= 12):
+                raise AssertionError("G7-H native source MP cannot be fabricated")
+            remaining[actor] = d["mp"]
+            resource_round[actor] = event["round"]
+        elif kind in ("g1_allied_transit_step", "g1_allied_transit_finished",
+                      "g1_movement_interception_resolved"):
+            # No alternate MP path or sourced allied transits in this
+            # bounded G7-G cautious scene. Do not skip unknown geometry.
+            raise AssertionError("Unreplayable movement cannot fund G7-H exit")
+        elif kind == "g1_movement_step":
+            actor = d.get("actor")
+            if (actor not in ROSTER or actor in exited
+                    or event["turn"] != actor
+                    or resource_round.get(actor) != event["round"]
+                    or actor not in remaining
+                    or d.get("cautious") is not True
+                    or d.get("crawl") is not False
+                    or d.get("reserved") is not False
+                    or d.get("opportunity_sources") != []):
+                raise AssertionError("Unsupported or unfunded G7-H G1 move")
+            source = expected.actors[actor]
+            before = [list(cell) for cell in source.occupied]
+            if d.get("old") != before:
+                raise AssertionError("G7-H G1 old coordinate breaks source movement continuity")
+            kind_step = d.get("step_kind")
+            try:
+                if kind_step in ("orthogonal", "diagonal"):
+                    direction = d.get("direction")
+                    if (not isinstance(direction, list) or len(direction) != 2
+                            or any(type(x) is not int or x not in (-1, 0, 1)
+                                   for x in direction)
+                            or direction == [0, 0]
+                            or d.get("pivot_anchor") is not None
+                            or d.get("clockwise") is not None):
+                        raise ValueError("Malformed G1 translation")
+                    destination, price, parsed_kind, allies = grid.preview(
+                        actor, delta=tuple(direction), cautious=True)
+                elif kind_step == "pivot":
+                    anchor = d.get("pivot_anchor")
+                    clockwise = d.get("clockwise")
+                    if (actor != "hunter" or anchor not in ("head", "rear")
+                            or type(clockwise) is not bool
+                            or d.get("direction") is not None):
+                        raise ValueError("Unfunded or malformed Hunter pivot")
+                    destination, price, parsed_kind, allies = grid.preview(
+                        actor, pivot=anchor, clockwise=clockwise, cautious=True)
+                else:
+                    raise ValueError("Unsupported G1 movement geometry")
+            except (ValueError, UnresolvedDecision) as error:
+                raise AssertionError("G7-H G1 source preview rejects movement") from error
+            if (allies or parsed_kind != kind_step
+                    or d.get("new") != [list(cell) for cell in destination]
+                    or type(d.get("cost")) is not int or d["cost"] != price
+                    or price > remaining[actor]
+                    or type(d.get("mp_remaining")) is not int
+                    or d["mp_remaining"] != remaining[actor] - price):
+                raise AssertionError("G7-H G1 move geometry, MP or destination altered")
+            remaining[actor] -= price
+            source.occupied = destination
+        elif kind == "g5_terminal_exit":
+            actor = d.get("actor")
+            if (actor not in ROSTER[1:] or actor in exited
+                    or event["turn"] != actor):
+                raise AssertionError("G7-H cannot move a departed or wrong actor")
+            exited.add(actor)
+        elif kind == "turn_end":
+            actor = d.get("actor")
+            if (actor not in remaining
+                    or resource_round.get(actor) != event["round"]
+                    or d.get("unused_mp") != remaining[actor]):
+                raise AssertionError("G7-H G1 MP does not reconcile at native Turn End")
+    return {actor: [list(cell) for cell in expected.actors[actor].occupied]
+            for actor in ROSTER}
+
+
 def _authored_exit_chains(ledger, terminal):
     """Validate all original G7-C G1 -> G4.5 -> G5 source-backed exits."""
+    proven_positions = _replay_native_exit_geometry(ledger)
     e0 = ledger[0]["detail"]
     maps = [x for x in ledger if x["kind"] == "g1_map_installed"]
     if len(maps) != 1:
@@ -342,6 +542,7 @@ def _source_decisions(ledger, *, policy, terminal):
                 and (x["detail"].get("damage") or {}).get("dead") is True]
         if len(bows) != 1 or bows[0]["index"] >= terminal["index"]:
             raise AssertionError("No genuinely lethal G6-D Bow adjudication")
+        _lethal_bow_terminal_chain(ledger, terminal, bows[0])
         flames = [x for x in events["g3_flame_launched"]
                   if x["detail"].get("caster") == "scholar"
                   and x["detail"].get("target") == "hunter"

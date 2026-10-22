@@ -342,6 +342,107 @@ class G7HMixedNativeTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
 
+    def test_21_codex_p1_victory_lethal_index_must_point_to_real_bow_death(self):
+        for corruption in ("nonlethal_g4", "wrong_source_cause",
+                           "wrong_action", "wrong_shot", "wrong_launch",
+                           "fabricated_summary", "wrong_event_key"):
+            with self.subTest(corruption=corruption):
+                r = self._case(POLICIES[0])
+                ledger = r["ledger"]
+                terminal = next(v for v in ledger
+                                if v["kind"] == "g6d_hunter_defeat_attested")
+                bow = next(v for v in ledger
+                           if v["kind"] == "g6d_bow_adjudicated"
+                           and (v["detail"].get("damage") or {}).get("dead"))
+                fatal = ledger[terminal["detail"]["lethal_damage_index"]]
+                if corruption == "nonlethal_g4":
+                    nonlethal = next(v for v in ledger
+                                    if v["kind"] == "g4_damage_applied"
+                                    and v["detail"].get("recipient") == "hunter"
+                                    and v["detail"].get("dead") is False)
+                    terminal["detail"]["lethal_damage_index"] = nonlethal["index"]
+                elif corruption == "wrong_source_cause":
+                    fatal["detail"]["cause"] = "g6d:source_bow:archer:0"
+                elif corruption == "wrong_action":
+                    bow["detail"]["action_index"] = 0
+                elif corruption == "wrong_shot":
+                    bow["detail"]["shot_index"] = 0
+                elif corruption == "wrong_launch":
+                    bow["detail"]["launch_index"] = 0
+                elif corruption == "fabricated_summary":
+                    bow["detail"]["damage"]["hp_loss"] += 1
+                else:
+                    fatal["detail"]["event_key"] = "fake-bow-event"
+                r["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(r, level=3, seed=17, policy=POLICIES[0])
+
+    def test_22_codex_p1_withdrawal_rejects_teleport_and_movement_cost(self):
+        for corruption in ("outside_old", "broken_previous", "changed_direction",
+                           "discounted_cost", "false_mp_remaining",
+                           "extra_destination", "wrong_step_kind"):
+            with self.subTest(corruption=corruption):
+                r = self._case(POLICIES[2])
+                ledger = r["ledger"]
+                exit_event = next(x for x in ledger if x["kind"] ==
+                                  "g5_terminal_exit"
+                                  and x["detail"].get("actor") == "guardian")
+                move = ledger[exit_event["detail"]["movement_index"]]
+                d = move["detail"]
+                if corruption == "outside_old":
+                    d["old"] = [[100, 100]]
+                elif corruption == "broken_previous":
+                    d["old"] = [[2, 2]]
+                elif corruption == "changed_direction":
+                    d["direction"] = [1, 0]
+                elif corruption == "discounted_cost":
+                    d["cost"] = 1
+                elif corruption == "false_mp_remaining":
+                    d["mp_remaining"] += 1
+                elif corruption == "extra_destination":
+                    d["new"] = [[100, 100]]
+                else:
+                    d["step_kind"] = "diagonal"
+                r["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(r, level=3, seed=17, policy=POLICIES[2])
+
+    def test_23_codex_p1_replay_all_moves_not_just_final_exit(self):
+        for corruption in ("initial_footprint", "authored_map",
+                           "midpath_position", "midpath_cost"):
+            with self.subTest(corruption=corruption):
+                r = self._case(POLICIES[2])
+                ledger = r["ledger"]
+                if corruption == "initial_footprint":
+                    ledger[0]["detail"]["source_ids"]["guardian"]["occupied"] = [[100, 100]]
+                elif corruption == "authored_map":
+                    grid = next(v for v in ledger if v["kind"] == "g1_map_installed")
+                    grid["detail"]["width"] = 100
+                else:
+                    intermediate = next(v for v in ledger
+                                        if v["kind"] == "g1_movement_step"
+                                        and v["round"] == 1
+                                        and v["detail"].get("actor") == "guardian")
+                    if corruption == "midpath_position":
+                        intermediate["detail"]["old"] = [[100, 100]]
+                    else:
+                        intermediate["detail"]["cost"] = 1
+                r["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(r, level=3, seed=17, policy=POLICIES[2])
+
+    def test_24_legitimate_P4_exits_replay_across_L2_and_L3(self):
+        for level in (2, 3):
+            with self.subTest(level=level):
+                r = run_pack(level, 17, include_trials=True)
+                trial = r["native_trials"][POLICIES[2]]
+                result = attest_trial(trial, level=level, seed=17,
+                                      policy=POLICIES[2])
+                self.assertEqual(result["outcome"], "party_withdrawal_attested")
+                self.assertEqual(result["source_decisions"]["native_exit_receipts"], 4)
+
+
+
 
 if __name__ == "__main__":
     unittest.main()
