@@ -881,5 +881,109 @@ class G7HMixedNativeTests(unittest.TestCase):
                         attest_trial(trial,level=3,seed=17,policy=policy)
 
 
+    def test_44_codex_p1_spell_AP_uses_real_turn_resource_receipt(self):
+        # Rehashed spell chains cannot spend 20/30 AP from a source turn
+        # whose Step-4 available AP was forged down to zero.
+        for actor,label in (("archer", "g3:guided:maintained"),
+                            ("scholar", "g3:thrown_flame:T1")):
+            exemplar = self._case(POLICIES[0])
+            actions = [x for x in exemplar["ledger"]
+                       if x["kind"] == "action_committed"
+                       and x["detail"].get("actor") == actor
+                       and x["detail"].get("label") == label]
+            self.assertEqual(len(actions), 1 if actor == "archer" else 2)
+            for chosen in range(len(actions)):
+                for mutate in ("zero_resources", "wrong_remainder",
+                               "forged_surplus_with_matching_remainder"):
+                    with self.subTest(actor=actor, turn=chosen, mutate=mutate):
+                        trial = self._case(POLICIES[0])
+                        ledger = trial["ledger"]
+                        action = [x for x in ledger
+                                  if x["kind"] == "action_committed"
+                                  and x["detail"].get("actor") == actor
+                                  and x["detail"].get("label") == label][chosen]
+                        resources = next(x for x in ledger
+                                         if x["kind"] == "turn_resources"
+                                         and x["round"] == action["round"]
+                                         and x["turn"] == actor)
+                        if mutate == "zero_resources":
+                            resources["detail"]["ap"] = 0
+                        elif mutate == "wrong_remainder":
+                            action["detail"]["ap_remaining"] = 0
+                        else:
+                            resources["detail"]["ap"] += 20
+                            action["detail"]["ap_remaining"] += 20
+                        trial["ledger_sha256"] = canonical_digest(ledger)
+                        with self.assertRaises(AssertionError):
+                            attest_trial(trial, level=3, seed=17,
+                                         policy=POLICIES[0])
+
+    def test_45_codex_p1_genesis_source_digest_must_match_fixture(self):
+        # Mirroring a fake digest into both snapshots and mutable source
+        # receipts does NOT recreate the authored creature/party fixtures.
+        for actor in ("hunter", "vanguard", "guardian", "archer", "scholar"):
+            with self.subTest(actor=actor):
+                trial = self._case(POLICIES[0])
+                forged = "a" * 64
+                trial["ledger"][0]["detail"]["source_ids"][actor]["digest"] = forged
+                trial["initial_state"][actor]["source_digest"] = forged
+                trial["final_state"][actor]["source_digest"] = forged
+                for entry in trial["ledger"]:
+                    detail = entry["detail"]
+                    if entry["kind"] == "g45_attested_hit":
+                        if detail.get("attacker") == actor:
+                            detail["attacker_source"] = forged
+                        if detail.get("target") == actor:
+                            detail["target_source"] = forged
+                    if entry["kind"] == "g5_melee_sequence_attested" and (
+                            detail.get("attacker") == actor):
+                        detail["source_digest"] = forged
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17,
+                                 policy=POLICIES[0])
+
+    def test_46_codex_p1_AB_packets_must_match_weapon_source_and_G4(self):
+        # Keep reported HP delta unchanged, corrupt raw and mitigated
+        # together, and recompute the only hash. The packet is impossible.
+        for actor, profile in (("vanguard", "B06-PC-A-SWORD"),
+                               ("guardian", "B06-PC-B-MACE")):
+            for mutation in ("raw_and_mitigated_999", "damage_type",
+                             "armor_rule", "extra_packet",
+                             "cached_hp_packets"):
+                with self.subTest(actor=actor, mutation=mutation):
+                    trial = self._case(POLICIES[0])
+                    ledger = trial["ledger"]
+                    packet = next(v for v in ledger
+                                  if v["kind"] == "g4_damage_applied"
+                                  and v["detail"].get("cause") ==
+                                      f"source-profile:{profile}")
+                    detail = packet["detail"]
+                    if mutation == "raw_and_mitigated_999":
+                        detail["packets"][0]["raw"] = 999
+                        detail["packets"][0]["mitigated"] = 999
+                    elif mutation == "damage_type":
+                        detail["packets"][0]["type"] = "Fire"
+                    elif mutation == "armor_rule":
+                        detail["packets"][0]["armor_rule"] = "none"
+                    elif mutation == "extra_packet":
+                        detail["packets"].append(dict(detail["packets"][0]))
+                    else:
+                        bridge = next(v for v in ledger
+                                      if v["kind"] == "g45_attested_hit"
+                                      and v["detail"].get("attacker") == actor
+                                      and v["detail"].get("profile") == profile)
+                        bridge["detail"]["actual_result"]["hp_packets"] = [999]
+                        resolved = next(v for v in ledger
+                                        if v["kind"] == "g5_melee_resolved"
+                                        and v["detail"].get("attacker") == actor
+                                        and v["detail"].get("profile") == profile)
+                        resolved["detail"]["damage"]["hp_packets"] = [999]
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17,
+                                     policy=POLICIES[0])
+
+
 if __name__ == "__main__":
     unittest.main()

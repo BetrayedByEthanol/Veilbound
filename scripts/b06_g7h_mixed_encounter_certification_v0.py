@@ -64,6 +64,16 @@ def _paid_action_ap(ledger, action, *, actor, cost, kind, label):
     if len(resources) != 1 or type(resources[0]["detail"].get("ap")) is not int:
         raise AssertionError("Source AP payment missing genuine own-turn resources")
     start = resources[0]
+    # This authored pack never grants extra Turn AP from equipment, spells
+    # or Blink. The turn's initial allowance is the canonical source sheet,
+    # not an editable turn_resources amount that can fund forged actions.
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+    genesis = ledger[0]["detail"]
+    level = genesis["source_ids"]["vanguard"]["level"]
+    expected = mixed_scene(size=4, level=level, seed=genesis["seed"])
+    if (start["detail"]["ap"] != expected.e.actors[actor].ap_total
+            or start["detail"]["ap"] <= 0):
+        raise AssertionError("Paid G7-H action lacks source-authored Turn AP")
     earlier = [v for v in ledger[start["index"]+1:action["index"]]
                if v["kind"] == "action_committed" and v["turn"] == actor
                and v["round"] == action["round"]]
@@ -176,6 +186,22 @@ def _origin(report, ledger, *, policy, level, seed):
                                  "turn_resources", "g1_movement_step")
                    for ev in ledger[:v["index"]])):
         raise AssertionError("G7-H policy not native-bound before first decision")
+    # Reconstruct every fixture independently of the attacker/target,
+    # mutable genesis digests, snapshot strings and G4.5 target_source.
+    # Merely making those ledger entries agree is not authentication.
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+    source_scene = mixed_scene(
+        size=4, level=level, seed=seed,
+        party_exits=(policy == "opposed_living_hunter_withdrawal"))
+    source_genesis = source_scene.e.ledger[0]["detail"]["source_ids"]
+    original_sources = genesis["detail"].get("source_ids")
+    if (not isinstance(original_sources, dict)
+            or set(original_sources) != set(ROSTER)
+            or original_sources != source_genesis
+            or any(original_sources[actor].get("digest") !=
+                   source_scene.e.actors[actor].source.digest
+                   for actor in ROSTER)):
+        raise AssertionError("G7-H original source digests diverge from authored fixtures")
     return scene
 
 
@@ -214,6 +240,8 @@ def _spell_payment_chain(ledger, event, *, actor, label, ap, vp_mode, vp_points)
                    and v["index"] != payment["index"]
                    for v in ledger[action["index"]+1:event["index"]])):
         raise AssertionError("G3 spell must consume its exact ordered AP/VP chain")
+    _paid_action_ap(ledger, action, actor=actor, cost=ap,
+                    kind="projection", label=label)
     return action, payment
 
 
@@ -838,6 +866,7 @@ def _player_melee_hit_chains(ledger, actor, profile):
     the original physical action index and actual own-turn chronology.
     """
     from scripts.b06_hunter_party_exchanges_v0 import BUILD
+    from scripts.b06_hunter_mixed_party_g6c_v0 import POLICY, mixed_scene
 
     role = {"vanguard": "A", "guardian": "B"}.get(actor)
     expected_profile = {"A": "B06-PC-A-SWORD", "B": "B06-PC-B-MACE"}.get(role)
@@ -859,6 +888,13 @@ def _player_melee_hit_chains(ledger, actor, profile):
                   and v["detail"].get("outcome") == "hit"]
     if not candidates:
         raise AssertionError("A/B martial contribution needs a genuine hit")
+    # Native G4 is the sole packet/mitigation authority. Load the original
+    # source fixtures and derive each authored dice roll through G4 rather
+    # than trusting G4 event raw/mitigated fields or a cached HP delta.
+    authored = mixed_scene(
+        size=4, level=sources["vanguard"]["level"], seed=seed)
+    g4 = authored.e.g4
+    hunter = authored.e.actors["hunter"]
     proven = []
     used_actions = set()
     for resolved in candidates:
@@ -999,6 +1035,23 @@ def _player_melee_hit_chains(ledger, actor, profile):
         if (rd.get("critical") != critical or d.get("critical") != critical
                 or bd.get("critical") != critical):
             raise AssertionError("A/B critical tier cannot be relabeled")
+        # G7-H certifies only G6-C's fixed two-round physical witness,
+        # never an unsourced damage d6 inferred from the reported HP loss.
+        faces = POLICY.get(resolved["round"], {}).get(actor)
+        if (not isinstance(faces, tuple) or len(faces) != 2
+                or face != faces[0]
+                or type(faces[1]) is not int or critical != "normal"):
+            raise AssertionError("A/B authored melee face or damage die is invalid")
+        _, profile_packet, packets = g4._profile_hit_packets(
+            actor, "hunter", profile, die_face=faces[1],
+            critical=critical, critical_dice=())
+        if (len(packets) != 1 or packets[0].resource != "hp"
+                or packets[0].armor_rule != "weapon"
+                or packets[0].damage_type !=
+                   profile_packet["damage_type"]):
+            raise AssertionError("A/B fixture must produce one source weapon packet")
+        source_raw = packets[0].raw
+        source_mitigated = g4._mitigate_hp(hunter, packets[0])
         damage_events = [v for v in ledger
                          if v["kind"] == "g4_damage_applied"
                          and roll["index"] < v["index"] < bridge["index"]
@@ -1024,10 +1077,14 @@ def _player_melee_hit_chains(ledger, actor, profile):
                     dmg["detail"].get("hp_before") -
                     dmg["detail"].get("hp_after"))
                 or actual.get("dead") is not dmg["detail"].get("dead")
-                or not isinstance(dmg["detail"].get("packets"), list)
-                or not dmg["detail"]["packets"]
-                or dmg["detail"]["packets"][0].get("resource") != "hp"):
+                or actual.get("vigor_loss") != 0
+                or actual.get("hp_packets") != [source_mitigated]
+                or actual.get("injection_eligible") is not False):
             raise AssertionError("A/B paid G4 damage not in attested hit chain")
+        _hp_damage_packet(
+            ledger, dmg, target="hunter", raw=source_raw,
+            mitigated=source_mitigated, cause=f"source-profile:{profile}",
+            damage_type=packets[0].damage_type, armor_rule="weapon")
         proven.append({"action": index, "roll": roll["index"],
                        "damage": dmg["index"], "bridge": bridge["index"],
                        "resolved": resolved["index"]})
