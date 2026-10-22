@@ -8,6 +8,10 @@ The documentation tree separates **design history** from **current game truth**.
 - `rules/` — canonical core rules organized for fast lookup.
 - `world/` — canonical lore and world reference.
 
+## Current development plan and MVP acceptance
+
+The active [development roadmap, milestone register and level 1–3 MVP checklist](design/veilbound-roadmap-and-mvp-readiness.md) is the authoritative **planning/status document** through merged B06 G7-F. It distinguishes delivered native rule/test infrastructure from full Archetype × Focus and encounter acceptance; its future work packages are proposals, not canonical game rules. Historical audits remain in [design records](design/README.md).
+
 ## Rules organization target
 
 The initial target structure is:

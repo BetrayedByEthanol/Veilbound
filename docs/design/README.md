@@ -13,6 +13,10 @@ Suggested subareas:
 The current Core Rules Audit should eventually live here as a tracked design/backlog document. Resolved items should be reflected in `docs/rules/` or `content/`.
 
 
+## Current roadmap and MVP acceptance
+
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint after merged B06 G7-F (PR #122). The document owns the **current** 17-area progress table, B01–B07 blockers, six unchanged MVP exit gates and the proposed next milestone sequence. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+
 ## Active design records
 
 - [B06 G7-F — Representative Encounter Calibration v0 (source-native pilot)](b06-g7f-representative-encounter-calibration-v0.md) — 31 reproducible L2/L3 × P3/P4 source-native tactical cohorts, 10 explicitly paired descriptive contrasts, real G0 ledger/terminal audit, complete censored denominators. Representative human/GM calibration, complete party pack, win-rate and Hunter CR remain uncertified.
