@@ -30,6 +30,116 @@ ROSTER = ("hunter", "vanguard", "guardian", "archer", "scholar")
 SOURCES = ("B06-EN-03", "A", "B", "R", "F")
 
 
+
+# Authored G7-H input dice, independent of editable trial/roll summaries.
+# G6-D run_i3_defeat's finishing R shot uses 20/20, (4, 4), damage d4=4.
+# G7-G _bite uses 20/20, (4, 4), damage d6=6 for defeat; 12,
+# no confirmation or critical dice, damage d6=1 for withdrawal.
+# G6-C's round-two Hunter attack is face=10, damage d6=1.
+BOW_FINISH_DICE = (20, 20, (4, 4), 4)
+BITE_AUTHORED_DICE = {
+    "mixed_victory_rite": (10, None, (), 1),
+    "hunter_multitarget_defeat": (20, 20, (4, 4), 6),
+    "opposed_living_hunter_withdrawal": (12, None, (), 1),
+}
+BITE_TARGET_ARMOR = {
+    "vanguard": 3, "guardian": 5, "archer": 3, "scholar": 3,
+}
+
+
+def _paid_action_ap(ledger, action, *, actor, cost, kind, label):
+    """Reconcile native current-turn AP from Step 4 through the payment."""
+    d = action["detail"]
+    if (action["kind"] != "action_committed"
+            or action["turn"] != actor or action["round"] < 1
+            or d.get("actor") != actor or d.get("action_class") != kind
+            or d.get("label") != label
+            or type(d.get("ap_spent")) is not int or d["ap_spent"] != cost
+            or type(d.get("ap_remaining")) is not int):
+        raise AssertionError("Source action's exact AP debit is invalid")
+    resources = [v for v in ledger[:action["index"]]
+                 if v["kind"] == "turn_resources"
+                 and v["round"] == action["round"] and v["turn"] == actor
+                 and v["detail"].get("actor") == actor]
+    if len(resources) != 1 or type(resources[0]["detail"].get("ap")) is not int:
+        raise AssertionError("Source AP payment missing genuine own-turn resources")
+    start = resources[0]
+    earlier = [v for v in ledger[start["index"]+1:action["index"]]
+               if v["kind"] == "action_committed" and v["turn"] == actor
+               and v["round"] == action["round"]]
+    if any(type(v["detail"].get("ap_spent")) is not int
+           or v["detail"]["ap_spent"] <= 0 for v in earlier):
+        raise AssertionError("Unfunded earlier source action")
+    remaining = start["detail"]["ap"] - sum(
+        v["detail"]["ap_spent"] for v in earlier) - cost
+    if remaining < 0 or d["ap_remaining"] != remaining:
+        raise AssertionError("Native AP remainder does not follow paid actions")
+    return remaining
+
+
+def _native_round_turn_chronology(ledger):
+    """Replay every authoritative G0 Round Begin/End and Initiative boundary."""
+    current_round, slot, active, completed = 0, 0, None, 0
+    for event in ledger:
+        kind, round_no, turn, detail = (
+            event["kind"], event["round"], event["turn"], event["detail"])
+        if kind == "round_begin":
+            if (active is not None or slot != 0 or current_round != completed
+                    or round_no != completed + 1 or turn is not None
+                    or detail.get("refreshed") != list(ROSTER)):
+                raise AssertionError("G0 Round Begin out of chronological order")
+            current_round = round_no
+        elif kind == "turn_start_expiry":
+            if (current_round == 0 or active is not None
+                    or slot >= len(ROSTER) or round_no != current_round
+                    or turn != ROSTER[slot]
+                    or detail.get("actor") != ROSTER[slot]):
+                raise AssertionError("Native Initiative turn opened for wrong actor")
+            active = turn
+        elif kind == "turn_end":
+            if (active != turn or round_no != current_round
+                    or detail.get("actor") != ROSTER[slot]
+                    or turn != ROSTER[slot]):
+                raise AssertionError("Native Initiative turn ended out of order")
+            active = None
+            slot += 1
+        elif kind == "round_end":
+            if (active is not None or slot != len(ROSTER)
+                    or round_no != current_round or turn is not None
+                    or current_round != completed + 1):
+                raise AssertionError("Native Round End does not close five paid turns")
+            completed += 1
+            slot = 0
+        elif event["index"] == 0:
+            if kind != "encounter_created" or round_no != 0 or turn is not None:
+                raise AssertionError("Native genesis is not round zero")
+        elif (round_no != current_round or turn != active):
+            raise AssertionError("G0 non-boundary event is outside its actual turn/round")
+    if active is not None or completed < 1 or slot != 0 or current_round != completed:
+        raise AssertionError("G0 certified trace ended with open native turn or round")
+    return completed
+
+
+def _hp_damage_packet(ledger, damage, *, target, raw, mitigated,
+                      cause, damage_type, armor_rule):
+    """Recompute typed native G4 HP loss, including lethal floor clipping."""
+    d = damage["detail"]
+    genesis = ledger[0]["detail"]["source_ids"]
+    hpmax = genesis[target]["hp"]
+    packet = {"resource": "hp", "type": damage_type, "raw": raw,
+              "mitigated": mitigated, "armor_rule": armor_rule}
+    if (damage["kind"] != "g4_damage_applied"
+            or d.get("recipient") != target or d.get("cause") != cause
+            or d.get("packets") != [packet]
+            or type(hpmax) is not int or hpmax <= 0
+            or type(d.get("hp_before")) is not int
+            or type(d.get("hp_after")) is not int
+            or d["hp_after"] != max(-hpmax, d["hp_before"] - mitigated)
+            or d.get("vigor_after") != d.get("vigor_before")
+            or d.get("vigor_details") != []):
+        raise AssertionError("G4 typed damage packet cannot follow source damage dice")
+    return d["hp_before"] - d["hp_after"]
+
 def _origin(report, ledger, *, policy, level, seed):
     """Bind identity and tactical policy to the *native G0 ledger*."""
     genesis = ledger[0]
@@ -222,6 +332,8 @@ def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
         raise AssertionError("G6-D Bow completion is not one current native Archer turn")
     action, launch, shot = (ledger[action_index], ledger[launch_index],
                             ledger[shot_index])
+    _paid_action_ap(ledger, action, actor="archer", cost=20,
+                    kind="physical", label="g2:bow:hunter:0")
     if (action["kind"] != "action_committed"
             or action["detail"].get("actor") != "archer"
             or action["detail"].get("action_class") != "physical"
@@ -270,6 +382,13 @@ def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
         if confirmation is not None or face + 4 <= defense:
             raise AssertionError("Ordinary Bow must actually beat ranged defense")
         tier, delivery = "normal", "intended_hit_pending_G5"
+    # G7-H is one preauthored *fixed-dice* witness, not a generic Bow
+    # damage referee. Bind its original 20/20 + two d4 + d4 faces to the
+    # typed G4 event; a rewritten ordinary d20 cannot retain a 14 HP hit.
+    authored_face, authored_confirm, extras, damage_die = BOW_FINISH_DICE
+    if (face != authored_face or confirmation != authored_confirm
+            or tier != "devastating"):
+        raise AssertionError("G7-H Bow finishing dice differ from source-authored shot")
     if (shot_d.get("outcome") != delivery
             or d.get("original_outcome") != delivery
             or d.get("critical") != tier
@@ -288,6 +407,20 @@ def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
             or declarations[0]["detail"].get("defenses") != ["take_hit"]):
         raise AssertionError("Victory Bow missing its original one-shot G2 declaration")
     seed = ledger[0]["detail"].get("seed")
+    raw = 2 + damage_die + sum(extras)
+    # Hunter natural hide Armor 3 is exactly bypassed by Bow Penetration 3.
+    hp_loss = _hp_damage_packet(
+        ledger, lethal, target="hunter", raw=raw, mitigated=raw,
+        cause=f"g6d:source_bow:archer:{shot_index}",
+        damage_type="Piercing", armor_rule="weapon")
+    source_result = d.get("damage")
+    if (not isinstance(source_result, dict)
+            or source_result.get("hp_packets") != [raw]
+            or source_result.get("hp_loss") != hp_loss
+            or source_result.get("vigor_loss") != 0
+            or source_result.get("dead") is not True
+            or source_result.get("wound") != lethal["detail"].get("wound")):
+        raise AssertionError("G6-D lethal Bow result cannot follow its d4 damage dice")
     if (lethal["detail"].get("cause") != f"g6d:source_bow:archer:{shot_index}"
             or lethal["detail"].get("event_key") !=
                f"g6d:bow:{seed}:{action_index}:{shot_index}"
@@ -309,13 +442,15 @@ G7C_BORDER_SQUARES = {
 }
 
 
-def _hunter_bite_hits(ledger, target):
+def _hunter_bite_hits(ledger, target, *, policy):
     """Reconstruct each *resolved* Hunter Bite from its source-paid G0 chain.
 
     A cancelled paid slot is NOT a hit, even if an earlier G4 packet and a
     G7-C terminal are left in a tampered ledger. All five stages are bound
     to the same paid action, target, source profile and native actor turn.
     """
+    if policy not in BITE_AUTHORED_DICE:
+        raise AssertionError("Only source-authored G7-H Bite policies are certified")
     hits = []
     seed = ledger[0]["detail"].get("seed")
     for resolved in ledger:
@@ -441,6 +576,16 @@ def _hunter_bite_hits(ledger, target):
             if confirm is not None:
                 raise AssertionError("Ordinary Hunter Bite cannot confirm critical")
             expected_critical = "normal"
+        authored_face, authored_confirmation, authored_extras, authored_damage = (
+            BITE_AUTHORED_DICE[policy])
+        if (policy == "mixed_victory_rite" and resolved["round"] != 2
+                or face != authored_face or confirm != authored_confirmation
+                or len(authored_extras) !=
+                    {"normal": 0, "strong": 1,
+                     "critical": 2, "devastating": 2}[expected_critical]):
+            raise AssertionError("Hunter Bite differs from fixed source-authored damage dice")
+        _paid_action_ap(ledger, action, actor="hunter", cost=24,
+                        kind="physical", label=f"sequence:B06-AT-04:{position}")
         if (rd.get("critical") != expected_critical
                 or d.get("critical") != expected_critical):
             raise AssertionError("Hunter Bite critical tier is not source-derived")
@@ -453,6 +598,27 @@ def _hunter_bite_hits(ledger, target):
             raise AssertionError("Hunter Bite has no single synchronous G4 packet")
         damage = damages[0]
         result = bridge["detail"]["actual_result"]
+        source_raw = 3 + authored_damage + sum(authored_extras)
+        mitigation = max(0, BITE_TARGET_ARMOR[target] - 1)
+        source_mitigated = max(0, source_raw - mitigation)
+        loss = _hp_damage_packet(
+            ledger, damage, target=target,
+            raw=source_raw, mitigated=source_mitigated,
+            cause="source-profile:B06-AT-04",
+            damage_type="Piercing", armor_rule="weapon")
+        profiles = [x for x in ledger[damage["index"]+1:bridge["index"]]
+                    if x["kind"] == "g4_profile_hit"
+                    and x["detail"].get("attacker") == "hunter"
+                    and x["detail"].get("target") == target
+                    and x["detail"].get("profile") == "B06-AT-04"]
+        if (len(profiles) != 1 or
+                profiles[0]["detail"].get("critical") != expected_critical
+                or profiles[0]["round"] != resolved["round"]
+                or profiles[0]["turn"] != "hunter"
+                or result.get("hp_packets") != [source_mitigated]
+                or result.get("hp_loss") != loss or
+                result.get("vigor_loss") != 0):
+            raise AssertionError("Native G4 Bite packet and profile result not source-derived")
         if (damage["round"] != resolved["round"] or damage["turn"] != "hunter"
                 or result.get("dead") is not damage["detail"].get("dead")
                 or result.get("hp_loss") != (
@@ -910,6 +1076,55 @@ def _flame_hit_from_defense(flame):
 
 
 
+def _flame_delivery_packet(ledger, flame):
+    """Bind source Thrown Flame's Fire and Direct Vigor to its one native G4."""
+    d = flame["detail"]
+    pending = d.get("packets_pending_g4")
+    if not isinstance(pending, dict) or set(pending) != {"fire_hp", "vigor"}:
+        raise AssertionError("Source Flame must declare two typed G3 packets")
+    hp_raw, vigor_raw = pending["fire_hp"], pending["vigor"]
+    key = f"g3-flame-ledger:{flame['index']}"
+    hits = [x for x in ledger
+            if x["kind"] == "g4_damage_applied"
+            and x["detail"].get("event_key") == key]
+    if len(hits) != 1:
+        raise AssertionError("One Thrown Flame must have exactly one G4 delivery")
+    hit = hits[0]
+    record = hit["detail"]
+    expected = [
+        {"resource": "hp", "type": "Fire", "raw": hp_raw,
+         "mitigated": hp_raw, "armor_rule": "none"},
+        {"resource": "vigor", "type": "Direct Vigor", "raw": vigor_raw,
+         "mitigated": vigor_raw, "armor_rule": "none"},
+    ]
+    if (hit["index"] <= flame["index"]
+            or hit["round"] != flame["round"]
+            or hit["turn"] != "scholar"
+            or record.get("recipient") != "hunter"
+            or record.get("cause") != "g3:thrown_flame"
+            or record.get("packets") != expected
+            or type(record.get("hp_before")) is not int
+            or type(record.get("hp_after")) is not int
+            or record["hp_after"] != max(
+                -ledger[0]["detail"]["source_ids"]["hunter"]["hp"],
+                record["hp_before"] - hp_raw)
+            or type(record.get("vigor_before")) is not int
+            or type(record.get("vigor_after")) is not int
+            or record["vigor_before"] < vigor_raw
+            or record["vigor_after"] != record["vigor_before"] - vigor_raw
+            or record.get("vigor_details") != [
+                {"raw": vigor_raw, "available": vigor_raw,
+                 "prevented": 0, "applied": vigor_raw}]):
+        raise AssertionError("Flame G4 packet/cause/HP/Vigor do not match source dice")
+    # No later action or turn transition can intervene before a synchronous
+    # native G3 -> G4 Fire launch; only G4's wound bookkeeping may precede it.
+    if any(v["kind"] in ("turn_end", "turn_start_expiry",
+                          "action_committed", "g3_flame_launched")
+           for v in ledger[flame["index"]+1:hit["index"]]):
+        raise AssertionError("Flame damage was not synchronous with its original G3")
+    return hit
+
+
 def _source_decisions(ledger, *, policy, terminal):
     events = {}
     for kind in ("g5_melee_resolved", "g6d_bow_adjudicated",
@@ -926,10 +1141,11 @@ def _source_decisions(ledger, *, policy, terminal):
         # Hunter has real Bite; A/B have paid G5 attacks; R has a Chosen
         # (VP-committed) Rite and lethal authenticated G2/G6-D Bow; F
         # launches independently paid G3 Fire through G4 damage.
-        if not any(e["detail"].get("attacker") == "hunter"
-                   and e["detail"].get("profile") == "B06-AT-04"
-                   for e in melee):
-            raise AssertionError("Source Hunter had no genuine physical attack")
+        actual_hunter_hits = _hunter_bite_hits(
+            ledger, "vanguard", policy="mixed_victory_rite")
+        if (len(actual_hunter_hits) != 1
+                or actual_hunter_hits[0]["resolved"]["round"] != 2):
+            raise AssertionError("Victory Hunter must land one actual paid Round-2 Bite")
         for who, attack in (("vanguard", "B06-PC-A-SWORD"),
                             ("guardian", "B06-PC-B-MACE")):
             _player_melee_hit_chains(ledger, who, attack)
@@ -973,11 +1189,9 @@ def _source_decisions(ledger, *, policy, terminal):
                 ledger, flame, actor="scholar",
                 label="g3:thrown_flame:T1", ap=20,
                 vp_mode="spent", vp_points=2)
-        if not all(any(
-                d["detail"].get("event_key") == f"g3-flame-ledger:{flame['index']}"
-                and d["detail"].get("recipient") == "hunter"
-                for d in events["g4_damage_applied"]) for flame in flames):
-            raise AssertionError("F did not deliver two genuine paid Fire packets")
+        deliveries = [_flame_delivery_packet(ledger, flame) for flame in flames]
+        if len({hit["index"] for hit in deliveries}) != 2:
+            raise AssertionError("Two source Flames cannot reuse one G4 delivery")
     elif policy == "hunter_multitarget_defeat":
         items = events["g7g_multitarget_defeat_verified"]
         if (len(items) != 1 or items[0]["index"] <= terminal["index"]
@@ -999,7 +1213,8 @@ def _source_decisions(ledger, *, policy, terminal):
             if len(deaths) != 1:
                 raise AssertionError("Every source PC needs one actual lethal Bite")
             death = deaths[0]
-            hits = [hit for hit in _hunter_bite_hits(ledger, victim)
+            hits = [hit for hit in _hunter_bite_hits(
+                    ledger, victim, policy="hunter_multitarget_defeat")
                     if hit["damage"]["index"] == death["index"]
                     and hit["bridge"]["detail"]["actual_result"].get("dead") is True
                     and hit["resolved"]["detail"]["damage"].get("dead") is True]
@@ -1038,7 +1253,8 @@ def _source_decisions(ledger, *, policy, terminal):
                     or type(step["detail"].get("cost")) is not int
                     or step["detail"]["cost"] <= 0):
                 raise AssertionError("Hunter pursuit requires source-paid Round-2 G1 MP")
-        bite_hits = _hunter_bite_hits(ledger, "vanguard")
+        bite_hits = _hunter_bite_hits(
+            ledger, "vanguard", policy="opposed_living_hunter_withdrawal")
         if (len(bite_hits) != 2 or
                 [h["resolved"]["round"] for h in bite_hits] != [1, 2]
                 or bite_hits[0]["resolved"]["index"] >= pursuit["index"]
@@ -1085,6 +1301,7 @@ def attest_trial(report, *, level, seed, policy):
         raise AssertionError("Original sequential G0 event indices required")
     if canonical_digest(ledger) != report.get("ledger_sha256"):
         raise AssertionError("G7-H source report and original ledger hash disagree")
+    completed_rounds = _native_round_turn_chronology(ledger)
     _origin(report, ledger, policy=policy, level=level, seed=seed)
     turns = [v["detail"].get("actor") for v in ledger if v["kind"] == "turn_end"]
     ends = [v for v in ledger if v["kind"] == "round_end"]
@@ -1095,6 +1312,7 @@ def attest_trial(report, *, level, seed, policy):
                        "g5_melee_sequence_attested", "g1_movement_step")
         and ev["index"] > last_round_end for ev in ledger)
     if (not ends or turns != list(ROSTER) * len(ends)
+            or len(ends) != completed_rounds
             or open_native
             or report.get("turns_completed") != len(turns)
             or report.get("rounds_completed") != len(ends)
