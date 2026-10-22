@@ -1306,5 +1306,110 @@ class G7HMixedNativeTests(unittest.TestCase):
                     "hunter_defeat_attested")
 
 
+    def test_58_codex_p1_every_hunter_bite_requires_original_declared_defense(self):
+        for policy in POLICIES:
+            native = self._case(policy)
+            bites = [v for v in native["ledger"]
+                     if v["kind"] == "g5_melee_resolved"
+                     and v["detail"].get("attacker") == "hunter"
+                     and v["detail"].get("profile") == "B06-AT-04"
+                     and v["detail"].get("outcome") == "hit"]
+            self.assertTrue(bites)
+            for bite in bites:
+                for variant in ("declaration_defense", "assigned_attack_key"):
+                    with self.subTest(policy=policy, action=bite["detail"]["action_index"],
+                                      variant=variant):
+                        trial = deepcopy(native)
+                        ledger = trial["ledger"]
+                        paid = bite["detail"]["action_index"]
+                        native_seq = next(
+                            v for v in ledger
+                            if v["kind"] == "g5_melee_sequence_attested"
+                            and paid in v["detail"].get("action_indices", ()))
+                        position = native_seq["detail"]["action_indices"].index(paid)
+                        declaration = ledger[
+                            native_seq["detail"]["declaration_index"]]
+                        assigned = ledger[
+                            native_seq["detail"]["defense_indices"][position]]
+                        self.assertEqual(
+                            declaration["detail"]["defenses"][position], "take_hit")
+                        self.assertEqual(
+                            assigned["detail"]["attack_key"],
+                            f"hunter:{bite['detail']['target']}:{position}")
+                        if variant == "declaration_defense":
+                            declaration["detail"]["defenses"][position] = "guard"
+                        else:
+                            assigned["detail"]["attack_key"] = "hunter:forged:0"
+                        trial["ledger_sha256"] = canonical_digest(ledger)
+                        with self.assertRaisesRegex(
+                                AssertionError, "Native Hunter Bite defense was altered"):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_59_codex_p2_victory_must_be_signed_after_last_round_end(self):
+        trial = self._case(POLICIES[0])
+        ledger = trial["ledger"]
+        last_round = max(v["index"] for v in ledger
+                         if v["kind"] == "round_end")
+        terminal = next(v for v in ledger
+                        if v["kind"] == "g6d_hunter_defeat_attested")
+        self.assertGreater(terminal["index"], last_round)
+        ledger.pop(terminal["index"])
+        ledger.insert(last_round, terminal)
+        for index, event in enumerate(ledger):
+            event["index"] = index
+        trial["native_terminal"]["terminal_event"] = terminal["index"]
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaisesRegex(
+                AssertionError, "G6-D victory terminal is not the complete canonical"):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_60_codex_p2_wipe_receipt_reconstructs_every_native_field(self):
+        policy = POLICIES[1]
+        original = self._case(policy)
+        proof = next(v for v in original["ledger"]
+                     if v["kind"] == "g7g_multitarget_defeat_verified")
+        self.assertEqual(proof["detail"]["party"],
+                         ["vanguard", "guardian", "archer", "scholar"])
+        self.assertEqual(proof["detail"]["distinct_targets"],
+                         ["vanguard", "guardian", "archer", "scholar"])
+        self.assertTrue(proof["detail"]["hunter_alive"])
+        for field, fake in (
+                ("party", []),
+                ("distinct_targets", []),
+                ("lethal_damage_indices", []),
+                ("hunter_alive", False)):
+            with self.subTest(field=field):
+                trial = deepcopy(original)
+                receipt = next(v for v in trial["ledger"]
+                               if v["kind"] == "g7g_multitarget_defeat_verified")
+                receipt["detail"][field] = fake
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaisesRegex(
+                        AssertionError, "G7-G full defeat verification"):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_61_codex_p2_wipe_targets_cannot_be_rewritten_with_receipt(self):
+        policy = POLICIES[1]
+        trial = self._case(policy)
+        ledger = trial["ledger"]
+        chosen = next(v for v in ledger
+                      if v["kind"] == "g7g_hunter_target_selected")
+        pursuit = next(v for v in ledger
+                       if v["kind"] == "g7g_hunter_pursuit_executed")
+        verified = next(v for v in ledger
+                        if v["kind"] == "g7g_multitarget_defeat_verified")
+        self.assertEqual(chosen["detail"]["target"], "vanguard")
+        self.assertEqual(pursuit["detail"]["target"], "vanguard")
+        chosen["detail"]["target"] = "guardian"
+        chosen["detail"]["target_source"] = "B"
+        pursuit["detail"]["target"] = "guardian"
+        verified["detail"]["distinct_targets"] = [
+            "guardian", "vanguard", "archer", "scholar"]
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaisesRegex(
+                AssertionError, "target choices contradict original Hunter turns"):
+            attest_trial(trial, level=3, seed=17, policy=policy)
+
+
 if __name__ == "__main__":
     unittest.main()

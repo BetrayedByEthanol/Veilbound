@@ -470,6 +470,8 @@ def _terminal_proof(report, ledger, *, policy, deaths):
                 or lethal["detail"].get("dead") is not True
                 or terminal["turn"] is not None
                 or terminal["round"] != report["rounds_completed"]
+                or terminal["index"] <= max(
+                    event["index"] for event in ledger if event["kind"] == "round_end")
                 or terminal["detail"] != expected_detail
                 or receipt.get("round") != terminal["round"]):
             raise AssertionError(
@@ -774,6 +776,8 @@ def _hunter_bite_hits(ledger, target, *, policy):
             raise AssertionError("Bite sequence changed its source profile or prey")
         declaration = ledger[declaration_index]
         if (declaration["kind"] != "attack_sequence_committed"
+                or declaration["round"] != resolved["round"]
+                or declaration["turn"] != "hunter"
                 or declaration["detail"].get("attacker") != "hunter"
                 or declaration["detail"].get("target") != target
                 or len(declaration["detail"].get("profiles", ())) <= position
@@ -821,9 +825,20 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or not 0 <= defense_positions[position] < roll["index"]):
             raise AssertionError("Hunter Bite requires native assigned defense")
         assigned = ledger[defense_positions[position]]
-        if (assigned["kind"] != "defense_assigned"
+        declared_defenses = declaration["detail"].get("defenses")
+        if (not isinstance(declared_defenses, list)
+                or len(declared_defenses) != len(seq["action_indices"])
+                or declared_defenses[position] != "take_hit"
+                or not declaration_index < assigned["index"] < attested["index"]
+                or len(set(defense_positions)) != len(defense_positions)
+                or assigned["kind"] != "defense_assigned"
                 or assigned["round"] != roll["round"]
+                or assigned["turn"] != "hunter"
                 or assigned["detail"].get("actor") != target
+                or assigned["detail"].get("attack_key") !=
+                   f"hunter:{target}:{position}"
+                or assigned["detail"].get("defense") !=
+                   declared_defenses[position]
                 or assigned["detail"].get("defense") != "take_hit"
                 or assigned["detail"].get("defense_value") is not None
                 or rd.get("defense") != "take_hit"
@@ -1593,6 +1608,59 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
             proven.append(death["index"])
         if proven != lethal_indices:
             raise AssertionError("G7-C death indices differ from independently resolved Bites")
+
+        # G7-G logs a Hunter-selected victim on each actual Hunter turn.
+        # Reconstruct that history from the original native G4 death
+        # transitions and the ordered source party, not from the editable
+        # verification receipt's distinct_targets or party assertions.
+        selections = [v for v in ledger if
+                      v["kind"] == "g7g_hunter_target_selected"]
+        pursuits = [v for v in ledger if
+                    v["kind"] == "g7g_hunter_pursuit_executed"]
+        round_ends = [v for v in ledger if v["kind"] == "round_end"]
+        if (len(selections) != len(round_ends)
+                or len(pursuits) != len(selections)
+                or not all(selections[i]["round"] == i + 1
+                           for i in range(len(selections)))):
+            raise AssertionError("Defeat source Hunter must select one target each round")
+        history = []
+        sources = ledger[0]["detail"]["source_ids"]
+        for selected, pursued in zip(selections, pursuits):
+            alive = [actor for actor in ROSTER[1:]
+                     if not any(e["detail"].get("recipient") == actor
+                                and e["detail"].get("dead") is True
+                                and e["index"] < selected["index"]
+                                for e in events["g4_damage_applied"])]
+            expected = alive[0] if alive else None
+            if (expected is None
+                    or selected["round"] != pursued["round"]
+                    or selected["turn"] != "hunter" or pursued["turn"] != "hunter"
+                    or selected["index"] >= pursued["index"]
+                    or selected["detail"].get("hunter") != "hunter"
+                    or selected["detail"].get("target") != expected
+                    or selected["detail"].get("target_source") !=
+                       sources[expected]["source_id"]
+                    or pursued["detail"].get("hunter") != "hunter"
+                    or pursued["detail"].get("target") != expected):
+                raise AssertionError(
+                    "G7-G target choices contradict original Hunter turns and deaths")
+            history.append(expected)
+        expected_receipt = {
+            "party": list(ROSTER[1:]),
+            "native_terminal_index": terminal["index"],
+            "lethal_damage_indices": proven,
+            "distinct_targets": list(dict.fromkeys(history)),
+            "hunter_alive": True,
+        }
+        verified = items[0]
+        if (verified["detail"] != expected_receipt
+                or verified["round"] != terminal["round"]
+                or verified["turn"] is not None
+                or verified["index"] <= terminal["index"]
+                or final_state["hunter"]["dead"] is not False
+                or set(expected_receipt["distinct_targets"]) != set(ROSTER[1:])):
+            raise AssertionError(
+                "G7-G full defeat verification must exactly match source Bite/death chains")
     else:
         items = events["g7g_living_hunter_disengagement_verified"]
         exits = events["g5_terminal_exit"]
