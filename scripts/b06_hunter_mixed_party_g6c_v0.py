@@ -38,7 +38,8 @@ POLICY = {
 }
 
 
-def mixed_scene(*,size,level=3,seed=630,archer_exit=False,party_exits=False):
+def mixed_scene(*,size,level=3,seed=630,archer_exit=False,party_exits=False,
+                frontline="A_head_forward"):
     """Create the authored clear-lane Hunter + A/B/R[/F] fixture.
 
     Strict scope before Encounter/G1 mutation: one Hunter and exactly
@@ -53,16 +54,30 @@ def mixed_scene(*,size,level=3,seed=630,archer_exit=False,party_exits=False):
     if (type(archer_exit) is not bool or type(party_exits) is not bool
             or (archer_exit and party_exits)):
         raise ValueError("Choose only one authored G7-B/C exit mode")
+    if frontline not in ("A_head_forward","B_head_forward"):
+        raise ValueError("Only authored A/B Hunter head-forward contact")
+    if frontline=="B_head_forward" and (archer_exit or party_exits):
+        raise ValueError("G7-D B-front has no independently authored exit routes")
     present=ROSTER[:size]
+    positions=dict(LOCATIONS)
+    if frontline=="B_head_forward":
+        # A/B exchange the front and side positions before scene setup.
+        # The Hunter's 1x2 head and anatomical Bite direction remain real.
+        positions["vanguard"],positions["guardian"]=(
+            positions["guardian"],positions["vanguard"])
     actors=[enemy_actor("B06-EN-03", "hunter", "enemy",
                         occupied=(HUNTER_HEAD,HUNTER_REAR))]
     actors += [party_actor(SOURCES[name],level,name,"party",
-                          occupied=(LOCATIONS[name],)) for name in present]
+                          occupied=(positions[name],)) for name in present]
     e=Encounter(actors,{k:SCORES[k] for k in ("hunter",*present)},
-                seed=seed,scenario=f"B06-I3-G6C:party-{size}:L{level}",
+                seed=seed,scenario=(f"B06-I3-G6C:party-{size}:L{level}"
+                    if frontline=="A_head_forward" else
+                    f"B06-I3-G7D:B-front:party-{size}:L{level}"),
                 objective="observe_two_real_rounds_without_inferred_victory",
                 policy="fixed_source_declared_dice_and_declined_optional_responses")
-    GridMovement(e,width=8,height=7,scene_id="G6C-clear-mixed-front")
+    GridMovement(e,width=8,height=7,scene_id=(
+        "G6C-clear-mixed-front" if frontline=="A_head_forward"
+        else "G7D-clear-B-head-forward"))
     RangedCombat(e)
     SpellState(e)
     DamageState(e)
@@ -85,9 +100,15 @@ def mixed_scene(*,size,level=3,seed=630,archer_exit=False,party_exits=False):
     # This invariant matters especially to the 1x2 Hunter: the Priest A is
     # in its only threatened forward square; Priest B is adjacent to its
     # side, but cannot intercept the Bite for free.
-    if (e.g1.front("hunter")!=LOCATIONS["vanguard"]
-            or not e.g1.melee_contact("guardian","hunter")
-            or e.g1.threatens("hunter",LOCATIONS["guardian"])):
+    frontline_actor=("vanguard" if frontline=="A_head_forward"
+                     else "guardian")
+    side_actor=("guardian" if frontline=="A_head_forward"
+                else "vanguard")
+    if (e.g1.front("hunter")!=positions[frontline_actor]
+            or not e.g1.melee_contact(side_actor,"hunter")
+            or e.g1.threatens("hunter",positions[side_actor])
+            or not e.g1.melee_contact("hunter",frontline_actor,
+                                      hunter_front=True)):
         raise AssertionError("Hunter anatomical mixed-party contact invalid")
     for caster in ("archer", "scholar"):
         if caster not in e.actors:

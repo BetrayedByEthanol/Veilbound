@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B06 G7-D — Protective Tactics and Alternative Frontlines v0](b06-g7d-protective-tactics-alternative-frontlines-v0.md) — genuine G6-D Reactive Shield/Prepared Body protection in two-round L3/P4 source fight plus four real B-head-forward L2/L3 P3/P4 encounter setups; seven bounded cohorts, no ambush, full encounter CR or win probability.
+
 - [B06 G7-C — Full-Party Terminal Certification v0](b06-g7c-full-party-terminal-certification-v0.md) — native source-authored A/B/R[/F] individual G1/G4.5/G5 border exits authenticated into a whole-party withdrawal terminal after genuine Round End; separate strict Hunter-Bite all-dead attestation gate, no inferred CR or sampled survival frequency.
 
 - [B06 G7-B — Native Flame Critical and Bounded Withdrawal Policy v0](b06-g7b-native-flame-and-withdrawal-policy-v0.md) — source-backed direct Thrown Flame natural-20 confirmation to single G4 Fire HP/independent Vigor packets, authenticated fatal Scholar Fire, and an actual preauthored R Archer G1 movement/G5 partial withdrawal; two policies × four warned-clear party/level cells, no whole-party terminal or CR.
