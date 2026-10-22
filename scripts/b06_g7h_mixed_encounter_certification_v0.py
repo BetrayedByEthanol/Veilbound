@@ -1720,12 +1720,14 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
         # Hunter has real Bite; A/B have paid G5 attacks; R has a Chosen
         # (VP-committed) Rite and lethal authenticated G2/G6-D Bow; F
         # launches independently paid G3 Fire through G4 damage.
-        _reconcile_victory_hunter_sequences(ledger)
         actual_hunter_hits = _hunter_bite_hits(
             ledger, "vanguard", policy="mixed_victory_rite")
         if (len(actual_hunter_hits) != 1
                 or actual_hunter_hits[0]["resolved"]["round"] != 2):
             raise AssertionError("Victory Hunter must land one actual paid Round-2 Bite")
+        # Preserve the original hit-specific source/defense diagnostics
+        # before authenticating the independent Round-1 paid miss.
+        _reconcile_victory_hunter_sequences(ledger)
         for who, attack in (("vanguard", "B06-PC-A-SWORD"),
                             ("guardian", "B06-PC-B-MACE")):
             # Verify every original paid sequence action, not just hits.
