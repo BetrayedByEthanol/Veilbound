@@ -69,6 +69,81 @@ def _origin(report, ledger, *, policy, level, seed):
     return scene
 
 
+def _spell_payment_chain(ledger, event, *, actor, label, ap, vp_mode, vp_points):
+    """Reconstruct one legal G0 action -> VP debit -> G3 effect/launch.
+
+    Authoritative slots are (round, native turn, caster) and the original
+    chronological indices, not an event label copied into the result.
+    """
+    if (event["turn"] != actor or type(event["round"]) is not int
+            or event["round"] < 1):
+        raise AssertionError("G3 source delivery must be on caster's own turn")
+    chain = [v for v in ledger[:event["index"]]
+             if v["round"] == event["round"] and v["turn"] == actor]
+    actions = [v for v in chain if v["kind"] == "action_committed"
+               and v["detail"].get("actor") == actor
+               and v["detail"].get("label") == label]
+    transitions = [v for v in chain if v["kind"] == "vp_transition"
+                   and v["detail"].get("actor") == actor
+                   and v["detail"].get("label") == label]
+    if len(actions) != 1 or len(transitions) != 1:
+        raise AssertionError("G3 source action or unique VP payment missing")
+    action, payment = actions[0], transitions[0]
+    if (not action["index"] < payment["index"] < event["index"]
+            or action["detail"].get("action_class") != "projection"
+            or type(action["detail"].get("ap_spent")) is not int
+            or action["detail"]["ap_spent"] != ap
+            or payment["detail"].get("mode") != vp_mode
+            or type(payment["detail"].get("points")) is not int
+            or payment["detail"]["points"] != vp_points
+            or any(v["kind"] == "action_committed"
+                   and v["detail"].get("actor") == actor
+                   for v in ledger[action["index"]+1:event["index"]])
+            or any(v["kind"] in ("vp_transition", "vp_release")
+                   and v["detail"].get("actor") == actor
+                   and v["index"] != payment["index"]
+                   for v in ledger[action["index"]+1:event["index"]])):
+        raise AssertionError("G3 spell must consume its exact ordered AP/VP chain")
+    return action, payment
+
+
+def _reconcile_source_vp(ledger, final):
+    """Independent G0 VP accounting; an edited/omitted payment never funds a cast."""
+    origin = ledger[0]["detail"].get("source_ids")
+    if not isinstance(origin, dict) or set(origin) != set(ROSTER):
+        raise AssertionError("G0 source VP genesis missing")
+    accounts = {}
+    for actor in ROSTER:
+        start = origin[actor].get("vp")
+        if (not isinstance(start, list) or len(start) != 3
+                or any(type(x) is not int or x < 0 for x in start)):
+            raise AssertionError("G0 initial VP state invalid")
+        accounts[actor] = list(start)
+    for ev in ledger[1:]:
+        d = ev["detail"]
+        if ev["kind"] == "vp_transition":
+            actor, mode, points = d.get("actor"), d.get("mode"), d.get("points")
+            if (actor not in accounts or ev["turn"] != actor
+                    or mode not in ("spent", "committed")
+                    or type(points) is not int or points <= 0
+                    or points > accounts[actor][0]):
+                raise AssertionError("Invalid source G0 VP debit")
+            accounts[actor][0] -= points
+            accounts[actor][1 if mode == "committed" else 2] += points
+        elif ev["kind"] == "vp_release":
+            actor, points = d.get("actor"), d.get("points")
+            if (actor not in accounts or type(points) is not int or points <= 0
+                    or points > accounts[actor][1]):
+                raise AssertionError("Invalid source G0 VP release")
+            accounts[actor][0] += points
+            accounts[actor][1] -= points
+    if any(final[actor].get("vp_available") != accounts[actor][0]
+           or final[actor].get("vp_committed") != accounts[actor][1]
+           for actor in ROSTER):
+        raise AssertionError("Final source VP state disagrees with paid ledger")
+    return accounts
+
+
 def _terminal_proof(report, ledger, *, policy, deaths):
     outcome, terminal_kind = TERMINALS[policy]
     terminals = [ev for ev in ledger if ev["kind"] in (
@@ -161,6 +236,47 @@ def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
             or shot["detail"].get("primary_face") != d.get("attack_face")
             or shot["detail"].get("outcome") != d.get("original_outcome")):
         raise AssertionError("Victory Bow lacks original G0/G2 paid shot and launch")
+    # G2 owns the projectile natural-1 auto-miss, original target and
+    # ranged defense. G6-D may only resolve a confirmed *G2 hit*; comparing
+    # two mutable outcome strings does not prove the actual d20 result.
+    shot_d, launch_d = shot["detail"], launch["detail"]
+    face = shot_d.get("primary_face")
+    defense = shot_d.get("final_defense")
+    confirmation = d.get("confirmation_face")
+    if (type(face) is not int or not 1 <= face <= 20
+            or type(defense) is not int
+            or type(shot_d.get("base_defense")) is not int
+            or type(shot_d.get("attack_total")) is not int
+            or type(d.get("attack_total")) is not int
+            or shot_d["attack_total"] != face + 4
+            or d["attack_total"] != shot_d["attack_total"]
+            or type(d.get("attack_face")) is not int
+            or d["attack_face"] != face
+            or d.get("defense_value") != defense
+            or launch_d.get("attack_bonus") != 4
+            or launch_d.get("cover") != 0
+            or launch_d.get("range_difficulty") is None
+            or shot_d["base_defense"] > defense
+            or face == 1):
+        raise AssertionError("Lethal Bow cannot certify false G2 roll/defense math")
+    if face == 20:
+        if type(confirmation) is not int or not 1 <= confirmation <= 20:
+            raise AssertionError("Natural-20 Bow requires source confirmation")
+        tier = ("devastating" if confirmation == 20 else
+                "critical" if confirmation != 1 and confirmation + 4 > defense
+                else "strong")
+        delivery = "critical_confirmation_pending_G5"
+    else:
+        if confirmation is not None or face + 4 <= defense:
+            raise AssertionError("Ordinary Bow must actually beat ranged defense")
+        tier, delivery = "normal", "intended_hit_pending_G5"
+    if (shot_d.get("outcome") != delivery
+            or d.get("original_outcome") != delivery
+            or d.get("critical") != tier
+            or shot_d.get("target") != "hunter"
+            or launch_d.get("shooter") != "archer"
+            or launch_d.get("target") != "hunter"):
+        raise AssertionError("Fatal G6-D Bow result must derive from native G2 d20")
     declarations = [x for x in ledger[action_index+1:launch_index]
                     if x["kind"] == "g2_bow_sequence_committed"
                     and x["round"] == lethal["round"]
@@ -280,6 +396,54 @@ def _hunter_bite_hits(ledger, target):
                 or not isinstance(bridge["detail"].get("actual_result"), dict)
                 or d.get("damage") != bridge["detail"]["actual_result"]):
             raise AssertionError("Hunter Bite roll, G4.5 and G5 outcome are not one hit")
+        # Hunter source B06-AT-04 is +6, and these two G7-G policies
+        # predeclare a standing one-square Take Hit target. Recompute the
+        # attack and critical legality from its actual d20 and native G0
+        # defense receipt: a natural 1 must NEVER certify a hit.
+        rd = roll["detail"]
+        defense_positions = seq.get("defense_indices")
+        if (not isinstance(defense_positions, list)
+                or len(defense_positions) <= position
+                or type(defense_positions[position]) is not int
+                or not 0 <= defense_positions[position] < roll["index"]):
+            raise AssertionError("Hunter Bite requires native assigned defense")
+        assigned = ledger[defense_positions[position]]
+        if (assigned["kind"] != "defense_assigned"
+                or assigned["round"] != roll["round"]
+                or assigned["detail"].get("actor") != target
+                or assigned["detail"].get("defense") != "take_hit"
+                or assigned["detail"].get("defense_value") is not None
+                or rd.get("defense") != "take_hit"
+                or rd.get("declared_defense") != "take_hit"
+                or rd.get("defense_value") is not None):
+            raise AssertionError("Native Hunter Bite defense was altered")
+        face = rd.get("attack_face")
+        confirm = rd.get("confirmation_face")
+        if (type(face) is not int or not 1 <= face <= 20
+                or face == 1
+                or type(rd.get("source_attack_bonus")) is not int
+                or rd["source_attack_bonus"] != 6
+                or type(rd.get("prone_modifier")) is not int
+                or rd["prone_modifier"] != 0
+                or type(rd.get("attack_bonus")) is not int
+                or rd["attack_bonus"] != 6
+                or type(rd.get("attack_total")) is not int
+                or rd["attack_total"] != face + 6
+                or rd.get("hit") is not True
+                or type(action["detail"].get("ap_spent")) is not int
+                or action["detail"]["ap_spent"] != 24):
+            raise AssertionError("Lethal/withdrawal Bite is not a legal paid G5 d20 hit")
+        if face == 20:
+            if type(confirm) is not int or not 1 <= confirm <= 20:
+                raise AssertionError("Hunter natural-20 must be confirmed")
+            expected_critical = ("devastating" if confirm == 20 else "critical")
+        else:
+            if confirm is not None:
+                raise AssertionError("Ordinary Hunter Bite cannot confirm critical")
+            expected_critical = "normal"
+        if (rd.get("critical") != expected_critical
+                or d.get("critical") != expected_critical):
+            raise AssertionError("Hunter Bite critical tier is not source-derived")
         damages = [x for x in ledger
                    if x["kind"] == "g4_damage_applied"
                    and roll["index"] < x["index"] < bridge["index"]
@@ -536,6 +700,9 @@ def _source_decisions(ledger, *, policy, terminal):
                 and v["detail"].get("label") == "g3:guided:maintained"
                 and v["index"] < rites[0]["index"] for v in ledger):
             raise AssertionError("No source-paid and chosen R Devotional Rite")
+        _spell_payment_chain(
+            ledger, rites[0], actor="archer", label="g3:guided:maintained",
+            ap=30, vp_mode="committed", vp_points=1)
         bows = [x for x in events["g6d_bow_adjudicated"]
                 if x["detail"].get("shooter") == "archer"
                 and x["detail"].get("target") == "hunter"
@@ -547,7 +714,20 @@ def _source_decisions(ledger, *, policy, terminal):
                   if x["detail"].get("caster") == "scholar"
                   and x["detail"].get("target") == "hunter"
                   and x["detail"].get("outcome") == "direct_hit_pending_G4"]
-        if len(flames) != 2 or not all(any(
+        if len(flames) != 2 or not all(
+                flame["detail"].get("tier") == 1
+                and flame["detail"].get("vp_spent") == 2
+                and flame["detail"].get("primary_face") in range(2, 21)
+                and flame["detail"].get("attack_total") ==
+                    flame["detail"].get("primary_face") + 5
+                for flame in flames):
+            raise AssertionError("G7-H Flame source/tier/attack receipts invalid")
+        for flame in flames:
+            _spell_payment_chain(
+                ledger, flame, actor="scholar",
+                label="g3:thrown_flame:T1", ap=20,
+                vp_mode="spent", vp_points=2)
+        if not all(any(
                 d["detail"].get("event_key") == f"g3-flame-ledger:{flame['index']}"
                 and d["detail"].get("recipient") == "hunter"
                 for d in events["g4_damage_applied"]) for flame in flames):
@@ -689,6 +869,7 @@ def attest_trial(report, *, level, seed, policy):
         raise AssertionError("Missing original/closing actor snapshots")
     _, deaths = _reconcile_hp_snapshots(
         ledger, initial, final, ROSTER, SOURCES)
+    _reconcile_source_vp(ledger, final)
     terminal = _terminal_proof(report, ledger, policy=policy, deaths=deaths)
     facts = _source_decisions(ledger, policy=policy, terminal=terminal)
     return {"policy": policy, "outcome": TERMINALS[policy][0],

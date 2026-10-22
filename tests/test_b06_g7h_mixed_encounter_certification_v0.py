@@ -444,5 +444,136 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_25_codex_p1_bow_natural_one_cannot_remain_lethal(self):
+        """An edited G2 delivery plus edited G6-D summary still misses."""
+        trial = self._case(POLICIES[0])
+        ledger = trial["ledger"]
+        bow = next(v for v in ledger if v["kind"] == "g6d_bow_adjudicated"
+                   and (v["detail"].get("damage") or {}).get("dead"))
+        shot = ledger[bow["detail"]["shot_index"]]
+        for event in (shot,):
+            event["detail"]["primary_face"] = 1
+            event["detail"]["attack_total"] = 5
+            event["detail"]["outcome"] = "automatic_miss"
+        bow["detail"]["attack_face"] = 1
+        bow["detail"]["attack_total"] = 5
+        bow["detail"]["original_outcome"] = "automatic_miss"
+        self.assertEqual(bow["detail"]["outcome"], "hit")
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_26_codex_p1_bow_bonus_defense_and_confirmation_provenance(self):
+        for attack in ("wrong_bonus", "lowered_defense", "false_confirmation",
+                       "false_delivery"):
+            with self.subTest(attack=attack):
+                trial = self._case(POLICIES[0])
+                bow = next(v for v in trial["ledger"]
+                           if v["kind"] == "g6d_bow_adjudicated"
+                           and (v["detail"].get("damage") or {}).get("dead"))
+                shot = trial["ledger"][bow["detail"]["shot_index"]]
+                launch = trial["ledger"][bow["detail"]["launch_index"]]
+                if attack == "wrong_bonus":
+                    shot["detail"]["attack_total"] += 1
+                    bow["detail"]["attack_total"] += 1
+                elif attack == "lowered_defense":
+                    shot["detail"]["final_defense"] -= 1
+                elif attack == "false_confirmation":
+                    bow["detail"]["confirmation_face"] = 1
+                else:
+                    shot["detail"]["outcome"] = "automatic_miss"
+                    bow["detail"]["original_outcome"] = "automatic_miss"
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_27_codex_p1_hunter_natural_one_rejects_defeat_and_escape(self):
+        for policy in POLICIES[1:]:
+            with self.subTest(policy=policy):
+                trial = self._case(policy)
+                rolls = [v for v in trial["ledger"]
+                         if v["kind"] == "g5_melee_roll"
+                         and v["detail"].get("attacker") == "hunter"
+                         and v["detail"].get("profile") == "B06-AT-04"
+                         and v["detail"].get("hit") is True]
+                self.assertGreater(len(rolls), 0)
+                for roll in rolls:
+                    roll["detail"]["attack_face"] = 1
+                    roll["detail"]["attack_total"] = 7
+                    # Leave the cached hit flag TRUE and all lethal G4 and
+                    # G4.5/G5 records untouched, as in the Codex witness.
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_28_codex_p1_hunter_bonus_and_critical_math_cannot_be_relabelled(self):
+        for policy in POLICIES[1:]:
+            for kind in ("wrong_bonus", "wrong_critical"):
+                with self.subTest(policy=policy, kind=kind):
+                    trial = self._case(policy)
+                    roll = next(v for v in trial["ledger"]
+                                if v["kind"] == "g5_melee_roll"
+                                and v["detail"].get("attacker") == "hunter")
+                    if kind == "wrong_bonus":
+                        roll["detail"]["attack_bonus"] = 7
+                        roll["detail"]["attack_total"] = roll["detail"]["attack_face"] + 7
+                    else:
+                        roll["detail"]["critical"] = "strong"
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_29_codex_p1_chosen_rite_requires_native_vp_commitment(self):
+        for kind in ("missing", "wrong_actor", "wrong_mode", "wrong_amount"):
+            with self.subTest(kind=kind):
+                trial = self._case(POLICIES[0])
+                ledger = trial["ledger"]
+                cost = next(v for v in ledger if v["kind"] == "vp_transition"
+                            and v["detail"].get("actor") == "archer"
+                            and v["detail"].get("label") == "g3:guided:maintained")
+                if kind == "missing":
+                    cost["kind"] = "cost_was_not_committed"
+                elif kind == "wrong_actor":
+                    cost["detail"]["actor"] = "scholar"
+                elif kind == "wrong_mode":
+                    cost["detail"]["mode"] = "spent"
+                else:
+                    cost["detail"]["points"] = 2
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_30_codex_p1_flame_needs_own_action_and_vp_for_each_launch(self):
+        for choice in ("both", "one_ap", "one_vp", "wrong_round",
+                       "wrong_spend", "wrong_label"):
+            with self.subTest(choice=choice):
+                trial = self._case(POLICIES[0])
+                ledger = trial["ledger"]
+                actions = [v for v in ledger if v["kind"] == "action_committed"
+                           and v["detail"].get("actor") == "scholar"
+                           and v["detail"].get("label") == "g3:thrown_flame:T1"]
+                costs = [v for v in ledger if v["kind"] == "vp_transition"
+                         and v["detail"].get("actor") == "scholar"
+                         and v["detail"].get("label") == "g3:thrown_flame:T1"]
+                self.assertEqual(len(actions), 2)
+                self.assertEqual(len(costs), 2)
+                if choice == "both":
+                    for v in actions + costs:
+                        v["kind"] = "relabeled_unpaid_action"
+                elif choice == "one_ap":
+                    actions[0]["kind"] = "relabeled_unpaid_action"
+                elif choice == "one_vp":
+                    costs[1]["kind"] = "relabeled_unpaid_action"
+                elif choice == "wrong_round":
+                    costs[1]["round"] = 1
+                elif choice == "wrong_spend":
+                    costs[0]["detail"]["points"] = 1
+                else:
+                    actions[0]["detail"]["label"] = "g3:unfunded_flame"
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+
 if __name__ == "__main__":
     unittest.main()
