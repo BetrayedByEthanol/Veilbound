@@ -1411,5 +1411,39 @@ class G7HMixedNativeTests(unittest.TestCase):
             attest_trial(trial, level=3, seed=17, policy=policy)
 
 
+    def test_62_p1_first_round_hunter_miss_requires_original_24_AP(self):
+        """An unpaid natural-1 attack must never disappear behind hit-only auditing."""
+        original = self._case(POLICIES[0])
+        payments = [v for v in original["ledger"]
+                    if v["kind"] == "action_committed"
+                    and v["round"] == 1
+                    and v["detail"].get("actor") == "hunter"
+                    and v["detail"].get("label") ==
+                       "sequence:B06-AT-04:0"]
+        self.assertEqual(len(payments), 1)
+        self.assertEqual(payments[0]["detail"]["ap_spent"], 24)
+        self.assertEqual(payments[0]["detail"]["ap_remaining"], 18)
+        for variant in ("no_debit", "wrong_balance", "miss_disappears"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(original)
+                ledger = trial["ledger"]
+                receipt = ledger[payments[0]["index"]]
+                if variant == "no_debit":
+                    receipt["detail"]["ap_spent"] = 0
+                    receipt["detail"]["ap_remaining"] = 42
+                elif variant == "wrong_balance":
+                    receipt["detail"]["ap_remaining"] = 42
+                else:
+                    outcome = next(v for v in ledger
+                                   if v["kind"] == "g5_melee_resolved"
+                                   and v["round"] == 1
+                                   and v["detail"].get("attacker") == "hunter")
+                    outcome["kind"] = "g5_melee_unresolved_forged"
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+
+
 if __name__ == "__main__":
     unittest.main()

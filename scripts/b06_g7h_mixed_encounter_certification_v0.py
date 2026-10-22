@@ -1495,6 +1495,119 @@ def _flame_delivery_packet(ledger, flame):
     return hit
 
 
+
+def _reconcile_victory_hunter_sequences(ledger):
+    """Audit BOTH G6-C Hunter actions, including the Round-1 natural-1 miss.
+
+    A source-native sequence still costs 24 AP when its attack misses;
+    hit-only G4/G4.5 traversals cannot vouch for that G0 payment.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import POLICY
+
+    label = "sequence:B06-AT-04:0"
+    payments = [v for v in ledger
+                if v["kind"] == "action_committed"
+                and v["detail"].get("actor") == "hunter"
+                and v["detail"].get("label") == label]
+    sequences = [v for v in ledger if
+                 v["kind"] == "g5_melee_sequence_attested"
+                 and v["detail"].get("attacker") == "hunter"]
+    resolved = [v for v in ledger if
+                v["kind"] == "g5_melee_resolved"
+                and v["detail"].get("attacker") == "hunter"]
+    rolls = [v for v in ledger if v["kind"] == "g5_melee_roll"
+             and v["detail"].get("attacker") == "hunter"]
+    if (len(payments) != 2 or len(sequences) != 2
+            or len(resolved) != 2 or len(rolls) != 2
+            or {v["round"] for v in payments} != {1, 2}):
+        raise AssertionError("Victory requires both original paid Hunter Bite sequences")
+    for action in payments:
+        round_no = action["round"]
+        face, damage_face, _ = POLICY[round_no]["hunter"]
+        _paid_action_ap(ledger, action, actor="hunter", cost=24,
+                        kind="physical", label=label)
+        matches = [v for v in sequences if
+                   v["round"] == round_no
+                   and v["turn"] == "hunter"
+                   and v["detail"].get("action_indices") == [action["index"]]
+                   and v["detail"].get("profiles") == ["B06-AT-04"]
+                   and v["detail"].get("attacker") == "hunter"
+                   and v["detail"].get("target") == "vanguard"]
+        if len(matches) != 1:
+            raise AssertionError("Hunter Bite payment lacks its original G5 sequence")
+        seq = matches[0]
+        declaration_index = seq["detail"].get("declaration_index")
+        defense_indices = seq["detail"].get("defense_indices")
+        if (type(declaration_index) is not int
+                or not action["index"] < declaration_index < seq["index"]
+                or not isinstance(defense_indices, list)
+                or len(defense_indices) != 1
+                or type(defense_indices[0]) is not int
+                or not declaration_index < defense_indices[0] < seq["index"]):
+            raise AssertionError("Paid Hunter sequence has no actual source declaration")
+        declared = ledger[declaration_index]
+        defense = ledger[defense_indices[0]]
+        expected_defense = "guard" if round_no == 1 else "take_hit"
+        if (declared["kind"] != "attack_sequence_committed"
+                or declared["round"] != round_no
+                or declared["turn"] != "hunter"
+                or declared["detail"].get("attacker") != "hunter"
+                or declared["detail"].get("target") != "vanguard"
+                or declared["detail"].get("profiles") != ["B06-AT-04"]
+                or declared["detail"].get("defenses") != [expected_defense]
+                or defense["kind"] != "defense_assigned"
+                or defense["round"] != round_no
+                or defense["turn"] != "hunter"
+                or defense["detail"].get("actor") != "vanguard"
+                or defense["detail"].get("attack_key") !=
+                   "hunter:vanguard:0"
+                or defense["detail"].get("defense") != expected_defense):
+            raise AssertionError("Victory Hunter declaration/defense was replaced")
+        hits = [v for v in resolved if
+                v["detail"].get("action_index") == action["index"]]
+        faces = [v for v in rolls if
+                 v["detail"].get("action_index") == action["index"]]
+        if len(hits) != 1 or len(faces) != 1:
+            raise AssertionError("Each paid Hunter action needs one source G5 roll/result")
+        result, roll = hits[0], faces[0]
+        expected_hit = round_no == 2
+        if (not seq["index"] < roll["index"] < result["index"]
+                or any(v["round"] != round_no or v["turn"] != "hunter"
+                       for v in (roll, result))
+                or roll["detail"].get("declaration_index") != declaration_index
+                or roll["detail"].get("slot") != 0
+                or roll["detail"].get("attacker") != "hunter"
+                or roll["detail"].get("target") != "vanguard"
+                or roll["detail"].get("profile") != "B06-AT-04"
+                or roll["detail"].get("attack_face") != face
+                or roll["detail"].get("source_attack_bonus") != 6
+                or roll["detail"].get("prone_modifier") != 0
+                or roll["detail"].get("attack_bonus") != 6
+                or roll["detail"].get("attack_total") != face + 6
+                or roll["detail"].get("hit") is not expected_hit
+                or roll["detail"].get("critical") != "normal"
+                or roll["detail"].get("confirmation_face") is not None
+                or roll["detail"].get("declared_defense") != expected_defense
+                or roll["detail"].get("defense") != expected_defense
+                or result["detail"].get("attacker") != "hunter"
+                or result["detail"].get("target") != "vanguard"
+                or result["detail"].get("profile") != "B06-AT-04"
+                or result["detail"].get("outcome") !=
+                   ("hit" if expected_hit else "miss")
+                or result["detail"].get("critical") != "normal"):
+            raise AssertionError("Hunter source-authored miss/hit not paid and resolved")
+        if not expected_hit:
+            if (damage_face is not None
+                    or result["detail"].get("damage") is not None
+                    or any(v["kind"] == "g45_attested_hit"
+                           and v["detail"].get("action_index") == action["index"]
+                           for v in ledger)):
+                raise AssertionError("Round-1 Hunter miss cannot create G4/G4.5 hit")
+        elif damage_face is None:
+            raise AssertionError("Round-2 source Bite requires genuine damage")
+    return True
+
+
 def _source_decisions(ledger, *, policy, terminal, final_state):
     events = {}
     for kind in ("g5_melee_resolved", "g6d_bow_adjudicated",
@@ -1511,6 +1624,7 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
         # Hunter has real Bite; A/B have paid G5 attacks; R has a Chosen
         # (VP-committed) Rite and lethal authenticated G2/G6-D Bow; F
         # launches independently paid G3 Fire through G4 damage.
+        _reconcile_victory_hunter_sequences(ledger)
         actual_hunter_hits = _hunter_bite_hits(
             ledger, "vanguard", policy="mixed_victory_rite")
         if (len(actual_hunter_hits) != 1
