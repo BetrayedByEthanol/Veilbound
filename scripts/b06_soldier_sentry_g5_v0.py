@@ -48,7 +48,8 @@ class SourceMelee:
     G5 does not choose a player defense, roll, or tactical response itself.
     """
     def __init__(self,encounter,*,scene_exit=None,scene_exits=()):
-        if (type(scene_exits) is not tuple
+        if ((scene_exit is not None and not isinstance(scene_exit,SceneExit))
+                or type(scene_exits) is not tuple
                 or (scene_exit is not None and scene_exits)
                 or any(not isinstance(v,SceneExit) for v in scene_exits)):
             raise ValueError("Select one single exit or a preauthored tuple")

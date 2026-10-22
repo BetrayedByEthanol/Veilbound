@@ -99,13 +99,24 @@ class PartyTerminal:
                     or move["detail"].get("old")==move["detail"].get("new")
                     or move["turn"]!=actor or x["round"]!=move["round"]):
                 raise UnresolvedDecision("No native final paid G1 exit translation")
+            # A G5 exit removes this actor from further scene play. It
+            # cannot be reused after later rounds, even when they make no
+            # attack, or after a genuine G1 step away and back to the same
+            # border square. The immediate turn_end following the exit is
+            # legitimate; a NEW turn_start_expiry or any actor-linked G1
+            # event is not. This also catches off-turn G1 movement.
             if any(v["index"]>x["index"] and (
                     v["kind"]=="g4_damage_applied"
                     and v["detail"].get("recipient")==actor
-                    or v["kind"]=="action_committed"
-                    and v["detail"].get("actor")==actor)
+                    or v["kind"] in (
+                        "action_committed","turn_start_expiry","turn_resources")
+                    and v["detail"].get("actor")==actor
+                    or v["kind"].startswith("g1_")
+                    and (v["detail"].get("actor")==actor
+                         or v["detail"].get("mover")==actor))
                    for v in e.ledger):
-                raise UnresolvedDecision("Exited actor resumed combat or was harmed")
+                raise UnresolvedDecision(
+                    "Exited actor resumed movement, turns or combat, or was harmed")
             receipts.append({"actor":actor,"policy":policy.policy_id,
                              "movement":step,"g45":y["index"],"g5":x["index"]})
         # Authenticated exits and genuine final Round End must precede
