@@ -239,7 +239,8 @@ def _clock_handoff(combat,seconds):
 
 
 def run_trial(level,size,seed,*,policy="pounce",round_limit=2,
-              exploration_seconds=7200,include_ledger=False):
+              exploration_seconds=7200,include_ledger=False,
+              calibration_policy=None):
     if (type(level) is not int or level not in (2,3)
             or type(size) is not int or size not in (3,4)
             or type(seed) is not int or seed<0
@@ -249,8 +250,15 @@ def run_trial(level,size,seed,*,policy="pounce",round_limit=2,
             or not 0<=exploration_seconds<=MAX_EXPLORATION
             or type(include_ledger) is not bool):
         raise ValueError("G7-E accepts four L2/3 P3/4 cells x two authored approaches")
+    cohort="forest_pounce" if policy=="pounce" else "forest_ordinary"
+    if calibration_policy is not None and calibration_policy!=cohort:
+        raise ValueError("G7-F cohort does not match native G7-E approach")
     c=forest_scene(level=level,size=size,seed=seed)
     e=c.e
+    if calibration_policy is not None:
+        e.log("g7f_policy_selected", cohort=cohort, runner="g7e",
+              mode=policy, scenario=e.scenario,
+              level=level, party_size=size, seed=seed)
     start=_snapshot(e)
     opening=None
     unresolved=None

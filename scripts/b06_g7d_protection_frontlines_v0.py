@@ -156,7 +156,7 @@ def _validate_protection(e,policy):
 
 
 def run_trial(level,size,seed,*,policy,round_limit=MAX_ROUNDS,
-              include_ledger=False):
+              include_ledger=False,calibration_policy=None):
     """Execute authored tactical choices; classify all censored branches."""
     if (type(level) is not int or type(size) is not int
             or type(seed) is not int or seed<0
@@ -165,9 +165,16 @@ def run_trial(level,size,seed,*,policy,round_limit=MAX_ROUNDS,
             or type(include_ledger) is not bool
             or (level,size,policy) not in CELLS):
         raise ValueError("G7-D only supports seven source-authored pilot cells")
+    cohort="protected_control" if policy=="control" else policy
+    if calibration_policy is not None and calibration_policy!=cohort:
+        raise ValueError("G7-F cohort does not match native G7-D protection")
     frontline=("B_head_forward" if policy=="b_front" else "A_head_forward")
     combat=mixed_scene(level=level,size=size,seed=seed,frontline=frontline)
     e=combat.e
+    if calibration_policy is not None:
+        e.log("g7f_policy_selected", cohort=cohort, runner="g7d",
+              mode=policy, scenario=e.scenario,
+              level=level, party_size=size, seed=seed)
     protection=(ReactiveHunterProtection(combat)
                 if policy in ("reactive_shield","prepared_body") else None)
     start=_snapshot(e)

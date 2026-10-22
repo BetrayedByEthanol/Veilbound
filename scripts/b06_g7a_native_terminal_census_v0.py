@@ -198,7 +198,7 @@ def _validate_native_ledger(e):
 
 
 def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False,
-              policy_mode="g7a"):
+              policy_mode="g7a",calibration_policy=None):
     if ((level,size) not in ALLOWED or type(level) is not int
             or type(size) is not int):
         raise ValueError("Only four G7 ready warned-clear A-front cells")
@@ -210,10 +210,18 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False,
         raise ValueError("Explicit include_ledger Boolean required")
     if policy_mode not in ("g7a","g7b_flame","g7b_archer_exit"):
         raise ValueError("Only preauthored G7-A/B policy modes are supported")
+    cohort={"g7a":"warned_control","g7b_flame":"warned_flame",
+            "g7b_archer_exit":"warned_archer_exit"}[policy_mode]
+    if calibration_policy is not None and calibration_policy!=cohort:
+        raise ValueError("G7-F cohort does not match native G7-A/B policy")
     combat=mixed_scene(
         level=level,size=size,seed=seed,
         archer_exit=policy_mode=="g7b_archer_exit")
     e=combat.e
+    if calibration_policy is not None:
+        e.log("g7f_policy_selected", cohort=cohort, runner="g7a",
+              mode=policy_mode, scenario=e.scenario,
+              level=level, party_size=size, seed=seed)
     before=_snapshot(e)
     unresolved=None
     archer_withdrew=False
