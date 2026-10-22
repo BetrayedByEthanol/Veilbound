@@ -195,6 +195,40 @@ historical Phase 3 digest. Requiring authored dice for this cohort is
 intentional; generalized unscripted player/GM roll distributions and
 independently representative encounter samples remain future gates.
 
+### Codex P1 correction — source-backed Spell AP, digests, and A/B typed damage
+
+G7-H no longer treats declared Spell AP as sufficient payment: each
+**Chosen Guided Regeneration Rite** and each separately launched **Scholar
+Thrown Flame** traverses the same native `_paid_action_ap` reconciliation
+used for the finishing Bow shot. The verifier requires one own-turn
+`turn_resources` receipt, checks source-authored starting Turn AP against
+an independently instantiated G6-C sheet, consumes earlier paid actions
+in order, and requires the exact recorded `ap_remaining` after each
+Projection Action. Zero-AP / inflated-AP receipts, negative funded balances
+and forged remainders are rejected even when the ledger is rehashed.
+
+Actor identity now binds **all five original G0 source digests** (Hunter,
+A, B, R, F) and the entire authored genesis source roster against fresh
+`mixed_scene` fixture construction. Agreement among editable genesis,
+snapshots, G5 action labels and G4.5 `attacker_source` /
+`target_source` strings cannot impersonate a real fixture.
+
+A/B actual hit validation now calls the source G4
+`_profile_hit_packets` and `_mitigate_hp` on independently recreated
+actors and the fixed G6-C `POLICY` attack/damage dice. It verifies the
+complete **Cut/Crush** HP packet structure, source die + Strength,
+penetration against Hunter Armor 3, effective HP mitigation, source
+`g4_damage_applied` event and actual clipped HP transition. The native
+G4.5 and G5 cached results must agree with the independently derived
+`hp_packets` and loss. Changing `raw` and `mitigated` to an impossible
+value while preserving the four-point HP delta cannot certify.
+
+Dedicated adversarial tests cover both separate Flame turns, the Rite,
+each of five fixture digests and both A/B profiles (including tampering
+with armor, damage type, extra packets, and cached summaries). This is
+**audited source provenance for the fixed bounded pack**; it does not
+expand coverage to arbitrary dice, new profiles or representative CR.
+
 ## Player/GM tactics and MVP boundary
 
 - **Playable source role diversity demonstrated:** A/B martial proxy
