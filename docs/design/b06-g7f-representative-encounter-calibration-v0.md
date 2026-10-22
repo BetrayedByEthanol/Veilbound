@@ -78,9 +78,12 @@ from the source-native G7-A/C/D/E runner. Before any own-turn resource
 allocation or attack, the runner checks that this cohort agrees with its
 actual execution mode and writes exactly one `g7f_policy_selected`
 native event directly into the G0 ledger, **after source G1/G2/G3/G4 setup
-but before the first Round Begin or resource expenditure**. Setup events
-may already occupy ledger indices after `encounter_created`, so the event
-must not be assumed to reside at index 1. It binds the cohort, runner, mode,
+but before the first actor turn, paid action or tactical die roll**. The
+native scene factory may already have begun Round 1 to refresh capacities
+and map world-clock deadlines. Setup events therefore already occupy
+ledger indices after `encounter_created`; the policy marker must occur
+before first turn allocation, not at a guessed fixed index or necessarily
+before Round Begin. It binds the cohort, runner, mode,
 source scenario, level, party size and seed. It is included in the
 existing `ledger_sha256` alongside all later source rolls, actions
 and outcomes; G7-F must verify the exact event fields, timing, unique

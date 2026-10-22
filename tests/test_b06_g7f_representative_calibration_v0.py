@@ -514,9 +514,10 @@ class NativeG7FTests(unittest.TestCase):
                 selection = next(e for e in ledger
                                  if e["kind"] == "g7f_policy_selected")
                 self.assertLess(selection["index"], next(
-                    e["index"] for e in ledger if e["kind"] == "round_begin"))
+                    e["index"] for e in ledger if e["kind"] == "turn_start_expiry"))
                 self.assertEqual(selection["kind"], "g7f_policy_selected")
-                self.assertEqual(selection["round"], ledger[0]["round"])
+                self.assertEqual(selection["round"],
+                                 ledger[selection["index"] - 1]["round"])
                 self.assertIsNone(selection["turn"])
                 self.assertEqual(selection["detail"]["cohort"], policy)
                 self.assertEqual(selection["detail"]["runner"], runner)
