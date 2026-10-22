@@ -209,5 +209,57 @@ class G7ANativeTests(unittest.TestCase):
                          sum(v["kind"]=="round_end" for v in t["ledger"]))
 
 
+    def test_19_seed_30_dying_vanguard_uses_native_take_hit(self):
+        # Codex P1: the live Vanguard can be <=0 HP without being dead
+        # when the Hunter takes its next own turn. Native G0 must assign
+        # Take Hit, never precommit an illegal Guard/Dodge.
+        for level in (2,3):
+            for size in (3,4):
+                with self.subTest(level=level,size=size):
+                    trial=g7a.run_trial(level,size,30,include_ledger=True)
+                    self.assertIn(trial["outcome"],g7a.OUTCOMES)
+                    self.assertTrue(trial["ledger"])
+                    defenses=[
+                        ev for ev in trial["ledger"]
+                        if ev["kind"]=="defense_assigned"
+                        and ev["detail"]["actor"]=="vanguard"
+                        and ev["detail"]["attack_key"].startswith("hunter:vanguard:")
+                    ]
+                    self.assertTrue(defenses)
+                    self.assertTrue(all(
+                        ev["detail"]["defense"] in ("guard","dodge","take_hit")
+                        for ev in defenses))
+                    self.assertTrue(any(
+                        ev["detail"]["defense"]=="take_hit" for ev in defenses),
+                        "Seed 30 must exercise a Dying Vanguard's Take Hit")
+                    self.assertEqual(trial["measures"]["g5_melee_resolved"],
+                                     sum(ev["kind"]=="g5_melee_resolved"
+                                         for ev in trial["ledger"]))
+                    self.assertEqual(trial["measures"]["round_ends"],
+                                     trial["rounds_completed"])
+
+    def test_20_full_128_seed_cohort_never_drops_a_trial(self):
+        # A valid seed (formerly seed 30) must not raise ValueError and
+        # abort a full 128-seed census halfway through. Retain every
+        # terminal, cutoff and unresolved branch in the denominator.
+        report=g7a.census(128,start_seed=0,include_trials=False)
+        self.assertEqual(len(report["cases"]),4)
+        self.assertTrue(report["no_numeric_cr"])
+        for case in report["cases"]:
+            with self.subTest(scenario=case["scenario_id"]):
+                self.assertEqual(case["seed_count"],128)
+                self.assertEqual(sum(case["counts"].values()),128)
+                self.assertEqual(len(case["trial_digests"]),128)
+                self.assertEqual([x["seed"] for x in case["trial_digests"]],
+                                 list(range(128)))
+                self.assertEqual(sum(case["unresolved_reasons"].values()),
+                                 case["counts"]["unresolved_mechanical_branch"])
+                self.assertEqual(case["complete_hunter_defeat_terminal_count"],
+                                 case["counts"]["hunter_defeat_attested"])
+                self.assertIsNone(case["complete_encounter_outcome_rate"])
+                self.assertIsNone(case["confidence_interval"])
+                self.assertIsNone(case["hunter_cr"])
+
+
 if __name__=="__main__":
     unittest.main()
