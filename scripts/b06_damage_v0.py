@@ -60,6 +60,11 @@ class DamageState:
             raise ValueError("G4 already installed")
         self.e = encounter
         self.used_events = set()
+        # An ordinary apply_damage caller cannot impersonate the synchronous
+        # G3->G4 Flame delivery merely by guessing its event key/cause.
+        # Only apply_flame opens this transient exact-packet authority.
+        self._live_flame_delivery = None
+        self._flame_consumptions = {}
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
@@ -163,6 +168,11 @@ class DamageState:
         packets = tuple(packets)
         if not packets or any(not isinstance(p, DamagePacket) for p in packets):
             raise ValueError("A delivered event requires typed packets")
+        if (cause=="g3:thrown_flame"
+                and self._live_flame_delivery!=(
+                    recipient,event_key,packets,devastating)):
+            raise UnresolvedDecision(
+                "G3 Flame damage must be consumed through native G4.apply_flame")
         if a.dead:
             raise ValueError("Dead recipient cannot receive live encounter damage")
         resolved = [self._mitigate_hp(a, p) if p.resource == "hp" else p.raw
@@ -303,12 +313,33 @@ class DamageState:
                 or type(pending["vigor"]) is not int
                 or pending["vigor"]<0):
             raise ValueError("G3 primary Fire packet/critical evidence mismatch")
-        return self.apply_damage(target, (
-            DamagePacket("hp", "Fire", pending["fire_hp"]),
-            DamagePacket("vigor", "Direct Vigor", pending["vigor"])),
-            event_key=event_key, cause="g3:thrown_flame",
-            devastating=critical=="devastating",
-            wound_location_roll=wound_location_roll)
+        packets=(DamagePacket("hp","Fire",pending["fire_hp"]),
+                 DamagePacket("vigor","Direct Vigor",pending["vigor"]))
+        if self._live_flame_delivery is not None:
+            raise UnresolvedDecision("Nested G3 Flame damage delivery not authorized")
+        self._live_flame_delivery=(
+            target,event_key,packets,critical=="devastating")
+        start=len(self.e.ledger)
+        try:
+            result=self.apply_damage(
+                target,packets,event_key=event_key,cause="g3:thrown_flame",
+                devastating=critical=="devastating",
+                wound_location_roll=wound_location_roll)
+        finally:
+            # An exception must never leak authorization to a later
+            # generic delivery or to another turn.
+            self._live_flame_delivery=None
+        deliveries=[entry for entry in self.e.ledger[start:]
+                    if entry["kind"]=="g4_damage_applied"
+                    and entry["detail"].get("event_key")==event_key
+                    and entry["detail"].get("recipient")==target]
+        if len(deliveries)!=1:
+            raise AssertionError("Native Flame consumption lacks one G4 packet")
+        # Runtime source provenance, written ONLY by this dedicated G4
+        # executor after real damage. No new ledger event or historical
+        # G7-A hash is introduced by this additional authority check.
+        self._flame_consumptions[ledger_index]=deliveries[0]["index"]
+        return result
 
     def _profile_hit_packets(self, attacker, target, profile_id, *,
                              die_face, critical="normal",

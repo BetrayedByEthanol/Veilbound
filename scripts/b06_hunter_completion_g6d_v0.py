@@ -7,11 +7,69 @@ confirmation) and an independently sourced wound location. No invented
 G5 melee action, extra hit roll, or Bow VP packet is created.
 """
 from copy import deepcopy
+from math import ceil
 
 from scripts.b06_encounter_state_v0 import RegenerationChoice, UnresolvedDecision
 from scripts.b06_damage_v0 import DamagePacket
 from scripts.b06_ranged_v0 import ShotChoice
 from scripts.b05_bow_vanguard_l1_l3_v0 import profile as bow_sheet
+
+
+
+def _verified_flame_delivery(e,party,hunter,lethal):
+    """Require native G4 consumption and the exact G3 direct Flame payload."""
+    if e.g4 is None or lethal["detail"].get("cause")!="g3:thrown_flame":
+        return False
+    for launch in e.ledger:
+        if launch["kind"]!="g3_flame_launched":
+            continue
+        d=launch["detail"]
+        caster=d.get("caster")
+        if (caster not in party or e.actors[caster].source.source_id!="F"
+                or d.get("target")!=hunter
+                or d.get("outcome")!="direct_hit_pending_G4"
+                or lethal["detail"].get("event_key")!=
+                   f"g3-flame-ledger:{launch['index']}"
+                or e.g4._flame_consumptions.get(launch["index"])!=lethal["index"]
+                or lethal["round"]!=launch["round"]
+                or lethal["turn"]!=launch["turn"]
+                or launch["turn"]!=caster or launch["index"]>=lethal["index"]):
+            continue
+        tier,face,die=d.get("tier"),d.get("primary_face"),d.get("die")
+        if (type(tier) is not int or tier not in (1,2)
+                or type(face) is not int or not 1<=face<=20
+                or type(die) is not int or not 1<=die<=8
+                or d.get("vp_spent")!=2*tier or d.get("attack_total")!=face+5):
+            continue
+        critical=d.get("critical","normal")
+        dice=d.get("critical_dice",[])
+        count={"normal":0,"strong":1,"critical":2,"devastating":2}.get(critical)
+        if (count is None or not isinstance(dice,(list,tuple))
+                or len(dice)!=count or any(
+                    type(v) is not int or not 1<=v<=4 for v in dice)):
+            continue
+        confirmation=d.get("confirmation_face")
+        if face==20:
+            if (type(confirmation) is not int or not 1<=confirmation<=20
+                    or critical=="normal"
+                    or (confirmation==20)!=(critical=="devastating")):
+                continue
+        elif confirmation is not None or critical!="normal":
+            continue
+        authorized={"fire_hp":2+sum(dice),"vigor":2+ceil(die*tier/3)}
+        if d.get("packets_pending_g4")!=authorized:
+            continue
+        expected=(("hp","Fire",authorized["fire_hp"]),
+                  ("vigor","Direct Vigor",authorized["vigor"]))
+        packets=lethal["detail"].get("packets")
+        if (not isinstance(packets,list) or len(packets)!=2 or any(
+                not isinstance(p,dict) or p.get("resource")!=resource
+                or p.get("type")!=damage_type or type(p.get("raw")) is not int
+                or p["raw"]!=raw or p.get("armor_rule")!="none"
+                for p,(resource,damage_type,raw) in zip(packets,expected))):
+            continue
+        return True
+    return False
 
 
 class HunterCompletion:
@@ -226,20 +284,7 @@ class HunterCompletion:
             v["detail"].get("target")==hunter and
             (v["detail"].get("damage") or {}).get("dead") is True
             for v in e.ledger))
-        # A direct Scholar Thrown Flame has a synchronous, uniquely keyed
-        # G3 launch -> G4 packet. Never accept a merely pending G3 natural
-        # 20, a missed launch, or a different party caster as lethal proof.
-        valid_flame=bool(cause=="g3:thrown_flame" and any(
-            ev["kind"]=="g3_flame_launched"
-            and ev["detail"].get("caster") in party
-            and e.actors[ev["detail"]["caster"]].source.source_id=="F"
-            and ev["detail"].get("target")==hunter
-            and ev["detail"].get("outcome")=="direct_hit_pending_G4"
-            and lethal["detail"].get("event_key")==f"g3-flame-ledger:{ev['index']}"
-            and lethal["round"]==ev["round"]
-            and lethal["turn"]==ev["turn"]
-            and ev["index"]<lethal["index"]
-            for ev in e.ledger))
+        valid_flame=_verified_flame_delivery(e,party,hunter,lethal)
         if not (valid_bow or valid_melee or valid_flame):
             raise UnresolvedDecision("Lethal event lacks paid source-attested combat")
         if any(v["kind"]=="g6d_hunter_defeat_attested" for v in e.ledger):
