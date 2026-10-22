@@ -663,6 +663,25 @@ class SpellState:
             if v.expiry_round is not None and self.e.round>=v.expiry_round:
                 self._end(v,reason="round_begin_duration_expiry")
 
+    @staticmethod
+    def _flame_confirmation_tier(confirmation_face,defense,defense_value):
+        """One confirmation against the exact currently live G2 defense.
+
+        This pure helper is used both before the original AP declaration
+        and after any on_committed responses. A predeclared d4 allocation
+        cannot be repurposed if the defense has changed its severity.
+        """
+        if type(confirmation_face) is not int or not 1<=confirmation_face<=20:
+            raise ValueError("One natural-20 Flame confirmation d20 required")
+        if defense not in ("take_hit","dodge","guard"):
+            raise ValueError("Known source projectile defense required")
+        if confirmation_face==20:
+            return "devastating"
+        if defense=="take_hit":
+            return "critical"
+        return ("critical" if confirmation_face!=1
+                and confirmation_face+5>defense_value else "strong")
+
     def cast_flame(self,caster,target,*,tier,face,vigor_die,
                    defense="take_hit",aware=False,hand_available=False,
                    on_committed=None,exposures=(),origin=None,target_cell=None,
@@ -712,16 +731,8 @@ class SpellState:
             raise ValueError("Explicit Flame critical dice required")
         critical="normal"
         if face==20 and confirmation_face is not None:
-            if type(confirmation_face) is not int or not 1<=confirmation_face<=20:
-                raise ValueError("One natural-20 Flame confirmation d20 required")
-            if confirmation_face==20:
-                critical="devastating"
-            elif defense=="take_hit":
-                critical="critical"
-            elif confirmation_face!=1 and confirmation_face+5>declared_defense:
-                critical="critical"
-            else:
-                critical="strong"
+            critical=self._flame_confirmation_tier(
+                confirmation_face,defense,declared_defense)
         elif face!=20 and confirmation_face is not None:
             raise ValueError("Flame confirmation only follows natural 20")
         required={"normal":0,"strong":1,"critical":2,"devastating":2}[critical]
@@ -766,6 +777,25 @@ class SpellState:
                        spell_kind="Thrown Flame",
                        cause="post_commit_defense_unusable",reason=str(error))
             return {"outcome":"interrupted_before_launch","vp_spent":0}
+        # The committed responses may have spent Dodge pressure, altered
+        # toxin/position defenses or otherwise changed the critical tier.
+        # A different tier needs a different *precommitted* number of d4s.
+        # Do not apply stale Fire damage and never fill the gap by rerolling
+        # or conjuring another die after the attacker has committed AP.
+        # Reject the launch BEFORE Spent VP/defensive capacity is paid.
+        if confirmed_critical:
+            live_critical=self._flame_confirmation_tier(
+                confirmation_face,defense,preflight_defense)
+            if live_critical!=critical:
+                self.e.log("g3_cast_interrupted",caster=caster,
+                           spell_kind="Thrown Flame",
+                           cause="post_commit_critical_tier_changed",
+                           original_tier=critical,live_tier=live_critical,
+                           original_defense=declared_defense,
+                           live_defense=preflight_defense,vp_spent=0)
+                self.e.check()
+                return {"outcome":"interrupted_before_launch","vp_spent":0,
+                        "cause":"post_commit_critical_tier_changed"}
         # Preflight an actual wound location before Spent VP or the target's
         # defense is committed. A qualifying G4 hit must resolve *now*, not
         # leave a paid hit with a missing later adjudication choice.
