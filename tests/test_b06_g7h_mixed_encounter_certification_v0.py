@@ -987,5 +987,121 @@ class G7HMixedNativeTests(unittest.TestCase):
                                      policy=POLICIES[0])
 
 
+    def test_47_codex_p1_AB_melee_replays_source_AP_and_remainder(self):
+        # A/B have valid signed 20-AP melee hits, but a hash does NOT
+        # authenticate forged Step-4 turn resources or a paid remainder.
+        for actor in ("vanguard", "guardian"):
+            for mutation in ("zero_turn_AP", "wrong_remainder",
+                             "surplus_turn_AP", "overdrawn_prior_payment"):
+                with self.subTest(actor=actor, mutation=mutation):
+                    trial = self._case(POLICIES[0])
+                    ledger = trial["ledger"]
+                    action = next(v for v in ledger
+                                  if v["kind"] == "action_committed"
+                                  and v["turn"] == actor
+                                  and v["detail"].get("label", "").startswith("sequence:"))
+                    res = next(v for v in ledger
+                               if v["kind"] == "turn_resources"
+                               and v["round"] == action["round"]
+                               and v["turn"] == actor)
+                    if mutation == "zero_turn_AP":
+                        res["detail"]["ap"] = 0
+                    elif mutation == "wrong_remainder":
+                        action["detail"]["ap_remaining"] = 0
+                    elif mutation == "surplus_turn_AP":
+                        res["detail"]["ap"] += 20
+                        action["detail"]["ap_remaining"] += 20
+                    else:
+                        action["detail"]["ap_spent"] += 50
+                        action["detail"]["ap_remaining"] -= 50
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17,
+                                     policy=POLICIES[0])
+
+    def test_48_codex_p1_legal_wrong_hunter_move_breaks_real_contact(self):
+        # A legal 2-MP sideways move is not a legal head-forward Bite.
+        # Both moved footprints and the G7-G summary are self-consistent,
+        # and the original editable contact=True assertion is left intact.
+        trial = self._case(POLICIES[2])
+        ledger = trial["ledger"]
+        pursuit = next(v for v in ledger
+                       if v["kind"] == "g7g_hunter_pursuit_executed"
+                       and v["round"] == 2)
+        moves = pursuit["detail"]["movement_indices"]
+        self.assertEqual(len(moves), 1)
+        step = ledger[moves[0]]
+        self.assertEqual(step["detail"]["direction"], [-1, 0])
+        self.assertEqual(step["detail"]["new"], [[2, 2], [3, 2]])
+        step["detail"]["direction"] = [0, -1]
+        step["detail"]["new"] = [[3, 1], [4, 1]]
+        pursuit["detail"]["final_footprint"] = [[3, 1], [4, 1]]
+        self.assertTrue(pursuit["detail"]["contact"])
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaisesRegex(AssertionError, "contact"):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+    def test_49_codex_p1_regeneration_requires_HP_cap_and_source_spending(self):
+        # Source Scholar starts at full HP. Editing the signed Step-2
+        # transcript and final summary cannot conjure HP above Max HP.
+        for mutation in ("over_max", "free_HP", "too_much_throughput",
+                         "false_vigor", "wrong_hp_arithmetic", "repair_from_nothing"):
+            with self.subTest(mutation=mutation):
+                trial = self._case(POLICIES[2])
+                ledger = trial["ledger"]
+                steps = [v for v in ledger if v["kind"] == "regeneration_step"
+                         and v["detail"].get("actor") == "scholar"]
+                self.assertTrue(steps)
+                regen = steps[-1]["detail"]
+                if mutation == "over_max":
+                    regen["hp_after"] = 999
+                    regen["hp_restored"] = 999 - regen["hp_before"]
+                    trial["final_state"]["scholar"]["hp"] = 999
+                elif mutation == "free_HP":
+                    regen["hp_restored"] = 1
+                    regen["hp_after"] = regen["hp_before"] + 1
+                    regen["throughput_spent"] = 0
+                    trial["final_state"]["scholar"]["hp"] += 1
+                elif mutation == "too_much_throughput":
+                    regen["throughput_spent"] = 99
+                elif mutation == "false_vigor":
+                    regen["vigor_after"] += 1
+                    trial["final_state"]["scholar"]["vigor"] += 1
+                elif mutation == "wrong_hp_arithmetic":
+                    regen["hp_after"] += 1
+                    trial["final_state"]["scholar"]["hp"] += 1
+                else:
+                    regen["repair_points"] = 1
+                    regen["wound_allocations"] = [["fake", 1]]
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+    def test_50_codex_p1_all_victory_terminal_fields_source_derived(self):
+        pristine = self._case(POLICIES[0])
+        terminal = next(v for v in pristine["ledger"]
+                        if v["kind"] == "g6d_hunter_defeat_attested")
+        fields = ("hunter", "party", "hp", "source_digest",
+                  "round", "outcome", "source_event_cause", "hunter_cr")
+        self.assertTrue(all(field in terminal["detail"] for field in fields))
+        for mutation in fields + ("all_forged_together",):
+            with self.subTest(mutation=mutation):
+                trial = self._case(POLICIES[0])
+                signed = next(v for v in trial["ledger"]
+                              if v["kind"] == "g6d_hunter_defeat_attested")
+                fields_to_change = fields[:-1] if mutation == "all_forged_together" else (mutation,)
+                for field in fields_to_change:
+                    signed["detail"][field] = {
+                        "hunter": "other", "party": ["scholar", "vanguard"],
+                        "hp": 999, "source_digest": "not-source",
+                        "round": 0, "outcome": "noncanonical",
+                        "source_event_cause": "unsourced",
+                        "hunter_cr": "fake-rating",
+                    }[field]
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+
 if __name__ == "__main__":
     unittest.main()

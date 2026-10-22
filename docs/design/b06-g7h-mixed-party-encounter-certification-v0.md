@@ -75,6 +75,18 @@ matrix when all three branches pass independently:
    independently reconstructed receipts. No post-exit actor movement,
    damage or new turn is accepted.
 
+Additional P1 authentication (this review round): A/B source melee
+must reconcile each paid 20-AP action against Step-4 original Turn AP
+and remaining AP; G7-G withdrawal must retain actual Hunter head-forward
+contact at the **replayed**, not just receipt-claimed, Round-2 pursuit
+footprint and at paid Bite rolls; every native regeneration Step must
+stay within independently sourced HP maximum, Regen throughput, Vigor
+availability, Dying and Step 2 timing. This bounded scenario does not
+authorize spontaneous external heals or unspecified voluntary wound
+repair. The G6-D victory terminal must match the **entire** authentic
+source receipt, including original party roster, source digest, native
+HP and round, cause and outcome—not merely its lethal event index.
+
 A mislabeled, incomplete, role-substituted, stale, unsigned or
 nonterminal result fails closed.
 
