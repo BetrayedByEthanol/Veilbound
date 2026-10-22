@@ -412,6 +412,39 @@ def _terminal_proof(report, ledger, *, policy, deaths):
             or report.get("hunter_cr") is not None
             or report.get("rounds_completed", report.get("rounds")) is None):
         raise AssertionError("G7-H requires unique authentic signed terminal")
+    if policy != "mixed_victory_rite":
+        # A fresh SHA over externally supplied bytes cannot authenticate
+        # *meaning* of a signed G7-C terminal. Reconstruct its entire native
+        # event and returned receipt schema from the finished G0 round and
+        # independently checked underlying fatal/exit evidence. Reject
+        # omitted, additional or altered fields rather than cherry-picking
+        # the event's lethal/exit list.
+        signed = terminals[0]
+        evidence = ("lethal_damage_indices"
+                    if policy == "hunter_multitarget_defeat"
+                    else "member_exits")
+        native_detail = {
+            "party": list(ROSTER[1:]),
+            evidence: receipt.get(evidence),
+            "round": report["rounds_completed"],
+            "hunter_cr": None,
+        }
+        native_receipt = {
+            "ending": outcome,
+            "terminal_event": signed["index"],
+            evidence: receipt.get(evidence),
+            "hunter_cr": None,
+            "complete_party_pack_certified": False,
+        }
+        last_end = max(x["index"] for x in ledger if x["kind"] == "round_end")
+        if (signed["detail"] != native_detail
+                or receipt != native_receipt
+                or signed["round"] != report["rounds_completed"]
+                or signed["turn"] is not None
+                or signed["index"] <= last_end):
+            raise AssertionError(
+                "G7-C signed terminal differs from canonical party/round/"
+                "rating/evidence and exact source receipt")
     if policy == "mixed_victory_rite":
         terminal = terminals[0]
         fatal_index = terminal["detail"].get("lethal_damage_index")
@@ -938,9 +971,19 @@ def _replay_native_exit_geometry(ledger):
             for actor in ROSTER}
 
 
-def _authored_exit_chains(ledger, terminal):
-    """Validate all original G7-C G1 -> G4.5 -> G5 source-backed exits."""
+def _authored_exit_chains(ledger, terminal, final_state):
+    """Validate G7-C exits and bind native G1 replay to closing positions."""
     proven_positions = _replay_native_exit_geometry(ledger)
+    # The caller's final_state is an untrusted summary, not a source of
+    # geometry. G1 replay reconstructs positions for *every* sourced actor,
+    # including Hunter and any player who did not move in the final round.
+    if (not isinstance(final_state, dict)
+            or set(final_state) != set(ROSTER)
+            or any(not isinstance(final_state[actor], dict)
+                   or final_state[actor].get("occupied") != proven_positions[actor]
+                   for actor in ROSTER)):
+        raise AssertionError(
+            "Closing source footprints disagree with fully replayed native G1 moves")
     e0 = ledger[0]["detail"]
     maps = [x for x in ledger if x["kind"] == "g1_map_installed"]
     if len(maps) != 1:
@@ -1346,7 +1389,7 @@ def _flame_delivery_packet(ledger, flame):
     return hit
 
 
-def _source_decisions(ledger, *, policy, terminal):
+def _source_decisions(ledger, *, policy, terminal, final_state):
     events = {}
     for kind in ("g5_melee_resolved", "g6d_bow_adjudicated",
                  "g3_flame_launched", "g3_effect_established",
@@ -1500,7 +1543,7 @@ def _source_decisions(ledger, *, policy, terminal):
                    [h["resolved"]["index"] for h in bite_hits]):
             raise AssertionError(
                 "G7-G opposed withdrawal needs two real paid Bites, including post-pursuit")
-        receipts = _authored_exit_chains(ledger, terminal)
+        receipts = _authored_exit_chains(ledger, terminal, final_state)
         if items[0]["detail"].get("border_exit_indices") != [
                 receipt["g5"] for receipt in receipts]:
             raise AssertionError("G7-G verification's exit indices diverged from native receipts")
@@ -1573,7 +1616,8 @@ def attest_trial(report, *, level, seed, policy):
     _reconcile_source_regeneration(
         ledger, final, policy=policy, level=level, seed=seed)
     terminal = _terminal_proof(report, ledger, policy=policy, deaths=deaths)
-    facts = _source_decisions(ledger, policy=policy, terminal=terminal)
+    facts = _source_decisions(
+        ledger, policy=policy, terminal=terminal, final_state=final)
     return {"policy": policy, "outcome": TERMINALS[policy][0],
             "source_scenario_id": report["scenario_id"],
             "native_terminal_event": terminal["index"],

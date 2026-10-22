@@ -1103,5 +1103,82 @@ class G7HMixedNativeTests(unittest.TestCase):
                     attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
 
 
+    def test_51_codex_p1_G7C_every_signed_terminal_field_is_canonical(self):
+        """A self-consistent recomputed SHA must not certify forged G7-C."""
+        for policy in POLICIES[1:]:
+            terminal_kind = TERMINALS[policy][1]
+            proof_key = ("lethal_damage_indices"
+                         if policy == POLICIES[1] else "member_exits")
+            for mutation in ("detail_round_999", "detail_round_earlier",
+                             "detail_hunter_cr", "detail_party",
+                             "detail_missing_field", "detail_extra_field",
+                             "detail_evidence", "event_round",
+                             "event_turn", "receipt_extra_field",
+                             "receipt_missing_rating"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = self._case(policy)
+                    signed = next(ev for ev in trial["ledger"]
+                                  if ev["kind"] == terminal_kind)
+                    if mutation == "detail_round_999":
+                        signed["detail"]["round"] = 999
+                    elif mutation == "detail_round_earlier":
+                        signed["detail"]["round"] = 1
+                    elif mutation == "detail_hunter_cr":
+                        signed["detail"]["hunter_cr"] = "fabricated-CR"
+                    elif mutation == "detail_party":
+                        signed["detail"]["party"] = ["vanguard"]
+                    elif mutation == "detail_missing_field":
+                        signed["detail"].pop("hunter_cr")
+                    elif mutation == "detail_extra_field":
+                        signed["detail"]["certified"] = True
+                    elif mutation == "detail_evidence":
+                        signed["detail"][proof_key] = []
+                    elif mutation == "event_round":
+                        signed["round"] = 999
+                    elif mutation == "event_turn":
+                        signed["turn"] = "archer"
+                    elif mutation == "receipt_extra_field":
+                        trial["native_terminal"]["invented"] = "accepted"
+                    else:
+                        trial["native_terminal"].pop("hunter_cr")
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_52_codex_p2_closing_snapshot_matches_replayed_all_actor_positions(self):
+        """Submitted snapshots are untrusted even with a genuine ledger hash."""
+        for actor in ("hunter", "vanguard", "guardian", "archer", "scholar"):
+            for mutation in ("outside_grid", "different_inside_grid",
+                             "malformed_footprint"):
+                with self.subTest(actor=actor, mutation=mutation):
+                    trial = self._case(POLICIES[2])
+                    original = deepcopy(trial["final_state"][actor]["occupied"])
+                    if mutation == "outside_grid":
+                        position = [[99, 99]]
+                    elif mutation == "different_inside_grid":
+                        position = [[(original[0][0] + 1) % 8, original[0][1]]]
+                    else:
+                        position = [[0, 0], [0, 0], [0, 0]]
+                    trial["final_state"][actor]["occupied"] = position
+                    # final_state is not inside the native ledger digest.
+                    self.assertEqual(
+                        trial["ledger_sha256"], canonical_digest(trial["ledger"]))
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+    def test_53_codex_p2_legitimate_L2_L3_footprints_remain_certified(self):
+        for level in (2, 3):
+            with self.subTest(level=level):
+                trial = run_pack(level, 17, include_trials=True)[
+                    "native_trials"][POLICIES[2]]
+                proof = attest_trial(trial, level=level, seed=17,
+                                     policy=POLICIES[2])
+                self.assertEqual(proof["outcome"],
+                                 "party_withdrawal_attested")
+                self.assertEqual(
+                    set(trial["final_state"]),
+                    {"hunter", "vanguard", "guardian", "archer", "scholar"})
+
+
 if __name__ == "__main__":
     unittest.main()
