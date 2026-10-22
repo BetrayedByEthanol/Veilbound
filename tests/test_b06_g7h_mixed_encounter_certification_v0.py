@@ -207,5 +207,141 @@ class G7HMixedNativeTests(unittest.TestCase):
         self.assertFalse(original["complete_party_pack_certified"])
 
 
+    def test_15_codex_p1_defeat_cannot_cancel_all_four_lethal_bites(self):
+        """A real G4 death does not survive removal of its G5 resolve."""
+        trial = self._case(POLICIES[1])
+        lethal = [x for x in trial["ledger"]
+                  if x["kind"] == "g5_melee_resolved"
+                  and x["detail"].get("attacker") == "hunter"
+                  and (x["detail"].get("damage") or {}).get("dead") is True]
+        self.assertEqual(len(lethal), 4)
+        for event in lethal:
+            event["kind"] = "g5_melee_cancelled"
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[1])
+
+    def test_16_codex_p1_lone_lethal_bite_needs_roll_and_g45(self):
+        for missing_kind in ("g5_melee_roll", "g45_attested_hit",
+                             "g5_melee_resolved", "action_committed"):
+            with self.subTest(missing_kind=missing_kind):
+                trial = self._case(POLICIES[1])
+                ledger = trial["ledger"]
+                fatal = next(x for x in ledger if x["kind"] == "g5_melee_resolved"
+                             and x["detail"].get("attacker") == "hunter"
+                             and (x["detail"].get("damage") or {}).get("dead") is True)
+                action_index = fatal["detail"]["action_index"]
+                if missing_kind == "action_committed":
+                    ledger[action_index]["kind"] = "missing_paid_action"
+                elif missing_kind == "g5_melee_resolved":
+                    fatal["kind"] = "g5_melee_cancelled"
+                else:
+                    hit = next(x for x in ledger if x["kind"] == missing_kind
+                               and x["detail"].get("action_index") == action_index)
+                    hit["kind"] = "missing_source_proof"
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[1])
+
+    def test_17_codex_p1_withdrawal_requires_two_resolved_hunter_bites(self):
+        for removed in ("both", "round2", "roll2", "bridge2"):
+            with self.subTest(removed=removed):
+                trial = self._case(POLICIES[2])
+                ledger = trial["ledger"]
+                bites = [x for x in ledger if x["kind"] == "g5_melee_resolved"
+                         and x["detail"].get("attacker") == "hunter"
+                         and x["detail"].get("target") == "vanguard"]
+                self.assertEqual([x["round"] for x in bites], [1, 2])
+                if removed == "both":
+                    for event in bites:
+                        event["kind"] = "g5_melee_cancelled"
+                elif removed == "round2":
+                    bites[1]["kind"] = "g5_melee_cancelled"
+                else:
+                    action_index = bites[1]["detail"]["action_index"]
+                    kind = ("g5_melee_roll" if removed == "roll2"
+                            else "g45_attested_hit")
+                    event = next(x for x in ledger if x["kind"] == kind
+                                 and x["detail"].get("action_index") == action_index)
+                    event["kind"] = "source_bite_evidence_missing"
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+    def test_18_codex_p1_withdrawal_requires_four_g45_exits(self):
+        for removed in ("all", "one"):
+            with self.subTest(removed=removed):
+                trial = self._case(POLICIES[2])
+                bridge = [x for x in trial["ledger"]
+                          if x["kind"] == "g45_withdrawal_attested"]
+                self.assertEqual(len(bridge), 4)
+                for event in bridge if removed == "all" else bridge[:1]:
+                    event["kind"] = "g45_source_attestation_missing"
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+    def test_19_exit_chain_policy_move_and_round_tampering(self):
+        for broken in ("auth_policy", "auth_square", "g5_policy", "g45_policy",
+                       "move_kind", "move_cell", "move_actor", "move_round",
+                       "exit_round", "terminal_receipt", "missing_move"):
+            with self.subTest(broken=broken):
+                trial = self._case(POLICIES[2])
+                ledger = trial["ledger"]
+                actor = "guardian"
+                auth = next(e for e in ledger if e["kind"] ==
+                            "g5_scene_exit_authored"
+                            and e["detail"].get("actor") == actor)
+                g5 = next(e for e in ledger if e["kind"] == "g5_terminal_exit"
+                          and e["detail"].get("actor") == actor)
+                g45 = next(e for e in ledger if e["kind"] ==
+                           "g45_withdrawal_attested"
+                           and e["detail"].get("actor") == actor)
+                move = ledger[g5["detail"]["movement_index"]]
+                end = next(e for e in ledger
+                           if e["kind"] == "g7c_party_withdrawal_attested")
+                if broken == "auth_policy":
+                    auth["detail"]["policy"] = "unauthorized_exit"
+                elif broken == "auth_square":
+                    auth["detail"]["square"] = [0, 0]
+                elif broken == "g5_policy":
+                    g5["detail"]["policy"] = "unauthorized_exit"
+                elif broken == "g45_policy":
+                    g45["detail"]["exit_policy_reference"] = "unauthorized_exit"
+                elif broken == "move_kind":
+                    move["detail"]["step_kind"] = "pivot"
+                elif broken == "move_cell":
+                    move["detail"]["new"] = [[0, 0]]
+                elif broken == "move_actor":
+                    move["detail"]["actor"] = "vanguard"
+                elif broken == "move_round":
+                    move["round"] = 1
+                elif broken == "exit_round":
+                    g5["round"] = 1
+                elif broken == "terminal_receipt":
+                    end["detail"]["member_exits"][1]["g45"] = 0
+                else:
+                    move["kind"] = "g1_step_cancelled"
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+    def test_20_exit_after_source_departure_cannot_resume_movement(self):
+        trial = self._case(POLICIES[2])
+        ledger = trial["ledger"]
+        exiting = next(e for e in ledger if e["kind"] == "g5_terminal_exit"
+                       and e["detail"].get("actor") == "vanguard")
+        # Reinterpret a harmless later event as an illicit G1 step by the
+        # already-exited Vanguard. Do not alter any original event indices.
+        candidate = next(e for e in ledger if e["index"] > exiting["index"]
+                         and e["kind"] == "g45_native_turn_started"
+                         and e["turn"] == "guardian")
+        candidate["kind"] = "g1_movement_step"
+        candidate["detail"]["actor"] = "vanguard"
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+
 if __name__ == "__main__":
     unittest.main()

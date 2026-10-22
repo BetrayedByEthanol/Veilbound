@@ -59,9 +59,21 @@ matrix when all three branches pass independently:
    point to the original event—not a new G7-H or fabricated ending.
 5. G7-H independently checks decisive native evidence: R actual Chosen
    Rite and Bow, F two real Fire packet deliveries, A/B melee and Hunter
-   Bite for victory; genuine unique G4 fatal Hunter Bite receipts for
-   every player in defeat; and four distinct source exits plus actual
-   Hunter pursued G1 steps for withdrawal.
+   Bite for victory. **Each lethal Hunter Bite** must retain one uncancelled
+   paid G0 Physical Action, its original G5 declaration, a hit-producing G5
+   roll, the synchronous G4 damage transition, a matching G4.5 attested hit,
+   and a final G5 `melee_resolved` result bound to the **same source action,
+   victim and round**. G4 cause text and the terminal's lethal indices alone
+   cannot certify a death.
+6. For opposed withdrawal, **both** native Hunter Bites must resolve in
+   Round 1 and after Round-2 pursuit respectively. The signed pursuit event
+   must reference actual paid G1 steps; all four exits must independently
+   bind the **previously authored actor/policy/border square** to the final
+   same-turn G1 cautious translation, the original matching G4.5 withdrawal
+   attestation, and the G5 exit, in strict event order. The final G7-C
+   `member_exits` list and G7-G verification indices must match those
+   independently reconstructed receipts. No post-exit actor movement,
+   damage or new turn is accepted.
 
 A mislabeled, incomplete, role-substituted, stale, unsigned or
 nonterminal result fails closed. Ordinary nonterminal scenes must retain

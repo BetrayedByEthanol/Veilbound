@@ -93,14 +93,212 @@ def _terminal_proof(report, ledger, *, policy, deaths):
             raise AssertionError("Hunter victory requires actual Hunter death")
     elif policy == "hunter_multitarget_defeat":
         if (deaths["hunter"] or not all(deaths[p] for p in ROSTER[1:])
+                or receipt.get("lethal_damage_indices") !=
+                   terminals[0]["detail"].get("lethal_damage_indices")
                 or len(receipt.get("lethal_damage_indices", ())) != 4):
             raise AssertionError("Hunter wipe requires four unique G4 lethal Bites")
     else:
-        if (any(deaths.values()) or
-                len(receipt.get("member_exits", ())) != 4):
+        if (any(deaths.values())
+                or receipt.get("member_exits") !=
+                   terminals[0]["detail"].get("member_exits")
+                or len(receipt.get("member_exits", ())) != 4):
             raise AssertionError("Disengagement requires all living original party exits")
     return terminals[0]
 
+
+
+# These four border destinations are fixed by the G6-C scene constructor,
+# NOT supplied by a terminal report or an editable exit-policy event.
+G7C_BORDER_SQUARES = {
+    "vanguard": [0, 2], "guardian": [3, 6],
+    "archer": [0, 4], "scholar": [0, 0],
+}
+
+
+def _hunter_bite_hits(ledger, target):
+    """Reconstruct each *resolved* Hunter Bite from its source-paid G0 chain.
+
+    A cancelled paid slot is NOT a hit, even if an earlier G4 packet and a
+    G7-C terminal are left in a tampered ledger. All five stages are bound
+    to the same paid action, target, source profile and native actor turn.
+    """
+    hits = []
+    seed = ledger[0]["detail"].get("seed")
+    for resolved in ledger:
+        if (resolved["kind"] != "g5_melee_resolved"
+                or resolved["detail"].get("attacker") != "hunter"
+                or resolved["detail"].get("target") != target
+                or resolved["detail"].get("profile") != "B06-AT-04"
+                or resolved["detail"].get("outcome") != "hit"):
+            continue
+        d = resolved["detail"]
+        action_index = d.get("action_index")
+        if (type(action_index) is not int
+                or not 0 <= action_index < resolved["index"]):
+            raise AssertionError("Bite resolution needs its exact paid action")
+        action = ledger[action_index]
+        if (action["kind"] != "action_committed"
+                or action["round"] != resolved["round"]
+                or action["turn"] != resolved["turn"]
+                or resolved["turn"] != "hunter"
+                or action["detail"].get("actor") != "hunter"
+                or action["detail"].get("action_class") != "physical"
+                or any(x["kind"] == "g5_melee_cancelled"
+                       and x["detail"].get("action_index") == action_index
+                       for x in ledger)):
+            raise AssertionError("Bite must consume one genuine uncancelled G0 payment")
+        attestations = [x for x in ledger
+                        if x["kind"] == "g5_melee_sequence_attested"
+                        and action_index in x["detail"].get("action_indices", ())
+                        and action_index < x["index"] < resolved["index"]]
+        if len(attestations) != 1:
+            raise AssertionError("Bite lacks one source-authenticated G5 sequence")
+        attested = attestations[0]
+        seq = attested["detail"]
+        position = seq["action_indices"].index(action_index)
+        declaration_index = seq.get("declaration_index")
+        if (seq.get("attacker") != "hunter" or seq.get("target") != target
+                or len(seq.get("profiles", ())) <= position
+                or seq["profiles"][position] != "B06-AT-04"
+                or type(declaration_index) is not int
+                or not action_index < declaration_index < attested["index"]
+                or attested["round"] != resolved["round"]
+                or attested["turn"] != "hunter"):
+            raise AssertionError("Bite sequence changed its source profile or prey")
+        declaration = ledger[declaration_index]
+        if (declaration["kind"] != "attack_sequence_committed"
+                or declaration["detail"].get("attacker") != "hunter"
+                or declaration["detail"].get("target") != target
+                or len(declaration["detail"].get("profiles", ())) <= position
+                or declaration["detail"]["profiles"][position] != "B06-AT-04"
+                or action["detail"].get("label") !=
+                   f"sequence:B06-AT-04:{position}"):
+            raise AssertionError("Paid Bite does not match original G0 declaration")
+        rolls = [x for x in ledger
+                 if x["kind"] == "g5_melee_roll"
+                 and x["detail"].get("action_index") == action_index]
+        bridges = [x for x in ledger
+                   if x["kind"] == "g45_attested_hit"
+                   and x["detail"].get("action_index") == action_index]
+        if len(rolls) != 1 or len(bridges) != 1:
+            raise AssertionError("Resolved Bite requires unique G5 roll and G4.5 hit")
+        roll, bridge = rolls[0], bridges[0]
+        native = (roll, bridge, resolved)
+        if (not attested["index"] < roll["index"] < bridge["index"]
+                < resolved["index"]
+                or any(x["round"] != resolved["round"] or x["turn"] != "hunter"
+                       for x in native)
+                or any(x["detail"].get("attacker") != "hunter"
+                       or x["detail"].get("target") != target
+                       or x["detail"].get("profile") != "B06-AT-04"
+                       for x in native)
+                or roll["detail"].get("hit") is not True
+                or roll["detail"].get("declaration_index") != declaration_index
+                or roll["detail"].get("slot") != position
+                or bridge["detail"].get("sequence_declaration_index") != declaration_index
+                or bridge["detail"].get("declared_profile_index") != position
+                or bridge["detail"].get("source_event") !=
+                   f"g5:source:{seed}:{action_index}"
+                or not isinstance(bridge["detail"].get("actual_result"), dict)
+                or d.get("damage") != bridge["detail"]["actual_result"]):
+            raise AssertionError("Hunter Bite roll, G4.5 and G5 outcome are not one hit")
+        damages = [x for x in ledger
+                   if x["kind"] == "g4_damage_applied"
+                   and roll["index"] < x["index"] < bridge["index"]
+                   and x["detail"].get("recipient") == target
+                   and x["detail"].get("cause") == "source-profile:B06-AT-04"]
+        if len(damages) != 1:
+            raise AssertionError("Hunter Bite has no single synchronous G4 packet")
+        damage = damages[0]
+        result = bridge["detail"]["actual_result"]
+        if (damage["round"] != resolved["round"] or damage["turn"] != "hunter"
+                or result.get("dead") is not damage["detail"].get("dead")
+                or result.get("hp_loss") != (
+                    damage["detail"].get("hp_before", 0) -
+                    damage["detail"].get("hp_after", 0))):
+            raise AssertionError("Bite's G4 damage does not match attested G5 outcome")
+        hits.append({"resolved": resolved, "roll": roll,
+                     "bridge": bridge, "damage": damage,
+                     "action": action, "sequence": attested})
+    return hits
+
+
+def _authored_exit_chains(ledger, terminal):
+    """Validate all original G7-C G1 -> G4.5 -> G5 source-backed exits."""
+    e0 = ledger[0]["detail"]
+    maps = [x for x in ledger if x["kind"] == "g1_map_installed"]
+    if len(maps) != 1:
+        raise AssertionError("Missing native G1 authored exit map")
+    grid = maps[0]["detail"]
+    if grid.get("scene") != "G6C-clear-mixed-front":
+        raise AssertionError("G7-H exit policy must use original G6-C grid")
+    authors = [x for x in ledger if x["kind"] == "g5_scene_exit_authored"]
+    exits = [x for x in ledger if x["kind"] == "g5_terminal_exit"]
+    bridges = [x for x in ledger if x["kind"] == "g45_withdrawal_attested"]
+    party = ROSTER[1:]
+    if (len(authors) != 4 or len(exits) != 4 or len(bridges) != 4
+            or {x["detail"].get("actor") for x in authors} != set(party)
+            or {x["detail"].get("actor") for x in exits} != set(party)
+            or {x["detail"].get("actor") for x in bridges} != set(party)):
+        raise AssertionError("Each PC needs unique authored/G4.5/G5 exit receipts")
+    receipts = []
+    for actor in party:
+        auth = next(x for x in authors if x["detail"]["actor"] == actor)
+        exit_event = next(x for x in exits if x["detail"]["actor"] == actor)
+        signed = next(x for x in bridges if x["detail"]["actor"] == actor)
+        square = G7C_BORDER_SQUARES[actor]
+        policy = f"G7C:party:{actor}:border"
+        at = exit_event["detail"]
+        step_index = at.get("movement_index")
+        if (auth["detail"].get("encounter_scene") != e0.get("scenario")
+                or auth["detail"].get("grid_scene") != grid["scene"]
+                or auth["detail"].get("objective") != e0.get("objective")
+                or auth["detail"].get("policy") != policy
+                or auth["detail"].get("square") != square
+                or auth["round"] != 1 or auth["turn"] is not None
+                or at.get("policy") != policy or at.get("at") != square
+                or type(step_index) is not int
+                or not auth["index"] < step_index < signed["index"]
+                < exit_event["index"] < terminal["index"]
+                or signed["detail"].get("status") != "withdrawal_attested"
+                or signed["detail"].get("exit_policy_reference") != policy
+                or signed["detail"].get("movement_event_index") != step_index
+                or signed["detail"].get("round") != exit_event["round"]
+                or signed["round"] != exit_event["round"]
+                or signed["turn"] != exit_event["turn"]
+                or exit_event["turn"] != actor):
+            raise AssertionError("G7-H actor's authored border or signed exit mismatched")
+        step = ledger[step_index]
+        mv = step["detail"]
+        if (step["kind"] != "g1_movement_step"
+                or step["turn"] != actor or step["round"] != exit_event["round"]
+                or mv.get("actor") != actor
+                or mv.get("step_kind") not in ("orthogonal", "diagonal")
+                or mv.get("old") == mv.get("new")
+                or mv.get("new") != [square]
+                or mv.get("cautious") is not True
+                or type(mv.get("cost")) is not int or mv["cost"] <= 0):
+            raise AssertionError("Exit requires paid final G1 cautious translation")
+        # Once G5 has signed an exit, that actor has no more source turns,
+        # harm or movement, even if later geometry would return to border.
+        if any(v["index"] > exit_event["index"] and (
+                (v["kind"] == "g4_damage_applied"
+                 and v["detail"].get("recipient") == actor)
+                or (v["kind"] in ("action_committed", "turn_start_expiry",
+                                    "turn_resources")
+                    and v["detail"].get("actor") == actor)
+                or (v["kind"].startswith("g1_")
+                    and (v["detail"].get("actor") == actor
+                         or v["detail"].get("mover") == actor)))
+               for v in ledger):
+            raise AssertionError("Exited actor continued native scene activity")
+        receipts.append({"actor": actor, "policy": policy,
+                         "movement": step_index, "g45": signed["index"],
+                         "g5": exit_event["index"]})
+    if (terminal["detail"].get("member_exits") != receipts
+            or terminal["detail"].get("party") != list(party)):
+        raise AssertionError("G7-C terminal exits disagree with four native receipt chains")
+    return receipts
 
 def _source_decisions(ledger, *, policy, terminal):
     events = {}
@@ -159,14 +357,30 @@ def _source_decisions(ledger, *, policy, terminal):
                 or items[0]["detail"].get("native_terminal_index") !=
                    terminal["index"]):
             raise AssertionError("Missing source-bound positive G7-G party wipe")
+        lethal_indices = terminal["detail"].get("lethal_damage_indices")
+        if (not isinstance(lethal_indices, list)
+                or len(lethal_indices) != len(ROSTER[1:])
+                or len(set(lethal_indices)) != len(lethal_indices)
+                or terminal["detail"].get("party") != list(ROSTER[1:])):
+            raise AssertionError("G7-C lethal indices must bind all original PCs")
+        proven = []
         for victim in ROSTER[1:]:
             deaths = [e for e in events["g4_damage_applied"]
                       if e["detail"].get("recipient") == victim
                       and e["detail"].get("dead") is True
                       and e["detail"].get("cause") == "source-profile:B06-AT-04"]
-            if len(deaths) != 1 or deaths[0]["index"] not in (
-                    terminal["detail"].get("lethal_damage_indices") or ()):
-                raise AssertionError("Non-native/deferred Hunter death in G7-H wipe")
+            if len(deaths) != 1:
+                raise AssertionError("Every source PC needs one actual lethal Bite")
+            death = deaths[0]
+            hits = [hit for hit in _hunter_bite_hits(ledger, victim)
+                    if hit["damage"]["index"] == death["index"]
+                    and hit["bridge"]["detail"]["actual_result"].get("dead") is True
+                    and hit["resolved"]["detail"]["damage"].get("dead") is True]
+            if len(hits) != 1:
+                raise AssertionError("Lethal G4 event lacks paid G5 roll/G4.5/resolved Bite")
+            proven.append(death["index"])
+        if proven != lethal_indices:
+            raise AssertionError("G7-C death indices differ from independently resolved Bites")
     else:
         items = events["g7g_living_hunter_disengagement_verified"]
         exits = events["g5_terminal_exit"]
@@ -178,13 +392,39 @@ def _source_decisions(ledger, *, policy, terminal):
                 or not p[0]["detail"].get("movement_indices")
                 or p[0]["detail"].get("contact") is not True):
             raise AssertionError("G7-H opposed withdrawal lacks living pursuit/exit proof")
-        for step in p[0]["detail"]["movement_indices"]:
-            if (type(step) is not int or not 0 <= step < len(ledger)
-                    or ledger[step]["kind"] != "g1_movement_step"
-                    or ledger[step]["detail"].get("actor") != "hunter"):
-                raise AssertionError("Non-native Hunter pursuit displacement")
-        if {e["detail"].get("actor") for e in exits} != set(ROSTER[1:]):
-            raise AssertionError("Missing/duplicated authenticated player exits")
+        pursuit = p[0]
+        if (pursuit["round"] != 2 or pursuit["turn"] != "hunter"
+                or items[0]["detail"].get("pursuit_index") != pursuit["index"]):
+            raise AssertionError("Authenticated pursuit must bind the actual second Hunter turn")
+        move_indices = pursuit["detail"]["movement_indices"]
+        if len(set(move_indices)) != len(move_indices):
+            raise AssertionError("Repeated Hunter movement index in pursuit")
+        for step_index in move_indices:
+            if (type(step_index) is not int
+                    or not 0 <= step_index < pursuit["index"]):
+                raise AssertionError("Invalid G1 pursuit movement index")
+            step = ledger[step_index]
+            if (step["kind"] != "g1_movement_step"
+                    or step["round"] != 2 or step["turn"] != "hunter"
+                    or step["detail"].get("actor") != "hunter"
+                    or step["detail"].get("cautious") is not True
+                    or type(step["detail"].get("cost")) is not int
+                    or step["detail"]["cost"] <= 0):
+                raise AssertionError("Hunter pursuit requires source-paid Round-2 G1 MP")
+        bite_hits = _hunter_bite_hits(ledger, "vanguard")
+        if (len(bite_hits) != 2 or
+                [h["resolved"]["round"] for h in bite_hits] != [1, 2]
+                or bite_hits[0]["resolved"]["index"] >= pursuit["index"]
+                or bite_hits[1]["roll"]["index"] <= pursuit["index"]
+                or bite_hits[1]["resolved"]["index"] >= terminal["index"]
+                or items[0]["detail"].get("hunter_paid_bite_indices") !=
+                   [h["resolved"]["index"] for h in bite_hits]):
+            raise AssertionError(
+                "G7-G opposed withdrawal needs two real paid Bites, including post-pursuit")
+        receipts = _authored_exit_chains(ledger, terminal)
+        if items[0]["detail"].get("border_exit_indices") != [
+                receipt["g5"] for receipt in receipts]:
+            raise AssertionError("G7-G verification's exit indices diverged from native receipts")
     return {
         "paid_melee_resolutions": len(melee),
         "bow_hit_adjudications": len(events["g6d_bow_adjudicated"]),
