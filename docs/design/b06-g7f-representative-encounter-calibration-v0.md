@@ -80,10 +80,35 @@ bounded native G0–G7 adapters are an exhaustive game engine.
 
 Every seed remains in one of the seven explicit outcome bins, including
 `legal_window_cutoff`, `unresolved_mechanical_branch`, and single-actor
-exit. An unresolved branch records its native reason. The source-policy
+exit. Its unresolved reason is now *derived from the hashed source ledger*,
+not trusted from mutable exception text. The source-policy
 paired observation cannot silently drop failed, censored or incomplete
 seed results. No post-selection denominator or "only resolved games"
 percentage is permitted.
+
+
+### Codex P2 follow-up — ledger-derived censored classifications
+
+The G7-F verifier reconstructs every non-certified outcome from the
+original source ledger and G4-reconciled death state. A genuine completed
+G0 Round End is required for `legal_window_cutoff`; an unmatched native
+Round Begin / turn-start or live unresolved decision produces a distinct
+unresolved classification. A real G5/G4.5 Archer exit cannot be demoted
+to a cutoff, and `party_defeat_observed` requires the deaths of every
+original PC, reconstructed from each genuine G4 transition.
+
+A real Hunter death without a corresponding terminal remains unresolved.
+Whole-party exit receipts without G7-C's unique party certificate are
+also unresolved rather than treated as safe departures. When the ledger
+demonstrates an incomplete turn, G7-F emits an auditable canonical reason
+(e.g. `native_turn_or_round_incomplete`) instead of allowing editable
+`unresolved.reason` to bias aggregated counts. Native reports that
+disagree with these ledger-derived outcomes fail closed, without rewriting
+the signed Phase 3 census or assigning a Hunter CR.
+
+Five additional regressions cover silent unresolved-to-cutoff,
+tampered unresolved reason, Archer-exit demotion, false whole-party death,
+and a positive reconstructed observed-party-death control.
 
 ## Paired, but noncausal tactical comparisons
 
@@ -139,7 +164,7 @@ python -m scripts.b06_g7f_representative_calibration_v0 --seeds 4
 python -m scripts.b06_g7f_representative_calibration_v0 --seeds 128
 ```
 
-The 31 dedicated tests cover all 31 native policy cells, paired
+The 36 dedicated tests cover all 31 native policy cells, paired
 histories, sample accounting, CLI/hash reproducibility, and fail-closed
 source, ledger, turn, terminal, time-handoff and CR invariants. Full
 repository CI must verify the unchanged Phase 3 signature, Bow and

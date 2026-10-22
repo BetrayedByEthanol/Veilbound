@@ -46,6 +46,11 @@ def fake_source_trial(level, size, seed, policy, outcome="legal_window_cutoff"):
     if outcome in g7f.CERTIFIED_TERMINALS:
         ledger.append({"index": len(ledger), "round": 1,
                        "kind": g7f.CERTIFIED_TERMINALS[outcome], "detail": {}})
+    if outcome == "unresolved_mechanical_branch":
+        # A genuine opened Round Begin cannot become a completed cutoff
+        # by deleting the mutable exception summary.
+        ledger.append({"index": len(ledger), "round": 2,
+                       "kind": "round_begin", "detail": {}})
     report = {
         "level": level, "party_size": size, "seed": seed,
         "policy_id": policy_id, "scenario_id": scenario_id,
@@ -180,7 +185,7 @@ class PureG7FTests(unittest.TestCase):
     def test_13_retains_reason_for_each_unresolved_branch(self):
         x = self.attested(outcome="unresolved_mechanical_branch")
         self.assertTrue(x["censored"])
-        self.assertEqual(x["unresolved_reason"], "mechanical_gap")
+        self.assertEqual(x["unresolved_reason"], "native_turn_or_round_incomplete")
 
     def test_14_refuses_clock_handoff_as_forest_escape(self):
         report = fake_source_trial(3, 4, 0, "forest_pounce")
@@ -354,6 +359,83 @@ class PureG7FTests(unittest.TestCase):
         report = fake_source_trial(3, 4, 0, "warned_control",
                                    "party_withdrawal_attested")
         with self.assertRaisesRegex(AssertionError, "Party withdrawal"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
+
+
+
+    def test_32_rejects_real_unresolved_window_hidden_as_cutoff(self):
+        report = fake_source_trial(3, 4, 0, "warned_control",
+                                   "unresolved_mechanical_branch")
+        original_hash = report["ledger_sha256"]
+        report["outcome"] = "legal_window_cutoff"
+        report["unresolved"] = None
+        with self.assertRaisesRegex(AssertionError, "Censored outcome"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+        self.assertEqual(report["ledger_sha256"], original_hash)
+
+    def test_33_reasons_are_from_ledger_not_mutable_exception(self):
+        report = fake_source_trial(3, 4, 0, "warned_control",
+                                   "unresolved_mechanical_branch")
+        report["unresolved"]["reason"] = "invented_non_source_reason"
+        verified = g7f.attest_native(report, level=3, size=4, seed=0,
+                                     policy="warned_control")
+        self.assertEqual(verified["unresolved_reason"],
+                         "native_turn_or_round_incomplete")
+        report["outcome"] = "party_defeat_observed"
+        report["unresolved"] = None
+        with self.assertRaisesRegex(AssertionError, "Censored outcome"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
+    def test_34_rejects_native_archer_exit_demoted_to_cutoff(self):
+        report = fake_source_trial(3, 4, 0, "warned_archer_exit")
+        ledger = report["ledger"]
+        ledger.insert(-1, {"index": 0, "round": 1,
+                           "kind": "g45_withdrawal_attested",
+                           "detail": {"actor": "archer", "movement_event_index": 13}})
+        ledger.insert(-1, {"index": 0, "round": 1,
+                           "kind": "g5_terminal_exit",
+                           "detail": {"actor": "archer", "movement_index": 13}})
+        for i, event in enumerate(ledger):
+            event["index"] = i
+        report["ledger_sha256"] = g7f._digest(ledger)
+        with self.assertRaisesRegex(AssertionError, "Censored outcome"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_archer_exit")
+
+    def test_35_rejects_fabricated_observed_party_defeat(self):
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        report["outcome"] = "party_defeat_observed"
+        with self.assertRaisesRegex(AssertionError, "Censored outcome"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+        report["final_state"]["vanguard"]["dead"] = True
+        with self.assertRaisesRegex(AssertionError, "HP/death"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
+    def test_36_actual_observed_defeat_requires_each_g4_death(self):
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        ledger = report["ledger"]
+        for actor in ("vanguard", "guardian", "archer", "scholar"):
+            ledger.insert(-1, {"index": 0, "round": 1,
+                               "kind": "g4_damage_applied",
+                               "detail": {"recipient": actor, "hp_before": 24,
+                                          "hp_after": -24, "dead": True}})
+            report["final_state"][actor].update(hp=-24, dead=True)
+        for i, event in enumerate(ledger):
+            event["index"] = i
+        report["ledger_sha256"] = g7f._digest(ledger)
+        report["outcome"] = "party_defeat_observed"
+        verified = g7f.attest_native(report, level=3, size=4, seed=0,
+                                     policy="warned_control")
+        self.assertFalse(verified["certified_terminal"])
+        self.assertEqual(verified["outcome"], "party_defeat_observed")
+        report["outcome"] = "legal_window_cutoff"
+        with self.assertRaisesRegex(AssertionError, "Censored outcome"):
             g7f.attest_native(report, level=3, size=4, seed=0,
                              policy="warned_control")
 
