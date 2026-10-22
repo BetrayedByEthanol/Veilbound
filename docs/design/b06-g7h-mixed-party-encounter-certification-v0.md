@@ -76,7 +76,30 @@ matrix when all three branches pass independently:
    damage or new turn is accepted.
 
 A mislabeled, incomplete, role-substituted, stale, unsigned or
-nonterminal result fails closed. Ordinary nonterminal scenes must retain
+nonterminal result fails closed.
+
+### Final source-payment and roll audit (Codex P1)
+
+The G7-H attestor independently rederives the Bow shot's natural-1 rule,
+source +4, effective ranged defense, natural-20 confirmation tier and
+permitted original G2 outcome. Both the G2 shot and G6-D adjudication
+must match that computation, not merely each other's mutable labels.
+The Hunter's paid Bite chain must similarly reproduce its **+6 source
+bonus**, original native Take Hit defense, +6 attack total, natural-1
+auto-miss, natural-20 confirmation tier and its 24-AP source payment
+before a successful G5/G4.5/G4 chain is counted.
+
+Each **Chosen R Guided Regeneration** instance and each of the **two
+F Thrown Flame** launches requires one *same-actor, same-round/turn,
+strictly ordered* matching G0 Projection AP payment **and** a distinct
+G0 \`vp_transition\` of the source-correct kind and exact quantity:
+R commits **1 VP** (30 AP); F spends **2 VP** (20 AP) per T1 launch.
+The verifier also reconciles total G0 source VP transitions/release
+against real final actor VP availability and commitment. Relabeling
+payment events and recomputing the ledger digest cannot preserve
+certification. These checks do not change any G0–G7-G source mechanics
+or the terminal certification boundary.
+ Ordinary nonterminal scenes must retain
 their unresolved/censored classification elsewhere; G7-H cannot call
 an unfinished run a victory or resample until a favored outcome appears.
 
