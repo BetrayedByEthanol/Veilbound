@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B06 G7-C — Full-Party Terminal Certification v0](b06-g7c-full-party-terminal-certification-v0.md) — native source-authored A/B/R[/F] individual G1/G4.5/G5 border exits authenticated into a whole-party withdrawal terminal after genuine Round End; separate strict Hunter-Bite all-dead attestation gate, no inferred CR or sampled survival frequency.
+
 - [B06 G7-B — Native Flame Critical and Bounded Withdrawal Policy v0](b06-g7b-native-flame-and-withdrawal-policy-v0.md) — source-backed direct Thrown Flame natural-20 confirmation to single G4 Fire HP/independent Vigor packets, authenticated fatal Scholar Fire, and an actual preauthored R Archer G1 movement/G5 partial withdrawal; two policies × four warned-clear party/level cells, no whole-party terminal or CR.
 
 - [B06 G7-A — Native End-to-End Policy and Terminal Census Infrastructure v0](b06-g7a-native-terminal-census-v0.md) — repeatable **G0–G6D source-actual**, SHA256-keyed three-round combat trials for the four warned-clear A-front L2/L3 P3/P4 cells; explicit Hunter-death attestation versus cutoffs/unsupported critical branches, with no asserted CR, survival probability or generalized policy certification.
