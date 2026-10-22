@@ -230,5 +230,100 @@ class G7CTests(unittest.TestCase):
         self.assertEqual(len(obj["cases"]),4)
 
 
+    def test_17_post_exit_move_away_then_back_is_not_an_exit(self):
+        # Codex P2: a previous G5 exit cannot be resurrected by ending at
+        # the same border coordinate after fresh, real G1 movements.
+        for size in (3,4):
+            with self.subTest(party_size=size):
+                c=mixed_scene(size=size,level=3,seed=23001,
+                              party_exits=True)
+                e=c.e
+                for actor in e.order:
+                    c.bridge.start_next_turn(RegenerationChoice())
+                    if actor!="hunter":
+                        for delta in EXIT_ROUTES[actor]:
+                            self.assertTrue(e.g1.step(
+                                actor,delta,cautious=True,responses=()))
+                        c.withdraw(actor)
+                        if actor=="vanguard":
+                            # A spent 8 MP to reach its authored border;
+                            # the remaining 4 MP suffice to step away and
+                            # back on the SAME own turn, after G5 exit.
+                            self.assertTrue(e.g1.step(
+                                actor,(1,0),responses=()))
+                            self.assertTrue(e.g1.step(
+                                actor,(-1,0),responses=()))
+                    c.bridge.end_current_turn()
+                self.assertEqual(e.actors["vanguard"].occupied,((0,2),))
+                self.assertEqual(sum(x["kind"]=="round_end"
+                                     for x in e.ledger),1)
+                self.assertEqual(sum(x["kind"]=="g5_terminal_exit"
+                                     for x in e.ledger),size)
+                steps=[x for x in e.ledger if
+                       x["kind"]=="g1_movement_step"
+                       and x["detail"]["actor"]=="vanguard"]
+                exit_event=next(x for x in e.ledger if
+                                x["kind"]=="g5_terminal_exit"
+                                and x["detail"]["actor"]=="vanguard")
+                self.assertEqual(len([x for x in steps if
+                                      x["index"]>exit_event["index"]]),2)
+                with self.assertRaisesRegex(
+                        UnresolvedDecision,"Exited actor resumed"):
+                    PartyTerminal(c).attest_withdrawal()
+                self.assertFalse(any(
+                    x["kind"]=="g7c_party_withdrawal_attested"
+                    for x in e.ledger))
+
+    def test_18_later_completed_round_invalidates_old_exit_without_movement(self):
+        # A subsequent normal G0 start is enough to invalidate an
+        # individually attested exit, even if the actor never moves
+        # again and ends at the original authored square.
+        for size in (3,4):
+            with self.subTest(party_size=size):
+                c=fully_exited_scene(size=size,level=3)
+                e=c.e
+                original_positions={p:e.actors[p].occupied
+                                    for p in e.order if p!="hunter"}
+                c.bridge.begin_next_round()
+                for actor in e.order:
+                    c.bridge.start_next_turn(RegenerationChoice())
+                    c.bridge.end_current_turn()
+                self.assertEqual(
+                    {p:e.actors[p].occupied for p in original_positions},
+                    original_positions)
+                self.assertEqual(sum(x["kind"]=="round_end"
+                                     for x in e.ledger),2)
+                self.assertEqual(sum(
+                    x["kind"]=="turn_start_expiry"
+                    for x in e.ledger if x["detail"].get("actor")=="vanguard"),
+                    2)
+                with self.assertRaisesRegex(
+                        UnresolvedDecision,"Exited actor resumed"):
+                    PartyTerminal(c).attest_withdrawal()
+                self.assertFalse(any(
+                    x["kind"]=="g7c_party_withdrawal_attested"
+                    for x in e.ledger))
+
+    def test_19_invalid_legacy_single_scene_exit_is_value_error(self):
+        # Codex P2: reject non-SceneExit *before* building the authored
+        # actor-id set; the legacy public argument must not AttributeError.
+        from scripts.b06_soldier_sentry_g5_v0 import SourceMelee
+        from scripts.b06_hunter_g6a_v0 import HunterCombat
+        for value in (0,False,"bad",{"actor_id":"archer"},
+                      object(),("not","a","scene","exit")):
+            for adapter in (SourceMelee,HunterCombat):
+                with self.subTest(value_type=type(value).__name__,
+                                  adapter=adapter.__name__):
+                    c=mixed_scene(size=3,level=2,seed=113)
+                    e=c.e
+                    before=len(e.ledger)
+                    with self.assertRaises(ValueError) as raised:
+                        adapter(e,scene_exit=value)
+                    self.assertNotIsInstance(raised.exception,AttributeError)
+                    self.assertEqual(len(e.ledger),before)
+                    self.assertIs(e.g5,c)
+                    e.check()
+
+
 if __name__=="__main__":
     unittest.main()

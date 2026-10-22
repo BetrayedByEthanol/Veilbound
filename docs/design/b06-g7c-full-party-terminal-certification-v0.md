@@ -15,7 +15,10 @@ The previous single-exit constructor and G7-B archer exit remain
 unchanged. Scene authoring still strictly validates scenario, grid,
 objective, actor, border square and source policy before any attacks;
 no new exit can be chosen while withdrawing, and duplicate actor exits
-or simultaneous single/multiple modes are rejected. All G5 exits retain
+or simultaneous single/multiple modes are rejected. The legacy
+`scene_exit` constructor argument is still strictly type-checked
+**before** any exit-member dereference, so malformed values reject with
+`ValueError` rather than an accidental `AttributeError`. All G5 exits retain
 their own authentic G1 movement + G4.5 signed exit + G5 terminal
 receipt.
 
@@ -48,7 +51,12 @@ One-party terminal attestor `PartyTerminal.attest_withdrawal()` checks:
   correct chronological ordering.
 - Each PC remains above 0 HP and is at their individual authored exit.
   No qualifying PC is subsequently harmed or takes another paid action
-  after their source-signed withdrawal.
+  after their source-signed withdrawal. **Any later actor-linked G1 event
+  (including a move away followed by a return) or subsequent G0 own-turn
+  start/resources also invalidate that actor's exit receipt**, even when
+  a later Round End leaves the PC at the exact original border square.
+  The immediate `turn_end` closing the legitimate exit turn is allowed;
+  a newly begun turn is not.
 
 Only then is the **unique** native ledger event
 `g7c_party_withdrawal_attested` issued with all member evidence indices.
