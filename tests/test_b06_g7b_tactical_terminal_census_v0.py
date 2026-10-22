@@ -375,5 +375,77 @@ class G7BTests(unittest.TestCase):
         e.check()
 
 
+    def test_22_callback_cannot_change_precommitted_fire_critical_faces(self):
+        # Codex P2: accepted list input is caller-owned. A G0 callback can
+        # mutate it after initial validation; never accept those new dice
+        # as additional Fire HP or change the immutable native receipt.
+        for replacement in ([4,4],[4],[4,4,4],[]):
+            with self.subTest(after_callback=replacement):
+                c=scholar_turn()
+                e=c.e
+                faces=[1,1]
+                h=e.actors["hunter"]
+                original_hp,original_vigor=h.hp,h.vigor
+                before_vp=e.actors["scholar"].vp_available
+
+                def change_caller_dice(encounter):
+                    faces[:]=replacement
+
+                result=e.g3.cast_flame(
+                    "scholar","hunter",tier=1,face=20,vigor_die=3,
+                    confirmation_face=10,critical_dice=faces,
+                    on_committed=change_caller_dice,hand_available=True,
+                    target_cell=e.g1.body_cell("hunter","head"),
+                    wound_location_roll=8)
+                self.assertEqual(faces,replacement)
+                self.assertEqual(result["outcome"],"direct_hit_resolved_G4")
+                self.assertEqual(result["packets_pending_g4"]["fire_hp"],4)
+                self.assertEqual(result["g4_damage"]["hp_loss"],4)
+                self.assertEqual(h.hp,original_hp-4)
+                self.assertEqual(h.vigor,original_vigor-3)
+                self.assertEqual(e.actors["scholar"].vp_available,before_vp-2)
+                launched=[x for x in e.ledger if x["kind"]=="g3_flame_launched"]
+                self.assertEqual(len(launched),1)
+                self.assertEqual(launched[0]["detail"]["critical"],"critical")
+                self.assertEqual(launched[0]["detail"]["critical_dice"],[1,1])
+                hit=[x for x in e.ledger if x["kind"]=="g4_damage_applied"]
+                self.assertEqual(len(hit),1)
+                self.assertEqual(hit[0]["detail"]["packets"][0]["raw"],4)
+                self.assertEqual(hit[0]["detail"]["packets"][1]["raw"],3)
+                self.assertEqual(hit[0]["detail"]["event_key"],
+                                 f"g3-flame-ledger:{launched[0]['index']}")
+                e.check()
+
+    def test_23_callback_cannot_inflate_strong_d4_or_vigor_packet(self):
+        # Freeze a single Strong Hit d4 as well: mutation may otherwise
+        # change its value *or* its length after commitment.
+        c=scholar_turn()
+        e=c.e
+        faces=[3]
+        h=e.actors["hunter"]
+        hp=h.hp
+
+        def expand_list(encounter):
+            faces.extend([4,4])
+
+        result=e.g3.cast_flame(
+            "scholar","hunter",tier=1,face=20,vigor_die=2,
+            defense="dodge",aware=True,
+            confirmation_face=1,critical_dice=faces,
+            on_committed=expand_list,hand_available=True,
+            target_cell=e.g1.body_cell("hunter","head"),
+            wound_location_roll=8)
+        self.assertEqual(faces,[3,4,4])
+        self.assertEqual(result["outcome"],"direct_hit_resolved_G4")
+        self.assertEqual(result["packets_pending_g4"]["fire_hp"],5)
+        self.assertEqual(h.hp,hp-5)
+        source=next(x for x in e.ledger if x["kind"]=="g3_flame_launched")
+        self.assertEqual(source["detail"]["critical"],"strong")
+        self.assertEqual(source["detail"]["critical_dice"],[3])
+        packet=next(x for x in e.ledger if x["kind"]=="g4_damage_applied")
+        self.assertEqual([x["raw"] for x in packet["detail"]["packets"]],[5,3])
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
