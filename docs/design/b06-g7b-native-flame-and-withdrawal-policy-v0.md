@@ -47,6 +47,18 @@ G3/G4 execution path:
   spent and no fabricated damage. Old G7-A results/census continue to
   use this legacy behavior; the new G7-B policy opts into predeclared
   confirmation and source-derived G4 damage.
+- **G4 Flame delivery authority (Codex P1):** Merely matching the
+  `g3-flame-ledger:<index>` key and naming `g3:thrown_flame` is not
+  enough. Generic `DamageState.apply_damage` refuses that cause unless
+  the dedicated synchronous `apply_flame` executor has opened an exact
+  one-call delivery authorization. That executor closes the authorization
+  in a `finally` block and retains the one-to-one consumed launch and
+  genuine G4 damage-event indices. The terminal verifier independently
+  checks that consumption record **and** that the lethal event contains
+  exactly the source-launched Fire HP and separate Direct Vigor packet,
+  including validated critical bonus dice, types and mitigation modes.
+  A late G4 install cannot retrospectively consume an earlier G3 launch.
+  This adds no new ledger event or altered damage rule.
 - The Hunter G6-D lethal-terminal validator now independently supports
   genuine G3→G4 **source F** fatal Fire packets, matching the exact
   launch-keyed G4 event/turn and excluding pending, missed, other-caster

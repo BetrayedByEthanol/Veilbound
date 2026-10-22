@@ -6,6 +6,8 @@ import json
 import unittest
 
 from scripts.b06_encounter_state_v0 import RegenerationChoice, UnresolvedDecision
+from scripts.b06_damage_v0 import DamagePacket, DamageState
+from scripts.b06_hunter_completion_g6d_v0 import HunterCompletion
 from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
 from scripts import b06_g7a_native_terminal_census_v0 as g7a
 from scripts import b06_g7b_tactical_terminal_census_v0 as g7b
@@ -445,6 +447,154 @@ class G7BTests(unittest.TestCase):
         packet=next(x for x in e.ledger if x["kind"]=="g4_damage_applied")
         self.assertEqual([x["raw"] for x in packet["detail"]["packets"]],[5,3])
         e.check()
+
+
+    def test_24_late_g4_cannot_accept_a_generic_flame_damage_claim(self):
+        # Regression: the G3 launch predates G4 installation. A caller
+        # must not gain Flame authority from a known launch-event key.
+        for raw in (2,999):
+            with self.subTest(fire_packet=raw):
+                c=scholar_turn()
+                e=c.e
+                e.g4=None
+                launched=e.g3.cast_flame(
+                    "scholar","hunter",tier=1,face=12,vigor_die=3,
+                    hand_available=True,
+                    target_cell=e.g1.body_cell("hunter","head"))
+                self.assertEqual(launched["outcome"],"direct_hit_pending_G4")
+                source=next(x for x in e.ledger
+                            if x["kind"]=="g3_flame_launched")
+                self.assertEqual(source["detail"]["packets_pending_g4"],
+                                 {"fire_hp":2,"vigor":3})
+                g4=DamageState(e)
+                initial_hp=e.actors["hunter"].hp
+                key=f"g3-flame-ledger:{source['index']}"
+                with self.assertRaises(UnresolvedDecision):
+                    g4.apply_damage(
+                        "hunter",(
+                            DamagePacket("hp","Fire",raw),
+                            DamagePacket("vigor","Direct Vigor",3)),
+                        event_key=key,cause="g3:thrown_flame",
+                        wound_location_roll=8)
+                self.assertEqual(e.actors["hunter"].hp,initial_hp)
+                self.assertNotIn(key,g4.used_events)
+                self.assertEqual(g4._flame_consumptions,{})
+                self.assertFalse(any(x["kind"]=="g4_damage_applied"
+                                     for x in e.ledger))
+                # Installing G4 later cannot retroactively finish a past
+                # G3 launch after intervening native installation events.
+                with self.assertRaises(ValueError):
+                    g4.apply_flame("scholar","hunter",
+                                   ledger_index=source["index"])
+                e.check()
+
+    def test_25_native_lethal_flame_has_dedicated_receipt_and_packet_parity(self):
+        for face,extra in ((12,{}),
+                           (20,{"confirmation_face":10,
+                                "critical_dice":(2,3)})):
+            with self.subTest(face=face):
+                c=scholar_turn()
+                e=c.e
+                h=e.actors["hunter"]
+                e.g4.apply_damage(
+                    "hunter",(DamagePacket("hp","Fire",2*h.hp_max-1),),
+                    event_key="test:already_wounded",cause="test:setup",
+                    wound_location_roll=8)
+                self.assertEqual(h.hp,-h.hp_max+1)
+                result=e.g3.cast_flame(
+                    "scholar","hunter",tier=1,face=face,vigor_die=3,
+                    hand_available=True,
+                    target_cell=e.g1.body_cell("hunter","head"),
+                    **extra)
+                self.assertEqual(result["outcome"],"direct_hit_resolved_G4")
+                self.assertTrue(h.dead)
+                sources=[x for x in e.ledger if x["kind"]=="g3_flame_launched"]
+                self.assertEqual(len(sources),1)
+                source=sources[0]
+                key=f"g3-flame-ledger:{source['index']}"
+                delivery=next(x for x in e.ledger
+                              if x["kind"]=="g4_damage_applied"
+                              and x["detail"]["event_key"]==key)
+                self.assertEqual(e.g4._flame_consumptions,
+                                 {source["index"]:delivery["index"]})
+                self.assertEqual(
+                    [(p["resource"],p["type"],p["raw"])
+                     for p in delivery["detail"]["packets"]],
+                    [("hp","Fire",source["detail"]["packets_pending_g4"]["fire_hp"]),
+                     ("vigor","Direct Vigor",
+                      source["detail"]["packets_pending_g4"]["vigor"])])
+                self.assertIsNone(e.g4._live_flame_delivery)
+                c.bridge.end_current_turn()
+                proof=HunterCompletion(c).attest_hunter_defeat(
+                    "hunter",party_ids=("vanguard","guardian",
+                                        "archer","scholar"))
+                self.assertEqual(proof["ending"],"hunter_defeat_attested")
+                self.assertEqual(
+                    sum(x["kind"]=="g6d_hunter_defeat_attested"
+                        for x in e.ledger),1)
+
+    def test_26_changed_fire_or_vigor_ledger_cannot_attest_lethal_flame(self):
+        variants=(
+            (0,"raw",999),
+            (1,"raw",999),
+            (0,"type","Piercing"),
+            (1,"resource","hp"),
+            (0,"armor_rule","weapon"),
+        )
+        for slot,field,value in variants:
+            with self.subTest(slot=slot,field=field):
+                c=scholar_turn()
+                e=c.e
+                h=e.actors["hunter"]
+                e.g4.apply_damage(
+                    "hunter",(DamagePacket("hp","Fire",2*h.hp_max-1),),
+                    event_key="test:near_lethal",cause="test:setup",
+                    wound_location_roll=8)
+                e.g3.cast_flame(
+                    "scholar","hunter",tier=1,face=20,vigor_die=3,
+                    confirmation_face=10,critical_dice=(2,3),
+                    hand_available=True,
+                    target_cell=e.g1.body_cell("hunter","head"))
+                self.assertTrue(h.dead)
+                lethal=next(x for x in e.ledger
+                            if x["kind"]=="g4_damage_applied"
+                            and x["detail"]["cause"]=="g3:thrown_flame")
+                lethal["detail"]["packets"][slot][field]=value
+                c.bridge.end_current_turn()
+                with self.assertRaises(UnresolvedDecision):
+                    HunterCompletion(c).attest_hunter_defeat(
+                        "hunter",party_ids=("vanguard","guardian",
+                                            "archer","scholar"))
+                self.assertFalse(any(x["kind"]=="g6d_hunter_defeat_attested"
+                                     for x in e.ledger))
+
+
+    def test_27_flame_event_key_and_matching_packets_without_g4_receipt_fail(self):
+        # Correct source-looking bytes are insufficient without evidence
+        # that the dedicated native G4 consumer delivered the packet.
+        c=scholar_turn()
+        e=c.e
+        h=e.actors["hunter"]
+        e.g4.apply_damage(
+            "hunter",(DamagePacket("hp","Fire",2*h.hp_max-1),),
+            event_key="test:near_terminal",cause="test:setup",
+            wound_location_roll=8)
+        e.g3.cast_flame(
+            "scholar","hunter",tier=1,face=12,vigor_die=3,
+            hand_available=True,target_cell=e.g1.body_cell("hunter","head"))
+        self.assertTrue(h.dead)
+        source=next(x for x in e.ledger if x["kind"]=="g3_flame_launched")
+        actual=next(x for x in e.ledger if x["kind"]=="g4_damage_applied"
+                    and x["detail"].get("cause")=="g3:thrown_flame")
+        self.assertEqual(e.g4._flame_consumptions.get(source["index"]),
+                         actual["index"])
+        e.g4._flame_consumptions.clear()
+        c.bridge.end_current_turn()
+        with self.assertRaises(UnresolvedDecision):
+            HunterCompletion(c).attest_hunter_defeat(
+                "hunter",party_ids=("vanguard","guardian","archer","scholar"))
+        self.assertFalse(any(x["kind"]=="g6d_hunter_defeat_attested"
+                             for x in e.ledger))
 
 
 if __name__=="__main__":
