@@ -90,6 +90,26 @@ HP and round, cause and outcome—not merely its lethal event index.
 A mislabeled, incomplete, role-substituted, stale, unsigned or
 nonterminal result fails closed.
 
+### G7-C signed terminal and closing geometry (Codex P1/P2)
+
+For **both** G7-C terminal paths, the independent verifier requires the
+**exact complete native signed event schema**: original party roster,
+four authentic `lethal_damage_indices` or `member_exits` in their
+canonical field, source-completed `round`, and `hunter_cr: null`.
+The terminal event itself must be at that completed G0 round, outside
+the actor's turn and after the final `round_end`; the separate returned
+terminal receipt must also have the exact source field set, not merely
+a matching event index. An extra, removed or substituted signed field
+cannot become authoritative by recomputing SHA-256.
+
+For **withdrawal**, G1 replays all authored cautious movements from
+the original source grid and actor footprints. The result is compared
+with `final_state[actor].occupied` for **each of the five original
+actors**, not just with the signed border-square exits. Forged in-grid
+positions, out-of-grid positions, altered Hunter footprint, omitted or
+extra occupied cells fail even when the original ledger and digest are
+otherwise genuine. The G7-G scene-exit limit is unchanged.
+
 ### Final source-payment and roll audit (Codex P1)
 
 The G7-H attestor independently rederives the Bow shot's natural-1 rule,
