@@ -137,14 +137,24 @@ def _validate_policy_origin(report, ledger, level, size, policy):
             source.get("seed") != report["seed"]):
         raise AssertionError("Native G0 scene/seed does not match selected policy")
     # Bind the selected native runner and action policy inside the original
-    # SHA-covered G0 ledger, before any source turns or die draws. Report-only
+    # SHA-covered G0 ledger, after native scene setup but before any source
+    # turns, paid actions or die draws. Report-only
     # labels can never substitute for this pre-action event.
     selections = [ev for ev in ledger if ev.get("kind") == "g7f_policy_selected"]
     runner, mode = _policy_binding(policy)
     expected_binding = {"cohort": policy, "runner": runner, "mode": mode,
                         "scenario": expected_scene, "seed": report["seed"],
                         "level": level, "party_size": size}
-    if (len(selections) != 1 or selections[0].get("index") != 1 or
+    # G1/G2/G3/G4 native scene initialization legitimately writes setup
+    # events after encounter_created. The cohort choice is still required
+    # before the first real Round Begin, paid action or own-turn allocation.
+    preaction = {"round_begin", "turn_start_expiry", "turn_resources",
+                 "action_committed", "turn_end", "round_end"}
+    if (len(selections) != 1 or
+            type(selections[0].get("index")) is not int or
+            selections[0]["index"] < 1 or
+            any(ev["kind"] in preaction
+                for ev in ledger[:selections[0]["index"]]) or
             selections[0].get("round") != genesis.get("round") or
             selections[0].get("turn") is not None or
             selections[0].get("detail") != expected_binding):

@@ -511,7 +511,10 @@ class NativeG7FTests(unittest.TestCase):
                 case = g7f._native_case(3, 4, 0, policy)
                 ledger = case["ledger"]
                 runner, mode = g7f._policy_binding(policy)
-                selection = ledger[1]
+                selection = next(e for e in ledger
+                                 if e["kind"] == "g7f_policy_selected")
+                self.assertLess(selection["index"], next(
+                    e["index"] for e in ledger if e["kind"] == "round_begin"))
                 self.assertEqual(selection["kind"], "g7f_policy_selected")
                 self.assertEqual(selection["round"], ledger[0]["round"])
                 self.assertIsNone(selection["turn"])
