@@ -663,11 +663,31 @@ class SpellState:
             if v.expiry_round is not None and self.e.round>=v.expiry_round:
                 self._end(v,reason="round_begin_duration_expiry")
 
+    @staticmethod
+    def _flame_confirmation_tier(confirmation_face,defense,defense_value):
+        """One confirmation against the exact currently live G2 defense.
+
+        This pure helper is used both before the original AP declaration
+        and after any on_committed responses. A predeclared d4 allocation
+        cannot be repurposed if the defense has changed its severity.
+        """
+        if type(confirmation_face) is not int or not 1<=confirmation_face<=20:
+            raise ValueError("One natural-20 Flame confirmation d20 required")
+        if defense not in ("take_hit","dodge","guard"):
+            raise ValueError("Known source projectile defense required")
+        if confirmation_face==20:
+            return "devastating"
+        if defense=="take_hit":
+            return "critical"
+        return ("critical" if confirmation_face!=1
+                and confirmation_face+5>defense_value else "strong")
+
     def cast_flame(self,caster,target,*,tier,face,vigor_die,
                    defense="take_hit",aware=False,hand_available=False,
                    on_committed=None,exposures=(),origin=None,target_cell=None,
                    prone_cover_policy=(),prone_dodge_feasible=False,
-                   wound_location_roll=None):
+                   wound_location_roll=None,confirmation_face=None,
+                   critical_dice=()):
         """Bounded clear/cover-only F Flame; G4 resolves direct hits in this call.
 
         Mixed living-screen destination/scatter and full opportunity/Reaction
@@ -701,9 +721,38 @@ class SpellState:
         victim=self.e.actors[target]
         position=self.e.g2._prone_position(
             victim,lane.distance,lane.cover,prone_cover_policy)
-        self.e.g2._defense_value(
+        _,declared_defense=self.e.g2._defense_value(
             victim,defense,0,lane.cover,position_bonus=position,
             prone_dodge_feasible=prone_dodge_feasible)
+        # Resolve exactly one natural-20 confirmation when supplied by a
+        # source-authorized caller. Legacy calls without it still remain
+        # pending G5, preserving their paid but unadjudicated delivery.
+        if type(critical_dice) not in (tuple,list):
+            raise ValueError("Explicit Flame critical dice required")
+        critical="normal"
+        if face==20 and confirmation_face is not None:
+            critical=self._flame_confirmation_tier(
+                confirmation_face,defense,declared_defense)
+        elif face!=20 and confirmation_face is not None:
+            raise ValueError("Flame confirmation only follows natural 20")
+        required={"normal":0,"strong":1,"critical":2,"devastating":2}[critical]
+        if (len(critical_dice)!=required or any(
+                type(x) is not int or not 1<=x<=4 for x in critical_dice)):
+            raise ValueError("Exact Flame critical d4 faces required")
+        # The public API accepts lists, but a committed response may mutate
+        # that caller-owned list. Freeze the validated faces before both
+        # wound preflight and the on_committed callback: recorded HP damage
+        # and the launch receipt must retain exactly the declared dice.
+        critical_dice=tuple(critical_dice)
+        confirmed_critical=face==20 and confirmation_face is not None
+        # A confirmed direct Flame is committed as an irreversible paid
+        # Projection Action below. Reject missing Devastating/zero-crossing
+        # wound evidence *before* that payment even with no callback.
+        # Repeat after on_committed because responses may change mitigation.
+        if self.e.g4 is not None and confirmed_critical:
+            self.e.g4.preflight_flame_wound(
+                target,wound_location_roll,fire_hp=2+sum(critical_dice),
+                devastating=critical=="devastating")
         price=2*tier
         self._funds(a,price,0)
         self._commit(caster,on_committed=on_committed,label="g3:thrown_flame:T"+str(tier))
@@ -733,11 +782,34 @@ class SpellState:
                        spell_kind="Thrown Flame",
                        cause="post_commit_defense_unusable",reason=str(error))
             return {"outcome":"interrupted_before_launch","vp_spent":0}
+        # The committed responses may have spent Dodge pressure, altered
+        # toxin/position defenses or otherwise changed the critical tier.
+        # A different tier needs a different *precommitted* number of d4s.
+        # Do not apply stale Fire damage and never fill the gap by rerolling
+        # or conjuring another die after the attacker has committed AP.
+        # Reject the launch BEFORE Spent VP/defensive capacity is paid.
+        if confirmed_critical:
+            live_critical=self._flame_confirmation_tier(
+                confirmation_face,defense,preflight_defense)
+            if live_critical!=critical:
+                self.e.log("g3_cast_interrupted",caster=caster,
+                           spell_kind="Thrown Flame",
+                           cause="post_commit_critical_tier_changed",
+                           original_tier=critical,live_tier=live_critical,
+                           original_defense=declared_defense,
+                           live_defense=preflight_defense,vp_spent=0)
+                self.e.check()
+                return {"outcome":"interrupted_before_launch","vp_spent":0,
+                        "cause":"post_commit_critical_tier_changed"}
         # Preflight an actual wound location before Spent VP or the target's
         # defense is committed. A qualifying G4 hit must resolve *now*, not
         # leave a paid hit with a missing later adjudication choice.
-        if (self.e.g4 is not None and 1<face<20 and face+5>preflight_defense):
-            self.e.g4.preflight_flame_wound(target,wound_location_roll)
+        if self.e.g4 is not None and (
+                (1<face<20 and face+5>preflight_defense) or confirmed_critical):
+            self.e.g4.preflight_flame_wound(
+                target,wound_location_roll,
+                fire_hp=2+sum(critical_dice),
+                devastating=critical=="devastating")
         self._pay(caster,price,0,label="g3:thrown_flame:T"+str(tier))
         # No callback or geometry mutation occurs between the pure final
         # validation and this one native G2 defensive-resource commitment.
@@ -749,7 +821,8 @@ class SpellState:
         if face==1:
             outcome="automatic_miss"
         elif face==20:
-            outcome="critical_confirmation_pending_G5"
+            outcome=("direct_hit_pending_G4" if confirmed_critical
+                     else "critical_confirmation_pending_G5")
         elif attack>d:
             outcome="direct_hit_pending_G4"
         elif refreshed.cover and attack>b and attack<=d:
@@ -758,14 +831,18 @@ class SpellState:
             outcome="guard_impact"
         else:
             outcome="ordinary_miss"
-        packets=( {"fire_hp":2,
+        packets=( {"fire_hp":2+sum(critical_dice),
                    "vigor":2+ceil(vigor_die*tier/3)}
                   if outcome=="direct_hit_pending_G4" else None)
         result={"outcome":outcome,"attack_total":attack,
                 "base_defense":b,"final_defense":d,"vp_spent":price,
                 "packets_pending_g4":packets}
+        confirmed=({"confirmation_face":confirmation_face,
+                    "critical":critical,"critical_dice":list(critical_dice)}
+                   if confirmed_critical else {})
         self.e.log("g3_flame_launched",caster=caster,target=target,
-                   tier=tier,primary_face=face,die=vigor_die,**result)
+                   tier=tier,primary_face=face,die=vigor_die,
+                   **confirmed,**result)
         if self.e.g4 is not None and outcome=="direct_hit_pending_G4":
             # The launch ledger index is a one-use damage capability. Consume
             # synchronously, before regeneration or changing resistances.

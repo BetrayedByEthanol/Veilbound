@@ -156,16 +156,24 @@ def _bow(c,seed,round_no):
     return HunterCompletion(c).bow_hit("archer","hunter",**kw)
 
 
-def _flame(c,seed,round_no):
+def _flame(c,seed,round_no,*,resolve_critical=False):
     e=c.e
     action="flame:tier1"
     face=roll(seed,round_no,"scholar",action,"primary_d20",20)
+    critical={}
+    if resolve_critical and face==20:
+        confirmation=roll(seed,round_no,"scholar",action,"confirmation",20)
+        critical={"confirmation_face":confirmation,
+                  "critical_dice":tuple(
+                      roll(seed,round_no,"scholar",action,"critical_d4",4,j)
+                      for j in range(2))}
     result=e.g3.cast_flame(
         "scholar","hunter",tier=1,face=face,
         vigor_die=roll(seed,round_no,"scholar",action,"vigor_d8",8),
         hand_available=True,
         target_cell=e.g1.body_cell("hunter","head"),
-        wound_location_roll=roll(seed,round_no,"scholar",action,"wound_d20",20))
+        wound_location_roll=roll(seed,round_no,"scholar",action,"wound_d20",20),
+        **critical)
     if result["outcome"]=="critical_confirmation_pending_G5":
         raise UnresolvedDecision("g3_flame_natural20_delivery_not_native_G5")
     if result["outcome"] not in ("direct_hit_resolved_G4",
@@ -189,7 +197,8 @@ def _validate_native_ledger(e):
     return len(turns),ends
 
 
-def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
+def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False,
+              policy_mode="g7a"):
     if ((level,size) not in ALLOWED or type(level) is not int
             or type(size) is not int):
         raise ValueError("Only four G7 ready warned-clear A-front cells")
@@ -199,10 +208,15 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
         raise ValueError("1–3 round native observation ceiling only")
     if type(include_ledger) is not bool:
         raise ValueError("Explicit include_ledger Boolean required")
-    combat=mixed_scene(level=level,size=size,seed=seed)
+    if policy_mode not in ("g7a","g7b_flame","g7b_archer_exit"):
+        raise ValueError("Only preauthored G7-A/B policy modes are supported")
+    combat=mixed_scene(
+        level=level,size=size,seed=seed,
+        archer_exit=policy_mode=="g7b_archer_exit")
     e=combat.e
     before=_snapshot(e)
     unresolved=None
+    archer_withdrew=False
     completed=0
     planned=ALLOWED[(level,size)]
     for round_no in range(1,max_rounds+1):
@@ -214,7 +228,7 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
                     _regen_choice(e,actor,seed,round_no))
                 a=e.actors[actor]
                 h=e.actors["hunter"]
-                if (a.dead or a.hp<=0 or
+                if (a.dead or a.hp<=0 or archer_withdrew or
                         h.dead and actor!="hunter"):
                     pass  # real turn remains started/ended, no phantom attack
                 elif actor=="hunter":
@@ -241,9 +255,27 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
                     defense="dodge" if pick==2 and h.hp>0 else "take_hit"
                     _melee(combat,actor,"hunter",profile,defense,seed,round_no)
                 elif actor=="archer":
-                    _bow(combat,seed,round_no)
+                    retreat=(policy_mode=="g7b_archer_exit" and
+                             roll(seed,round_no,"archer","route:west_border",
+                                  "retreat_choice",2)==2)
+                    if retreat:
+                        # The G6-C archer is one legal westward step away
+                        # from a *previously authored* scene exit. Decline
+                        # no true Opportunity: reject if anyone threatens
+                        # the step instead of suppressing its attack.
+                        dest,_,_,allies=e.g1.preview("archer",delta=(-1,0))
+                        if allies or e.g1._threats("archer",dest,False):
+                            raise UnresolvedDecision(
+                                "G7B archer border path needs genuine Opportunity resolver")
+                        if not e.g1.step("archer",(-1,0),responses=()):
+                            raise UnresolvedDecision("G7B archer border step interrupted")
+                        combat.withdraw("archer")
+                        archer_withdrew=True
+                    else:
+                        _bow(combat,seed,round_no)
                 elif actor=="scholar":
-                    _flame(combat,seed,round_no)
+                    _flame(combat,seed,round_no,
+                           resolve_critical=policy_mode!="g7a")
                 else:
                     raise AssertionError("G7-A does not invent fifth PC")
                 combat.bridge.end_current_turn()
@@ -256,14 +288,30 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
         if e.current is not None or e.cursor!=len(e.order):
             raise AssertionError("No fictitious Round End in completed G7-A round")
         completed+=1
-        if e.actors["hunter"].dead or all(
-                e.actors[x].dead for x in e.order if x!="hunter"):
+        if (archer_withdrew or e.actors["hunter"].dead or all(
+                e.actors[x].dead for x in e.order if x!="hunter")):
             break
     # No encounter success can be inferred merely from a hit, Dying,
     # missing legal continuation, or a finite observation ceiling.
     if unresolved is not None:
         status="unresolved_mechanical_branch"
         terminal=None
+    elif archer_withdrew:
+        # A *single* archer's genuine G1 -> G4.5 -> G5 exit, never
+        # automatically a whole-party withdrawal or Hunter loss.
+        exits=[v for v in e.ledger if v["kind"]=="g5_terminal_exit"
+               and v["detail"].get("actor")=="archer"]
+        signed=[v for v in e.ledger if v["kind"]=="g45_withdrawal_attested"
+                and v["detail"].get("actor")=="archer"]
+        if (len(exits)!=1 or len(signed)!=1
+                or exits[0]["detail"]["movement_index"]!=
+                   signed[0]["detail"]["movement_event_index"]):
+            raise AssertionError("G7-B archer exit lacks same native G1 movement")
+        status="archer_withdrawal_attested"
+        terminal={"ending":status,"actor":"archer",
+                  "g5_exit_event":exits[0]["index"],
+                  "g45_withdrawal_event":signed[0]["index"],
+                  "not_whole_party_withdrawal":True}
     elif e.actors["hunter"].dead:
         try:
             terminal=HunterCompletion(combat).attest_hunter_defeat(
@@ -294,7 +342,9 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
     native_digest=canonical_digest(e.ledger)
     summary={
         "scenario_id":planned,"level":level,"party_size":size,"seed":seed,
-        "policy_id":"G7A-keyed-guard-dodge-regen-clear-A-front-v0",
+        "policy_id":("G7A-keyed-guard-dodge-regen-clear-A-front-v0"
+                     if policy_mode=="g7a" else
+                     "G7B-keyed-"+policy_mode+"-clear-A-front-v0"),
         "opening":"warned_clear","frontline":"A_head_forward",
         "outcome":status,"native_terminal":terminal,
         "unresolved":unresolved,
@@ -303,6 +353,7 @@ def run_trial(level,size,seed,*,max_rounds=MAX_ROUNDS,include_ledger=False):
         "initial_state":before,"final_state":_snapshot(e),
         "measures":counts,"ledger_sha256":native_digest,
         "sample_is_complete_encounter":status=="hunter_defeat_attested",
+        "one_party_member_exit_only":status=="archer_withdrawal_attested",
         "complete_party_pack_certified":False,"hunter_cr":None,
     }
     if include_ledger:

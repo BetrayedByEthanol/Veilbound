@@ -16,6 +16,7 @@ from scripts.b06_ranged_v0 import RangedCombat, ShotChoice
 from scripts.b06_spells_v0 import SpellState
 from scripts.b06_damage_v0 import DamageState
 from scripts.b06_player_offense_g6b_v0 import PlayerHunterCombat
+from scripts.b06_soldier_sentry_g5_v0 import SceneExit
 
 HUNTER_HEAD = (3, 2)
 HUNTER_REAR = (4, 2)
@@ -37,7 +38,7 @@ POLICY = {
 }
 
 
-def mixed_scene(*,size,level=3,seed=630):
+def mixed_scene(*,size,level=3,seed=630,archer_exit=False):
     """Create the authored clear-lane Hunter + A/B/R[/F] fixture.
 
     Strict scope before Encounter/G1 mutation: one Hunter and exactly
@@ -49,6 +50,8 @@ def mixed_scene(*,size,level=3,seed=630):
         raise ValueError("G6-C fixture has L2 and L3 character sheets")
     if type(seed) is not int or seed < 0:
         raise ValueError("G6-C requires a nonnegative encounter seed")
+    if type(archer_exit) is not bool:
+        raise ValueError("G7-B authored archer exit selector must be Boolean")
     present=ROSTER[:size]
     actors=[enemy_actor("B06-EN-03", "hunter", "enemy",
                         occupied=(HUNTER_HEAD,HUNTER_REAR))]
@@ -63,7 +66,10 @@ def mixed_scene(*,size,level=3,seed=630):
     SpellState(e)
     DamageState(e)
     e.begin_round()
-    combat=PlayerHunterCombat(e)
+    exit_policy=(SceneExit(e.scenario,e.g1.scene_id,e.objective,
+                           "archer",(0,4),"G7B:archer-west-border")
+                 if archer_exit else None)
+    combat=PlayerHunterCombat(e,scene_exit=exit_policy)
     if e.order != ("hunter",*present):
         raise AssertionError("G6-C authored Initiative positions altered")
     # This invariant matters especially to the 1x2 Hunter: the Priest A is
