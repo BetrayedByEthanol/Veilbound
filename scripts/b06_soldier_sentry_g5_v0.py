@@ -47,27 +47,33 @@ class SourceMelee:
     a declared, reproducible policy/input and retained in the event ledger.
     G5 does not choose a player defense, roll, or tactical response itself.
     """
-    def __init__(self,encounter,*,scene_exit=None):
+    def __init__(self,encounter,*,scene_exit=None,scene_exits=()):
+        if ((scene_exit is not None and not isinstance(scene_exit,SceneExit))
+                or type(scene_exits) is not tuple
+                or (scene_exit is not None and scene_exits)
+                or any(not isinstance(v,SceneExit) for v in scene_exits)):
+            raise ValueError("Select one single exit or a preauthored tuple")
+        authored=(scene_exit,) if scene_exit is not None else scene_exits
+        if len({v.actor_id for v in authored})!=len(authored):
+            raise ValueError("One independently authored G5 exit per actor")
         if any(getattr(encounter,x,None) is None for x in ("g1","g3","g4")):
             raise ValueError("Install native G1, G3 and G4 before G5")
-        if scene_exit is not None:
-            if not isinstance(scene_exit,SceneExit):
-                raise ValueError("A source-authored SceneExit is required")
+        for exit in authored:
             g=encounter.g1
-            square=scene_exit.square
-            if (scene_exit.encounter_scene!=encounter.scenario
-                    or scene_exit.grid_scene!=g.scene_id
-                    or scene_exit.objective!=encounter.objective
-                    or scene_exit.actor_id not in encounter.actors
+            square=exit.square
+            if (exit.encounter_scene!=encounter.scenario
+                    or exit.grid_scene!=g.scene_id
+                    or exit.objective!=encounter.objective
+                    or exit.actor_id not in encounter.actors
                     or not isinstance(square,tuple) or len(square)!=2
                     or any(type(v) is not int for v in square)
                     or not g.inside(square)
                     or not (square[0] in (0,g.width-1)
                             or square[1] in (0,g.height-1))
-                    or not isinstance(scene_exit.policy_id,str)
-                    or not scene_exit.policy_id):
+                    or not isinstance(exit.policy_id,str)
+                    or not exit.policy_id):
                 raise ValueError("Scene exit must match source scene, border and objective")
-            if len(encounter.actors[scene_exit.actor_id].occupied)!=1:
+            if len(encounter.actors[exit.actor_id].occupied)!=1:
                 raise ValueError("G5 scene exit requires a one-square actor")
         if getattr(encounter,"g5",None) is not None:
             raise ValueError("G5 melee already attached to encounter")
@@ -85,18 +91,21 @@ class SourceMelee:
                 "Attach G5 before any untracked native Attack Sequence")
         self.e=encounter
         self.scene_exit=scene_exit
+        # Both single and multiple exit arrangements are fixed at attach
+        # time; withdrawals cannot supply or replace their own policies.
+        self.scene_exits=tuple(authored)
         # Authorize only this adapter's synchronous native G0 declaration.
         # Standalone Encounter.declare_sequence cannot strand paid slots.
         self._native_sequence_authorized=False
         self.bridge=WoundContinuation(encounter)
         encounter.g5=self
-        if scene_exit is not None:
+        for exit in authored:
             encounter.log("g5_scene_exit_authored",
-                          encounter_scene=scene_exit.encounter_scene,
-                          grid_scene=scene_exit.grid_scene,
-                          objective=scene_exit.objective,
-                          actor=scene_exit.actor_id,
-                          square=scene_exit.square,policy=scene_exit.policy_id)
+                          encounter_scene=exit.encounter_scene,
+                          grid_scene=exit.grid_scene,
+                          objective=exit.objective,
+                          actor=exit.actor_id,
+                          square=exit.square,policy=exit.policy_id)
 
     def pending_attack_slots(self,actor_id=None):
         """Read the authoritative encounter ledger, never caller receipts.
@@ -881,11 +890,11 @@ class SourceMelee:
             raise UnresolvedDecision(
                 "Cannot attest G5 terminal withdrawal with unresolved "
                 "committed attack slots")
-        policy=self.scene_exit
-        if policy is None:
+        if not self.scene_exits:
             raise UnresolvedDecision("No scene-authored exit policy for G5 withdrawal")
-        if actor_id!=policy.actor_id:
-            raise UnresolvedDecision("Actor does not match scene-authored exit policy")
+        policy=next((x for x in self.scene_exits if x.actor_id==actor_id),None)
+        if policy is None:
+            raise UnresolvedDecision("Actor does not match a scene-authored exit policy")
         if (self.e.scenario!=policy.encounter_scene or
                 self.e.objective!=policy.objective or
                 self.e.g1.scene_id!=policy.grid_scene):

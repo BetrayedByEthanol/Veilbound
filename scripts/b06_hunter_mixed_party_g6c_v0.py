@@ -38,7 +38,7 @@ POLICY = {
 }
 
 
-def mixed_scene(*,size,level=3,seed=630,archer_exit=False):
+def mixed_scene(*,size,level=3,seed=630,archer_exit=False,party_exits=False):
     """Create the authored clear-lane Hunter + A/B/R[/F] fixture.
 
     Strict scope before Encounter/G1 mutation: one Hunter and exactly
@@ -50,8 +50,9 @@ def mixed_scene(*,size,level=3,seed=630,archer_exit=False):
         raise ValueError("G6-C fixture has L2 and L3 character sheets")
     if type(seed) is not int or seed < 0:
         raise ValueError("G6-C requires a nonnegative encounter seed")
-    if type(archer_exit) is not bool:
-        raise ValueError("G7-B authored archer exit selector must be Boolean")
+    if (type(archer_exit) is not bool or type(party_exits) is not bool
+            or (archer_exit and party_exits)):
+        raise ValueError("Choose only one authored G7-B/C exit mode")
     present=ROSTER[:size]
     actors=[enemy_actor("B06-EN-03", "hunter", "enemy",
                         occupied=(HUNTER_HEAD,HUNTER_REAR))]
@@ -69,7 +70,16 @@ def mixed_scene(*,size,level=3,seed=630,archer_exit=False):
     exit_policy=(SceneExit(e.scenario,e.g1.scene_id,e.objective,
                            "archer",(0,4),"G7B:archer-west-border")
                  if archer_exit else None)
-    combat=PlayerHunterCombat(e,scene_exit=exit_policy)
+    # G7-C authorizes distinct, before-play exits for each source PC,
+    # not a retroactive withdrawal square selected by the caller.
+    exits=(
+        tuple(SceneExit(e.scenario,e.g1.scene_id,e.objective,ident,square,
+                        f"G7C:party:{ident}:border")
+              for ident,square in (
+                  ("vanguard",(0,2)),("guardian",(3,6)),
+                  ("archer",(0,4)),("scholar",(0,0))) if ident in present)
+        if party_exits else ())
+    combat=PlayerHunterCombat(e,scene_exit=exit_policy,scene_exits=exits)
     if e.order != ("hunter",*present):
         raise AssertionError("G6-C authored Initiative positions altered")
     # This invariant matters especially to the 1x2 Hunter: the Priest A is
