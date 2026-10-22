@@ -233,11 +233,14 @@ def attest_trial(report, *, level, seed, policy):
             or report.get("rounds_completed") != len(ends)
             or len([v for v in ledger if v["kind"] == "round_begin"]) != len(ends)
             or any(v["kind"] == "g5_melee_sequence_attested"
-                   and not any(x["kind"] in ("g5_melee_resolved", "g5_melee_cancelled")
-                               and x["detail"].get("declaration_index") ==
-                                   v["detail"].get("declaration_index")
-                               and x["index"] > v["index"]
-                               for x in ledger) for v in ledger)):
+                   and (not v["detail"].get("action_indices")
+                        or any(not any(
+                            x["kind"] in ("g5_melee_resolved", "g5_melee_cancelled")
+                            and x["detail"].get("action_index") == action
+                            and x["index"] > v["index"]
+                            for x in ledger)
+                            for action in v["detail"]["action_indices"]))
+                   for v in ledger)):
         raise AssertionError("G7-H terminal needs completed G0 rounds and funded G5 slots")
     initial, final = report.get("initial_state"), report.get("final_state")
     if (not isinstance(initial, dict) or not isinstance(final, dict)

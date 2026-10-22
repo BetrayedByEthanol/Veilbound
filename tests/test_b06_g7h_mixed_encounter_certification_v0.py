@@ -186,5 +186,26 @@ class G7HMixedNativeTests(unittest.TestCase):
         self.assertNotIn("native_trials", a)
 
 
+    def test_13_native_paid_slot_cannot_vanish_from_source_ledger(self):
+        policy=POLICIES[0]
+        trial=self._case(policy)
+        resolutions=[v for v in trial["ledger"] if v["kind"]=="g5_melee_resolved"]
+        self.assertTrue(resolutions)
+        resolutions[0]["kind"]="missing_paid_slot_resolution"
+        trial["ledger_sha256"]=canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial,level=3,seed=17,policy=policy)
+
+    def test_14_uninstrumented_legacy_g6d_victory_unchanged(self):
+        from scripts.b06_hunter_completion_g6d_v0 import run_i3_defeat
+        original=run_i3_defeat(level=3,seed=640)
+        self.assertEqual(original["terminal"]["ending"],"hunter_defeat_attested")
+        self.assertTrue(original["hunter_dead"])
+        self.assertEqual(original["rounds"],3)
+        self.assertFalse(any(v["kind"]=="g7h_pack_policy_selected"
+                             for v in original["ledger"]))
+        self.assertFalse(original["complete_party_pack_certified"])
+
+
 if __name__ == "__main__":
     unittest.main()
