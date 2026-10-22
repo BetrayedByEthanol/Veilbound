@@ -284,6 +284,38 @@ expand coverage to arbitrary dice, new profiles or representative CR.
   actual opposition; it does not establish that the surviving Hunter
   cannot pursue or track the party after leaving the scene.
 
+### Codex P1 follow-up — Bow arrow conservation and fixed Flame face identity
+
+The **victory certificate is a fixed G6-C/G6-D policy witness**. A
+syntactically consistent, rehashed native ledger is *not* enough when it
+substitutes different source-dice choices or consumes no physical arrow.
+
+- **R Bow physical inventory:** derive the starting R ammunition from the
+  actual B05 Bow Vanguard L2/L3 sheet (not from the mutable report), and
+  require the pre-action R snapshot to equal that quantity. The original
+  R **Round 1 Chosen Rite** spends no arrow; **Round 2** makes the original
+  G6-C natural-1 missed Bow shot; **Round 3** launches the 20/20 lethal
+  G6-D finishing Bow. Both authentic rounds must have exactly one ordered
+  **paid Physical Action → G2 one-arrow declaration (`ammunition_selected=1`)
+  → G2 launch (previous balance minus one) → G2 resolution
+  (`ammunition_spent=1`)**, and the final R snapshot must equal the
+  independently reconstructed **starting inventory minus two**. Zero-arrow
+  finishing shots are rejected even when the declaration, launch, resolution,
+  final snapshot and SHA digest have all been edited consistently.
+- **F source-dice identity:** each of the separately AP/VP-paid Round-1
+  and Round-2 Thrown Flame launches must carry its *own* independently
+  authored G6-C Scholar **(primary d20, vigor d8) = (12, 3)**, keyed to the
+  native round. The existing defense math and exact synchronous G4 Fire/
+  Vigor packet validations also apply. A legal alternate d20 hit (e.g.,
+  10+5) or d8 with identical resulting damage (e.g., 2 instead of 3)
+  cannot be relabeled as this fixed witness simply by rehashing the ledger.
+
+Adversarial tests cover Codex's coordinated zero-arrow forgery, missing or
+misordered source stages, incorrect opening/closing stock, either Round-2/3
+ammunition debit, and independently substituted Scholar d20 and d8 faces
+in either Round 1 or Round 2. Both actual L2 and L3 source traces must
+continue to certify with no rule modifications.
+
 ## Execution and regression checks
 
 ```bash
