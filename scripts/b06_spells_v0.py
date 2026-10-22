@@ -728,6 +728,15 @@ class SpellState:
         if (len(critical_dice)!=required or any(
                 type(x) is not int or not 1<=x<=4 for x in critical_dice)):
             raise ValueError("Exact Flame critical d4 faces required")
+        confirmed_critical=face==20 and confirmation_face is not None
+        # A confirmed direct Flame is committed as an irreversible paid
+        # Projection Action below. Reject missing Devastating/zero-crossing
+        # wound evidence *before* that payment even with no callback.
+        # Repeat after on_committed because responses may change mitigation.
+        if self.e.g4 is not None and confirmed_critical:
+            self.e.g4.preflight_flame_wound(
+                target,wound_location_roll,fire_hp=2+sum(critical_dice),
+                devastating=critical=="devastating")
         price=2*tier
         self._funds(a,price,0)
         self._commit(caster,on_committed=on_committed,label="g3:thrown_flame:T"+str(tier))
@@ -760,7 +769,6 @@ class SpellState:
         # Preflight an actual wound location before Spent VP or the target's
         # defense is committed. A qualifying G4 hit must resolve *now*, not
         # leave a paid hit with a missing later adjudication choice.
-        confirmed_critical=face==20 and confirmation_face is not None
         if self.e.g4 is not None and (
                 (1<face<20 and face+5>preflight_defense) or confirmed_critical):
             self.e.g4.preflight_flame_wound(
