@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B06 G7-H — Complete Mixed-Party Encounter Certification v0 (bounded terminal matrix)](b06-g7h-mixed-party-encounter-certification-v0.md) — one native L2/L3 A/B/R/F scene with separately source-attested Hunter death, all-party defeat and opposed scene exit. Victory adds a genuine source R Chosen Guided Rite to A/B/R/F damage roles; strictly audited native 3-terminal **bounded** coverage, not full representative pack, universal healing/protection policy, sampled win rate or Hunter CR.
+
 - [B06 G7-G — Hunter Pursuit, Party Defeat and Lawful Disengagement v0](b06-g7g-hunter-pursuit-party-defeat-disengagement-v0.md) — native cautious Hunter retarget/translation/pivot, genuine G5/G4 multi-target lethal Bite and G7-C all-dead positive witness; separately opposed two-round G7-C living-Hunter border exit. Fixed-dice/party policies only; no representative win rate, general world pursuit or Hunter CR.
 
 - [B06 G7-F — Representative Encounter Calibration v0 (source-native pilot)](b06-g7f-representative-encounter-calibration-v0.md) — 31 reproducible L2/L3 × P3/P4 source-native tactical cohorts, 10 explicitly paired descriptive contrasts, real G0 ledger/terminal audit, complete censored denominators. Representative human/GM calibration, complete party pack, win-rate and Hunter CR remain uncertified.
