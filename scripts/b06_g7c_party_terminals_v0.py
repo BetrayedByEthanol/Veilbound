@@ -187,15 +187,21 @@ class PartyTerminal:
                 "hunter_cr":None,"complete_party_pack_certified":False}
 
 
-def run_trial(level,size,seed,*,include_ledger=False):
+def run_trial(level,size,seed,*,include_ledger=False,calibration_policy=None):
     """One genuinely completed round of optional, cautious, sourced exits."""
     if (type(level) is not int or type(size) is not int
             or (level,size) not in ALLOWED
             or type(seed) is not int or seed<0
             or type(include_ledger) is not bool):
         raise ValueError("G7-C accepts four sourced scenes and nonnegative keyed seeds")
+    if calibration_policy is not None and calibration_policy!="warned_party_exit":
+        raise ValueError("G7-F must bind genuine G7-C party exit policy")
     combat=mixed_scene(level=level,size=size,seed=seed,party_exits=True)
     e=combat.e
+    if calibration_policy is not None:
+        e.log("g7f_policy_selected", cohort="warned_party_exit", runner="g7c",
+              mode="party_exits", scenario=e.scenario,
+              level=level, party_size=size, seed=seed)
     start=_snapshot(e)
     exited=[]
     unresolved=None

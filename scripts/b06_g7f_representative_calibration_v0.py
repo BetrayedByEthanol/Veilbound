@@ -65,20 +65,34 @@ def _native_case(level, size, seed, policy):
         mode = {"warned_control": "g7a", "warned_flame": "g7b_flame",
                 "warned_archer_exit": "g7b_archer_exit"}[policy]
         return run_trial(level, size, seed, policy_mode=mode, max_rounds=3,
-                         include_ledger=True)
+                         include_ledger=True, calibration_policy=policy)
     if policy == "warned_party_exit":
         from scripts.b06_g7c_party_terminals_v0 import run_trial
-        return run_trial(level, size, seed, include_ledger=True)
+        return run_trial(level, size, seed, include_ledger=True,
+                         calibration_policy=policy)
     if policy in ("b_front", *PROTECTIVE_POLICIES):
         from scripts.b06_g7d_protection_frontlines_v0 import run_trial
         mode = "control" if policy == "protected_control" else policy
         return run_trial(level, size, seed, policy=mode, round_limit=2,
-                         include_ledger=True)
+                         include_ledger=True, calibration_policy=policy)
     from scripts.b06_g7e_ambush_pounce_recovery_v0 import run_trial
     return run_trial(level, size, seed,
                      policy="pounce" if policy == "forest_pounce"
                      else "ordinary_approach", round_limit=2,
-                     exploration_seconds=0, include_ledger=True)
+                     exploration_seconds=0, include_ledger=True,
+                     calibration_policy=policy)
+
+
+def _policy_binding(policy):
+    """Expected native executor and mode, independent of report metadata."""
+    if policy in ("warned_control", "warned_flame", "warned_archer_exit"):
+        return ("g7a", {"warned_control": "g7a", "warned_flame": "g7b_flame",
+                        "warned_archer_exit": "g7b_archer_exit"}[policy])
+    if policy == "warned_party_exit":
+        return "g7c", "party_exits"
+    if policy in ("b_front", *PROTECTIVE_POLICIES):
+        return "g7d", "control" if policy == "protected_control" else policy
+    return "g7e", "pounce" if policy == "forest_pounce" else "ordinary_approach"
 
 
 def _policy_origin(level, size, policy):
@@ -122,6 +136,19 @@ def _validate_policy_origin(report, ledger, level, size, policy):
             source.get("scenario") != expected_scene or
             source.get("seed") != report["seed"]):
         raise AssertionError("Native G0 scene/seed does not match selected policy")
+    # Bind the selected native runner and action policy inside the original
+    # SHA-covered G0 ledger, before any source turns or die draws. Report-only
+    # labels can never substitute for this pre-action event.
+    selections = [ev for ev in ledger if ev.get("kind") == "g7f_policy_selected"]
+    runner, mode = _policy_binding(policy)
+    expected_binding = {"cohort": policy, "runner": runner, "mode": mode,
+                        "scenario": expected_scene, "seed": report["seed"],
+                        "level": level, "party_size": size}
+    if (len(selections) != 1 or selections[0].get("index") != 1 or
+            selections[0].get("round") != genesis.get("round") or
+            selections[0].get("turn") is not None or
+            selections[0].get("detail") != expected_binding):
+        raise AssertionError("Hashed native policy binding missing or wrong")
     pounces = sum(ev["kind"] == "g6_pounce_resolved" for ev in ledger)
     protections = [ev for ev in ledger
                    if ev["kind"] == "g6d_protective_bite_attested"]
@@ -148,8 +175,14 @@ def _validate_policy_origin(report, ledger, level, size, policy):
         raise AssertionError("Party withdrawal belongs only to authored G7-C exits")
     expected_method = {"reactive_shield": "shield_guard",
                        "prepared_body": "body_take_hit"}.get(policy)
+    expected_activation = {"reactive_shield": "reactive",
+                           "prepared_body": "prepared"}.get(policy)
     if any(expected_method is None or
-           ev["detail"].get("method") != expected_method
+           ev["detail"].get("method") != expected_method or
+           ev["detail"].get("activation") != expected_activation or
+           ev["detail"].get("attacker") != "hunter" or
+           ev["detail"].get("ward") != "vanguard" or
+           ev["detail"].get("protector") != "guardian"
            for ev in protections):
         raise AssertionError("Protective receipts do not belong to requested policy")
     if policy in ("b_front", *PROTECTIVE_POLICIES):
