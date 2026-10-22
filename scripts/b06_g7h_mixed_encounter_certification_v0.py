@@ -1369,6 +1369,21 @@ def _source_decisions(ledger, *, policy, terminal):
             raise AssertionError("Victory Hunter must land one actual paid Round-2 Bite")
         for who, attack in (("vanguard", "B06-PC-A-SWORD"),
                             ("guardian", "B06-PC-B-MACE")):
+            # Verify every original paid sequence action, not just hits.
+            # B's Round-1 miss is still a 20-AP commitment and cannot
+            # disappear from the Turn AP budget merely because no G4
+            # damage event was produced.
+            label = f"sequence:{attack}:0"
+            all_paid = [v for v in ledger
+                        if v["kind"] == "action_committed"
+                        and v["detail"].get("actor") == who
+                        and v["detail"].get("label") == label]
+            if (len(all_paid) != 2
+                    or {v["round"] for v in all_paid} != {1, 2}):
+                raise AssertionError("A/B require both original melee AP payments")
+            for action in all_paid:
+                _paid_action_ap(ledger, action, actor=who, cost=20,
+                                kind="physical", label=label)
             _player_melee_hit_chains(ledger, who, attack)
         rites = [x for x in events["g3_effect_established"]
                  if x["detail"].get("caster") == "archer"
