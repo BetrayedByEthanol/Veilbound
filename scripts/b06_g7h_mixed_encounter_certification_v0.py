@@ -1644,7 +1644,7 @@ def _authored_wound_basis(ledger, damage, *, policy):
                 ledger, flames[0])["index"] != damage["index"]:
             raise AssertionError("Wound must trace to the native G3/G4 Flame packet")
         _flame_hit_from_defense(flames[0])
-        tier = flames[0]["detail"]["critical"]
+        tier = flames[0]["detail"].get("critical", "normal")
         location_roll = 8 if flames[0]["round"] == 2 else None
         expected_key = f"g3-flame-ledger:{flames[0]['index']}"
         trauma = "Fire"
