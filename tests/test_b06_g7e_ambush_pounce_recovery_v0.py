@@ -169,8 +169,12 @@ class G7ETests(unittest.TestCase):
                 milestones=[x for x in r["ledger"] if
                             x["kind"]=="g44_hunter_milestone"]
                 self.assertTrue(milestones)
+                due=[x for x in r["ledger"]
+                     if x["kind"]=="g42_milestone_due"
+                     and x["detail"].get("source","").startswith("hunter:")]
+                self.assertTrue(due)
                 self.assertTrue(all(x["detail"]["round_begin"] is None
-                                    for x in milestones))
+                                    for x in due))
                 self.assertFalse(any(x["kind"]=="g4_six_hour_recovery"
                                      for x in r["ledger"]))
                 self.assertEqual(r["clock_handoff"]["mode"],"exploration")

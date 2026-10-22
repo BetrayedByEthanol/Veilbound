@@ -192,7 +192,8 @@ def _continuation(combat,seed,round_no):
                         pick=roll(seed,round_no,actor,"melee",
                                   "hunter_defense_choice",2)
                         _melee(combat,actor,"hunter",profile,
-                               "dodge" if pick==2 else "take_hit",seed,round_no)
+                               "dodge" if pick==2 and hunter.hp>0
+                               else "take_hit",seed,round_no)
             elif actor=="archer":
                 _bow(combat,seed,round_no)
             elif actor=="scholar":
