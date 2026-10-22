@@ -692,5 +692,194 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_36_p1_lethal_bow_rejects_ordinary_hit_with_devastating_packet(self):
+        trial=self._case(POLICIES[0])
+        ledger=trial["ledger"]
+        bow=next(v for v in ledger if v["kind"]=="g6d_bow_adjudicated"
+                 and (v["detail"].get("damage") or {}).get("dead"))
+        shot=ledger[bow["detail"]["shot_index"]]
+        # The 14-HP G4 packet is untouched, while both mutable G2/G6D
+        # receipts agree on an otherwise legal normal (10+4) hit.
+        for event in (shot,):
+            event["detail"].update(primary_face=10,attack_total=14,
+                                   outcome="intended_hit_pending_G5")
+        bow["detail"].update(attack_face=10,attack_total=14,
+                              confirmation_face=None,critical="normal",
+                              original_outcome="intended_hit_pending_G5")
+        trial["ledger_sha256"]=canonical_digest(ledger)
+        with self.assertRaises(AssertionError):
+            attest_trial(trial,level=3,seed=17,policy=POLICIES[0])
+
+    def test_37_p1_bow_die_packet_raw_and_clipping_must_match_source(self):
+        for variant in ("raw", "mitigated", "missing", "hp_packets"):
+            with self.subTest(variant=variant):
+                trial=self._case(POLICIES[0])
+                ledger=trial["ledger"]
+                bow=next(v for v in ledger if v["kind"]=="g6d_bow_adjudicated"
+                         and (v["detail"].get("damage") or {}).get("dead"))
+                terminal=next(v for v in ledger
+                              if v["kind"]=="g6d_hunter_defeat_attested")
+                damage=ledger[terminal["detail"]["lethal_damage_index"]]["detail"]
+                if variant=="raw":
+                    damage["packets"][0]["raw"]=2
+                elif variant=="mitigated":
+                    damage["packets"][0]["mitigated"]=2
+                elif variant=="missing":
+                    damage["packets"]=[]
+                else:
+                    bow["detail"]["damage"]["hp_packets"]=[2]
+                trial["ledger_sha256"]=canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial,level=3,seed=17,policy=POLICIES[0])
+
+    def test_38_p1_bow_paid_ap_and_remainder_required(self):
+        for mutation in ("zero_cost", "wrong_cost", "wrong_remaining",
+                         "resource_mismatch"):
+            with self.subTest(mutation=mutation):
+                trial=self._case(POLICIES[0])
+                ledger=trial["ledger"]
+                bow=next(v for v in ledger if v["kind"]=="g6d_bow_adjudicated"
+                         and (v["detail"].get("damage") or {}).get("dead"))
+                action=ledger[bow["detail"]["action_index"]]
+                if mutation=="zero_cost":
+                    action["detail"]["ap_spent"]=0
+                elif mutation=="wrong_cost":
+                    action["detail"]["ap_spent"]=24
+                elif mutation=="wrong_remaining":
+                    action["detail"]["ap_remaining"]+=20
+                else:
+                    resources=next(v for v in ledger
+                                   if v["kind"]=="turn_resources"
+                                   and v["round"]==action["round"]
+                                   and v["turn"]=="archer")
+                    resources["detail"]["ap"]+=20
+                trial["ledger_sha256"]=canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial,level=3,seed=17,policy=POLICIES[0])
+
+    def test_39_p1_fatal_bite_normal_hit_cannot_keep_17_point_packet(self):
+        trial=self._case(POLICIES[1])
+        ledger=trial["ledger"]
+        roll=next(v for v in ledger if v["kind"]=="g5_melee_roll"
+                  and v["detail"].get("attacker")=="hunter"
+                  and v["detail"].get("critical")=="devastating")
+        action=roll["detail"]["action_index"]
+        resolved=next(v for v in ledger if v["kind"]=="g5_melee_resolved"
+                      and v["detail"].get("action_index")==action)
+        roll["detail"].update(attack_face=2,attack_total=8,
+                              confirmation_face=None,critical="normal")
+        resolved["detail"]["critical"]="normal"
+        # Keep the former lethal G4 raw packet, G4.5 and fatal certificate.
+        trial["ledger_sha256"]=canonical_digest(ledger)
+        with self.assertRaises(AssertionError):
+            attest_trial(trial,level=3,seed=17,policy=POLICIES[1])
+
+    def test_40_p1_bite_raw_mitigation_and_source_receipt_required(self):
+        for policy in POLICIES[1:]:
+            for mutation in ("raw", "mitigated", "empty", "missing_profile"):
+                with self.subTest(policy=policy,mutation=mutation):
+                    trial=self._case(policy)
+                    ledger=trial["ledger"]
+                    bite=next(v for v in ledger if v["kind"]=="g5_melee_roll"
+                              and v["detail"].get("attacker")=="hunter")
+                    damage=next(v for v in ledger
+                                if v["kind"]=="g4_damage_applied"
+                                and v["round"]==bite["round"]
+                                and v["turn"]=="hunter")
+                    if mutation=="raw":
+                        damage["detail"]["packets"][0]["raw"]=100
+                    elif mutation=="mitigated":
+                        damage["detail"]["packets"][0]["mitigated"]=100
+                    elif mutation=="empty":
+                        damage["detail"]["packets"]=[]
+                    else:
+                        profile=next(v for v in ledger
+                                     if v["kind"]=="g4_profile_hit"
+                                     and v["round"]==bite["round"]
+                                     and v["turn"]=="hunter")
+                        profile["detail"]["critical"]="normal" if (
+                            profile["detail"]["critical"]!="normal") else "critical"
+                    trial["ledger_sha256"]=canonical_digest(ledger)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial,level=3,seed=17,policy=policy)
+
+    def test_41_p1_victory_hunter_bite_must_have_real_paid_hit(self):
+        for mutation in ("natural_one", "unpaid", "missing_profile_packet"):
+            with self.subTest(mutation=mutation):
+                trial=self._case(POLICIES[0])
+                ledger=trial["ledger"]
+                bite=next(v for v in ledger if v["kind"]=="g5_melee_roll"
+                          and v["round"]==2
+                          and v["detail"].get("attacker")=="hunter")
+                action=ledger[bite["detail"]["action_index"]]
+                if mutation=="natural_one":
+                    bite["detail"]["attack_face"]=1
+                    bite["detail"]["attack_total"]=7
+                elif mutation=="unpaid":
+                    action["detail"]["ap_spent"]=0
+                else:
+                    packet=next(v for v in ledger if v["kind"]=="g4_damage_applied"
+                                and v["round"]==2 and v["turn"]=="hunter")
+                    packet["detail"]["packets"]=[]
+                trial["ledger_sha256"]=canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial,level=3,seed=17,policy=POLICIES[0])
+
+    def test_42_p1_flame_must_have_two_exact_synchronous_packets(self):
+        for mutation in ("cleared", "changed_cause", "wrong_fire",
+                         "wrong_vigor", "wrong_armor", "changed_turn"):
+            with self.subTest(mutation=mutation):
+                trial=self._case(POLICIES[0])
+                ledger=trial["ledger"]
+                flame=next(v for v in ledger if v["kind"]=="g3_flame_launched")
+                packet=next(v for v in ledger
+                            if v["kind"]=="g4_damage_applied"
+                            and v["detail"].get("event_key")==
+                                f"g3-flame-ledger:{flame['index']}")
+                if mutation=="cleared":
+                    packet["detail"]["packets"]=[]
+                elif mutation=="changed_cause":
+                    packet["detail"]["cause"]="free_unsourced_fire"
+                elif mutation=="wrong_fire":
+                    packet["detail"]["packets"][0]["raw"]=20
+                elif mutation=="wrong_vigor":
+                    packet["detail"]["packets"][1]["raw"]=20
+                elif mutation=="wrong_armor":
+                    packet["detail"]["packets"][0]["armor_rule"]="weapon"
+                else:
+                    packet["turn"]="hunter"
+                trial["ledger_sha256"]=canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial,level=3,seed=17,policy=POLICIES[0])
+
+    def test_43_p2_round_and_turn_boundary_receipts_must_match_chronology(self):
+        for policy in POLICIES:
+            for mutation in ("round_999", "turn_actor", "turn_round",
+                             "duplicate_round", "round_turn", "skipped_turn"):
+                with self.subTest(policy=policy,mutation=mutation):
+                    trial=self._case(policy)
+                    ledger=trial["ledger"]
+                    rounds=[v for v in ledger if v["kind"]=="round_end"]
+                    turns=[v for v in ledger if v["kind"]=="turn_end"]
+                    if mutation=="round_999":
+                        rounds[0]["round"]=999
+                    elif mutation=="turn_actor":
+                        turns[0]["turn"]="archer"
+                    elif mutation=="turn_round":
+                        turns[0]["round"]+=1
+                    elif mutation=="duplicate_round":
+                        beginnings=[v for v in ledger if v["kind"]=="round_begin"]
+                        beginnings[1]["round"]=1
+                    elif mutation=="round_turn":
+                        rounds[0]["turn"]="hunter"
+                    else:
+                        turn_starts=[v for v in ledger
+                                     if v["kind"]=="turn_start_expiry"]
+                        turn_starts[1]["detail"]["actor"]="scholar"
+                    trial["ledger_sha256"]=canonical_digest(ledger)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial,level=3,seed=17,policy=policy)
+
+
 if __name__ == "__main__":
     unittest.main()

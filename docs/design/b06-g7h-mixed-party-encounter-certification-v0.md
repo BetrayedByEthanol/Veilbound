@@ -150,6 +150,51 @@ These checks validate ledger **consistency**, not the security of a
 public unkeyed digest against a fully fabricated, internally coherent
 history; trusted execution remains essential for final certification.
 
+## Codex P1/P2 correction — independently derived dice, source payments and chronology
+
+The G7-H *fixed-dice* witness now checks the original authored inputs
+against every claimed decisive native G4 packet, not just against editable
+G6-D/G5/G3 summaries or the ledger hash:
+
+- **R Bow lethal:** the actual G0 Physical action must debit **20 AP** and
+  its `ap_remaining` must follow the previous source `turn_resources`
+  and any earlier paid actions. The sourced G6-D finisher is natural
+  20, confirmation 20, two critical d4s `(4,4)`, damage d4 `4`.
+  Its exact **14 Piercing HP** packet, bypassed Armor-3 via Bow
+  Penetration-3, G4 floor-clipped HP loss and returned G6-D damage
+  receipt must all agree. Ordinary or natural-1 Bow hits cannot claim
+  the devastating packet even if G2 and G6-D summaries are edited
+  together. This is explicitly **not** a general Bow roll generator.
+- **Hunter Bite (all three policies):** victory's genuinely successful
+  Round-2 Bite now passes the exact same original G0→G5 declaration,
+  24 AP cost and remainder, defense, native d20, G4 source-profile
+  packet, G4.5 and G5 completion chain as defeat/withdrawal. The original
+  G6-C victory script uses `10` / d6 `1`; G7-G defeat uses natural
+  `20` / confirmation `20` / d4 `(4,4)` / d6 `6`;
+  opposed withdrawal uses face `12` / d6 `1`.
+  Accordingly the source B06-AT-04 **3+d6 Piercing Pen-1** raw packet
+  is exactly 4, 17 or 4 before verified source armor mitigation,
+  respectively. Editing an attack to an ordinary hit while preserving
+  the devastating fatal packet cannot certify.
+- **F Thrown Flame:** each already AP/VP-attested G3 launch binds to
+  **exactly one synchronous G4** event with original `g3:thrown_flame`
+  cause, caster turn, source event key, original **Fire HP** and
+  **Direct Vigor** raw/mitigated packets from the launch's
+  verified d20, d8, critical dice and Used Tier. Both HP and Vigor
+  transitions are checked. Clearing the packet list or relabeling a
+  cause fails closed even if HP summaries are left intact.
+- **G0 receipt chronology:** all `round_begin`, `turn_start_expiry`,
+  `turn_end` and `round_end` events are replayed in source
+  Initiative order with their original round and turn fields. A
+  rehashed `round_end.round=999`, wrong actor, repeated round or
+  post-Round-End open turn cannot be certified.
+
+These are source-model *witness attestation* rules. They do not extend
+the combat engine's universal ability/damage tables or change the
+historical Phase 3 digest. Requiring authored dice for this cohort is
+intentional; generalized unscripted player/GM roll distributions and
+independently representative encounter samples remain future gates.
+
 ## Player/GM tactics and MVP boundary
 
 - **Playable source role diversity demonstrated:** A/B martial proxy
