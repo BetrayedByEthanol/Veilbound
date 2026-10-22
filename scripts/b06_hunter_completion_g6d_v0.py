@@ -226,7 +226,21 @@ class HunterCompletion:
             v["detail"].get("target")==hunter and
             (v["detail"].get("damage") or {}).get("dead") is True
             for v in e.ledger))
-        if not (valid_bow or valid_melee):
+        # A direct Scholar Thrown Flame has a synchronous, uniquely keyed
+        # G3 launch -> G4 packet. Never accept a merely pending G3 natural
+        # 20, a missed launch, or a different party caster as lethal proof.
+        valid_flame=bool(cause=="g3:thrown_flame" and any(
+            ev["kind"]=="g3_flame_launched"
+            and ev["detail"].get("caster") in party
+            and e.actors[ev["detail"]["caster"]].source.source_id=="F"
+            and ev["detail"].get("target")==hunter
+            and ev["detail"].get("outcome")=="direct_hit_pending_G4"
+            and lethal["detail"].get("event_key")==f"g3-flame-ledger:{ev['index']}"
+            and lethal["round"]==ev["round"]
+            and lethal["turn"]==ev["turn"]
+            and ev["index"]<lethal["index"]
+            for ev in e.ledger))
+        if not (valid_bow or valid_melee or valid_flame):
             raise UnresolvedDecision("Lethal event lacks paid source-attested combat")
         if any(v["kind"]=="g6d_hunter_defeat_attested" for v in e.ledger):
             raise ValueError("Hunter defeat terminal already attested")

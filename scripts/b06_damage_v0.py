@@ -254,14 +254,22 @@ class DamageState:
                 "wound": severity, "dead": a.dead,
                 "hp_packets": [n for p,n in zip(packets,resolved) if p.resource=="hp"]}
 
-    def preflight_flame_wound(self, recipient, wound_location_roll):
-        """Require a wound die before paying for a G3 Flame that will cross 0."""
+    def preflight_flame_wound(self, recipient, wound_location_roll, *,
+                             fire_hp=2, devastating=False):
+        """Preflight the exact Fire primary *including* confirmed critical d4s.
+
+        A Devastating direct Flame also requires a real location die even
+        without crossing 0 HP. The future hit must consume the same value.
+        """
+        if type(fire_hp) is not int or fire_hp<2 or type(devastating) is not bool:
+            raise ValueError("Source-confirmed Flame Fire HP/critical required")
         a=self._actor(recipient)
-        hp_loss=self._mitigate_hp(a,DamagePacket("hp","Fire",2))
+        hp_loss=self._mitigate_hp(a,DamagePacket("hp","Fire",fire_hp))
         after=max(-a.hp_max,a.hp-hp_loss)
-        if a.hp>0 and after<=0 and after>-a.hp_max:
-            if type(wound_location_roll) is not int or not 1<=wound_location_roll<=20:
-                raise UnresolvedDecision("Actual wound-location d20 required before Flame VP payment")
+        wound=((a.hp>0 and after<=0) or devastating) and after>-a.hp_max
+        if wound and (type(wound_location_roll) is not int
+                      or not 1<=wound_location_roll<=20):
+            raise UnresolvedDecision("Actual wound-location d20 required before Flame VP payment")
 
     def apply_flame(self, caster, target, *, ledger_index, wound_location_roll=None):
         """Consume *only* the just-launched G3 direct hit synchronously."""
@@ -284,10 +292,22 @@ class DamageState:
         pending = d.get("packets_pending_g4")
         if not isinstance(pending, dict) or set(pending) != {"fire_hp", "vigor"}:
             raise ValueError("Missing G3 authorized packet pair")
+        critical=d.get("critical","normal")
+        extra=d.get("critical_dice",[])
+        required={"normal":0,"strong":1,"critical":2,"devastating":2}.get(critical)
+        if (required is None or not isinstance(extra,(tuple,list))
+                or len(extra)!=required
+                or any(type(x) is not int or not 1<=x<=4 for x in extra)
+                or type(pending["fire_hp"]) is not int
+                or pending["fire_hp"]!=2+sum(extra)
+                or type(pending["vigor"]) is not int
+                or pending["vigor"]<0):
+            raise ValueError("G3 primary Fire packet/critical evidence mismatch")
         return self.apply_damage(target, (
             DamagePacket("hp", "Fire", pending["fire_hp"]),
             DamagePacket("vigor", "Direct Vigor", pending["vigor"])),
             event_key=event_key, cause="g3:thrown_flame",
+            devastating=critical=="devastating",
             wound_location_roll=wound_location_roll)
 
     def _profile_hit_packets(self, attacker, target, profile_id, *,
