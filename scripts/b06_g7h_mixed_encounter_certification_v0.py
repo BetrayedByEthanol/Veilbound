@@ -1610,6 +1610,101 @@ def _reconcile_victory_hunter_sequences(ledger):
     return True
 
 
+def _authored_wound_basis(ledger, damage, *, policy):
+    """Recover wound inputs from the source's *independently verified* attack.
+
+    A G4 wound_created event is an OUTPUT, never the source of its own
+    severity, location, trauma, or identifier. Every damage cause in these
+    three fixed-policy scenes must have a known, authenticated native origin.
+    The original wound-location d20 is not serialized in G5's roll receipt;
+    use the immutable G6-C/G7-G authored input, not a replacement d20 from
+    the mutable wound record.
+    """
+    d = damage["detail"]
+    cause, actor, key = (
+        d.get("cause"), d.get("recipient"), d.get("event_key"))
+    if cause == "source-profile:B06-AT-04":
+        hits = [h for h in _hunter_bite_hits(ledger, actor, policy=policy)
+                if h["damage"]["index"] == damage["index"]]
+        if len(hits) != 1:
+            raise AssertionError("Wound must trace to an authenticated Hunter Bite")
+        tier = hits[0]["roll"]["detail"]["critical"]
+        # G7-G commits d20=8 for every wound-qualifying Hunter Bite.
+        # G6-C's single landed Bite does not supply a wound d20, and
+        # cannot legitimately generate a wound in the original scene.
+        location_roll = (8 if policy != "mixed_victory_rite" else None)
+        expected_key = (
+            f"g4:profile:hunter:{actor}:B06-AT-04:"
+            f"{damage['index'] - 1}" if d.get("wound") is not None else None)
+        trauma = "Piercing"
+    elif cause == "g3:thrown_flame":
+        flames = [ev for ev in ledger if ev["kind"] == "g3_flame_launched"
+                  and f"g3-flame-ledger:{ev['index']}" == key]
+        if len(flames) != 1 or _flame_delivery_packet(
+                ledger, flames[0])["index"] != damage["index"]:
+            raise AssertionError("Wound must trace to the native G3/G4 Flame packet")
+        _flame_hit_from_defense(flames[0])
+        tier = flames[0]["detail"]["critical"]
+        location_roll = 8 if flames[0]["round"] == 2 else None
+        expected_key = f"g3-flame-ledger:{flames[0]['index']}"
+        trauma = "Fire"
+    elif cause in ("source-profile:B06-PC-A-SWORD",
+                   "source-profile:B06-PC-B-MACE"):
+        attacker, profile = (
+            ("vanguard", "B06-PC-A-SWORD")
+            if cause.endswith("B06-PC-A-SWORD")
+            else ("guardian", "B06-PC-B-MACE"))
+        rolls = [ev for ev in ledger if ev["kind"] == "g5_melee_roll"
+                 and ev["detail"].get("attacker") == attacker
+                 and ev["detail"].get("target") == "hunter"
+                 and ev["detail"].get("profile") == profile
+                 and ev["detail"].get("hit") is True
+                 and ev["index"] < damage["index"]]
+        bridges = [ev for ev in ledger if ev["kind"] == "g45_attested_hit"
+                   and ev["detail"].get("attacker") == attacker
+                   and ev["detail"].get("target") == "hunter"
+                   and damage["index"] < ev["index"]]
+        pairs = [(roll, bridge) for roll in rolls for bridge in bridges
+                 if roll["detail"].get("action_index") ==
+                    bridge["detail"].get("action_index")
+                 and roll["index"] < damage["index"] < bridge["index"]]
+        if len(pairs) != 1:
+            raise AssertionError("G4 melee wound lacks unique native A/B paid hit")
+        tier = pairs[0][0]["detail"]["critical"]
+        location_roll = None   # G6-C A/B rolls supply no wound d20
+        expected_key = None
+        trauma = "Cut" if attacker == "vanguard" else "Crush"
+    elif isinstance(cause, str) and cause.startswith("g6d:source_bow:"):
+        if policy != "mixed_victory_rite":
+            raise AssertionError("Only mixed victory uses source R Bow damage")
+        # G6-D's 20/20 finishing shot hits the existing Dying Hunter's
+        # *lethal* threshold; no G4 wound can be minted after death.
+        terminal_bows = [ev for ev in ledger
+                         if ev["kind"] == "g6d_bow_adjudicated"
+                         and (ev["detail"].get("damage") or {}).get("dead") is True]
+        if (len(terminal_bows) != 1
+                or terminal_bows[0]["detail"].get("damage", {}).get("wound") is not None):
+            raise AssertionError("Source Bow fatal packet is not the authored finishing hit")
+        tier = "devastating"
+        location_roll = None
+        expected_key = None
+        trauma = "Piercing"
+    else:
+        raise AssertionError("Unrecognized damage source cannot certify G7-H wound history")
+    if tier not in ("normal", "strong", "critical", "devastating"):
+        raise AssertionError("Unsupported critical tier in native wound basis")
+    # The first positive, typed HP packet determines G4 wound trauma.
+    packets = d.get("packets")
+    if (not isinstance(packets, list)
+            or not any(p.get("resource") == "hp"
+                       and p.get("mitigated", 0) > 0
+                       and p.get("type") == trauma for p in packets)):
+        raise AssertionError("G4 trauma does not follow the authenticated attack type")
+    return {"devastating": tier == "devastating",
+            "location_roll": location_roll, "trauma": trauma,
+            "event_key": expected_key}
+
+
 def _reconcile_complete_snapshots(ledger, initial, final, *,
                                   policy, level, seed):
     """Reconstruct every serialized actor field from fixture and native events.
@@ -1620,7 +1715,8 @@ def _reconcile_complete_snapshots(ledger, initial, final, *,
     """
     from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
     from scripts.b06_g7a_native_terminal_census_v0 import _snapshot
-    from scripts.b06_damage_v0 import WOUND_BANDS
+    from scripts.b06_damage_v0 import WOUND_BANDS, LOCATIONS
+    from math import ceil
 
     reference = mixed_scene(
         size=4, level=level, seed=seed,
@@ -1635,43 +1731,88 @@ def _reconcile_complete_snapshots(ledger, initial, final, *,
         raise AssertionError("Final actor snapshot has missing/extra source fields")
 
     wounds = {actor: deepcopy(source_initial[actor]["wounds"]) for actor in ROSTER}
-    issued = set()
     created = [ev for ev in ledger if ev["kind"] == "g4_wound_created"]
     damages = [ev for ev in ledger if ev["kind"] == "g4_damage_applied"]
-    for w in created:
-        d = w["detail"]
-        actor, name, key = (
-            d.get("recipient"), d.get("wound"), d.get("event_key"))
-        if (actor not in wounds or not isinstance(name, str)
-                or name in issued
-                or not isinstance(key, str) or not key
-                or d.get("severity") not in WOUND_BANDS
-                or type(d.get("requirement")) is not int
-                or d["requirement"] != WOUND_BANDS[d["severity"]]
-                or not isinstance(d.get("location"), str)
-                or not isinstance(d.get("trauma"), str)):
-            raise AssertionError("G4 wound event has invalid unique native attributes")
-        matches = [ev for ev in damages
-                   if ev["detail"].get("recipient") == actor
-                   and ev["detail"].get("event_key") == key
-                   and ev["detail"].get("wound") == d["severity"]]
-        if (len(matches) != 1 or w["index"] >= matches[0]["index"]
-                or w["round"] != matches[0]["round"]
-                or w["turn"] != matches[0]["turn"]):
-            raise AssertionError("Wound creation lacks its actual synchronous G4 damage")
-        issued.add(name)
-        wounds[actor].append({
-            "id": name, "severity": d["severity"], "progress": 0,
-            "requirement": d["requirement"]})
+    # DamageState uses a *global* next_wound sequence, not an actor-local
+    # sequence or a freely chosen identifier from the event being checked.
+    carried = [w["id"] for actor in ROSTER
+               for w in source_initial[actor]["wounds"]]
+    next_wound = max((int(name[4:]) for name in carried
+                      if isinstance(name, str) and name.startswith("G4-W")
+                      and name[4:].isdigit()), default=0)
+    used = set(carried)
+    used_keys = set()
+    expected_created = []
+    # Iterate the *actual ordered G4 damage history*, computing necessity
+    # and severity without taking a declared wound or summary as authority.
     for damage in damages:
-        d = damage["detail"]
-        corresponding = [w for w in created
-                         if w["detail"].get("recipient") == d.get("recipient")
-                         and w["detail"].get("event_key") == d.get("event_key")]
-        if (d.get("wound") is None) != (len(corresponding) == 0):
-            raise AssertionError("G4 wound severity must reconcile with native creation")
-        if d.get("wound") is not None and len(corresponding) != 1:
-            raise AssertionError("Damage cannot create missing/duplicated wound")
+        record = damage["detail"]
+        actor, key = record.get("recipient"), record.get("event_key")
+        if (actor not in wounds or not isinstance(key, str) or not key
+                or key in used_keys):
+            raise AssertionError("G4 damage needs unique source event identity")
+        used_keys.add(key)
+        source = _authored_wound_basis(ledger, damage, policy=policy)
+        hp_max = source_initial[actor]["hp_max"]
+        before, after = record.get("hp_before"), record.get("hp_after")
+        if (type(before) is not int or type(after) is not int
+                or type(hp_max) is not int or hp_max <= 0):
+            raise AssertionError("Wound severity needs native integer G4 HP")
+        crosses = before > 0 and after <= 0
+        needed = (crosses or source["devastating"]) and after > -hp_max
+        matched = [ev for ev in created
+                   if ev["detail"].get("recipient") == actor
+                   and ev["detail"].get("event_key") == key]
+        if needed:
+            roll = source["location_roll"]
+            if type(roll) is not int or not 1 <= roll <= 20:
+                raise AssertionError("Source never supplied an authentic wound d20")
+            if len(matched) != 1 or matched[0]["index"] >= damage["index"]:
+                raise AssertionError("Missing/duplicated native wound before damage")
+            wound = matched[0]
+            # G4 establishes its event_key from the pre-creation ledger index
+            # for a physical profile. The original F Flame source key is
+            # independently fixed by its G3 launch index.
+            if source["event_key"] is not None and (
+                    key != source["event_key"]
+                    if record["cause"] == "g3:thrown_flame" else
+                    key != f"g4:profile:hunter:{actor}:B06-AT-04:{wound['index']}"):
+                raise AssertionError("Wound event key not bound to source delivery")
+            overkill = max(0, -after)
+            if overkill < ceil(hp_max / 3):
+                severity = "Serious"
+            elif overkill < ceil(2 * hp_max / 3):
+                severity = "Severe"
+            else:
+                severity = "Critical"
+            if source["devastating"]:
+                severity = "Critical"
+            next_wound += 1
+            name = f"G4-W{next_wound:04d}"
+            if name in used:
+                raise AssertionError("Global G4 wound ID reused")
+            used.add(name)
+            location = next(label for bound, label in LOCATIONS if roll <= bound)
+            expected_detail = {
+                "recipient": actor, "wound": name, "severity": severity,
+                "requirement": WOUND_BANDS[severity],
+                "location": location, "trauma": source["trauma"],
+                "event_key": key,
+            }
+            if (wound["detail"] != expected_detail
+                    or wound["round"] != damage["round"]
+                    or wound["turn"] != damage["turn"]
+                    or record.get("wound") != severity):
+                raise AssertionError(
+                    "Wound does not follow original damage, d20, critical and global ID")
+            wounds[actor].append({
+                "id": name, "severity": severity, "progress": 0,
+                "requirement": WOUND_BANDS[severity]})
+            expected_created.append(wound["index"])
+        elif matched or record.get("wound") is not None:
+            raise AssertionError("Unqualified G4 packet invented a wound")
+    if sorted(expected_created) != [ev["index"] for ev in created]:
+        raise AssertionError("Unpaired or reordered wound creation event")
     if any(ev["kind"] in ("g4_basic_heal_applied", "g4_wound_repaired")
            for ev in ledger):
         raise AssertionError("No external healing/wound repair in authored pack")
@@ -1915,9 +2056,30 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
             raise AssertionError(
                 "G7-G opposed withdrawal needs two real paid Bites, including post-pursuit")
         receipts = _authored_exit_chains(ledger, terminal, final_state)
-        if items[0]["detail"].get("border_exit_indices") != [
-                receipt["g5"] for receipt in receipts]:
-            raise AssertionError("G7-G verification's exit indices diverged from native receipts")
+        # Rebuild the *whole* G7-G certificate from its authenticated
+        # G7-C terminal, real G1 pursuit, two paid G5 Bites, distinct
+        # G1/G4.5/G5 border exits and source Hunter's closing HP/death.
+        # No free-form fields, stale pointers or contradictory claims may
+        # be accepted merely because the ledger digest was recomputed.
+        expected_receipt = {
+            "native_terminal_index": terminal["index"],
+            "hunter_alive": True,
+            "pursuit_index": pursuit["index"],
+            "hunter_paid_bite_indices": [
+                hit["resolved"]["index"] for hit in bite_hits],
+            "border_exit_indices": [receipt["g5"] for receipt in receipts],
+            "boundary": "authored_G7C_scene_exits_only",
+            "ongoing_world_pursuit_not_adjudicated": True,
+        }
+        verified = items[0]
+        if (verified["detail"] != expected_receipt
+                or verified["round"] != terminal["round"]
+                or verified["turn"] is not None
+                or verified["index"] <= terminal["index"]
+                or final_state["hunter"]["dead"] is not False
+                or final_state["hunter"]["hp"] <= 0):
+            raise AssertionError(
+                "G7-G opposed withdrawal receipt must exactly follow the native evidence")
     return {
         "paid_melee_resolutions": len(melee),
         "bow_hit_adjudications": len(events["g6d_bow_adjudicated"]),

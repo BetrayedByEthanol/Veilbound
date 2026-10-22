@@ -1502,5 +1502,129 @@ class G7HMixedNativeTests(unittest.TestCase):
                                  policy=POLICIES[1])
 
 
+    def test_65_p2_bite_wound_location_and_trauma_follow_source_d20(self):
+        original = self._case(POLICIES[1])
+        created = [v for v in original["ledger"]
+                   if v["kind"] == "g4_wound_created"]
+        self.assertTrue(created)
+        for field, replacement in (
+                ("location", "Invented anatomical location"),
+                ("location", "Head / neck"),
+                ("trauma", "Fire"),
+                ("trauma", "Cut")):
+            with self.subTest(field=field, replacement=replacement):
+                trial = deepcopy(original)
+                witness = next(v for v in trial["ledger"]
+                               if v["kind"] == "g4_wound_created")
+                self.assertEqual(witness["detail"]["location"], "Chest")
+                self.assertEqual(witness["detail"]["trauma"], "Piercing")
+                witness["detail"][field] = replacement
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[1])
+
+    def test_66_p2_coordinated_valid_severity_downgrade_cannot_certify(self):
+        trial = self._case(POLICIES[1])
+        wound = next(v for v in trial["ledger"] if v["kind"] == "g4_wound_created")
+        wd = wound["detail"]
+        self.assertEqual(wd["severity"], "Critical")
+        actor, key = wd["recipient"], wd["event_key"]
+        matching = [v for v in trial["ledger"]
+                    if v["kind"] == "g4_damage_applied"
+                    and v["detail"].get("recipient") == actor
+                    and v["detail"].get("event_key") == key]
+        self.assertEqual(len(matching), 1)
+        damage = matching[0]
+        wd["severity"] = "Serious"
+        wd["requirement"] = 10
+        damage["detail"]["wound"] = "Serious"
+        # Reconcile every *editable* G4.5/G5 summary and closing wound
+        # snapshot, so simple consistency checks cannot identify the edit.
+        for ev in trial["ledger"]:
+            if (ev["kind"] == "g45_attested_hit"
+                    and ev["detail"].get("attacker") == "hunter"
+                    and ev["detail"].get("target") == actor
+                    and damage["index"] < ev["index"]
+                    and (ev["detail"].get("actual_result") or {}).get("wound")
+                    == "Critical"):
+                ev["detail"]["actual_result"]["wound"] = "Serious"
+            if (ev["kind"] == "g5_melee_resolved"
+                    and ev["detail"].get("attacker") == "hunter"
+                    and ev["detail"].get("target") == actor
+                    and damage["index"] < ev["index"]
+                    and (ev["detail"].get("damage") or {}).get("wound")
+                    == "Critical"):
+                ev["detail"]["damage"]["wound"] = "Serious"
+        carried = next(w for w in trial["final_state"][actor]["wounds"]
+                       if w["id"] == wd["wound"])
+        carried["severity"] = "Serious"
+        carried["requirement"] = 10
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[1])
+
+    def test_67_p2_global_wound_id_reconstruction_rejects_coordinated_alias(self):
+        trial = self._case(POLICIES[1])
+        wound = next(v for v in trial["ledger"] if v["kind"] == "g4_wound_created")
+        actor, old = wound["detail"]["recipient"], wound["detail"]["wound"]
+        assert old.startswith("G4-W")
+        forged = "G4-W9999"
+        wound["detail"]["wound"] = forged
+        for existing in trial["final_state"][actor]["wounds"]:
+            if existing["id"] == old:
+                existing["id"] = forged
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[1])
+
+    def test_68_p2_opposed_withdrawal_reconstructs_entire_g7g_receipt(self):
+        original = self._case(POLICIES[2])
+        receipts = [v for v in original["ledger"]
+                    if v["kind"] == "g7g_living_hunter_disengagement_verified"]
+        self.assertEqual(len(receipts), 1)
+        original_details = receipts[0]["detail"]
+        self.assertEqual(original_details["hunter_alive"], True)
+        self.assertEqual(original_details["boundary"],
+                         "authored_G7C_scene_exits_only")
+        changes = (
+            ("hunter_alive", False),
+            ("boundary", "unverified_world_safe_escape"),
+            ("ongoing_world_pursuit_not_adjudicated", False),
+            ("native_terminal_index", 0),
+            ("pursuit_index", 0),
+            ("hunter_paid_bite_indices", []),
+            ("border_exit_indices", []),
+            ("unexpected_receipt_field", "forged"),
+        )
+        for field, changed in changes:
+            with self.subTest(field=field):
+                trial = deepcopy(original)
+                witness = next(v for v in trial["ledger"]
+                               if v["kind"] ==
+                               "g7g_living_hunter_disengagement_verified")
+                witness["detail"][field] = changed
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+        trial = deepcopy(original)
+        witness = next(v for v in trial["ledger"]
+                       if v["kind"] == "g7g_living_hunter_disengagement_verified")
+        del witness["detail"]["boundary"]
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
+
+    def test_69_p2_authentic_L2_L3_wounds_and_withdrawal_receipts(self):
+        for level in (2, 3):
+            with self.subTest(level=level):
+                pack = run_pack(level, 17, include_trials=True)
+                for policy in (POLICIES[1], POLICIES[2]):
+                    attested = attest_trial(
+                        deepcopy(pack["native_trials"][policy]),
+                        level=level, seed=17, policy=policy)
+                    self.assertEqual(
+                        attested["outcome"], TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
