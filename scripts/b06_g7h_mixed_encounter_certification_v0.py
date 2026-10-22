@@ -490,6 +490,86 @@ def _terminal_proof(report, ledger, *, policy, deaths):
 
 
 
+def _reconcile_victory_bow_ammunition(ledger, initial, final, *, level):
+    """Replay *every* source R Bow round from its independent B05 arrow count.
+
+    G0 genesis does not serialize arrow inventory, so the pre-action
+    snapshot must match the actual source sheet rather than being trusted
+    as an arbitrary caller-supplied starting balance. Round 1 consumes
+    no arrow (R casts its Chosen Rite); Round 2 launches one missed arrow
+    from G6-C; Round 3 launches the G6-D lethal arrow. Each declaration,
+    G2 launch and G2 resolution must agree with the same decrement, and
+    the reconciled balance must equal the final original-R snapshot.
+    """
+    from scripts.b05_bow_vanguard_l1_l3_v0 import profile as bow_sheet
+    from scripts.b06_hunter_mixed_party_g6c_v0 import POLICY
+
+    source_ammo = bow_sheet(level)["initial_arrows"]
+    if (type(source_ammo) is not int or source_ammo < 2
+            or type(initial["archer"].get("ammunition")) is not int
+            or initial["archer"]["ammunition"] != source_ammo):
+        raise AssertionError("G7-H R opening arrows must match source B05 sheet")
+    expected_faces = {2: POLICY[2]["archer"], 3: BOW_FINISH_DICE[0]}
+    stages = (
+        "action_committed", "g2_bow_sequence_committed",
+        "g2_bow_launched", "g2_bow_shot_resolved",
+    )
+    timeline = {stage: [ev for ev in ledger if ev["kind"] == stage
+                        and (stage != "action_committed" or
+                             ev["detail"].get("label") == "g2:bow:hunter:0")]
+                for stage in stages}
+    # These are the only ranged G2 arrow events for this fixed victory
+    # policy. A hidden launch, selected extra shot or missing resolution
+    # cannot be made legitimate by modifying the final ammunition.
+    if any(len(timeline[stage]) != 2 for stage in stages):
+        raise AssertionError("G7-H victory requires exactly two Bow arrow chains")
+
+    ammo = source_ammo
+    for round_no, expected_face in expected_faces.items():
+        items = []
+        for stage in stages:
+            found = [ev for ev in timeline[stage]
+                     if ev["round"] == round_no and ev["turn"] == "archer"]
+            if len(found) != 1:
+                raise AssertionError("Source Bow arrow has missing/duplicate own-turn stage")
+            items.append(found[0])
+        action, declaration, launch, shot = items
+        if not (action["index"] < declaration["index"]
+                < launch["index"] < shot["index"]):
+            raise AssertionError("G2 arrow was not declared, launched and resolved in order")
+        ad, dd, ld, sd = (ev["detail"] for ev in items)
+        _paid_action_ap(
+            ledger, action, actor="archer", cost=20,
+            kind="physical", label="g2:bow:hunter:0")
+        if (ad.get("actor") != "archer"
+                or dd.get("shooter") != "archer"
+                or dd.get("target") != "hunter"
+                or dd.get("profiles") != ["Bow"]
+                or dd.get("defenses") != ["take_hit"]
+                or type(dd.get("ammunition_selected")) is not int
+                or dd["ammunition_selected"] != 1
+                or ld.get("shooter") != "archer"
+                or ld.get("target") != "hunter"
+                or type(ld.get("ammo_remaining")) is not int
+                or ld["ammo_remaining"] != ammo - 1
+                or sd.get("shooter") != "archer"
+                or sd.get("intended") != "hunter"
+                or type(sd.get("ammunition_spent")) is not int
+                or sd["ammunition_spent"] != 1
+                or sd.get("primary_face") != expected_face
+                or sd.get("outcome") != (
+                    "automatic_miss" if round_no == 2
+                    else "critical_confirmation_pending_G5")
+                or sd.get("target") != (
+                    None if round_no == 2 else "hunter")):
+            raise AssertionError("G7-H G2 declared/paid/launched arrow balance changed")
+        ammo -= 1
+    if (type(final["archer"].get("ammunition")) is not int
+            or final["archer"]["ammunition"] != ammo):
+        raise AssertionError("Closing R arrow inventory disagrees with G2 paid launches")
+    return ammo
+
+
 def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
     """Bind G6-D's victory receipt to the unique paid *lethal* Bow shot.
 
@@ -1333,6 +1413,17 @@ def _flame_hit_from_defense(flame):
             or any(type(v) is not int or not 1 <= v <= 4 for v in dice)
             or type(d.get("die")) is not int or not 1 <= d["die"] <= 8):
         raise AssertionError("G7-H Flame critical or damage faces mismatch")
+    # This certificate is a *fixed* G6-C scene. Re-derive the exact
+    # independently preauthored Scholar input pair by its original round,
+    # not from an editable launch/attack-total pair. An otherwise legal
+    # substituted hit is a different policy and must not certify.
+    from scripts.b06_hunter_mixed_party_g6c_v0 import POLICY
+    authored = POLICY.get(flame["round"], {}).get("scholar")
+    if (flame["round"] not in (1, 2)
+            or flame["turn"] != "scholar"
+            or authored is None
+            or (face, d.get("die")) != tuple(authored)):
+        raise AssertionError("G7-H Flame diverged from fixed G6-C Scholar roll")
     from math import ceil
     if d.get("packets_pending_g4") != {
             "fire_hp": 2 + sum(dice), "vigor": 2 + ceil(d["die"] / 3)}:
@@ -1615,6 +1706,8 @@ def attest_trial(report, *, level, seed, policy):
     _reconcile_source_vp(ledger, final)
     _reconcile_source_regeneration(
         ledger, final, policy=policy, level=level, seed=seed)
+    if policy == "mixed_victory_rite":
+        _reconcile_victory_bow_ammunition(ledger, initial, final, level=level)
     terminal = _terminal_proof(report, ledger, policy=policy, deaths=deaths)
     facts = _source_decisions(
         ledger, policy=policy, terminal=terminal, final_state=final)

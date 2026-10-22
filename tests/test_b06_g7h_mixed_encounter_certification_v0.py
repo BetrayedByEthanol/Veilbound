@@ -1180,5 +1180,131 @@ class G7HMixedNativeTests(unittest.TestCase):
                     {"hunter", "vanguard", "guardian", "archer", "scholar"})
 
 
+    def test_54_codex_p1_coordinated_zero_arrow_lethal_bow_rejected(self):
+        """A rehashed declaration/launch/resolution/final-state counterfeit.
+
+        AP and the lethal 20/20 roll remain valid; only native ammunition
+        provenance is forged across all affected receipts.
+        """
+        trial = self._case(POLICIES[0])
+        ledger = trial["ledger"]
+        bow = next(ev for ev in ledger
+                   if ev["kind"] == "g6d_bow_adjudicated"
+                   and (ev["detail"].get("damage") or {}).get("dead"))
+        launch = ledger[bow["detail"]["launch_index"]]
+        shot = ledger[bow["detail"]["shot_index"]]
+        declaration = next(ev for ev in ledger[:launch["index"]]
+                           if ev["kind"] == "g2_bow_sequence_committed"
+                           and ev["round"] == bow["round"])
+        self.assertEqual(declaration["detail"]["ammunition_selected"], 1)
+        self.assertEqual(shot["detail"]["ammunition_spent"], 1)
+        declaration["detail"]["ammunition_selected"] = 0
+        launch["detail"]["ammo_remaining"] += 1
+        shot["detail"]["ammunition_spent"] = 0
+        trial["final_state"]["archer"]["ammunition"] += 1
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaisesRegex(AssertionError, "arrow"):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_55_codex_p1_bow_chain_debit_and_source_closing_inventory(self):
+        for round_no in (2, 3):
+            for variant in ("selected", "launch", "spent", "missing_launch",
+                            "missing_resolution", "wrong_shot_face"):
+                with self.subTest(round=round_no, variant=variant):
+                    trial = self._case(POLICIES[0])
+                    ledger = trial["ledger"]
+                    declaration = next(v for v in ledger
+                                       if v["kind"] == "g2_bow_sequence_committed"
+                                       and v["round"] == round_no)
+                    launch = next(v for v in ledger
+                                  if v["kind"] == "g2_bow_launched"
+                                  and v["round"] == round_no)
+                    resolution = next(v for v in ledger
+                                      if v["kind"] == "g2_bow_shot_resolved"
+                                      and v["round"] == round_no)
+                    if variant == "selected":
+                        declaration["detail"]["ammunition_selected"] = 0
+                    elif variant == "launch":
+                        launch["detail"]["ammo_remaining"] += 1
+                    elif variant == "spent":
+                        resolution["detail"]["ammunition_spent"] = 0
+                    elif variant == "missing_launch":
+                        launch["kind"] = "unsigned_bow_launch"
+                    elif variant == "missing_resolution":
+                        resolution["kind"] = "unsigned_bow_resolution"
+                    else:
+                        resolution["detail"]["primary_face"] = 10
+                        resolution["detail"]["attack_total"] = 14
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+        for variant in ("source_start", "final_inventory"):
+            with self.subTest(variant=variant):
+                trial = self._case(POLICIES[0])
+                if variant == "source_start":
+                    trial["initial_state"]["archer"]["ammunition"] += 1
+                else:
+                    trial["final_state"]["archer"]["ammunition"] += 1
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_56_codex_p1_flame_authored_d20_and_d8_cannot_be_substituted(self):
+        """Both original G6-C (12, 3) casts must survive digest rewrites."""
+        for round_no in (1, 2):
+            for variant in ("legal_alternative_hit", "legal_alternative_vigor_die"):
+                with self.subTest(round=round_no, variant=variant):
+                    trial = self._case(POLICIES[0])
+                    ledger = trial["ledger"]
+                    flame = next(ev for ev in ledger
+                                 if ev["kind"] == "g3_flame_launched"
+                                 and ev["round"] == round_no)
+                    detail = flame["detail"]
+                    self.assertEqual((detail["primary_face"], detail["die"]),
+                                     (12, 3))
+                    if variant == "legal_alternative_hit":
+                        detail["primary_face"] = 10
+                        detail["attack_total"] = 15
+                    else:
+                        # 2 and 3 yield identical ceil(d8 / 3) packet,
+                        # so the native G4 damage remains coherent.
+                        detail["die"] = 2
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    with self.assertRaisesRegex(AssertionError, "fixed G6-C Scholar roll"):
+                        attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_57_legitimate_fixed_Bow_and_Flame_receipts_L2_and_L3(self):
+        from scripts.b05_bow_vanguard_l1_l3_v0 import profile as bow_sheet
+        for level in (2, 3):
+            with self.subTest(level=level):
+                bundle = run_pack(level, 17, include_trials=True)
+                native = bundle["native_trials"][POLICIES[0]]
+                events = native["ledger"]
+                declarations = [ev for ev in events
+                                if ev["kind"] == "g2_bow_sequence_committed"]
+                launches = [ev for ev in events
+                            if ev["kind"] == "g2_bow_launched"]
+                shots = [ev for ev in events
+                         if ev["kind"] == "g2_bow_shot_resolved"]
+                flames = [ev for ev in events
+                          if ev["kind"] == "g3_flame_launched"]
+                start = bow_sheet(level)["initial_arrows"]
+                self.assertEqual(native["initial_state"]["archer"]["ammunition"], start)
+                self.assertEqual([x["detail"]["ammunition_selected"]
+                                  for x in declarations], [1, 1])
+                self.assertEqual([x["detail"]["ammo_remaining"] for x in launches],
+                                 [start - 1, start - 2])
+                self.assertEqual([x["detail"]["ammunition_spent"] for x in shots],
+                                 [1, 1])
+                self.assertEqual(native["final_state"]["archer"]["ammunition"],
+                                 start - 2)
+                self.assertEqual([(x["round"], x["detail"]["primary_face"],
+                                   x["detail"]["die"]) for x in flames],
+                                 [(1, 12, 3), (2, 12, 3)])
+                self.assertEqual(
+                    attest_trial(native, level=level, seed=17,
+                                 policy=POLICIES[0])["outcome"],
+                    "hunter_defeat_attested")
+
+
 if __name__ == "__main__":
     unittest.main()
