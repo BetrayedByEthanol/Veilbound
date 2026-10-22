@@ -53,6 +53,31 @@ Dying/0 HP is **not** death. Native Cautious withdrawal is distinct from
 G7-E's **zero-second** exploration-clock handoff; forest observation
 ending with a live Hunter cannot be turned into a safe rest or escape.
 
+### Codex P2 corrections — policy binding and snapshot provenance
+
+G7-F now matches the executor's exact **scenario ID, policy ID,
+opening and frontline** against the requested calibration policy before
+counting a trial. It independently checks the G0-created scene and
+seed, the forest Pounce receipt (including the distinction from an
+ordinary Bite), the protection method/receipt count, and the
+authoritative single-actor/whole-party exit policy. A source-valid
+`warned_control` trial can no longer be mislabeled as
+`warned_flame`, nor a forest ordinary Bite as a Pounce.
+
+The source ledger's `encounter_created.source_ids` contains exact
+initial HP, role identities and source digests. G7-F now reconstructs
+HP and death states using every native `g4_damage_applied`,
+`regeneration_step`, and `g4_basic_heal_applied` event in order,
+verifying each before/after chain and comparing the result against
+the initial and final report snapshots. The descriptive HP deltas
+and Hunter-dead flag come only from that reconstructed event history,
+not unauthenticated mutable snapshot fields. An intact ledger hash
+does **not** authorize changed HP or death snapshots.
+
+This is source-ledger reconciliation, not a claim that a caller-
+manufactured ledger hash is a cryptographic signature or that the
+bounded native G0–G7 adapters are an exhaustive game engine.
+
 Every seed remains in one of the seven explicit outcome bins, including
 `legal_window_cutoff`, `unresolved_mechanical_branch`, and single-actor
 exit. An unresolved branch records its native reason. The source-policy
@@ -114,7 +139,7 @@ python -m scripts.b06_g7f_representative_calibration_v0 --seeds 4
 python -m scripts.b06_g7f_representative_calibration_v0 --seeds 128
 ```
 
-The 24 dedicated tests cover all 31 native policy cells, paired
+The 31 dedicated tests cover all 31 native policy cells, paired
 histories, sample accounting, CLI/hash reproducibility, and fail-closed
 source, ledger, turn, terminal, time-handoff and CR invariants. Full
 repository CI must verify the unchanged Phase 3 signature, Bow and

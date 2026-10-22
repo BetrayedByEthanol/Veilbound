@@ -13,43 +13,63 @@ from scripts import b06_g7f_representative_calibration_v0 as g7f
 
 
 def fake_source_trial(level, size, seed, policy, outcome="legal_window_cutoff"):
-    """Non-gameplay fixture used ONLY for verifier corruption tests."""
+    """Isolated G0/G4-compatible verifier fixture; never gameplay evidence."""
     roster = ("hunter", "vanguard", "guardian", "archer") + (
         ("scholar",) if size == 4 else ())
     sources = ("B06-EN-03", "A", "B", "R") + (("F",) if size == 4 else ())
-    initial = {name: {"source_id": src, "source_digest": "hash:" + src,
-                      "hp": 24, "dead": False}
-               for name, src in zip(roster, sources)}
+    initial = {n: {"source_id": src, "source_digest": "hash:" + src,
+                   "hp": 24, "dead": False} for n, src in zip(roster, sources)}
     final = deepcopy(initial)
-    ledger = [{"index": idx, "round": 1, "kind": "turn_end",
-               "detail": {"actor": name}} for idx, name in enumerate(roster)]
+    scenario_id, policy_id, opening, frontline = g7f._policy_origin(
+        level, size, policy)
+    genesis = {n: {"source_id": src, "digest": "hash:" + src, "hp": 24}
+               for n, src in zip(roster, sources)}
+    g0_scene = (f"B06-G7E-forest-lane:L{level}:P{size}"
+                if policy.startswith("forest_") else
+                f"B06-I3-G7D:B-front:party-{size}:L{level}"
+                if policy == "b_front" else
+                f"B06-I3-G6C:party-{size}:L{level}")
+    ledger = [{"index": 0, "round": 0, "kind": "encounter_created",
+               "detail": {"scenario": g0_scene, "seed": seed,
+                          "source_ids": genesis}}]
+    if outcome == "hunter_defeat_attested":
+        ledger.append({"index": len(ledger), "round": 1,
+                       "kind": "g4_damage_applied",
+                       "detail": {"recipient": "hunter", "hp_before": 24,
+                                  "hp_after": -24, "dead": True}})
+        final["hunter"].update(hp=-24, dead=True)
+    offset = len(ledger)
+    ledger.extend({"index": offset + i, "round": 1, "kind": "turn_end",
+                   "detail": {"actor": n}} for i, n in enumerate(roster))
     ledger.append({"index": len(ledger), "round": 1,
                    "kind": "round_end", "detail": {}})
-    if outcome == "hunter_defeat_attested":
-        final["hunter"]["hp"] = -24
-        final["hunter"]["dead"] = True
+    if outcome in g7f.CERTIFIED_TERMINALS:
         ledger.append({"index": len(ledger), "round": 1,
-                       "kind": "g6d_hunter_defeat_attested", "detail": {}})
-    if outcome == "party_withdrawal_attested":
-        ledger.append({"index": len(ledger), "round": 1,
-                       "kind": "g7c_party_withdrawal_attested", "detail": {}})
-    if outcome == "party_defeat_attested":
-        ledger.append({"index": len(ledger), "round": 1,
-                       "kind": "g7c_party_defeat_attested", "detail": {}})
-    return {
-        "level": level, "party_size": size, "seed": seed, "policy_id": policy,
-        "scenario_id": "unit-test-only:" + policy,
-        "initial_state": initial, "final_state": final,
-        "outcome": outcome, "native_terminal": (
-            {"ending": outcome} if outcome in g7f.CERTIFIED_TERMINALS else None),
+                       "kind": g7f.CERTIFIED_TERMINALS[outcome], "detail": {}})
+    report = {
+        "level": level, "party_size": size, "seed": seed,
+        "policy_id": policy_id, "scenario_id": scenario_id,
+        "opening": opening, "initial_state": initial, "final_state": final,
+        "outcome": outcome,
+        "native_terminal": ({"ending": outcome} if outcome
+                            in g7f.CERTIFIED_TERMINALS else None),
         "unresolved": ({"reason": "mechanical_gap"}
                        if outcome == "unresolved_mechanical_branch" else None),
         "hunter_cr": None, "complete_party_pack_certified": False,
         "turns_completed": len(roster), "rounds_completed": 1,
         "ledger": ledger, "ledger_sha256": g7f._digest(ledger),
-        "clock_handoff": {"not_a_combat_terminal": True, "elapsed_seconds": 0}
-        if policy.startswith("forest_") else None,
     }
+    if frontline is not None:
+        report["frontline"] = frontline
+    if policy.startswith("forest_"):
+        report.update(clock_handoff={"not_a_combat_terminal": True,
+                                     "elapsed_seconds": 0},
+                      exploration_seconds_requested=0,
+                      universal_surprise_benefit_applied=False,
+                      native_pounce_count=0, opening_bite=None)
+    if policy in ("b_front", *g7f.PROTECTIVE_POLICIES):
+        report["protection"] = {"attested_protections": 0}
+    return report
 
 
 class PureG7FTests(unittest.TestCase):
@@ -106,7 +126,7 @@ class PureG7FTests(unittest.TestCase):
 
     def test_06_rejects_ledger_hash_tamper(self):
         report = fake_source_trial(3, 4, 0, "warned_control")
-        report["ledger"][0]["detail"]["actor"] = "guardian"
+        report["ledger"][1]["detail"]["actor"] = "guardian"
         with self.assertRaisesRegex(AssertionError, "hash"):
             g7f.attest_native(report, level=3, size=4, seed=0,
                              policy="warned_control")
@@ -121,7 +141,7 @@ class PureG7FTests(unittest.TestCase):
 
     def test_08_rejects_reordered_turns_even_with_rehashed_ledger(self):
         report = fake_source_trial(3, 4, 0, "warned_control")
-        report["ledger"][0]["detail"]["actor"] = "vanguard"
+        report["ledger"][1]["detail"]["actor"] = "vanguard"
         report["ledger_sha256"] = g7f._digest(report["ledger"])
         with self.assertRaisesRegex(AssertionError, "chronology"):
             g7f.attest_native(report, level=3, size=4, seed=0,
@@ -197,7 +217,15 @@ class PureG7FTests(unittest.TestCase):
     def test_17_paired_delta_preserves_each_separate_source_digest(self):
         def fake(level, size, seed, policy):
             trial = fake_source_trial(level, size, seed, policy)
-            trial["final_state"]["hunter"]["hp"] = 10 if policy == "forest_pounce" else 20
+            after = 10 if policy == "forest_pounce" else 20
+            trial["ledger"].insert(1, {"index": 1, "round": 1,
+                "kind": "g4_damage_applied",
+                "detail": {"recipient": "hunter", "hp_before": 24,
+                           "hp_after": after, "dead": False}})
+            for i, event in enumerate(trial["ledger"]):
+                event["index"] = i
+            trial["ledger_sha256"] = g7f._digest(trial["ledger"])
+            trial["final_state"]["hunter"]["hp"] = after
             return trial
         with patch.object(g7f, "_native_case", side_effect=fake):
             report = g7f.census(seeds=1)
@@ -223,6 +251,112 @@ class PureG7FTests(unittest.TestCase):
                            {"seeds": 1, "include_trials": 1}):
                 with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
                     g7f.census(**kwargs)
+
+    def test_25_rejects_wrong_requested_policy_metadata(self):
+        pairs = (("warned_flame", "warned_control"),
+                 ("forest_pounce", "forest_ordinary"),
+                 ("reactive_shield", "prepared_body"),
+                 ("warned_party_exit", "warned_control"))
+        for requested, substituted in pairs:
+            report = fake_source_trial(3, 4, 11, substituted)
+            with self.subTest(requested=requested), self.assertRaisesRegex(
+                    AssertionError, "scenario/policy"):
+                g7f.attest_native(report, level=3, size=4, seed=11,
+                                 policy=requested)
+        for key in ("scenario_id", "policy_id", "opening", "frontline"):
+            report = fake_source_trial(3, 4, 0, "reactive_shield")
+            report[key] = "other"
+            with self.subTest(key=key), self.assertRaisesRegex(
+                    AssertionError, "scenario/policy"):
+                g7f.attest_native(report, level=3, size=4, seed=0,
+                                 policy="reactive_shield")
+
+    def test_26_rejects_wrong_pounce_receipt(self):
+        report = fake_source_trial(3, 4, 0, "forest_pounce")
+        report["opening_bite"] = {"kind": "native_pounce"}
+        with self.assertRaisesRegex(AssertionError, "Pounce"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="forest_pounce")
+        report = fake_source_trial(3, 4, 0, "forest_ordinary")
+        report["native_pounce_count"] = 1
+        with self.assertRaisesRegex(AssertionError, "Pounce"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="forest_ordinary")
+
+    def test_27_rejects_snapshot_hp_tamper_with_unchanged_ledger_hash(self):
+        for phase, actor in (("initial_state", "vanguard"),
+                             ("final_state", "hunter")):
+            report = fake_source_trial(3, 4, 0, "warned_control")
+            signed = report["ledger_sha256"]
+            report[phase][actor]["hp"] += 8
+            with self.subTest(phase=phase), self.assertRaisesRegex(
+                    AssertionError, "HP"):
+                g7f.attest_native(report, level=3, size=4, seed=0,
+                                 policy="warned_control")
+            self.assertEqual(report["ledger_sha256"], signed)
+
+    def test_28_rejects_false_dead_flag_and_inconsistent_damage_chain(self):
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        report["final_state"]["hunter"]["dead"] = True
+        with self.assertRaisesRegex(AssertionError, "HP/death"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        report["ledger"].insert(1, {"index": 0, "round": 1,
+            "kind": "g4_damage_applied",
+            "detail": {"recipient": "hunter", "hp_before": 12,
+                       "hp_after": 10, "dead": False}})
+        for i, ev in enumerate(report["ledger"]): ev["index"] = i
+        report["ledger_sha256"] = g7f._digest(report["ledger"])
+        with self.assertRaisesRegex(AssertionError, "transition"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
+    def test_29_reconciles_damage_regeneration_and_healing(self):
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        transitions = (
+            {"kind": "g4_damage_applied", "detail": {
+                "recipient": "guardian", "hp_before": 24,
+                "hp_after": 15, "dead": False}},
+            {"kind": "regeneration_step", "detail": {
+                "actor": "guardian", "hp_before": 15,
+                "hp_after": 17, "dead": False}},
+            {"kind": "g4_basic_heal_applied", "detail": {
+                "recipient": "guardian", "hp_restored": 3}},
+        )
+        for ev in reversed(transitions):
+            report["ledger"].insert(1, {"index": 0, "round": 1, **ev})
+        for i, ev in enumerate(report["ledger"]): ev["index"] = i
+        report["ledger_sha256"] = g7f._digest(report["ledger"])
+        report["final_state"]["guardian"]["hp"] = 20
+        verified = g7f.attest_native(report, level=3, size=4, seed=0,
+                                     policy="warned_control")
+        self.assertEqual(verified["party_hp_change"], -4)
+        report["final_state"]["guardian"]["hp"] = 21
+        with self.assertRaisesRegex(AssertionError, "HP/death"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
+    def test_30_rejects_forged_snapshot_fingerprints(self):
+        report = fake_source_trial(3, 4, 0, "warned_control")
+        for phase in ("initial_state", "final_state"):
+            report[phase]["archer"]["source_digest"] = "forged"
+        with self.assertRaisesRegex(AssertionError, "source"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
+    def test_31_rejects_wrong_policy_exit_terminal(self):
+        report = fake_source_trial(3, 4, 0, "warned_archer_exit")
+        report["outcome"] = "archer_withdrawal_attested"
+        with self.assertRaisesRegex(AssertionError, "Archer exit"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_archer_exit")
+        report = fake_source_trial(3, 4, 0, "warned_control",
+                                   "party_withdrawal_attested")
+        with self.assertRaisesRegex(AssertionError, "Party withdrawal"):
+            g7f.attest_native(report, level=3, size=4, seed=0,
+                             policy="warned_control")
+
 
 
 class NativeG7FTests(unittest.TestCase):
