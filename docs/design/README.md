@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B06 G7-E — Forest Approach, Pounce and Extended Recovery v0](b06-g7e-ambush-pounce-extended-recovery-v0.md) — genuine G6-A three-step rigid Hunter Pounce versus ordinary paired Bite source policies, 8 bounded L2/L3 × 3/4-PC forest-geometry cohorts, and only completed-boundary G4.2 exploration clock handoff for slow venom and six-hour recovery; no universal surprise actions, invented Hunter departure, statistical win rate or CR.
+
 - [B06 G7-D — Protective Tactics and Alternative Frontlines v0](b06-g7d-protective-tactics-alternative-frontlines-v0.md) — genuine G6-D Reactive Shield/Prepared Body protection in two-round L3/P4 source fight plus four real B-head-forward L2/L3 P3/P4 encounter setups; seven bounded cohorts, no ambush, full encounter CR or win probability.
 
 - [B06 G7-C — Full-Party Terminal Certification v0](b06-g7c-full-party-terminal-certification-v0.md) — native source-authored A/B/R[/F] individual G1/G4.5/G5 border exits authenticated into a whole-party withdrawal terminal after genuine Round End; separate strict Hunter-Bite all-dead attestation gate, no inferred CR or sampled survival frequency.
