@@ -282,6 +282,119 @@ def _reconcile_source_vp(ledger, final):
     return accounts
 
 
+
+def _reconcile_source_regeneration(ledger, final, *, policy, level, seed):
+    """Audit G4 Step 2 against source HP, Vigor and throughput, not hash alone.
+
+    These three *fixed* authored policies use natural HP recovery and
+    Dying-loss cancellation, but NEVER voluntary wound repair or external
+    Basic Heal. Explicitly reject an unmodelled repair/heal here rather
+    than certify it by replaying untrusted transition amounts.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+
+    reference = mixed_scene(
+        size=4, level=level, seed=seed,
+        party_exits=(policy == "opposed_living_hunter_withdrawal")).e
+    genesis = ledger[0]["detail"]["source_ids"]
+    hp = {actor: genesis[actor]["hp"] for actor in ROSTER}
+    vigor = {actor: genesis[actor]["vigor"] for actor in ROSTER}
+    hp_limits = {actor: reference.actors[actor].hp_max for actor in ROSTER}
+    vigor_limits = {actor: reference.actors[actor].vigor_max for actor in ROSTER}
+    regenerated = set()
+    rites = set()
+    for ev in ledger:
+        d, kind = ev["detail"], ev["kind"]
+        if kind == "g3_effect_established" and (
+                d.get("effect_kind") == "Guided Regeneration"
+                and d.get("caster") == "archer"
+                and d.get("recipient") == "archer"):
+            if policy != "mixed_victory_rite":
+                raise AssertionError("Other authored packs have no Guided Rite")
+            rites.add("archer")
+        elif kind == "g3_effect_ended" and d.get("caster") == "archer":
+            rites.discard("archer")
+        elif kind == "g4_damage_applied":
+            actor = d.get("recipient")
+            if (actor not in hp or
+                    any(type(d.get(key)) is not int for key in (
+                        "hp_before", "hp_after", "vigor_before", "vigor_after"))
+                    or (d["hp_before"], d["vigor_before"]) !=
+                       (hp[actor], vigor[actor])
+                    or not -hp_limits[actor] <= d["hp_after"] <= hp_limits[actor]
+                    or not 0 <= d["vigor_after"] <= vigor_limits[actor]):
+                raise AssertionError("G4 damage violates source HP/Vigor continuity")
+            hp[actor], vigor[actor] = d["hp_after"], d["vigor_after"]
+        elif kind == "g4_basic_heal_applied":
+            raise AssertionError(
+                "Fixed G7-H policies have no source-authored external Basic Heal")
+        elif kind in ("regeneration_step", "regeneration_dead"):
+            actor = d.get("actor")
+            key = (ev["round"], actor)
+            if (actor not in hp or ev["turn"] != actor
+                    or ev["round"] < 1 or key in regenerated):
+                raise AssertionError("G4 regeneration must occur once on its own turn")
+            regenerated.add(key)
+            # Every Step 2 must occur after Step 1 and before the one
+            # Step 4 source resource grant for the same native turn.
+            before = [x for x in ledger[:ev["index"]]
+                      if x["round"] == ev["round"]
+                      and x["turn"] == actor and
+                      x["kind"] == "turn_start_expiry"]
+            after = [x for x in ledger[ev["index"] + 1:]
+                     if x["round"] == ev["round"]
+                     and x["turn"] == actor and
+                     x["kind"] == "turn_resources"]
+            if len(before) != 1 or len(after) != 1:
+                raise AssertionError("Regeneration not between native Step 1 and Step 4")
+            hpmax, vmax = hp_limits[actor], vigor_limits[actor]
+            if kind == "regeneration_dead":
+                if hp[actor] != -hpmax:
+                    raise AssertionError("Living source actor cannot skip Step 2 as dead")
+                continue
+            fields = ("hp_before", "hp_after", "hp_restored",
+                      "vigor_before", "vigor_after", "repair_points",
+                      "throughput_spent")
+            if (any(type(d.get(k)) is not int for k in fields)
+                    or type(d.get("survival_cancelled")) is not bool
+                    or type(d.get("dead")) is not bool
+                    or d.get("wound_allocations") != []
+                    or d["repair_points"] != 0
+                    or (d["hp_before"], d["vigor_before"]) !=
+                       (hp[actor], vigor[actor])):
+                raise AssertionError("Regeneration receipt lacks authentic allocation")
+            survival = int(d["survival_cancelled"])
+            restored, spent = d["hp_restored"], d["throughput_spent"]
+            available = reference.actors[actor].regen + int(actor in rites)
+            dying = hp[actor] <= 0
+            pre_heal = max(-hpmax, hp[actor] - int(dying and not survival))
+            died = pre_heal == -hpmax
+            if (restored < 0 or spent < 0
+                    or (survival and not dying)
+                    or (dying and restored != 0)
+                    or spent != (0 if died else restored + survival)
+                    or spent > available or spent > vigor[actor]
+                    or d["dead"] is not died
+                    or d["hp_after"] != pre_heal + (0 if died else restored)
+                    or not -hpmax <= d["hp_after"] <= hpmax
+                    or d["vigor_after"] != vigor[actor] - spent
+                    or not 0 <= d["vigor_after"] <= vmax):
+                raise AssertionError(
+                    "G4 regeneration exceeds source HP/Vigor/throughput or Dying law")
+            hp[actor], vigor[actor] = d["hp_after"], d["vigor_after"]
+    # No Step-2 gaps: even dead characters have exactly one actual
+    # regeneration_dead acknowledgement on every completed native turn.
+    every_turn = {(v["round"], v["detail"]["actor"]) for v in ledger
+                  if v["kind"] == "turn_start_expiry"}
+    if regenerated != every_turn:
+        raise AssertionError("G4 Step 2 absent or duplicated on source Initiative")
+    if any(hp[actor] != final[actor]["hp"]
+           or vigor[actor] != final[actor]["vigor"]
+           for actor in ROSTER):
+        raise AssertionError("Source regeneration/Vigor replay differs from final snapshot")
+    return True
+
+
 def _terminal_proof(report, ledger, *, policy, deaths):
     outcome, terminal_kind = TERMINALS[policy]
     terminals = [ev for ev in ledger if ev["kind"] in (
@@ -300,10 +413,34 @@ def _terminal_proof(report, ledger, *, policy, deaths):
             or report.get("rounds_completed", report.get("rounds")) is None):
         raise AssertionError("G7-H requires unique authentic signed terminal")
     if policy == "mixed_victory_rite":
-        if (not deaths["hunter"] or
-                any(deaths[p] for p in ROSTER[1:]) or
-                terminals[0]["detail"].get("lethal_damage_index") is None):
-            raise AssertionError("Hunter victory requires actual Hunter death")
+        terminal = terminals[0]
+        fatal_index = terminal["detail"].get("lethal_damage_index")
+        source_hunter = ledger[0]["detail"]["source_ids"]["hunter"]
+        lethal = (ledger[fatal_index] if type(fatal_index) is int
+                  and 0 <= fatal_index < terminal["index"] else None)
+        expected_detail = {
+            "hunter": "hunter",
+            "party": list(ROSTER[1:]),
+            "lethal_damage_index": fatal_index,
+            "hp": -source_hunter["hp"],
+            "source_digest": source_hunter["digest"],
+            "source_event_cause": (
+                lethal["detail"].get("cause") if lethal is not None else None),
+            "round": terminal["round"],
+            "outcome": "hunter_dead_after_actual_native_combat",
+            "hunter_cr": None,
+        }
+        if (not deaths["hunter"]
+                or any(deaths[p] for p in ROSTER[1:])
+                or lethal is None or lethal["kind"] != "g4_damage_applied"
+                or lethal["detail"].get("recipient") != "hunter"
+                or lethal["detail"].get("dead") is not True
+                or terminal["turn"] is not None
+                or terminal["round"] != report["rounds_completed"]
+                or terminal["detail"] != expected_detail
+                or receipt.get("round") != terminal["round"]):
+            raise AssertionError(
+                "G6-D victory terminal is not the complete canonical source receipt")
     elif policy == "hunter_multitarget_defeat":
         if (deaths["hunter"] or not all(deaths[p] for p in ROSTER[1:])
                 or receipt.get("lethal_damage_indices") !=
@@ -764,6 +901,27 @@ def _replay_native_exit_geometry(ledger):
                 raise AssertionError("G7-H G1 move geometry, MP or destination altered")
             remaining[actor] -= price
             source.occupied = destination
+        elif kind == "g7g_hunter_pursuit_executed":
+            # The G7-G contact Boolean is a receipt, not positional
+            # authority. Derive front = head + (head - rear) from the
+            # SOURCE-replayed rigid footprint and the target's live square.
+            target = d.get("target")
+            hunter = expected.actors["hunter"]
+            if (event["round"] != 2 or event["turn"] != "hunter"
+                    or target != "vanguard"
+                    or d.get("final_footprint") !=
+                       [list(cell) for cell in hunter.occupied]
+                    or d.get("contact") is not True
+                    or grid.front("hunter") != expected.actors[target].occupied[0]):
+                raise AssertionError(
+                    "G7-H Hunter pursuit receipt lost actual head-forward contact")
+        elif kind == "g5_melee_roll" and d.get("attacker") == "hunter":
+            target = d.get("target")
+            if (target != "vanguard" or
+                    event["turn"] != "hunter" or
+                    grid.front("hunter") != expected.actors[target].occupied[0]):
+                raise AssertionError(
+                    "G7-H paid Hunter Bite rolled outside replayed melee contact")
         elif kind == "g5_terminal_exit":
             actor = d.get("actor")
             if (actor not in ROSTER[1:] or actor in exited
@@ -918,6 +1076,12 @@ def _player_melee_hit_chains(ledger, actor, profile):
                        and x["detail"].get("action_index") == index
                        for x in ledger)):
             raise AssertionError("A/B hit did not consume its legal physical action")
+        # A genuine action index and a 20-AP debit are insufficient:
+        # reconstruct the actor's SOURCE-sized own-turn allowance and
+        # every preceding paid action, including the claimed remainder.
+        _paid_action_ap(
+            ledger, action, actor=actor, cost=20, kind="physical",
+            label=f"sequence:{profile}:0")
         attestations = [v for v in ledger
                         if v["kind"] == "g5_melee_sequence_attested"
                         and index in v["detail"].get("action_indices", ())]
@@ -1391,6 +1555,8 @@ def attest_trial(report, *, level, seed, policy):
     _, deaths = _reconcile_hp_snapshots(
         ledger, initial, final, ROSTER, SOURCES)
     _reconcile_source_vp(ledger, final)
+    _reconcile_source_regeneration(
+        ledger, final, policy=policy, level=level, seed=seed)
     terminal = _terminal_proof(report, ledger, policy=policy, deaths=deaths)
     facts = _source_decisions(ledger, policy=policy, terminal=terminal)
     return {"policy": policy, "outcome": TERMINALS[policy][0],
