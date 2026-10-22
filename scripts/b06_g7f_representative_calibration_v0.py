@@ -211,6 +211,69 @@ def _reconcile_hp_snapshots(ledger, initial, final, names, expected_sources):
             raise AssertionError("Final HP/death snapshot disagrees with native G4 ledger")
     return {n: hp[n] - genesis[n]["hp"] for n in names}, dead
 
+
+def _derive_uncertified_outcome(ledger, names, deaths, policy, turns, rounds):
+    """Reconstruct censored classes without trusting mutable report fields.
+
+    A cutoff needs a truly completed observation, without an unresolved
+    turn or a source exit/death concealed by an editable outcome label.
+    """
+    counts = Counter(x["kind"] for x in ledger)
+    phase_pairs = (("round_begin", "round_end"),
+                   ("turn_start_expiry", "turn_end"),
+                   ("turn_resources", "turn_end"))
+    for started, finished in phase_pairs:
+        if (counts[started] and
+                not counts[finished] <= counts[started] <= counts[finished] + 1):
+            raise AssertionError("Invalid native turn/round start chronology")
+    open_native = (len(turns) != rounds * len(names) or
+                   any(counts[started] > counts[finished] or
+                       max((x["index"] for x in ledger if x["kind"] == started),
+                           default=-1) >
+                       max((x["index"] for x in ledger if x["kind"] == finished),
+                           default=-1)
+                       for started, finished in phase_pairs))
+    exits = [x for x in ledger if x["kind"] == "g5_terminal_exit"]
+    signed = [x for x in ledger if x["kind"] == "g45_withdrawal_attested"]
+    party = names[1:]
+    actors = [x["detail"].get("actor") for x in exits]
+    if (len(actors) != len(set(actors)) or any(x not in party for x in actors)
+            or len(signed) != len(exits)):
+        raise AssertionError("Native exit evidence has duplicated/unknown actor or missing G4.5")
+    for exit_event in exits:
+        d = exit_event["detail"]
+        matching = [x for x in signed if x["detail"].get("actor") == d.get("actor")]
+        if (len(matching) != 1 or
+                matching[0]["index"] >= exit_event["index"] or
+                matching[0]["detail"].get("movement_event_index") != d.get("movement_index")):
+            raise AssertionError("Native G5 exit lacks matching signed G4.5 movement")
+    if exits and policy not in ("warned_archer_exit", "warned_party_exit"):
+        raise AssertionError("Unapproved native exit policy")
+    if policy == "warned_archer_exit" and exits:
+        if len(exits) != 1 or actors != ["archer"] or open_native:
+            raise AssertionError("Archer exit requires one finished source-native exit")
+        return "archer_withdrawal_attested", None, exits
+    if policy == "warned_party_exit" and len(exits) == len(party):
+        return "unresolved_mechanical_branch", "whole_party_exit_not_attested", exits
+    if deaths["hunter"]:
+        return "unresolved_mechanical_branch", "hunter_death_not_attested", exits
+    if not open_native and all(deaths[x] for x in party) and not exits:
+        return "party_defeat_observed", None, exits
+    if open_native:
+        last_end = max((x["index"] for x in ledger if x["kind"] == "round_end"),
+                       default=-1)
+        pending = [x for x in ledger if x["kind"] == "unresolved_decision"
+                   and x["index"] > last_end]
+        choice = pending[-1]["detail"].get("choice") if pending else None
+        reason = ("native_unresolved_decision:" + choice
+                  if isinstance(choice, str) and choice else
+                  "native_turn_or_round_incomplete")
+        return "unresolved_mechanical_branch", reason, exits
+    if all(deaths[x] for x in party):
+        return "unresolved_mechanical_branch", "conflicting_party_death_and_exit", exits
+    return "legal_window_cutoff", None, exits
+
+
 def attest_native(report, *, level, size, seed, policy):
     """Validate a native execution rather than trusting its summary label.
 
@@ -276,8 +339,27 @@ def attest_native(report, *, level, size, seed, policy):
             raise AssertionError("Certified terminal lacks source and final Round End")
     elif found:
         raise AssertionError("A real native terminal is mislabeled or discarded")
-    if (outcome == "unresolved_mechanical_branch") != (report.get("unresolved") is not None):
-        raise AssertionError("Unresolved mechanics must be retained explicitly")
+    derived_reason = None
+    if outcome not in CERTIFIED_TERMINALS:
+        derived_outcome, derived_reason, exits = _derive_uncertified_outcome(
+            ledger, names, reconstructed_death, policy, turns, round_ends)
+        if outcome != derived_outcome:
+            raise AssertionError("Censored outcome disagrees with signed native ledger evidence")
+        if outcome == "archer_withdrawal_attested":
+            terminal = report.get("native_terminal")
+            if (not isinstance(terminal, dict) or
+                    terminal.get("g5_exit_event") != exits[0]["index"] or
+                    terminal.get("not_whole_party_withdrawal") is not True):
+                raise AssertionError("Archer withdrawal summary lacks native exit proof")
+        elif report.get("native_terminal") is not None:
+            raise AssertionError("Uncertified outcome cannot carry a fabricated terminal")
+    source_unresolved = report.get("unresolved")
+    if (outcome == "unresolved_mechanical_branch") != (source_unresolved is not None):
+        raise AssertionError("Unresolved status conflicts with native ledger classification")
+    if source_unresolved is not None and (not isinstance(source_unresolved, dict) or
+                                          not isinstance(source_unresolved.get("reason"), str) or
+                                          not source_unresolved["reason"]):
+        raise AssertionError("Malformed source-reported unresolved detail")
     if policy in ("forest_ordinary", "forest_pounce"):
         clock = report.get("clock_handoff")
         if clock is not None and (clock.get("not_a_combat_terminal") is not True or
@@ -289,8 +371,7 @@ def attest_native(report, *, level, size, seed, policy):
         "source_policy_id": report["policy_id"],
         "outcome": outcome, "certified_terminal": outcome in CERTIFIED_TERMINALS,
         "censored": outcome not in CERTIFIED_TERMINALS,
-        "unresolved_reason": (report["unresolved"]["reason"]
-                              if report.get("unresolved") else None),
+        "unresolved_reason": derived_reason,
         "ledger_sha256": report["ledger_sha256"],
         "rounds_completed": round_ends, "turns_completed": len(turns),
         "hunter_hp_change": hp_changes["hunter"],
