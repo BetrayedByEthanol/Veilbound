@@ -316,6 +316,38 @@ ammunition debit, and independently substituted Scholar d20 and d8 faces
 in either Round 1 or Round 2. Both actual L2 and L3 source traces must
 continue to certify with no rule modifications.
 
+### Codex follow-up — defense declarations, terminal ordering and wipe receipts
+
+The completed source-chain audit now rejects three additional classes of
+post-hoc ledger forgery, **even when the attacker recomputes the canonical
+ledger SHA-256**:
+
+1. **Every certified Hunter Bite** must match its original G0
+   `attack_sequence_committed.defenses[position]`, the matching
+   `defense_assigned` receipt, and the exact
+   `hunter:<original-target>:<position>` attack key. Binding the roll and
+   source-paid action alone is insufficient; a re-labeled Guard is not the
+   originally declared Take Hit choice.
+2. **Victory terminal ordering** requires the genuine
+   `g6d_hunter_defeat_attested` event *after* the last completed native
+   `round_end`, just as the G7-C defeat/withdrawal terminals do. A terminal
+   inserted after the final turn but before its Round End is premature.
+3. **Defeat verification receipt** is compared as an exact original-schema
+   object against native proof: full original party list, unique G4 fatal
+   Bite indices in source-party order, native terminal pointer, all distinct
+   Hunter targets reconstructed from the actual chronological target
+   selections and prior deaths, and the still-living Hunter. The chosen
+   target must match each real pursuit event and first still-living source
+   party member; changing both a target and a summary cannot invent a
+   different target history.
+
+Adversarial tests mutate individual Bite declaration defense slots and
+attack keys **across all three terminal policies**, move the G6-D terminal
+before its last Round End, corrupt each of the four G7-G defeat verification
+fields, and forge target-selection and verification records together. These
+are strictly authentication improvements; no combat rule, dice or policy
+selection changes, and no new representative sample is claimed.
+
 ## Execution and regression checks
 
 ```bash
