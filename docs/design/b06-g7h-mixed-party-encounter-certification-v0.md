@@ -98,6 +98,35 @@ protective intervention/healing. Fixed encounter seeds identify G0
 events; **replaying multiple seeds is not a representative probability
 experiment**.
 
+### Codex P1 provenance hardening — lethal Bow and G1 withdrawal continuity
+
+The G7-H independent attestor now verifies the victory terminal's
+`lethal_damage_index` points to the **single genuinely lethal Hunter
+`g4_damage_applied` event**, not an earlier nonlethal hit. Its native
+`cause` and unique `event_key` must reconstruct the exact
+**G0-paid Physical Action → G2 Bow declaration → launch → shot resolve →
+G4 lethal damage → G6-D Bow adjudication → signed G6-D terminal**
+for the same real Archer turn. The terminal's own `source_event_cause`,
+the Bow damage summary and HP-loss transition must agree. A forged
+terminal pointer or substituted Bow action/shot fails even when the
+attacker recomputes the public ledger SHA-256.
+
+Withdrawal proofs additionally replay **every** G1 movement step—Hunter
+translations/pivots and each PC's intermediate and final steps—against
+a freshly authored G6-C map and initial source actor footprints. Each
+recorded old coordinate must equal the preceding genuine position;
+direction, step kind, cardinal Hunter anatomy/pivot, target footprint,
+map bounds, collisions, Cautious cost and remaining own-turn MP must
+agree with G1's original `preview()` contract. Unsupported alternate
+movement modes fail closed. The final G7-C exit still requires its
+separate movement/G4.5/G5 signed receipt. Neither a changed
+`old=[[100,100]]` coordinate nor a teleport-like translation can
+obtain a certificate simply by recalculating a digest.
+
+These checks validate ledger **consistency**, not the security of a
+public unkeyed digest against a fully fabricated, internally coherent
+history; trusted execution remains essential for final certification.
+
 ## Player/GM tactics and MVP boundary
 
 - **Playable source role diversity demonstrated:** A/B martial proxy
