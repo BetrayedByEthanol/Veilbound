@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B06 G7-G — Hunter Pursuit, Party Defeat and Lawful Disengagement v0](b06-g7g-hunter-pursuit-party-defeat-disengagement-v0.md) — native cautious Hunter retarget/translation/pivot, genuine G5/G4 multi-target lethal Bite and G7-C all-dead positive witness; separately opposed two-round G7-C living-Hunter border exit. Fixed-dice/party policies only; no representative win rate, general world pursuit or Hunter CR.
+
 - [B06 G7-F — Representative Encounter Calibration v0 (source-native pilot)](b06-g7f-representative-encounter-calibration-v0.md) — 31 reproducible L2/L3 × P3/P4 source-native tactical cohorts, 10 explicitly paired descriptive contrasts, real G0 ledger/terminal audit, complete censored denominators. Representative human/GM calibration, complete party pack, win-rate and Hunter CR remain uncertified.
 
 - [B06 G7-E — Forest Approach, Pounce and Extended Recovery v0](b06-g7e-ambush-pounce-extended-recovery-v0.md) — genuine G6-A three-step rigid Hunter Pounce versus ordinary paired Bite source policies, 8 bounded L2/L3 × 3/4-PC forest-geometry cohorts, and only completed-boundary G4.2 exploration clock handoff for slow venom and six-hour recovery; no universal surprise actions, invented Hunter departure, statistical win rate or CR.
