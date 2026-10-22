@@ -265,5 +265,115 @@ class G7BTests(unittest.TestCase):
         self.assertIsNone(parsed["creature_challenge_rating"])
 
 
+    def test_19_post_commit_dodge_pressure_turns_strong_into_critical_fail_closed(self):
+        c=scholar_turn()
+        e=c.e
+        h=e.actors["hunter"]
+        scholar=e.actors["scholar"]
+        before_defense=e.g2._defense_value(h,"dodge",0,0)[1]
+        confirmation=before_defense-5
+        self.assertIn(confirmation,range(2,20))
+        before_ap,before_vp=scholar.ap_remaining,scholar.vp_available
+        before_hp=h.hp
+
+        def spend_independent_dodge(encounter):
+            # Genuine G0 capacity charge during the external committed
+            # response; final G2 defense is lower by two.
+            encounter.defense("hunter","dodge",
+                              attack_key="other_paid_live_response")
+
+        result=e.g3.cast_flame(
+            "scholar","hunter",tier=1,face=20,vigor_die=3,
+            defense="dodge",aware=True,
+            confirmation_face=confirmation,critical_dice=(3,),
+            on_committed=spend_independent_dodge,hand_available=True,
+            target_cell=e.g1.body_cell("hunter","head"),wound_location_roll=8)
+        self.assertEqual(result["outcome"],"interrupted_before_launch")
+        self.assertEqual(result["cause"],"post_commit_critical_tier_changed")
+        self.assertEqual(scholar.ap_remaining,before_ap-scholar.projection_ap)
+        self.assertEqual(scholar.vp_available,before_vp)
+        self.assertEqual(h.hp,before_hp)
+        self.assertEqual(h.dodge_pressure,2)  # external, not Flame
+        self.assertFalse(any(x["kind"] in ("g3_flame_launched","g4_damage_applied")
+                             for x in e.ledger))
+        interruptions=[x["detail"] for x in e.ledger
+                       if x["kind"]=="g3_cast_interrupted"]
+        self.assertEqual(len(interruptions),1)
+        self.assertEqual(interruptions[0]["original_tier"],"strong")
+        self.assertEqual(interruptions[0]["live_tier"],"critical")
+        self.assertEqual(interruptions[0]["original_defense"],before_defense)
+        self.assertEqual(interruptions[0]["live_defense"],before_defense-2)
+        self.assertEqual(interruptions[0]["vp_spent"],0)
+        e.check()
+
+    def test_20_post_commit_defense_increase_downgrades_critical_fail_closed(self):
+        c=scholar_turn()
+        e=c.e
+        h=e.actors["hunter"]
+        scholar=e.actors["scholar"]
+        h.dodge_pressure=2
+        before=e.g2._defense_value(h,"dodge",0,0)[1]
+        confirmation=before-4  # confirmation+5=before+1: initially Critical
+        self.assertIn(confirmation,range(2,20))
+        prior_hp=h.hp
+        prior_vp=scholar.vp_available
+        prior_ap=scholar.ap_remaining
+
+        def response_clears_pressure(encounter):
+            # Any lawful change to defense inputs, including a condition
+            # removal, must be re-evaluated rather than using the old tier.
+            encounter.actors["hunter"].dodge_pressure=0
+
+        result=e.g3.cast_flame(
+            "scholar","hunter",tier=1,face=20,vigor_die=3,
+            defense="dodge",aware=True,
+            confirmation_face=confirmation,critical_dice=(2,4),
+            on_committed=response_clears_pressure,hand_available=True,
+            target_cell=e.g1.body_cell("hunter","head"),wound_location_roll=8)
+        self.assertEqual(result["cause"],"post_commit_critical_tier_changed")
+        self.assertEqual(scholar.ap_remaining,prior_ap-scholar.projection_ap)
+        self.assertEqual(scholar.vp_available,prior_vp)
+        self.assertEqual(h.hp,prior_hp)
+        self.assertEqual(h.dodge_pressure,0)
+        self.assertFalse(any(x["kind"] in ("g3_flame_launched","g4_damage_applied")
+                             for x in e.ledger))
+        interruption=next(x["detail"] for x in e.ledger
+                          if x["kind"]=="g3_cast_interrupted")
+        self.assertEqual(interruption["original_tier"],"critical")
+        self.assertEqual(interruption["live_tier"],"strong")
+        self.assertEqual(interruption["original_defense"],before)
+        self.assertEqual(interruption["live_defense"],before+2)
+        e.check()
+
+    def test_21_changed_pressure_same_critical_tier_uses_live_defense(self):
+        c=scholar_turn()
+        e=c.e
+        h=e.actors["hunter"]
+        scholar=e.actors["scholar"]
+        before_defense=e.g2._defense_value(h,"dodge",0,0)[1]
+        self.assertLess(before_defense,24)
+        vp=scholar.vp_available
+
+        def spend_independent_dodge(encounter):
+            encounter.defense("hunter","dodge",
+                              attack_key="separately_paid_response")
+
+        result=e.g3.cast_flame(
+            "scholar","hunter",tier=1,face=20,vigor_die=3,
+            defense="dodge",aware=True,
+            confirmation_face=19,critical_dice=(2,4),
+            on_committed=spend_independent_dodge,hand_available=True,
+            target_cell=e.g1.body_cell("hunter","head"),wound_location_roll=8)
+        self.assertEqual(result["outcome"],"direct_hit_resolved_G4")
+        self.assertEqual(result["final_defense"],before_defense-2)
+        self.assertEqual(result["packets_pending_g4"]["fire_hp"],8)
+        self.assertEqual(scholar.vp_available,vp-2)
+        self.assertEqual(h.dodge_pressure,4) # other defense + committed Flame
+        self.assertEqual([x["detail"]["critical"] for x in e.ledger
+                          if x["kind"]=="g3_flame_launched"],["critical"])
+        self.assertFalse(any(x["kind"]=="g3_cast_interrupted" for x in e.ledger))
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()

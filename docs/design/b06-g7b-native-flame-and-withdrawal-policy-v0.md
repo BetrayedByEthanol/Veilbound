@@ -27,6 +27,15 @@ G3/G4 execution path:
   an ordinary Take Hit gives Critical unless confirmation also rolls
   natural 20 (Devastating); eligible aware Dodge/Guard can produce Strong
   after failed confirmation. No second attack or second Projection AP.
+- If a live `on_committed` response changes the intended defender's
+  Dodge Pressure or any other ranged-defense input, **G3 re-evaluates
+  the critical tier against the recomputed live G2 defense** before
+  Spent VP or defensive capacity is paid. If the tier no longer
+  matches the previously declared critical dice count, G3 logs
+  `post_commit_critical_tier_changed` and interrupts before launch:
+  original Projection AP stays spent, Spent VP remains zero, and no
+  Fire/Vigor packet or defensive commitment is fabricated or rerolled.
+  Responses that change the defense but **not** the tier can proceed.
 - G4 preflights the correct Fire HP **including** bonus dice and
   independently requires the wound-location d20 on a 0-HP crossing or
   Devastating wound. G3 then commits one real launch with the exact
