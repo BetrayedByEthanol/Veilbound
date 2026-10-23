@@ -75,6 +75,24 @@ matrix when all three branches pass independently:
    independently reconstructed receipts. No post-exit actor movement,
    damage or new turn is accepted.
 
+**Exact authored A/B defender and miss policy (Codex follow-up).**
+For the G6-D victory witness, Hunter must **Dodge** both paid Vanguard
+sword sequences (original source Dodge 14 at each Round Begin, followed by
+2 Dodge Pressure), then **Take Hit** against both Guardian mace sequences
+while preserving that same pressure and source Guard remainder. The
+original G0 declaration, actual defense assignment, defense value,
+resource receipt, paid action, attested G5 sequence and final roll must
+agree with the **independently authored G6-C policy**, not just with each
+other. Guardian's Round-1 natural-1 **miss** still requires its paid
+20-AP action, both **legal** G0 response-window rechecks, genuine ready
+receipt, original G5 roll and uncancelled `g5_melee_resolved` miss; replacing
+it with cancellation or an illegal recheck cannot certify. This is
+checked for **all four** A/B actions across the two source rounds.
+For every terminal branch, `encounter_created.detail.policy` and
+`objective` must also equal the independently reconstructed **original
+G6-C scene**, even after a digest is recomputed; the later G7-H/G7-G
+marker cannot amend the genesis policy.
+
 Additional P1 authentication (this review round): A/B source melee
 must reconcile each paid 20-AP action against Step-4 original Turn AP
 and remaining AP; G7-G withdrawal must retain actual Hunter head-forward
