@@ -747,3 +747,39 @@ The three checks are **attestation-only** and make no change to native
 G2/G3/G4/G4.5 rules, Hunter difficulty, the historical Phase 3 corpus,
 the terminal coverage scope or fixed source policies.
 
+
+## Codex P2 follow-up — original summary, G2 preassignment and G5 source (23 October 2026)
+
+Three additional authenticated-evidence boundaries are enforced for the
+original L2/L3 authored, four-character terminal matrix:
+
+1. **Legacy G6-D victory result:** the attested native trial still exposes
+   `hunter_hp`, `hunter_dead`, `rounds`, `roster`, `terminal` and
+   `finishing_shot`. These must agree with the independently reconstructed
+   original Hunter closing HP/death, actual completed G0 rounds, exact
+   Hunter/A/B/R/F roster, the unique signed G6-D terminal, and the actual
+   lethal G6-D Bow adjudication plus final source R ammunition. A caller
+   cannot retain a valid newly derived verdict while replacing a legacy
+   summary with a contradictory value.
+2. **Bow preassignment before its response window:** each of the two
+   independently source-authorized R shots now requires exactly one
+   `g2_projectile_defense_preassigned` receipt strictly between its own
+   `g2_bow_sequence_committed` and
+   `g2_projectile_defense_rechecked`. The original Hunter Take Hit choice,
+   source guard capacity and the pressure accrued from authenticated
+   prior native Dodge defenses must agree with the receipt and its later
+   G2 recheck. A digest rehash cannot turn a missing preassignment into
+   a valid Bow result.
+3. **Full Hunter Bite G5 sequence:** every authored Hunter Bite in the
+   victory, multi-target defeat and opposed-withdrawal paths requires
+   the exact native `g5_melee_sequence_attested` metadata, including
+   the independently sourced B06-EN-03 digest and +6 B06-AT-04 attack
+   bonus, one paid action and defense index, originating declaration,
+   and actual non-Prone feasibility flags. A substituted 999 bonus or
+   forged digest fails even if later roll totals remain +6.
+
+Regressions test both Bow preassignments, the original source fields for
+Bites across all three terminal policies, every legacy summary field,
+rehashing after forged event changes, and positive native L2/L3 traces.
+These assertions do **not** expand source rules, policy sampling,
+representative calibration, long-world withdrawal claims or Hunter CR.
