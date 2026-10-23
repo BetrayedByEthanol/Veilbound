@@ -4507,5 +4507,85 @@ class G7HMixedNativeTests(unittest.TestCase):
                         "hunter_defeat_attested")
 
 
+    def test_169_codex_p2_g7g_in_turn_spell_receipts_cannot_inflate_coverage(self):
+        # Exact reviewer failure mode: insert an alleged F launch immediately
+        # before the Round-9 Scholar turn_end in the L3/seed-0 defeat.
+        # Update every subsequent event index, the G7-C terminal pointer
+        # and G7-G verification pointer, then recompute the canonical
+        # digest. No paid G0 AP, G3 VP debit or G4 packet exists.
+        # Also cover the two-round opposed withdrawal and related fixed-
+        # policy receipt families; the *location* of the forgery cannot
+        # make an unauthored action legitimate.
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import _native
+
+        candidate_receipts = (
+            ("g3_flame_launched", {
+                "caster": "scholar", "target": "hunter",
+                "outcome": "direct_hit_pending_G4"}),
+            ("g3_basic_heal_primary_once", {
+                "caster": "scholar", "recipient": "scholar",
+                "hp": 0, "vigor": 0}),
+            ("g2_bow_sequence_committed", {
+                "shooter": "archer", "target": "hunter"}),
+            ("g6d_bow_adjudicated", {
+                "shooter": "archer", "target": "hunter",
+                "outcome": "hit"}),
+        )
+        for policy in ("hunter_multitarget_defeat",
+                       "opposed_living_hunter_withdrawal"):
+            native = _native(policy, 3, 0)
+            valid = attest_trial(native, level=3, seed=0, policy=policy)
+            self.assertEqual(valid["source_decisions"]["flame_launches"], 0)
+            self.assertEqual(valid["source_decisions"]["bow_hit_adjudications"], 0)
+            final_round = native["rounds_completed"]
+            if policy == "hunter_multitarget_defeat":
+                self.assertEqual(final_round, 9)
+            for kind, detail in candidate_receipts:
+                with self.subTest(policy=policy, kind=kind):
+                    trial = deepcopy(native)
+                    ledger = trial["ledger"]
+                    at = next(i for i, ev in enumerate(ledger)
+                              if ev["kind"] == "turn_end"
+                              and ev["round"] == final_round
+                              and ev["turn"] == "scholar")
+                    ledger.insert(at, {
+                        "index": -1, "round": final_round,
+                        "turn": "scholar", "kind": kind,
+                        "detail": deepcopy(detail),
+                    })
+                    for i, ev in enumerate(ledger):
+                        ev["index"] = i
+                    signed = next(ev for ev in ledger if ev["kind"] ==
+                                  TERMINALS[policy][1])
+                    trial["native_terminal"]["terminal_event"] = signed["index"]
+                    native_verification = (
+                        "g7g_multitarget_defeat_verified"
+                        if policy == "hunter_multitarget_defeat"
+                        else "g7g_living_hunter_disengagement_verified")
+                    proof = next(ev for ev in ledger if
+                                 ev["kind"] == native_verification)
+                    proof["detail"]["native_terminal_index"] = signed["index"]
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    # The receipt is inside the completed turn. The
+                    # canonical post-round-tail test is insufficient.
+                    with self.assertRaisesRegex(
+                            AssertionError,
+                            "Fixed G7-G policy forbids unauthored spell, Bow or Heal receipts"):
+                        attest_trial(trial, level=3, seed=0, policy=policy)
+
+    def test_170_codex_p2_original_g7g_held_scholars_still_attest(self):
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import _native
+        for level, seed in ((2, 0), (2, 17), (3, 0), (3, 17)):
+            for policy in ("hunter_multitarget_defeat",
+                           "opposed_living_hunter_withdrawal"):
+                with self.subTest(level=level, seed=seed, policy=policy):
+                    native = _native(policy, level, seed)
+                    result = attest_trial(native, level=level, seed=seed,
+                                          policy=policy)
+                    self.assertEqual(result["source_decisions"]["flame_launches"], 0)
+                    self.assertEqual(result["source_decisions"]["bow_hit_adjudications"], 0)
+                    self.assertEqual(result["outcome"], TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()

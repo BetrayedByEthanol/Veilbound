@@ -1954,6 +1954,23 @@ def _attest_fixed_g7g_actions(ledger, *, policy):
     if policy not in ("hunter_multitarget_defeat",
                       "opposed_living_hunter_withdrawal"):
         return
+    # Both original G7-G runners explicitly HOLD every party Action.
+    # The only authorized G3 event is the fixture's installation
+    # (independently authenticated by _origin). No R Bow or F spell is
+    # cast in either fixed policy. This is a CLOSED-WORLD policy check,
+    # not just an AP/VP balance check: an unattached in-turn delivery
+    # receipt may otherwise inflate _source_decisions even when no AP,
+    # VP or G4 damage was ever committed. The canonical post-round-tail
+    # gate cannot see a forged receipt inside an otherwise legal turn.
+    unauthored = [ev for ev in ledger if
+                  (ev["kind"].startswith("g3_")
+                   and ev["kind"] != "g3_spell_state_installed")
+                  or ev["kind"].startswith("g2_bow_")
+                  or ev["kind"] in ("g6d_bow_adjudicated",
+                                   "g4_basic_heal_applied")]
+    if unauthored:
+        raise AssertionError(
+            "Fixed G7-G policy forbids unauthored spell, Bow or Heal receipts")
     actions = [ev for ev in ledger if ev["kind"] == "action_committed"]
     results = [ev for ev in ledger if ev["kind"] == "g5_melee_resolved"]
     forbidden = [ev for ev in ledger if ev["kind"] == "g5_melee_cancelled"]
