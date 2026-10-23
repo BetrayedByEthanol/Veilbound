@@ -1272,7 +1272,8 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or action["detail"].get("label") !=
                    "sequence:B06-AT-04:0"):
             raise AssertionError(
-                "Paid Bite requires exact one-profile/one-defense native G0 declaration")
+                "Native Hunter Bite defense was altered; paid Bite requires "
+                "exact one-profile/one-defense native G0 declaration")
         rolls = [x for x in ledger
                  if x["kind"] == "g5_melee_roll"
                  and x["detail"].get("action_index") == action_index]
