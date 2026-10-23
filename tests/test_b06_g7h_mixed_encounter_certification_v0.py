@@ -3839,5 +3839,110 @@ class G7HMixedNativeTests(unittest.TestCase):
                         attest_trial(trial, level=3, seed=17, policy=policy)
 
 
+    def test_151_codex_p2_every_paid_action_has_exact_native_G1_segment_break(self):
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _reconcile_g1_action_segments,
+        )
+        for level in (2, 3):
+            pack = (self.bundle if level == 3
+                    else run_pack(level, 17, include_trials=True))
+            for policy in POLICIES:
+                with self.subTest(level=level, policy=policy):
+                    trial = pack["native_trials"][policy]
+                    ledger = trial["ledger"]
+                    native_actions = [ev for ev in ledger
+                                      if ev["kind"] == "action_committed"]
+                    native_breaks = [ev for ev in ledger
+                                     if ev["kind"] == "g1_segment_break"]
+                    self.assertGreater(len(native_actions), 0)
+                    self.assertEqual(len(native_breaks), len(native_actions))
+                    for action in native_actions:
+                        successor = ledger[action["index"] + 1]
+                        self.assertEqual(successor["kind"], "g1_segment_break")
+                        self.assertEqual(successor["detail"]["actor"],
+                                         action["detail"]["actor"])
+                        self.assertEqual(successor["detail"]["reason"], "own_action")
+                    proof = _reconcile_g1_action_segments(ledger)
+                    self.assertEqual(proof["paid_action_breaks"],
+                                     len(native_actions))
+                    self.assertEqual(
+                        proof["replayed_movement_steps"],
+                        sum(ev["kind"] == "g1_movement_step" for ev in ledger))
+                    self.assertEqual(
+                        attest_trial(trial, level=level, seed=17,
+                                     policy=policy)["outcome"],
+                        TERMINALS[policy][0])
+
+    def test_152_codex_p2_rehashed_action_segment_break_mutations_fail(self):
+        # Every source policy must reject a forged segment receipt even when
+        # the adversary recomputes the public native ledger SHA-256.
+        for policy in POLICIES:
+            native = self._case(policy)
+            actions = [ev for ev in native["ledger"]
+                       if ev["kind"] == "action_committed"]
+            self.assertGreater(len(actions), 0)
+            self.assertEqual(native["ledger"][actions[0]["index"] + 1]["kind"],
+                             "g1_segment_break")
+            for mutation in ("relabel", "actor", "reason", "segment",
+                             "bool_segment", "round", "turn"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = deepcopy(native)
+                    receipt = trial["ledger"][actions[0]["index"] + 1]
+                    if mutation == "relabel":
+                        receipt["kind"] = "g1_segment_break_suppressed"
+                    elif mutation == "actor":
+                        receipt["detail"]["actor"] = "scholar"
+                    elif mutation == "reason":
+                        receipt["detail"]["reason"] = "movement_interception"
+                    elif mutation == "segment":
+                        receipt["detail"]["new_segment"] += 1
+                    elif mutation == "bool_segment":
+                        receipt["detail"]["new_segment"] = True
+                    elif mutation == "round":
+                        receipt["round"] += 1
+                    else:
+                        receipt["turn"] = "archer"
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    # Native G0 chronology may reject a foreign round
+                    # or turn before the dedicated segment validator runs.
+                    if mutation in ("round", "turn"):
+                        with self.assertRaises(AssertionError):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+                    else:
+                        with self.assertRaisesRegex(
+                                AssertionError, "G1 own-action segment break"):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_153_codex_p2_rehashed_movement_segments_and_orphan_breaks_fail(self):
+        for policy in ("hunter_multitarget_defeat",
+                       "opposed_living_hunter_withdrawal"):
+            native = self._case(policy)
+            steps = [ev for ev in native["ledger"]
+                     if ev["kind"] == "g1_movement_step"]
+            self.assertTrue(steps)
+            for value in (steps[0]["detail"]["segment"] + 1, True, -1):
+                with self.subTest(policy=policy, forged_segment=value):
+                    trial = deepcopy(native)
+                    trial["ledger"][steps[0]["index"]]["detail"]["segment"] = value
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "G1 movement segment"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+            # A movement-related break is not an ordinary own-action
+            # break; this authored cautious G7-G policy uses neither
+            # Standing nor Movement Interception.
+            trial = deepcopy(native)
+            fake = next(ev for ev in trial["ledger"]
+                        if ev["kind"] == "g7g_hunter_target_selected")
+            fake["kind"] = "g1_segment_break"
+            fake["detail"] = {"actor": "hunter",
+                              "reason": "movement_interception",
+                              "new_segment": 999}
+            trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+            with self.subTest(policy=policy), self.assertRaisesRegex(
+                    AssertionError, "Orphan or non-action G1 segment break"):
+                attest_trial(trial, level=3, seed=17, policy=policy)
+
+
 if __name__ == "__main__":
     unittest.main()

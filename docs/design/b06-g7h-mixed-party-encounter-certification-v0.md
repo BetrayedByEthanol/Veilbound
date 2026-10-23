@@ -75,6 +75,22 @@ matrix when all three branches pass independently:
    independently reconstructed receipts. No post-exit actor movement,
    damage or new turn is accepted.
 
+**G1 paid-action movement-segment provenance (Codex P2).**
+Every G0 `action_committed` event must be followed **immediately** by
+the exact native `g1_segment_break` with matching round/current actor,
+`reason=own_action`, and the next independently replayed per-actor
+`new_segment` number. G1 implicitly increments each actor's counter
+once at its own Turn Start (after `turn_resources`) without a separate
+segment-break receipt. The G7-H verifier reconstructs these increments
+and the subsequent action breaks, rejects missing, relabeled, foreign,
+orphan or duplicate breaks, and checks the `segment` stamped on
+**every** real `g1_movement_step` against that native counter. Only
+`own_action` breaks are possible in this **specific** fixed-policy pack:
+there is no internal Pounce AP, Standing, or Movement Interception
+segment change. Those mechanics require their own source-authorized
+replay if later introduced. Recomputing the ledger hash cannot make
+an impossible movement Opportunity segment legal.
+
 **Exact authored A/B defender and miss policy (Codex follow-up).**
 For the G6-D victory witness, Hunter must **Dodge** both paid Vanguard
 sword sequences (original source Dodge 14 at each Round Begin, followed by

@@ -362,6 +362,69 @@ def _attest_bite_response_window(ledger, *, action_index, attested_index, roll):
     return events[3]["index"]
 
 
+def _reconcile_g1_action_segments(ledger):
+    """Replay G1's implicit turn-start increment and paid-action segment breaks.
+
+    G0.spend_ap logs action_committed and synchronously calls G1.on_own_action;
+    ordinary source actions MUST therefore be followed immediately by one
+    g1_segment_break with reason own_action and the next actor segment.
+    G1.on_turn_start increments the same counter after turn_resources but
+    emits no break receipt. These three fixed G7-H policies have neither
+    internal Pounce AP nor Standing / Movement Interception segment breaks.
+    Reject any other break rather than treating a rehashed log as authority.
+    Reconcile movement_step.segment as well: the counter governs how G1
+    restricts Movement Opportunities, even in a Cautious fixed witness.
+    """
+    segments = {actor: 0 for actor in ROSTER}
+    consumed = set()
+    actions = 0
+    movements = 0
+    for index, event in enumerate(ledger):
+        kind, detail = event["kind"], event["detail"]
+        if kind == "turn_resources":
+            actor = detail.get("actor")
+            if actor not in segments or event["turn"] != actor:
+                raise AssertionError("G1 turn-start segment lacks sourced current actor")
+            # EncounterState.start_turn calls G1.on_turn_start synchronously
+            # after recording Step-4 turn_resources; that increment is silent.
+            segments[actor] += 1
+        elif kind == "action_committed":
+            actor = detail.get("actor")
+            if (actor not in segments or event["turn"] != actor
+                    or index + 1 >= len(ledger)):
+                raise AssertionError("G1 own-action segment break has no source action")
+            expected = segments[actor] + 1
+            following = ledger[index + 1]
+            if (following["kind"] != "g1_segment_break"
+                    or following["round"] != event["round"]
+                    or following["turn"] != actor
+                    or following["detail"] != {
+                        "actor": actor, "reason": "own_action",
+                        "new_segment": expected,
+                    }):
+                raise AssertionError(
+                    "G1 own-action segment break must immediately follow "
+                    "each original paid source action with exact actor/reason/number")
+            segments[actor] = expected
+            consumed.add(index + 1)
+            actions += 1
+        elif kind == "g1_segment_break":
+            if index not in consumed:
+                raise AssertionError("Orphan or non-action G1 segment break in fixed policy")
+        elif kind == "g1_movement_step":
+            actor = detail.get("actor")
+            if (actor not in segments or event["turn"] != actor
+                    or type(detail.get("segment")) is not int
+                    or detail["segment"] != segments[actor]):
+                raise AssertionError(
+                    "G1 movement segment disagrees with source-replayed "
+                    "turn starts and own-action breaks")
+            movements += 1
+    if actions == 0:
+        raise AssertionError("G7-H scene has no source-paid segment breaks")
+    return {"paid_action_breaks": actions, "replayed_movement_steps": movements}
+
+
 def _reconcile_all_turn_end_ap(ledger, *, level, seed):
     """Replay Step-4 resources, every native AP debit and exact Turn-End AP.
 
@@ -3710,6 +3773,7 @@ def attest_trial(report, *, level, seed, policy):
     _origin(report, ledger, policy=policy, level=level, seed=seed)
     _reconcile_g0_defense_resources(ledger, level=level, seed=seed)
     _reconcile_all_turn_end_ap(ledger, level=level, seed=seed)
+    _reconcile_g1_action_segments(ledger)
     _attest_fixed_g7g_actions(ledger, policy=policy)
     turns = [v["detail"].get("actor") for v in ledger if v["kind"] == "turn_end"]
     ends = [v for v in ledger if v["kind"] == "round_end"]
