@@ -15,9 +15,11 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
-**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint after merged B06 G7-F (PR #122). The document owns the **current** 17-area progress table, B01–B07 blockers, six unchanged MVP exit gates and the proposed next milestone sequence. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint after merged B06 G7-H (PR #125). The document owns the **current** 17-area progress table, B01–B07 blockers, six unchanged MVP exit gates and the proposed next milestone sequence. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
 
 ## Active design records
+
+- [B06 G8 — Soldier/Sentry Full Encounter Pack v0 (bounded native three-terminal matrix candidate)](b06-g8-soldier-sentry-full-encounter-pack-v0.md) — authored L2/L3 four-PC A/B/R/F victory, real enemy full-party defeat and opposed four-member scene exit against genuine Soldier and cold/prepared Firebound Sentry fixtures; G5 permits an opt-in source A/B vs named benchmark foe. Fixed face/decision policy, no representative win rate, general Bow damage, independent Focus acceptance or numerical CR. **Proposed PR scope, not merged baseline until reviewed and merged.**
 
 - [B06 G7-H — Complete Mixed-Party Encounter Certification v0 (bounded terminal matrix)](b06-g7h-mixed-party-encounter-certification-v0.md) — one native L2/L3 A/B/R/F scene with separately source-attested Hunter death, all-party defeat and opposed scene exit. Victory adds a genuine source R Chosen Guided Rite to A/B/R/F damage roles; strictly audited native 3-terminal **bounded** coverage, not full representative pack, universal healing/protection policy, sampled win rate or Hunter CR.
 

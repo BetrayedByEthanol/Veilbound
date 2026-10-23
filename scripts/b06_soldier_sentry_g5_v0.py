@@ -47,7 +47,19 @@ class SourceMelee:
     a declared, reproducible policy/input and retained in the event ledger.
     G5 does not choose a player defense, roll, or tactical response itself.
     """
-    def __init__(self,encounter,*,scene_exit=None,scene_exits=()):
+    def __init__(self,encounter,*,scene_exit=None,scene_exits=(),
+                 player_benchmark_target=None):
+        # G8 authorizes A/B physical proxies against ONE predeclared,
+        # existing one-square Soldier/Sentry opponent only. The default
+        # preserves the Hunter-only G6-B/G7 behavior.
+        if player_benchmark_target is not None:
+            victim=encounter.actors.get(player_benchmark_target)
+            if (victim is None or victim.team!="enemy"
+                    or victim.source.source_id not in
+                        ("B06-EN-01","B06-EN-02")
+                    or len(victim.occupied)!=1):
+                raise ValueError("G8 requires a genuine fixed Soldier/Sentry target")
+        self.player_benchmark_target=player_benchmark_target
         if ((scene_exit is not None and not isinstance(scene_exit,SceneExit))
                 or type(scene_exits) is not tuple
                 or (scene_exit is not None and scene_exits)
@@ -234,7 +246,9 @@ class SourceMelee:
         a,t=e.actors[attacker],e.actors[target]
         if a.team==t.team:
             raise ValueError("Cannot declare enemy sword against ally")
-        if a.source.source_id in ("A","B") and t.source.source_id!="B06-EN-03":
+        if (a.source.source_id in ("A","B") and
+                t.source.source_id!="B06-EN-03" and
+                target!=self.player_benchmark_target):
             raise UnresolvedDecision("Bounded G6-B player melee only targets the Hunter")
         target_supported=(len(t.occupied)==1 or
                           (t.source.source_id=="B06-EN-03"
@@ -382,8 +396,10 @@ class SourceMelee:
         if target.source.source_id=="B06-EN-03":
             return (target.footprint==("head","rear")
                     and len(target.occupied)==2)
-        return (actor.source.source_id not in ("A","B")
-                and len(target.occupied)==1)
+        return (len(target.occupied)==1 and
+                (actor.source.source_id not in ("A","B") or
+                 (target_id==self.player_benchmark_target and
+                  target.source.source_id in ("B06-EN-01","B06-EN-02"))))
 
     def _paid_target_unavailable(self,attacker,target_id):
         """Only genuine source targeting illegality unlocks a paid suffix.
