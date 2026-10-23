@@ -2223,6 +2223,27 @@ def _flame_delivery_packet(ledger, flame):
         raise AssertionError("One Thrown Flame must have exactly one G4 delivery")
     hit = hits[0]
     record = hit["detail"]
+    # Native G4.apply_damage always invokes G3.prevent_vigor, even without
+    # an active Shelter. The receipt is not an optional commentary event:
+    # the exact mitigated amount must reconcile with the subsequent G4
+    # Direct Vigor packet. G6-C has no Hunter Shelter; do not infer budget
+    # or absorption from a caller-edited receipt.
+    shelters = [v for v in ledger
+                if v["kind"] == "g3_shelter_packet"
+                and flame["index"] < v["index"] < hit["index"]]
+    shelter_detail = {
+        "recipient": "hunter", "original": vigor_raw,
+        "prevented": 0, "residual": vigor_raw, "budget": None,
+        "note": "G4 owns application of residual Vigor damage",
+    }
+    if (len(shelters) != 1
+            or shelters[0]["round"] != flame["round"]
+            or shelters[0]["turn"] != "scholar"
+            or shelters[0]["detail"] != shelter_detail
+            or any(v["kind"] in ("g4_damage_applied", "g3_flame_launched",
+                                  "turn_end", "action_committed")
+                   for v in ledger[flame["index"] + 1:shelters[0]["index"]])):
+        raise AssertionError("Flame lacks exact synchronous G3 Shelter residual receipt")
     expected = [
         {"resource": "hp", "type": "Fire", "raw": hp_raw,
          "mitigated": hp_raw, "armor_rule": "none"},
@@ -2819,6 +2840,8 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
             level=ledger[0]["detail"]["source_ids"]["vanguard"]["level"],
             seed=ledger[0]["detail"]["seed"])
         deliveries = [_flame_delivery_packet(ledger, flame) for flame in flames]
+        if len([v for v in ledger if v["kind"] == "g3_shelter_packet"]) != 2:
+            raise AssertionError("Two Flame hits must emit exactly two G3 mitigation receipts")
         if len({hit["index"] for hit in deliveries}) != 2:
             raise AssertionError("Two source Flames cannot reuse one G4 delivery")
     elif policy == "hunter_multitarget_defeat":
