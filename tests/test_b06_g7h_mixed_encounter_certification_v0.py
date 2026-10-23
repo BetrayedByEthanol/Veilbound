@@ -4166,10 +4166,12 @@ class G7HMixedNativeTests(unittest.TestCase):
                         else:
                             detail["hunter"] = claim
                         report["ledger_sha256"] = canonical_digest(report["ledger"])
-                        with self.assertRaisesRegex(
-                                AssertionError,
-                                "G7-H Hunter pursuit receipt lost actual "
-                                "head-forward contact"):
+                        expected_error = (
+                            "G7-G target choices contradict original Hunter turns and deaths"
+                            if policy == "hunter_multitarget_defeat" else
+                            "G7-H Hunter pursuit receipt lost actual head-forward contact"
+                        )
+                        with self.assertRaisesRegex(AssertionError, expected_error):
                             attest_trial(report, level=3, seed=17, policy=policy)
 
     def test_161_codex_p2_authentic_hunter_execution_survives_source_replay(self):
