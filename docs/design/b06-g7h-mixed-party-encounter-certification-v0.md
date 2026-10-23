@@ -1032,3 +1032,31 @@ native G4 installation and positive unaltered terminal traces at
 L2/L3 with authored seeds 0 and 17. The originally authenticated
 source outcomes and historical Phase 3 audit are unchanged. No
 representative difficulty or Hunter CR is inferred.
+
+## Codex P2 — Source-policy ownership of in-turn spell receipts (23 October 2026)
+
+An exact post-Round-End tail alone cannot authenticate arbitrary entries
+**inside** an otherwise legal turn. The G7-G fixed defeat and withdrawal
+scripts author Hunter paid Bite Actions, G1 pursuit/movement and genuine
+exits; **every party actor holds all discretionary Actions**. They do
+not authorize a Scholar Thrown Flame, a Priest Rite or Basic Heal, a
+Bow shot, or an extra healing delivery. Their only permitted G3 event
+is the initial `g3_spell_state_installed`, already checked against a
+fresh original G6-C source fixture.
+
+G7-H therefore rejects **all in-turn G3 action/effect/delivery events**
+in those two fixed policies, as well as G2 Bow action receipts,
+G6-D Bow adjudications and G4 Basic Heal receipts. It does so **before**
+counting `flame_launches`, `bow_hit_adjudications` or other terminal
+coverage. Syntactically plausible receipts cannot acquire authority
+from a recomputed ledger digest, available Turn AP or a legitimate
+surrounding terminal. By contrast, the victory policy retains its
+independent exact G3 AP/VP payment, Rite and two Flame delivery checks.
+
+The regression reproduces the reported L3/seed-0 Round-9 Scholar
+forgery: insert `g3_flame_launched` immediately before the genuine
+Scholar `turn_end`, reindex following events, update the G7-C and
+G7-G terminal pointers and recalculate SHA-256. It must still fail
+under the authored G7-G policy. Companion tests cover withdrawal,
+other unsupported delivery receipts and valid native L2/L3 seed-0/17
+traces. This does not expand what G7-G players can choose to do.
