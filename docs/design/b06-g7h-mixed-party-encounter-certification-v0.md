@@ -664,3 +664,44 @@ Hunter Bite and A/B G4.5 snapshot fields and bridge provenance and
 recompute the original ledger hash; positive L2/L3 source traces
 remain accepted. The source rules, historical census and Hunter CR
 are unchanged.
+
+## Codex P2 — Fixed G7-G Actions, Bite wound parity and signed pursuit routes
+
+Three further tampering cases are now rejected independently of an edited
+ledger SHA-256:
+
+1. **An affordable AP debit is not an authorized policy action.** The G7-G
+   defeat and withdrawal policies let the original players **hold** their
+   discretionary Actions (while G1 movement and lawful border exit remain
+   legitimate). The only G0 `action_committed` allowed in either policy
+   is one 24-AP `physical` `sequence:B06-AT-04:0` from the Hunter in a
+   given round. Each such payment must have exactly one native uncancelled
+   G5 Bite hit resolution and its own valid G4/G4.5 chain. An apparently
+   affordable `general`, `projection`, `full` or additional physical
+   Action by any original character is not certified merely because its
+   Turn-End unused AP was also rewritten.
+2. **One source packet, one wound severity.** Every native Hunter Bite's
+   `g45_attested_hit.detail.actual_result.wound` and its identical G5
+   `damage.wound` must equal the wound severity recorded by the actual
+   synchronous `g4_damage_applied.detail.wound` packet. A nonlethal
+   Devastating Bite that created a Critical wound cannot instead report
+   `null` on the G4.5/G5 result, even with correct HP/Vigor arithmetic.
+3. **Pursuit declarations and completion receipts derive from G1.**
+   At each G7-G Hunter target-selection event, independently reconstruct
+   the source shortest legal Cautious route using the G7-G native planner
+   on the freshly replayed source grid. Require the selection's initial
+   Hunter footprint and *entire* planned route to match that source
+   computation. Every actual Hunter G1 step/pivot must consume the
+   declared route's next movement with its real cost. At the subsequent
+   pursuit completion, compare the earlier starting footprint, ordered
+   actual G1 movement indices, final footprint, source-authenticated
+   remaining MP and real Hunter head contact. An incomplete prefix is
+   allowed only when the next declared step truly exceeds remaining
+   source MP. No forged empty movement list, arbitrary MP, substituted
+   route or contradictory footprint can supply a signed pursuit.
+
+The new negative tests target both fixed G7-G policy modes, jointly
+tampered G4.5/G5 wound summaries and multiple coordinated pursuit
+receipt forgeries. Legitimate L2/L3 source traces must still certify.
+The exact scope remains a **bounded authored terminal matrix**;
+there is no representative player/GM policy sampling or numeric CR.
