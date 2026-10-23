@@ -1939,6 +1939,104 @@ class G7HMixedNativeTests(unittest.TestCase):
                 self.assertEqual({v["detail"]["mp"] for v in grants}, {12})
                 attest_trial(receipt, level=level, seed=0, policy=policy)
 
+    def test_84_p2_forged_full_to_reduced_venom_with_rehashed_G45_G5(self):
+        # This reproduces the specific coordinated P2 injection: changing
+        # the original Full/3 resistance to a fictitious Reduced/999 and
+        # clearing marker identities in the accepted G4.4 event and BOTH
+        # mirrored G4.5/G5 receipts is still forbidden.
+        policy = POLICIES[0]
+        trial = self._case(policy)
+        ledger = trial["ledger"]
+        result = next(v for v in ledger if
+                      v["kind"] == "g5_melee_resolved"
+                      and v["detail"].get("attacker") == "hunter"
+                      and ((v["detail"].get("damage") or {}).get("venom") or {}).get(
+                          "outcome") == "accepted")
+        action = result["detail"]["action_index"]
+        bridge = next(v for v in ledger
+                      if v["kind"] == "g45_attested_hit"
+                      and v["detail"].get("action_index") == action)
+        accepted = next(v for v in ledger if v["kind"] == "g44_hunter_accepted"
+                        and v["detail"].get("key") == f"g6:bite:17:{action}")
+        self.assertEqual(accepted["detail"]["resolution"], "Full")
+        self.assertEqual(accepted["detail"]["resistance_total"], 3)
+        self.assertEqual(len(accepted["detail"]["marker_ids"]), 3)
+        accepted["detail"].update(
+            resolution="Reduced", resistance_total=999, marker_ids=[])
+        altered = {"outcome": "accepted", "resolution": "Reduced",
+                   "resistance_total": 999}
+        bridge["detail"]["actual_result"]["venom"] = deepcopy(altered)
+        result["detail"]["damage"]["venom"] = deepcopy(altered)
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaisesRegex(
+                AssertionError, "authored resistance roll/Vitality"):
+            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_85_p2_resistance_total_cannot_change_even_with_same_result(self):
+        for policy in (POLICIES[0], POLICIES[2]):
+            with self.subTest(policy=policy):
+                trial = self._case(policy)
+                ledger = trial["ledger"]
+                accepted = next(v for v in ledger
+                                if v["kind"] == "g44_hunter_accepted")
+                key = accepted["detail"]["key"]
+                actor_resolved = next(v for v in ledger
+                        if v["kind"] == "g5_melee_resolved"
+                        and ((v["detail"].get("damage") or {}).get("venom") or {}).get(
+                            "resistance_total") ==
+                               accepted["detail"]["resistance_total"]
+                        and f"g6:bite:17:{v['detail'].get('action_index')}" == key)
+                action = actor_resolved["detail"]["action_index"]
+                bridge = next(v for v in ledger
+                              if v["kind"] == "g45_attested_hit"
+                              and v["detail"].get("action_index") == action)
+                altered = accepted["detail"]["resistance_total"] + 1
+                accepted["detail"]["resistance_total"] = altered
+                bridge["detail"]["actual_result"]["venom"]["resistance_total"] = altered
+                actor_resolved["detail"]["damage"]["venom"]["resistance_total"] = altered
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaisesRegex(
+                        AssertionError, "authored resistance roll/Vitality"):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_86_p2_real_venom_requires_exact_source_timed_milestones(self):
+        for policy in (POLICIES[0], POLICIES[2]):
+            for mutation in ("due", "phase", "marker", "recipient"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = self._case(policy)
+                    ledger = trial["ledger"]
+                    accepted = next(v for v in ledger
+                                    if v["kind"] == "g44_hunter_accepted")
+                    key = accepted["detail"]["key"]
+                    marker = next(v for v in ledger
+                                  if v["kind"] == "g42_milestone_scheduled"
+                                  and v["detail"]["source"] == f"hunter:{key}")
+                    if mutation == "due":
+                        marker["detail"]["due_round"] += 1
+                    elif mutation == "phase":
+                        marker["detail"]["phase"] = "after_recovery"
+                    elif mutation == "recipient":
+                        marker["detail"]["actor"] = "scholar"
+                    else:
+                        accepted["detail"]["marker_ids"].pop()
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_87_p2_original_L2_L3_source_venom_and_MP_still_certify(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                pack = run_pack(level, seed, include_trials=True)
+                self.assertTrue(pack["bounded_terminal_matrix_certified"])
+                for policy in POLICIES:
+                    with self.subTest(level=level, seed=seed, policy=policy):
+                        trial = pack["native_trials"][policy]
+                        self.assertEqual(
+                            attest_trial(trial, level=level, seed=seed,
+                                         policy=policy)["outcome"],
+                            TERMINALS[policy][0])
+
+
 
 
 if __name__ == "__main__":

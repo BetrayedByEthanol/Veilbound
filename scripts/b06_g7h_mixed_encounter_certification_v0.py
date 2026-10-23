@@ -890,6 +890,127 @@ G7C_BORDER_SQUARES = {
 }
 
 
+
+def _attest_source_bite_venom(ledger, *, policy, target, profile, bridge,
+                              resolved, source_mitigated, seed, action_index):
+    """Rebuild G4.4 venom from the authored die and original target Vitality.
+
+    Merely repeating a forged resistance total/mode in G4.4, G4.5 and G5
+    does not make that total legal. These fixed policies have no Ward,
+    suppression, prior source toxin or elapsed Hunter-onset milestone.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+
+    result = bridge["detail"]["actual_result"]
+    exposure = f"g6:bite:{seed}:{action_index}"
+    outcome = result.get("venom")
+    profile_index = profile["index"]
+    delivered = [event for event in ledger[profile_index + 1:bridge["index"]]
+                 if event["kind"] in (
+                     "g44_hunter_accepted", "g44_hunter_ignored",
+                     "g44_hunter_prevented", "g44_hunter_not_delivered")]
+    if result.get("dead") is True:
+        if outcome is not None or delivered:
+            raise AssertionError("Lethal Bite cannot deliver venom postmortem")
+        return
+    if len(delivered) != 1 or not isinstance(outcome, dict):
+        raise AssertionError("Nonfatal Bite lacks one native G4.4 venom outcome")
+    event = delivered[0]
+    d = event["detail"]
+    if (event["round"] != resolved["round"]
+            or event["turn"] != "hunter"
+            or event["index"] <= profile_index):
+        raise AssertionError("Venom outcome is not synchronous with sourced Bite")
+
+    existing = [v for v in ledger[:profile_index]
+                if v["kind"] == "g44_hunter_accepted"
+                and v["detail"].get("recipient") == target]
+    # The authored encounters terminate before T+600 s/100 Round Begins,
+    # without any authorized ward or other toxin application. A previous
+    # accepted Moderate Hunter toxin therefore occupies this target's
+    # nonstacking slot until a genuine death; an equal-grade Bite is ignored.
+    if any(v["kind"] in ("g44_ward_intercepted", "g44_endurance_ended",
+                        "g44_hunter_milestone")
+           for v in ledger):
+        raise AssertionError("G7-H fixed Bite has unsupported ward/onset effect")
+    expected_type = ("g44_hunter_not_delivered" if source_mitigated <= 0
+                     else "g44_hunter_ignored" if existing
+                     else "g44_hunter_accepted")
+    if event["kind"] != expected_type:
+        raise AssertionError(
+            "Hunter venom outcome contradicts puncture and source nonstacking")
+    if expected_type == "g44_hunter_not_delivered":
+        if (d != {"attacker": "hunter", "recipient": target,
+                  "exposure_key": exposure, "hit_index": profile_index}
+                or outcome != {"outcome": "not_delivered"}):
+            raise AssertionError("Hunter nonpuncture venom exposure receipt mismatched")
+        expected_markers = []
+    elif expected_type == "g44_hunter_ignored":
+        previous = existing[-1]["detail"]["key"]
+        if (d != {"recipient": target, "key": exposure, "active": previous}
+                or outcome != {"outcome": "ignored", "active": previous}):
+            raise AssertionError("Hunter equal-grade venom exposure receipt mismatched")
+        expected_markers = []
+    else:
+        # Fixed authored die, NOT a mutable attack/venom receipt. G6-C's
+        # L2/L3 Round-2 Hunter uses natural 1; the two G7-G policies use 20.
+        die = 1 if policy == "mixed_victory_rite" else 20
+        source = mixed_scene(size=4, level=ledger[0]["detail"]["source_ids"][
+            "vanguard"]["level"], seed=seed).e.actors[target].source
+        vit = dict(source.abilities).get("Vitality")
+        if type(vit) is not int:
+            raise AssertionError("Hunter Bite target has no sourced Vitality")
+        total = die + vit  # Both fixed policies use modifier=0.
+        mode = "Reduced" if total >= 12 else "Full"
+        tag = f"hunter:{exposure}"
+        plan = ([("onset", 600), ("escalate", 1800), ("expiry", 7200)]
+                if mode == "Full" else
+                [("onset", 600), ("expiry", 3600)])
+        expected_markers = [f"{tag}:{label}" for label, _ in plan]
+        receipt = {"recipient": target, "key": exposure,
+                   "resolution": mode, "resistance_total": total,
+                   "hit_index": profile_index,
+                   "marker_ids": expected_markers}
+        if (d != receipt or
+                outcome != {"outcome": "accepted", "resolution": mode,
+                            "resistance_total": total}):
+            raise AssertionError(
+                "Hunter accepted venom does not follow authored resistance roll/Vitality")
+        # All delayed stages are source-scheduled at the actual Bite, not
+        # optional mutable annotations; require the exact identity, order,
+        # due-round conversion and clock phase of each scheduled milestone.
+        markers = [v for v in ledger
+                   if v["kind"] == "g42_milestone_scheduled"
+                   and (v["detail"].get("source") == tag or
+                        v["detail"].get("event_id", "").startswith(tag + ":"))]
+        if (len(markers) != len(plan)
+                or any(v["index"] <= profile_index or v["index"] >= event["index"]
+                       or v["round"] != resolved["round"]
+                       or v["turn"] != "hunter"
+                       or v["detail"] != {
+                           "event_id": f"{tag}:{label}",
+                           "actor": target, "actor_source": source.source_id,
+                           "source": tag, "phase": "before_recovery",
+                           "due_seconds": None,
+                           "due_round": resolved["round"] + seconds // 6,
+                       }
+                       for v, (label, seconds) in zip(markers, plan))):
+            raise AssertionError(
+                "Hunter source venom needs original scheduled milestone set")
+    # An ignored/blocked puncture cannot fabricate a future Hunter timer.
+    if expected_type != "g44_hunter_accepted" and any(
+            v["kind"] == "g42_milestone_scheduled"
+            and (v["detail"].get("source") == f"hunter:{exposure}" or
+                 v["detail"].get("event_id", "").startswith(
+                     f"hunter:{exposure}:"))
+            for v in ledger):
+        raise AssertionError("Unsourced Hunter venom milestones on nonacceptance")
+    if any(v["kind"] in ("g42_milestone_due", "g42_milestone_canceled")
+           and v["detail"].get("source") == f"hunter:{exposure}"
+           for v in ledger):
+        raise AssertionError("Hunter onset cannot occur in bounded G7-H turns")
+
+
 def _hunter_bite_hits(ledger, target, *, policy):
     """Reconstruct each *resolved* Hunter Bite from its source-paid G0 chain.
 
@@ -1094,48 +1215,10 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or result.get("injection_eligible") is not eligible):
             raise AssertionError("Bite G4 profile injection eligibility contradicts attested G4.5 result")
         exposure = f"g6:bite:{seed}:{action_index}"
-        venom_kinds = {
-            "g44_hunter_accepted": "accepted",
-            "g44_hunter_ignored": "ignored",
-            "g44_hunter_prevented": "prevented",
-            "g44_hunter_not_delivered": "not_delivered",
-        }
-        venom_events = [ev for ev in ledger[profile["index"]+1:bridge["index"]]
-                        if ev["kind"] in venom_kinds]
-        venom = result.get("venom")
-        if damage["detail"].get("dead") is True:
-            if venom is not None or venom_events:
-                raise AssertionError("Lethal Hunter Bite cannot inject postmortem venom")
-        else:
-            if (len(venom_events) != 1 or not isinstance(venom, dict)
-                    or venom.get("outcome") != venom_kinds[venom_events[0]["kind"]]):
-                raise AssertionError("Nonfatal Hunter Bite lacks matched native G4.4 venom outcome")
-            delivery = venom_events[0]
-            vd = delivery["detail"]
-            if (delivery["round"] != resolved["round"]
-                    or delivery["turn"] != "hunter"
-                    or ((delivery["kind"] == "g44_hunter_not_delivered")
-                        != (not eligible))
-                    or (delivery["kind"] == "g44_hunter_not_delivered"
-                        and (vd.get("attacker") != "hunter"
-                             or vd.get("recipient") != target
-                             or vd.get("hit_index") != profile["index"]
-                             or vd.get("exposure_key") != exposure))
-                    or (delivery["kind"] == "g44_hunter_accepted"
-                        and (vd.get("recipient") != target
-                             or vd.get("key") != exposure
-                             or vd.get("hit_index") != profile["index"]
-                             or vd.get("resolution") != venom.get("resolution")
-                             or vd.get("resistance_total") !=
-                                venom.get("resistance_total")))
-                    or (delivery["kind"] == "g44_hunter_ignored"
-                        and (vd.get("recipient") != target
-                             or vd.get("key") != exposure
-                             or vd.get("active") != venom.get("active")))
-                    or (delivery["kind"] == "g44_hunter_prevented"
-                        and (vd.get("recipient") != target
-                             or vd.get("key") != exposure))):
-                raise AssertionError("Hunter source puncture does not match G4.4 exposure receipt")
+        _attest_source_bite_venom(
+            ledger, policy=policy, target=target, profile=profile,
+            bridge=bridge, resolved=resolved, source_mitigated=source_mitigated,
+            seed=seed, action_index=action_index)
         if (damage["round"] != resolved["round"] or damage["turn"] != "hunter"
                 or result.get("dead") is not damage["detail"].get("dead")
                 or result.get("hp_loss") != (

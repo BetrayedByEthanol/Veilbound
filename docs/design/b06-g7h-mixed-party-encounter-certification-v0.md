@@ -512,3 +512,53 @@ whole-outcome denominators and Soldier/Sentry comparison baselines.
 Until those are demonstrated, the original MVP ledger remains at
 **0/12 independently certified Focus combinations**, **0 complete
 representative opposed party encounter packs** and Hunter **unrated**.
+
+## G7-H source-turn MP and Hunter venom hardening (Codex P2)
+
+The terminal audit must **not** treat a rehashed event ledger as the
+authority for resource entitlements or delayed venom outcomes.
+
+- **Turn MP:** G0 Step 4 awards each character **12 ordinary MP**
+  plus any genuine active source toxin modifier, whether or not the actor
+  moves. The G7-H G1 replay derives that allowance from a newly loaded
+  G6-C scene, never `turn_resources.detail.mp`. Its remaining-MP
+  check still independently accounts for each source-previewed Cautious
+  step and `turn_end.unused_mp`. No currently accepted G7-H terminal
+  reaches the first 600-second Hunter venom onset, and the fixed
+  policies provide no MP-granting ability. A fabricated zero-MP idle
+  turn plus matching zero `unused_mp` is rejected, even after a valid
+  rehash. This source formula must be extended if future policies
+  legitimately run through a toxin onset/other MP modifiers.
+- **Hunter Bite G4.4:** Every nonfatal G5/G4.5 Bite resolves a single
+  eligible source puncture or a non-puncture, and the original fixed
+  policy supplies its *resistance d20*: natural **1** for the G6-C
+  victory's Round-2 Hunter, natural **20** for G7-G defeat and
+  withdrawal. Recompute the resistance total as this die **plus the
+  independently loaded victim's Vitality** (authored modifier zero).
+  Compare the actual `Full` (total below DC 12) or `Reduced`
+  (total at least 12) result against the original G4.4 event and its
+  G4.5/G5 mirrors; a rehash cannot change `Full/3` to
+  `Reduced/999`.
+- **Source deadlines:** For an accepted Hunter Moderate toxin,
+  require exactly the native `g42_milestone_scheduled` identities,
+  chronological scheduling order, original target, source, phase
+  `before_recovery`, and delays: `Full` at 600/1800/7200 s
+  (onset/escalation/expiry), `Reduced` at 600/3600 s
+  (onset/expiry), converted by the canonical six-second
+  Round-Begin surrogate. The original accepted G4.4 `marker_ids`
+  must exactly list those markers. The fixed scenes end before due
+  markers; any fabricated early milestone or unexpected protective
+  Ward cannot silently redefine a supported trial.
+- **Nonstacking:** Once an original accepted Moderate Hunter toxin is
+  still active, later equal-grade puncturing Bites against that actor
+  must have the native **ignored** outcome, not a new resistance
+  result or an invented second timer. A non-puncturing hit cannot
+  manufacture scheduled venom at all. Lethal HP damage cannot
+  inject postmortem toxin.
+
+Dedicated tampering regressions cover idle-turn MP receipt/Turn End
+rewrites, coordinated G4.4/G4.5/G5 resistance-result substitutions,
+missing/mis-timed source venom markers, and positive L2/L3 source
+terminal runs. These checks harden the **bounded source-witness**
+certificate only; no numerical Hunter CR or representative encounter
+sampling is inferred.
