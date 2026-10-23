@@ -2052,6 +2052,7 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
             target = d.get("target")
             hunter = expected.actors["hunter"]
             if (not g7g or pursuit is None
+                    or d.get("hunter") != "hunter"
                     or event["round"] != pursuit["selected"]["round"]
                     or pursuit["selected"]["index"] >= event["index"]
                     or target != pursuit["selected"]["detail"].get("target")
