@@ -75,6 +75,17 @@ matrix when all three branches pass independently:
    independently reconstructed receipts. No post-exit actor movement,
    damage or new turn is accepted.
 
+**G0 turn-start reservation expiry provenance (Codex P2).**
+Every `turn_start_expiry` must carry exactly the native `actor` and an
+empty `expired=[]` list. None of the three fixed G7-H policies commits
+a G0 `reserve()` Interception action; the source R's maintained
+Chosen Rite instead reserves **G3 VP**, not a G0 trigger. A fabricated
+expired label (or a missing, non-list or extra expiry field) is therefore
+not evidence of lawful response funding, even when the editable G0 ledger
+SHA-256 is recomputed. A future G7-H policy that genuinely reserves
+Interceptions must add an independent AP-paid reservation/release replay
+before this fixed-policy limit can be relaxed.
+
 **G1 paid-action movement-segment provenance (Codex P2).**
 Every G0 `action_committed` event must be followed **immediately** by
 the exact native `g1_segment_break` with matching round/current actor,
