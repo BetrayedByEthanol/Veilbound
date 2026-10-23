@@ -1627,6 +1627,26 @@ def _player_melee_hit_chains(ledger, actor, profile):
                 or not isinstance(bd.get("actual_result"), dict)
                 or bd["actual_result"] != d.get("damage")):
             raise AssertionError("A/B G5 roll and G4.5 receipt do not bind the same hit")
+        # A genuine G5 roll may exist only after G0's original response
+        # window has passed BOTH legality rechecks and emitted its unique
+        # ready receipt. A rehashed G4/G4.5 hit cannot turn a canceled
+        # Vanguard/Guardian trigger into a legal melee contribution.
+        opening, ready = _attest_unopposed_response_window(
+            ledger, trigger=f"g5:melee:{index}", actor=actor,
+            round_no=resolved["round"], before_index=seq["index"],
+            after_index=roll["index"])
+        # G5's sourced decline-all policy has no intervening interception,
+        # spontaneous or nested response events: the native G0 rechecks
+        # occur back-to-back, and G5 rolls immediately after ready.
+        if (ready["index"] != roll["index"] - 1
+                or tuple(x["index"] for x in (
+                    opening,
+                    ledger[opening["index"] + 1],
+                    ledger[opening["index"] + 2],
+                    ready)) != tuple(range(opening["index"], ready["index"] + 1))
+                or ready["index"] != opening["index"] + 3):
+            raise AssertionError(
+                "A/B hit lacks contiguous legal G0 response-window ready chain")
         face = rd.get("attack_face")
         value = rd.get("defense_value")
         chosen = rd.get("defense")
@@ -2224,18 +2244,36 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
                 _paid_action_ap(ledger, action, actor=who, cost=20,
                                 kind="physical", label=label)
             _player_melee_hit_chains(ledger, who, attack)
-        rites = [x for x in events["g3_effect_established"]
-                 if x["detail"].get("caster") == "archer"
-                 and x["detail"].get("recipient") == "archer"
-                 and x["detail"].get("effect_kind") == "Guided Regeneration"
-                 and x["detail"].get("chosen") is True
-                 and x["detail"].get("committed") == 1]
-        if len(rites) != 1 or not any(
-                v["kind"] == "action_committed"
-                and v["detail"].get("actor") == "archer"
-                and v["detail"].get("label") == "g3:guided:maintained"
-                and v["index"] < rites[0]["index"] for v in ledger):
-            raise AssertionError("No source-paid and chosen R Devotional Rite")
+        # The G6-D G7-H opt-in branch casts exactly one G3 effect, the
+        # first effect allocated on its source scene. Reconstruct the FULL
+        # _new_effect() receipt from the authorized Chosen Maintained Self
+        # Guided spell; an editable receipt's ID, parent, expiry, budget,
+        # resistance or extra field cannot redefine the original Rite.
+        expected_rite = {
+            "caster": "archer",
+            "recipient": "archer",
+            "effect": "G3-0001",
+            "effect_kind": "Guided Regeneration",
+            "committed": 1,
+            "chosen": True,
+            "anchor": None,
+            "parent": None,
+            "budget": None,
+            "resistance": 0,
+            "expiry_round": None,
+        }
+        rites = events["g3_effect_established"]
+        if (len(rites) != 1
+                or rites[0]["round"] != 1
+                or rites[0]["turn"] != "archer"
+                or rites[0]["detail"] != expected_rite
+                or not any(
+                    v["kind"] == "action_committed"
+                    and v["detail"].get("actor") == "archer"
+                    and v["detail"].get("label") == "g3:guided:maintained"
+                    and v["index"] < rites[0]["index"] for v in ledger)):
+            raise AssertionError(
+                "Chosen R Rite requires the exact native G3 establishment receipt")
         _spell_payment_chain(
             ledger, rites[0], actor="archer", label="g3:guided:maintained",
             ap=30, vp_mode="committed", vp_points=1)

@@ -2044,6 +2044,138 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_88_p1_AB_every_hit_requires_both_legal_G0_response_rechecks(self):
+        # G5 cannot roll an A/B hit after a cancelled G0 original trigger.
+        # Recomputing the SHA cannot authorize the unchanged G4 and G4.5.
+        for level in (2, 3):
+            for seed in (0, 17):
+                native = run_pack(level, seed, include_trials=True)[
+                    "native_trials"][POLICIES[0]]
+                hits = [v for v in native["ledger"]
+                        if v["kind"] == "g5_melee_roll"
+                        and v["detail"].get("attacker") in ("vanguard", "guardian")
+                        and v["detail"].get("hit") is True]
+                self.assertTrue(any(v["detail"]["attacker"] == "vanguard"
+                                    for v in hits))
+                self.assertTrue(any(v["detail"]["attacker"] == "guardian"
+                                    for v in hits))
+                for roll in hits:
+                    trigger = f"g5:melee:{roll['detail']['action_index']}"
+                    for stage in ("trigger_rechecked_after_interceptions",
+                                  "trigger_rechecked_after_responses"):
+                        with self.subTest(level=level, seed=seed,
+                                          attacker=roll["detail"]["attacker"],
+                                          action=roll["detail"]["action_index"],
+                                          stage=stage):
+                            trial = deepcopy(native)
+                            recheck = next(
+                                v for v in trial["ledger"]
+                                if v["kind"] == stage
+                                and v["detail"].get("trigger") == trigger)
+                            self.assertIs(recheck["detail"]["legal"], True)
+                            recheck["detail"]["legal"] = False
+                            trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                            with self.assertRaisesRegex(
+                                    AssertionError,
+                                    "legal G0 response-window ready chain"):
+                                attest_trial(trial, level=level, seed=seed,
+                                             policy=POLICIES[0])
+
+    def test_89_p1_AB_hit_cannot_borrow_cancelled_or_foreign_G0_window(self):
+        source = run_pack(3, 0, include_trials=True)[
+            "native_trials"][POLICIES[0]]
+        rolls = [v for v in source["ledger"]
+                 if v["kind"] == "g5_melee_roll"
+                 and v["detail"].get("attacker") in ("vanguard", "guardian")
+                 and v["detail"].get("hit") is True]
+        self.assertGreaterEqual(len(rolls), 2)
+        for roll in rolls:
+            trigger = f"g5:melee:{roll['detail']['action_index']}"
+            for mutation in ("cancel_ready", "missing_open", "wrong_actor_turn",
+                             "borrow_other_paid_action", "foreign_response"):
+                with self.subTest(actor=roll["detail"]["attacker"],
+                                  action=roll["detail"]["action_index"],
+                                  mutation=mutation):
+                    trial = deepcopy(source)
+                    ledger = trial["ledger"]
+                    windows = [v for v in ledger
+                               if v["detail"].get("trigger") == trigger]
+                    self.assertEqual(
+                        [v["kind"] for v in windows],
+                        ["response_window_open",
+                         "trigger_rechecked_after_interceptions",
+                         "trigger_rechecked_after_responses",
+                         "trigger_ready_to_resolve"])
+                    if mutation == "cancel_ready":
+                        windows[-1]["kind"] = "trigger_cancelled_after_spontaneous"
+                    elif mutation == "missing_open":
+                        windows[0]["kind"] = "window_open_fabricated"
+                    elif mutation == "wrong_actor_turn":
+                        windows[1]["turn"] = "hunter"
+                    elif mutation == "borrow_other_paid_action":
+                        windows[2]["detail"]["trigger"] = "g5:melee:other"
+                    else:
+                        windows[1]["kind"] = "spontaneous_committed"
+                        windows[1]["detail"] = {
+                            "trigger": trigger, "actor": "hunter",
+                            "response_kind": "reaction"}
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    # Native chronology may reject a foreign actor turn
+                    # even before the dedicated response-chain validator.
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=0,
+                                     policy=POLICIES[0])
+
+    def test_90_p1_chosen_rite_requires_entire_native_G3_effect_receipt(self):
+        # _new_effect on the original G6-D/G7-H source scene must establish
+        # first-effect G3-0001, maintained without expiry/parent/budget,
+        # exactly 1 committed VP and no invented extra fields.
+        for level in (2, 3):
+            native = run_pack(level, 0, include_trials=True)[
+                "native_trials"][POLICIES[0]]
+            established = [v for v in native["ledger"]
+                           if v["kind"] == "g3_effect_established"]
+            self.assertEqual(len(established), 1)
+            for key, bad in (
+                    ("effect", "G3-fabricated"),
+                    ("expiry_round", 1),
+                    ("anchor", "Arrow"),
+                    ("parent", "G3-0099"),
+                    ("budget", 999),
+                    ("resistance", 4),
+                    ("chosen", False),
+                    ("committed", 2),
+                    ("effect_kind", "Vital Shelter"),
+                    ("caster", "guardian"),
+                    ("recipient", "vanguard")):
+                with self.subTest(level=level, field=key):
+                    trial = deepcopy(native)
+                    rite = next(v for v in trial["ledger"]
+                                if v["kind"] == "g3_effect_established")
+                    rite["detail"][key] = bad
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "exact native G3 establishment receipt"):
+                        attest_trial(trial, level=level, seed=0,
+                                     policy=POLICIES[0])
+            for mutation in ("extra_field", "deleted_field", "wrong_round"):
+                with self.subTest(level=level, mutation=mutation):
+                    trial = deepcopy(native)
+                    rite = next(v for v in trial["ledger"]
+                                if v["kind"] == "g3_effect_established")
+                    if mutation == "extra_field":
+                        rite["detail"]["invented_ward"] = True
+                    elif mutation == "deleted_field":
+                        del rite["detail"]["parent"]
+                    else:
+                        rite["round"] = 2
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "exact native G3 establishment receipt"):
+                        attest_trial(trial, level=level, seed=0,
+                                     policy=POLICIES[0])
+
+
 
 if __name__ == "__main__":
     unittest.main()
