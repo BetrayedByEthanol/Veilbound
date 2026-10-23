@@ -569,3 +569,45 @@ missing/mis-timed source venom markers, and positive L2/L3 source
 terminal runs. These checks harden the **bounded source-witness**
 certificate only; no numerical Hunter CR or representative encounter
 sampling is inferred.
+
+
+## Codex P1 — A/B hit windows and complete Chosen Rite provenance
+
+The source victory policy now refuses a Vanguard or Guardian *hit*
+unless the paid G5 source action has its **own original G0 response
+window**, keyed by `g5:melee:<action_index>` and bound to the specific
+native turn, attack-sequence attestation and roll. Exactly four
+contiguous events must occur after sequence attestation and before the
+hit-producing roll:
+
+1. `response_window_open`
+2. `trigger_rechecked_after_interceptions` with `legal=true`
+3. `trigger_rechecked_after_responses` with `legal=true`
+4. `trigger_ready_to_resolve` immediately before `g5_melee_roll`
+
+This is the **native G5 decline-all** policy: it neither claims to
+resolve a reserved Interception nor accepts invented intervening
+spontaneous responses. A canceled trigger, false legality recheck,
+foreign/duplicated ready or borrowed action trigger cannot authorize
+an unchanged G4 damage packet and G4.5 hit receipt, even after the
+ledger digest has been recomputed. Hunter Bites, Bow and G1 steps
+retain their separate previously implemented response-window proofs.
+
+The actual R `cast_guided(mode="maintained", chosen=True,
+recipient="archer")` calls `G3._new_effect` once on this source
+scene, creating `G3-0001` in Round 1. In addition to G0's
+30-AP Projected Action and 1-point `committed` VP debit, G7-H now
+requires **exactly one** full establishment receipt, with no omitted
+or added fields: `caster=recipient="archer"`,
+`effect="G3-0001"`, `effect_kind="Guided Regeneration"`,
+`committed=1`, `chosen=true`, `anchor=null`,
+`parent=null`, `budget=null`, `resistance=0` and
+`expiry_round=null`. Any fixed-duration expiry, fabricated effect
+ID, unattested anchor, parent, budget, resistance or extra effect is
+incompatible with that authorized maintained Chosen Rite.
+
+Dedicated source-ledger tampering regressions change each A/B
+hit's G0 legality rechecks and ready/origin binding, and every
+individually editable Rite establishment field. Positive L2/L3,
+seeds 0 and 17 remain bounded source-witness acceptance only,
+not broad response selection, a full Priest spellbook or Hunter CR.
