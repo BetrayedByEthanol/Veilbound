@@ -2558,5 +2558,178 @@ class G7HMixedNativeTests(unittest.TestCase):
                     self.assertEqual(accepted["outcome"], TERMINALS[policy][0])
 
 
+    def test_106_p1_both_flame_physical_lane_previews_mandatory(self):
+        policy = "mixed_victory_rite"
+        original = self._case(policy)
+        source_previews = [v for v in original["ledger"]
+                           if v["kind"] == "g2_flame_lane_preview"]
+        self.assertEqual(len(source_previews), 4)
+        for scenario in ("all_missing", "first_missing", "recheck_missing",
+                         "single_wrong_round", "single_wrong_caster"):
+            with self.subTest(scenario=scenario):
+                trial = deepcopy(original)
+                receipts = [v for v in trial["ledger"]
+                            if v["kind"] == "g2_flame_lane_preview"]
+                if scenario == "all_missing":
+                    for r in receipts:
+                        r["kind"] = "edited_out_lane"
+                elif scenario == "first_missing":
+                    receipts[0]["kind"] = "edited_out_lane"
+                elif scenario == "recheck_missing":
+                    receipts[1]["kind"] = "edited_out_lane"
+                elif scenario == "single_wrong_round":
+                    receipts[2]["round"] = 2
+                else:
+                    receipts[3]["turn"] = "archer"
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_107_p1_flame_range_target_cover_and_outcome_from_g2_fixture(self):
+        policy = "mixed_victory_rite"
+        original = self._case(policy)
+        for mutation, value in (("shooter", "archer"),
+                                ("target", "guardian"),
+                                ("squares", 99),
+                                ("range_difficulty", 8),
+                                ("obstruction", 4),
+                                ("outcome", "blocked"),
+                                ("extra", "silently_allowed")):
+            for slot in range(4):
+                with self.subTest(mutation=mutation, slot=slot):
+                    trial = deepcopy(original)
+                    receipts = [v for v in trial["ledger"]
+                                if v["kind"] == "g2_flame_lane_preview"]
+                    receipts[slot]["detail"][mutation] = value
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_108_p2_shelter_packet_required_for_each_native_flame(self):
+        policy = "mixed_victory_rite"
+        original = self._case(policy)
+        packets = [v for v in original["ledger"]
+                   if v["kind"] == "g3_shelter_packet"]
+        self.assertEqual(len(packets), 2)
+        for variant in ("both_missing", "first_missing", "second_missing",
+                        "duplicate"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(original)
+                shelters = [v for v in trial["ledger"]
+                            if v["kind"] == "g3_shelter_packet"]
+                if variant == "both_missing":
+                    for packet in shelters:
+                        packet["kind"] = "edited_out_shelter"
+                elif variant == "first_missing":
+                    shelters[0]["kind"] = "edited_out_shelter"
+                elif variant == "second_missing":
+                    shelters[1]["kind"] = "edited_out_shelter"
+                else:
+                    # Two receipts assigned to one launch, none to other.
+                    shelters[1]["round"] = shelters[0]["round"]
+                    shelters[1]["turn"] = shelters[0]["turn"]
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_109_p2_shelter_mitigation_must_agree_with_G4(self):
+        original = self._case("mixed_victory_rite")
+        for field, fake in (("recipient", "archer"), ("original", 0),
+                            ("prevented", 1), ("residual", 0),
+                            ("budget", 12), ("note", "not G4"),
+                            ("unauthenticated", True)):
+            with self.subTest(field=field):
+                trial = deepcopy(original)
+                receipt = next(x for x in trial["ledger"]
+                               if x["kind"] == "g3_shelter_packet")
+                receipt["detail"][field] = fake
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17,
+                                 policy="mixed_victory_rite")
+
+    def test_110_p2_every_G45_turn_boundary_start_and_end_are_required(self):
+        for policy in POLICIES:
+            original = self._case(policy)
+            starts = [v for v in original["ledger"]
+                      if v["kind"] == "g45_native_turn_started"]
+            ends = [v for v in original["ledger"]
+                    if v["kind"] == "g45_native_turn_ended"]
+            self.assertEqual(len(starts), original["turns_completed"])
+            self.assertEqual(len(ends), original["turns_completed"])
+            for variant in ("remove_all_starts", "remove_all_ends",
+                            "remove_one_start", "remove_one_end"):
+                with self.subTest(policy=policy, variant=variant):
+                    trial = deepcopy(original)
+                    targets = [v for v in trial["ledger"]
+                               if v["kind"] == ("g45_native_turn_started"
+                                               if "start" in variant
+                                               else "g45_native_turn_ended")]
+                    if variant.startswith("remove_all"):
+                        for item in targets:
+                            item["kind"] = "edited_out_g45"
+                    else:
+                        targets[0]["kind"] = "edited_out_g45"
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_111_p2_g45_every_actor_state_step2_and_closing_snapshot_replayed(self):
+        for policy in POLICIES:
+            original = self._case(policy)
+            for variant in ("start_actor", "start_step2", "start_before",
+                            "start_after", "start_digest", "end_actor",
+                            "end_state", "end_wounds", "end_digest"):
+                with self.subTest(policy=policy, variant=variant):
+                    trial = deepcopy(original)
+                    events = trial["ledger"]
+                    start = next(x for x in events
+                                 if x["kind"] == "g45_native_turn_started")
+                    end = next(x for x in events
+                               if x["kind"] == "g45_native_turn_ended")
+                    if variant == "start_actor":
+                        start["detail"]["actor"] = "guardian"
+                    elif variant == "start_step2":
+                        start["detail"]["step2_index"] = 0
+                    elif variant == "start_before":
+                        start["detail"]["before"]["hp"] = 999
+                    elif variant == "start_after":
+                        start["detail"]["after"]["hp"] = 999
+                    elif variant == "start_digest":
+                        start["detail"]["after"]["source_digest"] = "fake"
+                    elif variant == "end_actor":
+                        end["detail"]["actor"] = "guardian"
+                    elif variant == "end_state":
+                        end["detail"]["actor_state"]["vigor"] = 999
+                    elif variant == "end_wounds":
+                        end["detail"]["actor_state"]["wounds"] = [{"id": "fake"}]
+                    else:
+                        end["detail"]["actor_state"]["source_digest"] = "fake"
+                    trial["ledger_sha256"] = canonical_digest(events)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_112_all_reconstructed_flame_and_g45_receipts_valid_L2_L3(self):
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _reconcile_flame_lane_previews,
+        )
+        for level in (2, 3):
+            for seed in (0, 17):
+                report = run_pack(level, seed, include_trials=True)
+                for policy in POLICIES:
+                    with self.subTest(level=level, seed=seed, policy=policy):
+                        trial = report["native_trials"][policy]
+                        authenticated = attest_trial(trial, level=level, seed=seed,
+                                                     policy=policy)
+                        self.assertEqual(authenticated["outcome"],
+                                         TERMINALS[policy][0])
+                        if policy == "mixed_victory_rite":
+                            launches = [v for v in trial["ledger"]
+                                        if v["kind"] == "g3_flame_launched"]
+                            self.assertEqual(_reconcile_flame_lane_previews(
+                                trial["ledger"], launches,
+                                level=level, seed=seed), 4)
+
+
 if __name__ == "__main__":
     unittest.main()

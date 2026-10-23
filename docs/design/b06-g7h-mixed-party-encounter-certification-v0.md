@@ -705,3 +705,45 @@ tampered G4.5/G5 wound summaries and multiple coordinated pursuit
 receipt forgeries. Legitimate L2/L3 source traces must still certify.
 The exact scope remains a **bounded authored terminal matrix**;
 there is no representative player/GM policy sampling or numeric CR.
+
+
+## Codex follow-up — native Flame lanes, Shelter and G4.5 boundaries
+
+G7-H additionally authenticates three mandatory native source chains; a
+new SHA-256 over an edited ledger does not make missing or self-contradictory
+receipts genuine:
+
+- **Two G2 lane previews per Flame.** Before AP commitment and again after
+  the committed response window, the Scholar must have one
+  `g2_flame_lane_preview` on its actual Initiative turn. The original
+  G6-C no-movement fixture is reconstructed independently via G2's native
+  physical lane executor at the authored Hunter head. Both previews must
+  match the exact F→Hunter target, 1–3-square source range, zero-range
+  modifier, lack of obstruction and physical-only outcome. The source
+  indices must order **first preview → 20-AP paid Projection →
+  refreshed preview → 2-VP Spent transition → G3 launch**, for each
+  of two separate source Flame turns. Missing, relabeled, duplicated,
+  out-of-range, blocked, target-swapped or post-commit-only previews fail.
+- **One synchronous G3 Shelter receipt per Flame G4 delivery.** The original
+  G6-C scene has no Hunter Vital Shelter; G4 still calls G3 prevention
+  and must log `g3_shelter_packet` with Hunter as recipient, original and
+  residual equal to the independently derived G3 Direct Vigor packet,
+  prevented zero, no budget, and the canonical G4 handoff note. A
+  fabricated absorption claim, omitted receipt or packet contradiction
+  fails even when a forged G4 packet is made self-consistent.
+- **Exactly one complete G4.5 start/end pair per native G0 turn.** The same
+  source fixture and sequentially replayed G4 wound, HP/Vigor, Step-2
+  regeneration and VP transitions reconstruct each actor's canonical
+  G4.5 `_actor_state`. A start must identify the actual G0 actor, point
+  to the exact `regeneration_step` or `regeneration_dead` index, and
+  match both the immediate pre-turn and post-Step-2/Step-3/Step-4
+  actor snapshots; the matching end must follow native Turn End (and
+  Round End if applicable), carry the same actor and exactly match the
+  independently replayed closing state. This is required for **all
+  five participants on every finished round**, not only actors hit in
+  combat, across all three terminal paths.
+
+The three checks are **attestation-only** and make no change to native
+G2/G3/G4/G4.5 rules, Hunter difficulty, the historical Phase 3 corpus,
+the terminal coverage scope or fixed source policies.
+
