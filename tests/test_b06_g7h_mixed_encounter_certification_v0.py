@@ -3944,5 +3944,68 @@ class G7HMixedNativeTests(unittest.TestCase):
                 attest_trial(trial, level=3, seed=17, policy=policy)
 
 
+    def test_154_codex_p2_rehashed_forged_turn_start_expiry_rejected(self):
+        # G0 Step 1 can expire only prior AP-paid G0 reservations. These
+        # fixed G7-H policies reserve no Interceptions, including when R
+        # establishes a G3 maintained Chosen Rite. The public SHA-256
+        # must not authenticate an invented reservation label.
+        for policy in POLICIES:
+            native = self._case(policy)
+            starts = [v for v in native["ledger"]
+                      if v["kind"] == "turn_start_expiry"]
+            self.assertGreater(len(starts), 5)
+            for receipt in starts:
+                self.assertEqual(receipt["detail"],
+                                 {"actor": receipt["turn"], "expired": []})
+            # Exercise Hunter and PC turns, including subsequent rounds.
+            for slot in (0, len(starts) // 2, len(starts) - 1):
+                with self.subTest(policy=policy, slot=slot):
+                    trial = deepcopy(native)
+                    entry = [v for v in trial["ledger"]
+                             if v["kind"] == "turn_start_expiry"][slot]
+                    entry["detail"]["expired"] = ["forged-unpaid-interception"]
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "unauthored G0 reservations"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_155_codex_p2_expiry_receipt_shape_and_L2_source(self):
+        # Non-lists, absent keys and extra untrusted keys cannot stand in
+        # for the exact native {"actor": id, "expired": []} receipt.
+        for policy in POLICIES:
+            for mutation in ("missing", "string", "null", "extra_field"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = self._case(policy)
+                    turn = next(ev for ev in trial["ledger"]
+                                if ev["kind"] == "turn_start_expiry")
+                    if mutation == "missing":
+                        del turn["detail"]["expired"]
+                    elif mutation == "string":
+                        turn["detail"]["expired"] = "[]"
+                    elif mutation == "null":
+                        turn["detail"]["expired"] = None
+                    else:
+                        turn["detail"]["forged_source"] = "reservation"
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "unauthored G0 reservations"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+        # L2 retains exactly the same fixed empty reservation policy.
+        pack = run_pack(2, 17, include_trials=True)
+        for policy in POLICIES:
+            with self.subTest(level=2, policy=policy):
+                native = pack["native_trials"][policy]
+                expiries = [ev for ev in native["ledger"]
+                            if ev["kind"] == "turn_start_expiry"]
+                self.assertTrue(expiries)
+                self.assertTrue(all(ev["detail"] ==
+                                    {"actor": ev["turn"], "expired": []}
+                                    for ev in expiries))
+                self.assertEqual(attest_trial(
+                    native, level=2, seed=17, policy=policy)["outcome"],
+                    TERMINALS[policy][0])
+
+
+
 if __name__ == "__main__":
     unittest.main()

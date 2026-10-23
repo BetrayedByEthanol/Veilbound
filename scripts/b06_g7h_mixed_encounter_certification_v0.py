@@ -253,6 +253,15 @@ def _native_round_turn_chronology(ledger):
                     or turn != ROSTER[slot]
                     or detail.get("actor") != ROSTER[slot]):
                 raise AssertionError("Native Initiative turn opened for wrong actor")
+            # These three fixed G7-H policies never reserve a G0
+            # Interception (reserve() costs AP and logs a native
+            # interception_reserved action). In particular, R's Chosen
+            # maintained Rite is G3 VP commitment, *not* a G0 response
+            # reservation. An externally supplied report must not
+            # invent expired labels by recomputing the public ledger hash.
+            if set(detail) != {"actor", "expired"} or detail["expired"] != []:
+                raise AssertionError(
+                    "G7-H fixed policy cannot expire unauthored G0 reservations")
             active = turn
         elif kind == "turn_end":
             if (active != turn or round_no != current_round
