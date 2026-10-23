@@ -174,6 +174,67 @@ def _attest_g0_unresolved_roll_handoffs(ledger):
     return len(claimed)
 
 
+
+def _reconcile_g0_defense_resources(ledger, *, level, seed):
+    """Replay G0's POST-assignment Guard and Dodge counters from source actors.
+
+    G0 resets each actor's Guard capacity and Dodge pressure at Round Begin.
+    Its defense() consumes Guard / increases Dodge pressure before logging
+    even a Take Hit receipt. The mutable defense_assigned fields and the
+    digest cannot authorize extra capacity or silently change pressure.
+    This authored G7-H matrix has no alternative defense-resource grants.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+
+    source = mixed_scene(size=4, level=level, seed=seed).e.actors
+    guard = {name: actor.guard_capacity for name, actor in source.items()}
+    pressure = {name: 0 for name in source}
+    current_round, receipts = 0, 0
+    for event in ledger:
+        if event["kind"] == "round_begin":
+            if event["round"] != current_round + 1:
+                raise AssertionError("G0 defense resources require sequential Round Begin")
+            current_round = event["round"]
+            guard = {name: actor.guard_capacity for name, actor in source.items()}
+            pressure = {name: 0 for name in source}
+        if event["kind"] != "defense_assigned":
+            continue
+        d = event["detail"]
+        actor, choice = d.get("actor"), d.get("defense")
+        if (actor not in source or event["round"] != current_round
+                or current_round < 1 or choice not in ("guard", "dodge", "take_hit")):
+            raise AssertionError("G0 defense assignment has no native actor/round/choice")
+        a = source[actor]
+        if choice == "guard":
+            if (guard[actor] < 1 or not a.guard_instrument
+                    or a.guard_value is None or not a.ready_guard):
+                raise AssertionError("G0 Guard assignment exceeds genuine source capacity")
+            guard[actor] -= 1
+            value = a.guard_value
+        elif choice == "dodge":
+            # The authored G7-H G0 melee Dodge is taken only by Hunter,
+            # who has no toxin modifier. If the policy later introduces
+            # a poisoned Dodge, require its genuine G4.4 modifier replay.
+            if actor != "hunter":
+                raise AssertionError("Unreplayed non-Hunter Dodge requires G4.4 source proof")
+            value = 10 + min(a.agility, 4) + a.awareness - pressure[actor]
+            pressure[actor] += 2
+        else:
+            value = None
+        if (type(d.get("guard_remaining")) is not int
+                or d["guard_remaining"] != guard[actor]
+                or type(d.get("dodge_pressure")) is not int
+                or d["dodge_pressure"] != pressure[actor]
+                or d.get("defense_value") != value):
+            raise AssertionError(
+                "G0 defense assignment resources contradict independently "
+                "replayed source Guard/Dodge state")
+        receipts += 1
+    if receipts < 1:
+        raise AssertionError("G7-H must authenticate actual G0 defense resources")
+    return receipts
+
+
 def _native_round_turn_chronology(ledger):
     """Replay every authoritative G0 Round Begin/End and Initiative boundary."""
     current_round, slot, active, completed = 0, 0, None, 0
@@ -3563,6 +3624,7 @@ def attest_trial(report, *, level, seed, policy):
         raise AssertionError("G7-H source report and original ledger hash disagree")
     completed_rounds = _native_round_turn_chronology(ledger)
     _origin(report, ledger, policy=policy, level=level, seed=seed)
+    _reconcile_g0_defense_resources(ledger, level=level, seed=seed)
     _reconcile_all_turn_end_ap(ledger, level=level, seed=seed)
     _attest_fixed_g7g_actions(ledger, policy=policy)
     turns = [v["detail"].get("actor") for v in ledger if v["kind"] == "turn_end"]

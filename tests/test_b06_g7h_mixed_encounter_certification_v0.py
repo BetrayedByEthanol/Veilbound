@@ -3468,5 +3468,55 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_139_codex_p2_every_hunter_bite_defense_replays_both_resource_fields(self):
+        # The digest is recomputed intentionally. A valid Take Hit still
+        # has G0's true remaining Guard and Dodge Pressure *after* assignment.
+        # Include the G6-D Round-1 missed Guard and Round-2 hit, and the
+        # first/last native Hunter Bites in both G7-G terminal policies.
+        for policy in POLICIES:
+            native = self._case(policy)
+            sequences = [v for v in native["ledger"]
+                         if v["kind"] == "g5_melee_sequence_attested"
+                         and v["detail"].get("attacker") == "hunter"]
+            self.assertTrue(sequences)
+            selected = {v["detail"]["defense_indices"][0]
+                        for v in (sequences[0], sequences[-1])}
+            for index in sorted(selected):
+                original = native["ledger"][index]
+                self.assertEqual(original["kind"], "defense_assigned")
+                for field in ("guard_remaining", "dodge_pressure"):
+                    with self.subTest(policy=policy, defense=index, field=field):
+                        tampered = deepcopy(native)
+                        record = tampered["ledger"][index]["detail"]
+                        self.assertIs(type(record[field]), int)
+                        record[field] += 1
+                        tampered["ledger_sha256"] = canonical_digest(tampered["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError, "G0 defense assignment resources"):
+                            attest_trial(tampered, level=3, seed=17, policy=policy)
+
+    def test_140_codex_p2_prior_dodge_pressure_is_not_authority(self):
+        # A later Take Hit assignment must carry the Hunter's REAL
+        # Dodge pressure from the prior source-authored Vanguard attack.
+        source = self._case(POLICIES[0])
+        hits = [v for v in source["ledger"]
+                if v["kind"] == "defense_assigned"
+                and v["detail"].get("actor") == "hunter"]
+        self.assertEqual(len(hits), 4)
+        self.assertEqual([v["detail"]["dodge_pressure"] for v in hits],
+                         [2, 2, 2, 2])
+        for field in ("guard_remaining", "dodge_pressure"):
+            trial = deepcopy(source)
+            receipt = next(v for v in trial["ledger"]
+                           if v["kind"] == "defense_assigned"
+                           and v["detail"].get("attack_key") ==
+                               "guardian:hunter:0")
+            receipt["detail"][field] += 1
+            trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+            with self.subTest(field=field), self.assertRaisesRegex(
+                    AssertionError, "G0 defense assignment resources"):
+                attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+
 if __name__ == "__main__":
     unittest.main()
