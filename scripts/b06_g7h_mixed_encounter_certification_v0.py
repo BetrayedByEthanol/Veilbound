@@ -131,6 +131,61 @@ def _native_round_turn_chronology(ledger):
 
 
 
+def _attest_unopposed_response_window(ledger, *, trigger, actor, round_no,
+                                      before_index, after_index):
+    """Require the full legal G0 window authorizing one subsequent source action.
+
+    The G7-H Bow and Cautious G1 steps predeclare no Interceptions or
+    spontaneous responses. A recomputed digest cannot authorize an action
+    after either recheck failed, after a cancellation, or via a duplicated
+    ready receipt. Bind all four events to this exact trigger and actor turn.
+    """
+    required = ("response_window_open", "trigger_rechecked_after_interceptions",
+                "trigger_rechecked_after_responses", "trigger_ready_to_resolve")
+    scoped = [v for v in ledger if v["detail"].get("trigger") == trigger]
+    if (type(trigger) is not str or not trigger
+            or [v["kind"] for v in scoped] != list(required)
+            or not before_index < scoped[0]["index"]
+                   < scoped[1]["index"] < scoped[2]["index"]
+                   < scoped[3]["index"] < after_index
+            or any(v["round"] != round_no or v["turn"] != actor for v in scoped)
+            or scoped[1]["detail"].get("legal") is not True
+            or scoped[2]["detail"].get("legal") is not True):
+        raise AssertionError(
+            "Source action lacks a complete legal G0 response-window ready chain")
+    return scoped[0], scoped[3]
+
+
+def _attest_g1_step_response_window(ledger, step):
+    """Bind a G1 movement receipt to its own immediately preceding ready.
+
+    G7-G calls one source G1 step/pivot without explicit trigger override.
+    G1 builds its key from the *opening ledger index*. That construction,
+    exact same-turn G0 rechecks, and adjacency of ready -> committed step
+    prevent borrowing another step's valid window.
+    """
+    idx = step["index"]
+    if idx < 1 or ledger[idx - 1]["kind"] != "trigger_ready_to_resolve":
+        raise AssertionError("G1 step lacks its own legal response-window ready chain")
+    ready = ledger[idx - 1]
+    actor = step["detail"].get("actor")
+    trigger = ready["detail"].get("trigger")
+    openings = [v for v in ledger[:idx] if
+                v["kind"] == "response_window_open"
+                and v["detail"].get("trigger") == trigger]
+    if (actor not in ROSTER or len(openings) != 1
+            or trigger != f"g1:{actor}:step:{openings[0]['index']}"):
+        raise AssertionError("G1 step has no uniquely source-bound response-window trigger")
+    opening, signed = _attest_unopposed_response_window(
+        ledger, trigger=trigger, actor=actor, round_no=step["round"],
+        before_index=-1, after_index=idx)
+    if (signed["index"] != idx - 1 or
+            any(v["kind"] == "response_window_open"
+                for v in ledger[opening["index"] + 1:idx])):
+        raise AssertionError("G1 step cannot borrow another movement response window")
+    return signed["index"]
+
+
 def _attest_bite_response_window(ledger, *, action_index, attested_index, roll):
     """Bind one Bite roll to G0's real, legal, *ready* response trigger.
 
@@ -788,7 +843,18 @@ def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
             or declarations[0]["detail"].get("profiles") != ["Bow"]
             or declarations[0]["detail"].get("defenses") != ["take_hit"]):
         raise AssertionError("Victory Bow missing its original one-shot G2 declaration")
+    # A paid and launched shot must first survive its own *complete*
+    # source G0 response window, not merely cite a valid G2 action index.
+    # Neither a failed recheck nor a cancelled trigger may fund lethal G4.
     seed = ledger[0]["detail"].get("seed")
+    expected_trigger = (
+        f"g6d:bow:{seed}:{lethal['round']}:archer:hunter:one_shot")
+    if d.get("shot_trigger") != expected_trigger:
+        raise AssertionError("Lethal Bow response trigger differs from source shot")
+    _attest_unopposed_response_window(
+        ledger, trigger=expected_trigger, actor="archer",
+        round_no=lethal["round"], before_index=declarations[0]["index"],
+        after_index=launch_index)
     raw = 2 + damage_die + sum(extras)
     # Hunter natural hide Armor 3 is exactly bypassed by Bow Penetration 3.
     hp_loss = _hp_damage_packet(
@@ -1138,6 +1204,9 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
             # bounded G7-G cautious scene. Do not skip unknown geometry.
             raise AssertionError("Unreplayable movement cannot fund G7-H exit")
         elif kind == "g1_movement_step":
+            # Independently authenticate the actual trigger that permitted
+            # THIS movement before accepting source geometry or MP.
+            _attest_g1_step_response_window(ledger, event)
             actor = d.get("actor")
             if (actor not in ROSTER or actor in exited
                     or event["turn"] != actor

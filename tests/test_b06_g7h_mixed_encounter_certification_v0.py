@@ -1763,5 +1763,135 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_77_p1_lethal_bow_must_have_two_true_legal_response_rechecks(self):
+        # Codex P1: cancelling the final G0 Bow trigger used to leave an
+        # otherwise well-formed lethal G4 packet accepted after rehash.
+        for level in (2, 3):
+            original = run_pack(level, 0, include_trials=True)["native_trials"][POLICIES[0]]
+            bow = next(v for v in original["ledger"]
+                       if v["kind"] == "g6d_bow_adjudicated")
+            trigger = bow["detail"]["shot_trigger"]
+            for stage in ("trigger_rechecked_after_interceptions",
+                          "trigger_rechecked_after_responses"):
+                with self.subTest(level=level, stage=stage):
+                    trial = deepcopy(original)
+                    item = next(v for v in trial["ledger"]
+                                if v["kind"] == stage
+                                and v["detail"].get("trigger") == trigger)
+                    self.assertIs(item["detail"]["legal"], True)
+                    item["detail"]["legal"] = False
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "legal G0 response-window ready chain"):
+                        attest_trial(trial, level=level, seed=0, policy=POLICIES[0])
+
+    def test_78_p1_lethal_bow_cannot_use_cancelled_or_foreign_window(self):
+        original = run_pack(3, 0, include_trials=True)["native_trials"][POLICIES[0]]
+        bow = next(v for v in original["ledger"]
+                   if v["kind"] == "g6d_bow_adjudicated")
+        trigger = bow["detail"]["shot_trigger"]
+        for variant in ("cancel_ready", "duplicate_ready", "wrong_trigger",
+                        "unmodelled_spontaneous"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(original)
+                ledger = trial["ledger"]
+                if variant == "cancel_ready":
+                    ready = next(v for v in ledger
+                                 if v["kind"] == "trigger_ready_to_resolve"
+                                 and v["detail"].get("trigger") == trigger)
+                    ready["kind"] = "trigger_cancelled_after_spontaneous"
+                elif variant == "duplicate_ready":
+                    # A foreign second 'ready' cannot sign another shot.
+                    ready = next(v for v in ledger
+                                 if v["kind"] == "trigger_ready_to_resolve"
+                                 and v["detail"].get("trigger") == trigger)
+                    other = next(v for v in ledger
+                                 if v["kind"] == "g2_projectile_defense_rechecked")
+                    other["kind"] = "trigger_ready_to_resolve"
+                    other["detail"] = deepcopy(ready["detail"])
+                elif variant == "wrong_trigger":
+                    bow_record = next(v for v in ledger
+                                      if v["kind"] == "g6d_bow_adjudicated")
+                    bow_record["detail"]["shot_trigger"] = "g6d:bow:fake"
+                else:
+                    other = next(v for v in ledger
+                                 if v["kind"] == "g2_projectile_defense_rechecked")
+                    other["kind"] = "spontaneous_committed"
+                    other["detail"] = {"trigger": trigger, "actor": "hunter"}
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=0, policy=POLICIES[0])
+
+    def test_79_p1_every_replayed_g1_step_requires_legal_response_window(self):
+        # Codex P1: tamper all four final border steps, not only their
+        # coordinates/MP; failed trigger must invalidate their G5 exits.
+        for level in (2, 3):
+            original = run_pack(level, 0, include_trials=True)["native_trials"][POLICIES[2]]
+            moves = []
+            for exit_event in (v for v in original["ledger"]
+                               if v["kind"] == "g5_terminal_exit"):
+                moves.append(original["ledger"][
+                    exit_event["detail"]["movement_index"]])
+            self.assertEqual(len(moves), 4)
+            for stage in ("trigger_rechecked_after_interceptions",
+                          "trigger_rechecked_after_responses"):
+                with self.subTest(level=level, stage=stage):
+                    trial = deepcopy(original)
+                    for move in moves:
+                        ready = trial["ledger"][move["index"] - 1]
+                        self.assertEqual(ready["kind"], "trigger_ready_to_resolve")
+                        matching = next(v for v in trial["ledger"]
+                                        if v["kind"] == stage
+                                        and v["detail"].get("trigger") ==
+                                            ready["detail"]["trigger"])
+                        self.assertIs(matching["detail"]["legal"], True)
+                        matching["detail"]["legal"] = False
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "legal G0 response-window ready chain"):
+                        attest_trial(trial, level=level, seed=0, policy=POLICIES[2])
+
+    def test_80_p1_cancelled_or_reused_g1_window_cannot_fund_border_exit(self):
+        original = run_pack(3, 0, include_trials=True)["native_trials"][POLICIES[2]]
+        exit_event = next(v for v in original["ledger"]
+                          if v["kind"] == "g5_terminal_exit")
+        index = exit_event["detail"]["movement_index"]
+        for variant in ("cancel_ready", "foreign_ready", "missing_open",
+                        "duplicate_ready"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(original)
+                ledger = trial["ledger"]
+                ready = ledger[index - 1]
+                trigger = ready["detail"]["trigger"]
+                window = next(v for v in ledger
+                              if v["kind"] == "response_window_open"
+                              and v["detail"].get("trigger") == trigger)
+                if variant == "cancel_ready":
+                    ready["kind"] = "trigger_cancelled_after_spontaneous"
+                elif variant == "foreign_ready":
+                    ready["detail"]["trigger"] = "g1:archer:step:0"
+                elif variant == "missing_open":
+                    window["kind"] = "missing_response_window"
+                else:
+                    other = next(v for v in ledger
+                                 if v["kind"] == "trigger_rechecked_after_interceptions"
+                                 and v["detail"].get("trigger") == trigger)
+                    other["kind"] = "trigger_ready_to_resolve"
+                trial["ledger_sha256"] = canonical_digest(ledger)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=0, policy=POLICIES[2])
+
+    def test_81_p1_valid_bow_and_movement_windows_continue_to_certify(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                with self.subTest(level=level, seed=seed):
+                    bundle = run_pack(level, seed, include_trials=True)
+                    self.assertTrue(bundle["bounded_terminal_matrix_certified"])
+                    for policy in POLICIES:
+                        result = attest_trial(bundle["native_trials"][policy],
+                                             level=level, seed=seed, policy=policy)
+                        self.assertEqual(result["outcome"], TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
