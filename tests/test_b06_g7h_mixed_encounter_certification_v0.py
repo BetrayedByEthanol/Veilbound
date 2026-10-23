@@ -2869,5 +2869,149 @@ class G7HMixedNativeTests(unittest.TestCase):
                                          original["rounds_completed"])
 
 
+    def test_117_codex_p1_g7g_bite_rejects_extra_unpaid_profile(self):
+        # Both G7-G native policies declare a single 24-AP Bite; merely
+        # appending a second profile could otherwise retain a valid attested
+        # one-slot hit and G4 lethal/withdrawal certificate.
+        for policy in POLICIES[1:]:
+            baseline = self._case(policy)
+            declarations = [x for x in baseline["ledger"]
+                            if x["kind"] == "attack_sequence_committed"
+                            and x["detail"].get("attacker") == "hunter"]
+            self.assertTrue(declarations)
+            for number in range(len(declarations)):
+                for mutation in ("extra_profile", "extra_defense",
+                                 "both_extra", "foreign_profile", "extra_field"):
+                    with self.subTest(policy=policy, bite=number, mutation=mutation):
+                        trial = deepcopy(baseline)
+                        rec = [x for x in trial["ledger"]
+                               if x["kind"] == "attack_sequence_committed"
+                               and x["detail"].get("attacker") == "hunter"][number]
+                        self.assertEqual(rec["detail"]["profiles"], ["B06-AT-04"])
+                        self.assertEqual(rec["detail"]["defenses"], ["take_hit"])
+                        if mutation == "extra_profile":
+                            rec["detail"]["profiles"].append("B06-AT-05")
+                        elif mutation == "extra_defense":
+                            rec["detail"]["defenses"].append("take_hit")
+                        elif mutation == "both_extra":
+                            rec["detail"]["profiles"].append("B06-AT-05")
+                            rec["detail"]["defenses"].append("take_hit")
+                        elif mutation == "foreign_profile":
+                            rec["detail"]["profiles"] = ["B06-AT-05"]
+                        else:
+                            rec["detail"]["unauthenticated"] = True
+                        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError, "exact one-profile/one-defense"):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_118_codex_p1_missed_bow_requires_both_legal_rechecks(self):
+        # The Round-3 finishing arrow was previously checked, but the
+        # Round-2 miss could be launched despite a false G0 recheck.
+        for level in (2, 3):
+            pack = run_pack(level, 17, include_trials=True)
+            baseline = pack["native_trials"][POLICIES[0]]
+            opens = [v for v in baseline["ledger"]
+                     if v["kind"] == "response_window_open"
+                     and v["round"] == 2 and v["turn"] == "archer"]
+            self.assertEqual(len(opens), 1)
+            trigger = opens[0]["detail"]["trigger"]
+            self.assertEqual(trigger,
+                             f"g2:bow:archer:hunter:0:{opens[0]['index']}")
+            for kind in ("trigger_rechecked_after_interceptions",
+                         "trigger_rechecked_after_responses"):
+                with self.subTest(level=level, kind=kind):
+                    trial = deepcopy(baseline)
+                    item = next(v for v in trial["ledger"]
+                                if v["kind"] == kind
+                                and v["detail"].get("trigger") == trigger)
+                    self.assertIs(item["detail"]["legal"], True)
+                    item["detail"]["legal"] = False
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "legal G0 response-window ready chain"):
+                        attest_trial(trial, level=level, seed=17, policy=POLICIES[0])
+
+    def test_119_codex_p1_missed_bow_rejects_cancelled_or_foreign_window(self):
+        baseline = self._case(POLICIES[0])
+        for variant in ("missing_ready", "cancelled_ready", "borrowed_trigger",
+                        "duplicate_ready"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(baseline)
+                events = trial["ledger"]
+                opening = next(v for v in events if
+                               v["kind"] == "response_window_open"
+                               and v["round"] == 2 and v["turn"] == "archer")
+                trigger = opening["detail"]["trigger"]
+                ready = next(v for v in events if
+                             v["kind"] == "trigger_ready_to_resolve"
+                             and v["detail"].get("trigger") == trigger)
+                if variant == "missing_ready":
+                    ready["kind"] = "g0_ready_suppressed"
+                elif variant == "cancelled_ready":
+                    ready["kind"] = "trigger_cancelled_after_spontaneous"
+                elif variant == "borrowed_trigger":
+                    opening["detail"]["trigger"] = "g2:bow:archer:hunter:0:forged"
+                else:
+                    # Two ready receipts for one trigger are never equivalent
+                    # to a valid once-only response authorization.
+                    other = next(v for v in events if
+                                 v["kind"] == "g2_projectile_defense_rechecked"
+                                 and v["round"] == 2 and v["turn"] == "archer")
+                    other["kind"] = "trigger_ready_to_resolve"
+                    other["detail"] = deepcopy(ready["detail"])
+                trial["ledger_sha256"] = canonical_digest(events)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_120_codex_p2_lethal_bow_authenticates_source_digest_and_head(self):
+        for level in (2, 3):
+            pack = run_pack(level, 17, include_trials=True)
+            baseline = pack["native_trials"][POLICIES[0]]
+            native = next(x for x in baseline["ledger"]
+                          if x["kind"] == "g6d_bow_adjudicated")
+            self.assertEqual(native["detail"]["chosen_target_part"], "head")
+            self.assertEqual(native["detail"]["source_digest"],
+                             baseline["initial_state"]["archer"]["source_digest"])
+            for mutation in ("fake_digest", "rear", "unknown_part",
+                             "both_contradictory", "missing_digest",
+                             "missing_part"):
+                with self.subTest(level=level, mutation=mutation):
+                    trial = deepcopy(baseline)
+                    record = next(x for x in trial["ledger"]
+                                  if x["kind"] == "g6d_bow_adjudicated")
+                    d = record["detail"]
+                    if mutation == "fake_digest":
+                        d["source_digest"] = "forged-shooter"
+                    elif mutation == "rear":
+                        d["chosen_target_part"] = "rear"
+                    elif mutation == "unknown_part":
+                        d["chosen_target_part"] = "wing"
+                    elif mutation == "both_contradictory":
+                        d["source_digest"] = "forged-shooter"
+                        d["chosen_target_part"] = "rear"
+                    elif mutation == "missing_digest":
+                        del d["source_digest"]
+                    else:
+                        del d["chosen_target_part"]
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "Bow source digest or head target"):
+                        attest_trial(trial, level=level, seed=17, policy=POLICIES[0])
+
+    def test_121_codex_legal_declarations_both_bows_and_source_head_positive(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                native = run_pack(level, seed, include_trials=True)
+                for policy in POLICIES:
+                    with self.subTest(level=level, seed=seed, policy=policy):
+                        trial = native["native_trials"][policy]
+                        signed = attest_trial(
+                            trial, level=level, seed=seed, policy=policy)
+                        self.assertEqual(signed["outcome"], TERMINALS[policy][0])
+                        self.assertEqual(signed["ledger_sha256"],
+                                         canonical_digest(trial["ledger"]))
+
+
 if __name__ == "__main__":
     unittest.main()

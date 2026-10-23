@@ -826,6 +826,24 @@ def _reconcile_victory_bow_ammunition(ledger, initial, final, *, level):
         _authored_bow_lane_receipts(
             ledger, declaration, launch, shot, level=level,
             seed=ledger[0]["detail"]["seed"])
+        # Both source R arrows, including the Round-2 automatic miss,
+        # must have a full *legal* G0 window. A digest-valid launch after
+        # a failed recheck is impossible even if it consumes one arrow.
+        opens = [v for v in ledger if v["kind"] == "response_window_open"
+                 and preassigned["index"] < v["index"] < rechecked["index"]
+                 and v["round"] == round_no and v["turn"] == "archer"]
+        if len(opens) != 1:
+            raise AssertionError("Source Bow shot lacks one original G0 response window")
+        expected_trigger = (
+            f"g2:bow:archer:hunter:0:{opens[0]['index']}"
+            if round_no == 2 else
+            f"g6d:bow:{ledger[0]['detail']['seed']}:{round_no}:archer:hunter:one_shot")
+        if opens[0]["detail"].get("trigger") != expected_trigger:
+            raise AssertionError("Source Bow response trigger is not native-bound")
+        _attest_unopposed_response_window(
+            ledger, trigger=expected_trigger, actor="archer",
+            round_no=round_no, before_index=preassigned["index"],
+            after_index=rechecked["index"])
         ammo -= 1
     if (type(final["archer"].get("ammunition")) is not int
             or final["archer"]["ammunition"] != ammo):
@@ -857,6 +875,24 @@ def _lethal_bow_terminal_chain(ledger, terminal, adjudication):
             and x["detail"].get("dead") is True]) != 1:
         raise AssertionError("Victory requires one unique genuine Hunter death packet")
     d = adjudication["detail"]
+    # Independent source fixture, not the report's editable genesis/snapshot:
+    # the original G6-D shot targeted the Hunter's canonical HEAD cell.
+    # The adjudication must retain the actual R source digest and part,
+    # even if its roll, damage and terminal fields are otherwise coherent.
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+    genesis = ledger[0]["detail"]
+    source_scene = mixed_scene(
+        size=4, level=genesis["source_ids"]["archer"]["level"],
+        seed=genesis["seed"])
+    source_e = source_scene.e
+    hunter = source_e.actors["hunter"]
+    head_cell = source_e.g1.body_cell("hunter", "head")
+    source_part = hunter.footprint[hunter.occupied.index(head_cell)]
+    if (d.get("source_digest") != source_e.actors["archer"].source.digest
+            or d.get("chosen_target_part") != source_part
+            or source_part != "head"):
+        raise AssertionError(
+            "G6-D lethal Bow source digest or head target contradicts fixture")
     action_index, launch_index, shot_index = (
         d.get("action_index"), d.get("launch_index"), d.get("shot_index"))
     if (any(type(v) is not int for v in
@@ -1220,16 +1256,23 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or attested["turn"] != "hunter"):
             raise AssertionError("Bite sequence changed its source profile or prey")
         declaration = ledger[declaration_index]
+        # G0 charges every listed profile and demands an equally sized
+        # defense array. Checking only the resolved slot would let a
+        # rehashed, unpaid B06-AT-05 second profile ride on a legal Bite.
+        # This fixed G7-G policy declares precisely ONE Bite/Take Hit.
+        expected_declaration = {
+            "attacker": "hunter", "target": target,
+            "profiles": ["B06-AT-04"], "defenses": ["take_hit"],
+        }
         if (declaration["kind"] != "attack_sequence_committed"
                 or declaration["round"] != resolved["round"]
                 or declaration["turn"] != "hunter"
-                or declaration["detail"].get("attacker") != "hunter"
-                or declaration["detail"].get("target") != target
-                or len(declaration["detail"].get("profiles", ())) <= position
-                or declaration["detail"]["profiles"][position] != "B06-AT-04"
+                or position != 0
+                or declaration["detail"] != expected_declaration
                 or action["detail"].get("label") !=
-                   f"sequence:B06-AT-04:{position}"):
-            raise AssertionError("Paid Bite does not match original G0 declaration")
+                   "sequence:B06-AT-04:0"):
+            raise AssertionError(
+                "Paid Bite requires exact one-profile/one-defense native G0 declaration")
         rolls = [x for x in ledger
                  if x["kind"] == "g5_melee_roll"
                  and x["detail"].get("action_index") == action_index]
