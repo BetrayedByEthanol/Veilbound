@@ -611,3 +611,38 @@ hit's G0 legality rechecks and ready/origin binding, and every
 individually editable Rite establishment field. Positive L2/L3,
 seeds 0 and 17 remain bounded source-witness acceptance only,
 not broad response selection, a full Priest spellbook or Hunter CR.
+
+## Codex P1/P2 — Native Bow lane and G4.5 bridge snapshots
+
+The G6-D victory's Round-2 missed Bow and Round-3 lethal Bow are
+revalidated against a freshly constructed G6-C source scene. That
+policy authorizes **no repositioning**. For each launch, the verifier
+reconstructs the source Archer-to-Hunter **head-cell** G2 lane and
+compares its actual range band, absence of cover/living screens, zero
+Aim mitigation and resulting effective obstruction with the precise
+`g2_bow_launched` receipt. It also binds the immediately preceding
+`g2_projectile_defense_rechecked` and following
+`g2_miss_faces_preallocated` and `g2_bow_shot_resolved` defenses to
+the reconstructed G2 `take_hit` value. A forged range difficulty
+(such as 999), coordinated defense adjustment or substituted screen
+fails even if the ledger digest is recomputed.
+
+G7-H now reconstructs **every** native `g45_attested_hit`
+`target_state` **at the precise hit event**, rather than trusting
+the editable G4.5 result or final-state summary. The source actor's
+identity, digest, maximum resources and starting state come from a
+fresh G6-C fixture; chronological source G4 damage, Step-2 recovery,
+VP commitments/releases and G4 wound creation determine the complete
+post-hit state including HP, Vigor, VP, Dying/dead status and the
+original wound identities, trauma and progress. The verifier also
+checks the original paid action, G5 sequence/defense reference and
+G4.5 attacker/target source digests. Existing separate G4 packet,
+wound-severity, VP and natural regeneration verifiers still validate
+these inputs independently, preventing a forged earlier ledger event
+from becoming its own authority.
+
+New regression cases edit individual Bow geometry/defense receipts,
+Hunter Bite and A/B G4.5 snapshot fields and bridge provenance and
+recompute the original ledger hash; positive L2/L3 source traces
+remain accepted. The source rules, historical census and Hunter CR
+are unchanged.
