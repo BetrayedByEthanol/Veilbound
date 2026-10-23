@@ -3773,8 +3773,11 @@ def attest_trial(report, *, level, seed, policy):
     _origin(report, ledger, policy=policy, level=level, seed=seed)
     _reconcile_g0_defense_resources(ledger, level=level, seed=seed)
     _reconcile_all_turn_end_ap(ledger, level=level, seed=seed)
-    _reconcile_g1_action_segments(ledger)
+    # Source-policy legality produces its own actionable diagnostics first.
+    # Every *authorized* paid action must still replay its immediate G1
+    # own_action break before this branch can reach terminal acceptance.
     _attest_fixed_g7g_actions(ledger, policy=policy)
+    _reconcile_g1_action_segments(ledger)
     turns = [v["detail"].get("actor") for v in ledger if v["kind"] == "turn_end"]
     ends = [v for v in ledger if v["kind"] == "round_end"]
     if (not ends or turns != list(ROSTER) * len(ends)
