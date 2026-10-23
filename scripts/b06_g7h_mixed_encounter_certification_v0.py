@@ -955,8 +955,22 @@ def _attest_source_bite_venom(ledger, *, policy, target, profile, bridge,
         # Fixed authored die, NOT a mutable attack/venom receipt. G6-C's
         # L2/L3 Round-2 Hunter uses natural 1; the two G7-G policies use 20.
         die = 1 if policy == "mixed_victory_rite" else 20
-        source = mixed_scene(size=4, level=ledger[0]["detail"]["source_ids"][
-            "vanguard"]["level"], seed=seed).e.actors[target].source
+        reference = mixed_scene(
+            size=4, level=ledger[0]["detail"]["source_ids"]["vanguard"]["level"],
+            seed=seed).e
+        source = reference.actors[target].source
+        # The current authored G6-C scenarios begin native G0 combat rounds
+        # WITHOUT a WorldClock.enter_initiative() handoff. Consequently
+        # G4.4 schedules deadlines in exploration seconds, despite active
+        # Initiative turn labels. A rehashed source trace cannot invent an
+        # initiative conversion or elapse that clock in this fixed pack.
+        if (reference.g4.clock.mode != "exploration"
+                or reference.g4.clock.world_seconds != 0
+                or any(v["kind"] in (
+                    "g42_initiative_entered", "g42_initiative_exited",
+                    "g42_exploration_advanced") for v in ledger)):
+            raise AssertionError(
+                "G7-H Hunter venom requires original G6-C exploration clock basis")
         vit = dict(source.abilities).get("Vitality")
         if type(vit) is not int:
             raise AssertionError("Hunter Bite target has no sourced Vitality")
@@ -991,8 +1005,8 @@ def _attest_source_bite_venom(ledger, *, policy, target, profile, bridge,
                            "event_id": f"{tag}:{label}",
                            "actor": target, "actor_source": source.source_id,
                            "source": tag, "phase": "before_recovery",
-                           "due_seconds": None,
-                           "due_round": resolved["round"] + seconds // 6,
+                           "due_seconds": seconds,
+                           "due_round": None,
                        }
                        for v, (label, seconds) in zip(markers, plan))):
             raise AssertionError(

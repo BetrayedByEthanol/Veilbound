@@ -544,11 +544,18 @@ authority for resource entitlements or delayed venom outcomes.
   chronological scheduling order, original target, source, phase
   `before_recovery`, and delays: `Full` at 600/1800/7200 s
   (onset/escalation/expiry), `Reduced` at 600/3600 s
-  (onset/expiry), converted by the canonical six-second
-  Round-Begin surrogate. The original accepted G4.4 `marker_ids`
-  must exactly list those markers. The fixed scenes end before due
-  markers; any fabricated early milestone or unexpected protective
-  Ward cannot silently redefine a supported trial.
+  (onset/expiry). Importantly the current G6-C authored fixtures
+  begin ordinary G0 Initiative rounds **without calling the separate
+  WorldClock.enter_initiative() handoff**. The native scheduling basis
+  remains exploration at world second zero, so these source receipts
+  carry `due_seconds` of 600/1800/7200 or 600/3600 and
+  `due_round=null`—they do **not** yet use the canonical six-second
+  Round-Begin surrogate. G7-H derives this mode from a newly loaded
+  G6-C reference and rejects fabricated clock handoffs or advances.
+  The original accepted G4.4 `marker_ids` must exactly list those
+  markers. The fixed scenes end before due markers; any fabricated
+  early milestone or unexpected protective Ward cannot silently
+  redefine a supported trial.
 - **Nonstacking:** Once an original accepted Moderate Hunter toxin is
   still active, later equal-grade puncturing Bites against that actor
   must have the native **ignored** outcome, not a new resistance

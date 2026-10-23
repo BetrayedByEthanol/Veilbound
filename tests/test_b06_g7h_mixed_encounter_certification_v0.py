@@ -2011,8 +2011,14 @@ class G7HMixedNativeTests(unittest.TestCase):
                     marker = next(v for v in ledger
                                   if v["kind"] == "g42_milestone_scheduled"
                                   and v["detail"]["source"] == f"hunter:{key}")
+                    # G6-C's fixed witness never calls enter_initiative:
+                    # its WorldClock schedules the 600s/1800s/7200s or
+                    # 600s/3600s markers in exploration seconds (not a
+                    # fabricated Round-Begin conversion).
+                    self.assertIsNone(marker["detail"]["due_round"])
+                    self.assertIsInstance(marker["detail"]["due_seconds"], int)
                     if mutation == "due":
-                        marker["detail"]["due_round"] += 1
+                        marker["detail"]["due_seconds"] += 6
                     elif mutation == "phase":
                         marker["detail"]["phase"] = "after_recovery"
                     elif mutation == "recipient":
