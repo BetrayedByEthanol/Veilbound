@@ -4141,5 +4141,57 @@ class G7HMixedNativeTests(unittest.TestCase):
                         ["outcome"], TERMINALS[policy][0])
 
 
+    def test_160_codex_p2_pursuit_execution_receipt_binds_hunter_identity(self):
+        # Exact Codex reproduction: altering only the execution receipt's
+        # claimed pursuer and recomputing the original ledger SHA must
+        # not preserve G7-H attestation, even though every G1 step,
+        # target, route, MP and head-forward contact remains genuine.
+        for policy in ("hunter_multitarget_defeat",
+                       "opposed_living_hunter_withdrawal"):
+            native = self._case(policy)
+            executed = [e for e in native["ledger"] if
+                        e["kind"] == "g7g_hunter_pursuit_executed"]
+            self.assertTrue(executed)
+            self.assertTrue(all(e["detail"]["hunter"] == "hunter"
+                                for e in executed))
+            for index in (executed[0]["index"], executed[-1]["index"]):
+                for claim in ("guardian", "scholar", "unrecognized", None,
+                              "missing"):
+                    with self.subTest(policy=policy, index=index,
+                                      claimed_pursuer=claim):
+                        report = deepcopy(native)
+                        detail = report["ledger"][index]["detail"]
+                        if claim == "missing":
+                            del detail["hunter"]
+                        else:
+                            detail["hunter"] = claim
+                        report["ledger_sha256"] = canonical_digest(report["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError,
+                                "G7-H Hunter pursuit receipt lost actual "
+                                "head-forward contact"):
+                            attest_trial(report, level=3, seed=17, policy=policy)
+
+    def test_161_codex_p2_authentic_hunter_execution_survives_source_replay(self):
+        # Both fixed policies still accept unaltered G7-G execution
+        # receipts for the original L2 and L3 source actors.
+        for level in (2, 3):
+            pack = (self.bundle if level == 3
+                    else run_pack(level, 17, include_trials=True))
+            for policy in ("hunter_multitarget_defeat",
+                           "opposed_living_hunter_withdrawal"):
+                with self.subTest(level=level, policy=policy):
+                    report = pack["native_trials"][policy]
+                    receipts = [ev for ev in report["ledger"] if
+                                ev["kind"] == "g7g_hunter_pursuit_executed"]
+                    self.assertTrue(receipts)
+                    self.assertTrue(all(ev["turn"] == "hunter"
+                                        and ev["detail"].get("hunter") == "hunter"
+                                        for ev in receipts))
+                    result = attest_trial(report, level=level, seed=17,
+                                          policy=policy)
+                    self.assertEqual(result["outcome"], TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
