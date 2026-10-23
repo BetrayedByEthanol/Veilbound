@@ -3637,8 +3637,12 @@ class G7HMixedNativeTests(unittest.TestCase):
                     trial = deepcopy(native)
                     trial["ledger"][roll["index"]]["detail"]["defense_value"] = forgery
                     trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    # Round-2 Take Hit is also checked by the existing
+                    # native Bite bridge before this missed-roll verifier;
+                    # both paths must reject the forged value.
                     with self.assertRaisesRegex(
-                            AssertionError, "Hunter source-authored miss/hit"):
+                            AssertionError,
+                            "Hunter source-authored miss/hit|Native Hunter Bite defense was altered"):
                         attest_trial(trial, level=3, seed=17, policy=policy)
 
     def test_145_codex_p2_native_L2_L3_receipts_remain_authentic(self):
