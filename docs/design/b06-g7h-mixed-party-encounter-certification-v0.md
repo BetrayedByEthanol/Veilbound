@@ -105,6 +105,32 @@ repair. The G6-D victory terminal must match the **entire** authentic
 source receipt, including original party roster, source digest, native
 HP and round, cause and outcome—not merely its lethal event index.
 
+### G7-G summary, G4.5 critical and missed Bow parity (Codex P2)
+
+The certificate now audits **both** G7-G source reports' public native
+summaries. Their `mode`, original round limit (32 for multi-target death;
+2 for opposed withdrawal), fixed policy grade, living-Hunter status,
+sorted distinct source-Bite hit victims, source version, unchanged
+historical digest and non-calibration flags must match independently
+authenticated round, G4 death and G5 result evidence. A rehashed ledger
+cannot legitimize an unrelated or outdated top-level summary.
+
+Every original `g45_attested_hit.detail.critical` must equal the
+corresponding source-verified G5 roll **and** final resolved G5 critical
+tier for the exact paid action and target. That includes Hunter
+Devastating Bites and normal A/B melee hits, not only target-state and
+wound equality.
+
+Both source Bow receipts are now validated as a complete G2 result
+computed from the independently rebuilt physical lane and their actual
+authored face. The Round-2 automatic miss still has
+`attack_total = primary_face + 4` and
+`scatter_margin = max(0, base_defense - attack_total)`; neither can
+be replaced by a fictitious success or arbitrary scatter after
+rehashing. The Round-3 lethal delivery retains its own complete native
+result fields and null scatter. Dedicated tamper cases cover both
+source G7-G policies, every genuine G4.5 hit, and the missed Bow.
+
 ### G0 unresolved-roll handoff integrity (Codex P2)
 
 Every native `g5_melee_sequence_attested` must bind **exactly one**
