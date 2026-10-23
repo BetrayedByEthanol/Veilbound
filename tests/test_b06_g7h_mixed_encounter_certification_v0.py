@@ -3134,5 +3134,106 @@ class G7HMixedNativeTests(unittest.TestCase):
                             TERMINALS[policy][0])
 
 
+    def test_126_codex_p2_g7g_native_public_summary_follows_signed_evidence(self):
+        for policy in POLICIES[1:]:
+            baseline = self._case(policy)
+            self.assertEqual(
+                attest_trial(baseline, level=3, seed=17, policy=policy)["outcome"],
+                TERMINALS[policy][0])
+            for field in ("hunter_alive", "unique_hunter_bite_victims",
+                          "mode", "round_limit", "policy_grade", "version",
+                          "historical_phase3_sha256",
+                          "representative_encounter_calibration_accepted",
+                          "sampled_win_rate"):
+                with self.subTest(policy=policy, field=field):
+                    trial = deepcopy(baseline)
+                    alterations = {
+                        "hunter_alive": False,
+                        "unique_hunter_bite_victims": ["scholar", "nonparty"],
+                        "mode": ("opposed_disengagement"
+                                 if policy == "hunter_multitarget_defeat"
+                                 else "multitarget_defeat"),
+                        "round_limit": 100,
+                        "policy_grade": "not_a_native_policy",
+                        "version": "fake-G7G-version",
+                        "historical_phase3_sha256": "0" * 64,
+                        "representative_encounter_calibration_accepted": True,
+                        "sampled_win_rate": 0.4,
+                    }
+                    trial[field] = alterations[field]
+                    # Public report fields are *outside* the ledger digest.
+                    # Do not let a consumer certify a contradictory report.
+                    with self.assertRaisesRegex(AssertionError, "Legacy G7-G"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+            for field in ("hunter_alive", "unique_hunter_bite_victims",
+                          "mode", "round_limit"):
+                with self.subTest(policy=policy, missing=field):
+                    trial = deepcopy(baseline)
+                    del trial[field]
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_127_codex_p2_every_g45_critical_matches_native_g5_tier(self):
+        for policy in POLICIES:
+            source = self._case(policy)
+            bridges = [v for v in source["ledger"]
+                       if v["kind"] == "g45_attested_hit"]
+            self.assertTrue(bridges)
+            for slot in range(len(bridges)):
+                for forged in ("not_a_critical_tier", "normal" if
+                               bridges[slot]["detail"]["critical"] != "normal"
+                               else "devastating"):
+                    with self.subTest(policy=policy, slot=slot, forged=forged):
+                        trial = deepcopy(source)
+                        targets = [v for v in trial["ledger"]
+                                   if v["kind"] == "g45_attested_hit"]
+                        targets[slot]["detail"]["critical"] = forged
+                        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError, "G4.5 critical tier"):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_128_codex_p2_missed_bow_total_scatter_and_full_receipt(self):
+        policy = "mixed_victory_rite"
+        source = self._case(policy)
+        missed = [v for v in source["ledger"]
+                  if v["kind"] == "g2_bow_shot_resolved" and v["round"] == 2]
+        self.assertEqual(len(missed), 1)
+        self.assertEqual(missed[0]["detail"]["primary_face"], 1)
+        self.assertEqual(missed[0]["detail"]["attack_total"], 5)
+        self.assertEqual(
+            missed[0]["detail"]["scatter_margin"],
+            max(0, missed[0]["detail"]["base_defense"] - 5))
+        for field, value in (("attack_total", 999),
+                             ("scatter_margin", 999),
+                             ("scatter_margin", None),
+                             ("base_defense", 999),
+                             ("final_defense", 999),
+                             ("note", "forged_result"),
+                             ("ammunition_spent", 2)):
+            with self.subTest(field=field, value=value):
+                trial = deepcopy(source)
+                shot = next(v for v in trial["ledger"] if
+                            v["kind"] == "g2_bow_shot_resolved"
+                            and v["round"] == 2)
+                shot["detail"][field] = value
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_129_codex_all_original_source_outcomes_still_attest(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                with self.subTest(level=level, seed=seed):
+                    pack = run_pack(level, seed, include_trials=True)
+                    self.assertTrue(pack["bounded_terminal_matrix_certified"])
+                    self.assertEqual(len(pack["cases"]), len(POLICIES))
+                    for policy in POLICIES:
+                        proof = attest_trial(pack["native_trials"][policy],
+                                             level=level, seed=seed, policy=policy)
+                        self.assertEqual(proof["outcome"], TERMINALS[policy][0])
+                        self.assertTrue(proof["ledger_sha256"])
+
+
 if __name__ == "__main__":
     unittest.main()

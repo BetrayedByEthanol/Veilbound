@@ -830,6 +830,34 @@ def _authored_bow_lane_receipts(ledger, declaration, launch, shot, *, level, see
             or shot["detail"].get("final_defense") != final):
         raise AssertionError(
             "G2 launch range, cover, obstruction or defense disagrees with authored lane")
+    # The native G2 resolution is a deterministic result of the committed
+    # Bow face, the source +4 Bow attack and the independently rebuilt
+    # clear lane. Do not trust the event's attack_total/scatter_margin:
+    # even a natural-1 automatic miss still records both numeric values.
+    face = shot["detail"].get("primary_face")
+    if type(face) is not int or not 1 <= face <= 20:
+        raise AssertionError("G2 Bow receipt requires a sourced d20 face")
+    total = face + 4
+    outcome = ("automatic_miss" if face == 1 else
+               "critical_confirmation_pending_G5" if face == 20 else
+               "intended_hit_pending_G5" if total > final else
+               "ordinary_miss")
+    expected_shot = {
+        "shooter": "archer", "intended": "hunter",
+        "outcome": outcome,
+        "target": "hunter" if outcome in (
+            "critical_confirmation_pending_G5",
+            "intended_hit_pending_G5") else None,
+        "primary_face": face, "attack_total": total,
+        "base_defense": base, "final_defense": final,
+        "scatter_margin": max(0, base - total) if outcome in (
+            "automatic_miss", "ordinary_miss") else None,
+        "ammunition_spent": 1,
+        "note": "attack_delivery_only_HP_wounds_critical_G5_deferred",
+    }
+    if shot["detail"] != expected_shot:
+        raise AssertionError(
+            "G2 Bow total, scatter or resolution contradicts sourced face and lane")
     return base, final
 
 
@@ -2843,6 +2871,34 @@ def _reconcile_every_g45_target_snapshot(ledger, *, policy, level, seed):
                 raise AssertionError("G4.5 receipt cannot borrow a different G5 sequence")
             sequence = sequences[0]["detail"]
             slot = sequence["action_indices"].index(idx)
+            # G5 checks the actual confirmed tier against source rolls and
+            # G4 wound damage. The G4.5 bridge must attest that SAME tier,
+            # rather than relying on mutable post-hit target snapshots.
+            rolls = [v for v in ledger[:event["index"]]
+                     if v["kind"] == "g5_melee_roll"
+                     and v["detail"].get("action_index") == idx]
+            completions = [v for v in ledger[event["index"] + 1:]
+                           if v["kind"] == "g5_melee_resolved"
+                           and v["detail"].get("action_index") == idx]
+            if (len(rolls) != 1 or len(completions) != 1
+                    or not sequences[0]["index"] < rolls[0]["index"]
+                       < event["index"] < completions[0]["index"]
+                    or rolls[0]["round"] != event["round"]
+                    or completions[0]["round"] != event["round"]
+                    or rolls[0]["turn"] != actor
+                    or completions[0]["turn"] != actor
+                    or rolls[0]["detail"].get("attacker") != actor
+                    or rolls[0]["detail"].get("target") != target
+                    or rolls[0]["detail"].get("hit") is not True
+                    or completions[0]["detail"].get("outcome") != "hit"
+                    or completions[0]["detail"].get("attacker") != actor
+                    or completions[0]["detail"].get("target") != target
+                    or d.get("critical") not in (
+                        "normal", "strong", "critical", "devastating")
+                    or d["critical"] != rolls[0]["detail"].get("critical")
+                    or d["critical"] != completions[0]["detail"].get("critical")):
+                raise AssertionError(
+                    "G4.5 critical tier disagrees with the source-authenticated G5 roll")
             indices = sequence.get("defense_indices")
             if (not isinstance(indices, list) or slot >= len(indices)
                     or type(indices[slot]) is not int
@@ -3329,6 +3385,51 @@ def _reconcile_legacy_victory_report(report, ledger, final, *, terminal, rounds)
     return True
 
 
+def _reconcile_legacy_g7g_report(report, ledger, final, *,
+                                 policy, deaths, rounds):
+    """Check the complete public G7-G native report against certified facts.
+
+    The original G7-G top-level report is a consumable artifact. Its policy,
+    Hunter state, Bite target set and bounded round-limit assertions must
+    agree with the immutable authored G7-G contract and reconstructed G4/G5
+    evidence, just like the separately checked G6-D victory report.
+    """
+    from scripts.b06_g7g_hunter_pursuit_terminals_v0 import MAX_ROUNDS
+
+    contracts = {
+        "hunter_multitarget_defeat":
+            ("multitarget_defeat", MAX_ROUNDS, "authored_extremal_dice"),
+        "opposed_living_hunter_withdrawal":
+            ("opposed_disengagement", 2, "authored_two_round_pursuit"),
+    }
+    if policy not in contracts:
+        raise AssertionError("G7-G summary reconciliation requires a G7-G policy")
+    mode, limit, grade = contracts[policy]
+    victims = sorted({
+        ev["detail"]["target"] for ev in ledger
+        if ev["kind"] == "g5_melee_resolved"
+        and ev["detail"].get("attacker") == "hunter"
+        and ev["detail"].get("profile") == "B06-AT-04"
+        and ev["detail"].get("outcome") == "hit"
+    })
+    if (report.get("version") != "B06-G7G-native-pursuit-terminals-v0"
+            or report.get("mode") != mode
+            or type(report.get("round_limit")) is not int
+            or report["round_limit"] != limit
+            or report.get("policy_grade") != grade
+            or report.get("hunter_alive") is not (not deaths["hunter"])
+            or report.get("unique_hunter_bite_victims") != victims
+            or not 0 < rounds <= limit
+            or report.get("historical_phase3_sha256") != HISTORICAL_SHA
+            or report.get("representative_encounter_calibration_accepted") is not False
+            or report.get("sampled_win_rate") is not None
+            or final["hunter"]["dead"] is not deaths["hunter"]):
+        raise AssertionError(
+            "Legacy G7-G public summary contradicts authenticated policy, "
+            "living Hunter, native Bite targets or historical boundary")
+    return True
+
+
 def attest_trial(report, *, level, seed, policy):
     """Independent evidence validation. Never trust mutable report metadata."""
     if (type(level) is not int or level not in (2, 3)
@@ -3395,6 +3496,10 @@ def attest_trial(report, *, level, seed, policy):
     if policy == "mixed_victory_rite":
         _reconcile_legacy_victory_report(
             report, ledger, final, terminal=terminal, rounds=len(ends))
+    else:
+        _reconcile_legacy_g7g_report(
+            report, ledger, final, policy=policy,
+            deaths=deaths, rounds=len(ends))
     _attest_g0_unresolved_roll_handoffs(ledger)
     return {"policy": policy, "outcome": TERMINALS[policy][0],
             "source_scenario_id": report["scenario_id"],
