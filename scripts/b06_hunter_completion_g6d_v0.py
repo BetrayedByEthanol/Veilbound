@@ -300,7 +300,7 @@ class HunterCompletion:
                 "round":e.round,"hunter_cr":None,"complete_party_pack_certified":False}
 
 
-def run_i3_defeat(*,level=3,seed=640):
+def run_i3_defeat(*,level=3,seed=640,g7h_priest_rite=False):
     """Real 4-PC I3 window: two established rounds + one paid Bow lethal shot.
 
     The third round is completed with genuine turns. Death is not inferred
@@ -309,18 +309,37 @@ def run_i3_defeat(*,level=3,seed=640):
     """
     if type(level) is not int or level not in (2,3):
         raise ValueError("Only authored L2/L3 mixed party")
+    if type(g7h_priest_rite) is not bool:
+        raise ValueError("G7-H Rite witness must be an explicit boolean")
     from scripts.b06_hunter_mixed_party_g6c_v0 import (
         mixed_scene,_hunter_turn,_priest_turn,_archer_turn,_scholar_turn,
     )
     combat=mixed_scene(size=4,level=level,seed=seed)
     e=combat.e
+    if g7h_priest_rite:
+        from scripts.b06_g7a_native_terminal_census_v0 import _snapshot
+        g7h_initial=_snapshot(e)
+        e.log("g7h_pack_policy_selected",
+              runner="g6d",policy="mixed_victory_rite",
+              scenario=e.scenario,level=level,party_size=4,seed=seed)
     for round_no in (1,2):
         if round_no==2:
             combat.bridge.begin_next_round()
         _hunter_turn(combat,round_no)
         _priest_turn(combat,"vanguard",round_no)
         _priest_turn(combat,"guardian",round_no)
-        _archer_turn(combat,round_no)
+        if g7h_priest_rite and round_no==1:
+            # Source R Low Priest has a genuine Self Chosen Devotional Rite;
+            # it replaces the formerly missed Bow action, never grants free
+            # AP/VP, a party-wide Prayer, or an extra attack.
+            combat.bridge.start_next_turn(RegenerationChoice())
+            rite=e.g3.cast_guided(
+                "archer",mode="maintained",chosen=True,recipient="archer")
+            if rite is None or rite.committed!=1 or not rite.chosen:
+                raise AssertionError("G7-H source R Chosen Rite was not established")
+            combat.bridge.end_current_turn()
+        else:
+            _archer_turn(combat,round_no)
         _scholar_turn(combat,round_no)
     if e.actors["hunter"].hp>=1 or e.actors["hunter"].dead:
         raise AssertionError("Hunter must have genuine G4 Dying wound, not death")
@@ -339,10 +358,23 @@ def run_i3_defeat(*,level=3,seed=640):
     terminal=completion.attest_hunter_defeat(
         "hunter",party_ids=("vanguard","guardian","archer","scholar"))
     report=combat.report()
-    return {"terminal":terminal,"finishing_shot":finishing,
+    answer={"terminal":terminal,"finishing_shot":finishing,
             "source_report":report,"ledger":deepcopy(e.ledger),
             "hunter_hp":e.actors["hunter"].hp,
             "hunter_dead":e.actors["hunter"].dead,
             "rounds":e.round,"roster":list(e.order),
             "complete_party_pack_certified":False,
             "hunter_cr":None}
+    if g7h_priest_rite:
+        from scripts.b06_g7a_native_terminal_census_v0 import (
+            _snapshot,canonical_digest,
+        )
+        answer.update(level=level,party_size=4,seed=seed,
+                      scenario_id=e.scenario,policy_id="mixed_victory_rite",
+                      outcome="hunter_defeat_attested",native_terminal=terminal,
+                      initial_state=g7h_initial,final_state=_snapshot(e),
+                      ledger_sha256=canonical_digest(e.ledger),
+                      rounds_completed=e.round,
+                      turns_completed=sum(x["kind"]=="turn_end"
+                                          for x in e.ledger))
+    return answer
