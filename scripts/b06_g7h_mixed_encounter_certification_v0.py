@@ -87,6 +87,92 @@ def _paid_action_ap(ledger, action, *, actor, cost, kind, label):
     return remaining
 
 
+G0_UNRESOLVED_ROLL_REASON = (
+    "G0 commits declarations and defenses; G5 adjudicates physical hit/damage"
+)
+
+
+def _attest_g0_unresolved_roll_handoffs(ledger):
+    """Authenticate G0's *complete* synchronous handoff into every G5 sequence.
+
+    G0 spends sequence AP, logs one declaration and its N assignments,
+    then logs exactly one unresolved-roll handoff. G5 immediately logs
+    the sequence attestation. A rehashed ledger is not proof that the
+    target G0 handed to G5 was the target that G5 eventually resolved.
+    No dangling, duplicated, reordered or relabeled handoff is legal.
+    """
+    sequences = [v for v in ledger if v["kind"] == "g5_melee_sequence_attested"]
+    handoffs = [v for v in ledger if v["kind"] == "unresolved_attack_roll"]
+    declarations = [v for v in ledger if v["kind"] == "attack_sequence_committed"]
+    assigned = [v for v in ledger if v["kind"] == "defense_assigned"]
+    if (not sequences or len(handoffs) != len(sequences)
+            or len(declarations) != len(sequences)):
+        raise AssertionError("G0 unresolved-roll handoff must be unique per G5 sequence")
+    claimed = set()
+    paid_defenses = set()
+    for sequence in sequences:
+        q = sequence["detail"]
+        declaration_index = q.get("declaration_index")
+        defense_indices = q.get("defense_indices")
+        attacker, target = q.get("attacker"), q.get("target")
+        profiles = q.get("profiles")
+        if (type(declaration_index) is not int
+                or not isinstance(defense_indices, list)
+                or not isinstance(profiles, list)
+                or not profiles
+                or len(defense_indices) != len(profiles)
+                or len(defense_indices) != len(set(defense_indices))
+                or not 0 <= declaration_index < sequence["index"]
+                or defense_indices != list(range(
+                    declaration_index + 1, declaration_index + 1 + len(profiles)))):
+            raise AssertionError("G0 unresolved-roll handoff has no ordered native defenses")
+        declaration = ledger[declaration_index]
+        if (declaration["kind"] != "attack_sequence_committed"
+                or declaration["round"] != sequence["round"]
+                or declaration["turn"] != sequence["turn"]
+                or declaration["detail"] != {
+                    "attacker": attacker, "target": target,
+                    "profiles": profiles, "defenses": [
+                        ledger[i]["detail"].get("defense") for i in defense_indices
+                    ],
+                }):
+            raise AssertionError("G0 unresolved-roll handoff declaration disagrees with G5")
+        for slot, i in enumerate(defense_indices):
+            defense = ledger[i]
+            if (i in paid_defenses
+                    or defense["kind"] != "defense_assigned"
+                    or defense["round"] != sequence["round"]
+                    or defense["turn"] != sequence["turn"]
+                    or defense["detail"].get("actor") != target
+                    or defense["detail"].get("attack_key") !=
+                       f"{attacker}:{target}:{slot}"):
+                raise AssertionError("G0 unresolved-roll handoff defense was not native")
+            paid_defenses.add(i)
+        # G0 emits the roll handoff *immediately after* its final defense.
+        # G5 attests it immediately after G0's check. There is no lawful
+        # intermediate actor event in this synchronous source path.
+        handoff_index = defense_indices[-1] + 1
+        if handoff_index != sequence["index"] - 1:
+            raise AssertionError("G0 unresolved-roll handoff is not between defense and G5")
+        handoff = ledger[handoff_index]
+        if (handoff["kind"] != "unresolved_attack_roll"
+                or handoff_index in claimed
+                or handoff["round"] != sequence["round"]
+                or handoff["turn"] != sequence["turn"]
+                or handoff["detail"] != {
+                    "attacker": attacker, "target": target,
+                    "reason": G0_UNRESOLVED_ROLL_REASON,
+                }):
+            raise AssertionError("G0 unresolved-roll handoff target/reason/source mismatch")
+        claimed.add(handoff_index)
+    if (claimed != {v["index"] for v in handoffs}
+            or paid_defenses != {v["index"] for v in assigned}
+            or {v["detail"]["declaration_index"] for v in sequences} !=
+               {v["index"] for v in declarations}):
+        raise AssertionError("G0 unresolved-roll handoff is orphaned or duplicated")
+    return len(claimed)
+
+
 def _native_round_turn_chronology(ledger):
     """Replay every authoritative G0 Round Begin/End and Initiative boundary."""
     current_round, slot, active, completed = 0, 0, None, 0
@@ -3309,6 +3395,7 @@ def attest_trial(report, *, level, seed, policy):
     if policy == "mixed_victory_rite":
         _reconcile_legacy_victory_report(
             report, ledger, final, terminal=terminal, rounds=len(ends))
+    _attest_g0_unresolved_roll_handoffs(ledger)
     return {"policy": policy, "outcome": TERMINALS[policy][0],
             "source_scenario_id": report["scenario_id"],
             "native_terminal_event": terminal["index"],

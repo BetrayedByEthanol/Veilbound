@@ -3013,5 +3013,126 @@ class G7HMixedNativeTests(unittest.TestCase):
                                          canonical_digest(trial["ledger"]))
 
 
+    def test_122_codex_p2_g0_handoff_target_and_reason_both_source_bound(self):
+        # Codex reproduction: an internally rehashed ledger can leave its
+        # G5 source declaration intact but hand off a different G0 target.
+        # Repeat the reported L3/seed-0 change for all three terminal modes.
+        report = run_pack(3, 0, include_trials=True)
+        for policy in POLICIES:
+            original = report["native_trials"][policy]
+            handoffs = [v for v in original["ledger"]
+                        if v["kind"] == "unresolved_attack_roll"]
+            self.assertTrue(handoffs)
+            for change in ("target", "reason", "both"):
+                with self.subTest(policy=policy, mutation=change):
+                    trial = deepcopy(original)
+                    handoff = next(v for v in trial["ledger"]
+                                   if v["kind"] == "unresolved_attack_roll")
+                    if change in ("target", "both"):
+                        self.assertNotEqual(handoff["detail"]["target"], "scholar")
+                        handoff["detail"]["target"] = "scholar"
+                    if change in ("reason", "both"):
+                        handoff["detail"]["reason"] = "G0 handed off to scholar"
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "G0 unresolved-roll handoff"):
+                        attest_trial(trial, level=3, seed=0, policy=policy)
+
+    def test_123_codex_p2_every_handoff_requires_source_identity_and_schema(self):
+        report = run_pack(3, 0, include_trials=True)
+        for policy in POLICIES:
+            original = report["native_trials"][policy]
+            originals = [x for x in original["ledger"]
+                         if x["kind"] == "unresolved_attack_roll"]
+            for which in range(len(originals)):
+                for mutation in ("attacker", "target", "reason", "extra_field"):
+                    with self.subTest(policy=policy, handoff=which,
+                                      mutation=mutation):
+                        trial = deepcopy(original)
+                        entry = [x for x in trial["ledger"]
+                                 if x["kind"] == "unresolved_attack_roll"][which]
+                        if mutation == "attacker":
+                            entry["detail"]["attacker"] = "scholar"
+                        elif mutation == "target":
+                            entry["detail"]["target"] = (
+                                "scholar" if entry["detail"]["target"] != "scholar"
+                                else "vanguard")
+                        elif mutation == "reason":
+                            entry["detail"]["reason"] = "pending foreign G5 roll"
+                        else:
+                            entry["detail"]["second_target"] = "scholar"
+                        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError, "G0 unresolved-roll handoff"):
+                            attest_trial(trial, level=3, seed=0, policy=policy)
+
+    def test_124_codex_p2_missing_duplicate_and_unmatched_handoffs_rejected(self):
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _attest_g0_unresolved_roll_handoffs,
+        )
+        original = self._case("mixed_victory_rite")
+        ledger = original["ledger"]
+        expected = sum(e["kind"] == "g5_melee_sequence_attested" for e in ledger)
+        self.assertEqual(_attest_g0_unresolved_roll_handoffs(ledger), expected)
+        for variant in ("missing", "duplicate", "reordered", "wrong_turn"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(original)
+                events = trial["ledger"]
+                handoff = next(x for x in events if
+                               x["kind"] == "unresolved_attack_roll")
+                if variant == "missing":
+                    handoff["kind"] = "forged_hand_off_absent"
+                elif variant == "duplicate":
+                    # Convert a distinct on-turn G5 roll into a second
+                    # matching-looking G0 roll, without dropping the first.
+                    other = next(x for x in events if
+                                 x["kind"] == "g5_melee_roll")
+                    other["kind"] = "unresolved_attack_roll"
+                    other["detail"] = dict(handoff["detail"])
+                elif variant == "reordered":
+                    # A handoff before its assigned defense cannot authorize G5.
+                    defense = events[handoff["index"] - 1]
+                    handoff["kind"], defense["kind"] = (
+                        defense["kind"], handoff["kind"])
+                    handoff["detail"], defense["detail"] = (
+                        defense["detail"], handoff["detail"])
+                else:
+                    handoff["turn"] = "scholar"
+                with self.assertRaisesRegex(
+                        AssertionError, "G0 unresolved-roll handoff"):
+                    _attest_g0_unresolved_roll_handoffs(events)
+                trial["ledger_sha256"] = canonical_digest(events)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17,
+                                 policy="mixed_victory_rite")
+
+    def test_125_codex_p2_complete_g0_handoff_replay_both_levels_and_seeds(self):
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _attest_g0_unresolved_roll_handoffs, G0_UNRESOLVED_ROLL_REASON,
+        )
+        for level in (2, 3):
+            for seed in (0, 17):
+                pack = run_pack(level, seed, include_trials=True)
+                for policy in POLICIES:
+                    with self.subTest(level=level, seed=seed, policy=policy):
+                        trial = pack["native_trials"][policy]
+                        ledger = trial["ledger"]
+                        handoffs = [v for v in ledger if
+                                    v["kind"] == "unresolved_attack_roll"]
+                        seqs = [v for v in ledger if
+                                v["kind"] == "g5_melee_sequence_attested"]
+                        self.assertEqual(len(handoffs), len(seqs))
+                        self.assertGreater(len(handoffs), 0)
+                        self.assertEqual(_attest_g0_unresolved_roll_handoffs(
+                            ledger), len(seqs))
+                        self.assertTrue(all(
+                            x["detail"]["reason"] == G0_UNRESOLVED_ROLL_REASON
+                            for x in handoffs))
+                        self.assertEqual(
+                            attest_trial(trial, level=level, seed=seed,
+                                         policy=policy)["outcome"],
+                            TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
