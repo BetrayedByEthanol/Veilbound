@@ -404,6 +404,48 @@ post-scene-world-pursuit flag. Unrecognized or missing receipt keys fail
 closed. Neither correction broadens the witness into a general healing,
 restoration, safety, or encounter-difficulty claim.
 
+## G7-H response-window, Turn AP and Hunter venom reconciliation
+
+Accepted Hunter Bites now have an **action-keyed native response-window
+witness**, not merely a paid G5 roll and G4/G4.5 outcome. For every Hunter
+hit, and the original victory Round-1 miss, the exact trigger
+`g5:melee:<paid-action-index>` must have one original `response_window_open`,
+a **true** `trigger_rechecked_after_interceptions`, a **true**
+`trigger_rechecked_after_responses`, and
+`trigger_ready_to_resolve`, all in order on the same original Hunter
+turn **after** source G5 sequence attestation and **before** its roll.
+A cancelled, fabricated, duplicated, or substituted response stage is
+not a legally resolved Bite. The three authored witnesses all decline
+spontaneous responses; they cannot silently contain an additional
+Interception or Reaction while claiming this fixed policy.
+
+The audit also independently replays **every actor's Turn AP** across
+each native Initiative turn. G0 `turn_resources.ap` must equal the
+original L2/L3 source allowance for a conscious actor (zero if Dying or
+dead), each `action_committed` consumes the correct source Physical,
+Projection, General, or Full AP amount, every interim `ap_remaining`
+must equal the paid balance, and `turn_end.unused_ap` must equal the
+actual remaining amount. A Hunter with 42 AP after one paid 24-AP Bite
+must record **18 AP**, never a mutable alternative such as 999.
+
+Finally, each G4 Hunter `g4_profile_hit.injection_eligible` is derived
+from its actual source Piercing packet after mitigation and must be
+identical to the G4.5/G5 `actual_result.injection_eligible`. A living
+target's recorded G4.4 venom result must have exactly one matching,
+synchronous `accepted`, `ignored`, `prevented`, or
+`not_delivered` native venom receipt with the same original exposure
+key and, where present, original G4 profile hit index. A dead recipient
+cannot receive postmortem venom. Ledger digest recomputation cannot
+override these relationships.
+
+The additional adversarial regressions mutate legal rechecks,
+`trigger_ready_to_resolve`, Hunter/party AP budgets, Hunter
+injection eligibility and venom event classification while keeping
+the trial's recomputed ledger hash valid. Unmodified L2/L3 seeded
+native witnesses continue to be required to pass. No new combat rules,
+archetype capabilities, immunity, encounter probabilities or challenge
+ratings are inferred.
+
 ## Execution and regression checks
 
 ```bash
