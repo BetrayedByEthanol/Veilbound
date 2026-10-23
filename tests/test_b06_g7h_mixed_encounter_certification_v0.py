@@ -4007,5 +4007,139 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_156_codex_p2_round_end_exact_empty_opportunity_expirations(self):
+        # Every fixed policy declines G0 Opportunity Responses. Tampering
+        # with a signed Round End and rehashing must never make actors
+        # appear to have armed an unlogged response.
+        for policy in POLICIES:
+            native = self._case(policy)
+            rounds = [v for v in native["ledger"] if v["kind"] == "round_end"]
+            self.assertTrue(rounds)
+            self.assertTrue(all(v["detail"] == {
+                "effects": "authored effects deferred",
+                "expired_opportunity_response": [],
+            } for v in rounds))
+            for round_slot in (0, len(rounds) - 1):
+                for mutation in ("invent_response", "extra_field",
+                                 "changed_effects", "missing", "string"):
+                    with self.subTest(policy=policy, round_slot=round_slot,
+                                      mutation=mutation):
+                        trial = deepcopy(native)
+                        end = [v for v in trial["ledger"]
+                               if v["kind"] == "round_end"][round_slot]
+                        if mutation == "invent_response":
+                            end["detail"]["expired_opportunity_response"] = ["vanguard"]
+                        elif mutation == "extra_field":
+                            end["detail"]["forged_carry"] = "opportunity"
+                        elif mutation == "changed_effects":
+                            end["detail"]["effects"] = "effects resolved"
+                        elif mutation == "missing":
+                            del end["detail"]["expired_opportunity_response"]
+                        else:
+                            end["detail"]["expired_opportunity_response"] = "[]"
+                        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError, "G0 Round End cannot expire"):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_157_codex_p2_ab_prone_opt_ins_bound_to_source_declare(self):
+        # _priest_turn never grants any of the G5 feasibility opt-ins.
+        # Test every A/B sequence on both rounds, not only landed hits.
+        native = self._case("mixed_victory_rite")
+        sequences = [v for v in native["ledger"]
+                     if v["kind"] == "g5_melee_sequence_attested"
+                     and v["detail"].get("attacker")
+                     in ("vanguard", "guardian")]
+        self.assertEqual(len(sequences), 4)
+        flags = ("prone_attack_feasible", "prone_dodge_feasible",
+                 "prone_guard_feasible")
+        for seq in sequences:
+            self.assertTrue(all(seq["detail"][flag] is False for flag in flags))
+            for flag in flags:
+                with self.subTest(attacker=seq["detail"]["attacker"],
+                                  round=seq["round"], flag=flag):
+                    trial = deepcopy(native)
+                    original = trial["ledger"][seq["index"]]
+                    original["detail"][flag] = True
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "A/B G5 feasibility"):
+                        attest_trial(trial, level=3, seed=17,
+                                     policy="mixed_victory_rite")
+        for mutation in ("missing_flag", "extra_flag"):
+            trial = deepcopy(native)
+            seq = next(v for v in trial["ledger"]
+                       if v["kind"] == "g5_melee_sequence_attested"
+                       and v["detail"].get("attacker") == "vanguard")
+            if mutation == "missing_flag":
+                del seq["detail"]["prone_guard_feasible"]
+            else:
+                seq["detail"]["unsourced_permission"] = True
+            trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+            with self.subTest(mutation=mutation), self.assertRaisesRegex(
+                    AssertionError, "A/B G5 feasibility"):
+                attest_trial(trial, level=3, seed=17,
+                             policy="mixed_victory_rite")
+
+    def test_158_codex_p2_all_nonwounding_source_profile_keys(self):
+        # G4 forms the unique idempotency key from the ledger length at
+        # apply_profile_hit, even when no g4_wound_created event occurs.
+        # A checksum over forged keys must not certify either melee side.
+        for policy in POLICIES:
+            native = self._case(policy)
+            no_wound = [v for v in native["ledger"]
+                        if v["kind"] == "g4_damage_applied"
+                        and v["detail"].get("cause", "").startswith(
+                            "source-profile:")
+                        and v["detail"].get("wound") is None]
+            self.assertTrue(no_wound, policy)
+            for item in no_wound:
+                with self.subTest(policy=policy, damage_index=item["index"]):
+                    trial = deepcopy(native)
+                    event = trial["ledger"][item["index"]]
+                    event["detail"]["event_key"] = (
+                        f"forged-native-key:{policy}:{item['index']}")
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "G4 profile event key"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_159_codex_p2_profile_key_origin_positive_L2_L3(self):
+        # Verify the deterministic pre-damage index for wounded as well
+        # as non-wounding native packets at both authored levels.
+        owners = {
+            "source-profile:B06-AT-04": ("hunter", "B06-AT-04"),
+            "source-profile:B06-PC-A-SWORD":
+                ("vanguard", "B06-PC-A-SWORD"),
+            "source-profile:B06-PC-B-MACE":
+                ("guardian", "B06-PC-B-MACE"),
+        }
+        for level in (2, 3):
+            pack = run_pack(level, 17, include_trials=True)
+            for policy in POLICIES:
+                with self.subTest(level=level, policy=policy):
+                    trial = pack["native_trials"][policy]
+                    damages = [v for v in trial["ledger"]
+                               if v["kind"] == "g4_damage_applied"
+                               and v["detail"].get("cause") in owners]
+                    self.assertTrue(damages)
+                    for damage in damages:
+                        attacker, profile = owners[damage["detail"]["cause"]]
+                        index = damage["index"]
+                        # A native G4 wound creation occurs immediately
+                        # before a source profile's damage event in this
+                        # fixed pack (without deferred effect release).
+                        previous = trial["ledger"][index - 1]
+                        if previous["kind"] == "g4_wound_created":
+                            index = previous["index"]
+                        self.assertEqual(
+                            damage["detail"]["event_key"],
+                            f"g4:profile:{attacker}:"
+                            f"{damage['detail']['recipient']}:{profile}:{index}")
+                    self.assertEqual(
+                        attest_trial(trial, level=level, seed=17, policy=policy)
+                        ["outcome"], TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
