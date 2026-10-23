@@ -4587,5 +4587,103 @@ class G7HMixedNativeTests(unittest.TestCase):
                     self.assertEqual(result["outcome"], TERMINALS[policy][0])
 
 
+    def test_171_codex_p2_dead_scholar_cannot_move_in_replayed_round9(self):
+        """Even a self-consistent cautious G1 receipt cannot move a corpse.
+
+        Insert the exact reviewer-style Round-9 step and its full unopposed
+        response-window chain, reconcile the Step-4 MP budget, final
+        footprint, subsequent indices and terminal references, then rehash.
+        The G1 geometry replay must reject the movement due solely to the
+        scholar's earlier authentic fatal G4 transition.
+        """
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _native, _replay_native_exit_geometry,
+        )
+        from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+
+        policy = "hunter_multitarget_defeat"
+        trial = _native(policy, 3, 0)
+        self.assertEqual(trial["rounds_completed"], 9)
+        ledger = trial["ledger"]
+        original = _replay_native_exit_geometry(ledger, party_exits=False)
+        self.assertEqual(original["scholar"], [[1, 0]])
+        death = next(v for v in ledger if v["kind"] == "g4_damage_applied"
+                     and v["detail"].get("recipient") == "scholar"
+                     and v["detail"].get("dead") is True)
+        at = next(i for i, v in enumerate(ledger)
+                  if v["kind"] == "turn_end" and v["round"] == 9
+                  and v["turn"] == "scholar")
+        self.assertLess(death["index"], at)
+        opening_mp = next(v["detail"]["mp"] for v in ledger
+                          if v["kind"] == "turn_resources"
+                          and v["round"] == 9 and v["turn"] == "scholar")
+        authored = mixed_scene(size=4, level=3, seed=0)
+        destination, cost, step_kind, allies = authored.e.g1.preview(
+            "scholar", delta=(-1, 0), cautious=True)
+        self.assertEqual(destination, ((0, 0),))
+        self.assertEqual(step_kind, "orthogonal")
+        self.assertFalse(allies)
+        self.assertLessEqual(cost, opening_mp)
+        trigger = f"g1:scholar:step:{at}"
+        def synthetic(kind, detail):
+            return {"index": -1, "round": 9, "turn": "scholar",
+                    "kind": kind, "detail": detail}
+        ledger[at:at] = [
+            synthetic("response_window_open", {"trigger": trigger}),
+            synthetic("trigger_rechecked_after_interceptions",
+                      {"trigger": trigger, "legal": True}),
+            synthetic("trigger_rechecked_after_responses",
+                      {"trigger": trigger, "legal": True}),
+            synthetic("trigger_ready_to_resolve", {"trigger": trigger}),
+            synthetic("g1_movement_step", {
+                "actor": "scholar", "old": [[1, 0]], "new": [[0, 0]],
+                "step_kind": step_kind, "direction": [-1, 0],
+                "pivot_anchor": None, "clockwise": None,
+                "cautious": True, "crawl": False, "cost": cost,
+                "mp_remaining": opening_mp - cost, "opportunity_sources": [],
+                # G1 silently increments Scholar's segment on each Step-4
+                # Turn Start, even when the deceased actor holds all actions.
+                "segment": sum(
+                    v["kind"] == "turn_resources"
+                    and v["detail"].get("actor") == "scholar"
+                    for v in ledger[:at]), "reserved": False,
+            }),
+        ]
+        for i, event in enumerate(ledger):
+            event["index"] = i
+        end_turn = next(v for v in ledger if v["kind"] == "turn_end"
+                        and v["round"] == 9 and v["turn"] == "scholar")
+        end_turn["detail"]["unused_mp"] = opening_mp - cost
+        trial["final_state"]["scholar"]["occupied"] = [[0, 0]]
+        signed = next(v for v in ledger if v["kind"] ==
+                      "g7c_party_defeat_attested")
+        trial["native_terminal"]["terminal_event"] = signed["index"]
+        verification = next(v for v in ledger if v["kind"] ==
+                            "g7g_multitarget_defeat_verified")
+        verification["detail"]["native_terminal_index"] = signed["index"]
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        with self.assertRaisesRegex(
+                AssertionError, "G7-H G1 source movement by incapacitated or dead actor"):
+            _replay_native_exit_geometry(ledger, party_exits=False)
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=0, policy=policy)
+
+    def test_172_codex_p2_unmodified_alive_movement_and_fatality_still_replay(self):
+        """Incremental HP state must not reject sourced legal G7-G movement."""
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _native, _replay_native_exit_geometry,
+        )
+        for level in (2, 3):
+            for policy in ("hunter_multitarget_defeat",
+                           "opposed_living_hunter_withdrawal"):
+                with self.subTest(level=level, policy=policy):
+                    trial = _native(policy, level, 0)
+                    assert _replay_native_exit_geometry(
+                        trial["ledger"],
+                        party_exits=(policy == "opposed_living_hunter_withdrawal"))
+                    result = attest_trial(trial, level=level, seed=0, policy=policy)
+                    self.assertEqual(result["outcome"], TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()

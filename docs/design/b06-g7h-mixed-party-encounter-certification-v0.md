@@ -295,6 +295,17 @@ separate movement/G4.5/G5 signed receipt. Neither a changed
 `old=[[100,100]]` coordinate nor a teleport-like translation can
 obtain a certificate simply by recalculating a digest.
 
+The replay also advances each actor's **current HP and death state at
+each original G4 damage or Step-2 regeneration event**, before considering
+later movement. As with native `G1._movement`, an actor with HP at or below
+zero, or whose source death flag is set, cannot take a voluntary step.
+The check must precede the fresh grid `preview()`: otherwise the initial
+living source fixture makes a dead Scholar's forged Round-9 cautious step
+look geometrically affordable. This restriction applies to every
+source-replayed Hunter and PC movement—not just signed border exits.
+Regression covers that source-consistent, rehashed dead-Scholar step and
+unchanged lawful L2/L3 movement, while keeping final HP/death reconciliation.
+
 These checks validate ledger **consistency**, not the security of a
 public unkeyed digest against a fully fabricated, internally coherent
 history; trusted execution remains essential for final certification.

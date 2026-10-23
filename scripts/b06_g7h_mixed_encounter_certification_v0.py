@@ -2075,7 +2075,28 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
     completed_count = 0
     for event in ledger:
         kind, d = event["kind"], event["detail"]
-        if kind == "turn_resources":
+        if kind in ("g4_damage_applied", "regeneration_step"):
+            # G1._movement rejects HP <= 0 and dead *before* previewing
+            # geometry. Replaying only footprints/MP against the fresh
+            # living fixture would accept an inserted step from a corpse.
+            # Advance the source actor's health at the exact native G4/Step-2
+            # event, not from a closing snapshot or a mutable movement claim.
+            actor = (d.get("recipient") if kind == "g4_damage_applied"
+                     else d.get("actor"))
+            if actor not in ROSTER:
+                raise AssertionError("G7-H G1 health replay has foreign G4 actor")
+            source = expected.actors[actor]
+            before, after, dead = (
+                d.get("hp_before"), d.get("hp_after"), d.get("dead"))
+            if (type(before) is not int or type(after) is not int
+                    or type(dead) is not bool or source.hp != before
+                    or not -source.hp_max <= after <= source.hp_max
+                    or dead != (after <= -source.hp_max)
+                    or (source.dead and (after != before or not dead))):
+                raise AssertionError(
+                    "G7-H G1 health replay contradicts native G4 HP/death chronology")
+            source.hp, source.dead = after, dead
+        elif kind == "turn_resources":
             actor = d.get("actor")
             # G0 Step 4 grants a fixed 12 base MP plus genuinely live
             # source penalties. None of these <100-round fixed policies can
@@ -2145,6 +2166,9 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
                     or d.get("opportunity_sources") != []):
                 raise AssertionError("Unsupported or unfunded G7-H G1 move")
             source = expected.actors[actor]
+            if source.hp <= 0 or source.dead:
+                raise AssertionError(
+                    "G7-H G1 source movement by incapacitated or dead actor")
             before = [list(cell) for cell in source.occupied]
             if d.get("old") != before:
                 raise AssertionError("G7-H G1 old coordinate breaks source movement continuity")
