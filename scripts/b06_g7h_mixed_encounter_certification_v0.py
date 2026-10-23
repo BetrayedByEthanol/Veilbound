@@ -697,7 +697,9 @@ def _authored_bow_lane_receipts(ledger, declaration, launch, shot, *, level, see
                 and declaration["index"] < ev["index"] < recheck["index"]
                 and ev["round"] == launch["round"]
                 and ev["turn"] == "archer"]
-    expected_pressure = sum(
+    # Native G0 assigned Dodge increases pressure by TWO; the later G2
+    # projectile recheck must observe that exact earlier G0 expenditure.
+    expected_pressure = 2 * sum(
         ev["detail"].get("defense") == "dodge"
         for ev in ledger[:declaration["index"]]
         if ev["kind"] == "defense_assigned"
