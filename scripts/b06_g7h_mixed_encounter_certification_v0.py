@@ -649,6 +649,64 @@ def _terminal_proof(report, ledger, *, policy, deaths):
 
 
 
+
+def _authored_bow_lane_receipts(ledger, launch, shot, *, level, seed):
+    """Derive G2 Bow firing geometry and defense from the original fixture.
+
+    The three authored G7-H victory rounds do not move any actor. Rebuild
+    the original G2 grid and Bow lane independently of mutable G2 receipts;
+    an invented range, cover, obstruction or rechecked defense cannot
+    become true merely by rehashing a matching Bow outcome.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+
+    if any(v["kind"] in ("g1_movement_step", "g1_allied_transit_step")
+           for v in ledger):
+        raise AssertionError("Source G6-D victory never repositions its Bow lane")
+    scene = mixed_scene(size=4, level=level, seed=seed)
+    e = scene.e
+    hunter_cell = e.g1.body_cell("hunter", "head")
+    lane = e.g2.lane("archer", "hunter", target_cell=hunter_cell)
+    if (lane.origin != e.actors["archer"].occupied[0]
+            or lane.destination != hunter_cell
+            or lane.screens or lane.cover or lane.effective_obstruction):
+        raise AssertionError("G7-H lethal Bow requires authored clear head lane")
+    base, final = e.g2._defense_value(
+        e.actors["hunter"], "take_hit", lane.range_difficulty,
+        lane.effective_obstruction)
+    # G2 rechecks after the legal G0 response window and logs this receipt
+    # immediately before spending the real arrow in g2_bow_launched.
+    index = launch["index"]
+    if index < 1 or shot["index"] != index + 2:
+        raise AssertionError("G7-H Bow has no synchronous G2 lane/shot chain")
+    recheck, faces = ledger[index - 1], ledger[index + 1]
+    if (recheck["kind"] != "g2_projectile_defense_rechecked"
+            or faces["kind"] != "g2_miss_faces_preallocated"
+            or any(event["round"] != launch["round"]
+                   or event["turn"] != "archer"
+                   for event in (recheck, launch, faces, shot))
+            or any(ev["detail"].get("actor") != "hunter"
+                   for ev in (recheck,))
+            or any(recheck["detail"].get(key) != value for key, value in {
+                "declared": "take_hit", "actual": "take_hit",
+                "base": base, "final": final}.items())
+            or any(launch["detail"].get(key) != value for key, value in {
+                "shooter": "archer", "target": "hunter",
+                "attack_bonus": 4, "aim_mitigation": 0,
+                "range_difficulty": lane.range_difficulty,
+                "cover": lane.cover, "screens": {},
+                "effective_obstruction": final - base}.items())
+            or any(faces["detail"].get(key) != value for key, value in {
+                "shooter": "archer", "target": "hunter",
+                "faces": {}, "primary_face": shot["detail"].get("primary_face"),
+                "base_defense": base, "final_defense": final}.items())
+            or shot["detail"].get("base_defense") != base
+            or shot["detail"].get("final_defense") != final):
+        raise AssertionError(
+            "G2 launch range, cover, obstruction or defense disagrees with authored lane")
+    return base, final
+
+
 def _reconcile_victory_bow_ammunition(ledger, initial, final, *, level):
     """Replay *every* source R Bow round from its independent B05 arrow count.
 
@@ -722,6 +780,9 @@ def _reconcile_victory_bow_ammunition(ledger, initial, final, *, level):
                 or sd.get("target") != (
                     None if round_no == 2 else "hunter")):
             raise AssertionError("G7-H G2 declared/paid/launched arrow balance changed")
+        _authored_bow_lane_receipts(
+            ledger, launch, shot, level=level,
+            seed=ledger[0]["detail"]["seed"])
         ammo -= 1
     if (type(final["archer"].get("ammunition")) is not int
             or final["archer"]["ammunition"] != ammo):
@@ -2062,6 +2123,110 @@ def _authored_wound_basis(ledger, damage, *, policy):
             "event_key": expected_key}
 
 
+
+def _reconcile_every_g45_target_snapshot(ledger, *, policy, level, seed):
+    """Replay each G4.5 target's COMPLETE *immediate post-hit* actor state.
+
+    A G4.5 target_state is not an authority about death, VP, wounds or
+    Vigor: reconstruct it from a fresh source fixture and earlier G0/G3/G4
+    transactions. Global HP/regeneration/VP/wound checks elsewhere audit
+    those transitions against real costs and wound dice. Compare all G4.5
+    fields (including wound source identity), not only actual_result.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+    from scripts.b06_wound_continuation_v0 import _actor_state
+
+    source = mixed_scene(
+        size=4, level=level, seed=seed,
+        party_exits=(policy == "opposed_living_hunter_withdrawal")).e
+    state = {actor: _actor_state(source.actors[actor]) for actor in ROSTER}
+    bridges = 0
+    for event in ledger:
+        kind, d = event["kind"], event["detail"]
+        if kind == "g4_wound_created":
+            actor = d.get("recipient")
+            if actor not in state:
+                raise AssertionError("Wound recipient is not in original source scene")
+            requirement = d.get("requirement")
+            if type(requirement) is not int or requirement < 1:
+                raise AssertionError("G4 wound must have a genuine repair requirement")
+            state[actor]["wounds"].append({
+                "id": d.get("wound"), "source_event": d.get("event_key"),
+                "severity": d.get("severity"), "location": d.get("location"),
+                "trauma": d.get("trauma"), "requirement": requirement,
+                "progress": 0, "repairable": True, "completed": False,
+            })
+        elif kind in ("g4_damage_applied", "regeneration_step"):
+            actor = (d.get("recipient") if kind == "g4_damage_applied"
+                     else d.get("actor"))
+            if actor not in state:
+                raise AssertionError("G4 HP/Vigor transition has foreign actor")
+            current = state[actor]
+            if (d.get("hp_before") != current["hp"]
+                    or d.get("vigor_before") != current["vigor"]
+                    or type(d.get("hp_after")) is not int
+                    or type(d.get("vigor_after")) is not int):
+                raise AssertionError("G4.5 source prefix HP/Vigor is not chronological")
+            current["hp"], current["vigor"] = d["hp_after"], d["vigor_after"]
+            current["dead"] = current["hp"] <= -current["hp_max"]
+            current["dying"] = current["hp"] <= 0 and not current["dead"]
+        elif kind == "vp_transition":
+            actor, points, mode = (
+                d.get("actor"), d.get("points"), d.get("mode"))
+            if actor not in state or type(points) is not int or points <= 0:
+                raise AssertionError("G4.5 source prefix has invalid VP debit")
+            if mode not in ("committed", "spent"):
+                raise AssertionError("G4.5 source prefix has unknown VP mode")
+            current = state[actor]
+            current["vp_available"] -= points
+            current["vp_committed" if mode == "committed" else "vp_spent"] += points
+        elif kind == "vp_release":
+            actor, points = d.get("actor"), d.get("points")
+            if actor not in state or type(points) is not int or points <= 0:
+                raise AssertionError("G4.5 source prefix has invalid VP release")
+            current = state[actor]
+            current["vp_available"] += points
+            current["vp_committed"] -= points
+        elif kind == "g45_attested_hit":
+            actor, target = d.get("attacker"), d.get("target")
+            idx = d.get("action_index")
+            if (actor not in state or target not in state
+                    or actor == target or type(idx) is not int
+                    or not 0 <= idx < event["index"]):
+                raise AssertionError("G4.5 receipt has foreign source/paid action")
+            sequences = [v for v in ledger[:event["index"]]
+                         if v["kind"] == "g5_melee_sequence_attested"
+                         and idx in v["detail"].get("action_indices", ())]
+            if len(sequences) != 1:
+                raise AssertionError("G4.5 receipt cannot borrow a different G5 sequence")
+            sequence = sequences[0]["detail"]
+            slot = sequence["action_indices"].index(idx)
+            indices = sequence.get("defense_indices")
+            if (not isinstance(indices, list) or slot >= len(indices)
+                    or type(indices[slot]) is not int
+                    or not 0 <= indices[slot] < event["index"]
+                    or sequence.get("attacker") != actor
+                    or sequence.get("target") != target
+                    or d.get("source_event") != f"g5:source:{seed}:{idx}"
+                    or d.get("contact_reference") != f"g5:melee:{idx}"
+                    or d.get("defense_reference") != f"g0:defense:{indices[slot]}"
+                    or d.get("sequence_declaration_index") !=
+                       sequence.get("declaration_index")
+                    or d.get("declared_profile_index") != slot
+                    or d.get("attacker_source") !=
+                       source.actors[actor].source.digest
+                    or d.get("target_source") !=
+                       source.actors[target].source.digest
+                    or d.get("target_state") != state[target]):
+                raise AssertionError(
+                    "G4.5 complete target snapshot or bridge source provenance "
+                    "contradicts native G4 state at the hit")
+            bridges += 1
+    if bridges < 1:
+        raise AssertionError("No native G4.5 physical hit certified")
+    return bridges
+
+
 def _reconcile_complete_snapshots(ledger, initial, final, *,
                                   policy, level, seed):
     """Reconstruct every serialized actor field from fixture and native events.
@@ -2531,6 +2696,8 @@ def attest_trial(report, *, level, seed, policy):
         ledger, policy=policy, terminal=terminal, final_state=final)
     _reconcile_complete_snapshots(
         ledger, initial, final, policy=policy, level=level, seed=seed)
+    _reconcile_every_g45_target_snapshot(
+        ledger, policy=policy, level=level, seed=seed)
     return {"policy": policy, "outcome": TERMINALS[policy][0],
             "source_scenario_id": report["scenario_id"],
             "native_terminal_event": terminal["index"],

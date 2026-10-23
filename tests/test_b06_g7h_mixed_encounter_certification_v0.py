@@ -2179,5 +2179,116 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_91_p1_bow_lethal_range_rebuilt_from_authored_g2_lane(self):
+        for level in (2, 3):
+            native = run_pack(level, 0, include_trials=True)[
+                "native_trials"][POLICIES[0]]
+            launches = [v for v in native["ledger"]
+                        if v["kind"] == "g2_bow_launched"]
+            self.assertEqual(len(launches), 2)
+            for round_no in (2, 3):
+                with self.subTest(level=level, round=round_no):
+                    trial = deepcopy(native)
+                    launch = next(v for v in trial["ledger"]
+                                  if v["kind"] == "g2_bow_launched"
+                                  and v["round"] == round_no)
+                    self.assertEqual(launch["detail"]["range_difficulty"], -2)
+                    launch["detail"]["range_difficulty"] = 999
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "G2 launch range, cover, obstruction"):
+                        attest_trial(trial, level=level, seed=0,
+                                     policy=POLICIES[0])
+
+    def test_92_p1_bow_cover_obstruction_and_defense_recheck_from_lane(self):
+        native = self._case(POLICIES[0])
+        for target, field, replacement in (
+                ("g2_bow_launched", "cover", 2),
+                ("g2_bow_launched", "screens", {"guardian": 4}),
+                ("g2_bow_launched", "effective_obstruction", 6),
+                ("g2_bow_launched", "aim_mitigation", 4),
+                ("g2_projectile_defense_rechecked", "base", 90),
+                ("g2_projectile_defense_rechecked", "final", 90),
+                ("g2_projectile_defense_rechecked", "actual", "dodge"),
+                ("g2_bow_shot_resolved", "base_defense", 90),
+                ("g2_bow_shot_resolved", "final_defense", 90),
+                ("g2_miss_faces_preallocated", "final_defense", 90)):
+            with self.subTest(kind=target, field=field):
+                trial = deepcopy(native)
+                event = next(v for v in trial["ledger"]
+                             if v["kind"] == target and v["round"] == 3)
+                event["detail"][field] = replacement
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_93_p1_g45_post_hit_full_state_source_replayed_all_terminals(self):
+        for policy in POLICIES:
+            native = self._case(policy)
+            source_bridges = [v for v in native["ledger"]
+                              if v["kind"] == "g45_attested_hit"
+                              and v["detail"]["attacker"] == "hunter"]
+            self.assertTrue(source_bridges)
+            for field, bogus in (
+                    ("dead", True), ("dying", True),
+                    ("hp", 999), ("hp_max", 999),
+                    ("vigor", 999), ("vigor_max", 999),
+                    ("vp_available", 999), ("vp_committed", 999),
+                    ("vp_spent", 999), ("id", "different-actor"),
+                    ("source_id", "F"), ("source_digest", "forged"),
+                    ("wounds", [{"id": "synthetic"}])):
+                with self.subTest(policy=policy, field=field):
+                    trial = deepcopy(native)
+                    event = next(v for v in trial["ledger"]
+                                 if v["kind"] == "g45_attested_hit"
+                                 and v["detail"]["attacker"] == "hunter")
+                    original = event["detail"]["target_state"][field]
+                    event["detail"]["target_state"][field] = (
+                        not original if field in ("dead", "dying") else bogus)
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_94_p2_g45_bridge_source_digests_and_binding_authenticated(self):
+        for policy in POLICIES:
+            native = self._case(policy)
+            for key, bogus in (
+                    ("attacker_source", "rehashed-forgery"),
+                    ("target_source", "rehashed-forgery"),
+                    ("contact_reference", "g5:melee:other"),
+                    ("defense_reference", "g0:defense:other"),
+                    ("source_event", "g5:source:synthetic"),
+                    ("sequence_declaration_index", -1),
+                    ("declared_profile_index", 999)):
+                with self.subTest(policy=policy, key=key):
+                    trial = deepcopy(native)
+                    event = next(v for v in trial["ledger"]
+                                 if v["kind"] == "g45_attested_hit"
+                                 and v["detail"]["attacker"] == "hunter")
+                    event["detail"][key] = bogus
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_95_p2_g45_non_hunter_bridge_state_also_source_bound(self):
+        trial = self._case(POLICIES[0])
+        bridge = next(v for v in trial["ledger"]
+                      if v["kind"] == "g45_attested_hit"
+                      and v["detail"]["attacker"] == "vanguard")
+        bridge["detail"]["target_state"]["dead"] = True
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_96_p1_positive_all_native_g2_g45_chains_level2_level3(self):
+        for level in (2, 3):
+            with self.subTest(level=level):
+                run = run_pack(level, 0)
+                self.assertTrue(run["bounded_terminal_matrix_certified"])
+                self.assertEqual(run["distinct_native_terminal_outcomes"], 3)
+                self.assertFalse(run["complete_party_pack_certified"])
+
+
+
 if __name__ == "__main__":
     unittest.main()
