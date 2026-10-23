@@ -1626,5 +1626,142 @@ class G7HMixedNativeTests(unittest.TestCase):
                         attested["outcome"], TERMINALS[policy][0])
 
 
+    def test_70_p1_every_bite_requires_true_final_response_recheck(self):
+        for policy in POLICIES:
+            # Include the original first-round Hunter miss in the victory
+            # branch and the final lethal/pursued Bite in the other branches.
+            native = run_pack(3, 0, include_trials=True)["native_trials"][policy]
+            hunter_rolls = [v for v in native["ledger"]
+                            if v["kind"] == "g5_melee_roll"
+                            and v["detail"].get("attacker") == "hunter"]
+            self.assertTrue(hunter_rolls)
+            for roll in (hunter_rolls[0], hunter_rolls[-1]):
+                paid = roll["detail"]["action_index"]
+                trigger = f"g5:melee:{paid}"
+                for stage in ("trigger_rechecked_after_interceptions",
+                              "trigger_rechecked_after_responses"):
+                    with self.subTest(policy=policy, paid=paid, stage=stage):
+                        trial = deepcopy(native)
+                        recheck = next(x for x in trial["ledger"]
+                                       if x["kind"] == stage
+                                       and x["detail"].get("trigger") == trigger)
+                        self.assertIs(recheck["detail"]["legal"], True)
+                        recheck["detail"]["legal"] = False
+                        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError, "response-window ready chain"):
+                            attest_trial(trial, level=3, seed=0, policy=policy)
+
+    def test_71_p1_cancelled_ready_marker_cannot_underwrite_bite(self):
+        for policy in POLICIES:
+            native = self._case(policy)
+            roll = next(v for v in reversed(native["ledger"])
+                        if v["kind"] == "g5_melee_roll"
+                        and v["detail"].get("attacker") == "hunter")
+            trigger = f"g5:melee:{roll['detail']['action_index']}"
+            ready = next(v for v in native["ledger"]
+                         if v["kind"] == "trigger_ready_to_resolve"
+                         and v["detail"].get("trigger") == trigger)
+            ready["kind"] = "trigger_cancelled_after_spontaneous"
+            native["ledger_sha256"] = canonical_digest(native["ledger"])
+            with self.subTest(policy=policy), self.assertRaisesRegex(
+                    AssertionError, "response-window ready chain"):
+                attest_trial(native, level=3, seed=17, policy=policy)
+
+    def test_72_p2_turn_end_unused_AP_must_match_source_paid_actions(self):
+        for policy in POLICIES:
+            native = run_pack(3, 0, include_trials=True)["native_trials"][policy]
+            hunter_end = next(v for v in native["ledger"]
+                              if v["kind"] == "turn_end"
+                              and v["detail"].get("actor") == "hunter")
+            self.assertEqual(hunter_end["detail"]["unused_ap"], 18)
+            for bad in (999, 19, -1, None, True):
+                with self.subTest(policy=policy, unused_ap=bad):
+                    trial = deepcopy(native)
+                    receipt = next(v for v in trial["ledger"]
+                                   if v["kind"] == "turn_end"
+                                   and v["detail"].get("actor") == "hunter")
+                    receipt["detail"]["unused_ap"] = bad
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "Turn End unused AP"):
+                        attest_trial(trial, level=3, seed=0, policy=policy)
+
+    def test_73_p2_no_forged_AP_payment_remainder_or_allowance(self):
+        for policy in POLICIES:
+            native = self._case(policy)
+            for kind, field, replacement in (
+                    ("turn_resources", "ap", 999),
+                    ("action_committed", "ap_spent", 1),
+                    ("action_committed", "ap_remaining", 777)):
+                with self.subTest(policy=policy, kind=kind, field=field):
+                    trial = deepcopy(native)
+                    event = next(x for x in trial["ledger"]
+                                 if x["kind"] == kind
+                                 and x["detail"].get("actor") == "hunter")
+                    event["detail"][field] = replacement
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_74_p2_profile_injection_must_match_real_bite_receipt(self):
+        for policy in POLICIES:
+            native = run_pack(3, 0, include_trials=True)["native_trials"][policy]
+            profiles = [v for v in native["ledger"]
+                        if v["kind"] == "g4_profile_hit"
+                        and v["detail"].get("attacker") == "hunter"
+                        and v["detail"].get("profile") == "B06-AT-04"]
+            self.assertTrue(profiles)
+            for original in (profiles[0], profiles[-1]):
+                with self.subTest(policy=policy, index=original["index"]):
+                    trial = deepcopy(native)
+                    profile = trial["ledger"][original["index"]]
+                    self.assertIs(profile["detail"]["injection_eligible"], True)
+                    profile["detail"]["injection_eligible"] = False
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "G4 profile injection eligibility"):
+                        attest_trial(trial, level=3, seed=0, policy=policy)
+
+    def test_75_p2_nonfatal_bite_venom_outcome_needs_source_receipt(self):
+        for policy in POLICIES:
+            native = self._case(policy)
+            result = next(v for v in native["ledger"]
+                          if v["kind"] == "g5_melee_resolved"
+                          and v["detail"].get("attacker") == "hunter"
+                          and v["detail"].get("outcome") == "hit"
+                          and (v["detail"].get("damage") or {}).get("venom"))
+            paid = result["detail"]["action_index"]
+            exposure = f"g6:bite:17:{paid}"
+            recorded = [v for v in native["ledger"]
+                        if v["kind"] in (
+                            "g44_hunter_accepted", "g44_hunter_ignored",
+                            "g44_hunter_prevented", "g44_hunter_not_delivered")
+                        and (v["detail"].get("key") == exposure
+                             or v["detail"].get("exposure_key") == exposure)]
+            self.assertEqual(len(recorded), 1)
+            receipt = recorded[0]
+            receipt["kind"] = "g44_hunter_prevented" if (
+                receipt["kind"] != "g44_hunter_prevented"
+            ) else "g44_hunter_accepted"
+            native["ledger_sha256"] = canonical_digest(native["ledger"])
+            with self.subTest(policy=policy), self.assertRaisesRegex(
+                    AssertionError, "venom outcome|exposure receipt"):
+                attest_trial(native, level=3, seed=17, policy=policy)
+
+    def test_76_positive_L2_L3_seed0_and_17_all_terminal_paths(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                with self.subTest(level=level, seed=seed):
+                    bundle = run_pack(level, seed, include_trials=True)
+                    for policy in POLICIES:
+                        native = bundle["native_trials"][policy]
+                        attested = attest_trial(
+                            native, level=level, seed=seed, policy=policy)
+                        self.assertEqual(attested["outcome"],
+                                         TERMINALS[policy][0])
+
+
+
 if __name__ == "__main__":
     unittest.main()

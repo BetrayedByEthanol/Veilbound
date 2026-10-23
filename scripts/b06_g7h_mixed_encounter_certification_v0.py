@@ -130,6 +130,108 @@ def _native_round_turn_chronology(ledger):
     return completed
 
 
+
+def _attest_bite_response_window(ledger, *, action_index, attested_index, roll):
+    """Bind one Bite roll to G0's real, legal, *ready* response trigger.
+
+    G5 cannot resolve after either failed recheck. The event digest alone is
+    not a witness of this legality: all four G0 receipts must precede the
+    original G5 roll, with no cancellation or unmodelled responses.
+    """
+    trigger = f"g5:melee:{action_index}"
+    required = ("response_window_open", "trigger_rechecked_after_interceptions",
+                "trigger_rechecked_after_responses", "trigger_ready_to_resolve")
+    events = [v for v in ledger
+              if v["detail"].get("trigger") == trigger
+              and v["kind"] in (*required, "trigger_cancelled_before_spontaneous",
+                                "trigger_cancelled_after_spontaneous",
+                                "interception_released", "spontaneous_committed",
+                                "g5_melee_cancelled")]
+    if ([v["kind"] for v in events] != list(required)
+            or any(v["round"] != roll["round"] or v["turn"] != "hunter"
+                   for v in events)
+            or not attested_index < events[0]["index"]
+                   < events[1]["index"] < events[2]["index"]
+                   < events[3]["index"] < roll["index"]
+            or any(v["detail"].get("legal") is not True for v in events[1:3])
+            or roll["detail"].get("spontaneous_policy") != "decline_all"):
+        raise AssertionError("Hunter Bite lacks one legal G0 response-window ready chain")
+    return events[3]["index"]
+
+
+def _reconcile_all_turn_end_ap(ledger, *, level, seed):
+    """Replay Step-4 resources, every native AP debit and exact Turn-End AP.
+
+    Compare first against genuine L2/L3 source turn budgets (not a mutable
+    receipt); a Dying actor receives zero, including when it merely holds.
+    These policies do not use Blink debt or action-grant mechanics.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+    baseline = mixed_scene(size=4, level=level, seed=seed).e
+    hp = {actor: ledger[0]["detail"]["source_ids"][actor]["hp"]
+          for actor in ROSTER}
+    active, balance, turn_no = None, None, None
+    seen_resources = False
+    closed = 0
+    for ev in ledger:
+        kind, d = ev["kind"], ev["detail"]
+        if kind == "regeneration_step":
+            actor = d.get("actor")
+            if actor in hp:
+                hp[actor] = d["hp_after"]
+        elif kind == "g4_damage_applied":
+            actor = d.get("recipient")
+            if actor in hp:
+                hp[actor] = d["hp_after"]
+        elif kind == "g4_basic_heal_applied":
+            actor = d.get("recipient")
+            if actor in hp:
+                hp[actor] += d["hp_restored"]
+        if kind == "turn_start_expiry":
+            if active is not None or d.get("actor") not in ROSTER:
+                raise AssertionError("Unexpected overlapping native turn AP budgets")
+            active, balance, turn_no = d["actor"], None, ev["round"]
+            seen_resources = False
+        elif kind == "turn_resources":
+            actor = d.get("actor")
+            if (actor != active or turn_no != ev["round"]
+                    or ev["turn"] != active or seen_resources
+                    or type(d.get("ap")) is not int):
+                raise AssertionError("Native Turn AP allowance lacks original Step 4")
+            expected = baseline.actors[actor].ap_total if hp[actor] > 0 else 0
+            if d["ap"] != expected:
+                raise AssertionError("Native Step-4 AP differs from source living/Dying budget")
+            balance = d["ap"]
+            seen_resources = True
+        elif kind == "action_committed":
+            actor = d.get("actor")
+            if (actor != active or ev["turn"] != active
+                    or ev["round"] != turn_no or not seen_resources):
+                raise AssertionError("AP action was not on a funded native turn")
+            a = baseline.actors[actor]
+            costs = {"physical": a.physical_ap, "projection": a.projection_ap,
+                     "general": 24, "full": a.ap_total}
+            cost = costs.get(d.get("action_class"))
+            if (type(cost) is not int or cost <= 0
+                    or type(d.get("ap_spent")) is not int
+                    or d["ap_spent"] != cost or cost > balance
+                    or type(d.get("ap_remaining")) is not int
+                    or d["ap_remaining"] != balance - cost):
+                raise AssertionError("Native source Turn AP action debit is inconsistent")
+            balance -= cost
+        elif kind == "turn_end":
+            if (d.get("actor") != active or ev["turn"] != active
+                    or ev["round"] != turn_no or not seen_resources
+                    or type(d.get("unused_ap")) is not int
+                    or d["unused_ap"] != balance):
+                raise AssertionError("Turn End unused AP is not the source-paid remainder")
+            active, balance, turn_no = None, None, None
+            closed += 1
+    if active is not None or closed == 0:
+        raise AssertionError("Incomplete AP replay at native Round End")
+    return closed
+
+
 def _hp_damage_packet(ledger, damage, *, target, raw, mitigated,
                       cause, damage_type, armor_rule):
     """Recompute typed native G4 HP loss, including lethal floor clipping."""
@@ -813,6 +915,9 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or not isinstance(bridge["detail"].get("actual_result"), dict)
                 or d.get("damage") != bridge["detail"]["actual_result"]):
             raise AssertionError("Hunter Bite roll, G4.5 and G5 outcome are not one hit")
+        _attest_bite_response_window(
+            ledger, action_index=action_index,
+            attested_index=attested["index"], roll=roll)
         # Hunter source B06-AT-04 is +6, and these two G7-G policies
         # predeclare a standing one-square Take Hit target. Recompute the
         # attack and critical legality from its actual d20 and native G0
@@ -912,6 +1017,59 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or result.get("hp_loss") != loss or
                 result.get("vigor_loss") != 0):
             raise AssertionError("Native G4 Bite packet and profile result not source-derived")
+        # G4 computes puncture eligibility from this *specific* source
+        # Piercing HP packet. Never allow a rehashed G4 eligibility flag
+        # to contradict the G4.5/G5 result or synchronous G4.4 venom.
+        profile = profiles[0]
+        eligible = source_mitigated > 0
+        if (profile["index"] <= damage["index"]
+                or profile["index"] >= bridge["index"]
+                or profile["detail"].get("injection_eligible") is not eligible
+                or result.get("injection_eligible") is not eligible):
+            raise AssertionError("Bite G4 profile injection eligibility contradicts attested G4.5 result")
+        exposure = f"g6:bite:{seed}:{action_index}"
+        venom_kinds = {
+            "g44_hunter_accepted": "accepted",
+            "g44_hunter_ignored": "ignored",
+            "g44_hunter_prevented": "prevented",
+            "g44_hunter_not_delivered": "not_delivered",
+        }
+        venom_events = [ev for ev in ledger[profile["index"]+1:bridge["index"]]
+                        if ev["kind"] in venom_kinds]
+        venom = result.get("venom")
+        if damage["detail"].get("dead") is True:
+            if venom is not None or venom_events:
+                raise AssertionError("Lethal Hunter Bite cannot inject postmortem venom")
+        else:
+            if (len(venom_events) != 1 or not isinstance(venom, dict)
+                    or venom.get("outcome") != venom_kinds[venom_events[0]["kind"]]):
+                raise AssertionError("Nonfatal Hunter Bite lacks matched native G4.4 venom outcome")
+            delivery = venom_events[0]
+            vd = delivery["detail"]
+            if (delivery["round"] != resolved["round"]
+                    or delivery["turn"] != "hunter"
+                    or ((delivery["kind"] == "g44_hunter_not_delivered")
+                        != (not eligible))
+                    or (delivery["kind"] == "g44_hunter_not_delivered"
+                        and (vd.get("attacker") != "hunter"
+                             or vd.get("recipient") != target
+                             or vd.get("hit_index") != profile["index"]
+                             or vd.get("exposure_key") != exposure))
+                    or (delivery["kind"] == "g44_hunter_accepted"
+                        and (vd.get("recipient") != target
+                             or vd.get("key") != exposure
+                             or vd.get("hit_index") != profile["index"]
+                             or vd.get("resolution") != venom.get("resolution")
+                             or vd.get("resistance_total") !=
+                                venom.get("resistance_total")))
+                    or (delivery["kind"] == "g44_hunter_ignored"
+                        and (vd.get("recipient") != target
+                             or vd.get("key") != exposure
+                             or vd.get("active") != venom.get("active")))
+                    or (delivery["kind"] == "g44_hunter_prevented"
+                        and (vd.get("recipient") != target
+                             or vd.get("key") != exposure))):
+                raise AssertionError("Hunter source puncture does not match G4.4 exposure receipt")
         if (damage["round"] != resolved["round"] or damage["turn"] != "hunter"
                 or result.get("dead") is not damage["detail"].get("dead")
                 or result.get("hp_loss") != (
@@ -1572,6 +1730,9 @@ def _reconcile_victory_hunter_sequences(ledger):
         if len(hits) != 1 or len(faces) != 1:
             raise AssertionError("Each paid Hunter action needs one source G5 roll/result")
         result, roll = hits[0], faces[0]
+        _attest_bite_response_window(
+            ledger, action_index=action["index"],
+            attested_index=seq["index"], roll=roll)
         expected_hit = round_no == 2
         if (not seq["index"] < roll["index"] < result["index"]
                 or any(v["round"] != round_no or v["turn"] != "hunter"
@@ -2115,6 +2276,7 @@ def attest_trial(report, *, level, seed, policy):
         raise AssertionError("G7-H source report and original ledger hash disagree")
     completed_rounds = _native_round_turn_chronology(ledger)
     _origin(report, ledger, policy=policy, level=level, seed=seed)
+    _reconcile_all_turn_end_ap(ledger, level=level, seed=seed)
     turns = [v["detail"].get("actor") for v in ledger if v["kind"] == "turn_end"]
     ends = [v for v in ledger if v["kind"] == "round_end"]
     last_round_end = ends[-1]["index"] if ends else -1
