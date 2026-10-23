@@ -657,7 +657,7 @@ def _terminal_proof(report, ledger, *, policy, deaths):
 
 
 
-def _authored_bow_lane_receipts(ledger, launch, shot, *, level, seed):
+def _authored_bow_lane_receipts(ledger, declaration, launch, shot, *, level, seed):
     """Derive G2 Bow firing geometry and defense from the original fixture.
 
     The three authored G7-H victory rounds do not move any actor. Rebuild
@@ -687,6 +687,37 @@ def _authored_bow_lane_receipts(ledger, launch, shot, *, level, seed):
     if index < 1 or shot["index"] != index + 2:
         raise AssertionError("G7-H Bow has no synchronous G2 lane/shot chain")
     recheck, faces = ledger[index - 1], ledger[index + 1]
+    # G2 commits every declared defense BEFORE the response window.
+    # A later recheck cannot authenticate a missing original assignment.
+    # This fixed policy selects one Take Hit on Hunter for each one-arrow
+    # source declaration; all three receipt fields must remain identical
+    # to the original G2 resource transitions.
+    assigned = [ev for ev in ledger
+                if ev["kind"] == "g2_projectile_defense_preassigned"
+                and declaration["index"] < ev["index"] < recheck["index"]
+                and ev["round"] == launch["round"]
+                and ev["turn"] == "archer"]
+    expected_pressure = sum(
+        ev["detail"].get("defense") == "dodge"
+        for ev in ledger[:declaration["index"]]
+        if ev["kind"] == "defense_assigned"
+        and ev["round"] == launch["round"]
+        and ev["detail"].get("actor") == "hunter")
+    source_guard = e.actors["hunter"].guard_remaining
+    expected_assignment = {
+        "actor": "hunter", "shooter": "archer",
+        "sequence_index": 0, "choice": "take_hit",
+        "dodge_pressure_before": expected_pressure,
+        "guard_remaining": source_guard,
+        "dodge_pressure": expected_pressure,
+    }
+    if (len(assigned) != 1
+            or assigned[0]["detail"] != expected_assignment
+            or assigned[0]["index"] <= declaration["index"]
+            or recheck["detail"].get("guard_remaining") != source_guard
+            or recheck["detail"].get("dodge_pressure") != expected_pressure):
+        raise AssertionError(
+            "G2 Bow declaration lacks exactly one original source defense preassignment")
     if (recheck["kind"] != "g2_projectile_defense_rechecked"
             or faces["kind"] != "g2_miss_faces_preallocated"
             or any(event["round"] != launch["round"]
@@ -736,6 +767,8 @@ def _reconcile_victory_bow_ammunition(ledger, initial, final, *, level):
     expected_faces = {2: POLICY[2]["archer"], 3: BOW_FINISH_DICE[0]}
     stages = (
         "action_committed", "g2_bow_sequence_committed",
+        "g2_projectile_defense_preassigned",
+        "g2_projectile_defense_rechecked",
         "g2_bow_launched", "g2_bow_shot_resolved",
     )
     timeline = {stage: [ev for ev in ledger if ev["kind"] == stage
@@ -757,11 +790,12 @@ def _reconcile_victory_bow_ammunition(ledger, initial, final, *, level):
             if len(found) != 1:
                 raise AssertionError("Source Bow arrow has missing/duplicate own-turn stage")
             items.append(found[0])
-        action, declaration, launch, shot = items
+        action, declaration, preassigned, rechecked, launch, shot = items
         if not (action["index"] < declaration["index"]
+                < preassigned["index"] < rechecked["index"]
                 < launch["index"] < shot["index"]):
             raise AssertionError("G2 arrow was not declared, launched and resolved in order")
-        ad, dd, ld, sd = (ev["detail"] for ev in items)
+        ad, dd, _, _, ld, sd = (ev["detail"] for ev in items)
         _paid_action_ap(
             ledger, action, actor="archer", cost=20,
             kind="physical", label="g2:bow:hunter:0")
@@ -788,7 +822,7 @@ def _reconcile_victory_bow_ammunition(ledger, initial, final, *, level):
                     None if round_no == 2 else "hunter")):
             raise AssertionError("G7-H G2 declared/paid/launched arrow balance changed")
         _authored_bow_lane_receipts(
-            ledger, launch, shot, level=level,
+            ledger, declaration, launch, shot, level=level,
             seed=ledger[0]["detail"]["seed"])
         ammo -= 1
     if (type(final["archer"].get("ammunition")) is not int
@@ -1093,6 +1127,44 @@ def _attest_source_bite_venom(ledger, *, policy, target, profile, bridge,
         raise AssertionError("Hunter onset cannot occur in bounded G7-H turns")
 
 
+def _attest_hunter_bite_sequence_source(ledger, attested, *,
+                                        target, action_index,
+                                        defense_index, declaration_index):
+    """Require the complete original G5 Hunter sequence, not just its profile.
+
+    Its source digest and attack bonus come from a fresh immutable B06
+    Hunter source fixture. An externally rehashed G0 ledger is not a
+    substitute for that fixture's attack entitlement.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+
+    genesis = ledger[0]["detail"]
+    level, seed = genesis["source_ids"]["vanguard"]["level"], genesis["seed"]
+    combat = mixed_scene(size=4, level=level, seed=seed)
+    hunter = combat.e.actors["hunter"]
+    source_bonus = combat._profile("hunter", "B06-AT-04")
+    if (hunter.source.source_id != "B06-EN-03"
+            or source_bonus != 6
+            or genesis["source_ids"]["hunter"]["digest"] != hunter.source.digest):
+        raise AssertionError("Hunter Bite must derive its source from B06-EN-03")
+    expected = {
+        "attacker": "hunter", "target": target,
+        "source_digest": hunter.source.digest,
+        "profiles": ["B06-AT-04"],
+        "action_indices": [action_index],
+        "defense_indices": [defense_index],
+        "declaration_index": declaration_index,
+        "prone_dodge_feasible": False,
+        "prone_guard_feasible": False,
+        "prone_attack_feasible": False,
+        "source_bonuses": [source_bonus],
+    }
+    if attested["detail"] != expected:
+        raise AssertionError(
+            "G5 Bite source digest, bonus or complete sequence metadata is not native")
+    return source_bonus
+
+
 def _hunter_bite_hits(ledger, target, *, policy):
     """Reconstruct each *resolved* Hunter Bite from its source-paid G0 chain.
 
@@ -1219,6 +1291,10 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or rd.get("declared_defense") != "take_hit"
                 or rd.get("defense_value") is not None):
             raise AssertionError("Native Hunter Bite defense was altered")
+        _attest_hunter_bite_sequence_source(
+            ledger, attested, target=target, action_index=action_index,
+            defense_index=defense_positions[position],
+            declaration_index=declaration_index)
         face = rd.get("attack_face")
         confirm = rd.get("confirmation_face")
         if (type(face) is not int or not 1 <= face <= 20
@@ -2346,6 +2422,9 @@ def _reconcile_victory_hunter_sequences(ledger):
                    "hunter:vanguard:0"
                 or defense["detail"].get("defense") != expected_defense):
             raise AssertionError("Victory Hunter declaration/defense was replaced")
+        _attest_hunter_bite_sequence_source(
+            ledger, seq, target="vanguard", action_index=action["index"],
+            defense_index=defense_indices[0], declaration_index=declaration_index)
         hits = [v for v in resolved if
                 v["detail"].get("action_index") == action["index"]]
         faces = [v for v in rolls if
@@ -3082,6 +3161,42 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
     }
 
 
+def _reconcile_legacy_victory_report(report, ledger, final, *, terminal, rounds):
+    """Reconcile G6-D's original public keys with the SAME certified evidence.
+
+    External callers may inspect the original native trial, not just the
+    G7-H derived summary. Reject a legacy summary contradicting its actual
+    final source actors or the independently attested finishing Bow chain.
+    """
+    finishing = [v for v in ledger if v["kind"] == "g6d_bow_adjudicated"
+                 and v["detail"].get("shooter") == "archer"
+                 and v["detail"].get("target") == "hunter"
+                 and (v["detail"].get("damage") or {}).get("dead") is True]
+    if len(finishing) != 1:
+        raise AssertionError("Victory legacy Bow summary needs one actual lethal shot")
+    d = finishing[0]["detail"]
+    expected_shot = {
+        "outcome": d["outcome"], "critical": d["critical"],
+        "damage": d["damage"], "action_index": d["action_index"],
+        "shot_index": d["shot_index"],
+        "ammo_remaining": final["archer"]["ammunition"],
+    }
+    if (report.get("hunter_dead") is not True
+            or final["hunter"]["dead"] is not True
+            or type(report.get("hunter_hp")) is not int
+            or report["hunter_hp"] != final["hunter"]["hp"]
+            or type(report.get("rounds")) is not int
+            or report["rounds"] != rounds
+            or report.get("roster") != list(ROSTER)
+            or report.get("finishing_shot") != expected_shot
+            or report.get("terminal") != report.get("native_terminal")
+            or report["terminal"].get("terminal_event") != terminal["index"]):
+        raise AssertionError(
+            "Legacy G6-D victory fields disagree with source HP, rounds, "
+            "roster, terminal or paid lethal Bow receipt")
+    return True
+
+
 def attest_trial(report, *, level, seed, policy):
     """Independent evidence validation. Never trust mutable report metadata."""
     if (type(level) is not int or level not in (2, 3)
@@ -3145,6 +3260,9 @@ def attest_trial(report, *, level, seed, policy):
         ledger, initial, final, policy=policy, level=level, seed=seed)
     _reconcile_every_g45_target_snapshot(
         ledger, policy=policy, level=level, seed=seed)
+    if policy == "mixed_victory_rite":
+        _reconcile_legacy_victory_report(
+            report, ledger, final, terminal=terminal, rounds=len(ends))
     return {"policy": policy, "outcome": TERMINALS[policy][0],
             "source_scenario_id": report["scenario_id"],
             "native_terminal_event": terminal["index"],

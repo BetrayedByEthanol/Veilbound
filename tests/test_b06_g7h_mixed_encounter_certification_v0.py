@@ -2732,5 +2732,142 @@ class G7HMixedNativeTests(unittest.TestCase):
                                 level=level, seed=seed), 4)
 
 
+    def test_113_codex_p2_victory_legacy_summary_keys_must_match_native(self):
+        policy = "mixed_victory_rite"
+        baseline = self._case(policy)
+        self.assertEqual(attest_trial(baseline, level=3, seed=17, policy=policy)
+                         ["outcome"], "hunter_defeat_attested")
+        for variant in ("hunter_dead", "hunter_hp", "rounds", "roster",
+                        "finishing_shot_none", "finishing_shot_result",
+                        "finishing_shot_damage", "legacy_terminal"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(baseline)
+                if variant == "hunter_dead":
+                    trial["hunter_dead"] = False
+                elif variant == "hunter_hp":
+                    trial["hunter_hp"] = 999
+                elif variant == "rounds":
+                    trial["rounds"] = 999
+                elif variant == "roster":
+                    trial["roster"] = list(reversed(trial["roster"]))
+                elif variant == "finishing_shot_none":
+                    trial["finishing_shot"] = None
+                elif variant == "finishing_shot_result":
+                    trial["finishing_shot"]["critical"] = "normal"
+                elif variant == "finishing_shot_damage":
+                    trial["finishing_shot"]["damage"] = {"dead": False}
+                else:
+                    trial["terminal"]["terminal_event"] = 0
+                # No ledger modification: the legacy surface must also
+                # agree with the already authenticated source outcome.
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_114_codex_p2_each_bow_needs_native_defense_preassignment(self):
+        policy = "mixed_victory_rite"
+        baseline = self._case(policy)
+        receipts = [v for v in baseline["ledger"]
+                    if v["kind"] == "g2_projectile_defense_preassigned"]
+        self.assertEqual(len(receipts), 2)
+        for slot in (0, 1):
+            for mutation in ("deleted", "target", "shooter", "choice",
+                             "sequence", "pressure_before", "guard",
+                             "pressure", "round", "early", "additional_field"):
+                with self.subTest(slot=slot, mutation=mutation):
+                    trial = deepcopy(baseline)
+                    events = trial["ledger"]
+                    target = [v for v in events if v["kind"] ==
+                              "g2_projectile_defense_preassigned"][slot]
+                    d = target["detail"]
+                    if mutation == "deleted":
+                        target["kind"] = "former_g2_defense_assignment"
+                    elif mutation == "target":
+                        d["actor"] = "vanguard"
+                    elif mutation == "shooter":
+                        d["shooter"] = "guardian"
+                    elif mutation == "choice":
+                        d["choice"] = "dodge"
+                    elif mutation == "sequence":
+                        d["sequence_index"] = 1
+                    elif mutation == "pressure_before":
+                        d["dodge_pressure_before"] = 999
+                    elif mutation == "guard":
+                        d["guard_remaining"] = 999
+                    elif mutation == "pressure":
+                        d["dodge_pressure"] = 999
+                    elif mutation == "round":
+                        target["round"] = 99
+                    elif mutation == "early":
+                        target["turn"] = "hunter"
+                    else:
+                        d["unverified"] = True
+                    trial["ledger_sha256"] = canonical_digest(events)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+        # A matching forged post-response defense cannot replace the
+        # source-derived original, even after recomputing the G0 hash.
+        trial = deepcopy(baseline)
+        for v in trial["ledger"]:
+            if v["kind"] == "g2_projectile_defense_preassigned":
+                v["detail"]["dodge_pressure_before"] = 999
+                v["detail"]["dodge_pressure"] = 999
+            if v["kind"] == "g2_projectile_defense_rechecked":
+                v["detail"]["dodge_pressure"] = 999
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaises(AssertionError):
+            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_115_codex_p2_each_hunter_bite_source_digest_and_bonus(self):
+        for policy in POLICIES:
+            original = self._case(policy)
+            sequences = [v for v in original["ledger"]
+                         if v["kind"] == "g5_melee_sequence_attested"
+                         and v["detail"].get("attacker") == "hunter"]
+            self.assertTrue(sequences)
+            for which in (0, len(sequences) - 1):
+                for variant in ("digest", "bonus", "flags", "extra", "profile"):
+                    with self.subTest(policy=policy, which=which, variant=variant):
+                        trial = deepcopy(original)
+                        target = [v for v in trial["ledger"]
+                                  if v["kind"] == "g5_melee_sequence_attested"
+                                  and v["detail"].get("attacker") == "hunter"][which]
+                        d = target["detail"]
+                        if variant == "digest":
+                            d["source_digest"] = "not-source-hunter-digest"
+                        elif variant == "bonus":
+                            d["source_bonuses"] = [999]
+                        elif variant == "flags":
+                            d["prone_attack_feasible"] = True
+                        elif variant == "extra":
+                            d["unverified_source_data"] = 1
+                        else:
+                            d["profiles"] = ["B06-AT-05"]
+                        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                        with self.assertRaises(AssertionError):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+            trial = deepcopy(original)
+            for item in trial["ledger"]:
+                if item["kind"] == "g5_melee_sequence_attested" and (
+                        item["detail"].get("attacker") == "hunter"):
+                    item["detail"]["source_digest"] = "forged"
+                    item["detail"]["source_bonuses"] = [999]
+            trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+            with self.assertRaises(AssertionError):
+                attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_116_codex_p2_all_legitimate_L2_L3_terminal_paths_still_pass(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                pack = run_pack(level, seed, include_trials=True)
+                for policy in POLICIES:
+                    with self.subTest(level=level, seed=seed, policy=policy):
+                        original = pack["native_trials"][policy]
+                        attested = attest_trial(original, level=level,
+                                                seed=seed, policy=policy)
+                        self.assertEqual(attested["outcome"], TERMINALS[policy][0])
+                        self.assertEqual(attested["rounds_completed"],
+                                         original["rounds_completed"])
+
+
 if __name__ == "__main__":
     unittest.main()
