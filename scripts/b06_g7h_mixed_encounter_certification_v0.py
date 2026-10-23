@@ -2102,6 +2102,59 @@ def _player_melee_hit_chains(ledger, actor, profile):
     return proven
 
 
+
+def _reconcile_flame_lane_previews(ledger, flames, *, level, seed):
+    """Reconstruct *both* G2 geometry previews per authored G3 launch.
+
+    G6-C's victory policy never moves either party or Hunter; replaying
+    its original G2 physical lane on a fresh source fixture is therefore
+    authoritative for origin, target anatomy, range and obstruction.
+    Authenticated G1 movement is unsupported by this fixed victory path.
+    An editable preview (or absent initial/recheck preview) cannot prove
+    that an otherwise paid Flame had a usable physical firing lane.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene, HUNTER_HEAD
+
+    scene = mixed_scene(size=4, level=level, seed=seed)
+    e = scene.e
+    if any(v["kind"] == "g1_movement_step" for v in ledger):
+        raise AssertionError("G7-H fixed Flame geometry cannot silently move")
+    lane = e.g2.lane("scholar", "hunter", target_cell=HUNTER_HEAD,
+                     range_kind="flame")
+    if (lane.distance not in (1, 2, 3) or lane.cover or lane.screens
+            or lane.effective_obstruction != 0):
+        raise AssertionError("G7-H fixed Flame fixture lacks a clear G2 lane")
+    expected = {
+        "shooter": "scholar", "target": "hunter",
+        "squares": lane.distance, "range_difficulty": 0,
+        "obstruction": lane.effective_obstruction,
+        "outcome": "physical_only_G3_cast_not_committed",
+    }
+    previews = [v for v in ledger if v["kind"] == "g2_flame_lane_preview"]
+    if len(flames) != 2 or len(previews) != 4:
+        raise AssertionError("Each of two native Flame launches needs two G2 previews")
+    matched = set()
+    for flame in flames:
+        round_no = flame["round"]
+        receipts = [p for p in previews
+                    if p["round"] == round_no and p["turn"] == "scholar"]
+        if len(receipts) != 2 or round_no not in (1, 2):
+            raise AssertionError("Flame G2 previews require exact source turn/round")
+        action, payment = _spell_payment_chain(
+            ledger, flame, actor="scholar",
+            label="g3:thrown_flame:T1", ap=20,
+            vp_mode="spent", vp_points=2)
+        first, refreshed = receipts
+        if (not first["index"] < action["index"] <
+                refreshed["index"] < payment["index"] < flame["index"]
+                or any(p["detail"] != expected for p in receipts)):
+            raise AssertionError("G2 initial/rechecked lane cannot fund this Flame")
+        matched.update(p["index"] for p in receipts)
+    if matched != {p["index"] for p in previews}:
+        raise AssertionError("Flame uses missing, extra or borrowed G2 lane evidence")
+    return len(matched)
+
+
 def _flame_hit_from_defense(flame):
     """Re-derive the certified F direct hit from the native d20 and defense.
 
@@ -2761,6 +2814,10 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
                 ledger, flame, actor="scholar",
                 label="g3:thrown_flame:T1", ap=20,
                 vp_mode="spent", vp_points=2)
+        _reconcile_flame_lane_previews(
+            ledger, flames,
+            level=ledger[0]["detail"]["source_ids"]["vanguard"]["level"],
+            seed=ledger[0]["detail"]["seed"])
         deliveries = [_flame_delivery_packet(ledger, flame) for flame in flames]
         if len({hit["index"] for hit in deliveries}) != 2:
             raise AssertionError("Two source Flames cannot reuse one G4 delivery")
