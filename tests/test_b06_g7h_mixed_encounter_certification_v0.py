@@ -2170,8 +2170,10 @@ class G7HMixedNativeTests(unittest.TestCase):
                     else:
                         rite["round"] = 2
                     trial["ledger_sha256"] = canonical_digest(trial["ledger"])
-                    with self.assertRaisesRegex(
-                            AssertionError, "exact native G3 establishment receipt"):
+                    expected = ("G0 non-boundary event"
+                                if mutation == "wrong_round"
+                                else "exact native G3 establishment receipt")
+                    with self.assertRaisesRegex(AssertionError, expected):
                         attest_trial(trial, level=level, seed=0,
                                      policy=POLICIES[0])
 
