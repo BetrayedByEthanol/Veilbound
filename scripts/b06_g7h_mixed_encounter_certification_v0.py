@@ -528,6 +528,32 @@ def _origin(report, ledger, *, policy, level, seed):
             raise AssertionError(
                 "G7-H installed G2 lane/G3 initial effects disagree "
                 "with independently authored G6-C fixture")
+    # G4.5 opens exactly one WoundContinuation during the original
+    # source fixture setup, after Round Begin and before the first policy
+    # decision or actor turn. A rehashed trace is not source-native when
+    # this opening is absent, moved or carries another scene/source map.
+    # Compare the complete event to a *fresh* G6-C bridge opening rather
+    # than relying on attacker/target source digests in later hit receipts.
+    openings = [ev for ev in ledger
+                if ev["kind"] == "g45_continuation_opened"]
+    native_openings = [ev for ev in source_scene.e.ledger
+                       if ev["kind"] == "g45_continuation_opened"]
+    begins = [ev for ev in ledger if ev["kind"] == "round_begin"]
+    expected_detail = {
+        "scene": scene,
+        "sources": {actor: source_scene.e.actors[actor].source.digest
+                    for actor in ROSTER},
+    }
+    if (len(openings) != 1 or len(native_openings) != 1
+            or len(begins) < 1
+            or openings[0] != native_openings[0]
+            or openings[0]["detail"] != expected_detail
+            or not begins[0]["index"] < openings[0]["index"] < v["index"]
+            or any(ev["kind"] == "turn_start_expiry"
+                   and ev["index"] < openings[0]["index"] for ev in ledger)):
+        raise AssertionError(
+            "G4.5 continuation opening must uniquely match the native "
+            "G6-C scene and every original actor source digest")
     return scene
 
 

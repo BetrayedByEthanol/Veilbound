@@ -3518,5 +3518,67 @@ class G7HMixedNativeTests(unittest.TestCase):
                 attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
 
 
+    def test_141_codex_p2_g45_continuation_opening_is_unique_and_source_bound(self):
+        # Rehash the native ledger after mutating the only bridge genesis.
+        # Each of the three terminal policies must reject absent, foreign,
+        # duplicated and incomplete scene/source origin receipts.
+        for policy in POLICIES:
+            native = self._case(policy)
+            originals = [v for v in native["ledger"]
+                         if v["kind"] == "g45_continuation_opened"]
+            self.assertEqual(len(originals), 1)
+            for variant in ("relabel", "scene", "digest",
+                            "missing_source", "extra_source", "duplicate"):
+                with self.subTest(policy=policy, variant=variant):
+                    trial = deepcopy(native)
+                    ledger = trial["ledger"]
+                    opening = next(v for v in ledger
+                                   if v["kind"] == "g45_continuation_opened")
+                    if variant == "relabel":
+                        opening["kind"] = "not_a_native_bridge_opening"
+                    elif variant == "scene":
+                        opening["detail"]["scene"] = "foreign-scene"
+                    elif variant == "digest":
+                        opening["detail"]["sources"]["hunter"] = "foreign-digest"
+                    elif variant == "missing_source":
+                        del opening["detail"]["sources"]["archer"]
+                    elif variant == "extra_source":
+                        opening["detail"]["sources"]["intruder"] = "forged"
+                    else:
+                        duplicate = deepcopy(opening)
+                        duplicate["index"] = len(ledger)
+                        # Keep the extra receipt inside the already
+                        # completed native round so the *opening count*
+                        # check, not a generic chronology failure, catches it.
+                        duplicate["round"] = ledger[-1]["round"]
+                        duplicate["turn"] = ledger[-1]["turn"]
+                        ledger.append(duplicate)
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    with self.assertRaisesRegex(
+                            AssertionError, "G4.5 continuation opening"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_142_codex_p2_original_bridge_openings_match_source_fixture_L2_L3(self):
+        from scripts.b06_hunter_mixed_party_g6c_v0 import mixed_scene
+        for level in (2, 3):
+            pack = run_pack(level, 0, include_trials=True)
+            for policy in POLICIES:
+                with self.subTest(level=level, policy=policy):
+                    trial = pack["native_trials"][policy]
+                    fixture = mixed_scene(
+                        size=4, level=level, seed=0,
+                        party_exits=(policy == "opposed_living_hunter_withdrawal"))
+                    original = [v for v in trial["ledger"]
+                                if v["kind"] == "g45_continuation_opened"]
+                    expected = [v for v in fixture.e.ledger
+                                if v["kind"] == "g45_continuation_opened"]
+                    self.assertEqual(original, expected)
+                    self.assertEqual(len(original), 1)
+                    self.assertEqual(
+                        attest_trial(trial, level=level, seed=0,
+                                     policy=policy)["outcome"],
+                        TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
