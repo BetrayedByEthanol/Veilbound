@@ -516,17 +516,19 @@ def _origin(report, ledger, *, policy, level, seed):
         raise AssertionError("G7-H original source digests diverge from authored fixtures")
     # A synthetic clear-lane replay cannot authenticate a trace that was
     # *installed* with different directional cover or preloaded G3 effects.
-    # Bind the full native G2/G3 installation records (including index,
-    # round and actor) to this independently reconstructed source scene
-    # before treating its geometry and empty effect inventory as authority.
-    for kind in ("g2_lane_installed", "g3_spell_state_installed"):
+    # Bind the complete native G2, G3 and G4 installation records
+    # (including index, round, turn and detail) to the independently
+    # reconstructed source scene. G4 must be installed before any later
+    # damage, wound, venom or clock witness can be source-native.
+    for kind in ("g2_lane_installed", "g3_spell_state_installed",
+                 "g4_damage_state_installed"):
         original = [ev for ev in ledger if ev["kind"] == kind]
         authored = [ev for ev in source_scene.e.ledger if ev["kind"] == kind]
         if (len(original) != 1 or len(authored) != 1
                 or original[0] != authored[0]
                 or original[0]["index"] >= v["index"]):
             raise AssertionError(
-                "G7-H installed G2 lane/G3 initial effects disagree "
+                "G7-H installed G2/G3/G4 state disagrees "
                 "with independently authored G6-C fixture")
     # G4.5 opens exactly one WoundContinuation during the original
     # source fixture setup, after Round Begin and before the first policy
@@ -3648,6 +3650,39 @@ def _reconcile_legacy_g7g_report(report, ledger, final, *,
     return True
 
 
+def _attest_canonical_post_round_tail(ledger, *, policy, completed_rounds):
+    """Only source-native terminal events may follow the final real Round End.
+
+    G6-D signs Hunter death with one terminal event. G7-G signs defeat or
+    withdrawal with G7-C, then immediately writes its one matching G7-G
+    verification event. No G0/G1/G2/G3/G4/G5/extra semantic receipt,
+    alternate terminal, or free-form post-round log can be used as evidence
+    after play has finished, even with a recomputed canonical SHA-256.
+    """
+    last_ends = [ev for ev in ledger if ev["kind"] == "round_end"]
+    if len(last_ends) != completed_rounds or not last_ends:
+        raise AssertionError("G7-H post-round tail requires genuine native Round End")
+    expected = {
+        "mixed_victory_rite": ("g6d_hunter_defeat_attested",),
+        "hunter_multitarget_defeat": (
+            "g7c_party_defeat_attested", "g7g_multitarget_defeat_verified"),
+        "opposed_living_hunter_withdrawal": (
+            "g7c_party_withdrawal_attested",
+            "g7g_living_hunter_disengagement_verified"),
+    }[policy]
+    last_end = last_ends[-1]["index"]
+    tail = ledger[last_end + 1:]
+    if (tuple(ev["kind"] for ev in tail) != expected
+            or any(ev["index"] != last_end + offset
+                   or ev["round"] != completed_rounds
+                   or ev["turn"] is not None
+                   for offset, ev in enumerate(tail, start=1))):
+        raise AssertionError(
+            "G7-H post-round tail must be exactly its canonical terminal "
+            "and optional G7-G verification receipt")
+    return tail
+
+
 def attest_trial(report, *, level, seed, policy):
     """Independent evidence validation. Never trust mutable report metadata."""
     if (type(level) is not int or level not in (2, 3)
@@ -3672,15 +3707,8 @@ def attest_trial(report, *, level, seed, policy):
     _attest_fixed_g7g_actions(ledger, policy=policy)
     turns = [v["detail"].get("actor") for v in ledger if v["kind"] == "turn_end"]
     ends = [v for v in ledger if v["kind"] == "round_end"]
-    last_round_end = ends[-1]["index"] if ends else -1
-    open_native = any(
-        ev["kind"] in ("round_begin", "turn_start_expiry", "turn_resources",
-                       "action_committed", "attack_sequence_committed",
-                       "g5_melee_sequence_attested", "g1_movement_step")
-        and ev["index"] > last_round_end for ev in ledger)
     if (not ends or turns != list(ROSTER) * len(ends)
             or len(ends) != completed_rounds
-            or open_native
             or report.get("turns_completed") != len(turns)
             or report.get("rounds_completed") != len(ends)
             or len([v for v in ledger if v["kind"] == "round_begin"]) != len(ends)
@@ -3721,6 +3749,12 @@ def attest_trial(report, *, level, seed, policy):
             report, ledger, final, policy=policy,
             deaths=deaths, rounds=len(ends))
     _attest_g0_unresolved_roll_handoffs(ledger)
+    # Final closed-world check: retained native policy-specific terminal
+    # and verification events are the only permitted post-round evidence.
+    # Keep earlier dedicated source audits authoritative for their own
+    # diagnostic failures; certification always enforces this final gate.
+    _attest_canonical_post_round_tail(
+        ledger, policy=policy, completed_rounds=completed_rounds)
     return {"policy": policy, "outcome": TERMINALS[policy][0],
             "source_scenario_id": report["scenario_id"],
             "native_terminal_event": terminal["index"],

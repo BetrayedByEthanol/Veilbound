@@ -3663,5 +3663,151 @@ class G7HMixedNativeTests(unittest.TestCase):
                     "hunter_defeat_attested")
 
 
+
+    def test_146_codex_p2_post_round_tail_excludes_forged_semantic_receipts(self):
+        # A rehashed event following the G7-C verification cannot add
+        # fictitious Bow hits or Flame launches to G7-H's source decisions.
+        # The same closed-world terminal tail applies to all three modes.
+        receipts = (
+            ("g6d_bow_adjudicated",
+             {"shooter": "archer", "target": "hunter", "damage": None}),
+            ("g3_flame_launched",
+             {"caster": "scholar", "target": "hunter",
+              "outcome": "direct_hit_pending_G4"}),
+            ("g4_damage_applied",
+             {"recipient": "hunter", "hp_before": 0, "hp_after": -14}),
+            ("unrecognized_semantic_receipt", {"forged": True}),
+        )
+        for policy in POLICIES:
+            for kind, detail in receipts:
+                with self.subTest(policy=policy, kind=kind):
+                    trial = self._case(policy)
+                    ledger = trial["ledger"]
+                    ledger.append({
+                        "index": len(ledger),
+                        "round": trial["rounds_completed"], "turn": None,
+                        "kind": kind, "detail": detail.copy(),
+                    })
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    if (policy == "hunter_multitarget_defeat"
+                            and kind in ("g6d_bow_adjudicated",
+                                         "g3_flame_launched")):
+                        # These are Codex's exact previously accepted
+                        # semantic receipts: only the final tail gate
+                        # should now reject them.
+                        with self.assertRaisesRegex(
+                                AssertionError, "post-round tail must be exactly"):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+                    else:
+                        # An earlier specialized evidence validator may
+                        # independently reject a forged in-combat receipt.
+                        with self.assertRaises(AssertionError):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_147_codex_p2_only_exact_canonical_terminal_tail_allowed(self):
+        expected = {
+            "mixed_victory_rite": ("g6d_hunter_defeat_attested",),
+            "hunter_multitarget_defeat":
+                ("g7c_party_defeat_attested", "g7g_multitarget_defeat_verified"),
+            "opposed_living_hunter_withdrawal":
+                ("g7c_party_withdrawal_attested",
+                 "g7g_living_hunter_disengagement_verified"),
+        }
+        for policy in POLICIES:
+            source = self._case(policy)
+            end = max(x["index"] for x in source["ledger"]
+                      if x["kind"] == "round_end")
+            tail = source["ledger"][end + 1:]
+            self.assertEqual(tuple(e["kind"] for e in tail), expected[policy])
+            self.assertTrue(all(e["turn"] is None
+                                and e["round"] == source["rounds_completed"]
+                                for e in tail))
+            for tamper in ("insert_before_terminal", "append_after_terminal",
+                           "replace_verification", "wrong_round",
+                           "wrong_turn", "extra_terminal"):
+                with self.subTest(policy=policy, tamper=tamper):
+                    trial = deepcopy(source)
+                    entries = trial["ledger"]
+                    if tamper == "insert_before_terminal":
+                        entries.insert(end + 1, {
+                            "round": trial["rounds_completed"], "turn": None,
+                            "kind": "g6d_bow_adjudicated", "detail": {},
+                        })
+                    elif tamper == "append_after_terminal":
+                        entries.append({
+                            "round": trial["rounds_completed"], "turn": None,
+                            "kind": "g3_flame_launched", "detail": {},
+                        })
+                    elif tamper == "replace_verification":
+                        entries[-1]["kind"] = "g6d_bow_adjudicated"
+                    elif tamper == "wrong_round":
+                        entries[-1]["round"] += 1
+                    elif tamper == "wrong_turn":
+                        entries[-1]["turn"] = "archer"
+                    else:
+                        entries.append({
+                            "round": trial["rounds_completed"], "turn": None,
+                            "kind": expected[policy][0], "detail": {},
+                        })
+                    for index, event in enumerate(entries):
+                        event["index"] = index
+                    trial["ledger_sha256"] = canonical_digest(entries)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_148_codex_p2_G4_native_installation_is_mandatory(self):
+        for policy in POLICIES:
+            for mutation in ("relabel", "foreign_detail", "extra_field",
+                             "round", "turn", "duplicate"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = self._case(policy)
+                    ledger = trial["ledger"]
+                    source = [ev for ev in ledger if
+                              ev["kind"] == "g4_damage_state_installed"]
+                    self.assertEqual(len(source), 1)
+                    receipt = source[0]
+                    self.assertEqual(receipt["index"], 4)
+                    self.assertEqual(receipt["detail"], {})
+                    if mutation == "relabel":
+                        receipt["kind"] = "g4_not_installed"
+                    elif mutation == "foreign_detail":
+                        receipt["detail"] = {"damage_rules": "forged"}
+                    elif mutation == "extra_field":
+                        receipt["detail"]["intruder"] = True
+                    elif mutation == "round":
+                        receipt["round"] = 2
+                    elif mutation == "turn":
+                        receipt["turn"] = "hunter"
+                    else:
+                        ledger.append(deepcopy(receipt))
+                        ledger[-1]["index"] = len(ledger) - 1
+                    trial["ledger_sha256"] = canonical_digest(ledger)
+                    # G0 chronology can reject forged round/turn before
+                    # reaching the independently bound G4 fixture check.
+                    if mutation in ("round", "turn", "duplicate"):
+                        with self.assertRaises(AssertionError):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+                    else:
+                        with self.assertRaisesRegex(
+                                AssertionError, "installed G2/G3/G4 state"):
+                            attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_149_codex_p2_original_terminal_tails_and_G4_receipts_still_certify(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                with self.subTest(level=level, seed=seed):
+                    pack = run_pack(level, seed, include_trials=True)
+                    self.assertTrue(pack["bounded_terminal_matrix_certified"])
+                    for policy in POLICIES:
+                        native = pack["native_trials"][policy]
+                        self.assertEqual(
+                            sum(v["kind"] == "g4_damage_state_installed"
+                                for v in native["ledger"]), 1)
+                        self.assertEqual(
+                            attest_trial(native, level=level, seed=seed,
+                                         policy=policy)["outcome"],
+                            TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
