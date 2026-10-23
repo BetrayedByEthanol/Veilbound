@@ -275,6 +275,15 @@ def _native_round_turn_chronology(ledger):
                     or round_no != current_round or turn is not None
                     or current_round != completed + 1):
                 raise AssertionError("Native Round End does not close five paid turns")
+            # EncounterState.end_turn derives this list from actors with
+            # active Opportunity Responses. None of the three fixed
+            # source policies ever activates one: all windows decline.
+            # A rehashed terminal must not claim an unlogged response.
+            if detail != {
+                    "effects": "authored effects deferred",
+                    "expired_opportunity_response": []}:
+                raise AssertionError(
+                    "G0 Round End cannot expire unauthored Opportunity Responses")
             completed += 1
             slot = 0
         elif event["index"] == 0:
@@ -2256,6 +2265,24 @@ def _reconcile_victory_all_ab_sequences(ledger):
                     or not declaration_index < defense_indices[0] < seq["index"]
                     or seq["round"] != round_no or seq["turn"] != actor):
                 raise AssertionError("A/B paid sequence diverges from authored source")
+            # G6-C _priest_turn calls G5 declare without any Prone
+            # feasibility opt-ins. Bind every field of G5's attestation
+            # to that exact native call, including all three False flags;
+            # checking only the attack/defense would accept forged rights.
+            if q != {
+                    "attacker": actor, "target": "hunter",
+                    "source_digest": authored.e.actors[actor].source.digest,
+                    "profiles": [profile],
+                    "action_indices": [idx],
+                    "defense_indices": defense_indices,
+                    "declaration_index": declaration_index,
+                    "prone_attack_feasible": False,
+                    "prone_dodge_feasible": False,
+                    "prone_guard_feasible": False,
+                    "source_bonuses": [BUILD[role]["attack"]]}:
+                raise AssertionError(
+                    "A/B G5 feasibility and complete sequence metadata "
+                    "must match the source declare call")
             declaration, defense = ledger[declaration_index], ledger[defense_indices[0]]
             if (declaration["kind"] != "attack_sequence_committed"
                     or declaration["round"] != round_no
@@ -3264,6 +3291,33 @@ def _reconcile_complete_snapshots(ledger, initial, final, *,
         matched = [ev for ev in created
                    if ev["detail"].get("recipient") == actor
                    and ev["detail"].get("event_key") == key]
+        # G4.apply_profile_hit fixes its idempotency key BEFORE calling
+        # apply_damage, using len(e.ledger) at that source boundary.
+        # A G4 wound is the only intervening event in these fixed native
+        # profile paths. Therefore the pre-damage index is the wound
+        # receipt when one is required, or the damage receipt itself for
+        # a non-wounding hit. Check ALL profile packets; previously only
+        # Hunter packets which created a wound were authenticated.
+        native_profile_owner = {
+            "source-profile:B06-AT-04": ("hunter", "B06-AT-04"),
+            "source-profile:B06-PC-A-SWORD":
+                ("vanguard", "B06-PC-A-SWORD"),
+            "source-profile:B06-PC-B-MACE":
+                ("guardian", "B06-PC-B-MACE"),
+        }.get(record.get("cause"))
+        if native_profile_owner is not None:
+            if needed and (len(matched) != 1
+                           or matched[0]["index"] >= damage["index"]):
+                raise AssertionError("Profile wound lacks one preceding G4 receipt")
+            native_preindex = (
+                matched[0]["index"] if needed else damage["index"])
+            attacker, profile_id = native_profile_owner
+            expected_key = (
+                f"g4:profile:{attacker}:{actor}:{profile_id}:"
+                f"{native_preindex}")
+            if key != expected_key:
+                raise AssertionError(
+                    "G4 profile event key differs from native pre-damage index")
         if needed:
             roll = source["location_roll"]
             if type(roll) is not int or not 1 <= roll <= 20:
