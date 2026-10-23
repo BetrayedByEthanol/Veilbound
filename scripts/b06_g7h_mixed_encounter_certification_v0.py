@@ -1834,6 +1834,95 @@ def _hunter_bite_hits(ledger, target, *, policy):
 
 
 
+def _attest_fixed_victory_paid_actions(ledger, *, rite_action, flame_actions):
+    """Every G0 debit in the fixed G6-D/R-Rite victory has a native owner.
+
+    General Turn AP and G1 own-action segment replay prove affordability
+    and sequencing, NOT that a player chose this action in the authored
+    policy. Build the permitted index set ONLY from the already checked
+    G5 melee declarations, G2 Bow declarations, and G3 spell AP/VP
+    delivery chains. No extra action, even one with a valid AP decrement,
+    a familiar label and a perfect G1 break, may occur on a held turn.
+    """
+    approved = set()
+
+    def own(action, *, round_no, actor, kind, label):
+        index = action.get("index")
+        if (type(index) is not int or not 0 <= index < len(ledger)
+                or ledger[index] is not action
+                or index in approved
+                or action["kind"] != "action_committed"
+                or action["round"] != round_no
+                or action["turn"] != actor
+                or action["detail"].get("actor") != actor
+                or action["detail"].get("action_class") != kind
+                or action["detail"].get("label") != label):
+            raise AssertionError(
+                "Victory paid action not bound to its authenticated source chain")
+        approved.add(index)
+
+    # These six unique paid G5 sequences have already been audited against
+    # the independent G6-C Hunter/A/B choices, attack rolls and defenses.
+    melee = {
+        (round_no, actor): f"sequence:{profile}:0"
+        for round_no in (1, 2)
+        for actor, profile in (
+            ("hunter", "B06-AT-04"),
+            ("vanguard", "B06-PC-A-SWORD"),
+            ("guardian", "B06-PC-B-MACE"),
+        )
+    }
+    sequences = [v for v in ledger
+                 if v["kind"] == "g5_melee_sequence_attested"]
+    if len(sequences) != len(melee):
+        raise AssertionError("Fixed victory needs exactly six source G5 action chains")
+    for sequence in sequences:
+        key = sequence["round"], sequence["detail"].get("attacker")
+        indices = sequence["detail"].get("action_indices")
+        if (key not in melee or not isinstance(indices, list)
+                or len(indices) != 1 or type(indices[0]) is not int
+                or not 0 <= indices[0] < sequence["index"]):
+            raise AssertionError("G5 victory paid sequence has no original source action")
+        own(ledger[indices[0]], round_no=key[0], actor=key[1],
+            kind="physical", label=melee.pop(key))
+
+    # The R Round-2 miss and Round-3 lethal Bow are each checked by
+    # _reconcile_victory_bow_ammunition, including their complete G2
+    # declaration, native AP, response window, launch, dice and shot.
+    bows = [v for v in ledger if v["kind"] == "g2_bow_sequence_committed"]
+    if len(bows) != 2 or {v["round"] for v in bows} != {2, 3}:
+        raise AssertionError("Fixed victory needs the two source R Bow chains")
+    for declaration in bows:
+        candidates = [v for v in ledger[:declaration["index"]]
+                      if v["kind"] == "action_committed"
+                      and v["round"] == declaration["round"]
+                      and v["turn"] == "archer"
+                      and v["detail"].get("label") == "g2:bow:hunter:0"]
+        if len(candidates) != 1:
+            raise AssertionError("G2 Bow declaration lacks unique native R AP debit")
+        own(candidates[0], round_no=declaration["round"], actor="archer",
+            kind="physical", label="g2:bow:hunter:0")
+
+    # _spell_payment_chain independently binds each of these exact G0
+    # indices to one real, ordered VP payment and G3 effect/Flame delivery.
+    own(rite_action, round_no=1, actor="archer",
+        kind="projection", label="g3:guided:maintained")
+    if (len(flame_actions) != 2
+            or {flame["round"] for flame, _ in flame_actions} != {1, 2}):
+        raise AssertionError("Victory must contain two source-paid F Fire deliveries")
+    for flame, action in flame_actions:
+        if (flame["turn"] != "scholar" or action["index"] >= flame["index"]):
+            raise AssertionError("F Fire source payment does not precede its delivery")
+        own(action, round_no=flame["round"], actor="scholar",
+            kind="projection", label="g3:thrown_flame:T1")
+
+    all_paid = {v["index"] for v in ledger if v["kind"] == "action_committed"}
+    if (len(approved) != 11 or approved != all_paid):
+        raise AssertionError(
+            "Fixed G7-H victory forbids orphan or unauthored paid actions")
+    return approved
+
+
 def _attest_fixed_g7g_actions(ledger, *, policy):
     """Only the authored paid Hunter Bite is a G7-G Action.
 
@@ -3492,7 +3581,7 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
                     and v["index"] < rites[0]["index"] for v in ledger)):
             raise AssertionError(
                 "Chosen R Rite requires the exact native G3 establishment receipt")
-        _spell_payment_chain(
+        rite_action, _ = _spell_payment_chain(
             ledger, rites[0], actor="archer", label="g3:guided:maintained",
             ap=30, vp_mode="committed", vp_points=1)
         bows = [x for x in events["g6d_bow_adjudicated"]
@@ -3514,12 +3603,14 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
                     flame["detail"].get("primary_face") + 5
                 for flame in flames):
             raise AssertionError("G7-H Flame source/tier/attack receipts invalid")
+        flame_actions = []
         for flame in flames:
             _flame_hit_from_defense(flame)
-            _spell_payment_chain(
+            flame_action, _ = _spell_payment_chain(
                 ledger, flame, actor="scholar",
                 label="g3:thrown_flame:T1", ap=20,
                 vp_mode="spent", vp_points=2)
+            flame_actions.append((flame, flame_action))
         _reconcile_flame_lane_previews(
             ledger, flames,
             level=ledger[0]["detail"]["source_ids"]["vanguard"]["level"],
@@ -3529,6 +3620,10 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
             raise AssertionError("Two Flame hits must emit exactly two G3 mitigation receipts")
         if len({hit["index"] for hit in deliveries}) != 2:
             raise AssertionError("Two source Flames cannot reuse one G4 delivery")
+        # Only after every original G5/G2/G3 source chain has been
+        # independently validated can the complete AP ledger be closed.
+        _attest_fixed_victory_paid_actions(
+            ledger, rite_action=rite_action, flame_actions=flame_actions)
     elif policy == "hunter_multitarget_defeat":
         items = events["g7g_multitarget_defeat_verified"]
         if (len(items) != 1 or items[0]["index"] <= terminal["index"]

@@ -4281,5 +4281,116 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_164_codex_p2_held_round3_scholar_cannot_buy_unlaunched_flame(self):
+        # Reviewer reproduction: a digest-valid, AP-affordable Projection
+        # action + matching G1 break is still NOT one of the G6-D victory
+        # policy's G3 Flame chains. Scholar explicitly holds Round 3.
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import _native
+
+        for level, seed in ((3, 0), (2, 17)):
+            for label in ("g3:thrown_flame:T1", "g3:self_basic_heal"):
+                with self.subTest(level=level, seed=seed, label=label):
+                    trial = _native("mixed_victory_rite", level, seed)
+                    attest_trial(trial, level=level, seed=seed,
+                                 policy="mixed_victory_rite")
+                    events = trial["ledger"]
+                    close = next(i for i, v in enumerate(events)
+                                 if v["kind"] == "turn_end"
+                                 and v["round"] == 3
+                                 and v["turn"] == "scholar")
+                    self.assertEqual(events[close]["detail"]["actor"], "scholar")
+                    remaining = events[close]["detail"]["unused_ap"]
+                    self.assertGreaterEqual(remaining, 20)
+                    # G1's silent turn-start increment plus every prior
+                    # committed own action determines the next segment.
+                    segment = sum(
+                        v["kind"] in ("turn_resources", "action_committed")
+                        and v["detail"].get("actor") == "scholar"
+                        for v in events[:close]) + 1
+                    injected = [
+                        {
+                            "index": -1, "round": 3, "turn": "scholar",
+                            "kind": "action_committed",
+                            "detail": {
+                                "actor": "scholar", "action_class": "projection",
+                                "label": label, "ap_spent": 20,
+                                "ap_remaining": remaining - 20,
+                            },
+                        },
+                        {
+                            "index": -1, "round": 3, "turn": "scholar",
+                            "kind": "g1_segment_break",
+                            "detail": {
+                                "actor": "scholar", "reason": "own_action",
+                                "new_segment": segment,
+                            },
+                        },
+                    ]
+                    events[close:close] = injected
+                    events[close + 2]["detail"]["unused_ap"] -= 20
+                    for i, ev in enumerate(events):
+                        ev["index"] = i
+                    signed = next(
+                        ev["index"] for ev in events
+                        if ev["kind"] == "g6d_hunter_defeat_attested")
+                    trial["native_terminal"]["terminal_event"] = signed
+                    trial["terminal"]["terminal_event"] = signed
+                    trial["ledger_sha256"] = canonical_digest(events)
+
+                    # AP accounting and synchronous G1 segment replay still
+                    # accept the inserted pair; G3 cannot spend zero VP and
+                    # conjure a third authenticated Flame event.
+                    from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+                        _reconcile_all_turn_end_ap, _reconcile_g1_action_segments,
+                    )
+                    _reconcile_all_turn_end_ap(
+                        events, level=level, seed=seed)
+                    _reconcile_g1_action_segments(events)
+                    with self.assertRaisesRegex(
+                            AssertionError,
+                            "Fixed G7-H victory forbids orphan or unauthored paid actions"):
+                        attest_trial(
+                            trial, level=level, seed=seed,
+                            policy="mixed_victory_rite")
+
+    def test_165_codex_p2_victory_source_payments_are_exhaustive(self):
+        # Every valid G0 debit must be included in one independently
+        # checked G5 melee, G2 launched Bow, or G3 AP/VP spell chain.
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _attest_fixed_victory_paid_actions, _spell_payment_chain,
+        )
+        for level in (2, 3):
+            with self.subTest(level=level):
+                report = run_pack(level, 17, include_trials=True)[
+                    "native_trials"]["mixed_victory_rite"]
+                ledger = report["ledger"]
+                rite = next(e for e in ledger
+                            if e["kind"] == "g3_effect_established"
+                            and e["detail"].get("effect_kind") ==
+                            "Guided Regeneration")
+                rite_action, _ = _spell_payment_chain(
+                    ledger, rite, actor="archer",
+                    label="g3:guided:maintained", ap=30,
+                    vp_mode="committed", vp_points=1)
+                flames = [e for e in ledger if e["kind"] == "g3_flame_launched"]
+                flame_actions = [
+                    (flame, _spell_payment_chain(
+                        ledger, flame, actor="scholar",
+                        label="g3:thrown_flame:T1", ap=20,
+                        vp_mode="spent", vp_points=2)[0])
+                    for flame in flames
+                ]
+                permitted = _attest_fixed_victory_paid_actions(
+                    ledger, rite_action=rite_action, flame_actions=flame_actions)
+                all_paid = {v["index"] for v in ledger
+                            if v["kind"] == "action_committed"}
+                self.assertEqual(permitted, all_paid)
+                self.assertEqual(len(permitted), 11)
+                self.assertEqual(attest_trial(
+                    report, level=level, seed=17,
+                    policy="mixed_victory_rite")["outcome"],
+                    "hunter_defeat_attested")
+
+
 if __name__ == "__main__":
     unittest.main()
