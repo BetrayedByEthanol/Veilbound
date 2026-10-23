@@ -3580,5 +3580,84 @@ class G7HMixedNativeTests(unittest.TestCase):
                         TERMINALS[policy][0])
 
 
+    def test_143_codex_p2_ab_source_g4_injection_eligibility_is_replayed(self):
+        # Native A/B swords/maces have no source toxin delivery. Rehashing
+        # only G4's source receipt must not bypass the correct G4.5 false.
+        policy = "mixed_victory_rite"
+        native = self._case(policy)
+        profiles = [v for v in native["ledger"]
+                    if v["kind"] == "g4_profile_hit"
+                    and v["detail"].get("attacker") in ("vanguard", "guardian")]
+        self.assertEqual(
+            {v["detail"]["attacker"] for v in profiles},
+            {"vanguard", "guardian"})
+        self.assertTrue(all(v["detail"]["injection_eligible"] is False
+                            for v in profiles))
+        for original in profiles:
+            for altered in (True, None, "false"):
+                with self.subTest(actor=original["detail"]["attacker"],
+                                  event=original["index"], forged=altered):
+                    trial = deepcopy(native)
+                    trial["ledger"][original["index"]]["detail"][
+                        "injection_eligible"] = altered
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "A/B paid G4 damage"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_144_codex_p2_hunter_missed_roll_defense_value_binds_to_g0(self):
+        # The first Hunter action is a natural-1 miss against an assigned
+        # real Guard 17, NOT an arbitrary number supplied to G5's log.
+        policy = "mixed_victory_rite"
+        native = self._case(policy)
+        sequences = [v for v in native["ledger"]
+                     if v["kind"] == "g5_melee_sequence_attested"
+                     and v["detail"].get("attacker") == "hunter"]
+        self.assertEqual(len(sequences), 2)
+        for seq in sequences:
+            defense = native["ledger"][
+                seq["detail"]["defense_indices"][0]]["detail"]
+            action_index = seq["detail"]["action_indices"][0]
+            matches = [v for v in native["ledger"]
+                       if v["kind"] == "g5_melee_roll"
+                       and v["detail"].get("action_index") == action_index]
+            self.assertEqual(len(matches), 1)
+            roll = matches[0]
+            self.assertEqual(roll["detail"]["defense_value"],
+                             defense["defense_value"])
+            if roll["round"] == 1:
+                self.assertEqual(roll["detail"]["attack_face"], 1)
+                self.assertEqual(defense["defense"], "guard")
+                self.assertEqual(defense["defense_value"], 17)
+            else:
+                self.assertEqual(defense["defense"], "take_hit")
+                self.assertIsNone(defense["defense_value"])
+            for forgery in (999, -1, True):
+                with self.subTest(round=roll["round"], forged=forgery):
+                    trial = deepcopy(native)
+                    trial["ledger"][roll["index"]]["detail"]["defense_value"] = forgery
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaisesRegex(
+                            AssertionError, "Hunter source-authored miss/hit"):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_145_codex_p2_native_L2_L3_receipts_remain_authentic(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                pack = run_pack(level, seed, include_trials=True)
+                native = pack["native_trials"]["mixed_victory_rite"]
+                for actor in ("vanguard", "guardian"):
+                    source_events = [v for v in native["ledger"]
+                                     if v["kind"] == "g4_profile_hit"
+                                     and v["detail"].get("attacker") == actor]
+                    self.assertTrue(source_events)
+                    self.assertTrue(all(x["detail"]["injection_eligible"]
+                                        is False for x in source_events))
+                self.assertEqual(
+                    attest_trial(native, level=level, seed=seed,
+                                 policy="mixed_victory_rite")["outcome"],
+                    "hunter_defeat_attested")
+
+
 if __name__ == "__main__":
     unittest.main()

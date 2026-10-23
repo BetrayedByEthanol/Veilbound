@@ -2472,7 +2472,7 @@ def _player_melee_hit_chains(ledger, actor, profile):
                 or face != faces[0]
                 or type(faces[1]) is not int or critical != "normal"):
             raise AssertionError("A/B authored melee face or damage die is invalid")
-        _, profile_packet, packets = g4._profile_hit_packets(
+        source_profile, profile_packet, packets = g4._profile_hit_packets(
             actor, "hunter", profile, die_face=faces[1],
             critical=critical, critical_dice=())
         if (len(packets) != 1 or packets[0].resource != "hp"
@@ -2482,6 +2482,15 @@ def _player_melee_hit_chains(ledger, actor, profile):
             raise AssertionError("A/B fixture must produce one source weapon packet")
         source_raw = packets[0].raw
         source_mitigated = g4._mitigate_hp(hunter, packets[0])
+        # G4 alone derives puncture eligibility from the original weapon
+        # profile's toxin delivery and the actual mitigated Piercing HP.
+        # A/B have no toxin-delivering profile. A rehashed G4 receipt
+        # must not contradict the independently reconstructed source,
+        # even when G4.5 already records the correct false result.
+        source_injection_eligible = bool(
+            source_profile.get("toxin_delivery") and source_mitigated > 0)
+        if source_injection_eligible:
+            raise AssertionError("A/B source profiles cannot deliver toxin")
         damage_events = [v for v in ledger
                          if v["kind"] == "g4_damage_applied"
                          and roll["index"] < v["index"] < bridge["index"]
@@ -2502,6 +2511,8 @@ def _player_melee_hit_chains(ledger, actor, profile):
                 or source_events[0]["round"] != resolved["round"]
                 or source_events[0]["turn"] != actor
                 or source_events[0]["detail"].get("critical") != critical
+                or source_events[0]["detail"].get("injection_eligible")
+                   is not source_injection_eligible
                 or not dmg["index"] < source_events[0]["index"] < bridge["index"]
                 or actual.get("hp_loss") != (
                     dmg["detail"].get("hp_before") -
@@ -2509,7 +2520,7 @@ def _player_melee_hit_chains(ledger, actor, profile):
                 or actual.get("dead") is not dmg["detail"].get("dead")
                 or actual.get("vigor_loss") != 0
                 or actual.get("hp_packets") != [source_mitigated]
-                or actual.get("injection_eligible") is not False):
+                or actual.get("injection_eligible") is not source_injection_eligible):
             raise AssertionError("A/B paid G4 damage not in attested hit chain")
         _hp_damage_packet(
             ledger, dmg, target="hunter", raw=source_raw,
@@ -2797,6 +2808,12 @@ def _reconcile_victory_hunter_sequences(ledger):
                 or roll["detail"].get("confirmation_face") is not None
                 or roll["detail"].get("declared_defense") != expected_defense
                 or roll["detail"].get("defense") != expected_defense
+                # G0 assigns Guard 17 on the R1 natural-1 miss; the
+                # authenticated assignment (also source-resource-replayed)
+                # must be the numeric defense G5 actually rolled against.
+                # Round 2 Take Hit legitimately uses None.
+                or roll["detail"].get("defense_value") !=
+                   defense["detail"].get("defense_value")
                 or result["detail"].get("attacker") != "hunter"
                 or result["detail"].get("target") != "vanguard"
                 or result["detail"].get("profile") != "B06-AT-04"
