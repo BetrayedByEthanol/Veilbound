@@ -3706,11 +3706,13 @@ class G7HMixedNativeTests(unittest.TestCase):
 
     def test_147_codex_p2_only_exact_canonical_terminal_tail_allowed(self):
         expected = {
-            "mixed_victory_rite": ("g6d_hunter_defeat_attested",),
+            "mixed_victory_rite":
+                ("g45_native_turn_ended", "g6d_hunter_defeat_attested"),
             "hunter_multitarget_defeat":
-                ("g7c_party_defeat_attested", "g7g_multitarget_defeat_verified"),
+                ("g45_native_turn_ended", "g7c_party_defeat_attested",
+                 "g7g_multitarget_defeat_verified"),
             "opposed_living_hunter_withdrawal":
-                ("g7c_party_withdrawal_attested",
+                ("g45_native_turn_ended", "g7c_party_withdrawal_attested",
                  "g7g_living_hunter_disengagement_verified"),
         }
         for policy in POLICIES:
@@ -3807,6 +3809,34 @@ class G7HMixedNativeTests(unittest.TestCase):
                             attest_trial(native, level=level, seed=seed,
                                          policy=policy)["outcome"],
                             TERMINALS[policy][0])
+
+
+
+    def test_150_post_round_g45_native_turn_closure_is_obligatory(self):
+        # G0 emits Round End inside end_turn(); the G4.5 bridge then logs
+        # this *one* actual last-turn closure before the G7-C/D terminal.
+        for policy in POLICIES:
+            baseline = self._case(policy)
+            ledger = baseline["ledger"]
+            index = max(v["index"] for v in ledger
+                        if v["kind"] == "round_end") + 1
+            self.assertEqual(ledger[index]["kind"], "g45_native_turn_ended")
+            self.assertEqual(ledger[index]["detail"]["actor"], "scholar")
+            for mutation in ("missing", "wrong_actor", "duplicate"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = deepcopy(baseline)
+                    entries = trial["ledger"]
+                    if mutation == "missing":
+                        entries[index]["kind"] = "forged_turn_closure"
+                    elif mutation == "wrong_actor":
+                        entries[index]["detail"]["actor"] = "archer"
+                    else:
+                        entries.insert(index + 1, deepcopy(entries[index]))
+                    for j, entry in enumerate(entries):
+                        entry["index"] = j
+                    trial["ledger_sha256"] = canonical_digest(entries)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
 
 
 if __name__ == "__main__":

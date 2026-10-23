@@ -941,16 +941,17 @@ Hunter CR.
 
 The G7-H ledger is **closed after the last genuine G0 Round End**.
 A SHA-256 digest over caller-controlled evidence does not authorize new
-combat effects or counters once the native terminal is certified. The
-attestor now requires exactly the following **contiguous** source events
-after the final Round End, all stamped with its native round and a null
-turn (and no additional entries):
+combat effects or counters once the native terminal is certified. G4.5
+genuinely writes a `g45_native_turn_ended` receipt for the final Scholar
+turn *after* G0 writes Round End. The attestor now requires exactly the
+following **contiguous** source events after the final Round End, all
+stamped with its native round and a null turn (and no additional entries):
 
 | Source policy | Exact ordered post-round tail |
 |---|---|
-| `mixed_victory_rite` | `g6d_hunter_defeat_attested` |
-| `hunter_multitarget_defeat` | `g7c_party_defeat_attested` then `g7g_multitarget_defeat_verified` |
-| `opposed_living_hunter_withdrawal` | `g7c_party_withdrawal_attested` then `g7g_living_hunter_disengagement_verified` |
+| `mixed_victory_rite` | `g45_native_turn_ended` then `g6d_hunter_defeat_attested` |
+| `hunter_multitarget_defeat` | `g45_native_turn_ended` then `g7c_party_defeat_attested` then `g7g_multitarget_defeat_verified` |
+| `opposed_living_hunter_withdrawal` | `g45_native_turn_ended` then `g7c_party_withdrawal_attested` then `g7g_living_hunter_disengagement_verified` |
 
 The old selective `open_native` action blacklist did not exclude a
 rehashed, post-verification `g6d_bow_adjudicated` or
@@ -969,7 +970,7 @@ installation checks. Re-labeling the index-4 G4 event and recomputing
 the digest no longer certifies a trace that invokes later G4 wound,
 venom and HP authority without a genuine source installation.
 
-Regression tests 146–149 include the exact Codex forged Bow/Flame tail
+Regression tests 146–150 include the exact Codex forged Bow/Flame tail
 case, extra/ordered/retimed terminal events, absent/modified/duplicated
 native G4 installation and positive unaltered terminal traces at
 L2/L3 with authored seeds 0 and 17. The originally authenticated

@@ -3653,9 +3653,10 @@ def _reconcile_legacy_g7g_report(report, ledger, final, *,
 def _attest_canonical_post_round_tail(ledger, *, policy, completed_rounds):
     """Only source-native terminal events may follow the final real Round End.
 
-    G6-D signs Hunter death with one terminal event. G7-G signs defeat or
-    withdrawal with G7-C, then immediately writes its one matching G7-G
-    verification event. No G0/G1/G2/G3/G4/G5/extra semantic receipt,
+    The G4.5 bridge logs the final scholar's native turn closure just
+    after G0 Round End. G6-D then signs Hunter death with one terminal
+    event. G7-G signs defeat or withdrawal with G7-C followed by one
+    matching G7-G verification event. No G0/G1/G2/G3/G4/G5/extra receipt,
     alternate terminal, or free-form post-round log can be used as evidence
     after play has finished, even with a recomputed canonical SHA-256.
     """
@@ -3663,23 +3664,28 @@ def _attest_canonical_post_round_tail(ledger, *, policy, completed_rounds):
     if len(last_ends) != completed_rounds or not last_ends:
         raise AssertionError("G7-H post-round tail requires genuine native Round End")
     expected = {
-        "mixed_victory_rite": ("g6d_hunter_defeat_attested",),
+        "mixed_victory_rite": (
+            "g45_native_turn_ended", "g6d_hunter_defeat_attested"),
         "hunter_multitarget_defeat": (
+            "g45_native_turn_ended",
             "g7c_party_defeat_attested", "g7g_multitarget_defeat_verified"),
         "opposed_living_hunter_withdrawal": (
-            "g7c_party_withdrawal_attested",
+            "g45_native_turn_ended", "g7c_party_withdrawal_attested",
             "g7g_living_hunter_disengagement_verified"),
     }[policy]
     last_end = last_ends[-1]["index"]
     tail = ledger[last_end + 1:]
     if (tuple(ev["kind"] for ev in tail) != expected
+            or ledger[last_end - 1]["kind"] != "turn_end"
+            or ledger[last_end - 1]["detail"].get("actor") != ROSTER[-1]
+            or tail[0]["detail"].get("actor") != ROSTER[-1]
             or any(ev["index"] != last_end + offset
                    or ev["round"] != completed_rounds
                    or ev["turn"] is not None
                    for offset, ev in enumerate(tail, start=1))):
         raise AssertionError(
-            "G7-H post-round tail must be exactly its canonical terminal "
-            "and optional G7-G verification receipt")
+            "G7-H post-round tail must be exactly G4.5 turn closure, "
+            "the canonical terminal and optional G7-G verification receipt")
     return tail
 
 
