@@ -869,3 +869,29 @@ unmodified L2/L3 native terminal matrices.
 These are **attestation-only** changes: the source combat executors,
 historical Phase 3 SHA, terminal coverage boundary, representative
 calibration, and Hunter CR remain unchanged.
+
+### G3 committed-VP ownership (Codex P1 correction)
+
+The original G7-H victory policy establishes exactly one maintained G3
+Chosen Self Guided Regeneration Rite for R (effect `G3-0001`, **1
+Committed VP**). Unlike a Spent-VP cast, the reservation remains owned by
+the active effect for the duration of the three-round Hunter-defeat trace.
+No effect expires, is voluntarily released or ends on R's death in these
+authored rounds. Both other terminal policies establish no G3 effect and
+have no committed effect VP.
+
+The G7-H attestor therefore independently tracks G3 effect establishment
+and ownership against every G0 `vp_transition` and `vp_release`:
+refunds must reference the exact active caster/effect amount and be followed
+**immediately** by the matching `g3_effect_ended` receipt, with the
+`g3:<reason>` label and identical event timing; orphan ends are rejected.
+Even a paired *invented* release and end is forbidden by these fixed source
+policies, which require the chosen R Rite to remain funded through the
+canonical terminal. The final actor VP balances must agree both with the
+chronological G0 ledger **and** live G3 reservations; recomputing the
+ledger digest and editing an ending snapshot cannot evade either check.
+
+Regression tests reproduce the originally reported forged post-terminal
+`vp_release` (R's committed balance 1 → 0), an invented matching
+`g3_effect_ended`, an orphan effect end and unowned VP, while retaining
+positive source trials at L2 and L3.
