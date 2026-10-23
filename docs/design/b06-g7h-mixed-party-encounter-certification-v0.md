@@ -936,3 +936,42 @@ installations and both L2/L3 fixtures. These are source-authentication
 changes only, not changes to the game's physical lane rules, Priest
 VP ownership, native ending semantics, representative calibration, or
 Hunter CR.
+
+## Codex P2 — Canonical post-round tail and native G4 installation (23 October 2026)
+
+The G7-H ledger is **closed after the last genuine G0 Round End**.
+A SHA-256 digest over caller-controlled evidence does not authorize new
+combat effects or counters once the native terminal is certified. The
+attestor now requires exactly the following **contiguous** source events
+after the final Round End, all stamped with its native round and a null
+turn (and no additional entries):
+
+| Source policy | Exact ordered post-round tail |
+|---|---|
+| `mixed_victory_rite` | `g6d_hunter_defeat_attested` |
+| `hunter_multitarget_defeat` | `g7c_party_defeat_attested` then `g7g_multitarget_defeat_verified` |
+| `opposed_living_hunter_withdrawal` | `g7c_party_withdrawal_attested` then `g7g_living_hunter_disengagement_verified` |
+
+The old selective `open_native` action blacklist did not exclude a
+rehashed, post-verification `g6d_bow_adjudicated` or
+`g3_flame_launched`. Those could inflate the certified
+`bow_hit_adjudications`/`flame_launches` without a native legal turn,
+even though the original terminal remained genuine. Now any appended,
+inserted, substituted, out-of-round or out-of-turn event fails the
+*exact terminal-tail* acceptance check. Specific VP, spell and attack
+audits still run and may reject related forgeries independently.
+
+Source installation authentication now also requires the sole original
+`g4_damage_state_installed` event (including empty detail and full
+index/round/turn context) to equal the independently constructed
+`mixed_scene` G6-C fixture, alongside the existing G2 and G3
+installation checks. Re-labeling the index-4 G4 event and recomputing
+the digest no longer certifies a trace that invokes later G4 wound,
+venom and HP authority without a genuine source installation.
+
+Regression tests 146–149 include the exact Codex forged Bow/Flame tail
+case, extra/ordered/retimed terminal events, absent/modified/duplicated
+native G4 installation and positive unaltered terminal traces at
+L2/L3 with authored seeds 0 and 17. The originally authenticated
+source outcomes and historical Phase 3 audit are unchanged. No
+representative difficulty or Hunter CR is inferred.
