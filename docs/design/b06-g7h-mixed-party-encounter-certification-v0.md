@@ -241,6 +241,20 @@ protective intervention/healing. Fixed encounter seeds identify G0
 events; **replaying multiple seeds is not a representative probability
 experiment**.
 
+**Codex P2 — fixed G7-G regeneration allocation provenance:** Both
+G7-G outcomes run `_next` with exactly zero voluntary HP restoration,
+zero wound repair and no extra allocation. A still-living Dying actor
+chooses to cancel its mandatory Dying loss **if and only if it has Vigor
+available**; an actor already dead receives its native dead-Step receipt.
+G7-H reconstructs HP and Vigor immediately before each real G4 Step 2
+from source damage and prior transactions, and checks these *decisions*
+in addition to their ordinary costs and arithmetic. A different,
+mechanically affordable 1-HP-per-turn Vanguard healing policy (including
+rehashed source reports and internally consistent final snapshots)
+must not receive the certificate of G7-G's authored policy. The
+separate G6-D victory policy retains its independent regeneration
+allocation behavior.
+
 ### Codex P1 provenance hardening — lethal Bow and G1 withdrawal continuity
 
 The G7-H independent attestor now verifies the victory terminal's

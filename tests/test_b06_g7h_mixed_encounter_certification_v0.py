@@ -4194,6 +4194,92 @@ class G7HMixedNativeTests(unittest.TestCase):
                                           policy=policy)
                     self.assertEqual(result["outcome"], TERMINALS[policy][0])
 
+    def test_162_codex_p2_g7g_discretionary_hp_is_not_fixed_policy(self):
+        # Produce a genuine native, mechanically legal alternative policy:
+        # restore 1 HP on *each* Vanguard withdrawal turn. This retains
+        # real G4 receipts, legitimate Vigor payment, G0 turns, all G7-C
+        # exits, source snapshots and the original canonical ledger hash.
+        # An affordable choice does NOT make it the G7-G _next policy.
+        from unittest.mock import patch
+        from scripts import b06_g7g_hunter_pursuit_terminals_v0 as g7g
+        from scripts.b06_encounter_state_v0 import RegenerationChoice
+
+        original_next = g7g._next
+
+        def alternate_regeneration(combat, actor):
+            if actor != "vanguard":
+                return original_next(combat, actor)
+            a = combat.e.actors[actor]
+            combat.bridge.start_next_turn(RegenerationChoice(hp=1))
+            if combat.e.current != actor:
+                raise AssertionError("Native Vanguard turn required")
+            return a
+
+        native = g7g.run_trial(
+            level=3, size=4, seed=0,
+            mode="opposed_disengagement", include_ledger=True)
+        self.assertEqual(
+            (native["final_state"]["vanguard"]["hp"],
+             native["final_state"]["vanguard"]["vigor"]), (8, 36))
+        with patch.object(g7g, "_next", alternate_regeneration):
+            altered = g7g.run_trial(
+                level=3, size=4, seed=0,
+                mode="opposed_disengagement", include_ledger=True)
+        self.assertEqual(
+            (altered["final_state"]["vanguard"]["hp"],
+             altered["final_state"]["vanguard"]["vigor"]), (10, 34))
+        self.assertEqual(altered["ledger_sha256"],
+                         canonical_digest(altered["ledger"]))
+        healed = [x["detail"] for x in altered["ledger"]
+                  if x["kind"] == "regeneration_step"
+                  and x["detail"]["actor"] == "vanguard"]
+        self.assertEqual(len(healed), 2)
+        self.assertTrue(all(d["hp_restored"] == 1
+                            and d["throughput_spent"] == 1
+                            for d in healed))
+        with self.assertRaisesRegex(
+                AssertionError, "Fixed G7-G regeneration policy"):
+            attest_trial(
+                altered, level=3, seed=0,
+                policy="opposed_living_hunter_withdrawal")
+        # Unpatched original source choices still certify.
+        attest_trial(
+            native, level=3, seed=0,
+            policy="opposed_living_hunter_withdrawal")
+
+    def test_163_codex_p2_g7g_requires_dying_loss_cancellation_choice(self):
+        # G7-G _next spends one genuine Vigor to avoid Dying loss
+        # whenever the actor is not dead, is Dying and has Vigor.
+        # Replacing this with a legal "let Dying progress" allocation is
+        # a *different policy* even when the G4 arithmetic is valid.
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _reconcile_source_regeneration,
+        )
+        for level in (2, 3):
+            with self.subTest(level=level):
+                trial = run_pack(level, 17, include_trials=True)[
+                    "native_trials"]["hunter_multitarget_defeat"]
+                ledger = trial["ledger"]
+                dying = next(
+                    x for x in ledger if x["kind"] == "regeneration_step"
+                    and x["detail"]["survival_cancelled"] is True)
+                d = dying["detail"]
+                self.assertLessEqual(d["hp_before"], 0)
+                self.assertGreater(d["vigor_before"], 0)
+                # This mutation is internally affordable and uses a
+                # legal Dying-loss choice, but not G7-G's fixed choice.
+                d["survival_cancelled"] = False
+                d["hp_after"] -= 1
+                d["vigor_after"] += 1
+                d["throughput_spent"] -= 1
+                with self.assertRaisesRegex(
+                        AssertionError, "Fixed G7-G regeneration policy"):
+                    _reconcile_source_regeneration(
+                        ledger, trial["final_state"],
+                        policy="hunter_multitarget_defeat",
+                        level=level, seed=17)
+
+
 
 if __name__ == "__main__":
     unittest.main()

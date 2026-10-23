@@ -881,6 +881,23 @@ def _reconcile_source_regeneration(ledger, final, *, policy, level, seed):
                 raise AssertionError("Regeneration receipt lacks authentic allocation")
             survival = int(d["survival_cancelled"])
             restored, spent = d["hp_restored"], d["throughput_spent"]
+            if policy in ("hunter_multitarget_defeat",
+                          "opposed_living_hunter_withdrawal"):
+                # G7-G's _next chooses RegenerationChoice() for every
+                # conscious character: NEVER discretionary HP regeneration.
+                # A living Dying actor instead cancels the mandatory loss
+                # if and only if it has Vigor available. Those are *policy*
+                # decisions, not mere G4 affordability constraints.
+                # Reconstruct the pre-Step-2 state from independently
+                # replayed G4 damage and Vigor, not mutable summaries.
+                expected_cancel = (hp[actor] <= 0
+                                   and hp[actor] > -hpmax
+                                   and vigor[actor] > 0)
+                if (restored != 0
+                        or d["survival_cancelled"] is not expected_cancel):
+                    raise AssertionError(
+                        "Fixed G7-G regeneration policy forbids discretionary "
+                        "HP restoration and requires exact Dying-loss cancellation")
             available = reference.actors[actor].regen + int(actor in rites)
             dying = hp[actor] <= 0
             pre_heal = max(-hpmax, hp[actor] - int(dying and not survival))
