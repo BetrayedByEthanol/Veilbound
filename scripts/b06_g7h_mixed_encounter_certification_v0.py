@@ -1305,12 +1305,76 @@ def _hunter_bite_hits(ledger, target, *, policy):
                 or result.get("dead") is not damage["detail"].get("dead")
                 or result.get("hp_loss") != (
                     damage["detail"].get("hp_before", 0) -
-                    damage["detail"].get("hp_after", 0))):
+                    damage["detail"].get("hp_after", 0))
+                or result.get("wound") != damage["detail"].get("wound")):
             raise AssertionError("Bite's G4 damage does not match attested G5 outcome")
         hits.append({"resolved": resolved, "roll": roll,
                      "bridge": bridge, "damage": damage,
                      "action": action, "sequence": attested})
     return hits
+
+
+
+def _attest_fixed_g7g_actions(ledger, *, policy):
+    """Only the authored paid Hunter Bite is a G7-G Action.
+
+    G0 Turn AP arithmetic establishes affordability, not tactical authority.
+    In both G7-G scripts all party actors explicitly hold: their source G1
+    border moves and G5 exits do not spend arbitrary G0 Actions. Hunter may
+    commit exactly one physical B06-AT-04 Bite per round, and every such
+    debit must resolve as a paid, native G5/G4.5/G4 hit.
+    """
+    if policy not in ("hunter_multitarget_defeat",
+                      "opposed_living_hunter_withdrawal"):
+        return
+    actions = [ev for ev in ledger if ev["kind"] == "action_committed"]
+    results = [ev for ev in ledger if ev["kind"] == "g5_melee_resolved"]
+    forbidden = [ev for ev in ledger if ev["kind"] == "g5_melee_cancelled"]
+    if forbidden or len(actions) != len(results):
+        raise AssertionError("Fixed G7-G action policy forbids cancelled/unresolved paid slots")
+    per_round = set()
+    action_indices = set()
+    for action in actions:
+        d = action["detail"]
+        if (action["turn"] != "hunter" or d.get("actor") != "hunter"
+                or d.get("action_class") != "physical"
+                or d.get("label") != "sequence:B06-AT-04:0"
+                or type(d.get("ap_spent")) is not int or d["ap_spent"] != 24
+                or action["round"] in per_round):
+            raise AssertionError("Fixed G7-G action policy prohibits unauthored AP")
+        per_round.add(action["round"])
+        action_indices.add(action["index"])
+    authenticated = set()
+    for resolved in results:
+        d = resolved["detail"]
+        action_index = d.get("action_index")
+        if (type(action_index) is not int
+                or action_index not in action_indices
+                or action_index in authenticated
+                or resolved["turn"] != "hunter"
+                or d.get("attacker") != "hunter"
+                or d.get("target") not in ROSTER[1:]
+                or d.get("profile") != "B06-AT-04"
+                or d.get("outcome") != "hit"
+                or ledger[action_index]["round"] != resolved["round"]
+                or action_index >= resolved["index"]):
+            raise AssertionError("Fixed G7-G action policy requires a resolved native Bite")
+        authenticated.add(action_index)
+    if authenticated != action_indices:
+        raise AssertionError("Fixed G7-G action policy has orphan paid actions")
+    if policy == "opposed_living_hunter_withdrawal":
+        if sorted(per_round) != [1, 2] or len(actions) != 2:
+            raise AssertionError("Fixed G7-G withdrawal requires two paid Hunter Bites")
+    # Independently authenticate *every* physical outcome, including
+    # nonlethal hits before the actual final fatal Bite. Do not rely only
+    # on the terminal's selected lethal damage indices.
+    all_hits = [hit for actor in ROSTER[1:] for hit in
+                _hunter_bite_hits(ledger, actor, policy=policy)]
+    if (len(all_hits) != len(results)
+            or {hit["resolved"]["index"] for hit in all_hits} !=
+               {resolved["index"] for resolved in results}):
+        raise AssertionError("Fixed G7-G action policy has unadjudicated native resolution")
+
 
 
 def _replay_native_exit_geometry(ledger, *, party_exits=True):
@@ -1353,6 +1417,10 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
     remaining = {}
     resource_round = {}
     exited = set()
+    g7g = any(x["kind"] == "g7g_policy_selected" for x in ledger)
+    pursuit = None
+    selected_count = 0
+    completed_count = 0
     for event in ledger:
         kind, d = event["kind"], event["detail"]
         if kind == "turn_resources":
@@ -1378,6 +1446,38 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
             # No alternate MP path or sourced allied transits in this
             # bounded G7-G cautious scene. Do not skip unknown geometry.
             raise AssertionError("Unreplayable movement cannot fund G7-H exit")
+        elif kind == "g7g_hunter_target_selected":
+            # Rebuild the *whole declared route* from the original fixture's
+            # replayed Hunter footprint and target positions. A digest alone
+            # cannot authenticate an edited route or a fabricated starting
+            # footprint; the authored planner never reads that declaration.
+            from scripts.b06_g7g_hunter_pursuit_terminals_v0 import _route_to_contact
+            hunter = expected.actors["hunter"]
+            target = d.get("target")
+            before = [list(cell) for cell in hunter.occupied]
+            if (not g7g or pursuit is not None
+                    or event["turn"] != "hunter"
+                    or target not in ROSTER[1:]
+                    or d.get("hunter") != "hunter"
+                    or d.get("target_source") !=
+                       expected.actors[target].source.source_id
+                    or resource_round.get("hunter") != event["round"]
+                    or d.get("initial_footprint") != before
+                    or (party_exits and
+                        (event["round"] != 2 or target != "vanguard"))):
+                raise AssertionError("G7-H pursuit selection contradicts replayed source position")
+            try:
+                source_route = _route_to_contact(expected, target)
+            except (UnresolvedDecision, ValueError) as error:
+                raise AssertionError("G7-H pursuit has no authored source route") from error
+            authored = [[step, list(arg) if isinstance(arg, tuple) else arg,
+                         clockwise, cost]
+                        for step, arg, clockwise, cost in source_route]
+            if d.get("declared_cautious_route") != authored:
+                raise AssertionError("G7-H pursuit declaration differs from actual native route")
+            pursuit = {"selected": event, "initial": before,
+                       "route": authored, "steps": []}
+            selected_count += 1
         elif kind == "g1_movement_step":
             # Independently authenticate the actual trigger that permitted
             # THIS movement before accepting source geometry or MP.
@@ -1431,12 +1531,35 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
                 raise AssertionError("G7-H G1 move geometry, MP or destination altered")
             remaining[actor] -= price
             source.occupied = destination
+            if g7g and actor == "hunter":
+                if pursuit is None or len(pursuit["steps"]) >= len(pursuit["route"]):
+                    raise AssertionError("G7-H pursuit contains undeclared Hunter motion")
+                route_step = pursuit["route"][len(pursuit["steps"])]
+                route_kind, route_arg, route_clockwise, route_cost = route_step
+                actual_kind = ("pivot" if kind_step == "pivot" else "step")
+                actual_arg = (d.get("pivot_anchor") if actual_kind == "pivot"
+                              else d.get("direction"))
+                if (actual_kind != route_kind or actual_arg != route_arg
+                        or d.get("clockwise") != route_clockwise
+                        or price != route_cost):
+                    raise AssertionError("G7-H pursuit movement differs from declared route")
+                pursuit["steps"].append(event["index"])
         elif kind == "g7g_hunter_pursuit_executed":
             # Independently derive Hunter front-line contact from its
             # replayed anatomical footprint, even for multi-round defeat.
             target = d.get("target")
             hunter = expected.actors["hunter"]
-            if (event["turn"] != "hunter"
+            if (not g7g or pursuit is None
+                    or event["round"] != pursuit["selected"]["round"]
+                    or pursuit["selected"]["index"] >= event["index"]
+                    or target != pursuit["selected"]["detail"].get("target")
+                    or d.get("initial_footprint") != pursuit["initial"]
+                    or d.get("movement_indices") != pursuit["steps"]
+                    or d.get("mp_remaining") != remaining.get("hunter")
+                    or (len(pursuit["steps"]) < len(pursuit["route"])
+                        and pursuit["route"][len(pursuit["steps"])][3]
+                            <= remaining["hunter"])
+                    or event["turn"] != "hunter"
                     or target not in ROSTER[1:]
                     or d.get("final_footprint") !=
                        [list(cell) for cell in hunter.occupied]
@@ -1448,6 +1571,8 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
                                          or d["contact"] is not True))):
                 raise AssertionError(
                     "G7-H Hunter pursuit receipt lost actual head-forward contact")
+            completed_count += 1
+            pursuit = None
         elif kind == "g5_melee_roll" and d.get("attacker") == "hunter":
             target = d.get("target")
             if (target not in ROSTER[1:] or event["turn"] != "hunter"
@@ -1466,6 +1591,9 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
                     or resource_round.get(actor) != event["round"]
                     or d.get("unused_mp") != remaining[actor]):
                 raise AssertionError("G7-H G1 MP does not reconcile at native Turn End")
+    if g7g and (pursuit is not None or selected_count != completed_count
+                or selected_count == 0):
+        raise AssertionError("G7-H pursuit has unmatched native selection or execution")
     return {actor: [list(cell) for cell in expected.actors[actor].occupied]
             for actor in ROSTER}
 
@@ -2822,6 +2950,7 @@ def attest_trial(report, *, level, seed, policy):
     completed_rounds = _native_round_turn_chronology(ledger)
     _origin(report, ledger, policy=policy, level=level, seed=seed)
     _reconcile_all_turn_end_ap(ledger, level=level, seed=seed)
+    _attest_fixed_g7g_actions(ledger, policy=policy)
     turns = [v["detail"].get("actor") for v in ledger if v["kind"] == "turn_end"]
     ends = [v for v in ledger if v["kind"] == "round_end"]
     last_round_end = ends[-1]["index"] if ends else -1

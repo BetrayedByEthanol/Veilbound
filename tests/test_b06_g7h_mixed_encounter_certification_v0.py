@@ -2434,5 +2434,115 @@ class G7HMixedNativeTests(unittest.TestCase):
                     self.assertEqual(proof["outcome"],"hunter_defeat_attested")
 
 
+    def test_102_p2_fixed_g7g_player_cannot_commit_valid_but_unauthored_ap(self):
+        # Replay legitimate actor/source AP exactly as the current accounting
+        # validator would accept. The *policy*, not budget, must reject it.
+        for policy in POLICIES[1:]:
+            with self.subTest(policy=policy):
+                trial = self._case(policy)
+                events = trial["ledger"]
+                # An otherwise non-Action source in the Scholar's first
+                # turn, replaced with a self-consistent affordable 24 AP
+                # general action. The same technique can target any member.
+                unused = next(v for v in events
+                              if v["kind"] == "regeneration_step"
+                              and v["round"] == 1 and v["turn"] == "scholar")
+                scholar_resources = next(v for v in events
+                                         if v["kind"] == "turn_resources"
+                                         and v["round"] == 1
+                                         and v["turn"] == "scholar")
+                self.assertGreaterEqual(scholar_resources["detail"]["ap"], 24)
+                unused["kind"] = "action_committed"
+                unused["detail"] = {
+                    "actor": "scholar", "action_class": "general",
+                    "label": "g7h:unapproved:general",
+                    "ap_spent": 24,
+                    "ap_remaining": scholar_resources["detail"]["ap"] - 24,
+                }
+                end = next(v for v in events if v["kind"] == "turn_end"
+                           and v["round"] == 1 and v["turn"] == "scholar")
+                end["detail"]["unused_ap"] -= 24
+                trial["ledger_sha256"] = canonical_digest(events)
+                with self.assertRaisesRegex(
+                        AssertionError, "Fixed G7-G action policy"):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_103_p2_defeat_bite_wound_must_match_synchronous_G4(self):
+        trial = self._case("hunter_multitarget_defeat")
+        events = trial["ledger"]
+        damage = next(e for e in events if e["kind"] == "g4_damage_applied"
+                      and e["detail"].get("cause") == "source-profile:B06-AT-04"
+                      and e["detail"].get("wound") == "Critical"
+                      and e["detail"].get("dead") is not True)
+        bridge = next(e for e in events if
+                      e["kind"] == "g45_attested_hit"
+                      and e["detail"].get("target") == damage["detail"]["recipient"]
+                      and e["index"] > damage["index"]
+                      and e["detail"].get("actual_result", {}).get("wound") ==
+                          "Critical")
+        action = bridge["detail"]["action_index"]
+        resolved = next(e for e in events
+                        if e["kind"] == "g5_melee_resolved"
+                        and e["detail"].get("action_index") == action)
+        self.assertEqual(resolved["detail"]["damage"]["wound"],
+                         bridge["detail"]["actual_result"]["wound"])
+        bridge["detail"]["actual_result"]["wound"] = None
+        resolved["detail"]["damage"]["wound"] = None
+        trial["ledger_sha256"] = canonical_digest(events)
+        with self.assertRaisesRegex(
+                AssertionError, "Bite's G4 damage"):
+            attest_trial(trial, level=3, seed=17,
+                         policy="hunter_multitarget_defeat")
+
+    def test_104_p2_defeat_source_pursuit_receipt_reconstructs_entire_route(self):
+        source = self._case("hunter_multitarget_defeat")
+        selected = next(v for v in source["ledger"] if
+                        v["kind"] == "g7g_hunter_target_selected"
+                        and v["detail"]["declared_cautious_route"])
+        pursued = next(v for v in source["ledger"] if
+                       v["kind"] == "g7g_hunter_pursuit_executed"
+                       and v["round"] == selected["round"])
+        for variant in ("selection_start", "selection_route",
+                        "pursuit_start", "pursuit_indices",
+                        "pursuit_mp", "pursuit_extra_index"):
+            with self.subTest(variant=variant):
+                trial = deepcopy(source)
+                a = trial["ledger"][selected["index"]]["detail"]
+                b = trial["ledger"][pursued["index"]]["detail"]
+                if variant == "selection_start":
+                    a["initial_footprint"] = [[7, 6], [7, 5]]
+                elif variant == "selection_route":
+                    a["declared_cautious_route"] = [["step", [0, 1], None, 2]]
+                elif variant == "pursuit_start":
+                    b["initial_footprint"] = [[7, 6], [7, 5]]
+                elif variant == "pursuit_indices":
+                    b["movement_indices"] = []
+                elif variant == "pursuit_mp":
+                    b["mp_remaining"] = 999
+                else:
+                    b["movement_indices"].append(pursued["index"])
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaisesRegex(AssertionError, "G7-H pursuit"):
+                    attest_trial(trial, level=3, seed=17,
+                                 policy="hunter_multitarget_defeat")
+
+    def test_105_p2_positive_exact_G7G_action_and_pursuit_receipts(self):
+        for level in (2, 3):
+            report = run_pack(level, 17, include_trials=True)
+            for policy in POLICIES[1:]:
+                with self.subTest(level=level, policy=policy):
+                    trial = report["native_trials"][policy]
+                    actions = [v for v in trial["ledger"]
+                               if v["kind"] == "action_committed"]
+                    self.assertTrue(actions)
+                    self.assertEqual({v["detail"]["actor"] for v in actions},
+                                     {"hunter"})
+                    self.assertEqual({v["detail"]["label"] for v in actions},
+                                     {"sequence:B06-AT-04:0"})
+                    accepted = attest_trial(trial, level=level, seed=17,
+                                            policy=policy)
+                    self.assertEqual(accepted["outcome"], TERMINALS[policy][0])
+
+
 if __name__ == "__main__":
     unittest.main()
