@@ -255,6 +255,21 @@ must not receive the certificate of G7-G's authored policy. The
 separate G6-D victory policy retains its independent regeneration
 allocation behavior.
 
+**Codex P2 — fixed G6-D victory regeneration allocation provenance:**
+The `mixed_victory_rite` source is not a choose-any-affordable-HP-policy
+fight: G6-C `_hunter_turn` requests **4 HP** for the Hunter in Round 2;
+`_priest_turn` requests **min(2, missing HP, available Vigor)** for
+Vanguard in Round 2; all other Step-2 choices restore **0 HP** and
+do **not** cancel Dying loss, including the Hunter's Round-3 Dying
+turn. G7-H calculates these choices from independently replayed
+**pre-regeneration** source HP/Vigor, before accepting any signed
+G4/G4.5 receipt, final actor snapshot or separately retained embedded
+`source_report`. A legal alternative Vanguard 1-HP heal is still a
+different policy, even when its own live G4, G4.5, wound, Vigor and
+final snapshots are consistent and its original G6-D
+`source_report` is left unchanged. The attestor rejects it without
+changing the underlying G4 regeneration freedom elsewhere.
+
 ### Codex P1 provenance hardening — lethal Bow and G1 withdrawal continuity
 
 The G7-H independent attestor now verifies the victory terminal's
