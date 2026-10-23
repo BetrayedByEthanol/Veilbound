@@ -6,6 +6,7 @@ G6-D victory; G7-G supplies genuine lethal pursuit and opposed withdrawal.
 This is terminal-path *coverage*, not representative play or Hunter CR.
 """
 from copy import deepcopy
+from functools import lru_cache
 import json
 
 from scripts.b06_encounter_state_v0 import UnresolvedDecision
@@ -452,6 +453,20 @@ def _origin(report, ledger, *, policy, level, seed):
                    source_scene.e.actors[actor].source.digest
                    for actor in ROSTER)):
         raise AssertionError("G7-H original source digests diverge from authored fixtures")
+    # A synthetic clear-lane replay cannot authenticate a trace that was
+    # *installed* with different directional cover or preloaded G3 effects.
+    # Bind the full native G2/G3 installation records (including index,
+    # round and actor) to this independently reconstructed source scene
+    # before treating its geometry and empty effect inventory as authority.
+    for kind in ("g2_lane_installed", "g3_spell_state_installed"):
+        original = [ev for ev in ledger if ev["kind"] == kind]
+        authored = [ev for ev in source_scene.e.ledger if ev["kind"] == kind]
+        if (len(original) != 1 or len(authored) != 1
+                or original[0] != authored[0]
+                or original[0]["index"] >= v["index"]):
+            raise AssertionError(
+                "G7-H installed G2 lane/G3 initial effects disagree "
+                "with independently authored G6-C fixture")
     return scene
 
 
@@ -3430,7 +3445,23 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
     }
 
 
-def _reconcile_legacy_victory_report(report, ledger, final, *, terminal, rounds):
+@lru_cache(maxsize=32)
+def _authored_victory_source_report(level, seed):
+    """Replay the original G6-D public report from independently sourced play.
+
+    The embedded 'source_report' contains G4.5 start/current actor state,
+    wounds, actual attack receipts and ending. Comparing it only to a
+    few outer summary fields lets a caller retain contradictory original
+    evidence after an otherwise valid terminal attestation. The replay
+    is deterministic by source scene, authored policy, level and seed.
+    Cache only the internally created fixture; never cache a caller trial.
+    """
+    return run_i3_defeat(
+        level=level, seed=seed, g7h_priest_rite=True)["source_report"]
+
+
+def _reconcile_legacy_victory_report(
+        report, ledger, final, *, terminal, rounds, level, seed):
     """Reconcile G6-D's original public keys with the SAME certified evidence.
 
     External callers may inspect the original native trial, not just the
@@ -3458,6 +3489,8 @@ def _reconcile_legacy_victory_report(report, ledger, final, *, terminal, rounds)
             or report["rounds"] != rounds
             or report.get("roster") != list(ROSTER)
             or report.get("finishing_shot") != expected_shot
+            or report.get("source_report") !=
+               _authored_victory_source_report(level, seed)
             or report.get("terminal") != report.get("native_terminal")
             or report["terminal"].get("terminal_event") != terminal["index"]):
         raise AssertionError(
@@ -3576,7 +3609,8 @@ def attest_trial(report, *, level, seed, policy):
         ledger, policy=policy, level=level, seed=seed)
     if policy == "mixed_victory_rite":
         _reconcile_legacy_victory_report(
-            report, ledger, final, terminal=terminal, rounds=len(ends))
+            report, ledger, final, terminal=terminal, rounds=len(ends),
+            level=level, seed=seed)
     else:
         _reconcile_legacy_g7g_report(
             report, ledger, final, policy=policy,

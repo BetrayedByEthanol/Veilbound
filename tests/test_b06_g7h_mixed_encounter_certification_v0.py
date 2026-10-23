@@ -3338,5 +3338,135 @@ class G7HMixedNativeTests(unittest.TestCase):
                             self.assertEqual(proof["source_decisions"]["chosen_R_rites"], 1)
 
 
+    def test_135_codex_p1_installed_G2_cover_matches_source_fixture(self):
+        # The exact directional surface is a *valid* G2 configuration:
+        # it would make the two attack-total-17 Fire projectiles miss.
+        # Reconstructed clear-lane previews cannot override that receipt.
+        for policy in POLICIES:
+            for mutation in ("cover", "scene", "missing", "duplicate",
+                             "index", "round"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = self._case(policy)
+                    installations = [e for e in trial["ledger"]
+                                     if e["kind"] == "g2_lane_installed"]
+                    self.assertEqual(len(installations), 1)
+                    receipt = installations[0]
+                    if mutation == "cover":
+                        receipt["detail"]["cover"].append(
+                            {"cell": [2, 1], "difficulty": 8,
+                             "facing": [1, 1]})
+                    elif mutation == "scene":
+                        receipt["detail"]["scene"] = "forged_clear_lane"
+                    elif mutation == "missing":
+                        receipt["kind"] = "g2_lane_previously_installed"
+                    elif mutation == "duplicate":
+                        trial["ledger"].append(deepcopy(receipt))
+                        trial["ledger"][-1]["index"] = len(trial["ledger"]) - 1
+                    elif mutation == "index":
+                        receipt["index"], trial["ledger"][receipt["index"] + 1]["index"] = (
+                            receipt["index"] + 1, receipt["index"])
+                        # Index chronology itself may reject the forgery.
+                    else:
+                        receipt["round"] = 99
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_136_codex_p2_installed_G3_effect_inventory_is_source_bound(self):
+        for policy in POLICIES:
+            for mutation in ("fabricated_effect", "missing_loaded",
+                             "foreign_effect", "extra_field", "absent_receipt",
+                             "extra_receipt"):
+                with self.subTest(policy=policy, mutation=mutation):
+                    trial = self._case(policy)
+                    installations = [e for e in trial["ledger"]
+                                     if e["kind"] == "g3_spell_state_installed"]
+                    self.assertEqual(len(installations), 1)
+                    receipt = installations[0]
+                    self.assertEqual(receipt["detail"]["loaded"], [])
+                    if mutation == "fabricated_effect":
+                        receipt["detail"]["loaded"] = [
+                            {"caster": "archer", "effect": "G3-0001",
+                             "committed": 1}]
+                    elif mutation == "missing_loaded":
+                        del receipt["detail"]["loaded"]
+                    elif mutation == "foreign_effect":
+                        receipt["detail"]["loaded"] = [
+                            {"caster": "hunter", "effect": "G3-forged",
+                             "committed": 3}]
+                    elif mutation == "extra_field":
+                        receipt["detail"]["preloaded_vp"] = 1
+                    elif mutation == "absent_receipt":
+                        receipt["kind"] = "not_an_installed_effect"
+                    else:
+                        trial["ledger"].append(deepcopy(receipt))
+                        trial["ledger"][-1]["index"] = len(trial["ledger"]) - 1
+                    trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_137_codex_p2_embedded_g6d_source_report_must_reconcile(self):
+        policy = "mixed_victory_rite"
+        baseline = self._case(policy)
+        self.assertEqual(baseline["source_report"]["ending"], "death_attested")
+        self.assertTrue(baseline["source_report"]["current"]
+                        ["actors"]["hunter"]["dead"])
+        for mutation in ("removed", "ending", "attacks", "current_death",
+                         "current_hp", "source_provenance", "wounds",
+                         "unresolved_attack_slots", "additional_field"):
+            with self.subTest(mutation=mutation):
+                trial = deepcopy(baseline)
+                native = trial["source_report"]
+                if mutation == "removed":
+                    del trial["source_report"]
+                elif mutation == "ending":
+                    native["ending"] = "unresolved"
+                elif mutation == "attacks":
+                    native["attacks"] = []
+                elif mutation == "current_death":
+                    native["current"]["actors"]["hunter"]["dead"] = False
+                elif mutation == "current_hp":
+                    native["current"]["actors"]["hunter"]["hp"] = 14
+                elif mutation == "source_provenance":
+                    native["source_provenance"]["hunter"]["hp"] = 123
+                elif mutation == "wounds":
+                    native["wounds"] = []
+                    native["wounds"].append({"fake": True})
+                elif mutation == "unresolved_attack_slots":
+                    native["unresolved_attack_slots"] = [{"fabricated": True}]
+                else:
+                    native["fabricated_adjudication"] = "accepted"
+                # Native G0/G2/G3/G4/G5 ledger is unchanged. The
+                # formerly unchecked retained report must still fail.
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_138_legitimate_installation_and_embedded_report_L2_L3(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                pack = run_pack(level, seed, include_trials=True)
+                for policy in POLICIES:
+                    with self.subTest(level=level, seed=seed, policy=policy):
+                        trial = pack["native_trials"][policy]
+                        receipts = {kind: [v for v in trial["ledger"]
+                                           if v["kind"] == kind]
+                                    for kind in ("g2_lane_installed",
+                                                 "g3_spell_state_installed")}
+                        self.assertEqual(len(receipts["g2_lane_installed"]), 1)
+                        self.assertEqual(len(receipts["g3_spell_state_installed"]), 1)
+                        self.assertEqual(receipts["g2_lane_installed"][0]
+                                         ["detail"]["cover"], [])
+                        self.assertEqual(receipts["g3_spell_state_installed"][0]
+                                         ["detail"]["loaded"], [])
+                        if policy == "mixed_victory_rite":
+                            self.assertEqual(
+                                trial["source_report"]["ending"], "death_attested")
+                        self.assertEqual(
+                            attest_trial(trial, level=level, seed=seed,
+                                         policy=policy)["outcome"],
+                            TERMINALS[policy][0])
+
+
+
 if __name__ == "__main__":
     unittest.main()
