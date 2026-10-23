@@ -350,7 +350,14 @@ def _origin(report, ledger, *, policy, level, seed):
     source_scene = mixed_scene(
         size=4, level=level, seed=seed,
         party_exits=(policy == "opposed_living_hunter_withdrawal"))
-    source_genesis = source_scene.e.ledger[0]["detail"]["source_ids"]
+    authored_genesis = source_scene.e.ledger[0]["detail"]
+    # The branch-specific G7-H/G7-G marker is not authority to replace
+    # G0's original scenario contract. Reconstruct it from the native
+    # G6-C factory rather than trusting a rehashed genesis policy string.
+    if (genesis["detail"].get("policy") != authored_genesis["policy"]
+            or genesis["detail"].get("objective") != authored_genesis["objective"]):
+        raise AssertionError("G7-H G0 genesis policy/objective differs from source scene")
+    source_genesis = authored_genesis["source_ids"]
     original_sources = genesis["detail"].get("source_ids")
     if (not isinstance(original_sources, dict)
             or set(original_sources) != set(ROSTER)
@@ -1551,6 +1558,163 @@ def _authored_exit_chains(ledger, terminal, final_state):
         raise AssertionError("G7-C terminal exits disagree with four native receipt chains")
     return receipts
 
+def _reconcile_victory_all_ab_sequences(ledger):
+    """Bind EVERY A/B paid slot to the G6-C policy, including B's R1 miss.
+
+    Native consistency of a declaration, assignment and roll cannot prove
+    which *legal* Dodge/Take Hit the authored Hunter originally chose.
+    Reconstruct both rounds and the defender's pressured Dodge resource
+    from the independent source scene, not a mutable report or roll.
+    """
+    from scripts.b06_hunter_mixed_party_g6c_v0 import POLICY, mixed_scene
+    from scripts.b06_hunter_party_exchanges_v0 import BUILD
+
+    genesis = ledger[0]["detail"]
+    level, seed = genesis["source_ids"]["vanguard"]["level"], genesis["seed"]
+    authored = mixed_scene(size=4, level=level, seed=seed)
+    hunter = authored.e.actors["hunter"]
+    base_dodge = 10 + min(hunter.agility, 4) + hunter.awareness
+    guard = hunter.guard_capacity
+    actors = (("vanguard", "A", "B06-PC-A-SWORD", "dodge"),
+              ("guardian", "B", "B06-PC-B-MACE", "take_hit"))
+    paid = [v for v in ledger if v["kind"] == "action_committed"
+            and v["detail"].get("actor") in ("vanguard", "guardian")
+            and v["detail"].get("label", "").startswith("sequence:")]
+    assigned_to_hunter = [v for v in ledger
+                          if v["kind"] == "defense_assigned"
+                          and v["detail"].get("actor") == "hunter"]
+    ab_rolls = [v for v in ledger if v["kind"] == "g5_melee_roll"
+                and v["detail"].get("attacker") in ("vanguard", "guardian")]
+    ab_results = [v for v in ledger
+                  if v["kind"] in ("g5_melee_resolved", "g5_melee_cancelled")
+                  and (v["detail"].get("attacker") in ("vanguard", "guardian")
+                       or v["detail"].get("action_index") in
+                          {action["index"] for action in paid})]
+    if (len(paid) != 4 or len(assigned_to_hunter) != 4
+            or len(ab_rolls) != 4 or len(ab_results) != 4):
+        raise AssertionError("Every authored A/B slot needs one paid roll and resolution")
+
+    seen_actions, checked = set(), []
+    for round_no in (1, 2):
+        pressure = 0  # G0 begin_round resets Dodge Pressure on Hunter.
+        for actor, role, profile, defense_choice in actors:
+            face, damage_die = POLICY[round_no][actor]
+            action_set = [v for v in paid
+                          if v["round"] == round_no and v["turn"] == actor
+                          and v["detail"].get("label") == f"sequence:{profile}:0"]
+            if len(action_set) != 1:
+                raise AssertionError("A/B authored round lacks exact source payment")
+            action = action_set[0]
+            idx = action["index"]
+            if idx in seen_actions:
+                raise AssertionError("A/B native action index was reused")
+            seen_actions.add(idx)
+            expected_value = (base_dodge - pressure
+                              if defense_choice == "dodge" else None)
+            if defense_choice == "dodge":
+                pressure += 2
+            seqs = [v for v in ledger if v["kind"] == "g5_melee_sequence_attested"
+                    and idx in v["detail"].get("action_indices", ())]
+            if len(seqs) != 1:
+                raise AssertionError("A/B paid slot has no unique original G5 sequence")
+            seq = seqs[0]
+            q = seq["detail"]
+            declaration_index = q.get("declaration_index")
+            defense_indices = q.get("defense_indices")
+            if (q.get("attacker") != actor or q.get("target") != "hunter"
+                    or q.get("profiles") != [profile]
+                    or q.get("action_indices") != [idx]
+                    or q.get("source_bonuses") != [BUILD[role]["attack"]]
+                    or q.get("source_digest") !=
+                       genesis["source_ids"][actor]["digest"]
+                    or type(declaration_index) is not int
+                    or not idx < declaration_index < seq["index"]
+                    or not isinstance(defense_indices, list)
+                    or len(defense_indices) != 1
+                    or type(defense_indices[0]) is not int
+                    or not declaration_index < defense_indices[0] < seq["index"]
+                    or seq["round"] != round_no or seq["turn"] != actor):
+                raise AssertionError("A/B paid sequence diverges from authored source")
+            declaration, defense = ledger[declaration_index], ledger[defense_indices[0]]
+            if (declaration["kind"] != "attack_sequence_committed"
+                    or declaration["round"] != round_no
+                    or declaration["turn"] != actor
+                    or declaration["detail"].get("attacker") != actor
+                    or declaration["detail"].get("target") != "hunter"
+                    or declaration["detail"].get("profiles") != [profile]
+                    or declaration["detail"].get("defenses") != [defense_choice]
+                    or defense["kind"] != "defense_assigned"
+                    or defense["round"] != round_no
+                    or defense["turn"] != actor
+                    or defense["detail"].get("actor") != "hunter"
+                    or defense["detail"].get("attack_key") !=
+                       f"{actor}:hunter:0"
+                    or defense["detail"].get("defense") != defense_choice
+                    or defense["detail"].get("defense_value") != expected_value
+                    or defense["detail"].get("dodge_pressure") != pressure
+                    or defense["detail"].get("guard_remaining") != guard):
+                raise AssertionError("A/B authored Dodge/Take Hit or resource state changed")
+            rolls = [v for v in ab_rolls
+                     if v["detail"].get("action_index") == idx]
+            results = [v for v in ab_results
+                       if v["detail"].get("action_index") == idx]
+            if len(rolls) != 1 or len(results) != 1:
+                raise AssertionError("Every paid A/B melee slot must roll and resolve")
+            roll, result = rolls[0], results[0]
+            rd, d = roll["detail"], result["detail"]
+            if (result["kind"] != "g5_melee_resolved"
+                    or not seq["index"] < roll["index"] < result["index"]
+                    or roll["round"] != round_no or roll["turn"] != actor
+                    or result["round"] != round_no or result["turn"] != actor
+                    or rd.get("action_index") != idx
+                    or rd.get("declaration_index") != declaration_index
+                    or rd.get("slot") != 0
+                    or rd.get("attacker") != actor or rd.get("target") != "hunter"
+                    or rd.get("profile") != profile
+                    or rd.get("declared_defense") != defense_choice
+                    or rd.get("defense") != defense_choice
+                    or rd.get("defense_value") != expected_value
+                    or rd.get("attack_face") != face
+                    or rd.get("source_attack_bonus") != BUILD[role]["attack"]
+                    or rd.get("prone_modifier") != 0
+                    or rd.get("attack_bonus") != BUILD[role]["attack"]
+                    or rd.get("attack_total") != face + BUILD[role]["attack"]
+                    or rd.get("confirmation_face") is not None
+                    or rd.get("critical") != "normal"
+                    or rd.get("spontaneous_policy") != "decline_all"
+                    or d.get("attacker") != actor or d.get("target") != "hunter"
+                    or d.get("profile") != profile
+                    or d.get("critical") != "normal"):
+                raise AssertionError("A/B authored melee roll or native result altered")
+            opening, ready = _attest_unopposed_response_window(
+                ledger, trigger=f"g5:melee:{idx}", actor=actor,
+                round_no=round_no, before_index=seq["index"],
+                after_index=roll["index"])
+            if (ready["index"] != roll["index"] - 1
+                    or ready["index"] != opening["index"] + 3):
+                raise AssertionError("A/B paid roll lacks contiguous legal G0 response chain")
+            hit = (face != 1 and (defense_choice == "take_hit"
+                   or face == 20 or face + BUILD[role]["attack"] > expected_value))
+            if (rd.get("hit") is not hit
+                    or d.get("outcome") != ("hit" if hit else "miss")
+                    or (not hit and d.get("damage") is not None)
+                    or (not hit and any(
+                        v["kind"] == "g45_attested_hit"
+                        and v["detail"].get("action_index") == idx for v in ledger))):
+                raise AssertionError("A/B authored miss/hit must match source roll")
+            checked.append((actor, round_no, hit))
+        if pressure != 2:
+            raise AssertionError("Authored Vanguard Dodge must commit Hunter pressure")
+    if (len(seen_actions) != 4
+            or [v["detail"]["attack_key"] for v in assigned_to_hunter] !=
+               [f"{actor}:hunter:0" for _ in (1, 2) for actor in
+                ("vanguard", "guardian")]
+            or checked != [("vanguard", 1, True), ("guardian", 1, False),
+                           ("vanguard", 2, True), ("guardian", 2, True)]):
+        raise AssertionError("Victory lacks exact four source A/B outcomes")
+    return checked
+
+
 def _player_melee_hit_chains(ledger, actor, profile):
     """Prove G6-B A/B participation from real paid G0 -> G5 -> G4 -> G4.5.
 
@@ -2388,8 +2552,10 @@ def _source_decisions(ledger, *, policy, terminal, final_state):
         if (len(actual_hunter_hits) != 1
                 or actual_hunter_hits[0]["resolved"]["round"] != 2):
             raise AssertionError("Victory Hunter must land one actual paid Round-2 Bite")
-        # Preserve the original hit-specific source/defense diagnostics
-        # before authenticating the independent Round-1 paid miss.
+        # Bind all four A/B paid actions to the original G6-C defense
+        # policy, Hunter Dodge Pressure and BOTH hit/miss response windows.
+        # The hit-specific G4/G4.5 audit below remains independent.
+        _reconcile_victory_all_ab_sequences(ledger)
         _reconcile_victory_hunter_sequences(ledger)
         for who, attack in (("vanguard", "B06-PC-A-SWORD"),
                             ("guardian", "B06-PC-B-MACE")):

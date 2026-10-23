@@ -2290,5 +2290,149 @@ class G7HMixedNativeTests(unittest.TestCase):
 
 
 
+    def test_97_p1_every_AB_defense_is_exact_source_policy_and_pressure(self):
+        # Coordinated changes to declaration, assignment, roll and the
+        # subsequent pressure receipt still cannot substitute another
+        # legal Hunter defense for the G6-C authored choice.
+        for round_no in (1, 2):
+            for actor in ("vanguard", "guardian"):
+                with self.subTest(round_no=round_no, actor=actor):
+                    trial=self._case(POLICIES[0])
+                    events=trial["ledger"]
+                    declaration=next(v for v in events
+                                     if v["kind"]=="attack_sequence_committed"
+                                     and v["round"]==round_no
+                                     and v["detail"].get("attacker")==actor
+                                     and v["detail"].get("target")=="hunter")
+                    chosen="take_hit" if actor=="vanguard" else "dodge"
+                    declaration["detail"]["defenses"]=[chosen]
+                    key=f"{actor}:hunter:0"
+                    assigned=next(v for v in events
+                                  if v["kind"]=="defense_assigned"
+                                  and v["round"]==round_no
+                                  and v["detail"].get("attack_key")==key)
+                    defense_value=(None if chosen=="take_hit" else 12)
+                    assigned["detail"]["defense"]=chosen
+                    assigned["detail"]["defense_value"]=defense_value
+                    assigned["detail"]["dodge_pressure"]=(
+                        0 if chosen=="take_hit" else 4)
+                    seq=next(v for v in events
+                             if v["kind"]=="g5_melee_sequence_attested"
+                             and v["detail"].get("attacker")==actor
+                             and v["round"]==round_no)
+                    action=seq["detail"]["action_indices"][0]
+                    roll=next(v for v in events
+                              if v["kind"]=="g5_melee_roll"
+                              and v["detail"].get("action_index")==action)
+                    roll["detail"]["defense"]=chosen
+                    roll["detail"]["declared_defense"]=chosen
+                    roll["detail"]["defense_value"]=defense_value
+                    if actor=="vanguard":
+                        # Also amend the *next* G0 pressure receipt, so all
+                        # changed local resource metadata appears coherent.
+                        guardian=next(v for v in events
+                                      if v["kind"]=="defense_assigned"
+                                      and v["round"]==round_no
+                                      and v["detail"].get("attack_key")==
+                                      "guardian:hunter:0")
+                        guardian["detail"]["dodge_pressure"]=0
+                    trial["ledger_sha256"]=canonical_digest(events)
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial,level=3,seed=17,policy=POLICIES[0])
+
+    def test_98_p1_guardian_round1_miss_requires_true_legal_window(self):
+        # Round-1 B face=1 misses and has no G4.5 hit; it STILL needs
+        # both legal source rechecks and one authentic G5 roll/resolution.
+        for level in (2, 3):
+            source=run_pack(level, 17, include_trials=True)[
+                "native_trials"][POLICIES[0]]
+            events=source["ledger"]
+            miss=next(v for v in events if
+                      v["kind"]=="g5_melee_resolved"
+                      and v["round"]==1
+                      and v["detail"].get("attacker")=="guardian")
+            self.assertEqual(miss["detail"]["outcome"],"miss")
+            action=miss["detail"]["action_index"]
+            trigger=f"g5:melee:{action}"
+            for stage in ("trigger_rechecked_after_interceptions",
+                          "trigger_rechecked_after_responses"):
+                with self.subTest(level=level,stage=stage):
+                    trial=deepcopy(source)
+                    recheck=next(v for v in trial["ledger"]
+                                 if v["kind"]==stage
+                                 and v["detail"].get("trigger")==trigger)
+                    self.assertIs(recheck["detail"]["legal"],True)
+                    recheck["detail"]["legal"]=False
+                    trial["ledger_sha256"]=canonical_digest(trial["ledger"])
+                    with self.assertRaises(AssertionError):
+                        attest_trial(trial,level=level,seed=17,policy=POLICIES[0])
+
+    def test_99_p1_guardian_round1_miss_cannot_be_cancelled_or_omitted(self):
+        source=self._case(POLICIES[0])
+        for corruption in ("fake_cancel", "omit_original_roll",
+                           "replace_original_roll", "change_miss_to_hit"):
+            with self.subTest(corruption=corruption):
+                trial=deepcopy(source)
+                events=trial["ledger"]
+                resolved=next(v for v in events if
+                              v["kind"]=="g5_melee_resolved"
+                              and v["round"]==1
+                              and v["detail"].get("attacker")=="guardian")
+                action=resolved["detail"]["action_index"]
+                original_roll=next(v for v in events
+                                   if v["kind"]=="g5_melee_roll"
+                                   and v["detail"].get("action_index")==action)
+                if corruption=="fake_cancel":
+                    resolved["kind"]="g5_melee_cancelled"
+                    resolved["detail"]={
+                        "action_index":action, "trigger":f"g5:melee:{action}"}
+                elif corruption=="omit_original_roll":
+                    original_roll["kind"]="declined_melee_roll"
+                elif corruption=="replace_original_roll":
+                    original_roll["detail"]["attack_face"]=2
+                    original_roll["detail"]["attack_total"]+=1
+                else:
+                    original_roll["detail"]["hit"]=True
+                    resolved["detail"]["outcome"]="hit"
+                trial["ledger_sha256"]=canonical_digest(events)
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial,level=3,seed=17,policy=POLICIES[0])
+
+    def test_100_p2_genesis_policy_is_original_source_for_all_outcomes(self):
+        for policy in POLICIES:
+            with self.subTest(policy=policy):
+                source=self._case(policy)
+                native=source["ledger"][0]["detail"]
+                self.assertEqual(
+                    native["policy"],
+                    "fixed_source_declared_dice_and_declined_optional_responses")
+                for changed in ("policy", "objective"):
+                    with self.subTest(field=changed):
+                        trial=deepcopy(source)
+                        trial["ledger"][0]["detail"][changed]="unrelated_authored_policy"
+                        trial["ledger_sha256"]=canonical_digest(trial["ledger"])
+                        with self.assertRaises(AssertionError):
+                            attest_trial(trial,level=3,seed=17,policy=policy)
+
+    def test_101_valid_all_AB_slots_and_original_genesis_remain_accepted(self):
+        for level in (2,3):
+            for seed in (0,17):
+                with self.subTest(level=level,seed=seed):
+                    pack=run_pack(level,seed,include_trials=True)
+                    trial=pack["native_trials"][POLICIES[0]]
+                    original=trial["ledger"]
+                    ab=[v for v in original if v["kind"]=="g5_melee_resolved"
+                        and v["detail"].get("attacker") in ("vanguard","guardian")]
+                    self.assertEqual(len(ab),4)
+                    self.assertEqual([(v["detail"]["attacker"],
+                                       v["round"],v["detail"]["outcome"])
+                                      for v in ab],
+                                     [("vanguard",1,"hit"),("guardian",1,"miss"),
+                                      ("vanguard",2,"hit"),("guardian",2,"hit")])
+                    proof=attest_trial(trial,level=level,seed=seed,
+                                       policy=POLICIES[0])
+                    self.assertEqual(proof["outcome"],"hunter_defeat_attested")
+
+
 if __name__ == "__main__":
     unittest.main()
