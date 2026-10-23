@@ -404,6 +404,40 @@ post-scene-world-pursuit flag. Unrecognized or missing receipt keys fail
 closed. Neither correction broadens the witness into a general healing,
 restoration, safety, or encounter-difficulty claim.
 
+## Codex P1 — Legal Bow and G1 movement response-window provenance
+
+G7-H treats `trigger_rechecked_after_responses.legal=false` as a
+**cancellation**, even when a later G2 launch/G4 death or G1 move/G5
+exit event remains in a tampered ledger with a recomputed SHA-256.
+Those later receipts do **not** override the native G0 trigger state.
+
+- **Lethal R Bow:** reconstruct the exact source G6-D one-shot trigger
+  from the native seed, combat round, archer and Hunter. Require one
+  `response_window_open`, true
+  `trigger_rechecked_after_interceptions`, true
+  `trigger_rechecked_after_responses` and
+  `trigger_ready_to_resolve`, all once, in that order, on the Archer's
+  actual turn **after** the real G2 Bow declaration and **before** the
+  real G2 launch. Reject cancelled, duplicate, foreign-trigger,
+  intercepted or spontaneous response receipts in this authored
+  no-response witness.
+- **Every G7-G Cautious G1 step**, not just final border exits: the
+  actual `g1_movement_step` must immediately follow its own G0
+  `trigger_ready_to_resolve`. Verify that window's original opening
+  has the authentic `g1:<actor>:step:<opening-index>` key; both
+  legal rechecks are true; open → rechecks → ready have no missing,
+  extra, duplicated or cancelled stage. A movement cannot borrow
+  another turn's or another step's valid ready receipt. The existing
+  independently rebuilt G1 geometry/MP replay and G4.5/G5 border
+  receipt checks still apply.
+
+Adversarial tests cover false rechecks on the finishing Bow and **all
+four** closing party border moves (with their ledger hashes recomputed);
+wrong/duplicated ready receipts, invalid trigger bindings and authentic
+L2/L3 seed-0/seed-17 positive traces. These are provenance checks on
+the already-supported G0/G1/G2 rules, **not new Opportunity,
+Interception, Ranged or scene-exit mechanics**.
+
 ## G7-H response-window, Turn AP and Hunter venom reconciliation
 
 Accepted Hunter Bites now have an **action-keyed native response-window
