@@ -3238,5 +3238,105 @@ class G7HMixedNativeTests(unittest.TestCase):
                         self.assertTrue(proof["ledger_sha256"])
 
 
+    def _forged_rite_refund(self, trial, *, matched_end):
+        """Codex witness: post-terminal refund and rehashed final VP."""
+        ledger = trial["ledger"]
+        vp = trial["final_state"]["archer"]
+        self.assertEqual(vp["vp_committed"], 1)
+        last = ledger[-1]
+        ledger.append({
+            "index": len(ledger), "round": last["round"], "turn": last["turn"],
+            "kind": "vp_release",
+            "detail": {"actor": "archer", "points": 1,
+                       "label": "g3:voluntary_release"},
+        })
+        if matched_end:
+            ledger.append({
+                "index": len(ledger), "round": last["round"],
+                "turn": last["turn"], "kind": "g3_effect_ended",
+                "detail": {"caster": "archer", "effect": "G3-0001",
+                           "effect_kind": "Guided Regeneration",
+                           "returned": 1, "reason": "voluntary_release"},
+            })
+        vp["vp_available"] += 1
+        vp["vp_committed"] -= 1
+        trial["ledger_sha256"] = canonical_digest(ledger)
+        return trial
+
+    def test_130_codex_p1_post_terminal_vp_release_without_effect_end(self):
+        for level in (2, 3):
+            with self.subTest(level=level):
+                trial = (self._case(POLICIES[0]) if level == 3 else
+                         run_pack(level, 17, include_trials=True)
+                         ["native_trials"][POLICIES[0]])
+                self._forged_rite_refund(trial, matched_end=False)
+                self.assertEqual(trial["final_state"]["archer"]["vp_committed"], 0)
+                with self.assertRaisesRegex(
+                        AssertionError, "VP release must match the original ended"):
+                    attest_trial(trial, level=level, seed=17, policy=POLICIES[0])
+
+    def test_131_codex_p1_forged_paired_effect_end_cannot_void_rite(self):
+        trial = self._forged_rite_refund(
+            self._case(POLICIES[0]), matched_end=True)
+        with self.assertRaisesRegex(
+                AssertionError, "Fixed G7-H policy must preserve"):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_132_codex_p1_ended_effect_without_refund_rejected(self):
+        trial = self._case(POLICIES[0])
+        last = trial["ledger"][-1]
+        trial["ledger"].append({
+            "index": len(trial["ledger"]), "round": last["round"],
+            "turn": last["turn"], "kind": "g3_effect_ended",
+            "detail": {"caster": "archer", "effect": "G3-0001",
+                       "effect_kind": "Guided Regeneration",
+                       "returned": 1, "reason": "voluntary_release"},
+        })
+        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+        with self.assertRaisesRegex(
+                AssertionError, "G3 effect end lacks its exact native VP refund"):
+            attest_trial(trial, level=3, seed=17, policy=POLICIES[0])
+
+    def test_133_codex_p1_missing_effect_or_unowned_vp_rejected(self):
+        for variant in ("missing_effect", "unowned_vp"):
+            with self.subTest(variant=variant):
+                policy = POLICIES[0] if variant == "missing_effect" else POLICIES[2]
+                trial = self._case(policy)
+                if variant == "missing_effect":
+                    establishment = next(v for v in trial["ledger"]
+                                         if v["kind"] == "g3_effect_established")
+                    establishment["kind"] = "forged_non_effect"
+                else:
+                    trial["ledger"].append({
+                        "index": len(trial["ledger"]), "round": trial["rounds_completed"],
+                        "turn": "archer", "kind": "vp_transition",
+                        "detail": {"actor": "archer", "mode": "committed",
+                                   "points": 1, "label": "g3:unowned_vp"},
+                    })
+                    trial["final_state"]["archer"]["vp_available"] -= 1
+                    trial["final_state"]["archer"]["vp_committed"] += 1
+                trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                with self.assertRaises(AssertionError):
+                    attest_trial(trial, level=3, seed=17, policy=policy)
+
+    def test_134_codex_p1_all_original_rite_balances_remain_native(self):
+        for level in (2, 3):
+            for seed in (0, 17):
+                with self.subTest(level=level, seed=seed):
+                    pack = run_pack(level, seed, include_trials=True)
+                    for policy in POLICIES:
+                        native = pack["native_trials"][policy]
+                        self.assertFalse(any(
+                            e["kind"] in ("vp_release", "g3_effect_ended")
+                            for e in native["ledger"]))
+                        proof = attest_trial(native, level=level, seed=seed,
+                                             policy=policy)
+                        want = 1 if policy == POLICIES[0] else 0
+                        self.assertEqual(
+                            native["final_state"]["archer"]["vp_committed"], want)
+                        if want:
+                            self.assertEqual(proof["source_decisions"]["chosen_R_rites"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

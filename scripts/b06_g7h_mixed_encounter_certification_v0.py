@@ -495,8 +495,19 @@ def _spell_payment_chain(ledger, event, *, actor, label, ap, vp_mode, vp_points)
     return action, payment
 
 
-def _reconcile_source_vp(ledger, final):
-    """Independent G0 VP accounting; an edited/omitted payment never funds a cast."""
+def _reconcile_source_vp(ledger, final, *, policy):
+    """Reconstruct VP and *effect ownership*, not only aggregate balances.
+
+    G3._end removes an active effect, calls G0.release_vp with a g3:<reason>
+    label, and then logs g3_effect_ended. Therefore an original vp_release
+    must be immediately followed by its exact matching end receipt. A paid
+    VP release alone, even with a recomputed digest and final snapshot, is
+    not proof that G3 freed the reservation. These authored G7-H policies
+    never deliberately end an effect: the R Chosen maintained Self Rite
+    remains active/funded at the Hunter-victory terminal.
+    """
+    if policy not in POLICIES:
+        raise AssertionError("VP ownership needs an original G7-H policy")
     origin = ledger[0]["detail"].get("source_ids")
     if not isinstance(origin, dict) or set(origin) != set(ROSTER):
         raise AssertionError("G0 source VP genesis missing")
@@ -507,9 +518,16 @@ def _reconcile_source_vp(ledger, final):
                 or any(type(x) is not int or x < 0 for x in start)):
             raise AssertionError("G0 initial VP state invalid")
         accounts[actor] = list(start)
+
+    # G6-C's source roster has no preloaded G3 effect. In this bounded
+    # matrix, G6-D's optional R Rite is the sole G3 establishment.
+    active = {}
+    matched_ends = set()
+    releases = 0
     for ev in ledger[1:]:
         d = ev["detail"]
-        if ev["kind"] == "vp_transition":
+        kind = ev["kind"]
+        if kind == "vp_transition":
             actor, mode, points = d.get("actor"), d.get("mode"), d.get("points")
             if (actor not in accounts or ev["turn"] != actor
                     or mode not in ("spent", "committed")
@@ -518,19 +536,81 @@ def _reconcile_source_vp(ledger, final):
                 raise AssertionError("Invalid source G0 VP debit")
             accounts[actor][0] -= points
             accounts[actor][1 if mode == "committed" else 2] += points
-        elif ev["kind"] == "vp_release":
-            actor, points = d.get("actor"), d.get("points")
-            if (actor not in accounts or type(points) is not int or points <= 0
-                    or points > accounts[actor][1]):
+        elif kind == "g3_effect_established":
+            actor, ident, points = (
+                d.get("caster"), d.get("effect"), d.get("committed"))
+            key = (actor, ident)
+            if (policy != "mixed_victory_rite"
+                    or actor != "archer" or ident != "G3-0001"
+                    or d.get("recipient") != "archer"
+                    or d.get("effect_kind") != "Guided Regeneration"
+                    or d.get("chosen") is not True
+                    or type(points) is not int or points != 1
+                    or key in active or active
+                    or ev["round"] != 1 or ev["turn"] != "archer"
+                    or accounts[actor][1] < points):
+                raise AssertionError("G3 effect ownership has no original Chosen Rite")
+            active[key] = {
+                "committed": points,
+                "effect_kind": d["effect_kind"],
+            }
+        elif kind == "vp_release":
+            actor, points, label = (
+                d.get("actor"), d.get("points"), d.get("label"))
+            if (actor not in accounts or type(points) is not int
+                    or points <= 0 or points > accounts[actor][1]
+                    or not isinstance(label, str)
+                    or not label.startswith("g3:")):
                 raise AssertionError("Invalid source G0 VP release")
+            # A G3 effect is popped before its generic VP refund; the very
+            # next ledger entry is the corresponding G3 end receipt.
+            next_index = ev["index"] + 1
+            ended = ledger[next_index] if next_index < len(ledger) else None
+            reason = label[3:]
+            key = (actor, ended["detail"].get("effect")) if (
+                isinstance(ended, dict)
+                and isinstance(ended.get("detail"), dict)) else None
+            owner = active.get(key)
+            expected_end = (
+                {"caster": actor, "effect": key[1],
+                 "effect_kind": owner["effect_kind"], "returned": points,
+                 "reason": reason}
+                if owner is not None else None)
+            if (ended is None or ended["kind"] != "g3_effect_ended"
+                    or ended["round"] != ev["round"]
+                    or ended["turn"] != ev["turn"]
+                    or owner is None or owner["committed"] != points
+                    or ended["detail"] != expected_end
+                    or not reason or next_index in matched_ends):
+                raise AssertionError(
+                    "VP release must match the original ended G3 reservation")
+            del active[key]
+            matched_ends.add(next_index)
             accounts[actor][0] += points
             accounts[actor][1] -= points
-    if any(final[actor].get("vp_available") != accounts[actor][0]
-           or final[actor].get("vp_committed") != accounts[actor][1]
-           for actor in ROSTER):
-        raise AssertionError("Final source VP state disagrees with paid ledger")
-    return accounts
+            releases += 1
+        elif kind == "g3_effect_ended":
+            if ev["index"] not in matched_ends:
+                raise AssertionError("G3 effect end lacks its exact native VP refund")
 
+    expected = ({("archer", "G3-0001"): 1}
+                if policy == "mixed_victory_rite" else {})
+    owners = {key: entry["committed"] for key, entry in active.items()}
+    # In these *fixed authored traces*, R never releases its chosen Rite:
+    # there is no voluntary release, time expiration (only 3 rounds), or
+    # death of R in the victory path. Other policies cast no G3 effects.
+    # A fabricated G3 end/refund pair must not silently change that policy.
+    if owners != expected or releases:
+        raise AssertionError(
+            "Fixed G7-H policy must preserve its exact active G3 effect funding")
+    for actor in ROSTER:
+        reserved = sum(points for (caster, _), points in owners.items()
+                       if caster == actor)
+        if (accounts[actor][1] != reserved
+                or final[actor].get("vp_available") != accounts[actor][0]
+                or final[actor].get("vp_committed") != accounts[actor][1]):
+            raise AssertionError("Final source VP violates live G3 reservation funding")
+    return accounts
 
 
 def _reconcile_source_regeneration(ledger, final, *, policy, level, seed):
@@ -3481,7 +3561,7 @@ def attest_trial(report, *, level, seed, policy):
         raise AssertionError("Missing original/closing actor snapshots")
     _, deaths = _reconcile_hp_snapshots(
         ledger, initial, final, ROSTER, SOURCES)
-    _reconcile_source_vp(ledger, final)
+    _reconcile_source_vp(ledger, final, policy=policy)
     _reconcile_source_regeneration(
         ledger, final, policy=policy, level=level, seed=seed)
     if policy == "mixed_victory_rite":
