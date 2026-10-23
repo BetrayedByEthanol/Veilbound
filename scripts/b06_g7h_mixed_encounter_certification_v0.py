@@ -1962,12 +1962,20 @@ def _attest_fixed_g7g_actions(ledger, *, policy):
     # receipt may otherwise inflate _source_decisions even when no AP,
     # VP or G4 damage was ever committed. The canonical post-round-tail
     # gate cannot see a forged receipt inside an otherwise legal turn.
-    unauthored = [ev for ev in ledger if
-                  (ev["kind"].startswith("g3_")
-                   and ev["kind"] != "g3_spell_state_installed")
-                  or ev["kind"].startswith("g2_bow_")
-                  or ev["kind"] in ("g6d_bow_adjudicated",
-                                   "g4_basic_heal_applied")]
+    # The independent canonical-tail validator owns evidence AFTER
+    # the last genuine Round End. This policy gate owns in-turn events;
+    # preserving that boundary also keeps post-round tamper diagnostics
+    # explicit rather than shadowing them with a less specific error.
+    last_round_end = max(
+        (ev["index"] for ev in ledger if ev["kind"] == "round_end"),
+        default=-1)
+    unauthored = [ev for ev in ledger
+                  if ev["index"] < last_round_end
+                  and ((ev["kind"].startswith("g3_")
+                        and ev["kind"] != "g3_spell_state_installed")
+                       or ev["kind"].startswith("g2_bow_")
+                       or ev["kind"] in ("g6d_bow_adjudicated",
+                                        "g4_basic_heal_applied"))]
     if unauthored:
         raise AssertionError(
             "Fixed G7-G policy forbids unauthored spell, Bow or Heal receipts")
