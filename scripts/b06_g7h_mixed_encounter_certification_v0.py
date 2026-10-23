@@ -881,6 +881,25 @@ def _reconcile_source_regeneration(ledger, final, *, policy, level, seed):
                 raise AssertionError("Regeneration receipt lacks authentic allocation")
             survival = int(d["survival_cancelled"])
             restored, spent = d["hp_restored"], d["throughput_spent"]
+            if policy == "mixed_victory_rite":
+                # G6-C's fixed victory policy authors exact Step-2 choices,
+                # not merely affordable G4 regeneration. _hunter_turn
+                # requests 4 HP in Round 2, _priest_turn requests the
+                # available/capped 2 HP for Vanguard in Round 2, and every
+                # other turn (including the Dying Hunter in Round 3)
+                # explicitly chooses RegenerationChoice() with no Dying
+                # cancellation. Use independently replayed pre-Step-2 HP
+                # and Vigor rather than mutable G4.5 or report snapshots.
+                expected_hp = (
+                    4 if actor == "hunter" and ev["round"] == 2
+                    else min(2, hpmax - hp[actor], vigor[actor])
+                    if actor == "vanguard" and ev["round"] == 2
+                    else 0)
+                if (restored != expected_hp
+                        or d["survival_cancelled"] is not False):
+                    raise AssertionError(
+                        "Fixed G6-D victory regeneration policy requires "
+                        "the exact authored HP allocation and Dying choice")
             if policy in ("hunter_multitarget_defeat",
                           "opposed_living_hunter_withdrawal"):
                 # G7-G's _next chooses RegenerationChoice() for every

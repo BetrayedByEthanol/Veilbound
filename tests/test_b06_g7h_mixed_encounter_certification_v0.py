@@ -4392,5 +4392,120 @@ class G7HMixedNativeTests(unittest.TestCase):
                     "hunter_defeat_attested")
 
 
+    def test_166_codex_p2_victory_native_one_hp_recovery_is_not_authored(self):
+        # Reproduce the reporter's *legitimate native execution* rather
+        # than only changing one unbalanced ledger receipt. G6-C's
+        # Round-2 Vanguard can afford one HP instead of the authored two:
+        # G4, G4.5, later rounds and closing snapshots all remain real.
+        # Keep the original embedded source_report as the reviewer did.
+        from unittest.mock import patch
+        from scripts import b06_hunter_mixed_party_g6c_v0 as g6c
+        from scripts.b06_hunter_completion_g6d_v0 import run_i3_defeat
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _reconcile_source_regeneration,
+        )
+
+        original_choice = g6c.RegenerationChoice
+
+        def one_hp_vanguard(*args, **kwargs):
+            if kwargs.get("hp") == 2:
+                kwargs["hp"] = 1
+            return original_choice(*args, **kwargs)
+
+        for level in (2, 3):
+            with self.subTest(level=level):
+                normal = run_i3_defeat(
+                    level=level, seed=0, g7h_priest_rite=True)
+                with patch.object(g6c, "RegenerationChoice", one_hp_vanguard):
+                    altered = run_i3_defeat(
+                        level=level, seed=0, g7h_priest_rite=True)
+                self.assertEqual(altered["ledger_sha256"],
+                                 canonical_digest(altered["ledger"]))
+                self.assertEqual(altered["outcome"], "hunter_defeat_attested")
+                self.assertEqual(altered["native_terminal"]["ending"],
+                                 "hunter_defeat_attested")
+                v_before = normal["final_state"]["vanguard"]
+                v_after = altered["final_state"]["vanguard"]
+                self.assertEqual(v_after["hp"], v_before["hp"] - 1)
+                self.assertEqual(v_after["vigor"], v_before["vigor"] + 1)
+                changed = [ev for ev in altered["ledger"]
+                           if ev["kind"] == "regeneration_step"
+                           and ev["round"] == 2
+                           and ev["detail"].get("actor") == "vanguard"]
+                self.assertEqual(len(changed), 1)
+                self.assertEqual(changed[0]["detail"]["hp_restored"], 1)
+                self.assertEqual(changed[0]["detail"]["throughput_spent"], 1)
+                # An attacker can leave the source_report untouched:
+                # checking that embedded report alone does not bind the
+                # actual source-allocated G4 recovery policy.
+                altered["source_report"] = deepcopy(normal["source_report"])
+                self.assertEqual(altered["source_report"], normal["source_report"])
+                with self.assertRaisesRegex(
+                        AssertionError, "Fixed G6-D victory regeneration policy"):
+                    _reconcile_source_regeneration(
+                        altered["ledger"], altered["final_state"],
+                        policy="mixed_victory_rite", level=level, seed=0)
+                with self.assertRaisesRegex(
+                        AssertionError, "Fixed G6-D victory regeneration policy"):
+                    attest_trial(
+                        altered, level=level, seed=0,
+                        policy="mixed_victory_rite")
+                self.assertEqual(
+                    attest_trial(normal, level=level, seed=0,
+                                 policy="mixed_victory_rite")["outcome"],
+                    "hunter_defeat_attested")
+
+    def test_167_codex_p2_victory_hunter_round2_requires_four_hp(self):
+        # Exact source Hunter regeneration (4 HP in Round 2) is also a
+        # prescribed policy choice, even if 3 would fit the G4 budget.
+        from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+            _reconcile_source_regeneration,
+        )
+        trial = self._case("mixed_victory_rite")
+        hunter = next(v["detail"] for v in trial["ledger"]
+                      if v["kind"] == "regeneration_step"
+                      and v["round"] == 2
+                      and v["detail"].get("actor") == "hunter")
+        self.assertEqual(hunter["hp_restored"], 4)
+        self.assertEqual(hunter["throughput_spent"], 4)
+        hunter["hp_restored"] = 3
+        hunter["throughput_spent"] = 3
+        hunter["hp_after"] -= 1
+        hunter["vigor_after"] += 1
+        with self.assertRaisesRegex(
+                AssertionError, "Fixed G6-D victory regeneration policy"):
+            _reconcile_source_regeneration(
+                trial["ledger"], trial["final_state"],
+                policy="mixed_victory_rite", level=3, seed=17)
+
+    def test_168_codex_p2_victory_exact_regeneration_every_original_turn(self):
+        # All original source policies still have their fixed allocations
+        # at both levels and different provenance seeds.
+        for level in (2, 3):
+            for seed in (0, 17):
+                with self.subTest(level=level, seed=seed):
+                    native = run_pack(level, seed, include_trials=True)[
+                        "native_trials"]["mixed_victory_rite"]
+                    steps = [v for v in native["ledger"]
+                             if v["kind"] == "regeneration_step"]
+                    self.assertEqual(len(steps), 15)
+                    for ev in steps:
+                        actor, rd, d = (
+                            ev["detail"]["actor"], ev["round"], ev["detail"])
+                        expected = (
+                            4 if actor == "hunter" and rd == 2
+                            else min(
+                                2, native["initial_state"]["vanguard"]["hp_max"]
+                                - d["hp_before"], d["vigor_before"])
+                            if actor == "vanguard" and rd == 2
+                            else 0)
+                        self.assertEqual(d["hp_restored"], expected)
+                        self.assertFalse(d["survival_cancelled"])
+                    self.assertEqual(
+                        attest_trial(native, level=level, seed=seed,
+                                     policy="mixed_victory_rite")["outcome"],
+                        "hunter_defeat_attested")
+
+
 if __name__ == "__main__":
     unittest.main()
