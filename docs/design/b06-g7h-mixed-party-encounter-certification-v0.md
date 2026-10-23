@@ -105,6 +105,23 @@ repair. The G6-D victory terminal must match the **entire** authentic
 source receipt, including original party roster, source digest, native
 HP and round, cause and outcome—not merely its lethal event index.
 
+### G0 unresolved-roll handoff integrity (Codex P2)
+
+Every native `g5_melee_sequence_attested` must bind **exactly one**
+`unresolved_attack_roll` emitted by G0 between its final
+`defense_assigned` and G5's sequence attestation. The attestor now
+reconciles the original declaration and ordered defense indices,
+actor/target and native attack keys, same-round/turn event identity,
+and the **exact original G0 reason**:
+`G0 commits declarations and defenses; G5 adjudicates physical hit/damage`.
+G0's final assignment, unresolved-roll handoff and G5 attestation must
+appear in their native synchronous order; a handoff for another target
+cannot authorize a correct G5 resolution. Missing, duplicate, reordered,
+foreign, extra-field or orphan handoffs fail even when a caller recomputes
+the ledger SHA-256 digest. The regression suite includes the reported
+L3/seed-0 handoff-target mutation for **all three** terminal policies,
+plus positive L2/L3, seed-0/17 replay.
+
 A mislabeled, incomplete, role-substituted, stale, unsigned or
 nonterminal result fails closed.
 
