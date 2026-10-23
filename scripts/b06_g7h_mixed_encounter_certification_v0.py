@@ -549,7 +549,8 @@ def _reconcile_source_vp(ledger, final, *, policy):
                     or key in active or active
                     or ev["round"] != 1 or ev["turn"] != "archer"
                     or accounts[actor][1] < points):
-                raise AssertionError("G3 effect ownership has no original Chosen Rite")
+                raise AssertionError(
+                    "Chosen R Rite requires the exact native G3 establishment receipt")
             active[key] = {
                 "committed": points,
                 "effect_kind": d["effect_kind"],
