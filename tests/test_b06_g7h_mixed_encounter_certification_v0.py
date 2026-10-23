@@ -1893,5 +1893,53 @@ class G7HMixedNativeTests(unittest.TestCase):
                         self.assertEqual(result["outcome"], TERMINALS[policy][0])
 
 
+    def test_82_p2_no_move_turn_cannot_lower_source_MP_and_turn_end(self):
+        # Codex P2: two mutually consistent signed balances still contradict
+        # the independent G6-C/G0 base 12-MP grant for every original actor.
+        for level in (2, 3):
+            native = run_pack(level, 17, include_trials=True)["native_trials"]
+            for policy in POLICIES:
+                src = native[policy]
+                no_move = next(
+                    (event for event in src["ledger"]
+                     if event["kind"] == "turn_resources"
+                     and event["detail"]["mp"] == 12
+                     and not any(v["kind"] == "g1_movement_step"
+                                 and v["round"] == event["round"]
+                                 and v["detail"].get("actor") == event["detail"]["actor"]
+                                 for v in src["ledger"])),
+                    None)
+                self.assertIsNotNone(no_move)
+                for lowered in (0, 11):
+                    with self.subTest(level=level, policy=policy, mp=lowered):
+                        trial = deepcopy(src)
+                        start = trial["ledger"][no_move["index"]]
+                        start["detail"]["mp"] = lowered
+                        ends = [e for e in trial["ledger"]
+                                if e["kind"] == "turn_end"
+                                and e["round"] == start["round"]
+                                and e["detail"].get("actor") == start["detail"]["actor"]]
+                        self.assertEqual(len(ends), 1)
+                        ends[0]["detail"]["unused_mp"] = lowered
+                        trial["ledger_sha256"] = canonical_digest(trial["ledger"])
+                        with self.assertRaisesRegex(
+                                AssertionError, "source allowance"):
+                            attest_trial(trial, level=level, seed=17,
+                                         policy=policy)
+
+    def test_83_p2_every_native_MP_grant_is_exactly_source_authorized(self):
+        for level in (2, 3):
+            pack = run_pack(level, 0, include_trials=True)["native_trials"]
+            for policy in POLICIES:
+                receipt = pack[policy]
+                grants = [v for v in receipt["ledger"]
+                          if v["kind"] == "turn_resources"]
+                self.assertEqual(len(grants),
+                                 receipt["rounds_completed"] * 5)
+                self.assertEqual({v["detail"]["mp"] for v in grants}, {12})
+                attest_trial(receipt, level=level, seed=0, policy=policy)
+
+
+
 if __name__ == "__main__":
     unittest.main()

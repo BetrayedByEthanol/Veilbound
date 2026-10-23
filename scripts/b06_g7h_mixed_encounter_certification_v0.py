@@ -1192,11 +1192,21 @@ def _replay_native_exit_geometry(ledger, *, party_exits=True):
         kind, d = event["kind"], event["detail"]
         if kind == "turn_resources":
             actor = d.get("actor")
+            # G0 Step 4 grants a fixed 12 base MP plus genuinely live
+            # source penalties. None of these <100-round fixed policies can
+            # reach Hunter venom onset; the independently constructed G6-C
+            # source actor therefore has exactly 12 MP on every turn.
+            # The receipt cannot invent a smaller opening allowance and
+            # then make its own movement/Turn End arithmetic self-consistent.
+            source_mp = max(
+                0, 12 + expected.g4.toxins.modifier(actor, "mp")
+            ) if actor in ROSTER else None
             if (actor not in ROSTER or event["turn"] != actor
                     or type(d.get("mp")) is not int
-                    or not 0 <= d["mp"] <= 12):
-                raise AssertionError("G7-H native source MP cannot be fabricated")
-            remaining[actor] = d["mp"]
+                    or d["mp"] != source_mp):
+                raise AssertionError(
+                    "G7-H native Step-4 MP differs from source allowance")
+            remaining[actor] = source_mp
             resource_round[actor] = event["round"]
         elif kind in ("g1_allied_transit_step", "g1_allied_transit_finished",
                       "g1_movement_interception_resolved"):
