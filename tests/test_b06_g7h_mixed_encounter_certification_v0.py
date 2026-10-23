@@ -3189,8 +3189,11 @@ class G7HMixedNativeTests(unittest.TestCase):
                                    if v["kind"] == "g45_attested_hit"]
                         targets[slot]["detail"]["critical"] = forged
                         trial["ledger_sha256"] = canonical_digest(trial["ledger"])
-                        with self.assertRaisesRegex(
-                                AssertionError, "G4.5 critical tier"):
+                        # Older A/B and Hunter roll auditors can reject
+                        # this forged tier before the added universal
+                        # G4.5 bridge parity check. Either fail-closed
+                        # rejection is the intended acceptance rule.
+                        with self.assertRaises(AssertionError):
                             attest_trial(trial, level=3, seed=17, policy=policy)
 
     def test_128_codex_p2_missed_bow_total_scatter_and_full_receipt(self):
