@@ -2578,7 +2578,8 @@ class G7HMixedNativeTests(unittest.TestCase):
                 elif scenario == "recheck_missing":
                     receipts[1]["kind"] = "edited_out_lane"
                 elif scenario == "single_wrong_round":
-                    receipts[2]["round"] = 2
+                    # The third preview belongs to original Round 2.
+                    receipts[2]["round"] = 1
                 else:
                     receipts[3]["turn"] = "archer"
                 trial["ledger_sha256"] = canonical_digest(trial["ledger"])
