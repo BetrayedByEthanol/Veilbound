@@ -2507,9 +2507,68 @@ def _reconcile_every_g45_target_snapshot(ledger, *, policy, level, seed):
         party_exits=(policy == "opposed_living_hunter_withdrawal")).e
     state = {actor: _actor_state(source.actors[actor]) for actor in ROSTER}
     bridges = 0
+    # The continuation bridge snapshots its actor *before* G0 Step 1 and
+    # *after* the one real Step 2/3/4 start; it closes immediately after
+    # native Turn End (and Round End for the last actor). Reconstruct the
+    # complete _actor_state independently and require one pair per turn.
+    turn_before, step2, ended, starts, finishes = {}, {}, set(), set(), set()
     for event in ledger:
         kind, d = event["kind"], event["detail"]
-        if kind == "g4_wound_created":
+        if kind == "turn_start_expiry":
+            actor = d.get("actor")
+            key = (event["round"], actor)
+            if (actor not in state or event["turn"] != actor
+                    or key in turn_before):
+                raise AssertionError("G4.5 turn start is not the source Initiative actor")
+            turn_before[key] = deepcopy(state[actor])
+        elif kind == "regeneration_dead":
+            actor = d.get("actor")
+            key = (event["round"], actor)
+            if (actor not in state or key not in turn_before or key in step2
+                    or event["turn"] != actor):
+                raise AssertionError("G4.5 missing unique dead-actor native Step 2")
+            step2[key] = event["index"]
+        elif kind == "g45_native_turn_started":
+            actor = d.get("actor")
+            key = (event["round"], actor)
+            resources = [v for v in ledger[step2.get(key, event["index"]):event["index"]]
+                         if v["kind"] == "turn_resources"
+                         and v["round"] == event["round"]
+                         and v["turn"] == actor]
+            if (actor not in state or event["turn"] != actor
+                    or key not in turn_before or key not in step2
+                    or key in starts or len(resources) != 1
+                    or not step2[key] < resources[0]["index"] < event["index"]
+                    or d != {
+                        "actor": actor, "step2_index": step2[key],
+                        "before": turn_before[key], "after": state[actor],
+                    }):
+                raise AssertionError("G4.5 start receipt omits or falsifies native Step 2 state")
+            starts.add(key)
+        elif kind == "turn_end":
+            actor = d.get("actor")
+            key = (event["round"], actor)
+            if (actor not in state or event["turn"] != actor
+                    or key not in starts or key in ended):
+                raise AssertionError("G4.5 turn ended without prior source start receipt")
+            ended.add(key)
+        elif kind == "g45_native_turn_ended":
+            actor = d.get("actor")
+            key = (event["round"], actor)
+            before = ledger[event["index"] - 1] if event["index"] else None
+            native = (before if before and before["kind"] == "turn_end"
+                      else ledger[event["index"] - 2]
+                      if event["index"] >= 2 and before
+                      and before["kind"] == "round_end" else None)
+            if (actor not in state or event["turn"] is not None
+                    or key not in ended or key in finishes
+                    or native is None or native["round"] != event["round"]
+                    or native["turn"] != actor
+                    or native["detail"].get("actor") != actor
+                    or d != {"actor": actor, "actor_state": state[actor]}):
+                raise AssertionError("G4.5 end receipt is not bound to native Turn End state")
+            finishes.add(key)
+        elif kind == "g4_wound_created":
             actor = d.get("recipient")
             if actor not in state:
                 raise AssertionError("Wound recipient is not in original source scene")
@@ -2536,6 +2595,12 @@ def _reconcile_every_g45_target_snapshot(ledger, *, policy, level, seed):
             current["hp"], current["vigor"] = d["hp_after"], d["vigor_after"]
             current["dead"] = current["hp"] <= -current["hp_max"]
             current["dying"] = current["hp"] <= 0 and not current["dead"]
+            if kind == "regeneration_step":
+                key = (event["round"], actor)
+                if (key not in turn_before or key in step2
+                        or event["turn"] != actor):
+                    raise AssertionError("G4.5 Step 2 is not unique source own-turn regeneration")
+                step2[key] = event["index"]
         elif kind == "vp_transition":
             actor, points, mode = (
                 d.get("actor"), d.get("points"), d.get("mode"))
@@ -2588,6 +2653,13 @@ def _reconcile_every_g45_target_snapshot(ledger, *, policy, level, seed):
                     "G4.5 complete target snapshot or bridge source provenance "
                     "contradicts native G4 state at the hit")
             bridges += 1
+    turns = {(v["round"], v["detail"]["actor"]) for v in ledger
+             if v["kind"] == "turn_start_expiry"}
+    completed = {(v["round"], v["detail"]["actor"]) for v in ledger
+                 if v["kind"] == "turn_end"}
+    if (not turns or not turns == completed == set(turn_before) ==
+            set(step2) == starts == ended == finishes):
+        raise AssertionError("Every G0 turn requires one authenticated G4.5 start/end")
     if bridges < 1:
         raise AssertionError("No native G4.5 physical hit certified")
     return bridges
