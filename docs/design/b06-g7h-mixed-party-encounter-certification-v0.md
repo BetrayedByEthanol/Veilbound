@@ -783,3 +783,46 @@ Bites across all three terminal policies, every legacy summary field,
 rehashing after forged event changes, and positive native L2/L3 traces.
 These assertions do **not** expand source rules, policy sampling,
 representative calibration, long-world withdrawal claims or Hunter CR.
+
+## Codex P1/P2 follow-up — exact Bite declarations and both Bow windows (23 October 2026)
+
+Three further checks reject source-impossible ledgers even after a new
+SHA-256 digest is calculated:
+
+1. **G7-G one-profile native Bite declaration (P1):** both the
+   `hunter_multitarget_defeat` and
+   `opposed_living_hunter_withdrawal` policies now require the original
+   `attack_sequence_committed.detail` to equal the exact one-action
+   Hunter `B06-AT-04` / `take_hit` pair, with the unchanged original
+   target and actor. Adding `B06-AT-05`, a second defense, a mismatched
+   profile/defense count or an extra unverified declaration field fails.
+   G0 would have charged another Physical AP for a second declared profile;
+   one valid G5 Bite witness cannot silently pay for it.
+2. **Both native Bow response windows (P1):** the victory's Round-2
+   **missed** arrow now receives the same full
+   `response_window_open` →
+   `trigger_rechecked_after_interceptions(legal=true)` →
+   `trigger_rechecked_after_responses(legal=true)` →
+   `trigger_ready_to_resolve` check as the Round-3 lethal arrow.
+   The missed shot's native G2 key is derived from the original opening
+   index; the lethal G6-D key is reconstructed from seed, round and
+   source identities. The four-event legal chain must lie after this
+   shot's original defense preassignment and before the G2 defense
+   recheck/launch. A cancelled, duplicated, false-legal or foreign
+   response window cannot authorize either launched arrow.
+3. **Independent G6-D Bow attribution (P2):** the finishing
+   `g6d_bow_adjudicated` receipt must carry the original **R Archer**
+   `source_digest` from a newly instantiated G6-C source fixture and
+   `chosen_target_part=head` from the actual source Hunter's head cell
+   and footprint. Replacing the digest, changing the anatomical target
+   to rear/unknown, or omitting either field invalidates the terminal
+   rather than being legitimized by a recomputed ledger hash.
+
+Regression tests exercise every genuine G7-G Bite declaration, the
+Round-2 missed Bow in L2 and L3, cancelling either G0 recheck,
+tampered/missing ready events, G6-D source/geometry substitutions and
+unmodified L2/L3 native terminal matrices.
+
+These are **attestation-only** changes: the source combat executors,
+historical Phase 3 SHA, terminal coverage boundary, representative
+calibration, and Hunter CR remain unchanged.
