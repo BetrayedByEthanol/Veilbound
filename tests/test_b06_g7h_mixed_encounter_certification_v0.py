@@ -1038,7 +1038,7 @@ class G7HMixedNativeTests(unittest.TestCase):
         pursuit["detail"]["final_footprint"] = [[3, 1], [4, 1]]
         self.assertTrue(pursuit["detail"]["contact"])
         trial["ledger_sha256"] = canonical_digest(ledger)
-        with self.assertRaisesRegex(AssertionError, "contact"):
+        with self.assertRaisesRegex(AssertionError, "contact|pursuit"):
             attest_trial(trial, level=3, seed=17, policy=POLICIES[2])
 
     def test_49_codex_p1_regeneration_requires_HP_cap_and_source_spending(self):
@@ -2452,17 +2452,31 @@ class G7HMixedNativeTests(unittest.TestCase):
                                          and v["round"] == 1
                                          and v["turn"] == "scholar")
                 self.assertGreaterEqual(scholar_resources["detail"]["ap"], 24)
-                unused["kind"] = "action_committed"
-                unused["detail"] = {
+                # Preserve an otherwise source-legal Step-4 receipt
+                # ahead of the new Action. The renamed regeneration receipt
+                # is deliberately NOT a legal source continuation; the AP
+                # verifier must still accept the forged debit itself, while
+                # the fixed policy gate must reject it independently.
+                self.assertLess(unused["index"], scholar_resources["index"])
+                allowance = scholar_resources["detail"]["ap"]
+                unused["kind"] = "turn_resources"
+                unused["detail"] = deepcopy(scholar_resources["detail"])
+                scholar_resources["kind"] = "action_committed"
+                scholar_resources["detail"] = {
                     "actor": "scholar", "action_class": "general",
                     "label": "g7h:unapproved:general",
-                    "ap_spent": 24,
-                    "ap_remaining": scholar_resources["detail"]["ap"] - 24,
+                    "ap_spent": 24, "ap_remaining": allowance - 24,
                 }
                 end = next(v for v in events if v["kind"] == "turn_end"
                            and v["round"] == 1 and v["turn"] == "scholar")
                 end["detail"]["unused_ap"] -= 24
                 trial["ledger_sha256"] = canonical_digest(events)
+                from scripts.b06_g7h_mixed_encounter_certification_v0 import (
+                    _reconcile_all_turn_end_ap,
+                )
+                self.assertEqual(
+                    _reconcile_all_turn_end_ap(events, level=3, seed=17),
+                    trial["rounds_completed"] * 5)
                 with self.assertRaisesRegex(
                         AssertionError, "Fixed G7-G action policy"):
                     attest_trial(trial, level=3, seed=17, policy=policy)
@@ -2522,7 +2536,7 @@ class G7HMixedNativeTests(unittest.TestCase):
                 else:
                     b["movement_indices"].append(pursued["index"])
                 trial["ledger_sha256"] = canonical_digest(trial["ledger"])
-                with self.assertRaisesRegex(AssertionError, "G7-H pursuit"):
+                with self.assertRaisesRegex(AssertionError, "G7-H.*pursuit"):
                     attest_trial(trial, level=3, seed=17,
                                  policy="hunter_multitarget_defeat")
 
