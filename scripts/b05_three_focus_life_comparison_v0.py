@@ -194,6 +194,17 @@ def _metrics(e):
             if x["detail"]["actor"]=="priest"),
         "effects_established":len([x for x in rows("g3_effect_established")
                                    if x["detail"]["caster"]=="priest"]),
+        # G3 releases only effective Committed VP when a finite host
+        # actually terminates; its establishment/Exaltation Spent VP stays
+        # Spent. This is particularly relevant for B8 -> L3 Vital ->
+        # source Sentry Direct Vigor exhaustions in the matched matrix.
+        "committed_vp_refunded":sum(
+            x["detail"]["returned"] for x in rows("g3_effect_ended")
+            if x["detail"]["caster"]=="priest"),
+        "finite_host_exhaustions":len([
+            x for x in rows("g3_effect_ended")
+            if x["detail"]["caster"]=="priest"
+            and x["detail"]["reason"]=="budget_exhausted"]),
         "outstanding_exaltation":bool(getattr(
             getattr(e.g3,"low_life",None),"pending",None)),
     }

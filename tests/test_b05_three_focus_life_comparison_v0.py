@@ -120,8 +120,28 @@ class ThreeFocusLifeComparisonTests(unittest.TestCase):
                     exalt=self.index[role,3,opponent,"exaltation"]["metrics"]
                     self.assertEqual(exalt["projection_or_full_ap_paid"],30)
                     self.assertEqual(exalt["effects_established"],1)
-                    self.assertEqual(exalt["final_vp"][1],1)
+                    # A held host remains reserved. B's finite B8 may
+                    # be exhausted by real L3 Vital HP diversion followed
+                    # by a prepared Sentry Vigor packet; G3 MUST refund
+                    # its one effective Committed VP, never Spent VP.
                     self.assertLessEqual(exalt["exaltation_arms"],1)
+                    self.assertEqual(exalt["final_vp"][1],
+                                     1-exalt["committed_vp_refunded"])
+                    self.assertIn(exalt["committed_vp_refunded"],(0,1))
+                    self.assertEqual(exalt["finite_host_exhaustions"],
+                                     exalt["committed_vp_refunded"])
+                    if role=="A":
+                        self.assertEqual(exalt["final_vp"][1],1)
+                    elif exalt["committed_vp_refunded"]:
+                        actual=run_policy(
+                            role=role,level=3,opponent=opponent,
+                            policy="exaltation")
+                        ends=rows(actual,"g3_effect_ended")
+                        self.assertEqual(len(ends),1)
+                        self.assertEqual(
+                            (ends[0]["detail"]["reason"],
+                             ends[0]["detail"]["returned"]),
+                            ("budget_exhausted",1))
                     self.assertEqual(exalt["final_vp"][2],
                                      (1 if role=="B" else 0)
                                      +exalt["exaltation_arms"])
