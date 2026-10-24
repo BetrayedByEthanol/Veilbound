@@ -344,5 +344,147 @@ class LowLifeNativeTests(unittest.TestCase):
                               x["detail"]["actor"]=="low"]),2)
 
 
+    def test_19_vital_profile_preflight_uses_uncharged_hp_diversion(self):
+        # Pre-existing, legal injured entry snapshot. No synthetic G5 hit
+        # or post-roll injury location is invented for the setup.
+        e,low=attached_scene("B",3,"soldier",0)
+        priest=e.actors["low"]
+        priest.hp=4
+        e.check()
+        e.start_turn("low",regen_choice=RegenerationChoice())
+        host=low.cast_chosen("low")
+        low.arm_vital("low")
+        e.end_turn()
+        e.start_turn("foe",regen_choice=RegenerationChoice())
+
+        before=(host.budget,deepcopy(low.pending),
+                priest.vp_available,priest.vp_committed,priest.vp_spent,
+                len(e.ledger))
+        # B06-AT-03, face 4, B's actual Brigandine: raw HP after
+        # Armor is 5. EX-LP-01 diverts 2; 4 HP -> 1 HP, no wound.
+        for _ in range(2):
+            preview=e.g4.preflight_profile_hit(
+                "foe","low","B06-AT-03",die_face=4)
+            self.assertEqual(preview["hp_after"],1)
+            self.assertFalse(preview["wound_required"])
+            self.assertEqual(preview["hp_packet_count"],1)
+        self.assertEqual(
+            (host.budget,low.pending,priest.vp_available,
+             priest.vp_committed,priest.vp_spent,len(e.ledger)),before)
+
+        sequence=e.g5.declare("foe","low",profiles=("B06-AT-03",),
+                              defenses=("take_hit",))
+        result=e.g5.resolve(sequence,0,attack_face=12,damage_face=4)
+        self.assertEqual(result["outcome"],"hit")
+        self.assertIsNone(result["damage"]["wound"])
+        self.assertEqual((priest.hp,host.budget),(1,4))
+        self.assertIsNone(low.pending)
+        self.assertEqual(len(events(e,"g4_wound_created")),0)
+        self.assertEqual(events(e,"b05_vital_interposition_applied")[0]["prevented_hp"],2)
+        self.assertEqual(len(events(e,"g5_melee_resolved")),1)
+        e.check()
+
+    def test_20_without_vital_same_g5_attack_requires_wound_die(self):
+        e,low=attached_scene("B",3,"soldier",0)
+        priest=e.actors["low"]
+        priest.hp=4
+        e.check()
+        e.start_turn("low",regen_choice=RegenerationChoice())
+        low.cast_chosen("low")
+        e.end_turn()
+        e.start_turn("foe",regen_choice=RegenerationChoice())
+        before=len(e.ledger)
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location"):
+            e.g4.preflight_profile_hit("foe","low","B06-AT-03",
+                                       die_face=4)
+        self.assertEqual(len(e.ledger),before)
+        self.assertEqual(priest.hp,4)
+        self.assertEqual(e.g4.preflight_profile_hit(
+            "foe","low","B06-AT-03",die_face=4,
+            wound_location_roll=8)["wound_required"],True)
+        self.assertEqual(len(events(e,"b05_vital_interposition_applied")),0)
+
+    def test_21_vital_expires_on_actual_initiative_exit(self):
+        e,low=attached_scene("B",3,"soldier",0)
+        e.g4.clock.enter_initiative()
+        e.start_turn("low")
+        host=low.cast_chosen("low")
+        low.arm_vital("low")
+        priest=e.actors["low"]
+        original=(priest.vp_available,priest.vp_committed,priest.vp_spent)
+        with self.assertRaisesRegex(ValueError,"round boundary"):
+            e.g4.clock.leave_initiative()
+        self.assertIsNotNone(low.pending)
+        e.end_turn()
+        e.start_turn("foe")
+        e.end_turn()
+        e.g4.clock.leave_initiative()
+        self.assertEqual(e.g4.clock.mode,"exploration")
+        self.assertIsNone(low.pending)
+        self.assertEqual((priest.vp_available,priest.vp_committed,
+                          priest.vp_spent),original)
+        self.assertEqual(host.budget,8)
+        self.assertEqual(len(e.g3.active("low","Vital Shelter")),1)
+        expired=events(e,"b05_exaltation_expired")
+        self.assertEqual(len(expired),1)
+        self.assertEqual((expired[0]["property"],expired[0]["reason"],
+                          expired[0]["host"]),
+                         ("EX-LP-01","initiative_exit",host.ident))
+        before=priest.hp
+        result=e.g4.apply_damage(
+            "low",(DamagePacket("hp","Fire",3),),
+            event_key="real-post-initiative-fire-event",
+            cause="independently-confirmed-exploration-harm")
+        self.assertEqual(result["hp_loss"],3)
+        self.assertEqual(priest.hp,before-3)
+        self.assertEqual(host.budget,8)
+        self.assertEqual(len(events(e,"b05_vital_interposition_applied")),0)
+        e.g4.clock.enter_initiative()
+        self.assertIsNone(low.pending)
+        self.assertEqual(len(events(e,"b05_exaltation_expired")),1)
+        e.check()
+
+    def test_22_held_expires_on_actual_initiative_exit(self):
+        e,low=attached_scene("A",3,"soldier",0)
+        e.g4.clock.enter_initiative()
+        e.start_turn("low")
+        host=low.cast_chosen("low")
+        e.end_turn()
+        e.start_turn("foe")
+        e.end_turn()
+        e.begin_round()
+        e.start_turn("low",regen_choice=RegenerationChoice(),
+                     on_regeneration_complete=lambda enc,who:
+                         low.arm_held(who,2))
+        self.assertEqual(low.pending["points"],2)
+        priest=e.actors["low"]
+        spent_before=priest.vp_spent
+        vigor_before=priest.vigor
+        e.end_turn()
+        e.start_turn("foe")
+        e.end_turn()
+        e.g4.clock.leave_initiative()
+        self.assertIsNone(low.pending)
+        self.assertEqual(priest.vp_spent,spent_before)
+        self.assertEqual(priest.vp_committed,1)
+        self.assertEqual(len(e.g3.active("low","Guided Regeneration")),1)
+        self.assertEqual(host.committed,1)
+        expired=events(e,"b05_exaltation_expired")
+        self.assertEqual(len(expired),1)
+        self.assertEqual((expired[0]["property"],expired[0]["reason"],
+                          expired[0]["host"]),
+                         ("EX-LR-01","initiative_exit",host.ident))
+        before=priest.hp
+        result=e.g4.apply_damage(
+            "low",(DamagePacket("hp","Fire",3),),
+            event_key="real-post-initiative-held-expired-hit",
+            cause="independently-confirmed-exploration-harm")
+        self.assertEqual(result["hp_loss"],3)
+        self.assertEqual(priest.hp,before-3)
+        self.assertEqual(priest.vigor,vigor_before)
+        self.assertEqual(len(events(e,"b05_held_renewal_resolved")),0)
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()
