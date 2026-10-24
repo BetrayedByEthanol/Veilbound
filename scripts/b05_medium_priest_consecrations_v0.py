@@ -100,12 +100,12 @@ class MediumLifeConsecrations:
                 self._host(caster) is not None or
                 any(v.kind == kind and v.recipient == recipient
                     for v in self.g3.effects.values())):
-            self.e.log("b05_medium_cast_interrupted",caster=caster,kind=kind)
+            self.e.log("b05_medium_cast_interrupted",caster=caster,technique=kind)
             return None
         try:
             self._target(caster,recipient)
         except (ValueError,UnresolvedDecision):
-            self.e.log("b05_medium_cast_interrupted",caster=caster,kind=kind,
+            self.e.log("b05_medium_cast_interrupted",caster=caster,technique=kind,
                        cause="recipient_or_path_changed")
             return None
         self.g3._pay(caster,spent,2,label="b05:medium:"+kind)
@@ -113,7 +113,7 @@ class MediumLifeConsecrations:
             caster,kind,recipient,2,budget=(8+max(0,p["abilities"]["Veil Control"])
                                              if kind == "Vital Shelter" else None))
         self.e.log("b05_consecration_applied",caster=caster,recipient=recipient,
-                   effect=effect.ident,kind=kind,spent=spent,committed=2,
+                   effect=effect.ident,technique=kind,spent=spent,committed=2,
                    budget=effect.budget)
         return effect
 
@@ -161,7 +161,7 @@ class MediumLifeConsecrations:
         a.reaction_available = False
         self.e.spend_vp(caster,2,mode="spent",label="b05:medium:intercession")
         self.e.log("b05_intercession_paid",caster=caster,recipient=recipient,
-                   effect=host.ident,kind=kind,reaction=True,spent=2)
+                   effect=host.ident,technique=kind,reaction=True,spent=2)
         return host
 
     def intercede_regeneration(self, caster, recipient):
