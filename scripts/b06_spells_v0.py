@@ -626,6 +626,9 @@ class SpellState:
         a=self.e.actors[effect.caster]
         if effect.ident in a.maintained:
             a.maintained.remove(effect.ident)
+        low=getattr(self,"low_life",None)
+        if low is not None:
+            low.on_host_end(effect)
         if effect.committed:
             self.e.release_vp(effect.caster,effect.committed,label="g3:"+reason)
         self.e.log("g3_effect_ended",caster=effect.caster,effect=effect.ident,

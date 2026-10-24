@@ -151,6 +151,23 @@ class DamageState:
             amount = max(0, amount - resistance)
         return amount
 
+    def _preview_damage_packets(self, recipient, packets):
+        """Pure native packet mitigation plus optional Chosen HP diversion.
+
+        Both G5's preflight and G4's eventual application MUST compute the
+        same HP/wound threshold from the same live source packets. The Low
+        Life preview never consumes a host budget or a pending property.
+        """
+        victim=self._actor(recipient)
+        resolved=tuple(
+            self._mitigate_hp(victim,p) if p.resource=="hp" else p.raw
+            for p in packets)
+        low=(getattr(self.e.g3,"low_life",None)
+             if self.e.g3 is not None else None)
+        if low is None:
+            return resolved,None
+        return low.preview_hp(recipient,packets,resolved)
+
     def apply_damage(self, recipient, packets, *, event_key, cause,
                      devastating=False, wound_location_roll=None,
                      wound_trauma=None, medium_intercessor=None):
@@ -185,8 +202,9 @@ class DamageState:
                 raise ValueError("Medium Intercession requires native positive G4 Vigor packet")
             # Fail closed before any HP/Vigor or wound mutation.
             self.e.g3.medium_life.preflight_vigor(medium_intercessor,recipient)
-        resolved = [self._mitigate_hp(a, p) if p.resource == "hp" else p.raw
-                    for p in packets]
+        resolved,lp_proposal=self._preview_damage_packets(recipient,packets)
+        low=(getattr(self.e.g3,"low_life",None)
+             if self.e.g3 is not None else None)
         hp_loss = sum(x for p, x in zip(packets, resolved) if p.resource == "hp")
         hp_after = max(-a.hp_max, a.hp - hp_loss)
         if medium_intercessor is not None and hp_after <= -a.hp_max:
@@ -243,6 +261,8 @@ class DamageState:
             finally:
                 self._live_medium_vigor = None
             interceded_packet = (index,residual)
+        if lp_proposal is not None:
+            low.commit_hp(recipient,lp_proposal,event_key=event_key)
         a.hp = hp_after
         # Set the threshold flag before any VP-release hook can validate G0.
         a.dead = a.hp <= -a.hp_max
@@ -302,6 +322,11 @@ class DamageState:
                              "raw":p.raw, "mitigated":n, "armor_rule":p.armor_rule}
                             for p,n in zip(packets,resolved)],
                    vigor_details=vigor_details, wound=severity, dead=a.dead)
+        # EX-LR-01 payout happens only after native HP loss, wound,
+        # and Dying/death rules. The event ledger keeps the gross loss and
+        # a separate paid post-hit Exaltation receipt.
+        if low is not None:
+            low.after_hp_loss(recipient,before_hp-a.hp,event_key=event_key)
         # Independently resolved G4 damage can incapacitate an attacker
         # *after* G0 has paid and declared a G5 multi-slot sword sequence.
         # Close every remaining paid slot at the real damage boundary,
@@ -328,7 +353,13 @@ class DamageState:
         if type(fire_hp) is not int or fire_hp<2 or type(devastating) is not bool:
             raise ValueError("Source-confirmed Flame Fire HP/critical required")
         a=self._actor(recipient)
-        hp_loss=self._mitigate_hp(a,DamagePacket("hp","Fire",fire_hp))
+        # This is the same pure, live packet preview used by native G5
+        # preflight and G4.apply_damage. An armed Low Priest Vital
+        # Interposition may absorb a Flame's Fire HP *before* the wound
+        # threshold is evaluated; preview neither spends budget nor VP.
+        packets=(DamagePacket("hp","Fire",fire_hp),)
+        resolved,_=self._preview_damage_packets(recipient,packets)
+        hp_loss=resolved[0]
         after=max(-a.hp_max,a.hp-hp_loss)
         wound=((a.hp>0 and after<=0) or devastating) and after>-a.hp_max
         if wound and (type(wound_location_roll) is not int
@@ -470,8 +501,8 @@ class DamageState:
         victim=self._actor(target)
         if victim.dead:
             raise ValueError("Dead recipient cannot receive live encounter damage")
-        hp_loss=sum(self._mitigate_hp(victim,packet)
-                    for packet in packets if packet.resource=="hp")
+        resolved,_=self._preview_damage_packets(target,packets)
+        hp_loss=sum(n for p,n in zip(packets,resolved) if p.resource=="hp")
         hp_after=max(-victim.hp_max,victim.hp-hp_loss)
         creates_wound=(victim.hp>0 and hp_after<=0
                        or critical=="devastating") and hp_after>-victim.hp_max
@@ -604,10 +635,21 @@ class DamageState:
         if g3 is None:
             raise ValueError("Source-backed G3 required for casting")
         caster_source=self._actor(caster).source.source_id
-        ap_cost={"F":20,"R":30,"M":24}.get(caster_source)
+        ap_cost={"F":20,"R":30,"M":24,"A":30,"B":30}.get(caster_source)
         if ap_cost is None:
             raise UnresolvedDecision("Caster lacks verified Basic Heal repertoire")
         actor = g3._own(caster,ap_cost)
+        if caster_source in ("A","B"):
+            low=getattr(g3,"low_life",None)
+            if low is None or low.caster!=caster:
+                raise UnresolvedDecision("A/B physical proxy lacks prepared Life authority")
+            low._source(caster)
+            # The source-locked B mace+shield occupy both hands. The
+            # existing physical proxy has no verified equipment-switch
+            # executor, so a caller Boolean cannot grant a free hand.
+            if caster_source=="B":
+                raise UnresolvedDecision(
+                    "B mace and shield occupy both hands; no native free-hand transition")
         if caster_source=="M":
             from scripts.b05_medium_priest_life_l1_l3_v0 import profile as medium_profile
             p=medium_profile(actor.level)
