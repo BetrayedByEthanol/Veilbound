@@ -6,7 +6,7 @@ No generic GM-created damage or extra regeneration/Reaction is authorized.
 """
 from hashlib import sha256
 
-from scripts.b06_encounter_state_v0 import ROOT, UnresolvedDecision
+from scripts.b06_encounter_state_v0 import ROOT, UnresolvedDecision, party_actor
 from scripts.b06_ranged_v0 import RangedCombat
 
 SOURCE="scripts/b06_hunter_party_exchanges_v0.py"
@@ -32,12 +32,18 @@ class LowLifeNativeRites:
         if caster not in encounter.actors:
             raise ValueError("Missing chosen Priest")
         a=encounter.actors[caster]
+        expected=party_actor(a.source.source_id,a.level,"source-proof","party",
+                             occupied=a.occupied) if a.source.source_id in CHOICES else None
         design=(ROOT/DESIGN).read_text(encoding="utf-8")
         rules=(ROOT/RULE).read_text(encoding="utf-8")
         if any(pin not in rules for pin in RULE_PINS):
             raise AssertionError("Canonical Low Exaltation price/identity changed")
-        if (a.source.source_id not in CHOICES or a.focus!="Low"
-                or a.source.path!=SOURCE
+        if (expected is None or a.source!=expected.source
+                or a.hp_max!=expected.hp_max
+                or a.vigor_max!=expected.vigor_max
+                or a.ap_total!=expected.ap_total
+                or a.physical_ap!=expected.physical_ap
+                or a.focus!="Low" or a.source.path!=SOURCE
                 or a.source.digest!=sha256((ROOT/SOURCE).read_bytes()).hexdigest()
                 or a.source.status!="B05_UNBUFFED_PHYSICAL_PROXY"
                 or a.vp_max!=2*a.level or a.projection_ap!=30
@@ -48,7 +54,8 @@ class LowLifeNativeRites:
         self.e=encounter
         self.g3=encounter.g3
         self.caster=caster
-        self.chosen_name=CHOICES[a.source.source_id]
+        self.role=a.source.source_id
+        self.chosen_name=CHOICES[self.role]
         self.pending=None
         self.armed_vital_turns=set()
         self.last_held_step=None
@@ -62,7 +69,15 @@ class LowLifeNativeRites:
         if caster!=self.caster:
             raise UnresolvedDecision("Wrong Low Life caster")
         a=self.e.actors[caster]
-        if (a.source.source_id not in CHOICES
+        expected=party_actor(self.role,a.level,"source-proof","party",
+                             occupied=a.occupied)
+        if (a.source!=expected.source
+                or a.hp_max!=expected.hp_max
+                or a.vigor_max!=expected.vigor_max
+                or a.ap_total!=expected.ap_total
+                or a.physical_ap!=expected.physical_ap
+                or a.source.source_id!=self.role or a.source.path!=SOURCE
+                or a.source.status!="B05_UNBUFFED_PHYSICAL_PROXY"
                 or a.source.digest!=sha256((ROOT/SOURCE).read_bytes()).hexdigest()
                 or a.focus!="Low" or a.vp_max!=2*a.level
                 or a.projection_ap!=30 or a.regen!=6):
@@ -105,8 +120,12 @@ class LowLifeNativeRites:
         self.e.spend_ap(caster,"projection",label="b05:low:chosen_rite")
         if on_committed is not None:
             on_committed(self.e)
-        if (a.hp<=0 or a.vp_available<spent+committed
-                or a.source.digest!=sha256((ROOT/SOURCE).read_bytes()).hexdigest()
+        source_ok=True
+        try:
+            self._source(caster)
+        except (ValueError,UnresolvedDecision):
+            source_ok=False
+        if (not source_ok or a.hp<=0 or a.vp_available<spent+committed
                 or self._host()
                 or any(v.caster==caster and v.committed>0 and
                        v.kind in ("Guided Regeneration","Vital Shelter")
