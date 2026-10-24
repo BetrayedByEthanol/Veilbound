@@ -60,9 +60,9 @@ REQUIRED_RULES = {
         "**2→1 Committed VP**",
     ),
     SOURCE_PATHS[1]: (
-        "High Focus:** \`max(1, 6 + Veil Affinity) × Level\`",
-        "Medium Focus:** \`max(1, 4 + Veil Affinity) × Level\`",
-        "Low Focus:** \`max(1, 2 + Veil Affinity) × Level\`",
+        "High Focus:** `max(1, 6 + Veil Affinity) × Level`",
+        "Medium Focus:** `max(1, 4 + Veil Affinity) × Level`",
+        "Low Focus:** `max(1, 2 + Veil Affinity) × Level`",
         "VP Recovery = 25% of Max VP",
     ),
     SOURCE_PATHS[2]: (
