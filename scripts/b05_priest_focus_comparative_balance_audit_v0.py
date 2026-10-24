@@ -6,6 +6,7 @@ Low A is a physical G0 proxy plus separate documented Rite/Exaltation tests.
 Never convert modeled access/capacity into certified effectiveness.
 """
 import argparse
+from hashlib import sha256
 from copy import deepcopy
 import json
 
@@ -32,21 +33,36 @@ SOURCE_PATHS = (
     "docs/rules/05-combat/action-categories-and-physical-tempo.md",
     "docs/rules/06-vigor-wounds-death/hp-and-vigor.md",
     "docs/rules/07-veil-magic/basic-heal-v0.md",
+    "docs/rules/07-veil-magic/guided-regeneration-v0.md",
+    "docs/rules/07-veil-magic/vital-shelter-v0.md",
+    "docs/rules/10-advancement/talents-level-1-5-v0.md",
     "docs/design/b05-life-low-priest-l3-build-exaltation-verification-v0.md",
     "docs/design/b04-b05-medium-priest-life-l1-l3-encounter-integration-balance-verification-v0.md",
+    "scripts/b05_medium_priest_life_l1_l3_v0.py",
+    "scripts/b05_medium_life_encounter_balance_v0.py",
+    "scripts/b06_encounter_state_v0.py",
+    "scripts/b06_hunter_party_exchanges_v0.py",
 )
+# Match the actual price-bearing DECLARATIONS, not just feature labels or
+# incidental examples elsewhere in the same document. A same-length price
+# replacement must fail closed before modeled witnesses can be attested.
 REQUIRED_RULES = {
     SOURCE_PATHS[0]: (
         "High **4/5/5**, Medium **3/4/4**, Low **2/3/3**",
+        "- pays the **full normal technique VP** plus **1 additional Spent VP Invocation Surcharge**,",
+        "- **levels 1–4: one Full Action**,",
+        "**level 5+:** the technique's normal action while still paying +1 Spent VP;",
+        "This **+1 surcharge is a provisional L1–3 playtest value**.",
         "Intercession = 2 Spent VP",
-        "Open Invocation",
-        "Chosen Devotion",
-        "one **General Tempo Action (24 AP)**",
+        "- costs one **General Tempo Action (24 AP)**;",
+        "**2 Committed + 1 Spent VP**",
+        "**−1 Committed VP, minimum 1**",
+        "**2→1 Committed VP**",
     ),
     SOURCE_PATHS[1]: (
-        "High Focus:** `max(1, 6 + Veil Affinity) × Level`",
-        "Medium Focus:** `max(1, 4 + Veil Affinity) × Level`",
-        "Low Focus:** `max(1, 2 + Veil Affinity) × Level`",
+        "High Focus:** \`max(1, 6 + Veil Affinity) × Level\`",
+        "Medium Focus:** \`max(1, 4 + Veil Affinity) × Level\`",
+        "Low Focus:** \`max(1, 2 + Veil Affinity) × Level\`",
         "VP Recovery = 25% of Max VP",
     ),
     SOURCE_PATHS[2]: (
@@ -60,22 +76,48 @@ REQUIRED_RULES = {
         "High Focus: +1", "Medium Focus: +2", "Low Focus: +3",
     ),
     SOURCE_PATHS[4]: (
-        "High **20 AP**, Medium **24 AP**, Low **30 AP**",
+        "| Primary activation | **One Projection Action**, paid High **20 AP**, Medium **24 AP**, Low **30 AP** |",
+        "| Primary VP | **2 × T Spent VP** for the attempted spell |",
+    ),
+    SOURCE_PATHS[5]: (
+        "| Ordinary activation | **One Projection Action** on caster's own turn: High **20 AP**, Medium **24 AP**, Low **30 AP**",
+        "| Maintained mode | **2 Committed VP**;",
+        "| Benefit | **+1 throughput** at beneficiary's **existing once-per-own-turn Regeneration Step**",
+        "with a **separate +1 Spent VP surcharge**.",
+    ),
+    SOURCE_PATHS[6]: (
+        "| Ordinary activation | **One own-turn Focus-priced Projection Action**, High **20**, Medium **24**, Low **30 Turn AP**;",
+        "| Maintained mode — Primary | **2 Committed VP + 1 ordinary Spent VP**;",
+        "| Primary initial prevention budget | **B = 8 + max(0, caster Veil Control)**;",
+    ),
+    SOURCE_PATHS[7]: (
+        "### TAL-M03 — Frugal Technique",
+        "with a normal **Spent VP component of at least 2** costs **1 fewer Spent VP**",
     ),
 }
 
 
 def verify_basis():
-    """Fail closed if the *specific* rule declarations being modeled drift."""
+    """Pin price-bearing declarations AND hash actual source bytes for replay.
+
+    The source hash is part of the signed report itself: editing a source
+    without changing character count still changes audit_sha256 and makes an
+    earlier attestation fail. Price changes must additionally fail closed
+    instead of simply reissuing the stale numerical payment witness.
+    """
     evidence={}
     for path in SOURCE_PATHS:
-        contents=(ROOT / path).read_text(encoding="utf-8")
+        raw=(ROOT / path).read_bytes()
+        contents=raw.decode("utf-8")
         for needle in REQUIRED_RULES.get(path, ()):
-            if needle not in contents:
-                raise AssertionError(f"Rule changed; review audit: {path}: {needle}")
-        # All comparison records are actual tracked sources, not citations
-        # to imaginary completed High Priest character/encounter packages.
-        evidence[path]={"present": True, "chars": len(contents)}
+            if contents.count(needle)!=1:
+                raise AssertionError(
+                    f"Rule changed or duplicate declaration; review audit: {path}: {needle}")
+        evidence[path]={
+            "present":True,
+            "chars":len(contents),
+            "sha256":sha256(raw).hexdigest(),
+        }
     return evidence
 
 

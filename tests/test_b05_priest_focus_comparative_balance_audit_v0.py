@@ -1,10 +1,12 @@
 """Fail-closed comparative Priest Focus audit, not full three-Focus certification."""
 from copy import deepcopy
+from hashlib import sha256
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
 from scripts.b05_priest_focus_comparative_balance_audit_v0 import (
-    FOCUSES, LEVELS, REQUIRED_RULES, SOURCE_PATHS,
+    FOCUSES, LEVELS, REQUIRED_RULES, SOURCE_PATHS, ROOT,
     _half_up_quarter, _crosscheck_real_characters, attest, audit,
     row, verify_basis,
 )
@@ -21,6 +23,10 @@ class PriestFocusComparativeBalanceTests(unittest.TestCase):
         self.assertEqual(set(source),set(SOURCE_PATHS))
         self.assertTrue(all(v["present"] and v["chars"]>100
                             for v in source.values()))
+        for path,details in source.items():
+            self.assertEqual(len(details["sha256"]),64)
+            self.assertEqual(details["sha256"],
+                             sha256((ROOT/path).read_bytes()).hexdigest())
         self.assertIn("High",self.report["focus_progression"])
         self.assertIn("Low",self.report["focus_progression"])
 
@@ -158,6 +164,82 @@ class PriestFocusComparativeBalanceTests(unittest.TestCase):
                    replacement):
             with self.assertRaisesRegex(AssertionError,"Rule changed"):
                 verify_basis()
+
+    @staticmethod
+    def _mutate_source(path, before, after):
+        """In-memory same-length edit; do not change canonical disk files."""
+        before,after=before.encode("utf-8"),after.encode("utf-8")
+        if len(before)!=len(after):
+            raise AssertionError("Mutation test must preserve byte length")
+        original=Path.read_bytes
+        selected=ROOT/path
+        def reader(self):
+            raw=original(self)
+            if self==selected:
+                if raw.count(before)!=1:
+                    raise AssertionError("Expected one source declaration")
+                return raw.replace(before,after,1)
+            return raw
+        return reader
+
+    def test_12_same_length_payment_edits_fail_before_attestation(self):
+        examples=(
+            ("docs/rules/08-archetypes/priest.md",
+             "**1 additional Spent VP Invocation Surcharge**",
+             "**2 additional Spent VP Invocation Surcharge**"),
+            ("docs/rules/08-archetypes/priest.md",
+             "This **+1 surcharge is a provisional",
+             "This **+2 surcharge is a provisional"),
+            ("docs/rules/08-archetypes/priest.md",
+             "Intercession = 2 Spent VP",
+             "Intercession = 3 Spent VP"),
+            ("docs/rules/08-archetypes/priest.md",
+             "**2→1 Committed VP**",
+             "**2→2 Committed VP**"),
+            ("docs/rules/07-veil-magic/basic-heal-v0.md",
+             "| Primary VP | **2 × T Spent VP**",
+             "| Primary VP | **3 × T Spent VP**"),
+            ("docs/rules/07-veil-magic/guided-regeneration-v0.md",
+             "| Maintained mode | **2 Committed VP**",
+             "| Maintained mode | **3 Committed VP**"),
+            ("docs/rules/07-veil-magic/vital-shelter-v0.md",
+             "| Maintained mode — Primary | **2 Committed VP",
+             "| Maintained mode — Primary | **3 Committed VP"),
+            ("docs/rules/07-veil-magic/vital-shelter-v0.md",
+             "| Primary initial prevention budget | **B = 8 +",
+             "| Primary initial prevention budget | **B = 9 +"),
+            ("docs/rules/10-advancement/talents-level-1-5-v0.md",
+             "costs **1 fewer Spent VP**",
+             "costs **2 fewer Spent VP**"),
+        )
+        for path,before,after in examples:
+            with self.subTest(path=path,from_value=before):
+                with patch.object(Path,"read_bytes",
+                                  new=self._mutate_source(path,before,after)):
+                    with self.assertRaisesRegex(AssertionError,
+                                                "Rule changed or duplicate"):
+                        verify_basis()
+                    with self.assertRaisesRegex(AssertionError,
+                                                "Rule changed or duplicate"):
+                        attest(self.report,seed=0)
+
+    def test_13_equal_length_nonprice_change_invalidates_previous_report(self):
+        path="docs/design/b05-life-low-priest-l3-build-exaltation-verification-v0.md"
+        baseline=verify_basis()
+        with patch.object(Path,"read_bytes",new=self._mutate_source(
+                path,"Verification record","Verification Record")):
+            changed=verify_basis()
+            self.assertEqual(changed[path]["chars"],baseline[path]["chars"])
+            self.assertNotEqual(changed[path]["sha256"],
+                                baseline[path]["sha256"])
+            changed_report=audit(seed=0)
+            self.assertNotEqual(changed_report["audit_sha256"],
+                                self.report["audit_sha256"])
+            self.assertEqual(changed_report["source_files"][path]["sha256"],
+                             changed[path]["sha256"])
+            with self.assertRaisesRegex(AssertionError,
+                                        "independent source replay"):
+                attest(self.report,seed=0)
 
     def test_10_invalid_inputs_fail_without_partial_report(self):
         for args in (
