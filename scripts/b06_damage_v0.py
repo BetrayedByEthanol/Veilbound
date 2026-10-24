@@ -151,6 +151,23 @@ class DamageState:
             amount = max(0, amount - resistance)
         return amount
 
+    def _preview_damage_packets(self, recipient, packets):
+        """Pure native packet mitigation plus optional Chosen HP diversion.
+
+        Both G5's preflight and G4's eventual application MUST compute the
+        same HP/wound threshold from the same live source packets. The Low
+        Life preview never consumes a host budget or a pending property.
+        """
+        victim=self._actor(recipient)
+        resolved=tuple(
+            self._mitigate_hp(victim,p) if p.resource=="hp" else p.raw
+            for p in packets)
+        low=(getattr(self.e.g3,"low_life",None)
+             if self.e.g3 is not None else None)
+        if low is None:
+            return resolved,None
+        return low.preview_hp(recipient,packets,resolved)
+
     def apply_damage(self, recipient, packets, *, event_key, cause,
                      devastating=False, wound_location_roll=None,
                      wound_trauma=None, medium_intercessor=None):
@@ -185,14 +202,9 @@ class DamageState:
                 raise ValueError("Medium Intercession requires native positive G4 Vigor packet")
             # Fail closed before any HP/Vigor or wound mutation.
             self.e.g3.medium_life.preflight_vigor(medium_intercessor,recipient)
-        resolved = [self._mitigate_hp(a, p) if p.resource == "hp" else p.raw
-                    for p in packets]
-        low = (getattr(self.e.g3,"low_life",None)
-               if self.e.g3 is not None else None)
-        lp_proposal=None
-        if low is not None:
-            resolved,lp_proposal=low.preview_hp(recipient,packets,resolved)
-            resolved=list(resolved)
+        resolved,lp_proposal=self._preview_damage_packets(recipient,packets)
+        low=(getattr(self.e.g3,"low_life",None)
+             if self.e.g3 is not None else None)
         hp_loss = sum(x for p, x in zip(packets, resolved) if p.resource == "hp")
         hp_after = max(-a.hp_max, a.hp - hp_loss)
         if medium_intercessor is not None and hp_after <= -a.hp_max:
@@ -483,8 +495,8 @@ class DamageState:
         victim=self._actor(target)
         if victim.dead:
             raise ValueError("Dead recipient cannot receive live encounter damage")
-        hp_loss=sum(self._mitigate_hp(victim,packet)
-                    for packet in packets if packet.resource=="hp")
+        resolved,_=self._preview_damage_packets(target,packets)
+        hp_loss=sum(n for p,n in zip(packets,resolved) if p.resource=="hp")
         hp_after=max(-victim.hp_max,victim.hp-hp_loss)
         creates_wound=(victim.hp>0 and hp_after<=0
                        or critical=="devastating") and hp_after>-victim.hp_max

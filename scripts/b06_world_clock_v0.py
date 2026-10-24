@@ -313,6 +313,13 @@ class WorldClock:
             seconds = ROUND_SECONDS_SURROGATE * max(0,ev.due_round-current-1)
             ev.due_seconds = self.world_seconds + seconds
             ev.due_round = None
+        # Combat-only Exaltations end at the initiative-to-exploration
+        # boundary, BEFORE due exploration events can deliver new damage.
+        # The Chosen Rite itself and its Committed VP remain unaffected.
+        low=(getattr(self.e.g3,"low_life",None)
+             if self.e.g3 is not None else None)
+        if low is not None:
+            low.on_initiative_exit()
         self.e.log("g42_initiative_exited",round_label=current,
                    world_seconds=self.world_seconds)
         self._due_exploration()  # E<=C+1: resolve at mode transition.

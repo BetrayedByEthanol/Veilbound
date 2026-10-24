@@ -170,6 +170,20 @@ class LowLifeNativeRites:
                        property=pending["id"],reason="exact_host_ended",
                        host=effect.ident)
 
+    def on_initiative_exit(self):
+        """Expire the single pending combat-only Exaltation; no VP refund.
+
+        The original Chosen host remains independently maintained under
+        its own G3 rules. Exploration never inherits the armed property.
+        """
+        if self.pending is not None:
+            pending=self.pending
+            self.pending=None
+            self.e.log("b05_exaltation_expired",caster=self.caster,
+                       property=pending["id"],reason="initiative_exit",
+                       host=pending["host"])
+        self.last_held_step=None
+
     def on_step_start(self,actor_id):
         if actor_id==self.caster and self.pending is not None:
             self.e.log("b05_exaltation_expired",caster=actor_id,
