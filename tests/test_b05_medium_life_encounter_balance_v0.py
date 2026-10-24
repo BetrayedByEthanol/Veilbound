@@ -51,7 +51,7 @@ class MediumLifeEncounterIntegrationTests(unittest.TestCase):
                         self.assertEqual(hit["detail"]["target"],"ally")
                         self.assertEqual(hit["detail"]["target_source"],
                                          r["source_digests"]["ally"])
-                        self.assertIsNone(hit["detail"]["medium_intercessor"])
+                        self.assertIsNone(hit["detail"].get("medium_intercessor"))
                     self.assertFalse(r["full_encounter_certified"])
                     self.assertIsNone(r["sampled_win_rate"])
                     self.assertIsNone(r["policy_weighting"])

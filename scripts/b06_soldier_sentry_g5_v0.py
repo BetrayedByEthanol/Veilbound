@@ -897,7 +897,8 @@ class SourceMelee:
               attacker=attacker,target=target,profile=p,
               outcome="hit" if hit else "miss",
               damage=result,critical=critical,
-              medium_intercessor=medium_intercessor)
+              **({"medium_intercessor":medium_intercessor}
+                 if medium_intercessor is not None else {}))
         # Even a fatal first hit retains any remaining paid slots.
         # The caller must redirect them to a new legal target, or explicitly
         # decline when the original target is no longer available.
