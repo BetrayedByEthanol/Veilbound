@@ -1,0 +1,42 @@
+# B04/B05 — Low Priest Life L1–3 Native Encounter and Exaltation Verification v0
+
+**Scope:** source-authenticated, two-round, native G0/G1/G3/G4/G4.5/G5 Soldier/Sentry encounter traces for **audited Low Life A (Restorative Vanguard)** and **B (Preservation Guardian)**. At L3, test actual **EX-LR-01 Held Renewal** and **EX-LP-01 Vital Interposition** with resource conservation, provenance and genuine event timing. **No new Focus or Exaltation numbers, independent character/CR balance certification, win-rate, Hunter scenario or opponent AI.**
+
+## Source identities and fixed policy
+
+- Reuse the **original A/B G0 physical source identities** (SHA-256 of `scripts/b06_hunter_party_exchanges_v0.py`) with their authored nine-Ability, L1–3 HP/Vigor/VP, physical training/equipment, Talent progression and the independent [B05 audited Life build record](b05-life-low-priest-l3-build-exaltation-verification-v0.md). A/B remain explicitly **physical-only unless `LowLifeNativeRites` binds that exact source before Round Begin**. Binding grants only the original explicitly prepared Life expressions: A **Chosen self Guided Regeneration**, B **Chosen self maintained Vital Shelter**, and native G4 **Basic Heal** only to A with its legitimately free hand. B's original mace+shield have both hands occupied and cannot be silently swapped away by a Boolean; its Basic Heal access remains unresolved until a real equipment action/state demonstrates a functioning free hand.
+- Use the **existing Soldier** (B06-EN-02) and **prepared Firebound Sentry** (B06-EN-01) exact JSON source, G3 Sword Reserve and G5 swords. One 1x1 Low Priest starts in real clear G1 contact with the foe. Exact Initiative order: Low then foe. Each of two rounds: exactly one actual Priest Step 2; the first Priest turn establishes the explicitly Chosen maintained Rite for **30 AP**, the foe pays and resolves one native G5 attack (d20 face 12; independently supplied legitimate source d6 face A=1 or B=4; Sentry’s authored Vigor d6 face 4). `take_hit` is an explicitly declared defense policy, not a lucky Guard miss or new response. On round two the same enemy delivers a second paid attack. The policy is a deterministic **test case, not character AI or random sampling**.
+- 2 roles × 3 levels × 2 source opponents = **12 bounded native cases**. At L1/L2 no Exaltation exists. At L3, A may pay 1 Spent VP to hold actual unused throughput **only at the end of its second true Step 2** (after genuine allocation), then the second source hit is resolved through G4 and may pay out *post-damage*. B may arm **Vital Interposition immediately after its legally established Chosen Shelter** for 1 Spent VP on L3 round one; the subsequent first qualifying source HP event consumes it with exact packet source/order.
+- This controlled pairing deliberately exposes incoming pressure on the Priest and no assisted third-party recipient. It does **not** assert a complete playable party tactics certification, wound treatment rotation, six-hour attrition, Hunter pounce parity, or the relative superiority of A vs B.
+
+## Canonical resource and event rules
+
+| Mechanic | Native behavior |
+|---|---|
+| Low L1/2/3 full VP (VA0) | **2 / 4 / 6**, conserved as Available + Committed + Spent |
+| A Chosen self Guided | **30 AP +1 Committed**, normal one-instance G3 effect; affects only beneficiary's actual Step 2 with **+1 throughput**, never creates a Step |
+| B Chosen self Shelter | **30 AP +1 Committed +1 Spent**, G3 finite B8 at VC0; actual incoming **Direct Vigor** damages consume remaining B per G4 |
+| Chosen discount boundary | Applies only to **one explicitly chosen original maintained self instance**. An unchosen instance has **2 Committed** and cannot anchor either property. L1–3 one active Rite, no free second slot |
+| EX-LR-01 | L3 A, real completed Step 2 with available surplus from baseline **6** plus already-active Guided **+1**, hold 1–2 genuinely unused points for **1 Spent VP**; expire at first following HP-loss event or next Step; after native damage, wounds and Dying check, restore up to held HP only while **above 0 HP and conscious**; pay 1 own Vigor per actual HP restored |
+| EX-LP-01 | L3 B, own-turn **0 extra AP**, at least B2, pay **1 Spent VP**, no Reaction; first genuine event with post-mitigation HP triggers one conversion: at most **2 HP prevented** for **2 remaining host budget per HP**, allocating to native primary HP packet before later source packets; remaining finite host B then processes that event's real Vigor packets |
+| Termination | Host ending returns **only actual locked Committed**, never its establishment Spent or Exaltation Spent. Separate VP and G3 termination receipts; no retroactive refund or re-preparation |
+| G4/G5 evidence | Exact actual source attacks, independently mitigated typed HP packets, one-event wound/death check, G3 prevention of the original direct Vigor packets. No synthetic bonus damage is counted as a G5 hit |
+
+The G4 integration deliberately **previews** HP diversion without modifying any budget, determines the real modified HP threshold/wound requirements, then commits the property only after preflight succeeds. In an enchanted Sentry hit the surviving Piercing and Fire packet types remain separate. Reduced Piercing can no longer independently qualify as positive puncture for toxin rules. **Within a single HP+Vigor event HP diversion spends budget first**, and G3 ordinary Vigor prevention then uses only the leftover host. Held Renewal resolves in a **separate post-G4-damage receipt**, and an HP crossing to 0 or lower is never undone by its pending points. G0's voluntary end-of-Step callback passes through G4.5 but executes **only after the real, once-per-turn regeneration**, before start hazards and ordinary Turn AP; it is not a free new regeneration hook.
+
+## Executable boundaries
+
+- `LowLifeNativeRites` attaches before Round Begin and verifies the exact A/B physical source digest, level, Focus, resources and canonical Life property identity. The existing A/B physical-only encounter paths are not automatically upgraded. No fabricated third-party Low priest actor, alternate Aspect, unknown Rite, freely composed spell or unconfirmed G5 hit can activate these effects.
+- **Basic Heal:** A may invoke the existing **G4 Single Target Primary** when its authored preparation/one-handed sword permits one functioning free hand. B's source keeps mace and shield occupied; the bounded v0 adapter rejects a claimed free hand without independently implemented G2 item-state transition. The host Rite itself has no hand component and is legal with B's shield+mace. A's TAL-C10 Emergency Regeneration is a separately authored pre-hit Reaction feature; this PR does not silently exercise it during fixed `take_hit` cases or count it as Held Renewal.
+- The G4 hook is conditional on an explicitly installed `LowLifeNativeRites` and leaves all older G0/G3/G4/G5 policies unchanged. The G0 Step-end callback is optional and is passed through the existing G4.5 bridge. It does not grant any ordinary action and remains inaccessible before Step 2 resolves.
+- Fail closed for illegal L1–2 Exaltation, missing Chosen status, duplicate Rites/pending properties, insufficient VP or AP, wrong caster, unsupported fake source, and replay mutations. A pure Vigor-only packet never consumes an armed Vital Interposition, but can lawfully deplete the original Shelter reservoir.
+
+## Test commands and acceptance
+
+`python -m unittest tests.test_b05_low_life_native_encounter_v0 -v`
+
+`python -m unittest discover -s tests -v`
+
+`python -m scripts.b05_low_life_native_encounter_v0 --seed 0`
+
+**Acceptance:** a 12-cell reproducible native G5/G4 matrix with source digests and SHA-256 ledger hashes; no unverified attack/damage/Step count; a real second-turn Held Renewal paid activation and post-hit payout; a real first-hit Vital Interposition with remaining typed HP packets and finite-budget-first ordering; both original Chosen host VP ledgers; negative source/hand/status/AP/VP/time tests; original Phase 3 census SHA unchanged. The resulting milestone establishes **integration for the bounded A/B Life L1–3 source characters**, not any global **0/12 independently certified full Focus encounter** gate. Three-Focus matchup comparisons remain a follow-on milestone.
