@@ -565,8 +565,13 @@ class SpellState:
 
     def regen_throughput(self,actor_id):
         # No invented instant Regeneration Step; augment one actual G0 Step.
-        return int(any(x.kind=="Guided Regeneration" and x.recipient==actor_id
-                       for x in self.effects.values()))
+        ordinary = int(any(x.kind=="Guided Regeneration" and x.recipient==actor_id
+                           for x in self.effects.values()))
+        medium = getattr(self, "medium_life", None)
+        bonus = medium.bonus_for_regen(actor_id) if medium is not None else 0
+        if ordinary and bonus:
+            raise ValueError("Guided Regeneration cannot stack with Intercession")
+        return ordinary + bonus
 
     def resistance(self,actor_id,kind,other=()):
         allowed=kind in ("Physical","Crush","Cut","Piercing","Fire","Electrical")
@@ -576,9 +581,20 @@ class SpellState:
                        if v.kind=="Stone Skin" and v.recipient==actor_id]
         return max((0,*values))
 
-    def prevent_vigor(self,actor_id,damage):
+    def prevent_vigor(self,actor_id,damage,*,medium_intercessor=None):
         if type(damage) is not int or damage<0:
             raise ValueError("Explicit nonnegative direct Vigor packet required")
+        if medium_intercessor is not None:
+            if (self.e.g4 is None or
+                    getattr(self.e.g4,"_live_medium_vigor",None)!=(actor_id,damage)):
+                raise ValueError("Only an applying native G4 packet can trigger Intercession")
+            medium=getattr(self,"medium_life",None)
+            if medium is None:
+                raise ValueError("No source-bound Medium Priest Intercession")
+            if any(v.kind=="Vital Shelter" and v.recipient==actor_id
+                   for v in self.effects.values()):
+                raise ValueError("Vital Shelter cannot stack with Intercession")
+            return medium.intercede_vigor(medium_intercessor,actor_id,damage)
         shelters=[v for v in self.effects.values()
                   if v.kind=="Vital Shelter" and v.recipient==actor_id]
         if len(shelters)>1:

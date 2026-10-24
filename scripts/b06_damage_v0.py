@@ -64,6 +64,9 @@ class DamageState:
         # G3->G4 Flame delivery merely by guessing its event key/cause.
         # Only apply_flame opens this transient exact-packet authority.
         self._live_flame_delivery = None
+        # Only a currently applying native G4 packet authorizes Medium L3
+        # Intercession; direct G3 calls must never fabricate a packet.
+        self._live_medium_vigor = None
         self._flame_consumptions = {}
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
@@ -150,7 +153,7 @@ class DamageState:
 
     def apply_damage(self, recipient, packets, *, event_key, cause,
                      devastating=False, wound_location_roll=None,
-                     wound_trauma=None):
+                     wound_trauma=None, medium_intercessor=None):
         """Apply an independently *confirmed* damaging event exactly once.
 
         A delivered event may contain multiple HP and direct Vigor packets.
@@ -175,10 +178,19 @@ class DamageState:
                 "G3 Flame damage must be consumed through native G4.apply_flame")
         if a.dead:
             raise ValueError("Dead recipient cannot receive live encounter damage")
+        if medium_intercessor is not None:
+            if (self.e.g3 is None or
+                    getattr(self.e.g3, "medium_life", None) is None or
+                    not any(p.resource=="vigor" and p.raw>0 for p in packets)):
+                raise ValueError("Medium Intercession requires native positive G4 Vigor packet")
+            # Fail closed before any HP/Vigor or wound mutation.
+            self.e.g3.medium_life.preflight_vigor(medium_intercessor,recipient)
         resolved = [self._mitigate_hp(a, p) if p.resource == "hp" else p.raw
                     for p in packets]
         hp_loss = sum(x for p, x in zip(packets, resolved) if p.resource == "hp")
         hp_after = max(-a.hp_max, a.hp - hp_loss)
+        if medium_intercessor is not None and hp_after <= -a.hp_max:
+            raise UnresolvedDecision("Cannot extend Consecration to a fatal recipient")
         crosses = a.hp > 0 and hp_after <= 0
         creates_wound = (crosses or devastating) and hp_after > -a.hp_max
         severity = None
@@ -224,13 +236,27 @@ class DamageState:
                        location=location, trauma=wound_trauma,
                        event_key=event_key)
         vigor_details = []
+        intercession_used = False
         for p, n in zip(packets, resolved):
             if p.resource != "vigor":
                 continue
             # Never consume Shelter budget for reserve the actor does not have.
             actual = min(a.vigor, n)
-            residual = (self.e.g3.prevent_vigor(recipient, actual)
-                        if self.e.g3 is not None else actual)
+            intercessor = (medium_intercessor if not intercession_used and actual > 0
+                           else None)
+            if intercessor is not None:
+                intercession_used = True
+            if intercessor is not None:
+                if self._live_medium_vigor is not None:
+                    raise UnresolvedDecision("Nested Medium packet intercession")
+                self._live_medium_vigor = (recipient,actual)
+            try:
+                residual = (self.e.g3.prevent_vigor(
+                    recipient, actual, medium_intercessor=intercessor)
+                    if self.e.g3 is not None else actual)
+            finally:
+                if intercessor is not None:
+                    self._live_medium_vigor = None
             a.vigor -= residual
             vigor_details.append({"raw": p.raw, "available": actual,
                                   "prevented": actual - residual,
