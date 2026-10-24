@@ -142,9 +142,8 @@ def _priest_action(combat,adapter,role,policy,round_no,tactic):
         if not e.g1.melee_contact("foe","priest"):
             raise AssertionError("Cautious movement may not invent enemy pursuit")
     if round_no==1 and policy not in ("baseline","heal_cycle"):
-        spell=(policy if policy in ("guided","shelter")
-               else CHOSEN[role])
-        kind=("Guided Regeneration" if spell=="guided"
+        kind=(CHOSEN[role] if role in ("A","B") else
+              "Guided Regeneration" if policy=="guided"
               else "Vital Shelter")
         if role=="H":
             effect=adapter.cast("priest",kind,"priest",
