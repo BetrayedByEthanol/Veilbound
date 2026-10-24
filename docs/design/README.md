@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — High Priest Life L1–3 Native Encounter Integration v0](b04-b05-high-priest-life-l1-l3-native-encounter-integration-v0.md) — 42 sourced, paid two-round Soldier/Sentry Life support cases across prepared, Invocation, L3 Open Prayer and double Projection actions; no independent Focus balance certification.
+
 - [B04/B05 — Low Priest Life L1–3 Native Encounter and Exaltation Verification v0](b04-b05-low-priest-life-l1-l3-native-encounter-exaltation-verification-v0.md) — source-bound A/B G5 Soldier/Sentry encounter traces, Chosen self Rites, G4 post-event Held Renewal and packet-preserving finite-budget Vital Interposition; provisional, not complete Focus certification.
 
 - [B04/B05 — High Priest Life L1–3 Character Build and Open Invocation Verification v0](b04-b05-high-priest-life-l1-l3-build-open-invocation-verification-v0.md) — sourced High Life build, native G0/G3/G4 prepared prayers, separately paid Full-Action Invocation and L3 Open Prayer binding; independent opposed Focus and complete catalogue not certified.
