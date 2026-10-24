@@ -523,7 +523,7 @@ class Encounter:
         self.check()
 
     def start_turn(self, actor_id, *, regen_choice=None,
-                   on_regeneration_ready=None):
+                   on_regeneration_ready=None,on_regeneration_complete=None):
         if not self.round or self.cursor >= len(self.order):
             raise ValueError("No turn is ready")
         if self.current is not None and self.pending_regeneration != actor_id:
@@ -553,7 +553,17 @@ class Encounter:
             if not callable(on_regeneration_ready):
                 raise ValueError("Regeneration response must be callable")
             on_regeneration_ready(self, actor_id)
+        low = (getattr(self.g3,"low_life",None)
+               if self.g3 is not None else None)
+        if low is not None:
+            low.on_step_start(actor_id)
         self._regenerate(a, regen_choice)
+        # The actual completed G0 Step 2 is the only legal EX-LR-01
+        # arming window. A caller's callback does not create a second Step.
+        if on_regeneration_complete is not None:
+            if not callable(on_regeneration_complete):
+                raise ValueError("Regeneration completion policy must be callable")
+            on_regeneration_complete(self, actor_id)
         if self.g3 is not None and getattr(self.g3, "medium_life", None) is not None:
             self.g3.medium_life.finish_regen(actor_id)
         self.pending_regeneration = None

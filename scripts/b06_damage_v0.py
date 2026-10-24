@@ -187,6 +187,12 @@ class DamageState:
             self.e.g3.medium_life.preflight_vigor(medium_intercessor,recipient)
         resolved = [self._mitigate_hp(a, p) if p.resource == "hp" else p.raw
                     for p in packets]
+        low = (getattr(self.e.g3,"low_life",None)
+               if self.e.g3 is not None else None)
+        lp_proposal=None
+        if low is not None:
+            resolved,lp_proposal=low.preview_hp(recipient,packets,resolved)
+            resolved=list(resolved)
         hp_loss = sum(x for p, x in zip(packets, resolved) if p.resource == "hp")
         hp_after = max(-a.hp_max, a.hp - hp_loss)
         if medium_intercessor is not None and hp_after <= -a.hp_max:
@@ -243,6 +249,8 @@ class DamageState:
             finally:
                 self._live_medium_vigor = None
             interceded_packet = (index,residual)
+        if lp_proposal is not None:
+            low.commit_hp(recipient,lp_proposal,event_key=event_key)
         a.hp = hp_after
         # Set the threshold flag before any VP-release hook can validate G0.
         a.dead = a.hp <= -a.hp_max
@@ -302,6 +310,11 @@ class DamageState:
                              "raw":p.raw, "mitigated":n, "armor_rule":p.armor_rule}
                             for p,n in zip(packets,resolved)],
                    vigor_details=vigor_details, wound=severity, dead=a.dead)
+        # EX-LR-01 payout happens only after native HP loss, wound,
+        # and Dying/death rules. The event ledger keeps the gross loss and
+        # a separate paid post-hit Exaltation receipt.
+        if low is not None:
+            low.after_hp_loss(recipient,before_hp-a.hp,event_key=event_key)
         # Independently resolved G4 damage can incapacitate an attacker
         # *after* G0 has paid and declared a G5 multi-slot sword sequence.
         # Close every remaining paid slot at the real damage boundary,
@@ -604,10 +617,21 @@ class DamageState:
         if g3 is None:
             raise ValueError("Source-backed G3 required for casting")
         caster_source=self._actor(caster).source.source_id
-        ap_cost={"F":20,"R":30,"M":24}.get(caster_source)
+        ap_cost={"F":20,"R":30,"M":24,"A":30,"B":30}.get(caster_source)
         if ap_cost is None:
             raise UnresolvedDecision("Caster lacks verified Basic Heal repertoire")
         actor = g3._own(caster,ap_cost)
+        if caster_source in ("A","B"):
+            low=getattr(g3,"low_life",None)
+            if low is None or low.caster!=caster:
+                raise UnresolvedDecision("A/B physical proxy lacks prepared Life authority")
+            low._source(caster)
+            # The source-locked B mace+shield occupy both hands. The
+            # existing physical proxy has no verified equipment-switch
+            # executor, so a caller Boolean cannot grant a free hand.
+            if caster_source=="B":
+                raise UnresolvedDecision(
+                    "B mace and shield occupy both hands; no native free-hand transition")
         if caster_source=="M":
             from scripts.b05_medium_priest_life_l1_l3_v0 import profile as medium_profile
             p=medium_profile(actor.level)
