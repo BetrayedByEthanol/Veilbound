@@ -11,6 +11,7 @@ from scripts.b06_encounter_state_v0 import (
     Encounter,RegenerationChoice,UnresolvedDecision,enemy_actor,party_actor,
 )
 from scripts.b06_movement_v0 import GridMovement
+from scripts.b06_ranged_v0 import RangedCombat
 from scripts.b06_spells_v0 import SpellState
 from scripts.b06_damage_v0 import DamageState,DamagePacket
 from scripts.b06_soldier_sentry_g5_v0 import SourceMelee
@@ -30,6 +31,31 @@ class LowLifeNativeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.report=run_matrix(seed=0)
+
+    @staticmethod
+    def _native_flame_scene(*,armed,initial_hp=2):
+        # Both characters are original source-backed B05 builds. Low
+        # acts first to establish Chosen Shelter; F then makes one real
+        # G2-authorized, G3-paid Thrown Flame against an unobstructed lane.
+        low=party_actor("B",3,"low","party",occupied=((3,2),))
+        flame=party_actor("F",3,"flame","enemy",occupied=((1,2),))
+        low.hp=initial_hp
+        e=Encounter([low,flame],{"low":30,"flame":20},seed=633,
+                    scenario="B05-Low-Life-G3-Flame-diversion",
+                    policy="fixed_source_F_flame_low_B")
+        GridMovement(e,width=9,height=7)
+        RangedCombat(e)
+        SpellState(e)
+        DamageState(e)
+        adapter=LowLifeNativeRites(e,"low")
+        e.begin_round()
+        e.start_turn("low",regen_choice=RegenerationChoice())
+        host=adapter.cast_chosen("low")
+        if armed:
+            adapter.arm_vital("low")
+        e.end_turn()
+        e.start_turn("flame",regen_choice=RegenerationChoice())
+        return e,adapter,host
 
     def test_01_twelve_genuine_policies_and_source_evidence(self):
         data=self.report
@@ -483,6 +509,87 @@ class LowLifeNativeTests(unittest.TestCase):
         self.assertEqual(priest.hp,before-3)
         self.assertEqual(priest.vigor,vigor_before)
         self.assertEqual(len(events(e,"b05_held_renewal_resolved")),0)
+        e.check()
+
+
+    def test_23_native_flame_hp2_preflight_diversion_no_wound_die(self):
+        e,adapter,host=self._native_flame_scene(armed=True)
+        victim=e.actors["low"]
+        caster=e.actors["flame"]
+        self.assertEqual((victim.hp,host.budget),(2,8))
+        self.assertEqual(caster.ap_remaining,42)
+        original=(host.budget,deepcopy(adapter.pending),
+                  victim.hp,victim.vigor,tuple(
+                      (x.vp_available,x.vp_committed,x.vp_spent)
+                      for x in (caster,victim)),len(e.ledger))
+        for _ in range(2):
+            e.g4.preflight_flame_wound("low",None,fire_hp=2)
+        self.assertEqual(
+            (host.budget,adapter.pending,victim.hp,victim.vigor,tuple(
+                (x.vp_available,x.vp_committed,x.vp_spent)
+                for x in (caster,victim)),len(e.ledger)),original)
+        # Native G3 commits 20 AP and 2 Spent VP once, then applies
+        # genuinely resolved Fire HP2 + Direct Vigor3 via G4.
+        shot=e.g3.cast_flame("flame","low",tier=1,face=12,
+                            vigor_die=1,hand_available=True)
+        self.assertEqual(shot["outcome"],"direct_hit_resolved_G4")
+        self.assertEqual((caster.ap_remaining,caster.vp_spent),(22,2))
+        self.assertEqual((victim.hp,victim.vigor),(2,victim.vigor_max))
+        self.assertEqual(shot["g4_damage"]["hp_loss"],0)
+        self.assertEqual(shot["g4_damage"]["vigor_loss"],0)
+        self.assertEqual((host.budget,adapter.pending),(1,None))
+        self.assertEqual(len(events(e,"g4_wound_created")),0)
+        self.assertEqual(len(events(e,"g3_flame_launched")),1)
+        self.assertEqual(len(events(e,"g4_damage_applied")),1)
+        protection=events(e,"b05_vital_interposition_applied")
+        self.assertEqual(len(protection),1)
+        self.assertEqual((protection[0]["prevented_hp"],
+                          protection[0]["consumed_budget"]),(2,4))
+        self.assertEqual(protection[0]["allocation"][0]["type"],"Fire")
+        self.assertEqual(protection[0]["allocation"][0]["residual"],0)
+        e.check()
+
+    def test_24_unarmed_native_flame_still_requires_wound_die(self):
+        e,adapter,host=self._native_flame_scene(armed=False)
+        victim=e.actors["low"]
+        caster=e.actors["flame"]
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location"):
+            e.g4.preflight_flame_wound("low",None,fire_hp=2)
+        before=tuple((x.ap_remaining,x.vp_available,x.vp_committed,
+                      x.vp_spent) for x in (caster,victim))
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location"):
+            e.g3.cast_flame("flame","low",tier=1,face=12,
+                            vigor_die=1,hand_available=True)
+        self.assertEqual(caster.ap_remaining,before[0][0]-20)
+        self.assertEqual(caster.vp_spent,before[0][3])
+        self.assertEqual((victim.hp,host.budget),(2,8))
+        self.assertIsNone(adapter.pending)
+        self.assertFalse(events(e,"g3_flame_launched"))
+        self.assertFalse(events(e,"g4_damage_applied"))
+        # A fresh paid action with an actual location die is legal and
+        # applies the unprotected crossing and its native G4 wound.
+        shot=e.g3.cast_flame("flame","low",tier=1,face=12,
+                            vigor_die=1,hand_available=True,
+                            wound_location_roll=8)
+        self.assertEqual(shot["outcome"],"direct_hit_resolved_G4")
+        self.assertEqual(victim.hp,0)
+        self.assertEqual(len(events(e,"g4_wound_created")),1)
+        self.assertEqual(len(victim.wounds),1)
+        self.assertEqual(len(events(e,"b05_vital_interposition_applied")),0)
+        e.check()
+
+    def test_25_devastating_flame_keeps_wound_requirement(self):
+        e,adapter,host=self._native_flame_scene(armed=True,initial_hp=13)
+        # A confirmed Devastating spell can still create an injury when
+        # diversion keeps the Priest above 0 HP; no blanket exemption.
+        before=(host.budget,deepcopy(adapter.pending),len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location"):
+            e.g4.preflight_flame_wound(
+                "low",None,fire_hp=4,devastating=True)
+        e.g4.preflight_flame_wound(
+            "low",8,fire_hp=4,devastating=True)
+        self.assertEqual((host.budget,adapter.pending,len(e.ledger)),before)
+        self.assertEqual(len(events(e,"b05_vital_interposition_applied")),0)
         e.check()
 
 
