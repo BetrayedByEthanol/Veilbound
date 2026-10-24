@@ -19,6 +19,9 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Priest Focus Comparative Balance Audit v0 (L1–3)](b04-b05-priest-focus-comparative-balance-audit-v0.md) — source-verified High/Medium/Low capacities, AP/VP/recovery and source-bound Low/M examples; reuses the 27 native Medium policies, explicitly withholds matched three-Focus balance certification and recommends no mechanical retuning.
+
+
 - [B06 G8 — Soldier/Sentry Full Encounter Pack v0 (bounded native three-terminal matrix candidate)](b06-g8-soldier-sentry-full-encounter-pack-v0.md) — authored L2/L3 four-PC A/B/R/F victory, real enemy full-party defeat and opposed four-member scene exit against genuine Soldier and cold/prepared Firebound Sentry fixtures; G5 permits an opt-in source A/B vs named benchmark foe. Fixed face/decision policy, no representative win rate, general Bow damage, independent Focus acceptance or numerical CR. **Proposed PR scope, not merged baseline until reviewed and merged.**
 
 - [B06 G7-H — Complete Mixed-Party Encounter Certification v0 (bounded terminal matrix)](b06-g7h-mixed-party-encounter-certification-v0.md) — one native L2/L3 A/B/R/F scene with separately source-attested Hunter death, all-party defeat and opposed scene exit. Victory adds a genuine source R Chosen Guided Rite to A/B/R/F damage roles; strictly audited native 3-terminal **bounded** coverage, not full representative pack, universal healing/protection policy, sampled win rate or Hunter CR.
