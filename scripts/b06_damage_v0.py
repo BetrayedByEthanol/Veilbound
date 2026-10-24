@@ -353,7 +353,13 @@ class DamageState:
         if type(fire_hp) is not int or fire_hp<2 or type(devastating) is not bool:
             raise ValueError("Source-confirmed Flame Fire HP/critical required")
         a=self._actor(recipient)
-        hp_loss=self._mitigate_hp(a,DamagePacket("hp","Fire",fire_hp))
+        # This is the same pure, live packet preview used by native G5
+        # preflight and G4.apply_damage. An armed Low Priest Vital
+        # Interposition may absorb a Flame's Fire HP *before* the wound
+        # threshold is evaluated; preview neither spends budget nor VP.
+        packets=(DamagePacket("hp","Fire",fire_hp),)
+        resolved,_=self._preview_damage_packets(recipient,packets)
+        hp_loss=resolved[0]
         after=max(-a.hp_max,a.hp-hp_loss)
         wound=((a.hp>0 and after<=0) or devastating) and after>-a.hp_max
         if wound and (type(wound_location_roll) is not int
