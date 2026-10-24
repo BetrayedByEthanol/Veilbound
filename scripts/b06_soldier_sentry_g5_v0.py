@@ -528,7 +528,8 @@ class SourceMelee:
     def resolve(self,sequence,slot,*,attack_face,damage_face=None,
                 confirmation_face=None,critical_dice=(),vigor_die=None,
                 wound_location_roll=None,spontaneous_policy="decline_all",
-                venom_resistance_die=None,venom_resistance_modifier=0):
+                venom_resistance_die=None,venom_resistance_modifier=0,
+                medium_intercessor=None):
         e=self.e
         attacker,target=sequence["attacker"],sequence["target"]
         if type(slot) is not int or slot not in range(len(sequence["profiles"])):
@@ -811,6 +812,18 @@ class SourceMelee:
                 attacker,target,p,die_face=damage_face,
                 critical=critical,critical_dice=tuple(critical_dice),
                 vigor_die=vigor_die,wound_location_roll=wound_location_roll)
+            if medium_intercessor is not None:
+                # G5 has the canonical live paid profile, actual hit and
+                # exact G4 native damage packet. Reject before roll log.
+                if (predicted["vigor_packet_count"] == 0
+                        or e.actors[target].vigor == 0):
+                    raise UnresolvedDecision("G5 Intercession needs native Vigor damage and Current Vigor")
+                if predicted["hp_after"] <= -e.actors[target].hp_max:
+                    raise UnresolvedDecision("G5 Intercession cannot follow a lethal target packet")
+                if (e.g3 is None or
+                        getattr(e.g3,"medium_life",None) is None):
+                    raise UnresolvedDecision("No source-bound Medium Priest")
+                e.g3.medium_life.preflight_vigor(medium_intercessor,target)
             if p=="B06-AT-04":
                 venom_exposure_key=f"g6:bite:{e.seed}:{action_index}"
                 if predicted["hp_after"]>-e.actors[target].hp_max:
@@ -826,6 +839,8 @@ class SourceMelee:
                         "Potential puncturing Hunter Bite requires precommitted venom d20")
         elif damage_face is not None:
             raise ValueError("Damage dice cannot be used for a miss")
+        if medium_intercessor is not None and not hit:
+            raise UnresolvedDecision("Cannot Intercede for a missed G5 attack")
         if dying_fallback:
             e.log("g5_defense_unavailable_fallback",attacker=attacker,
                   target=target,action_index=action_index,
@@ -876,11 +891,13 @@ class SourceMelee:
                 die_face=damage_face,critical=critical,
                 critical_dice=tuple(critical_dice),vigor_die=vigor_die,
                 wound_location_roll=wound_location_roll,
-                on_damage=after_damage if p=="B06-AT-04" else None)
+                on_damage=after_damage if p=="B06-AT-04" else None,
+                medium_intercessor=medium_intercessor)
         e.log("g5_melee_resolved",action_index=action_index,
               attacker=attacker,target=target,profile=p,
               outcome="hit" if hit else "miss",
-              damage=result,critical=critical)
+              damage=result,critical=critical,
+              medium_intercessor=medium_intercessor)
         # Even a fatal first hit retains any remaining paid slots.
         # The caller must redirect them to a new legal target, or explicitly
         # decline when the original target is no longer available.

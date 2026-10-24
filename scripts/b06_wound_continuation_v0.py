@@ -208,7 +208,7 @@ class WoundContinuation:
         self.e.check()
         return result
 
-    def start_next_turn(self,choice=None):
+    def start_next_turn(self,choice=None,*,on_regeneration_ready=None):
         """Only the actual next Initiative position; no synthesized steps."""
         if self.e.cursor>=len(self.e.order):
             raise ValueError("Begin the next real round first")
@@ -217,7 +217,8 @@ class WoundContinuation:
             raise ValueError("Actual source RegenerationChoice required")
         before=self.snapshot()
         first=len(self.e.ledger)
-        self.e.start_turn(actor_id,regen_choice=choice)
+        self.e.start_turn(actor_id,regen_choice=choice,
+                          on_regeneration_ready=on_regeneration_ready)
         evidence=[x for x in self.e.ledger[first:]
                   if x["kind"] in ("regeneration_step","regeneration_dead")]
         if len(evidence)!=1:
