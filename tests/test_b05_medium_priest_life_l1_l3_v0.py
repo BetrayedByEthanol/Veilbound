@@ -200,6 +200,90 @@ class MediumLifeTest(unittest.TestCase):
                               medium_intercessor="medium")
         self.assertEqual(a.vp_spent,0)
 
+    def test_direct_intercede_vigor_cannot_forge_g4_packet(self):
+        # Codex P2: do not trust that callers reached this through G3.
+        e,c=scene(3)
+        e.start_turn("medium")
+        host=c.cast("medium","Vital Shelter","medium")
+        a=e.actors["medium"]
+        state=(a.vp_available,a.vp_committed,a.vp_spent,
+               a.reaction_available,host.budget,len(e.ledger))
+        for amount in (5,1):
+            with self.subTest(amount=amount):
+                with self.assertRaisesRegex(ValueError,"matching live G4"):
+                    c.intercede_vigor("medium","ally",amount)
+                self.assertEqual(
+                    (a.vp_available,a.vp_committed,a.vp_spent,
+                     a.reaction_available,host.budget,len(e.ledger)),state)
+        with self.assertRaisesRegex(ValueError,"applying native G4"):
+            e.g3.prevent_vigor("ally",5,medium_intercessor="medium")
+        self.assertEqual(
+            (a.vp_available,a.vp_committed,a.vp_spent,
+             a.reaction_available,host.budget,len(e.ledger)),state)
+        self.assertFalse(events(e,"b05_intercession_paid"))
+        self.assertFalse(events(e,"b05_vital_intercession_packet"))
+        e.check()
+
+    def test_self_intercession_mixed_incapacitating_hit_is_atomic(self):
+        # Codex P2: pay/resolve the already confirmed defensive Reaction
+        # before the same event reduces the Medium caster to Dying.
+        e,c=scene(3)
+        e.start_turn("medium")
+        host=c.cast("medium","Vital Shelter","ally")
+        priest=e.actors["medium"]
+        self.assertEqual((priest.hp,priest.vigor,host.budget),(12,36,8))
+        result=e.g4.apply_damage(
+            "medium",(DamagePacket("hp","Fire",12),
+                      DamagePacket("vigor","Direct Vigor",5)),
+            event_key="mixed-self-dying",cause="bounded_confirmed_mixed_packet",
+            wound_location_roll=4,medium_intercessor="medium")
+        self.assertEqual((result["hp_loss"],result["vigor_loss"]),(12,0))
+        self.assertEqual((priest.hp,priest.vigor,priest.dead,
+                          priest.ap_remaining),(0,36,False,0))
+        self.assertEqual((priest.vp_available,priest.vp_committed,
+                          priest.vp_spent,priest.reaction_available),
+                         (7,2,3,False))
+        self.assertEqual((host.recipient,host.budget),("ally",3))
+        self.assertIn("mixed-self-dying",e.g4.used_events)
+        self.assertEqual(len(priest.wounds),1)
+        self.assertEqual(priest.wounds[0].source_event,"mixed-self-dying")
+        self.assertEqual(len(events(e,"b05_intercession_paid")),1)
+        self.assertEqual(len(events(e,"b05_vital_intercession_packet")),1)
+        self.assertEqual(
+            events(e,"b05_vital_intercession_packet")[0]["prevented"],5)
+        self.assertEqual(len(events(e,"g4_damage_applied")),1)
+        # The entire original source event is consumed: a retry cannot
+        # apply its Vigor portion or grant another defensive Reaction.
+        with self.assertRaisesRegex(ValueError,"already consumed"):
+            e.g4.apply_damage(
+                "medium",(DamagePacket("hp","Fire",12),
+                          DamagePacket("vigor","Direct Vigor",5)),
+                event_key="mixed-self-dying",cause="bounded_confirmed_mixed_packet",
+                wound_location_roll=4,medium_intercessor="medium")
+        with self.assertRaisesRegex(ValueError,"matching live G4"):
+            c.intercede_vigor("medium","ally",5)
+        e.check()
+
+    def test_mixed_wound_preflight_rejects_before_reaction_and_damage(self):
+        e,c=scene(3)
+        e.start_turn("medium")
+        host=c.cast("medium","Vital Shelter","ally")
+        a=e.actors["medium"]
+        previous=(a.hp,a.vigor,a.ap_remaining,a.vp_available,a.vp_spent,
+                  a.reaction_available,host.budget,len(a.wounds),len(e.ledger))
+        with self.assertRaisesRegex(UnresolvedDecision,"wound-location"):
+            e.g4.apply_damage(
+                "medium",(DamagePacket("hp","Fire",12),
+                          DamagePacket("vigor","Direct Vigor",5)),
+                event_key="needs-wound-location",cause="bounded_confirmed_mixed_packet",
+                medium_intercessor="medium")
+        self.assertEqual(
+            (a.hp,a.vigor,a.ap_remaining,a.vp_available,a.vp_spent,
+             a.reaction_available,host.budget,len(a.wounds),len(e.ledger)),
+            previous)
+        self.assertNotIn("needs-wound-location",e.g4.used_events)
+        e.check()
+
     def test_deterministic_ledger_and_unsupported_options(self):
         def witness():
             e,c=scene(3)

@@ -213,6 +213,32 @@ class DamageState:
                 wound_trauma = next((p.damage_type for p, n in zip(packets, resolved)
                                      if p.resource == "hp" and n > 0), "Unresolved")
         before_hp, before_vigor = a.hp, a.vigor
+        # Intercession is a defensive Reaction to the already-confirmed
+        # incoming packet. Resolve it AFTER the entire HP/wound preflight,
+        # but BEFORE committing any HP loss: the recipient can also be the
+        # priest, and the same mixed hit may incapacitate the priest.
+        # Waiting for the later Vigor loop would recheck consciousness
+        # after the wound was already written, then fail partially.
+        interceded_packet = None
+        if medium_intercessor is not None:
+            first = next(((i,min(a.vigor,n))
+                          for i,(p,n) in enumerate(zip(packets,resolved))
+                          if p.resource == "vigor" and n > 0 and a.vigor > 0),
+                         None)
+            if first is None:
+                raise ValueError("No positive native Vigor packet to Intercede")
+            index, actual = first
+            if self._live_medium_vigor is not None:
+                raise UnresolvedDecision("Nested Medium packet intercession")
+            # Exact caster, beneficiary and amount belong to this one live
+            # G4 application, never a caller-owned fabricated spell packet.
+            self._live_medium_vigor = (medium_intercessor,recipient,actual)
+            try:
+                residual = self.e.g3.prevent_vigor(
+                    recipient,actual,medium_intercessor=medium_intercessor)
+            finally:
+                self._live_medium_vigor = None
+            interceded_packet = (index,residual)
         a.hp = hp_after
         # Set the threshold flag before any VP-release hook can validate G0.
         a.dead = a.hp <= -a.hp_max
@@ -236,27 +262,19 @@ class DamageState:
                        location=location, trauma=wound_trauma,
                        event_key=event_key)
         vigor_details = []
-        intercession_used = False
-        for p, n in zip(packets, resolved):
+        for index, (p, n) in enumerate(zip(packets, resolved)):
             if p.resource != "vigor":
                 continue
-            # Never consume Shelter budget for reserve the actor does not have.
+            # Never consume Shelter budget for Vigor the actor does not have.
             actual = min(a.vigor, n)
-            intercessor = (medium_intercessor if not intercession_used and actual > 0
-                           else None)
-            if intercessor is not None:
-                intercession_used = True
-            if intercessor is not None:
-                if self._live_medium_vigor is not None:
-                    raise UnresolvedDecision("Nested Medium packet intercession")
-                self._live_medium_vigor = (recipient,actual)
-            try:
-                residual = (self.e.g3.prevent_vigor(
-                    recipient, actual, medium_intercessor=intercessor)
-                    if self.e.g3 is not None else actual)
-            finally:
-                if intercessor is not None:
-                    self._live_medium_vigor = None
+            if interceded_packet is not None and index == interceded_packet[0]:
+                # Already paid/blocked in the live pre-damage Reaction window.
+                # This is the same first positive packet, never a second
+                # Intercession, even if the hit also caused Dying.
+                residual = interceded_packet[1]
+            else:
+                residual = (self.e.g3.prevent_vigor(recipient,actual)
+                            if self.e.g3 is not None else actual)
             a.vigor -= residual
             vigor_details.append({"raw": p.raw, "available": actual,
                                   "prevented": actual - residual,

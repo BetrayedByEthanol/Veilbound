@@ -586,7 +586,8 @@ class SpellState:
             raise ValueError("Explicit nonnegative direct Vigor packet required")
         if medium_intercessor is not None:
             if (self.e.g4 is None or
-                    getattr(self.e.g4,"_live_medium_vigor",None)!=(actor_id,damage)):
+                    getattr(self.e.g4,"_live_medium_vigor",None)!=(
+                        medium_intercessor,actor_id,damage)):
                 raise ValueError("Only an applying native G4 packet can trigger Intercession")
             medium=getattr(self,"medium_life",None)
             if medium is None:

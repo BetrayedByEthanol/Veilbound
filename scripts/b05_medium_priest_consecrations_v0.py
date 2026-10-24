@@ -207,6 +207,12 @@ class MediumLifeConsecrations:
         """Called synchronously from one genuinely applying G4 Vigor packet."""
         if type(amount) is not int or amount <= 0:
             raise ValueError("Positive native direct Vigor packet required")
+        # This method is public to Python callers, not just G3. Recheck G4's
+        # ephemeral exact packet authority here, before the Reaction, VP or
+        # finite budget can change; checking only in G3 is bypassable.
+        if (self.e.g4 is None or
+                self.e.g4._live_medium_vigor != (caster,recipient,amount)):
+            raise ValueError("Intercession requires the matching live G4 Vigor packet")
         self.preflight_vigor(caster,recipient)
         host = self._intercession(caster,recipient,"Vital Shelter")
         target = self.e.actors[recipient]

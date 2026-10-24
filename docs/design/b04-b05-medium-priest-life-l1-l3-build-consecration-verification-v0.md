@@ -83,6 +83,15 @@ the existing G3 rather than owning a parallel VP economy:
    the source Medium Priest pays one Reaction + 2 Spent VP; the one packet
    consumes the *original* finite G3 budget. G4 applies only the residual
    packet to target's Vigor; budget exhaustion ends/refunds the G3 effect.
+   Native packet authority is checked **inside** `intercede_vigor` as well
+   as G3, binding the caster, beneficiary and exact positive packet size to
+   G4's transient live marker. A direct public-method invocation has no
+   authority and cannot spend Reaction/VP or drain a host.
+   For mixed HP+Vigor delivery, G4 first validates the complete HP/wound
+   requirements, then resolves this already-triggered defensive Reaction
+   **before applying HP damage**. If that hit incapacitates the priest,
+   the earlier legal Intercession still completes and G4 consumes the
+   entire event (HP, wound and residual Vigor) exactly once.
 5. G1 live clear-grid sight/range/wall checks are enforced for other
    one-square recipients, including fresh Reassign/Intercession selection.
    This bounded procedure treats target cooperation as explicitly authored
@@ -96,7 +105,11 @@ the existing G3 rather than owning a parallel VP economy:
 
 `python -m unittest discover -s tests -v`
 
-Tests check: each selected build level and bought source allocation; target
+Tests check: forged direct Intercession is rejected without any ledger,
+VP, Reaction or budget change; a mixed HP/Vigor hit that leaves the priest
+Dying still completes its already-paid self-Intercession and full G4 event,
+with mandatory wound-location preflight occurring before any payment;
+each selected build level and bought source allocation; target
 range/wall/prepared/cap/AP/VP legality; fixed host ownership and release;
 spent establishment no-refund; nonrefreshing reassignment; exactly one
 real-target G4 regeneration bonus; Reaction/Spent VP one-event Intercession;
