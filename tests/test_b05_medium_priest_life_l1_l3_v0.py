@@ -180,6 +180,103 @@ class MediumLifeTest(unittest.TestCase):
         self.assertFalse(e.actors["medium"].reaction_available)
         e.check()
 
+    def test_l3_intercession_absorbs_full_packet_before_current_vigor_cap(self):
+        # Codex P2: 10 eligible Vigor against 2 Current Vigor and B8.
+        # Do not clamp the packet to 2 before the defensive Reaction.
+        e,c=scene(3)
+        e.start_turn("medium")
+        host=c.cast("medium","Vital Shelter","medium")
+        target=e.actors["ally"]
+        target.vigor=2
+        result=e.g4.apply_damage(
+            "ally",(DamagePacket("vigor","Direct Vigor",10),),
+            event_key="intercede-10-vs-2",cause="confirmed_full_vigor_packet",
+            medium_intercessor="medium")
+        self.assertEqual(result["vigor_loss"],2)
+        self.assertEqual(target.vigor,0)
+        self.assertEqual(host.budget,0)
+        self.assertFalse(e.g3.active("medium","Vital Shelter"))
+        receipt=events(e,"b05_vital_intercession_packet")
+        self.assertEqual(len(receipt),1)
+        self.assertEqual((receipt[0]["original"],receipt[0]["prevented"],
+                          receipt[0]["residual"],receipt[0]["budget"]),
+                         (10,8,2,0))
+        delivered=events(e,"g4_damage_applied")
+        self.assertEqual(len(delivered),1)
+        self.assertEqual(delivered[0]["vigor_details"],[
+            {"raw":10,"available":2,"prevented":8,"applied":2}])
+        priest=e.actors["medium"]
+        self.assertEqual((priest.vp_available,priest.vp_committed,
+                          priest.vp_spent,priest.reaction_available),
+                         (9,0,3,False))
+        self.assertIn("intercede-10-vs-2",e.g4.used_events)
+        e.check()
+
+    def test_ordinary_shelter_full_packet_and_zero_vigor_guard(self):
+        # The same finite-budget rule applies to ordinary G3 Shelter, with
+        # no Intercession Reaction/VP price.
+        e,c=scene(3)
+        e.start_turn("medium")
+        host=c.cast("medium","Vital Shelter","ally")
+        target=e.actors["ally"]
+        target.vigor=2
+        result=e.g4.apply_damage(
+            "ally",(DamagePacket("vigor","Direct Vigor",10),),
+            event_key="ordinary-10-vs-2",cause="confirmed_full_vigor_packet")
+        self.assertEqual((result["vigor_loss"],target.vigor,host.budget),(2,0,0))
+        self.assertEqual(events(e,"g4_damage_applied")[0]["vigor_details"],[
+            {"raw":10,"available":2,"prevented":8,"applied":2}])
+        priest=e.actors["medium"]
+        self.assertEqual((priest.vp_available,priest.vp_committed,
+                          priest.vp_spent,priest.reaction_available),
+                         (11,0,1,True))
+        self.assertFalse(e.g3.active("medium","Vital Shelter"))
+        # With Current Vigor already zero, another shelter does not lose
+        # prevention budget to a packet that cannot reduce Current Vigor.
+        e2,c2=scene(3)
+        e2.start_turn("medium")
+        h2=c2.cast("medium","Vital Shelter","ally")
+        ally2=e2.actors["ally"]
+        ally2.vigor=0
+        result2=e2.g4.apply_damage(
+            "ally",(DamagePacket("vigor","Direct Vigor",10),),
+            event_key="ordinary-at-zero",cause="confirmed_full_vigor_packet")
+        self.assertEqual(result2["vigor_loss"],0)
+        self.assertEqual(h2.budget,8)
+        self.assertEqual(events(e2,"g4_damage_applied")[0]["vigor_details"],[
+            {"raw":10,"available":0,"prevented":0,"applied":0}])
+        e.check()
+        e2.check()
+
+    def test_self_intercession_mixed_dying_and_oversized_vigor_packet(self):
+        # Keep the prior Codex P2 ordering guarantee while exercising the
+        # full-packet cap: a Priest at 2 Vigor goes Dying on the HP part.
+        e,c=scene(3)
+        e.start_turn("medium")
+        host=c.cast("medium","Vital Shelter","ally")
+        priest=e.actors["medium"]
+        priest.vigor=2
+        result=e.g4.apply_damage(
+            "medium",(DamagePacket("hp","Fire",12),
+                      DamagePacket("vigor","Direct Vigor",10)),
+            event_key="mixed-dying-oversized",cause="confirmed_mixed_packet",
+            wound_location_roll=4,medium_intercessor="medium")
+        self.assertEqual((result["hp_loss"],result["vigor_loss"]),(12,2))
+        self.assertEqual((priest.hp,priest.vigor,priest.dead), (0,0,False))
+        self.assertEqual((priest.vp_available,priest.vp_committed,
+                          priest.vp_spent,priest.reaction_available),
+                         (9,0,3,False))
+        self.assertEqual(host.budget,0)
+        self.assertFalse(e.g3.active("medium","Vital Shelter"))
+        self.assertEqual(events(e,"b05_vital_intercession_packet")[0]["prevented"],8)
+        self.assertEqual(events(e,"g4_damage_applied")[0]["vigor_details"],[
+            {"raw":10,"available":2,"prevented":8,"applied":2}])
+        self.assertEqual(len(priest.wounds),1)
+        self.assertEqual(priest.wounds[0].source_event,"mixed-dying-oversized")
+        self.assertEqual(len(events(e,"g4_damage_applied")),1)
+        self.assertIn("mixed-dying-oversized",e.g4.used_events)
+        e.check()
+
     def test_intercession_fail_closed_pre_damage_no_consumption(self):
         e,c=scene(3)
         e.start_turn("medium")

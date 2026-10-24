@@ -92,6 +92,17 @@ the existing G3 rather than owning a parallel VP economy:
    **before applying HP damage**. If that hit incapacitates the priest,
    the earlier legal Intercession still completes and G4 consumes the
    entire event (HP, wound and residual Vigor) exactly once.
+   The pending **full eligible Vigor-damage packet**, not the smaller
+   `min(packet, Current Vigor)`, is passed through G3/Intercession. Only
+   after finite Shelter absorption does G4 cap the residual actually
+   applied to Current Vigor. At Current Vigor **2**, incoming **10**
+   and Shelter budget **8**, the host prevents **8**, exhausts and
+   refunds its Committed VP; **2** remaining damage reduces Vigor
+   to **0**. With Current Vigor **0**, the Shelter prevents nothing
+   and its finite budget does not decrement. The G4 packet ledger keeps
+   `prevented=8`, `applied=2`, not an artificial 2-point prevention
+   with an outstanding six-point shield. The ordinary non-Intercession
+   Shelter path follows this same packet-before-current-Vigor ordering.
 5. G1 live clear-grid sight/range/wall checks are enforced for other
    one-square recipients, including fresh Reassign/Intercession selection.
    This bounded procedure treats target cooperation as explicitly authored
@@ -105,7 +116,10 @@ the existing G3 rather than owning a parallel VP economy:
 
 `python -m unittest discover -s tests -v`
 
-Tests check: forged direct Intercession is rejected without any ledger,
+Tests check: full 10-point packet / 2 Current Vigor / B8 overflow for
+both ordinary Vital Shelter and Medium Intercession, zero-Vigor nondepletion,
+and a mixed HP/Vigor incapacitation with an oversized Vigor packet;
+forged direct Intercession is rejected without any ledger,
 VP, Reaction or budget change; a mixed HP/Vigor hit that leaves the priest
 Dying still completes its already-paid self-Intercession and full G4 event,
 with mandatory wound-location preflight occurring before any payment;

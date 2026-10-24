@@ -221,7 +221,11 @@ class DamageState:
         # after the wound was already written, then fail partially.
         interceded_packet = None
         if medium_intercessor is not None:
-            first = next(((i,min(a.vigor,n))
+            # The Reaction must see the FULL eligible packet. The rule only
+            # caps damage to Current Vigor AFTER finite-budget prevention.
+            # A 10-point packet against Vigor 2 and B8 consumes all B8,
+            # then applies the remaining 2 damage.
+            first = next(((i,n)
                           for i,(p,n) in enumerate(zip(packets,resolved))
                           if p.resource == "vigor" and n > 0 and a.vigor > 0),
                          None)
@@ -265,20 +269,26 @@ class DamageState:
         for index, (p, n) in enumerate(zip(packets, resolved)):
             if p.resource != "vigor":
                 continue
-            # Never consume Shelter budget for Vigor the actor does not have.
-            actual = min(a.vigor, n)
+            # Preserve the full post-mitigation packet until protection has
+            # consumed its finite budget. Even with Current Vigor 2, a
+            # confirmed packet of 10 must consume B8 before the final 2
+            # points are applied to Vigor. At Current Vigor 0, the shelter
+            # itself prevents nothing (G3 owns that explicit rule).
+            available = a.vigor
             if interceded_packet is not None and index == interceded_packet[0]:
                 # Already paid/blocked in the live pre-damage Reaction window.
                 # This is the same first positive packet, never a second
                 # Intercession, even if the hit also caused Dying.
                 residual = interceded_packet[1]
             else:
-                residual = (self.e.g3.prevent_vigor(recipient,actual)
-                            if self.e.g3 is not None else actual)
-            a.vigor -= residual
-            vigor_details.append({"raw": p.raw, "available": actual,
-                                  "prevented": actual - residual,
-                                  "applied": residual})
+                residual = (self.e.g3.prevent_vigor(recipient,n)
+                            if self.e.g3 is not None else n)
+            applied = min(available,residual)
+            a.vigor -= applied
+            vigor_details.append({"raw": p.raw,
+                                  "available": min(available,n),
+                                  "prevented": n - residual,
+                                  "applied": applied})
         a.dead = a.hp <= -a.hp_max
         if a.hp <= 0:
             a.ap_remaining = 0
