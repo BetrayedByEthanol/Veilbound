@@ -22,6 +22,8 @@
 | Termination | Host ending returns **only actual locked Committed**, never its establishment Spent or Exaltation Spent. Separate VP and G3 termination receipts; no retroactive refund or re-preparation |
 | G4/G5 evidence | Exact actual source attacks, independently mitigated typed HP packets, one-event wound/death check, G3 prevention of the original direct Vigor packets. No synthetic bonus damage is counted as a G5 hit |
 
+At the genuine Step-2 boundary, Held Renewal measures remaining throughput from **G4's live effective value, including source-authorized toxin/regeneration suppression**; the unsuppressed selected build statistic is not sufficient proof of unused throughput. A suppressed Step with zero actual remaining throughput cannot arm EX-LR-01.
+
 The G4 integration deliberately **previews** HP diversion without modifying any budget, determines the real modified HP threshold/wound requirements, then commits the property only after preflight succeeds. In an enchanted Sentry hit the surviving Piercing and Fire packet types remain separate. Reduced Piercing can no longer independently qualify as positive puncture for toxin rules. **Within a single HP+Vigor event HP diversion spends budget first**, and G3 ordinary Vigor prevention then uses only the leftover host. Held Renewal resolves in a **separate post-G4-damage receipt**, and an HP crossing to 0 or lower is never undone by its pending points. G0's voluntary end-of-Step callback passes through G4.5 but executes **only after the real, once-per-turn regeneration**, before start hazards and ordinary Turn AP; it is not a free new regeneration hook.
 
 ## Executable boundaries

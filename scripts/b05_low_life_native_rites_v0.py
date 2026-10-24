@@ -194,7 +194,13 @@ class LowLifeNativeRites:
         step=self.e.ledger[-1]
         if self.last_held_step==step["index"]:
             raise ValueError("Step cannot arm Held Renewal twice")
-        remaining=a.regen+self.g3.regen_throughput(caster)-step["detail"]["throughput_spent"]
+        # Use exactly G4's live suppressed throughput, not an unsuppressed
+        # build constant: toxin/regeneration suppression must not become
+        # imaginary unused points available for Exaltation.
+        available_throughput=max(
+            0,a.regen+self.g3.regen_throughput(caster)
+            +self.e.g4.toxins.modifier(caster,"regen_throughput"))
+        remaining=available_throughput-step["detail"]["throughput_spent"]
         if (remaining<points or a.vp_available<1):
             raise ValueError("Cannot hold spent/suppressed throughput or unavailable VP")
         self.e.spend_vp(caster,1,mode="spent",label="b05:EX-LR-01")

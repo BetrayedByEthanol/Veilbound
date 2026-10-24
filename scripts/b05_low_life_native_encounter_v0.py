@@ -72,8 +72,10 @@ def _start(combat,adapter,actor,round_no):
         # after G0/G4 resolves actual Step 2, before start-of-turn hazards.
         def arm(enc,who):
             step=enc.ledger[-1]["detail"]
-            unused=(enc.actors[who].regen+enc.g3.regen_throughput(who)
-                    -step["throughput_spent"])
+            throughput=max(0,enc.actors[who].regen
+                           +enc.g3.regen_throughput(who)
+                           +enc.g4.toxins.modifier(who,"regen_throughput"))
+            unused=throughput-step["throughput_spent"]
             if unused>0:
                 adapter.arm_held(who,min(2,unused))
     combat.bridge.start_next_turn(choice,on_regeneration_complete=arm)

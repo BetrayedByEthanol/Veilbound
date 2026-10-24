@@ -1,6 +1,7 @@
 """Source-paid Low Life A/B native G5/G4 and timed L3 Exaltation gates."""
 from copy import deepcopy
 import unittest
+from unittest.mock import patch
 
 from scripts.b05_low_life_native_encounter_v0 import (
     OPPONENTS, LEVELS, ROLES, run_policy, attest_policy, run_matrix, scene,
@@ -315,6 +316,32 @@ class LowLifeNativeTests(unittest.TestCase):
         event=events(e,"b05_vital_interposition_applied")[0]
         self.assertEqual((event["prevented_hp"],event["budget_remaining"]),(0,1))
         self.assertEqual(host.budget,1)
+
+
+    def test_18_suppressed_real_step_has_no_fabricated_held_points(self):
+        e,c=attached_scene("A",3,"soldier",0)
+        e.start_turn("low")
+        c.cast_chosen("low")
+        e.end_turn()
+        e.start_turn("foe")
+        e.end_turn()
+        e.begin_round()
+        a=e.actors["low"]
+        before=a.vp_available
+        def suppressed(actor,kind):
+            return -7 if kind=="regen_throughput" else 0
+        with patch.object(e.g4.toxins,"modifier",side_effect=suppressed):
+            def arm(enc,who):
+                with self.assertRaises(ValueError):
+                    c.arm_held(who,1)
+            e.start_turn("low",regen_choice=RegenerationChoice(),
+                         on_regeneration_complete=arm)
+        self.assertIsNone(c.pending)
+        self.assertEqual(a.vp_available,before)
+        self.assertEqual(len(events(e,"b05_exaltation_armed")),0)
+        self.assertEqual(len([x for x in e.ledger
+                              if x["kind"]=="regeneration_step" and
+                              x["detail"]["actor"]=="low"]),2)
 
 
 if __name__=="__main__":
