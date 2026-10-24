@@ -174,7 +174,7 @@ class HighLifeLiturgy:
             self.prepared.add(kind)
             self.open_slot=False
             self.open_filled=kind
-            self.e.log("b05_open_prayer_slot_filled",caster=caster,kind=kind,
+            self.e.log("b05_open_prayer_slot_filled",caster=caster,technique=kind,
                        prepared=sorted(self.prepared),capacity=self.capacity)
         self.e.spend_ap(caster,action,label="b05:high:"+access+":"+kind)
         if on_committed is not None:
@@ -200,7 +200,7 @@ class HighLifeLiturgy:
             if a.hp<=0 or a.vp_available<price:
                 raise ValueError("Caster incapacitated or funds no longer available")
         except (ValueError,UnresolvedDecision) as error:
-            self.e.log("b05_high_cast_interrupted",caster=caster,kind=kind,
+            self.e.log("b05_high_cast_interrupted",caster=caster,technique=kind,
                        access=access,reason=str(error),vp_spent=0)
             self.e.check()
             return None
@@ -214,7 +214,7 @@ class HighLifeLiturgy:
                 source="b05:high:"+access+":paid_primary")
             r.update({"spent_vp":spent+surcharge,"surcharge":surcharge,
                       "committed_vp":0,"action_ap":ap_required})
-            self.e.log("b05_high_life_applied",caster=caster,kind=kind,
+            self.e.log("b05_high_life_applied",caster=caster,technique=kind,
                        recipient=recipient,access=access,spent=spent,
                        surcharge=surcharge,committed=0,action_ap=ap_required,
                        hp_restored=r["hp_restored"],vigor_restored=r["vigor_restored"])
@@ -224,7 +224,7 @@ class HighLifeLiturgy:
             budget=(8+max(0,dict(a.source.abilities)["Veil Control"])
                     if kind=="Vital Shelter" else None),
             expiry_round=(self.e.round+10 if mode=="fixed" else None))
-        self.e.log("b05_high_life_applied",caster=caster,kind=kind,
+        self.e.log("b05_high_life_applied",caster=caster,technique=kind,
                    recipient=recipient,access=access,mode=mode,
                    spent=spent,surcharge=surcharge,
                    committed=committed,effect=host.ident,
