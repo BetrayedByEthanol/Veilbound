@@ -210,11 +210,31 @@ def enemy_actor(source_id, actor_id, team, *, start_state=None, occupied):
 
 
 def party_actor(role, level, actor_id, team, *, occupied):
-    """A/B remain explicitly physical-only Phase-2 proxies; R/F are B05 sheets."""
+    """A/B remain physical proxies; H/M/R/F are sourced B05 sheets."""
     _integer(level, "level", 1)
     if level not in (1, 2, 3):
         raise ValueError("G0 only adapts authored L1–3")
-    if role == "M":
+    if role == "H":
+        from scripts.b05_high_priest_life_l1_l3_v0 import profile
+        p=profile(level)
+        path="scripts/b05_high_priest_life_l1_l3_v0.py"
+        gear=tuple((name,"worn" if name=="Leather armor" else
+                    "wielded" if name=="Sword" else "carried")
+                   for name in p["equipment_sp"])
+        source=Source(path,"H",_fingerprint(path),"STRUCTURAL_B05_ONLY",
+                      tuple(sorted(p["abilities"].items())),
+                      tuple(sorted(p["weapon_training"].items())),
+                      gear,(),f"L{level}-high-life-structural")
+        a=p["abilities"]
+        actor=Actor(actor_id,team,source,level,"High",
+                    p["initiative"],a["Awareness"],a["Agility"],
+                    p["hp_max"],p["vigor_max"],p["vp_max"],
+                    p["hp_max"],p["vigor_max"],p["vp_max"],0,0,
+                    p["normal_regen_throughput"],p["turn_ap"],
+                    p["physical_action_ap"],p["projection_action_ap"],
+                    "Sword",p["guard_value"],p["normal_guard_capacity"],
+                    occupied=tuple(tuple(c) for c in occupied))
+    elif role == "M":
         from scripts.b05_medium_priest_life_l1_l3_v0 import profile
         p = profile(level)
         path = "scripts/b05_medium_priest_life_l1_l3_v0.py"
