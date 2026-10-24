@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — High Priest Life L1–3 Character Build and Open Invocation Verification v0](b04-b05-high-priest-life-l1-l3-build-open-invocation-verification-v0.md) — sourced High Life build, native G0/G3/G4 prepared prayers, separately paid Full-Action Invocation and L3 Open Prayer binding; independent opposed Focus and complete catalogue not certified.
+
 - [B04/B05 — Priest Focus Comparative Balance Audit v0 (L1–3)](b04-b05-priest-focus-comparative-balance-audit-v0.md) — source-verified High/Medium/Low capacities, AP/VP/recovery and source-bound Low/M examples; reuses the 27 native Medium policies, explicitly withholds matched three-Focus balance certification and recommends no mechanical retuning.
 
 
