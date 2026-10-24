@@ -139,7 +139,7 @@ class WoundContinuation:
                              contact_verified,defense_verified,
                              die_face,critical="normal",critical_dice=(),
                              vigor_die=None,wound_location_roll=None,
-                             on_damage=None):
+                             on_damage=None,medium_intercessor=None):
         """Consume a *real* G0 Physical Action and an external G5 attestation.
 
         The caller, NOT G4.5, must have resolved contact, defense and critical
@@ -187,7 +187,8 @@ class WoundContinuation:
             attacker,target,profile_id,die_face=die_face,
             confirmed_hit=True,critical=critical,
             critical_dice=critical_dice,vigor_die=vigor_die,
-            wound_location_roll=wound_location_roll)
+            wound_location_roll=wound_location_roll,
+            medium_intercessor=medium_intercessor)
         self.seen_actions.add(action_index)
         # A Hunter Bite's delivered toxin must consume the newest G4 hit
         # synchronously, before G4.5 appends its own provenance event.
@@ -204,11 +205,13 @@ class WoundContinuation:
                    attacker_source=self.e.actors[attacker].source.digest,
                    target_source=self.e.actors[target].source.digest,
                    critical=critical,actual_result=result,
+                   **({"medium_intercessor":medium_intercessor}
+                      if medium_intercessor is not None else {}),
                    target_state=_actor_state(self.e.actors[target]))
         self.e.check()
         return result
 
-    def start_next_turn(self,choice=None):
+    def start_next_turn(self,choice=None,*,on_regeneration_ready=None):
         """Only the actual next Initiative position; no synthesized steps."""
         if self.e.cursor>=len(self.e.order):
             raise ValueError("Begin the next real round first")
@@ -217,7 +220,8 @@ class WoundContinuation:
             raise ValueError("Actual source RegenerationChoice required")
         before=self.snapshot()
         first=len(self.e.ledger)
-        self.e.start_turn(actor_id,regen_choice=choice)
+        self.e.start_turn(actor_id,regen_choice=choice,
+                          on_regeneration_ready=on_regeneration_ready)
         evidence=[x for x in self.e.ledger[first:]
                   if x["kind"] in ("regeneration_step","regeneration_dead")]
         if len(evidence)!=1:

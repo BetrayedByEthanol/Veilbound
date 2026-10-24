@@ -485,7 +485,8 @@ class DamageState:
 
     def apply_profile_hit(self, attacker, target, profile_id, *,
                           die_face, confirmed_hit, critical="normal",
-                          critical_dice=(), vigor_die=None, wound_location_roll=None):
+                          critical_dice=(), vigor_die=None, wound_location_roll=None,
+                          medium_intercessor=None):
         """Post-G5 attack-result adapter for exact B06 enemy JSON damage profiles.
 
         The caller must have independently adjudicated hit, legal contact,
@@ -507,7 +508,8 @@ class DamageState:
             cause=f"source-profile:{profile_id}",
             devastating=(critical=="devastating"),
             wound_location_roll=wound_location_roll,
-            wound_trauma=main["damage_type"])
+            wound_trauma=main["damage_type"],
+            medium_intercessor=medium_intercessor)
         result["injection_eligible"] = bool(p.get("toxin_delivery")
                                             and result["hp_packets"][0] > 0)
         # Qualification only: the Hunter's toxin still requires real
@@ -601,9 +603,19 @@ class DamageState:
         g3 = self.e.g3
         if g3 is None:
             raise ValueError("Source-backed G3 required for casting")
-        actor = g3._own(caster,20 if self._actor(caster).source.source_id=="F" else 30)
-        if actor.source.source_id not in ("F","R"):
+        caster_source=self._actor(caster).source.source_id
+        ap_cost={"F":20,"R":30,"M":24}.get(caster_source)
+        if ap_cost is None:
             raise UnresolvedDecision("Caster lacks verified Basic Heal repertoire")
+        actor = g3._own(caster,ap_cost)
+        if caster_source=="M":
+            from scripts.b05_medium_priest_life_l1_l3_v0 import profile as medium_profile
+            p=medium_profile(actor.level)
+            if (dict(actor.source.abilities)!=p["abilities"]
+                    or actor.vp_max!=p["vp_max"]
+                    or "Basic Heal" not in p["prepared_prayers"]
+                    or actor.focus!="Medium"):
+                raise UnresolvedDecision("Caster lacks verified prepared Medium Life Basic Heal")
         if type(tier) is not int or tier<1 or tier>(1 if actor.level<3 else 2):
             raise ValueError("Invalid Heal Used Tier")
         if type(die) is not int or not 1<=die<=8:
