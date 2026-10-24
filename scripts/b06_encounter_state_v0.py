@@ -214,7 +214,27 @@ def party_actor(role, level, actor_id, team, *, occupied):
     _integer(level, "level", 1)
     if level not in (1, 2, 3):
         raise ValueError("G0 only adapts authored L1–3")
-    if role in ("R", "F"):
+    if role == "M":
+        from scripts.b05_medium_priest_life_l1_l3_v0 import profile
+        p = profile(level)
+        path = "scripts/b05_medium_priest_life_l1_l3_v0.py"
+        gear = tuple((name, "worn" if name == "Leather armor" else
+                      "wielded" if name == "Sword" else "carried")
+                     for name in p["equipment_sp"])
+        source = Source(path, "M", _fingerprint(path), "STRUCTURAL_B05_ONLY",
+                        tuple(sorted(p["abilities"].items())),
+                        tuple(sorted(p["weapon_training"].items())),
+                        gear, (), f"L{level}-medium-life-structural")
+        a = p["abilities"]
+        actor = Actor(actor_id, team, source, level, "Medium",
+                      p["initiative"], a["Awareness"], a["Agility"],
+                      p["hp_max"], p["vigor_max"], p["vp_max"],
+                      p["hp_max"], p["vigor_max"], p["vp_max"], 0, 0,
+                      p["normal_regen_throughput"], p["turn_ap"],
+                      p["physical_action_ap"], p["projection_action_ap"],
+                      "Sword", p["guard_value"], p["normal_guard_capacity"],
+                      occupied=tuple(tuple(c) for c in occupied))
+    elif role in ("R", "F"):
         if role == "R":
             from scripts.b05_bow_vanguard_l1_l3_v0 import profile
             path = "scripts/b05_bow_vanguard_l1_l3_v0.py"
@@ -482,7 +502,8 @@ class Encounter:
                  repair_points=debit-survival-choice.hp, throughput_spent=debit)
         self.check()
 
-    def start_turn(self, actor_id, *, regen_choice=None):
+    def start_turn(self, actor_id, *, regen_choice=None,
+                   on_regeneration_ready=None):
         if not self.round or self.cursor >= len(self.order):
             raise ValueError("No turn is ready")
         if self.current is not None and self.pending_regeneration != actor_id:
@@ -506,7 +527,15 @@ class Encounter:
         # Step 1 is committed and logged only once. If Step 2 needs a policy
         # choice, keep this turn suspended here and resume Step 2 later; do
         # NOT revive expired reservations or append a duplicate expiry event.
+        # Optional source-authored response at the real Step-2 boundary.
+        # This is not a new free regeneration step or an ordinary cast.
+        if on_regeneration_ready is not None:
+            if not callable(on_regeneration_ready):
+                raise ValueError("Regeneration response must be callable")
+            on_regeneration_ready(self, actor_id)
         self._regenerate(a, regen_choice)
+        if self.g3 is not None and getattr(self.g3, "medium_life", None) is not None:
+            self.g3.medium_life.finish_regen(actor_id)
         self.pending_regeneration = None
         # G4 handles genuine Step 3 scheduled toxin harm after the sole
         # Step 2 regeneration, before Step 4 establishes Turn resources.
