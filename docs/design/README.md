@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Three-Focus Priest Life Comparative Encounter Balance v0](b04-b05-three-focus-priest-life-comparative-encounter-balance-v0.md) — 64 matched source-paid H/M/Low A/B self-defense cells, 36 separately classified existing H/M F-ally evidence cells, local baseline deltas and explicit no-tuning boundary.
+
 - [B04/B05 — High Priest Life L1–3 Native Encounter Integration v0](b04-b05-high-priest-life-l1-l3-native-encounter-integration-v0.md) — 42 sourced, paid two-round Soldier/Sentry Life support cases across prepared, Invocation, L3 Open Prayer and double Projection actions; no independent Focus balance certification.
 
 - [B04/B05 — Low Priest Life L1–3 Native Encounter and Exaltation Verification v0](b04-b05-low-priest-life-l1-l3-native-encounter-exaltation-verification-v0.md) — source-bound A/B G5 Soldier/Sentry encounter traces, Chosen self Rites, G4 post-event Held Renewal and packet-preserving finite-budget Vital Interposition; provisional, not complete Focus certification.
