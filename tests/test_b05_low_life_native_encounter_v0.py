@@ -20,6 +20,11 @@ def events(e,kind):
     return [v["detail"] for v in e.ledger if v["kind"]==kind]
 
 
+def attached_scene(*args):
+    combat,adapter=scene(*args)
+    return combat.e,adapter
+
+
 class LowLifeNativeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -124,7 +129,7 @@ class LowLifeNativeTests(unittest.TestCase):
                 self.assertIsNone(r["metrics"]["pending"])
 
     def test_06_source_authentication_rejects_other_roles_and_stale_actor(self):
-        e,c=scene("A",3,"soldier",0)
+        e,c=attached_scene("A",3,"soldier",0)
         with self.assertRaises((UnresolvedDecision,ValueError)):
             c.cast_chosen("foe")
         with self.assertRaises(ValueError):
@@ -141,7 +146,7 @@ class LowLifeNativeTests(unittest.TestCase):
 
     def test_07_low_chosen_rite_cost_and_reaction_independence(self):
         for role in ROLES:
-            e,c=scene(role,3,"soldier",0)
+            e,c=attached_scene(role,3,"soldier",0)
             e.start_turn("low")
             initial=e.actors["low"].reaction_available
             host=c.cast_chosen("low")
@@ -156,7 +161,7 @@ class LowLifeNativeTests(unittest.TestCase):
             e.check()
 
     def test_08_nonchosen_host_cannot_anchor_and_no_reroute(self):
-        e,c=scene("B",3,"soldier",0)
+        e,c=attached_scene("B",3,"soldier",0)
         e.start_turn("low")
         host=c.cast_chosen("low",chosen=False)
         self.assertFalse(host.chosen)
@@ -170,7 +175,7 @@ class LowLifeNativeTests(unittest.TestCase):
 
     def test_09_low_a_native_basic_heal_and_b_hand_boundary(self):
         for role in ROLES:
-            e,c=scene(role,3,"soldier",0)
+            e,c=attached_scene(role,3,"soldier",0)
             e.start_turn("low")
             target=e.actors["low"]
             target.hp-=4
@@ -213,7 +218,7 @@ class LowLifeNativeTests(unittest.TestCase):
                            opponent=args[2],seed=args[3])
 
     def test_12_vigor_only_does_not_consume_pending_vital(self):
-        e,c=scene("B",3,"soldier",0)
+        e,c=attached_scene("B",3,"soldier",0)
         e.start_turn("low")
         c.cast_chosen("low")
         c.arm_vital("low")
@@ -228,7 +233,7 @@ class LowLifeNativeTests(unittest.TestCase):
         self.assertEqual(len(events(e,"g4_damage_applied")),1)
 
     def test_13_no_held_arm_before_real_step_or_without_chosen(self):
-        e,c=scene("A",3,"soldier",0)
+        e,c=attached_scene("A",3,"soldier",0)
         e.start_turn("low")
         c.cast_chosen("low")
         with self.assertRaises(ValueError):
@@ -239,7 +244,7 @@ class LowLifeNativeTests(unittest.TestCase):
             c.arm_held("low",1)
 
     def test_14_host_termination_keeps_spent_property_price(self):
-        e,c=scene("B",3,"soldier",0)
+        e,c=attached_scene("B",3,"soldier",0)
         e.start_turn("low")
         c.cast_chosen("low")
         c.arm_vital("low")
@@ -262,7 +267,7 @@ class LowLifeNativeTests(unittest.TestCase):
 
 
     def test_16_held_first_dying_crossing_never_resurrects(self):
-        e,c=scene("A",3,"soldier",0)
+        e,c=attached_scene("A",3,"soldier",0)
         e.start_turn("low")
         c.cast_chosen("low")
         e.end_turn()
@@ -290,7 +295,7 @@ class LowLifeNativeTests(unittest.TestCase):
         self.assertFalse(a.dead)
 
     def test_17_vital_pending_budget_one_consumes_without_hp_protection(self):
-        e,c=scene("B",3,"soldier",0)
+        e,c=attached_scene("B",3,"soldier",0)
         e.start_turn("low")
         host=c.cast_chosen("low")
         c.arm_vital("low")
