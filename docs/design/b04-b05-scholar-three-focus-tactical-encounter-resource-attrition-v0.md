@@ -22,7 +22,7 @@ All selected L1–3 Scholars begin **two squares** from the same Soldier: Schola
 |---|---|---|
 | `pressure` | High, Medium, Low | Source opening Flame or ordinary Sword, original Soldier melee Take Hit retaliation, 4 native damage opportunities and real Vigor-limited HP recovery |
 | `dodge` | All | Same original Soldier d20 face with **Dodge** declared before G5 roll; no extra attack or invented Dodge value |
-| `cover` | All | Physical G2 directional tier-8 partial cover at (3,2); the High ranged Flame is a paid **cover impact** rather than G4 direct damage; S/T close and strike using ordinary melee, not magical projectile cover mechanics |
+| `cover` | All | Physical G2 directional tier-8 partial cover at (3,2); the High ranged Flame is a paid **cover impact** rather than G4 direct damage; S/T close and strike using ordinary melee, not magical projectile cover mechanics (the original G1 one-square movement receipt charges **2 MP**, not a fabricated 1-MP step) |
 | `stone` | All | Spend native Projection and **Commit VP** to independent Stone Skin before contact; retain actual protective mitigation/attrition/host receipts, no free Sword effect |
 | `guard` | Medium, Low only | Declare genuine Sword Guard17 against the Soldier's same attack. High has a carried Dagger and cannot use this policy |
 | `guided` | Medium, Low only | Commit VP with separately paid MS/LS Guided on round one; execute source-native G0 Step2 throughput/recovery, then ordinary Sword on later legal turns |

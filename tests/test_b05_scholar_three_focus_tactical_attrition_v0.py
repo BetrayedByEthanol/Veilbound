@@ -98,7 +98,7 @@ class ScholarTacticalAttritionV0Tests(unittest.TestCase):
                     len([v for v in step if v["detail"].get("actor")=="scholar"]),1)
                 self.assertEqual(
                     [v["detail"]["cost"] for v in step
-                     if v["detail"].get("actor")=="scholar"],[1])
+                     if v["detail"].get("actor")=="scholar"],[2])
                 source_damage=[v for v in events(r,"g4_damage_applied")
                                if v["detail"]["recipient"]=="foe"]
                 self.assertEqual(len(source_damage),2)
