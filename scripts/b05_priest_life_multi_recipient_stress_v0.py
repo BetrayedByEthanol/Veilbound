@@ -263,6 +263,7 @@ def _foe(combat,opponent,recipient,pressure,role,policy,round_no):
     if profile=="B06-AT-02":
         dice["vigor_die"]=SENTRY_DIE
     if (role=="M" and policy=="shelter_intercession"
+            and opponent=="sentry_prepared" and profile=="B06-AT-02"
             and recipient=="rear" and round_no==2
             and e.actors["priest"].reaction_available
             and e.actors["priest"].vp_available>=2
