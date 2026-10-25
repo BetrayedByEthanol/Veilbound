@@ -39,6 +39,7 @@ class SpellState:
         self.effects = {}
         self.next_effect = 0
         self.medium_scholar = None  # Source-bound S Inward adapter only.
+        self.low_scholar = None  # Source-bound T Embodiment adapter only.
         self.reactive_stone_claimed = set()
         self.reactive_stone_claims = {}
         self.reactive_stone_serial = 0
@@ -569,7 +570,13 @@ class SpellState:
         scholar=self.medium_scholar
         inward=(scholar.regen_bonus(actor_id)
                 if scholar is not None else None)
+        low=self.low_scholar
+        embodiment=(low.regen_bonus(actor_id)
+                    if low is not None else None)
+        if inward is not None and embodiment is not None:
+            raise ValueError("Cannot combine two Scholar Guided instances")
         ordinary = (inward if inward is not None else
+                    embodiment if embodiment is not None else
                     int(any(x.kind=="Guided Regeneration" and x.recipient==actor_id
                             for x in self.effects.values())))
         medium = getattr(self, "medium_life", None)
@@ -637,6 +644,9 @@ class SpellState:
         scholar=self.medium_scholar
         if scholar is not None:
             scholar.on_host_end(effect)
+        low_scholar=self.low_scholar
+        if low_scholar is not None:
+            low_scholar.on_host_end(effect)
         if effect.committed:
             self.e.release_vp(effect.caster,effect.committed,label="g3:"+reason)
         self.e.log("g3_effect_ended",caster=effect.caster,effect=effect.ident,

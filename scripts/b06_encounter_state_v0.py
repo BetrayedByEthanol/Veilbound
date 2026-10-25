@@ -254,6 +254,28 @@ def party_actor(role, level, actor_id, team, *, occupied):
                       p["physical_action_ap"], p["projection_action_ap"],
                       "Sword", p["guard_value"], p["normal_guard_capacity"],
                       occupied=tuple(tuple(c) for c in occupied))
+    elif role == "T":
+        # Source T: Low Scholar with individually known and genuinely
+        # prepared technical Arsenal; no generic attack authorization.
+        from scripts.b05_low_scholar_l1_l3_v0 import profile
+        p=profile(level)
+        path="scripts/b05_low_scholar_l1_l3_v0.py"
+        equipment=tuple(sorted((name,
+            "worn" if name=="Leather armor" else
+            "wielded" if name=="Sword" else "carried")
+            for name in p["equipment_sp"]))
+        source=Source(path,"T",_fingerprint(path),"STRUCTURAL_B05_ONLY",
+                      tuple(sorted(p["abilities"].items())),
+                      tuple(sorted(p["weapon_training"].items())),
+                      equipment, (), f"L{level}-low-scholar-prepared")
+        a=p["abilities"]
+        actor=Actor(actor_id,team,source,level,"Low",p["initiative"],
+                    a["Awareness"],a["Agility"],p["hp_max"],p["vigor_max"],
+                    p["vp_max"],p["hp_max"],p["vigor_max"],p["vp_max"],0,0,
+                    p["normal_regen_throughput"],p["turn_ap"],
+                    p["physical_action_ap"],p["projection_action_ap"],
+                    "Sword",p["guard_value"],p["normal_guard_capacity"],
+                    occupied=tuple(tuple(c) for c in occupied))
     elif role == "S":
         # Structural Medium Scholar, independent from M Medium Priest.
         # No unauthored normal melee-attack authorization is conferred.
@@ -579,7 +601,13 @@ class Encounter:
                if self.g3 is not None else None)
         if low is not None:
             low.on_step_start(actor_id)
+        low_scholar=(getattr(self.g3,"low_scholar",None)
+                     if self.g3 is not None else None)
+        if low_scholar is not None:
+            low_scholar.on_step_start(actor_id)
         self._regenerate(a, regen_choice)
+        if low_scholar is not None:
+            low_scholar.on_step_complete(actor_id)
         # The actual completed G0 Step 2 is the only legal EX-LR-01
         # arming window. A caller's callback does not create a second Step.
         if on_regeneration_complete is not None:
