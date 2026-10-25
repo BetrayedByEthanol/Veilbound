@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Scholar Three-Focus Comparative Balance and Native Encounter Audit v0](b04-b05-scholar-three-focus-comparative-balance-native-encounter-audit-v0.md) — same-face, three-round High/Medium/Low source-native Soldier defensive audit (18 matched cells); preserves 28 distinct earlier M/L cases as **unmatched** evidence, signed rule/ledger basis, no numerical tuning or full-role certification.
+
 - [B04/B05 — Low Scholar L1–3 Character Build and Native Embodiment Verification v0](b04-b05-low-scholar-l1-l3-build-native-embodiment-v0.md) — source T lawful L1–3 Prepared Arsenal, two exact Stone/Guided Self Embodiments, paid switching and L3 genuine timed intensity, 14 native G5/G4 cells; **not** fully certified PS-03 or independent Focus/adventure completion.
 
 - [B04/B05 — Medium Scholar L1–3 Character Build and Native Inward Verification v0](b04-b05-medium-scholar-l1-l3-build-native-inward-v0.md) — a fifth **candidate** structural Focus pairing (S Medium Scholar Earth/Life), actual G0/G1/G3/G4 Inward Stone/Guided and 14 native Soldier cells, source-paid AP/VP/MP, no independent complete Focus/adventure certification.
