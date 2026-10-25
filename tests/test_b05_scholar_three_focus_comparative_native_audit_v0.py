@@ -116,10 +116,19 @@ class ThreeFocusScholarAuditTests(TestCase):
                     self.assertEqual(base["stone_committed"],0)
                     self.assertEqual(stone["stone_committed"],
                                      row(focus,lv)["stone_self_committed"])
+                    # Activation cost is sourced from G3's paid creation
+                    # even when G4 later ends Stone at unconsciousness.
                     self.assertEqual(stone["vp"][1],
-                                     stone["stone_committed"])
+                                     stone["stone_committed_at_end"])
+                    self.assertEqual(stone["stone_committed_at_end"],
+                                     (stone["stone_committed"] if
+                                      stone["stone_active_at_end"] else 0))
+                    self.assertEqual(sum(stone["vp"]),row(focus,lv)["vp_max"])
                     self.assertEqual(stone["vp"][2],0)
-                    self.assertGreater(stone["hp"],base["hp"])
+                    self.assertGreaterEqual(stone["hp"],base["hp"])
+                    if not stone["stone_active_at_end"]:
+                        self.assertEqual(stone["stone_end_reason"],
+                                         "caster_unconscious_or_dead")
             self.assertEqual(outcomes["High"]["stone"]["stone_r"],2)
             self.assertEqual(outcomes["Medium"]["stone"]["stone_r"],1)
             self.assertEqual(outcomes["Low"]["stone"]["stone_r"],2)
@@ -222,6 +231,38 @@ class ThreeFocusScholarAuditTests(TestCase):
                             for x in r["native_matched"]))
         self.assertTrue(all(not x["full_focus_certified"]
                             for x in r["prior_native_separate_cohorts"]))
+
+
+    def test_17_native_stone_disappears_only_with_real_termination_receipt(self):
+        # Under the unchanged d6=5 policy, F/S can lawfully drop to <=0 HP.
+        # The audit must not promote a paid activation into a permanent host.
+        for level in LEVELS:
+            for focus in FOCUSES:
+                with self.subTest(level=level,focus=focus):
+                    r=matched_soldier(focus,level,"stone")
+                    m=r["metrics"]
+                    established=[v for v in r["ledger"]
+                                 if v["kind"]=="g3_effect_established"
+                                 and v["detail"]["caster"]=="scholar"
+                                 and v["detail"]["effect_kind"]=="Stone Skin"]
+                    ended=[v for v in r["ledger"]
+                           if v["kind"]=="g3_effect_ended"
+                           and v["detail"]["caster"]=="scholar"
+                           and v["detail"]["effect_kind"]=="Stone Skin"]
+                    self.assertEqual(len(established),1)
+                    self.assertEqual(len(ended),int(not m["stone_active_at_end"]))
+                    self.assertEqual(m["stone_r"],established[0]["detail"]["resistance"])
+                    self.assertEqual(m["stone_committed"],
+                                     established[0]["detail"]["committed"])
+                    if ended:
+                        self.assertEqual(ended[0]["detail"]["effect"],
+                                         established[0]["detail"]["effect"])
+                        self.assertEqual(m["vp"][1],0)
+                        self.assertEqual(m["stone_end_reason"],
+                                         "caster_unconscious_or_dead")
+                    else:
+                        self.assertEqual(m["vp"][1],m["stone_committed"])
+                        self.assertIsNone(m["stone_end_reason"])
 
 
 if __name__=="__main__":

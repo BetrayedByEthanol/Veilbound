@@ -273,12 +273,28 @@ def matched_soldier(focus,level,policy,*,seed=0):
            if v["detail"]["actor"]=="scholar"]
     actions=[v for v in ev("action_committed")
              if v["detail"]["actor"]=="scholar"]
+    # G4 may lawfully end Stone Skin when its caster becomes unconscious.
+    # Attest the paid activation and its originally sourced resistance from
+    # immutable G3 receipts, rather than assuming the host survives every
+    # fixed incoming attack. Retain the actual terminal host/refund state.
+    created=[v for v in ev("g3_effect_established")
+             if v["detail"]["caster"]=="scholar"
+             and v["detail"]["effect_kind"]=="Stone Skin"]
     host=[v for v in g3.effects.values()
           if v.caster=="scholar" and v.kind=="Stone Skin"]
-    if policy=="stone" and len(host)!=1:
-        raise AssertionError("Expected one source-native retained Stone host")
-    if policy=="baseline" and host:
-        raise AssertionError("No free default Stone allowed")
+    ended=[v for v in ev("g3_effect_ended")
+           if v["detail"]["caster"]=="scholar"
+           and v["detail"]["effect_kind"]=="Stone Skin"]
+    if policy=="stone":
+        if len(created)!=1 or len(host)+len(ended)!=1:
+            raise AssertionError("Source Stone must be established once and either live or end")
+        if ended and ended[0]["detail"]["effect"]!=created[0]["detail"]["effect"]:
+            raise AssertionError("Ended G3 host is not the originally paid Stone")
+        if host and host[0].ident!=created[0]["detail"]["effect"]:
+            raise AssertionError("Surviving host is not the paid source Stone")
+    elif created or host or ended:
+        raise AssertionError("Baseline cannot acquire or release a free Stone")
+    source_effect=(created[0]["detail"] if created else None)
     result={
         "version":"B04-B05-Scholar-Matched-Soldier-v0",
         "focus":focus,"level":level,"policy":policy,"seed":seed,
@@ -297,8 +313,11 @@ def matched_soldier(focus,level,policy,*,seed=0):
             "hp_restored":sum(v["detail"]["hp_restored"] for v in steps),
             "paid_projection_ap":sum(v["detail"]["ap_spent"] for v in actions),
             "paid_projection_actions":len(actions),
-            "stone_r":host[0].resistance if host else 0,
-            "stone_committed":host[0].committed if host else 0,
+            "stone_r":source_effect["resistance"] if source_effect else 0,
+            "stone_committed":source_effect["committed"] if source_effect else 0,
+            "stone_active_at_end":bool(host),
+            "stone_committed_at_end":host[0].committed if host else 0,
+            "stone_end_reason":ended[0]["detail"]["reason"] if ended else None,
         },
         "ledger":deepcopy(e.ledger),
         "source_native_matched_defense_only":True,
