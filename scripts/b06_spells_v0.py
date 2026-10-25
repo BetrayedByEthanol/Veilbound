@@ -702,7 +702,7 @@ class SpellState:
                 self._end(v,reason="round_begin_duration_expiry")
 
     @staticmethod
-    def _flame_confirmation_tier(confirmation_face,defense,defense_value):
+    def _flame_confirmation_tier(confirmation_face,defense,defense_value,*,attack_bonus=5):
         """One confirmation against the exact currently live G2 defense.
 
         This pure helper is used both before the original AP declaration
@@ -718,7 +718,7 @@ class SpellState:
         if defense=="take_hit":
             return "critical"
         return ("critical" if confirmation_face!=1
-                and confirmation_face+5>defense_value else "strong")
+                and confirmation_face+attack_bonus>defense_value else "strong")
 
     def cast_flame(self,caster,target,*,tier,face,vigor_die,
                    defense="take_hit",aware=False,hand_available=False,
@@ -726,17 +726,22 @@ class SpellState:
                    prone_cover_policy=(),prone_dodge_feasible=False,
                    wound_location_roll=None,confirmation_face=None,
                    critical_dice=()):
-        """Bounded clear/cover-only F Flame; G4 resolves direct hits in this call.
+        """Bounded source-authored F/S/T Flame; G4 resolves real direct hits.
 
         Mixed living-screen destination/scatter and full opportunity/Reaction
         response need the G2 general-projectile adapter, deferred to G3+G5.
         Reject them rather than pretend G2's Bow arrow is a magic projectile.
         """
-        a=self._own(caster,20)
-        if a.source.source_id!="F":
-            raise ValueError("Only authored F has this known T1 Conjure Flame")
-        if tier not in (1,2) or tier>scholar(a.level)["max_used_tier"]:
-            raise ValueError("Unsupported Used Tier for F")
+        from scripts.b05_scholar_thrown_flame_access_v0 import flame_access
+        if caster not in self.e.actors:
+            raise ValueError("Unknown Flame caster")
+        source=flame_access(
+            self.e.actors[caster],
+            wielded=(self.e.g2.wielded[caster] if self.e.g2 is not None else None))
+        a=self._own(caster,source["action_ap"])
+        if type(tier) is not int or tier not in (1,2) or tier>source["max_tier"]:
+            raise ValueError("Unsupported source-authored Used Tier")
+        attack_bonus=source["attack_bonus"]
         if hand_available is not True:
             raise ValueError("Free Thrown Flame requires available functioning hand")
         if type(face) is not int or not 1<=face<=20:
@@ -755,7 +760,7 @@ class SpellState:
             raise UnresolvedDecision("G3 mixed Flame collision/area needs full G2 projectile delivery")
         if any(self.e.g1.threatens(enemy.id,c) for enemy in self.e.actors.values()
                if enemy.team!=a.team for c in a.occupied):
-            raise UnresolvedDecision("Threatened F casting needs genuine Opportunity response")
+            raise UnresolvedDecision(("Threatened F casting" if source["role"]=="F" else "Threatened Scholar casting")+" needs genuine Opportunity response")
         victim=self.e.actors[target]
         position=self.e.g2._prone_position(
             victim,lane.distance,lane.cover,prone_cover_policy)
@@ -770,7 +775,7 @@ class SpellState:
         critical="normal"
         if face==20 and confirmation_face is not None:
             critical=self._flame_confirmation_tier(
-                confirmation_face,defense,declared_defense)
+                confirmation_face,defense,declared_defense,attack_bonus=attack_bonus)
         elif face!=20 and confirmation_face is not None:
             raise ValueError("Flame confirmation only follows natural 20")
         required={"normal":0,"strong":1,"critical":2,"devastating":2}[critical]
@@ -794,6 +799,19 @@ class SpellState:
         price=2*tier
         self._funds(a,price,0)
         self._commit(caster,on_committed=on_committed,label="g3:thrown_flame:T"+str(tier))
+        # The paid action never permits spoofing a different source sheet or
+        # preparation between declaration and physical launch. Post-commit
+        # source changes interrupt the spell before spending any VP.
+        try:
+            live_source=flame_access(a,wielded=self.e.g2.wielded[caster])
+        except UnresolvedDecision:
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Thrown Flame",cause="post_commit_source")
+            return {"outcome":"interrupted_before_launch","vp_spent":0}
+        if live_source!=source:
+            self.e.log("g3_cast_interrupted",caster=caster,
+                       spell_kind="Thrown Flame",cause="post_commit_authority")
+            return {"outcome":"interrupted_before_launch","vp_spent":0}
         try:
             refreshed=self.e.g2.preview_thrown_flame(
                 caster,target,exposures=exposures,origin=origin,target_cell=target_cell)
@@ -828,7 +846,7 @@ class SpellState:
         # Reject the launch BEFORE Spent VP/defensive capacity is paid.
         if confirmed_critical:
             live_critical=self._flame_confirmation_tier(
-                confirmation_face,defense,preflight_defense)
+                confirmation_face,defense,preflight_defense,attack_bonus=attack_bonus)
             if live_critical!=critical:
                 self.e.log("g3_cast_interrupted",caster=caster,
                            spell_kind="Thrown Flame",
@@ -843,7 +861,7 @@ class SpellState:
         # defense is committed. A qualifying G4 hit must resolve *now*, not
         # leave a paid hit with a missing later adjudication choice.
         if self.e.g4 is not None and (
-                (1<face<20 and face+5>preflight_defense) or confirmed_critical):
+                (1<face<20 and face+attack_bonus>preflight_defense) or confirmed_critical):
             self.e.g4.preflight_flame_wound(
                 target,wound_location_roll,
                 fire_hp=2+sum(critical_dice),
@@ -855,7 +873,7 @@ class SpellState:
             victim,defense,0,refreshed.cover,commit=True,
             position_bonus=position,
             prone_dodge_feasible=prone_dodge_feasible)
-        attack=face+5
+        attack=face+attack_bonus
         if face==1:
             outcome="automatic_miss"
         elif face==20:
@@ -879,6 +897,9 @@ class SpellState:
                     "critical":critical,"critical_dice":list(critical_dice)}
                    if confirmed_critical else {})
         self.e.log("g3_flame_launched",caster=caster,target=target,
+                   source_id=source["role"],source_digest=source["source_digest"],
+                   source_attack_bonus=attack_bonus,
+                   projection_ap=source["action_ap"],
                    tier=tier,primary_face=face,die=vigor_die,
                    **confirmed,**result)
         if self.e.g4 is not None and outcome=="direct_hit_pending_G4":

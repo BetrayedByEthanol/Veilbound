@@ -261,10 +261,11 @@ class RangedCombat:
 
     def preview_thrown_flame(self, shooter_id, target_id, *, exposures=(),
                              origin=None, target_cell=None):
-        """Physical lane only; no G3 spell access, AP, VP, roll or Fire hit."""
-        a = self.e.actors[shooter_id]
-        if a.source.source_id != "F":
-            raise ValueError("Only authored F High Scholar may preview Flame")
+        """Source-backed physical preview; no VP, AP, roll or Fire damage."""
+        from scripts.b05_scholar_thrown_flame_access_v0 import flame_access
+        if shooter_id not in self.e.actors:
+            raise ValueError("Unknown Flame shooter")
+        flame_access(self.e.actors[shooter_id],wielded=self.wielded[shooter_id])
         lane = self.lane(shooter_id,target_id,exposures=exposures,origin=origin,
                          target_cell=target_cell,range_kind="flame")
         self.e.log("g2_flame_lane_preview", shooter=shooter_id,target=target_id,
