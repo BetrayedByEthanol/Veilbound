@@ -155,10 +155,16 @@ If the new recipient has a relevant Intrusion refusal, resolve the technique's o
 | Technique is merely known by a Scholar | No automatic Medium Scholar reroute, Low Scholar Active Embodiment, or composite pairing solely from matching labels |
 | Outside initiative for 6 hours | **No invented Regeneration Steps**; existing Vigor Recovery timing remains unchanged |
 
+## Explicit Medium and Low Scholar compatibility (alternative Tier-1 modes)
+
+[Scholar-specific profile addendum](scholar-inward-embodiment-profiles-v0.md) now authors `MS-GUIDED-REGEN-T1` (**Medium** Self Inward Regeneration, **24 AP + 1 Committed VP**, +1 existing own G0 Step throughput) and `LS-GUIDED-REGEN-T1` (**Low** prepared Self Embodiment, **30 AP + 2 Committed VP**, same base Step-only output). At L3, Low can spend **1 VP** on a valid active host for **+1 throughput in its next genuine own Step**, not a new Step or instant healing.
+
+These exact Scholar-only alternate profiles do not reduce the original projection modes for others, grant Priest Chosen or Intercession, or convert generic Self spells into Focus effects. [The profile verifier](../../design/b05-scholar-inward-embodiment-profiles-v0.md) is a cost/legality model, **not native G0 regeneration receipts**.
+
 ## Open calibration and explicit deferrals
 
 - **2 Spent VP / one minute versus 2 Committed VP / continuous**: verify role distinction, long-term maintenance, resource scarcity and L1–3 encounter utility with actual combats.
 - **+1 per actual Regeneration Step**: confirm useful for Low Devotion without making larger immediate heals or protection redundant; measure net **Vigor spent**, not just theoretical additional throughput.
 - **Level-3 Intercession 2 Spent VP** may be too costly for +1 throughput; retain current Priest benchmark and test before changing universal Intercession pricing.
-- A distinct **Tier-2/3 profile/upcast**, any compound/restoration specialization, **additional Low Priest Exaltation properties**, Scholar Routing/Embodiment compatibility, other Archetype-specific expression and extended out-of-combat healing rules remain **unauthored**. The separate [Held Renewal v0](life-exaltation-properties-v0.md#ex-lr-01--held-renewal) property is authored only for a qualifying active Chosen Rite; its numbers/overlap with Emergency Regeneration remain a playtest watch.
+- A distinct **Tier-2/3 profile/upcast**, compound/restoration specialization, **additional Low Priest Exaltation properties**, *further Scholar Routing/Embodiment profiles and native combat implementation beyond the exact Earth/Life alternatives*, other Archetype-specific expression and extended out-of-combat healing rules remain **unauthored or unverified**. The separate [Held Renewal v0](life-exaltation-properties-v0.md#ex-lr-01--held-renewal) property is authored only for a qualifying active Chosen Rite; its numbers/overlap with Emergency Regeneration remain a playtest watch.
 - **No changes** to Prepared Prayer counts, starting Accord, general VP Recovery, regeneration priorities, Direct Veil procedure, or global time/targeting rules.

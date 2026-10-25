@@ -181,6 +181,12 @@ If the Reaction cast is valid and resolves before the triggering hit/hazard dama
 | Same composite maintains Stone Skin several rounds | Basic Heal's Secondary **never repeats**; ending Stone Skin returns only Committed VP |
 | Stone Skin technique known but no Archetype authorization to use it | No cast; document does not grant automatic repertoire |
 
+## Explicit Medium and Low Scholar compatibility (alternative Tier-1 modes)
+
+The [Scholar-specific profile addendum](scholar-inward-embodiment-profiles-v0.md) expressly authors `MS-STONE-BODY-T1` (**Medium** Self Inward Body, **24 AP + 1 Committed VP**, HP R1 of original eligible Physical/Fire/Electrical types) and `LS-STONE-BODY-T1` (**Low** prepared Self Embodiment, **30 AP + ceil(Max VP/3) Committed VP**, original snapshotted Stone Skin R). Low L3 can Intensify the active host for **1 Spent VP**, receiving **+1 R until next own turn**, not a reactive extra spell.
+
+Neither is automatic from the ordinary `Self` [Projection] tag; neither alters original Stone Skin's native reactive cast, High Scholar composite or named-effect nonstacking. Their early [profile/AP/VP model](../../design/b05-scholar-inward-embodiment-profiles-v0.md) does not yet constitute G3/G4 native Medium/Low Scholar combat certification.
+
 ## Status
 
 **v0 design lock:** separate **normal Projection Action** and **standalone Reaction** activation methods, with **no reactive AP debt**; one-third-Max-VP Committed Reserve, maintained until unconsciousness/release; type-based Physical/Fire/Electrical **HP resistance** independent of damage source; **highest applicable resistance once per HP packet**, while worn Armor remains separate; `Self` Primary, no Stone Skin Secondary/Rider, and on-turn High Scholar Stone Skin Primary + `Self` Basic Heal Secondary resolved once. Numerical balance, damage-type coverage and higher-tier utility remain **provisional**. B05 remains open pending enough Pillar/Aspect and Archetype repertoire to play all twelve MVP builds.
