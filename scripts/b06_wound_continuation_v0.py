@@ -211,6 +211,76 @@ class WoundContinuation:
         self.e.check()
         return result
 
+    def verified_opportunity_hit(self,attacker,target,profile_id,*,trigger,
+                                 response,response_index,pending_index,
+                                 die_face,critical="normal",critical_dice=(),
+                                 vigor_die=None,wound_location_roll=None):
+        """G4.5 off-turn proof: consume ONE actual G0 Opportunity commitment.
+
+        Unlike an ordinary turn attack, no AP action/sequence is fabricated.
+        The immutable response index and *live* G1 pre-step callback bind the
+        defender, source, actual G4 packet and one permitted damage event.
+        """
+        e=self.e
+        if (not e.is_live_spontaneous(trigger,response)
+                or response.kind!="opportunity"
+                or response.actor_id!=attacker
+                or trigger.actor_id!=target
+                or trigger.target_id!=target
+                or type(response_index) is not int
+                or type(pending_index) is not int
+                or response_index<self.start
+                or pending_index<=response_index
+                or pending_index>=len(e.ledger)):
+            raise UnresolvedDecision("G4.5 requires exact live committed G0/G1 Opportunity")
+        paid=e.ledger[response_index]
+        pending=e.ledger[pending_index]
+        if (paid["kind"]!="spontaneous_committed"
+                or paid["round"]!=e.round
+                or paid["detail"].get("actor")!=attacker
+                or paid["detail"].get("response_kind")!="opportunity"
+                or paid["detail"].get("label")!=response.label
+                or paid["detail"].get("trigger")!=trigger.key
+                or pending["kind"]!="g1_movement_opportunity_pending"
+                or pending["detail"].get("trigger")!=trigger.key
+                or pending["detail"].get("attacker")!=attacker
+                or pending["detail"].get("mover")!=target
+                or e.current!=target or e.pending_regeneration is not None
+                or e.actors[attacker].hp<=0
+                or e.actors[attacker].dead
+                or e.actors[target].dead):
+            raise UnresolvedDecision("Source response and moving target no longer match")
+        if any(event["kind"] in ("g45_opportunity_attested_hit",
+                               "g5_opportunity_resolved","g5_opportunity_cancelled")
+               and event["detail"].get("response_index")==response_index
+               for event in e.ledger):
+            raise ValueError("G0 Opportunity source response already consumed")
+        if (e.g1 is None or
+                not e.g1.melee_contact(attacker,target)):
+            raise UnresolvedDecision("Opportunity requires genuine pre-step G1 contact")
+        # G4 enforces original source JSON, Armor, HP/Vigor, critical/wound,
+        # poison/active-effect transition and exact wound-location preflight.
+        e.g4.preflight_profile_hit(
+            attacker,target,profile_id,die_face=die_face,
+            critical=critical,critical_dice=critical_dice,
+            vigor_die=vigor_die,wound_location_roll=wound_location_roll)
+        result=e.g4.apply_profile_hit(
+            attacker,target,profile_id,die_face=die_face,
+            confirmed_hit=True,critical=critical,
+            critical_dice=critical_dice,vigor_die=vigor_die,
+            wound_location_roll=wound_location_roll)
+        e.log("g45_opportunity_attested_hit",
+              attacker=attacker,target=target,profile=profile_id,
+              response_index=response_index,pending_index=pending_index,
+              trigger=trigger.key,
+              source_event=f"g45:opportunity:{e.seed}:{response_index}",
+              attacker_source=e.actors[attacker].source.digest,
+              target_source=e.actors[target].source.digest,
+              no_turn_ap_payment=True,critical=critical,
+              actual_result=result,target_state=_actor_state(e.actors[target]))
+        e.check()
+        return result
+
     def start_next_turn(self,choice=None,*,on_regeneration_ready=None,
                         on_regeneration_complete=None):
         """Only the actual next Initiative position; no synthesized steps."""

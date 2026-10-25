@@ -238,6 +238,19 @@ class SourceMelee:
             raise UnresolvedDecision("Sourced attack bonus required")
         return bonus
 
+    def opportunity_step(self,mover,delta,*,decisions,cautious=False):
+        """Run one actual G1 step with fully authored off-turn G5 choices.
+
+        The ordinary G5 current-turn AP sequence remains completely separate.
+        """
+        from scripts.b06_offturn_opportunity_v0 import step
+        return step(self,mover,delta,decisions=decisions,cautious=cautious)
+
+    def resolve_opportunity(self,trigger,response,choice):
+        """G0's exact live G1 response callback is the only authority."""
+        from scripts.b06_offturn_opportunity_v0 import resolve
+        return resolve(self,trigger,response,choice)
+
     def declare(self,attacker,target,*,profiles,defenses,
                 prone_dodge_feasible=None,prone_guard_feasible=None,
                 prone_attack_feasible=None):
