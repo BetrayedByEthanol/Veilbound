@@ -345,5 +345,104 @@ class NativeOpportunityV0Tests(unittest.TestCase):
                           m.mp_remaining,len(e.ledger)),original)
 
 
+    def test_24_second_dodge_uses_pressure_from_first_response(self):
+        e,g,m,a=scene(role="S",two=True)
+        hp=m.hp
+        self.assertTrue(g.opportunity_step("mover",(0,1),decisions={
+            "alpha":OpportunityChoice("B06-AT-03",2,"dodge"),
+            # 8+6=14 misses the ORIGINAL 14, but hits the REAL next
+            # Dodge value 12 after alpha's paid Dodge pressure.
+            "beta":OpportunityChoice("B06-AT-03",8,"dodge",
+                                     damage_face=1,wound_location_roll=8)}))
+        self.assertLess(m.hp,hp)
+        self.assertEqual(m.dodge_pressure,4)
+        self.assertEqual([v["detail"]["defense_value"]
+                          for v in events(e,"defense_assigned")],[14,12])
+        self.assertEqual([v["detail"]["outcome"]
+                          for v in events(e,"g5_opportunity_resolved")],
+                         ["miss","hit"])
+        self.assertEqual(len(events(e,"g45_opportunity_attested_hit")),1)
+
+    def test_25_second_dodge_new_hit_missing_die_fails_before_any_payment(self):
+        e,g,m,a=scene(role="S",two=True)
+        beta=e.actors["beta"]
+        before=(m.hp,m.mp_remaining,m.dodge_pressure,m.guard_remaining,
+                m.occupied,len(e.ledger),a.opportunity_used,beta.opportunity_used,
+                a.reaction_available,beta.reaction_available)
+        with self.assertRaises((ValueError,UnresolvedDecision)):
+            g.opportunity_step("mover",(0,1),decisions={
+                "alpha":OpportunityChoice("B06-AT-03",2,"dodge"),
+                "beta":OpportunityChoice("B06-AT-03",8,"dodge")})
+        self.assertEqual((m.hp,m.mp_remaining,m.dodge_pressure,m.guard_remaining,
+                          m.occupied,len(e.ledger),a.opportunity_used,
+                          beta.opportunity_used,a.reaction_available,
+                          beta.reaction_available),before)
+        self.assertEqual(len(events(e,"g5_opportunity_resolved")),0)
+
+    def test_26_two_guards_with_one_capacity_fail_atomically(self):
+        e,g,m,a=scene(role="S",two=True,level=1)
+        beta=e.actors["beta"]
+        self.assertEqual(m.guard_remaining,1)
+        before=(m.hp,m.guard_remaining,m.mp_remaining,m.occupied,
+                len(e.ledger),a.opportunity_used,beta.opportunity_used,
+                a.reaction_available,beta.reaction_available)
+        with self.assertRaises((ValueError,UnresolvedDecision)):
+            g.opportunity_step("mover",(0,1),decisions={
+                "alpha":OpportunityChoice("B06-AT-03",2,"guard"),
+                "beta":OpportunityChoice("B06-AT-03",2,"guard")})
+        self.assertEqual((m.hp,m.guard_remaining,m.mp_remaining,m.occupied,
+                          len(e.ledger),a.opportunity_used,beta.opportunity_used,
+                          a.reaction_available,beta.reaction_available),before)
+
+    def test_27_second_hit_cumulative_wound_requirement_precommitted(self):
+        e,g,m,a=scene(role="F",two=True,level=1)
+        beta=e.actors["beta"]
+        before=(m.hp,m.occupied,m.mp_remaining,len(e.ledger),
+                a.opportunity_used,beta.opportunity_used)
+        # Both noncritical source Sword hits individually leave a fresh
+        # 12-HP target alive. In sequence they cross zero only on hit two.
+        with self.assertRaises((ValueError,UnresolvedDecision)):
+            g.opportunity_step("mover",(0,1),decisions={
+                "alpha":OpportunityChoice("B06-AT-03",12,damage_face=6),
+                "beta":OpportunityChoice("B06-AT-03",12,damage_face=6)})
+        self.assertEqual((m.hp,m.occupied,m.mp_remaining,len(e.ledger),
+                          a.opportunity_used,beta.opportunity_used),before)
+        self.assertEqual(len(events(e,"g4_damage_applied")),0)
+        self.assertFalse(g.opportunity_step("mover",(0,1),decisions={
+            "alpha":OpportunityChoice("B06-AT-03",12,damage_face=6),
+            "beta":OpportunityChoice("B06-AT-03",12,damage_face=6,
+                                     wound_location_roll=8)}))
+        self.assertLessEqual(m.hp,0)
+        self.assertEqual(m.occupied,((2,2),))
+        self.assertEqual(len(events(e,"g4_damage_applied")),2)
+        self.assertEqual(len(events(e,"g4_wound_created")),1)
+        self.assertEqual(len(events(e,"g45_opportunity_attested_hit")),2)
+
+    def test_28_second_dodge_confirmation_changes_critical_tier(self):
+        e,g,m,a=scene(role="S",two=True)
+        beta=e.actors["beta"]
+        before=(m.hp,m.dodge_pressure,m.mp_remaining,len(e.ledger),
+                a.opportunity_used,beta.opportunity_used)
+        with self.assertRaises((ValueError,UnresolvedDecision)):
+            g.opportunity_step("mover",(0,1),decisions={
+                "alpha":OpportunityChoice("B06-AT-03",2,"dodge"),
+                # 7+6=13 confirms only after Dodge falls 14 -> 12:
+                # real Critical requires TWO d4, not the stale Strong one.
+                "beta":OpportunityChoice("B06-AT-03",20,"dodge",
+                    damage_face=1,confirmation_face=7,
+                    critical_dice=(4,),wound_location_roll=8)})
+        self.assertEqual((m.hp,m.dodge_pressure,m.mp_remaining,len(e.ledger),
+                          a.opportunity_used,beta.opportunity_used),before)
+        self.assertFalse(g.opportunity_step("mover",(0,1),decisions={
+            "alpha":OpportunityChoice("B06-AT-03",2,"dodge"),
+            "beta":OpportunityChoice("B06-AT-03",20,"dodge",
+                damage_face=1,confirmation_face=7,
+                critical_dice=(4,4),wound_location_roll=8)}))
+        rolls=events(e,"g5_opportunity_roll")
+        self.assertEqual([r["detail"]["critical"] for r in rolls],
+                         ["normal","critical"])
+        self.assertEqual(len(events(e,"g45_opportunity_attested_hit")),1)
+
+
 if __name__=="__main__":
     unittest.main()
