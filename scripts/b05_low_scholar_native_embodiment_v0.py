@@ -43,7 +43,7 @@ class LowScholarEmbodiment:
                 or a.source.digest!=_fingerprint(path)
                 or a.source.status!="STRUCTURAL_B05_ONLY"
                 or a.source.start_state!=f"L{a.level}-low-scholar-prepared"
-                or a.source.attack_profiles!=()
+                or a.source.attack_profiles!=("B05-PC-T-SWORD-CUT",)
                 or a.source.equipment!=equipment
                 or dict(a.source.abilities)!=p["abilities"]
                 or dict(a.source.training)!=p["weapon_training"]
