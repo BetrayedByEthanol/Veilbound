@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Formal Priest Life Focus Balance Assessment v0](b04-b05-formal-priest-life-focus-balance-assessment-v0.md) — source-replayed 1,384-case three-stratum audit with 36 separately classified historical H/M ally cases, per-policy exposure-aware observations, six decision gates and explicit retain-values/no-ranking recommendation.
+
 - [B04/B05 — Priest Life Multi-Recipient Support and Intercession Stress v0](b04-b05-priest-life-multi-recipient-support-intercession-stress-v0.md) — 408 native four-actor F/R/Priest targeted encounters; High dual prayers, Medium reassignment and actual G4 Intercession, Low A paid Basic Heal and B free-hand limitations, without Focus tuning.
 
 - [B04/B05 — Three-Focus Priest Life Extended Attrition and Tactical Balance v0](b04-b05-three-focus-priest-life-extended-attrition-tactical-balance-v0.md) — 912 native High/Medium/Low extended (4/8-round) pressure/defense/movement cases, true early-stop and source-local baseline accounting; no tuning.
