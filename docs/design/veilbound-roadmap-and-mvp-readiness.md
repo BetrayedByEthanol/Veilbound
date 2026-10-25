@@ -1,6 +1,6 @@
 # Veilbound — Development Roadmap, Milestones and Level 1–3 MVP Readiness
 
-> **Active checkpoint: 23 October 2026, through merged B06 G7-H PR #125.**
+> **Active checkpoint: 25 October 2026, through merged B04/B05 Formal Priest Life Balance PR #137, following B06 G8 PR #127.**
 > This is the repository's current **planning and MVP acceptance register**, not a canonical gameplay rule.
 > [Canonical rules](../rules/) and [structured content](../../content/) outrank design/audit commentary.
 > Individual [design records](README.md) retain their own scope, results and historical limitations.
@@ -17,28 +17,30 @@
 
 | Indicator | Accepted state | Qualification |
 |---|---|---|
-| Archetype × Focus architectures | **4 × 3 = 12 defined** | **0/12 independently certified end-to-end** |
-| Selected MVP Pillars | **8/8 represented** | A represented Pillar is not a complete repertoire |
-| MVP Tier-1 Aspect coverage | **10/24** | Missing breadth remains a B05 blocker |
-| Authored Tier-1 Pillar techniques | **13** | Life has **6/6** planned Tier-1 candidates |
-| Life L3 Exaltation properties | **2** | No full opposed Life Focus certification |
-| Selected structural L1→3 builds | Two Life Low Priest variants; Bow Vanguard (Priest/Low); High Scholar Fire (Scholar/High) | Three Priest/Low fixtures do **not** count as three different Focus pairings |
-| Creature fixture catalogue | **3 executable / 5 concept-only / 6 deferred** of 14 | Soldier, Sentry, Hunter have bounded proof, not three full packs |
-| Hunter early calibration | Phase 1 **8 fixed**; Phase 2 **8,192 bounded**; Phase 3 **4,096 historical** | Early/one-round stops are not complete fights |
-| Native encounter integration | **G0–G7-H merged** | G7-G/G7-H authenticate bounded terminal paths; strict B06 acceptance remains open |
-| G7-F pilot | **31** source-policy cohorts, **10** descriptive seed-paired comparisons | Supports 1–128 seeds per cohort, **not representative human/GM policy sampling** |
-| Complete certified opposed encounter packs | **0** | G7-H certifies one **bounded L2/L3 × P4 three-terminal matrix**, not a full representative encounter pack |
-| Positive Hunter multi-target full-party defeat | **Demonstrated in G7-G** | Genuine G1 pursuit, paid G5/G4 lethal Bites and G7-C all-dead terminal; fixed extremal dice, not a measured wipe rate |
-| Authenticated Hunter outcomes | **Three fixed-policy terminals** | G7-H: Hunter defeat, multi-target party defeat, and opposed living-Hunter scene exit; no representative frequencies |
-| Hunter numerical challenge rating | **Unrated** | No defensible full-fight win rate or confidence interval |
-| Closed B01–B07 definition blockers | **3/7** (B01–B03) | B04/B05/B07 partial, B06 still blocking |
-| PR #125 exact-head repository CI | **1,127 tests passed** | Both B06 Phase 3 and B05 Scholar workflows succeeded; not tabletop playtest certification |
+| Archetype × Focus architectures | **12/12 defined** | Architecture does not establish complete playable content |
+| Structural L1→3 Focus pairings | **4/12** | Priest High/Medium/Low Life + Scholar High Fire. Three Low Priest variants count as **one pairing** |
+| Independently full-certified Focus pairings | **0/12** | No complete combat + noncombat evidence at every level |
+| Selected MVP Pillars | **8/8 represented** | Not full repertoires |
+| Authored Tier-1 Aspects | **10/24**, **14** still missing | Last explicit content census; no fresh full-catalogue audit in this documentation PR |
+| Tier-1 Pillar techniques | **13** | Life has 6/6 planned first-tier expressions; content census unchanged |
+| Life L3 Exaltation properties | **2** | Guided Held Renewal; Shelter Vital Interposition |
+| Creature fixtures | **3 executable / 5 concept / 6 deferred** | Soldier, Firebound Sentry, Hunter still not three representative packs |
+| Hunter historical calibration | Phase 1 **8** / Phase 2 **8,192** / Phase 3 **4,096** | Frozen original counts/digest, not valid full fight win-rate inference |
+| B06 native encounter integration | **G0–G7-H and G8 merged** | Hunter G7-H and Soldier/Sentry G8 separately source-backed fixed-policy three-terminal matrices |
+| G7-F pilot | **31** source-policy cohorts, **10** seed-paired descriptive comparisons | Not representative human/GM behavior |
+| Complete **representative** encounter packs | **0** | Bounded three-terminal matrices are not representative whole-fight evidence |
+| Priest Life formal comparative evidence | **1,384 deterministic primary cases** | **64** two-round + **912** extended attrition + **408** multi-recipient; 36 historical H/M ally cases are distinct context, not additional primary |
+| Hunter challenge rating | **Unrated** | No trustworthy complete encounter success-rate denominators |
+| B01–B07 blocker definitions closed | **3/7** | B04/B05/B06/B07 remain blocking |
+| Exact-head CI verification | **#137 B06 and B05 workflows succeeded** | PR #137 assessment cites **1,294 tests**; this document-only role update requires its own exact-head CI |
 
 **Frozen historical Hunter Phase 3 SHA-256:** c02c9830d10f1bcaf7d80ccedfe81102c1d4d9b28f4f004e9f715560b184ca5b.
 
-[G7-F pilot](b06-g7f-representative-encounter-calibration-v0.md) · [G7-G pursuit and terminals](b06-g7g-hunter-pursuit-party-defeat-disengagement-v0.md) · [G7-H bounded terminal matrix](b06-g7h-mixed-party-encounter-certification-v0.md) · [Merged PR #125](https://github.com/BetrayedByEthanol/Veilbound/pull/125).
+Milestones: [G7-H #125](https://github.com/BetrayedByEthanol/Veilbound/pull/125), [G8 #127](https://github.com/BetrayedByEthanol/Veilbound/pull/127), [Medium Priest #128–129](https://github.com/BetrayedByEthanol/Veilbound/pull/129), [High/Low Priest #131–133](https://github.com/BetrayedByEthanol/Veilbound/pull/133), [Priest comparison #134–136](https://github.com/BetrayedByEthanol/Veilbound/pull/136), [Formal Priest Life assessment #137](https://github.com/BetrayedByEthanol/Veilbound/pull/137).
 
-G7-F requires its chosen source policy to appear in the original SHA-covered G0 ledger, reconciles native HP/death transitions and counts unresolved/censored samples without silently converting them into wins. G7-G separately adds positive native multi-target defeat and opposed scene-local living-Hunter withdrawal. G7-H authenticates Hunter death, party death and party withdrawal for one fixed L2/L3 four-PC source scene: `bounded_terminal_matrix_certified=true`, but `complete_party_pack_certified=false` and `full_representative_encounter_pack_certified=false`. Representative encounter calibration remains **not accepted**, all twelve Focus combinations remain **uncertified**, and the Hunter remains **unrated**.
+**Assessment interpretation:** all three Priest Life Focus identities now have L1–3 structural builds and bounded native encounter results. The formal assessment found **no demonstrated major numerical defect requiring immediate rule changes**, recommended **retaining existing AP/VP** for controlled playtesting and explicitly did **not** certify global Focus balance or approve numerical tuning. G7-H and G8 certify **fixed policy reachability only**, not representative complete encounter difficulty.
+
+The [eight-combat-playstyle B04/B05 evaluation framework](b04-b05-eight-combat-playstyles-evaluation-framework-v0.md) establishes a **proposed design and testing taxonomy**. It is neither a new class rule nor an additional MVP acceptance gate and certifies no new character by itself.
 
 ## Development roadmap — 17 areas
 
@@ -47,17 +49,17 @@ G7-F requires its chosen source policy to appear in the original SHA-covered G0 
 | 1 | Character creation | Ability/Training budgets, starting equipment, resource formulas, selected verified structural sheets | Independently legal example build and meaningful choices for **all 12 Archetype × Focus pairings** |
 | 2 | Core resolution | Passive/active checks, safe-time Take 10/20 and Ability/Training/difficulty baseline | Group/help, opposed/extended and specialized noncombat natural-roll rules only where pilot needs them |
 | 3 | Attack/defense math | Attack, Guard, Dodge, Take Hit, Dodge Pressure, hit confirmation and critical v0 | Weapon identity, defenses and lethality tested across L1–3 |
-| 4 | Combat procedure | G0/AP, declarations/responses, Intervene, Aim, G1–G7-H native paths and bounded three-terminal Hunter matrix | Broader legal player/GM tactics, defensive/healing continuations, non-fixed encounter decisions and post-scene consequences |
+| 4 | Combat procedure | G0/AP, declarations/responses, Intervene, Aim, G1–G7-H and G8 fixed three-terminal native encounter paths | Broader legal player/GM tactics, healing/protection in real terminal scenes, non-fixed decisions and post-scene consequences |
 | 5 | Movement and hazards | Explicit grid, rigid 1×2 Hunter, Opportunities/Interceptions, falling, eleven mundane toxin examples | Pilot terrain/Climb/Swim, toxin effect calibration and required complex physical cases |
-| 6 | Combat calibration | Fixed and seeded Hunter phases; G7-A–F audited cohorts plus G7-G/G7-H bounded terminal proof | Representative complete-policy outcomes, independent Soldier/Sentry comparisons and defensible difficulty analysis |
+| 6 | Combat calibration | Hunter G7-A–H and Soldier/Sentry G8 bounded terminals; Priest 1,384-case same-source comparisons | Representative encounters, varied human/GM tactical policies, honest exposure/outcomes and defensible challenge ratings |
 | 7 | Techniques and Veil magic | Inspection/Blink, 48 Aspect identities, eight selected Pillars, 13 Tier-1 techniques, G3 spell engine | Missing MVP Aspect breadth, named T2/T3 Life Miracles, Focus-specific playable actions and costs |
-| 8 | Archetype and Focus content | Four Archetypes × three Focus designs, Priest/Scholar starts, Life Low alternatives, High Scholar candidate | Complete High/Medium Priest, remaining Scholar, Gifted and Anointed playable Focus packages |
+| 8 | Archetype and Focus content | 12 architectures; structural Priest High/Medium/Low Life + High Scholar Fire; eight-role design/testing framework | Remaining eight pairing builds, Scholar Medium/Low, Gifted/Anointed executable effects and independent playstyle/noncombat scene validation |
 | 9 | Advancement | L1–3 resource/Training/Talent architecture, 32 B07 L1–5 Talents, selected L1→3 source sheets | Twelve valid level-1→2→3 progressions and explicit pilot advancement award policy |
 | 10 | Equipment and economy | 150 sp starter budget, loadouts, prices, armor/weapons and ammo | Needed Reach/Brace/handling identities and starter balance |
 | 11 | Crafting | Basic trade/discipline resolution | **Deferred:** recipe, rune, magical manufacturing and advanced economy |
 | 12 | Exploration | Movement/field checks, G4.2 clock, toxin/venom phases and Recovery integration | Real exploration scenario with hazards, safe departure and timed consequences |
 | 13 | Social and investigation | Basic ability/discipline resolution | One authored and actually tested social/investigation encounter |
-| 14 | GM engine and encounters | Three source-backed enemies; G5 Soldier/Sentry bounded witnesses; Hunter G7-H three-terminal fixed-policy matrix | Full Soldier/Sentry packs, broader Hunter policy/terrain/heal/protection and playable GM adventure scenes |
+| 14 | GM engine and encounters | Three source-backed foes, G7-H Hunter and G8 Soldier/Sentry separate bounded terminal matrices | Representative full packs, broader legal terrain/party tactics, healing and protection, exploration/social GM scenes |
 | 15 | World and setting | Volition/Pillars/Aspects, initial species/metaphysics boundaries | Pilot location, factions/NPCs and adventure-specific context, not a full atlas |
 | 16 | Structured content data | Schemas, source records and executable verification tests | MVP data consistency, identifiers, cross-references and loadable relevant content |
 | 17 | Web/PWA tooling | Minimal reference/offline shell | **Deferred:** complete character builder, campaign/VTT and production PWA |
@@ -66,12 +68,14 @@ G7-F requires its chosen source policy to appear in the original SHA-covered G0 
 
 | Archetype | Low Focus | Medium Focus | High Focus |
 |---|---|---|---|
-| **Priest** | **Structural evidence:** two Life Low variants and Bow Vanguard | Life Consecration options authored; full L1→3 build **open** | Full build **open** |
-| **Scholar** | Full build **open** | Full build **open** | **Structural evidence:** Fire High Scholar L1→3 |
-| **Gifted** | Full build **open** | Full build **open** | Full build **open** |
-| **Anointed** | Full build **open** | Full build **open** | Full build **open** |
+| **Priest** | **Structural/native Life A/B/R**; one Focus pairing | **Structural/native Life M** | **Structural/native Life H** |
+| **Scholar** | Content/build open | Content/build open | **Structural Fire F L1→3** |
+| **Gifted** | Content/build open | Content/build open | Content/build open |
+| **Anointed** | Content/build open | Content/build open | Content/build open |
 
-There are **two Focus pairings with selected structural L1–3 examples**, and **zero independently accepted end-to-end Focus certifications**. Existing multiple Priest/Low variants do not increase the number of represented pairings.
+**4/12 structurally verified Focus pairings; 0/12 independently end-to-end certified.** Multiple Low Life variants are still only one Priest/Low pairing. A bounded native encounter is not a complete role and noncombat certificate.
+
+Provisional [combat playstyle roles](b04-b05-eight-combat-playstyles-evaluation-framework-v0.md): High Life **Healer / Support** (battlefield sustain); Medium Life **adaptive Healer / Support** (tactical distribution); Low Guided **Fighter / Defender** (self-sustain) and Low Shelter **Defender / Fighter** (finite protection). These are intended comparisons, **not measured rankings**. Specialized role advantages, weakness countercases and level power drift are expected. A High Priest should not be penalized solely for outperforming a Low Priest in external healing, nor may a Low Priest be declared an adequate Defender without actual source-backed ally protection.
 
 ## B06 delivered milestone register — current as merged
 
@@ -93,6 +97,7 @@ There are **two Focus pairings with selected structural L1–3 examples**, and *
 | **G7-F** | 31-cohort pilot, 10 descriptive comparisons, policy selection in hashed ledger, HP/terminal audit | Representative sampling, full encounter pack, Hunter CR **not accepted** |
 | **G7-G** | Paid Hunter pursuit and target changes, source-verified multi-target party death, genuine opposed living-Hunter border withdrawal | Fixed authored policies; scene-local departure does **not** prove future pursuit ends or make rest safe |
 | **G7-H** | Authenticated L2/L3 four-PC matrix of Hunter death, full-party death and withdrawal; source-paid Bow/Flame/melee, R Chosen Guided Regeneration Rite | **Bounded matrix only**: no complete representative pack, mixed-policy healing/wards/Intervene, sampled rates or CR |
+| **G8** | PR #127 Soldier, cold/prepared Sentry L2/L3 source-native four-PC victory/defeat/scene exit, with paid real G5/G4 packets | Fixed-policy three-terminal matrix only; no full representative encounter difficulty, universal Bow injury or numeric CR |
 
 Key design records: [G5 Soldier/Sentry](b06-g5-soldier-sentry-encounter-integration-v0.md),
 [G7 readiness](b06-g7-encounter-calibration-readiness-scenario-matrix-v0.md),
@@ -101,24 +106,23 @@ Key design records: [G5 Soldier/Sentry](b06-g5-soldier-sentry-encounter-integrat
 [G7-E forest/Pounce](b06-g7e-ambush-pounce-extended-recovery-v0.md),
 [G7-F pilot](b06-g7f-representative-encounter-calibration-v0.md),
 [G7-G pursuit and terminals](b06-g7g-hunter-pursuit-party-defeat-disengagement-v0.md),
-[G7-H bounded terminal matrix](b06-g7h-mixed-party-encounter-certification-v0.md).
+[G7-H bounded terminal matrix](b06-g7h-mixed-party-encounter-certification-v0.md),
+[G8 Soldier/Sentry matrix](b06-g8-soldier-sentry-full-encounter-pack-v0.md).
 
 ## Level 1–3 tabletop MVP — objective and six exit requirements
 
-**Unchanged target:** a **3–5-session** short adventure at **levels 1–3** supporting legal example characters for **all 12 Archetype × Focus combinations**. The pilot does not require twelve complete campaigns, but each combination must be **constructible, meaningfully capable in combat and noncombat**, and covered by representative tests.
+**Unchanged MVP goal:** a **3–5-session L1–3 tabletop adventure** supporting **all 12 Archetype × Focus pairings** with source-legal build/progression and meaningful **combat and noncombat** participation. All **six** strict exit gates remain **unchecked**.
 
-The following six requirements retain their **original acceptance meaning**. **All six remain unchecked**, even where sophisticated technical building blocks already exist.
-
-| MVP exit requirement | Current | Supporting evidence | What is still required for acceptance |
+| MVP exit requirement | Current | Delivered evidence | Still required |
 |---|---|---|---|
-| [ ] **Create — independently build 12 legal characters** | **PARTIAL** | Starting chassis and selected Priest/Low and Scholar/High structural L1→3 sheets | 12/12 complete legal starting allocations, gear, Training, Talents, features, known/prepared techniques and resources |
-| [ ] **Act — distinctive combat and noncombat choices** | **PARTIAL** | 13 Tier-1 techniques, 10/24 MVP Aspects, two Life L3 properties, real Bow/Flame native actions | Each Focus has available, affordable, mechanically supported decisions, not only free universal Inspection/Blink; preserve hand/VP/Tempo/target law |
-| [ ] **Resolve — complete native combat consequences** | **ADVANCED PARTIAL** | G0–G7-H; source-verified pursuit, full-party defeat, scene-local escape and a four-PC bounded three-terminal matrix with R Chosen Rite | Representative complete opposed scenes, Priest healing/wards/protection within terminal paths, broader legal tactics, pursuit after exit and aftermath |
-| [ ] **Advance — legal L1 → L2 → L3** | **PARTIAL** | Structural Life Low, Bow and Fire High progression witnesses; Talents and progression framework | 12/12 full level steps with new choices, AP/Guard/Tempo/VP and repertoire; Blink unlock at L3 **does not imply the Low Focus can pay 10 VP** |
-| [ ] **Challenge — several encounter types and noncombat scenes** | **PARTIAL / BLOCKING** | Three executable opponents, limited Hunter scenes and physical/toxin/exploration substrates | Complete Soldier/Sentry/Hunter pack; actual exploratory challenge and social/investigation situation with GM procedures |
-| [ ] **Observe — calibrate by representative play** | **OPEN** | Historical bounded model data and G7-F source-policy comparison pipeline | Observed GM/player action choice, full outcome denominators, turn/session pacing, damage/resource/VP logs and independent comparative difficulty baselines |
+| [ ] **Create — independently build 12 legal characters** | **PARTIAL** | **4/12** structural pairings (Priest H/M/Low Life; Scholar High Fire), independently sourced equipment/VP/AP | **Eight more** structural pairings and **12/12** independent, complete legal level-appropriate character certificates |
+| [ ] **Act — distinctive combat and noncombat choices** | **PARTIAL** | Genuine bounded Life self/support choices; 13 Tier-1 techniques, 10/24 Aspect coverage; eight-playstyle protocol | Runnable role-positive and weakness encounters at each level for all Focuses, legal skill/exploration/social actions and meaningful choice without invented techniques |
+| [ ] **Resolve — complete native combat consequences** | **ADVANCED PARTIAL** | G7-H Hunter and G8 Soldier/Sentry three-terminal fixed-policy matrices, native Priest Life support/attrition receipts | Representative varied enemy/party policies, terrain, mixed support/protection in real terminals and honest post-scene aftermath |
+| [ ] **Advance — legal L1 → L2 → L3** | **PARTIAL** | Four structural L1→3 Focus pairings, existing Talent/AP/VP/Guard/Tempo progression | All twelve source-legal level steps and full scene use; settle pilot advancement rewards and role drift; L3 Blink knowledge is not Low VP affordability |
+| [ ] **Challenge — several encounter types and noncombat scenes** | **PARTIAL / BLOCKING** | Three executable foes; bounded G7-H/G8 encounter proofs; timed toxins/exploration infrastructure | Playable GM full encounter packs, an exploration challenge and a social/investigation scene in an integrated adventure |
+| [ ] **Observe — calibrate by representative play** | **OPEN** | G7-F census machinery and Priest 1,384 deterministic primary cases with same-source no-magic baselines | Observed human/GM choices, complete outcome denominators, representative adventure pacing, level/role/objective tradeoffs and reliable difficulty assessment |
 
-**Acceptance discipline:** Passing tests, scenario-locked terminal evidence, a data schema or a structurally legal sheet alone **must not mark an MVP box complete**. G7-F reports **representative_encounter_calibration_accepted = false**, **complete_party_packs_certified = 0**, **creature_challenge_rating = null**. G7-H additionally reports `bounded_terminal_matrix_certified=true`, while **`complete_party_pack_certified=false`** and **`full_representative_encounter_pack_certified=false`**. Neither fixed authored policy nor 1,127 passing tests measures actual player/GM strategy probabilities.
+**Evidence discipline:** G7-H/G8 scenario-locked three-terminal reachability is **not** a complete representative pack; Priest evidence is neither random sampling nor a universal class ranking. The eight-playstyle classification, suggested tolerances and any number of passing tests do **not** close a strict gate. Hunter CR is still **null/unrated**; **global Priest Life balance certification remains false**.
 
 ### B01–B07 MVP blocker register
 
@@ -129,44 +133,43 @@ Blocker IDs **B01–B07** below are distinct from rules chapters, B07 Talents, a
 | **B01** | Dodge Pressure sign contradiction | **CLOSED** | Maintain negative-pressure-on-defense regression and repeated-Dodge playtest |
 | **B02** | Strong/Critical damage undefined | **CLOSED AS v0 DEFINITION** | Strong **+1d4**, Critical **+2d4**, Devastating **+2d4 plus wound trigger**; retain numerical balance watch |
 | **B03** | Wound/overkill severity undefined | **CLOSED AS v0 DEFINITION** | Deterministic Serious/Severe/Critical overkill; default **10/20/30 Vigor** repair requirements, pending playtest |
-| **B04** | Character creation not end-to-end executable | **PARTIAL — BLOCKING** | Complete source-legal all-Focus creation paths; currently 0/12 fully certified |
-| **B05** | Archetype starting access and techniques | **PARTIAL — BLOCKING** | Distinct playable High/Medium Priest, Scholar, Gifted/Anointed packages, selected Aspect and higher Life Miracle content |
-| **B06** | Enemy and encounter content insufficient | **BOUNDED HUNTER TERMINALS DELIVERED — BLOCKING** | Expand G7-H beyond its fixed matrix; full Soldier/Sentry encounter packs, varied Hunter tactics/continuations and GM adventure scenes |
-| **B07** | L1–3 advancement unverified | **PARTIAL — BLOCKING** | All 12 level-by-level choices/resources and actual scene-use certificates; settle pilot XP/milestone award |
+| **B04** | Character creation not end-to-end executable | **PARTIAL — BLOCKING** | **4/12** structural Focus pairings, **0/12** independent full certifications; eight remaining builds, verify twelve complete legal sheets and role cards |
+| **B05** | Archetype starting access and techniques | **PARTIAL — BLOCKING** | Priest Life H/M/Low built/integrated; missing Medium/Low Scholar Inward/Embodiment, Gifted/Anointed effects, 14 selected Tier-1 Aspect expressions and planned higher Life Miracles |
+| **B06** | Enemy and encounter content insufficient | **BOUNDED G7-H/G8 TERMINALS DELIVERED — BLOCKING** | Full representative Soldier/Sentry/Hunter packs with mixed Priest mechanics, alternative tactics, role tests, pursuit and playable GM scenes |
+| **B07** | L1–3 advancement unverified | **PARTIAL — BLOCKING** | Twelve source-legal L1→2→3 choices/scene-use certificates, role-specific level drift and pilot XP/milestone award |
 
 **Definition closure remains 3/7** (B01–B03), not 7/7. "Closed as definition" does not certify those numeric values as balanced.
 
-## Proposed next implementation milestones — after merged G7-H
+## Proposed next implementation milestones — after merged PR #137
 
-These are **proposed work packages**, not new canonical rules or already accepted milestones. G7-G (PR #124) and G7-H (PR #125) are **merged bounded implementations**, not pending tasks. Assign one coherent PR per future task and review its independent evidence before updating a gate.
+PR #127 G8 and Priest Life PRs #128–137 are **already merged**; do not propose them again as first implementations. Remaining work is divided into independently reviewable PRs.
 
-| Priority | Proposed milestone | Implementation and dependency | Acceptance test / stop condition |
-|---:|---|---|---|
-| **1** | **B06 G8 candidate — Soldier/Sentry Full Encounter Pack** | Reuse G0–G7-H native adjudication, but source the Soldier and cold/prepared Firebound Sentry separately; begin with a small verified full-party matrix, not copied Hunter behavior | Authentic complete victory/defeat/withdrawal where legally supported; paid physical and typed Fire/Vigor effects, declared reactions, resource, movement, injury, terminal and aftermath provenance. **G8 is only a candidate label, not a reserved canonical ID.** |
-| **2 (parallel)** | **B04/B05 — Focus and technique completeness** | Author missing Priest/Scholar/Gifted/Anointed abilities and the necessary MVP Aspect breadth; use combat/noncombat source examples | All 12 pairings gain affordable, mechanically supported choices without invented VP, Tier, Training or repertoire |
-| **3** | **B06 G7-H follow-up — Broader Hunter encounter certification** | Expand beyond fixed A/B physical-only Priest proxies: native healing/wards, protection and Intervene within terminal paths, alternate frontlines/terrain, player/GM policy variation and meaningful post-exit pursuit/recovery | At least one representative complete Hunter encounter pack under independently supported options; report genuine denominators and censored cases without invented success rates |
-| **4** | **B04/B07 — Twelve Focus and advancement certifications** | Complete source-legal L1→2→3 construction and test meaningful combat/noncombat scene use | **12/12 independent** Focus identities; multiple Priest/Low variants still count once |
-| **5** | **MVP adventure integration** | Compact setting, GM scenario, Soldier/Sentry/Hunter, exploration, investigation/social, downtime/recovery and advancement | A 3–5-session L1–3 pilot runnable without inventing essential rules |
-| **6** | **MVP representative playtest and balance acceptance** | Human/GM tactics, complete outcomes, resource and pacing metrics, separately grounded challenge evidence | Review real playtest evidence before any numerical Hunter CR, broad balance or MVP acceptance |
+| Priority | Proposed milestone | Deliverable / stop condition |
+|---:|---|---|
+| **1** | **B04/B05 — Priest Life role decision-gate playtests** | Real PS-02/PS-08 (and Low PS-01) with varied damage, initiative/targets, Reaction competition, role objectives, source-local baseline and truthful missing coverage; no unapproved numerical tuning |
+| **2** | **B05 — Scholar Inward Boost/Embodiment profiles; Medium and Low Scholar builds** | Actual eligible/affordable modes and PS-03 Spellblade or alternative legal roles, L1–3 source sheets and countercases |
+| **3** | **B05 — Gifted/Anointed Focus expressions and missing Aspect breadth** | Author executable identity-specific effects, starting access and at least one distinct combat and noncombat use per intended role |
+| **4** | **B06 — Broaden Hunter, Soldier and Sentry native encounter packs** | Representative full-party tactics, terrain, mixed healing/defense, varied foe choices, legal withdrawal aftermath and honest calibration denominators |
+| **5** | **B04/B07 — Complete all 12 Focus builds and progression** | Eight missing structural pairings plus independently certified L1→2→3 character/role/noncombat scene use |
+| **6** | **Integrated adventure and representative playtests** | 3–5-session GM pilot with social/investigation, exploration, recovery/pacing and per-role objective assessment; independently review six MVP gates |
 
-**Sequencing:** Soldier/Sentry full packs are the **next B06 candidate**, while B04/B05 Focus content should proceed in parallel. Revisit Hunter breadth once the project can test varied legal player abilities and enemy policies. Do **not** treat G7-H's three authentic terminal outcomes as a representative complete encounter pack, G7-F's hardcoded seed-paired contrasts as human-policy weights, or an authored border exit as global tracking cessation.
+**Sequencing:** Role design and content development may progress in parallel; L1–3 demonstrates baseline identity, not settled L4–20 power curves. Do not impose equal raw healing/damage across diverse combat playstyles, infer numeric win rates from deterministic policies or treat all authored Level-3 options as fully payable.
 
 ### Active progress checklist
 
-- [x] Source-native G0–G7-H implementation slices merged through PR #125.
-- [x] Retain frozen **4,096**-window Phase 3 census and original SHA-256.
-- [x] G7-F hashed policy binding, terminal/censored accounting; **31** cohorts and **10** descriptive comparisons preserved.
-- [x] **G7-G:** Genuine multi-target Hunter full-party defeat and opposed scene-local living-Hunter withdrawal.
-- [x] **G7-H:** Fixed-policy L2/L3 × four-PC three-terminal matrix with real R Chosen Rite, R Bow, F Flame, A/B melee and Hunter Bites.
-- [x] **PR #125 exact-head:** **1,127** full-suite tests passed, B06 Phase 3 and B05 High Scholar workflows succeeded; historical audit digest unchanged.
-- [ ] **G7-H beyond bounded slice:** Representative complete Hunter packs with varied tactics, protections, healing, post-exit consequences and honest censored outcomes.
-- [ ] **Next B06 candidate:** Complete separately sourced Soldier and Sentry full-party encounters.
-- [ ] Finish playable Focus repertoires, selected MVP Aspect content and required Life Miracles.
-- [ ] Independently verify all **12** legal starting builds and L1→3 progressions.
-- [ ] Author and exercise one exploration and one social/investigation challenge.
-- [ ] Run a complete short GM adventure with honest downtime/recovery/resource effects.
-- [ ] Collect representative human/GM policy traces, measure pacing and calibrate provisional numbers.
-- [ ] Accept each of the **six** MVP exit gates based on reviewed whole-scenario evidence.
+- [x] G0–G7-H native Hunter terminal milestones merged (#125); original G7-F **31** cohorts and **10** comparisons retained.
+- [x] **G8** bounded Soldier/Sentry three-terminal matrix merged (#127).
+- [x] Priest H/M/Low L1–3 structural/native integration merged (#128–133); Low source variants count once.
+- [x] Priest 64 self, 912 attrition and 408 multi-recipient cases merged (#134–136).
+- [x] Formal Priest Life balance assessment merged (#137): **retain numbers for controlled playtests**, no global certification or Focus ranking.
+- [x] Define the **eight original combat playstyles** and PS-01–PS-08 proposed role-validation protocol; **documentation only, not completed role tests**.
+- [ ] Eight missing structural Focus pairings and 12 independently full-certified builds.
+- [ ] Source-native role-positive and countercase playtests across L1–3; Medium Reaction-cost and Low party-defense evidence.
+- [ ] Medium/Low Scholar, Gifted and Anointed effect packages and MVP Aspect repertoire.
+- [ ] Representative full encounter packs with healing/protection, non-fixed foe behavior and lawful aftermath.
+- [ ] One complete adventure with actual exploration, social/investigation, advancement and downtime.
+- [ ] Representative human/GM evidence, level-drift metrics and meaningful performance comparisons.
+- [ ] Independent acceptance of all **six** MVP gates; no automatic numerical CR or rules changes.
 
 ## Playtest-provisional register — P01–P05
 
@@ -175,7 +178,7 @@ These are **proposed work packages**, not new canonical rules or already accepte
 | **P01 — Core checks** | Assistance, opposed/extended noncombat checks, help/group and difficulty adjudication |
 | **P02 — Combat** | Armor, Dodge Pressure, Guard/Shield, protective Intervene, weapon differentiation, critical +1d4/+2d4, physical/Veil Tempo |
 | **P03 — HP/Vigor/wounds** | Healing, Dying, fixed overkill/10–20–30 repair demands, toxin/venom scheduling and six-hour recovery |
-| **P04 — Priest/Scholar/VP** | Accord/preparation, Miracle Debt/Destiny, Guided Regeneration's different VP modes, Open Invocation Full Action/+1 surcharge, Focus affordability/Blink |
+| **P04 — Priest/Scholar/VP** | Accord/preparation, Miracle Debt/Destiny, Guided Regeneration VP modes, Open Invocation Full Action/+1 surcharge, Focus/Blink affordability, Intercession Reaction cost and Low external-support/level-drift evidence |
 | **P05 — Noncombat** | Social, investigation, stealth, traversal and essential specialized checks; avoid inventing broad universal D&D-like skills |
 
 ## Explicitly deferred outside strict MVP — D01–D05
