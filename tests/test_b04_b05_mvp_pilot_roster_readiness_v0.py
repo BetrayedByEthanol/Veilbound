@@ -11,16 +11,35 @@ DOC = ROOT / "docs/design/b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.
 INDEX = ROOT / "docs/design/README.md"
 ROADMAP = ROOT / "docs/design/veilbound-roadmap-and-mvp-readiness.md"
 IDENTITY = re.compile(r"^# (?P<name>.+?) v0 [—-] (?P<pillar>[A-Za-z]+) / (?P<aspect>[A-Za-z ]+)$")
+BASE_TIER_FIELD = re.compile(
+    r"^\|\s*(?:Base Tier(?:\s*/\s*[^|]+)?|Base and Used Tier|Tier and acquisition)\s*\|\s*(?P<definition>[^|]+)\|",
+    re.MULTILINE
+)
+TIER_ONE = re.compile(r"\b(?:Tier[- ]?1|T1)\b|\*\*1\*\*", re.IGNORECASE)
+COLLECTION_SUFFIXES = ("-profiles-v0.md", "-properties-v0.md")
 ROSTER = re.compile(r"^\| \*\*(\w+)\*\* \| (\w+) \| (\w+) \| (\w+) \|")
 EMOTIONS = ("Joy", "Sadness", "Anger", "Fear", "Surprise", "Disgust", "Trust", "Anticipation")
 
 
+def individual_tier_one_identity(path, source):
+    """Require an individual source's T1 metadata; shared Focus modes are not spells."""
+    if path.name.endswith(COLLECTION_SUFFIXES):
+        return None
+    lines = source.splitlines()
+    match = IDENTITY.fullmatch(lines[0]) if lines else None
+    tier = BASE_TIER_FIELD.search(source)
+    if not match or not tier or not TIER_ONE.search(tier.group("definition")):
+        return None
+    return match
+
+
 def source_techniques():
-    """Count named, individually authored source identities, never shared engines/modes."""
+    """Count named, individually authored Tier-1 identities, not shared profiles."""
     inventory = {}
     for path in TECHNIQUES.glob("*.md"):
-        heading = path.read_text(encoding="utf-8").splitlines()[0]
-        match = IDENTITY.fullmatch(heading)
+        match = individual_tier_one_identity(
+            path, path.read_text(encoding="utf-8")
+        )
         if match:
             inventory[match.group("name")] = (
                 match.group("pillar"), match.group("aspect").strip(), path.name
@@ -40,6 +59,27 @@ def selected_roster():
 
 
 class MvpPilotRosterReadinessTests(unittest.TestCase):
+    def test_shared_scholar_profiles_are_not_technique_identities(self):
+        profile = TECHNIQUES / "scholar-inward-embodiment-profiles-v0.md"
+        source = profile.read_text(encoding="utf-8")
+        # The old heading-only matcher falsely counted this Earth/Life
+        # collection as a fourteenth technique.
+        self.assertIsNotNone(IDENTITY.fullmatch(source.splitlines()[0]))
+        self.assertIsNone(individual_tier_one_identity(profile, source))
+        self.assertNotIn(
+            "Scholar Inward Boost and Embodiment Profiles", source_techniques()
+        )
+        # Classification is by document type AND authored base-T1 metadata:
+        # a profile collection never turns into a new spell just by adding
+        # a tiered sub-profile, and a T2 spell is not part of the T1 census.
+        hypothetical = source + "\n| Base Tier | **Tier 1** |\n"
+        self.assertIsNone(individual_tier_one_identity(profile, hypothetical))
+        self.assertIsNone(individual_tier_one_identity(
+            Path("fabricated-v0.md"),
+            "# Fabricated v0 — Earth / Fortification\n"
+            "| Base Tier | **Tier 2** |\n"
+        ))
+
     def test_fresh_scoped_source_census(self):
         inventory = source_techniques()
         roster = selected_roster()
