@@ -152,7 +152,27 @@ class GridMovement:
         if self.e.g2 is not None and a.source.source_id == "R":
             return ("Dagger" in self.e.g2.wielded[actor_id]
                     and a.hp > 0 and not a.dead and at in self.reach(actor_id))
+        if a.source.source_id in ("S","T"):
+            # Native Scholar weapons are genuine, mutable G2 readiness.
+            # A purchased Sword stowed after G0 cannot keep threatening.
+            return (self.e.g2 is not None
+                    and self.genuine_scholar_sword_ready(actor_id)
+                    and a.hp > 0 and not a.dead and at in self.reach(actor_id))
         return self._can_melee(a) and at in self.reach(actor_id)
+
+    def genuine_scholar_sword_ready(self,actor_id):
+        """G1 contact needs the same source/G2 wielding as paid G5 attacks."""
+        from scripts.b05_scholar_native_sword_v0 import (
+            SWORD_IDS, scholar_sword_profile,
+        )
+        a=self.e.actors[actor_id]
+        if a.source.source_id not in SWORD_IDS:
+            return False
+        try:
+            scholar_sword_profile(a,SWORD_IDS[a.source.source_id],encounter=self.e)
+        except UnresolvedDecision:
+            return False
+        return True
 
     def melee_contact(self, attacker_id, target_id, *, hunter_front=False):
         a, t = self.e.actors[attacker_id], self.e.actors[target_id]

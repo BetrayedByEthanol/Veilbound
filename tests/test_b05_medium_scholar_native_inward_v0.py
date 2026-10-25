@@ -70,7 +70,9 @@ class MediumScholarNativeTests(unittest.TestCase):
             self.assertEqual(a.source.source_id,"S")
             self.assertEqual(a.source.status,"STRUCTURAL_B05_ONLY")
             self.assertEqual(dict(a.source.abilities),p["abilities"])
-            self.assertEqual(a.source.attack_profiles,())
+            self.assertEqual(a.source.attack_profiles,
+                             ("B05-PC-S-SWORD-CUT",))
+            self.assertTrue(p["native_physical_attack_verified"])
             self.assertEqual((a.hp_max,a.vigor_max,a.vp_max),
                              (12,12*lv,4*lv))
             self.assertEqual((a.ap_total,a.physical_ap,a.projection_ap),

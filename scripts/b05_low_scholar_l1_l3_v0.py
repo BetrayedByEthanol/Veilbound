@@ -97,6 +97,7 @@ def profile(level):
         "blink_known": level>=3,
         "independent_full_focus_certified": False,
         "native_outgoing_spell_attack_certified": False,
+        "native_physical_attack_verified": True,  # source-bound mundane Sword Cut
         "native_weapon_embodiment_authored": False,
     })
 

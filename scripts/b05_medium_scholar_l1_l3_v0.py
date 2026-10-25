@@ -82,7 +82,7 @@ def profile(level):
         "movement_points": 12, "reroute_spent_vp": 3 if level<3 else 2,
         "overroute_max_steps": 0 if level<3 else 2,
         "blink_affordable_from_full_vp": level>=3 and 12>=10,
-        "native_physical_attack_verified": False,
+        "native_physical_attack_verified": True,  # B05 native Sword Cut; not full Focus
         "complete_focus_certified": False,
     })
 

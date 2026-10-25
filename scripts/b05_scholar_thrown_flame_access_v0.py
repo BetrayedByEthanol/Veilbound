@@ -1,8 +1,8 @@
 """Exact source authorization for L1–3 Scholar Thrown Flame.
 
 This helper returns *only* the individually authored Primary Thrown
-Projectile access. It never grants S/T native Sword offense, a new
-Embodiment/Composite, or an unprepared Low outward technique.
+Projectile access. It never bypasses source-bound S/T Sword readiness,
+grants a new Embodiment/Composite, or prepares a Low outward technique.
 """
 from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high_profile
 from scripts.b05_medium_scholar_l1_l3_v0 import profile as medium_profile
@@ -32,10 +32,15 @@ def flame_access(actor, *, wielded=None):
     expected_start=(f"L{actor.level}-structural" if focus=="High" else
                     f"L{actor.level}-medium-scholar-inward" if focus=="Medium"
                     else f"L{actor.level}-low-scholar-prepared")
+    expected_profiles={
+        "High":(),
+        "Medium":("B05-PC-S-SWORD-CUT",),
+        "Low":("B05-PC-T-SWORD-CUT",),
+    }[focus]
     if (actor.focus!=focus or a.path!=path or a.digest!=_fingerprint(path)
             or a.status!="STRUCTURAL_B05_ONLY"
             or a.start_state!=expected_start
-            or a.attack_profiles!=()
+            or a.attack_profiles!=expected_profiles
             or a.equipment!=expected_gear
             or dict(a.abilities)!=p["abilities"]
             or dict(a.training)!=p["weapon_training"]
