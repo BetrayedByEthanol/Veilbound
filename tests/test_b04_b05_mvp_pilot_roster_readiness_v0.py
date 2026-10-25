@@ -11,7 +11,7 @@ DOC = ROOT / "docs/design/b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.
 INDEX = ROOT / "docs/design/README.md"
 ROADMAP = ROOT / "docs/design/veilbound-roadmap-and-mvp-readiness.md"
 IDENTITY = re.compile(r"^# (?P<name>.+?) v0 [—-] (?P<pillar>[A-Za-z]+) / (?P<aspect>[A-Za-z ]+)$")
-ROSTER = re.compile(r"^\\| \\*\\*(\\w+)\\*\\* \\| (\\w+) \\| (\\w+) \\| (\\w+) \\|")
+ROSTER = re.compile(r"^\| \*\*(\w+)\*\* \| (\w+) \| (\w+) \| (\w+) \|")
 EMOTIONS = ("Joy", "Sadness", "Anger", "Fear", "Surprise", "Disgust", "Trust", "Anticipation")
 
 
