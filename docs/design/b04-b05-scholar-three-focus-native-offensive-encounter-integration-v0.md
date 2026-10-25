@@ -16,6 +16,10 @@ The zero Throwing rank does **not** add a penalty or grant phantom +2 Training. 
 
 **Cast interruption and timing:** preflight unprepared access, missing hand, out-of-range line, current threat, unavailable VP/AP, invalid tier or missing damage evidence *before any AP*. After AP commitment the source/prepared/wielded state and physical line are checked again; a lost line or source authority interrupts without spending unlaunched VP. Full active Opportunity/Interception and screen collisions remain unresolved in this bounded scene and are never auto-declined as a free cast. The initial High F direct attack behavior stays unchanged for previously authored Ranged and G3 tests.
 
+## Follow-up: native ordinary Sword authorization
+
+The later [Medium/Low Scholar Native Physical Offense and Weapon Readiness v0](b04-b05-medium-low-scholar-native-physical-offense-weapon-readiness-v0.md) explicitly adds **one source-bound ordinary Sword Cut profile** to the selected S/T sheets. References below to empty S/T native melee rosters are the **historical boundary of this earlier Thrown Flame-only PR**, not the current state. The new mundane profile grants no enchantment or extra Flame preparation.
+
 ## Bounded matched native scene
 
 [The native encounter runner](../../scripts/b05_scholar_three_focus_native_offense_v0.py) uses one Scholar (source F/S/T) at (2,2) and the same fully equipped **B06-EN-02 Soldier** at (4,2), with clear G1/G2 lane and fixed rolled Initiative Scholar first. Three source-selected levels, all three Focuses, and three policies yield **21 cells**:
