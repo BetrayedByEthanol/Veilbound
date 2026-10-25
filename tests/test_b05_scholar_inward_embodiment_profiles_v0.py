@@ -3,6 +3,7 @@ import unittest
 
 from scripts.b05_scholar_inward_embodiment_profiles_v0 import (
     PROFILES, MEDIUM, LOW, TECHNIQUE_NAMES, KNOWN_CAP, PREPARED_CAP,
+    BASE_MOVEMENT_MP,
     ScholarConfigurationLedger, committed_cost,
 )
 
@@ -76,22 +77,26 @@ class ScholarInwardEmbodimentProfilesTests(unittest.TestCase):
         m = medium(level=3)
         m.begin_turn()
         m.activate(MEDIUM[0])
+        self.assertEqual(BASE_MOVEMENT_MP, 12)
+        self.assertEqual(m.model_effect()["movement_cap"], 12)
         m.overroute(2)
         self.assertEqual(m.model_effect(), {
-            "resistance": 3, "regen_bonus": 0, "movement_cap": 2})
+            "resistance": 3, "regen_bonus": 0, "movement_cap": 8})
         self.assertEqual(m.vp_spent, 2)
         before = m.snapshot()
         m.overroute(2)
         self.assertEqual(m.snapshot(), before)
         m.overroute(0)
         self.assertEqual(m.model_effect()["resistance"], 1)
+        self.assertEqual(m.model_effect()["movement_cap"], 12)
         self.assertEqual(m.vp_spent, 2)  # no refund of earlier Spent VP
         m.overroute(1)
+        self.assertEqual(m.model_effect()["movement_cap"], 10)
         self.assertEqual(m.vp_spent, 3)
         m.reroute(MEDIUM[1], overroute_steps=2)
         self.assertEqual(m.vp_spent, 7)  # L3 2 reroute +2 overroute
         self.assertEqual(m.model_effect(), {
-            "resistance": 0, "regen_bonus": 3, "movement_cap": 2})
+            "resistance": 0, "regen_bonus": 3, "movement_cap": 8})
         self.assertEqual(m.vp_committed, 1)
 
     def test_06_no_l1_overrouting_and_no_direct_cast_bypass(self):
@@ -113,6 +118,7 @@ class ScholarInwardEmbodimentProfilesTests(unittest.TestCase):
             self.assertEqual(a.vp_committed, committed_cost(PROFILES[LOW[0]], a.max_vp))
             self.assertEqual(a.vp_committed, (a.max_vp + 2)//3)
             self.assertEqual(a.model_effect(veil_control=0)["resistance"], 2)
+            self.assertEqual(a.model_effect(veil_control=0)["movement_cap"], 12)
             self.assertEqual(a.ap_remaining, 30 + 6*(lv-1)-30)
             a.check()
 

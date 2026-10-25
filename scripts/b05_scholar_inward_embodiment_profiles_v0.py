@@ -45,6 +45,9 @@ MEDIUM = ("MS-STONE-BODY-T1", "MS-GUIDED-REGEN-T1")
 LOW = ("LS-STONE-BODY-T1", "LS-GUIDED-REGEN-T1")
 KNOWN_CAP = {"Medium": (4, 5, 5), "Low": (3, 4, 4)}
 PREPARED_CAP = (2, 3, 3)
+# Movement Foundation: 12 MP per turn; each orthogonal square costs 2 MP.
+# This preview does not enforce actual G1 movement expenditure.
+BASE_MOVEMENT_MP = 12
 
 
 def committed_cost(profile, max_vp):
@@ -276,7 +279,7 @@ class ScholarConfigurationLedger:
             raise ValueError("Raw VC must be independently sourced")
         p = PROFILES[self.active.profile_id]
         steps = self.active.overroute_steps
-        effective_mp_cap = 6 - 2 * steps
+        effective_mp_cap = BASE_MOVEMENT_MP - 2 * steps
         if steps and effective_mp_cap < 0:
             raise AssertionError("Overroute must sacrifice actual locomotion")
         if p.channel == "Body":

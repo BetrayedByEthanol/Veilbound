@@ -16,7 +16,7 @@ Canonical proposed values and timing: [Scholar Inward / Embodiment Profiles v0](
 | L1 Medium | MS-GUIDED-REGEN-T1, Guided Regeneration Inward Regeneration | **24 AP +1 Committed**; real Self Step +1 throughput | Can reroute Body→Regeneration **+3 Spent**, leaving 0 Available VP. No free HP/Step or changed recipient |
 | L1 Low (Max VP 2) | LS-STONE-BODY-T1, Stone Skin Embodiment | **30 AP +1 Committed**; original normal Stone Skin R2 at VC0 | No Priest Chosen discount or inherited reactive Embodiment |
 | L1 Low | LS-GUIDED-REGEN-T1, Guided Embodiment | **30 AP +2 Committed**, consuming all Max VP | +1 only at natural Self Step. To switch, release and **pay another Projection**; no Medium reroute |
-| L3 Medium (Max VP 12) | Active Inward, Overroute | **+1 Spent per step**, at most 2, with **−2 MP available per step** | At L3 reroute cost is **2 Spent**; step increases resistance or natural regen +1 but sacrifices real locomotion |
+| L3 Medium (Max VP 12) | Active Inward, Overroute | **+1 Spent per step**, at most 2, with **−2 MP available per step** (**12 / 10 / 8 MP** for zero/one/two steps) | At L3 reroute cost is **2 Spent**; step increases resistance or natural regen +1 but sacrifices real locomotion |
 | L3 Low (Max VP 6) | Active Stone/Guided Embodiment, Intensify | **1 Spent** per active unconsumed intensification | Stone R+1 until next own turn; Guided +1 at next genuine own Step; no instant heal, new cast or out-of-turn trigger |
 
 This deliberately preserves a meaningful distinction between **Medium swapping functions through one already paid commitment** and **Low committing to a planned configuration with a costly release/recast**. Medium never gains extra recipients, Low never gains free reaction timing or an enchanted weapon simply because it is equipment-focused.
@@ -29,7 +29,7 @@ This deliberately preserves a meaningful distinction between **Medium swapping f
 | Known/prepared limits | Medium ordinary known, Low known+prepared verified against allowed list and cap | **Model checked**; no source character/repertoire signer |
 | VP and AP conservation | Available/Committed/Spent ledger + source baseline VA0 formula, 24/30 AP | **Model checked**; not native G0 event attestation |
 | Medium one active + reroute | No same-profile refresh, no unsupported other Inward, full cost before release | **Model checked**; no real G3 application/MP enforcement yet |
-| Medium L3 Overroute | +1 per paid step; −2 MP per step preview, 2 maximum | **Authored/model checked only**; G1 movement source continuity not yet established |
+| Medium L3 Overroute | +1 per paid step; −2 MP per step preview from **12 MP** (10/8 MP when boosted), 2 maximum | **Authored/model checked only**; G1 movement source continuity not yet established |
 | Low switch and L3 Intensify | Release refunds only Committed; new activation pays AP; timed benefits | **Authored/model checked only**; no authentic G4 packet or G0 Step binding yet |
 | Medium/Low L1→3 builds | Nine Abilities, Training, Talents, equipment, complete technique picks | **BLOCKED**, next B04/B05 build packages |
 | PS-03/PS-01/PS-02 combat role outcomes | Source-authored physical attack, real affected enemy or protected ally | **NOT CLAIMED**; build + encounter adapters needed |
@@ -38,7 +38,7 @@ This deliberately preserves a meaningful distinction between **Medium swapping f
 
 - Medium **1-Committed** Guided throughput vs ordinary **2-Committed** Guided is intentionally an Inward-focus-specific price. Test whether frequent rerouting becomes worth its 3/2 Spent VP fee instead of simply maintaining one effect.
 - Medium Stone R1 vs Low full Stone R2 must be compared on actual typed HP packets, Vigor costs, enemy targeting and weapon access—not assumed equivalent buffs.
-- Medium Overroute movement sacrifice must be enforced by **native G1 remaining MP/elapsed-movement proofs**, or the stronger output cannot be certified.
+- Medium Overroute movement sacrifice is **2 MP per step from 12 MP** (not two squares); it must be enforced by **native G1 remaining MP/elapsed-movement proofs**, or the stronger output cannot be certified.
 - Low L1 Guided costs all VP, leaving no reserve for emergency casting; Stone can leave 1 Available. Low L3 pending intensification must be consumed by genuine time/Step events and must not conjure a third Projection action.
 - The ordinary spell's reactive/maintained rules, damage resistance stacking and native G0 response timing remain authoritative. No Focus-wide numeric tuning or ranking is authorized.
 
