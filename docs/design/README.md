@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Priest Life Multi-Recipient Support and Intercession Stress v0](b04-b05-priest-life-multi-recipient-support-intercession-stress-v0.md) — 408 native four-actor F/R/Priest targeted encounters; High dual prayers, Medium reassignment and actual G4 Intercession, Low A paid Basic Heal and B free-hand limitations, without Focus tuning.
+
 - [B04/B05 — Three-Focus Priest Life Extended Attrition and Tactical Balance v0](b04-b05-three-focus-priest-life-extended-attrition-tactical-balance-v0.md) — 912 native High/Medium/Low extended (4/8-round) pressure/defense/movement cases, true early-stop and source-local baseline accounting; no tuning.
 
 - [B04/B05 — Three-Focus Priest Life Comparative Encounter Balance v0](b04-b05-three-focus-priest-life-comparative-encounter-balance-v0.md) — 64 matched source-paid H/M/Low A/B self-defense cells, 36 separately classified existing H/M F-ally evidence cells, local baseline deltas and explicit no-tuning boundary.
