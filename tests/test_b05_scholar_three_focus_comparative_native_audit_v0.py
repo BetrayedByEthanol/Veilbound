@@ -1,5 +1,6 @@
 """B04/B05 genuine three-Focus Scholar source / matched-native audit tests."""
 from copy import deepcopy
+import json
 from unittest import TestCase, main
 
 from scripts.b05_scholar_three_focus_comparative_native_audit_v0 import (
@@ -263,6 +264,30 @@ class ThreeFocusScholarAuditTests(TestCase):
                     else:
                         self.assertEqual(m["vp"][1],m["stone_committed"])
                         self.assertIsNone(m["stone_end_reason"])
+
+    def test_18_persisted_json_audit_roundtrip_attests_and_detects_forgery(self):
+        # The original M/L native runners return VP tuples; JSON converts
+        # those to lists. Attesting the unchanged saved CLI witness must
+        # succeed WITHOUT bypassing exact source-policy comparison.
+        generated=run_audit()
+        restored=json.loads(json.dumps(generated,sort_keys=True,allow_nan=False))
+        self.assertEqual(restored,generated)
+        self.assertEqual(restored["audit_sha256"],canonical_digest({
+            k:v for k,v in restored.items() if k!="audit_sha256"}))
+        self.assertEqual(restored["prior_cohort_count"],28)
+        self.assertTrue(all(
+            isinstance(item["native_metrics"]["vp"],list)
+            for item in restored["prior_native_separate_cohorts"]))
+        self.assertEqual(attest_audit(restored),restored)
+        self.assertEqual(attest_audit(generated),restored)
+        # Rehashing a changed, JSON-loaded witness cannot forge a valid
+        # source-native report, including an old tuple-bearing field.
+        forged=deepcopy(restored)
+        forged["prior_native_separate_cohorts"][0]["native_metrics"]["vp"][0]+=1
+        forged["audit_sha256"]=canonical_digest({
+            k:v for k,v in forged.items() if k!="audit_sha256"})
+        with self.assertRaises(AssertionError):
+            attest_audit(forged)
 
 
 if __name__=="__main__":

@@ -390,6 +390,12 @@ def run_audit(*,seed=0):
             "statistical_win_rate":None,
         },
     }
+    # This witness is persisted with json.dumps. Original Medium/Low
+    # runners legitimately return tuples (notably metrics["vp"]); a raw
+    # Python result must have the SAME container types as its saved JSON
+    # before hashing or strict replay attestation. Normalize only the
+    # finished audit witness, not its independently attested source runs.
+    result=json.loads(json.dumps(result,sort_keys=True,allow_nan=False))
     result["audit_sha256"]=canonical_digest(result)
     return result
 
