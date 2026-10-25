@@ -187,7 +187,7 @@ class LowScholarEmbodiment:
             host.resistance+=1
             self._stone_intensified_on_round=self.e.round
         self.e.log("b05_low_scholar_intensified",caster=self.caster,
-                   effect=host.ident,kind=host.kind,spent=1,
+                   effect=host.ident,effect_kind=host.kind,spent=1,
                    window=("next_own_turn_begin" if host.kind=="Stone Skin"
                            else "next_actual_G0_Step2"))
         self.e.check()
