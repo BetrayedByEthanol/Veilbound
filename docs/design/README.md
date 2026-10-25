@@ -15,7 +15,7 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
-**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint after merged G8 (#127) and formal Priest Life balance assessment (#137). The document owns the **current** 17-area progress table, B01–B07 blockers, six unchanged MVP exit gates and the proposed next milestone sequence. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged #148. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 6/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
 
 ## Active design records
 
@@ -37,7 +37,7 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 - [B05 — Scholar Inward Boost and Embodiment Profiles v0](b05-scholar-inward-embodiment-profiles-v0.md) — four individually authored T1 Medium Inward / Low Embodiment options from Stone Skin and Guided Regeneration, provisional Routing/Overroute/Intensification contracts and isolated model regressions; **no full Scholar build or native G1/G3/G4 outcome proof**.
 
-- [B04/B05 — Priest Life Role Decision-Gate Playtests v0](b04-b05-priest-life-role-decision-gate-playtests-v0.md) — proposed four-variant source-native L1–3 H/M/Low role matrix with authentic G5 hit/miss vs Dodge, alternate initiative/target pressure, same-source baselines, paid Intercession and explicit unverified PS-01/02/08 role boundaries. **Candidate review scope; not yet merged or full role certification.**
+- [B04/B05 — Priest Life Role Decision-Gate Playtests v0](b04-b05-priest-life-role-decision-gate-playtests-v0.md) — **merged #139** bounded native H/M/Low L1–3 PS-01/02/08 role and countercase matrix, authentic G5 hit/miss vs Dodge, differing initiative/target pressure, same-source baselines, paid Intercession and explicit unresolved role boundaries; **not** independent full role certification or observed human playtest.
 
 - [B04/B05 — Eight Combat Playstyles: Build Identity and Evaluation Framework v0](b04-b05-eight-combat-playstyles-evaluation-framework-v0.md) — eight non-class-locked combat identities, resource rhythms, source-authorized build cards, PS-01–PS-08 future role checks, L1–3 drift and nonbinding balance tolerance; **no changed rules, completed scenarios or MVP certification**.
 
