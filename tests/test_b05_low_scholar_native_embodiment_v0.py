@@ -64,7 +64,9 @@ class LowScholarNativeTests(unittest.TestCase):
                                  (30+6*(level-1),20,30))
                 self.assertEqual(a.focus,"Low")
                 self.assertEqual(a.source.source_id,"T")
-                self.assertEqual(a.source.attack_profiles,())
+                self.assertEqual(a.source.attack_profiles,
+                                 ("B05-PC-T-SWORD-CUT",))
+                self.assertTrue(p["native_physical_attack_verified"])
                 self.assertEqual((a.regen,a.guard_value,a.guard_capacity),
                                  (5,17,1 if level<3 else 2))
                 self.assertEqual(p["movement_points"],12)

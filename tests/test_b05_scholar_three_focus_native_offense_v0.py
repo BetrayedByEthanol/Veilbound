@@ -179,11 +179,12 @@ class ScholarNativeOffenseTests(unittest.TestCase):
                 g.cast_flame("scholar","foe",tier=True,face=12,
                              vigor_die=3,hand_available=True)
 
-    def test_10_no_synthetic_S_T_melee_profile_authorization(self):
-        for focus in ("Medium","Low"):
+    def test_10_only_native_S_T_sword_cut_no_extra_profiles(self):
+        for focus,ident in (("Medium","B05-PC-S-SWORD-CUT"),
+                            ("Low","B05-PC-T-SWORD-CUT")):
             a=party_actor(FOCUSES[focus],3,"scholar","party",
                           occupied=((2,2),))
-            self.assertEqual(a.source.attack_profiles,())
+            self.assertEqual(a.source.attack_profiles,(ident,))
             self.assertEqual(dict(a.source.equipment)["Sword"],"wielded")
             self.assertEqual(dict(a.source.training)["One-Handed Swords"],2)
 
