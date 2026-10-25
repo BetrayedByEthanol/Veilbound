@@ -1,5 +1,6 @@
 """B04/B05 Medium Scholar real G0/G1/G3/G4 and Soldier G5 verification."""
 from copy import deepcopy
+from dataclasses import replace
 import unittest
 
 from scripts.b05_medium_scholar_l1_l3_v0 import (
@@ -207,7 +208,15 @@ class MediumScholarNativeTests(unittest.TestCase):
         self.assertEqual(result["metrics"]["overroutes"],1)
         self.assertEqual(result["metrics"]["active_steps"],2)
         self.assertEqual(result["metrics"]["vp"],(9,1,2))
-        self.assertEqual(result["metrics"]["last_mp"],8)
+        # G0 end-turn cleanup correctly discards unused MP: assert the
+        # native MP *during* each turn, never claim 8 MP survived cleanup.
+        self.assertEqual(result["metrics"]["last_mp"],0)
+        turns=[x["detail"]["mp"] for x in events(result,"turn_resources")
+               if x["detail"]["actor"]=="scholar"]
+        self.assertEqual(turns,[12,8,8])
+        applied=[x["detail"]["mp_remaining"] for x in
+                 events(result,"b05_medium_scholar_mp_reconciled")]
+        self.assertIn(8,applied)
         guided=run_policy(level=3,policy="guided")
         self.assertGreater(result["metrics"]["native_hp_restored"],
                            guided["metrics"]["native_hp_restored"])
@@ -302,6 +311,25 @@ class MediumScholarNativeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ms.activate("MS-STONE-BODY-T1")
         self.assertFalse(e.g3.active("foe","Guided Regeneration"))
+        e.check()
+        source=e.actors["scholar"].source
+        before=(e.actors["scholar"].vp_available,
+                e.actors["scholar"].vp_committed,
+                e.actors["scholar"].vp_spent)
+        for forged in (
+            replace(source,digest="0"*64),
+            replace(source,equipment=tuple(
+                (name,"carried" if name=="Leather armor" else state)
+                for name,state in source.equipment)),
+        ):
+            e.actors["scholar"].source=forged
+            with self.assertRaises(UnresolvedDecision):
+                ms.reroute("MS-STONE-BODY-T1")
+            self.assertEqual(before,(
+                e.actors["scholar"].vp_available,
+                e.actors["scholar"].vp_committed,
+                e.actors["scholar"].vp_spent))
+        e.actors["scholar"].source=source
         e.check()
 
 

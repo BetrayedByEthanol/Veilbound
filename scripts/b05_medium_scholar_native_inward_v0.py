@@ -8,7 +8,7 @@ from scripts.b05_medium_scholar_l1_l3_v0 import profile
 from scripts.b05_scholar_inward_embodiment_profiles_v0 import (
     PROFILES, MEDIUM, BASE_MOVEMENT_MP,
 )
-from scripts.b06_encounter_state_v0 import UnresolvedDecision
+from scripts.b06_encounter_state_v0 import UnresolvedDecision, _fingerprint
 
 
 class MediumScholarInward:
@@ -34,12 +34,28 @@ class MediumScholarInward:
         if a is None or a.source.source_id != "S" or a.focus != "Medium":
             raise UnresolvedDecision("Only authored S Medium Scholar can use Inward")
         p = profile(a.level)
-        if (a.source.path != "scripts/b05_medium_scholar_l1_l3_v0.py"
+        path = "scripts/b05_medium_scholar_l1_l3_v0.py"
+        equipment = tuple(sorted((name,
+            "worn" if name == "Leather armor" else
+            "wielded" if name == "Sword" else "carried")
+            for name in p["equipment_sp"]))
+        if (a.source.path != path
+                or a.source.digest != _fingerprint(path)
+                or a.source.start_state != f"L{a.level}-medium-scholar-inward"
+                or a.source.status != "STRUCTURAL_B05_ONLY"
+                or a.source.attack_profiles != ()
+                or a.source.equipment != equipment
                 or dict(a.source.abilities) != p["abilities"]
                 or dict(a.source.training) != p["weapon_training"]
                 or a.vp_max != p["vp_max"]
+                or a.hp_max != p["hp_max"]
+                or a.vigor_max != p["vigor_max"]
+                or a.initiative_bonus != p["initiative"]
                 or a.projection_ap != 24
                 or a.physical_ap != 24
+                or a.guard_instrument != p["guard_instrument"]
+                or a.guard_value != p["guard_value"]
+                or a.guard_capacity != p["normal_guard_capacity"]
                 or a.regen != p["normal_regen_throughput"]):
             raise UnresolvedDecision("Medium Scholar live source sheet mismatch")
         return a,p
@@ -51,7 +67,8 @@ class MediumScholarInward:
             raise ValueError("Inward decision requires ready own turn")
         if a.dead or a.hp<=0:
             raise ValueError("Incapacitated Medium Scholar")
-        if self.e.g5 is not None and self.e.g5.pending_attack_slots(self.caster):
+        if (getattr(self.e,"g5",None) is not None and
+                self.e.g5.pending_attack_slots(self.caster)):
             raise UnresolvedDecision("Cannot alter Inward before resolving G5 slots")
         return a,p
 
