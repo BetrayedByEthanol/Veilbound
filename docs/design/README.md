@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Medium Scholar L1–3 Character Build and Native Inward Verification v0](b04-b05-medium-scholar-l1-l3-build-native-inward-v0.md) — a fifth **candidate** structural Focus pairing (S Medium Scholar Earth/Life), actual G0/G1/G3/G4 Inward Stone/Guided and 14 native Soldier cells, source-paid AP/VP/MP, no independent complete Focus/adventure certification.
+
 - [B05 — Scholar Inward Boost and Embodiment Profiles v0](b05-scholar-inward-embodiment-profiles-v0.md) — four individually authored T1 Medium Inward / Low Embodiment options from Stone Skin and Guided Regeneration, provisional Routing/Overroute/Intensification contracts and isolated model regressions; **no full Scholar build or native G1/G3/G4 outcome proof**.
 
 - [B04/B05 — Priest Life Role Decision-Gate Playtests v0](b04-b05-priest-life-role-decision-gate-playtests-v0.md) — proposed four-variant source-native L1–3 H/M/Low role matrix with authentic G5 hit/miss vs Dodge, alternate initiative/target pressure, same-source baselines, paid Intercession and explicit unverified PS-01/02/08 role boundaries. **Candidate review scope; not yet merged or full role certification.**
