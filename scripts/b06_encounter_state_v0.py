@@ -255,8 +255,8 @@ def party_actor(role, level, actor_id, team, *, occupied):
                       "Sword", p["guard_value"], p["normal_guard_capacity"],
                       occupied=tuple(tuple(c) for c in occupied))
     elif role == "T":
-        # Source T: Low Scholar with individually known and genuinely
-        # prepared technical Arsenal; no generic attack authorization.
+        # Source T: prepared technical Arsenal and one *explicit*, ordinary
+        # sourced Sword Cut profile; no generic weapon enchantment authority.
         from scripts.b05_low_scholar_l1_l3_v0 import profile
         p=profile(level)
         path="scripts/b05_low_scholar_l1_l3_v0.py"
@@ -267,7 +267,8 @@ def party_actor(role, level, actor_id, team, *, occupied):
         source=Source(path,"T",_fingerprint(path),"STRUCTURAL_B05_ONLY",
                       tuple(sorted(p["abilities"].items())),
                       tuple(sorted(p["weapon_training"].items())),
-                      equipment, (), f"L{level}-low-scholar-prepared")
+                      equipment, ("B05-PC-T-SWORD-CUT",),
+                      f"L{level}-low-scholar-prepared")
         a=p["abilities"]
         actor=Actor(actor_id,team,source,level,"Low",p["initiative"],
                     a["Awareness"],a["Agility"],p["hp_max"],p["vigor_max"],
@@ -278,7 +279,7 @@ def party_actor(role, level, actor_id, team, *, occupied):
                     occupied=tuple(tuple(c) for c in occupied))
     elif role == "S":
         # Structural Medium Scholar, independent from M Medium Priest.
-        # No unauthored normal melee-attack authorization is conferred.
+        # Only its exact mundane Sword Cut profile is authorized.
         from scripts.b05_medium_scholar_l1_l3_v0 import profile
         p=profile(level)
         path="scripts/b05_medium_scholar_l1_l3_v0.py"
@@ -289,7 +290,8 @@ def party_actor(role, level, actor_id, team, *, occupied):
         source=Source(path,"S",_fingerprint(path),"STRUCTURAL_B05_ONLY",
                       tuple(sorted(p["abilities"].items())),
                       tuple(sorted(p["weapon_training"].items())),
-                      equipment, (), f"L{level}-medium-scholar-inward")
+                      equipment, ("B05-PC-S-SWORD-CUT",),
+                      f"L{level}-medium-scholar-inward")
         a=p["abilities"]
         actor=Actor(actor_id,team,source,level,"Medium",p["initiative"],
                     a["Awareness"],a["Agility"],p["hp_max"],p["vigor_max"],
@@ -754,6 +756,10 @@ class Encounter:
         if projectile:
             raise UnresolvedDecision("G2 must validate projectile Guard/Dodge and lane first")
         if choice == "guard":
+            if (a.source.source_id in ("S","T")
+                    and (self.g1 is None or
+                         not self.g1.genuine_scholar_sword_ready(actor_id))):
+                raise ValueError("Scholar Sword Guard requires current wielding")
             if (a.guard_remaining == 0 or a.guard_value is None
                     or not a.guard_instrument or not a.ready_guard):
                 raise ValueError("Cannot Guard without ready legal instrument/capacity")
@@ -827,7 +833,10 @@ class Encounter:
         if defenses.count("guard") > t.guard_remaining or (
             "guard" in defenses and (
                 t.guard_value is None or not t.ready_guard
-                or not t.guard_instrument)):
+                or not t.guard_instrument
+                or (t.source.source_id in ("S","T") and
+                    (self.g1 is None or
+                     not self.g1.genuine_scholar_sword_ready(target))))):
             raise ValueError("Insufficient legal Guard assignments")
         self.seen_sequences.add((attacker, target))
         for i, p in enumerate(profiles):

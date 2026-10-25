@@ -215,6 +215,10 @@ class SourceMelee:
             from scripts.b06_player_offense_g6b_v0 import party_weapon_profile
             profile,bonus=party_weapon_profile(a,profile_id)
             return bonus
+        if a.source.source_id in ("S","T"):
+            from scripts.b05_scholar_native_sword_v0 import scholar_sword_profile
+            _,bonus=scholar_sword_profile(a,profile_id,encounter=self.e)
+            return bonus
         if a.source.source_id not in ("B06-EN-01","B06-EN-02","B06-EN-03"):
             raise UnresolvedDecision("G5/G6 only resolves sourced enemy or A/B melee")
         if (a.source.source_id=="B06-EN-03"
@@ -772,7 +776,9 @@ class SourceMelee:
             value=None
         elif (defense=="guard" and (
                 not e.actors[target].ready_guard or
-                not e.actors[target].guard_instrument)):
+                not e.actors[target].guard_instrument or
+                (e.actors[target].source.source_id in ("S","T")
+                 and not e.g1.genuine_scholar_sword_ready(target)))):
             raise UnresolvedDecision("Changed Guard requires native defensive fallback")
         attack_face=_face(attack_face,20,"initial melee attack")
         if attack_face==20:

@@ -35,7 +35,10 @@ def flame_access(actor, *, wielded=None):
     if (actor.focus!=focus or a.path!=path or a.digest!=_fingerprint(path)
             or a.status!="STRUCTURAL_B05_ONLY"
             or a.start_state!=expected_start
-            or a.attack_profiles!=()
+            or a.attack_profiles!=(
+                (("B05-PC-S-SWORD-CUT",) if focus=="Medium"
+                 else ("B05-PC-T-SWORD-CUT",) if focus=="Low"
+                 else ())
             or a.equipment!=expected_gear
             or dict(a.abilities)!=p["abilities"]
             or dict(a.training)!=p["weapon_training"]
