@@ -377,5 +377,114 @@ class LowScholarNativeTests(unittest.TestCase):
         e.check()
 
 
+    def test_19_native_dying_death_mid_step_preserves_receipt_and_ends_turn(self):
+        # The low-Scholar host is terminated by native G4 while Step2 is
+        # already in progress. G0 still must authenticate that exact Step.
+        for level in (1, 2, 3):
+            with self.subTest(level=level):
+                e,ls=scene(level)
+                a=e.actors["scholar"]
+                host=ls.activate(GUIDED)
+                if level==3:
+                    ls.intensify()
+                before_spent=a.vp_spent
+                e.end_turn()
+                e.start_turn("foe",regen_choice=RegenerationChoice())
+                e.end_turn()
+
+                # Source-valid fixture immediately before the native Dying
+                # loss: -11 of 12 HP and no Vigor to cancel it.
+                a.hp=-11
+                a.vigor=0
+                e.check()
+                e.begin_round()
+                first=len(e.ledger)
+                e.start_turn("scholar",regen_choice=RegenerationChoice())
+
+                self.assertTrue(a.dead)
+                self.assertEqual(a.hp,-12)
+                self.assertEqual(a.vigor,0)
+                self.assertIsNone(e.pending_regeneration)
+                self.assertEqual(e.current,"scholar")
+                self.assertIn("scholar",e.regen_done)
+                self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),
+                                 (2*level-before_spent,0,before_spent))
+                self.assertEqual(a.ap_remaining,0)
+                self.assertIsNone(ls.effect_id)
+                self.assertFalse(ls.intensified)
+                self.assertFalse(ls._step_live)
+                self.assertIsNone(ls._step_open_at)
+                self.assertNotIn(("scholar",host.ident),e.g3.effects)
+
+                progressed=e.ledger[first:]
+                ended=[v for v in progressed if
+                       v["kind"]=="g3_effect_ended" and
+                       v["detail"]["effect"]==host.ident]
+                step=[v for v in progressed if
+                      v["kind"]=="regeneration_step" and
+                      v["detail"]["actor"]=="scholar"]
+                self.assertEqual(len(ended),1)
+                self.assertEqual(len(step),1)
+                self.assertLess(ended[0]["index"],step[0]["index"])
+                self.assertEqual((step[0]["detail"]["hp_before"],
+                                  step[0]["detail"]["hp_after"]),(-11,-12))
+                self.assertTrue(step[0]["detail"]["dead"])
+                self.assertFalse(any(v["kind"]==
+                    "b05_low_scholar_guided_intensity_consumed"
+                    for v in progressed))
+                self.assertFalse(any(v["kind"]=="regeneration_dead"
+                                     for v in progressed))
+                e.check()
+                # Re-entering Step2 or replaying the same source turn is
+                # illegal; a genuine end_turn must nevertheless succeed.
+                with self.assertRaises(ValueError):
+                    e.start_turn("scholar",regen_choice=RegenerationChoice())
+                e.end_turn()
+                e.start_turn("foe",regen_choice=RegenerationChoice())
+                e.end_turn()
+                e.check()
+
+    def test_20_nonfatal_dying_step_consumes_guided_without_fake_hp(self):
+        # A living but unconscious caster can maintain Guided. The native
+        # Step still consumes one Intensification even with zero Vigor,
+        # but must not invent HP recovery or terminate the live host.
+        e,ls=scene(3)
+        a=e.actors["scholar"]
+        host=ls.activate(GUIDED)
+        ls.intensify()
+        e.end_turn()
+        e.start_turn("foe",regen_choice=RegenerationChoice())
+        e.end_turn()
+        a.hp=0
+        a.vigor=0
+        e.check()
+        e.begin_round()
+        first=len(e.ledger)
+        e.start_turn("scholar",regen_choice=RegenerationChoice())
+        self.assertEqual((a.hp,a.vigor),(-1,0))
+        self.assertFalse(a.dead)
+        self.assertIsNone(e.pending_regeneration)
+        self.assertEqual(ls.effect_id,host.ident)
+        self.assertFalse(ls.intensified)
+        self.assertFalse(ls._step_live)
+        self.assertIsNone(ls._step_open_at)
+        self.assertIs(e.g3.effects[("scholar",host.ident)],host)
+        self.assertEqual((a.vp_available,a.vp_committed,a.vp_spent),(3,2,1))
+        trace=e.ledger[first:]
+        steps=[v for v in trace if v["kind"]=="regeneration_step"
+               and v["detail"]["actor"]=="scholar"]
+        consumed=[v for v in trace if
+                  v["kind"]=="b05_low_scholar_guided_intensity_consumed"]
+        self.assertEqual((len(steps),len(consumed)),(1,1))
+        self.assertEqual(steps[0]["detail"]["hp_restored"],0)
+        self.assertEqual(consumed[0]["detail"]["step2_index"],steps[0]["index"])
+        self.assertFalse(any(v["kind"]=="g3_effect_ended" for v in trace))
+        e.check()
+        e.end_turn()
+        e.start_turn("foe",regen_choice=RegenerationChoice())
+        e.end_turn()
+        e.check()
+
+
 if __name__=="__main__":
     unittest.main()

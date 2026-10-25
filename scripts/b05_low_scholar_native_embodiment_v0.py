@@ -157,8 +157,18 @@ class LowScholarEmbodiment:
             self.effect_id=None
             self.intensified=False
             self._stone_intensified_on_round=None
-            self._step_live=False
-            self._step_open_at=None
+            # G4 can end this host *inside* a real Step 2 (for example when
+            # the ordinary Dying HP loss kills the caster). The expired
+            # effect and its pending intensity are gone, but G0 has not yet
+            # called on_step_complete(). Keep the independent receipt
+            # boundary until that callback authenticates the genuine Step.
+            # Outside the native pending Step there is no live boundary to
+            # preserve, so clear any inactive/stale marker normally.
+            if not (self._step_live
+                    and self.e.current == self.caster
+                    and self.e.pending_regeneration == self.caster):
+                self._step_live=False
+                self._step_open_at=None
 
     def release(self):
         self._own()
