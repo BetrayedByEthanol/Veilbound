@@ -80,6 +80,18 @@ class MediumScholarInward:
             raise UnresolvedDecision("Technique not individually learned")
         return candidate
 
+    def _has_named_effect_conflict(self, kind):
+        """No duplicate named spell from this caster *or* on this recipient.
+
+        G3.active(caster, kind) only checks the original caster. A distinct
+        Priest may already maintain Guided Regeneration on the Scholar;
+        both activation and free-AP rerouting must reject that recipient
+        collision before committing any AP, VP, MP or existing host.
+        """
+        return bool(self.g3.active(self.caster, kind)) or any(
+            effect.kind == kind and effect.recipient == self.caster
+            for effect in self.g3.effects.values())
+
     def _host(self):
         if self.effect_id is None:
             return None
@@ -158,12 +170,12 @@ class MediumScholarInward:
         if self._host() is not None:
             raise ValueError("One active Inward at levels 1-3")
         kind=PROFILES[ident].technique
-        if self.g3.active(self.caster,kind):
-            raise ValueError("Cannot stack same named G3 spell")
+        if self._has_named_effect_conflict(kind):
+            raise ValueError("Cannot stack same named G3 spell on recipient")
         if a.ap_remaining<24 or a.vp_available<1:
             raise ValueError("Inward activation requires 24 AP and 1 Available VP")
         self.e.spend_ap(self.caster,"projection",label="b05:scholar:activate:"+ident)
-        if a.hp<=0 or a.vp_available<1 or self.g3.active(self.caster,kind):
+        if a.hp<=0 or a.vp_available<1 or self._has_named_effect_conflict(kind):
             self.e.log("b05_medium_scholar_activation_interrupted",
                        caster=self.caster,profile=ident)
             return None
@@ -221,9 +233,8 @@ class MediumScholarInward:
         fee=(3 if a.level<3 else 2)+overroute_steps
         if a.vp_available+old.committed<fee+1:
             raise ValueError("Reroute cannot afford full Spent plus Committed")
-        if any(x.kind==candidate.technique and x.caster==self.caster
-               for x in self.g3.effects.values()):
-            raise ValueError("Replacement would duplicate a named G3 effect")
+        if self._has_named_effect_conflict(candidate.technique):
+            raise ValueError("Replacement would duplicate named G3 effect on recipient")
         delta=self._reconcile_mp(overroute_steps)
         self.g3._end(old,reason="medium_scholar_reroute")
         self.e.spend_vp(self.caster,fee,mode="spent",

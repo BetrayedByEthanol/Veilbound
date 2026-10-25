@@ -7,6 +7,7 @@ from scripts.b05_medium_scholar_l1_l3_v0 import (
     profile,verify,KNOWN_L1,KNOWN_L2,PROFILE_IDS,
 )
 from scripts.b05_medium_scholar_native_inward_v0 import MediumScholarInward
+from scripts.b05_medium_priest_consecrations_v0 import MediumLifeConsecrations
 from scripts.b05_medium_scholar_native_encounter_v0 import (
     run_policy,attest_policy,run_matrix,
 )
@@ -35,6 +36,28 @@ def scene(level=3):
 
 def events(r,kind):
     return [x for x in r["ledger"] if x["kind"]==kind]
+
+
+def priest_guided_scene(*, level=2, recipient="scholar"):
+    """Pay a real M Consecration before S's actual native G0 turn."""
+    priest=party_actor("M",level,"priest","party",occupied=((1,2),))
+    scholar=party_actor("S",level,"scholar","party",occupied=((2,2),))
+    e=Encounter([priest,scholar],{"priest":40,"scholar":30},seed=0,
+                scenario="B05-Medium-Scholar-recipient-exclusivity",
+                policy="real_preexisting_medium_priest_consecration")
+    GridMovement(e,width=7,height=7,scene_id="priest-scholar-guided")
+    SpellState(e)
+    DamageState(e)
+    consecrations=MediumLifeConsecrations(e)
+    inward=MediumScholarInward(e,"scholar")
+    e.begin_round()
+    e.start_turn("priest",regen_choice=RegenerationChoice())
+    priest_host=consecrations.cast("priest","Guided Regeneration",recipient)
+    if priest_host is None:
+        raise AssertionError("Expected a legally paid native Priest effect")
+    e.end_turn()
+    e.start_turn("scholar",regen_choice=RegenerationChoice())
+    return e,consecrations,inward,priest_host
 
 
 class MediumScholarNativeTests(unittest.TestCase):
@@ -330,6 +353,92 @@ class MediumScholarNativeTests(unittest.TestCase):
                 e.actors["scholar"].vp_committed,
                 e.actors["scholar"].vp_spent))
         e.actors["scholar"].source=source
+        e.check()
+
+
+    def test_19_priest_guided_on_scholar_blocks_activation_before_payment(self):
+        e,priest,ms,priest_host=priest_guided_scene(level=1)
+        actor=e.actors["scholar"]
+        self.assertEqual(priest_host.recipient,"scholar")
+        self.assertEqual(priest_host.caster,"priest")
+        # This is the precise regression: active(caster,kind) is empty,
+        # although the recipient already has the same native blessing.
+        self.assertEqual(e.g3.active("scholar","Guided Regeneration"),[])
+        self.assertEqual(e.g3.regen_throughput("scholar"),1)
+        before=(actor.ap_remaining,actor.vp_available,actor.vp_committed,
+                actor.vp_spent,actor.mp_remaining,len(e.ledger),
+                tuple(e.g3.effects))
+        with self.assertRaises(ValueError):
+            ms.activate("MS-GUIDED-REGEN-T1")
+        self.assertEqual(before,(
+            actor.ap_remaining,actor.vp_available,actor.vp_committed,
+            actor.vp_spent,actor.mp_remaining,len(e.ledger),
+            tuple(e.g3.effects)))
+        self.assertIsNone(ms.effect_id)
+        self.assertEqual(e.g3.effects[("priest",priest_host.ident)],priest_host)
+        self.assertEqual(e.g3.regen_throughput("scholar"),1)
+        # Unrelated Stone Inward remains a valid paid option.
+        stone=ms.activate("MS-STONE-BODY-T1")
+        self.assertEqual(stone.kind,"Stone Skin")
+        self.assertEqual(e.g3.regen_throughput("scholar"),1)
+        e.check()
+
+    def test_20_priest_guided_blocks_reroute_without_releasing_stone(self):
+        e,priest,ms,priest_host=priest_guided_scene(level=2)
+        scholar=e.actors["scholar"]
+        stone=ms.activate("MS-STONE-BODY-T1")
+        self.assertEqual(e.g3.resistance("scholar","Physical"),1)
+        before=(ms.effect_id,ms.steps,
+                scholar.ap_remaining,scholar.vp_available,
+                scholar.vp_committed,scholar.vp_spent,scholar.mp_remaining,
+                len(e.ledger),tuple(e.g3.effects))
+        with self.assertRaises(ValueError):
+            ms.reroute("MS-GUIDED-REGEN-T1")
+        self.assertEqual(before,(
+            ms.effect_id,ms.steps,
+            scholar.ap_remaining,scholar.vp_available,
+            scholar.vp_committed,scholar.vp_spent,scholar.mp_remaining,
+            len(e.ledger),tuple(e.g3.effects)))
+        self.assertIs(e.g3.effects[("scholar",stone.ident)],stone)
+        self.assertIs(e.g3.effects[("priest",priest_host.ident)],priest_host)
+        self.assertEqual(e.g3.resistance("scholar","Physical"),1)
+        self.assertEqual(e.g3.regen_throughput("scholar"),1)
+        e.check()
+
+        # Once the original Priest legitimately releases the benefit,
+        # the exact same Scholar reroute is legal on the next own turn.
+        e.end_turn()
+        e.begin_round()
+        e.start_turn("priest",regen_choice=RegenerationChoice())
+        e.g3.release("priest","Guided Regeneration")
+        e.end_turn()
+        e.start_turn("scholar",regen_choice=RegenerationChoice())
+        guided=ms.reroute("MS-GUIDED-REGEN-T1")
+        self.assertEqual(guided.recipient,"scholar")
+        self.assertEqual(guided.caster,"scholar")
+        self.assertEqual((scholar.vp_available,scholar.vp_committed,
+                          scholar.vp_spent),(4,1,3))
+        self.assertEqual(e.g3.resistance("scholar","Physical"),0)
+        self.assertEqual(e.g3.regen_throughput("scholar"),1)
+        self.assertEqual(len([x for x in e.g3.effects.values()
+                              if x.kind=="Guided Regeneration" and
+                              x.recipient=="scholar"]),1)
+        e.check()
+
+    def test_21_same_named_effect_on_other_recipient_is_legal(self):
+        e,priest,ms,priest_host=priest_guided_scene(
+            level=1,recipient="priest")
+        self.assertEqual(priest_host.recipient,"priest")
+        scholar=e.actors["scholar"]
+        guided=ms.activate("MS-GUIDED-REGEN-T1")
+        self.assertIsNotNone(guided)
+        self.assertEqual(guided.recipient,"scholar")
+        self.assertEqual((scholar.ap_remaining,scholar.vp_available,
+                          scholar.vp_committed,scholar.vp_spent),(6,3,1,0))
+        self.assertEqual(e.g3.regen_throughput("scholar"),1)
+        self.assertEqual(e.g3.regen_throughput("priest"),1)
+        self.assertEqual(len([x for x in e.g3.effects.values()
+                              if x.kind=="Guided Regeneration"]),2)
         e.check()
 
 
