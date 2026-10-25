@@ -43,7 +43,8 @@ L3_ONLY={"H":frozenset(("split_wards",)),
          "M":frozenset(("guided_intercession","shelter_intercession")),
          "A":frozenset(),
          "B":frozenset(("vital_exaltation",))}
-L2_ONLY={"A":frozenset(("chosen_and_heal",))}
+L2_ONLY={role:(frozenset(("chosen_and_heal",)) if role=="A" else frozenset())
+         for role in POLICIES}
 ATTACK_FACE=12
 SENTRY_DIE=4
 HEAL_DIE=3
