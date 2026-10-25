@@ -6,6 +6,7 @@ spontaneous callback; only it can authorize an independently source-bound G5
 hit, and G4.5 attests against G0's actual response index rather than Turn AP.
 """
 from dataclasses import dataclass,replace
+from copy import deepcopy
 from scripts.b06_encounter_state_v0 import Response,UnresolvedDecision
 
 
@@ -102,6 +103,51 @@ def _validated(g5,mover,attacker,choice):
     return bonus,value,hit,critical
 
 
+def _preflight_sequence(g5,mover,ordered,decisions):
+    """Rehearse the ENTIRE initiative-ordered response in isolated native state.
+
+    Preflighting each choice independently uses stale Dodge pressure, Guard,
+    HP, and wound thresholds. Instead simulate actual G0 defense assignment
+    and G4 source damage on a full detached encounter. G4's own resistance,
+    wards, wounds, dying and maintained-effect hooks are authoritative; do
+    not approximate them with a second ad hoc damage formula.
+
+    This is the ONLY pre-commit validation. No G0 Reaction/Opportunity, G1
+    movement MP or actual defender capacity is changed by the rehearsal.
+    """
+    e=g5.e
+    # Validate all source identities first, even if a preceding predicted
+    # hit would cancel a later already-committed response.
+    for who in ordered:
+        choice=decisions[who]
+        if choice is not None:
+            _source(g5,who,choice.profile)
+    shadow=deepcopy(e)
+    for who in ordered:
+        choice=decisions[who]
+        if choice is None:
+            continue
+        mover_actor=shadow.actors[mover]
+        if mover_actor.hp<=0 or mover_actor.dead:
+            # G0 still spends the next selected responder's capacity;
+            # native G5 logs cancellation instead of rolling at a corpse.
+            continue
+        bonus,value,hit,critical=_validated(
+            shadow.g5,mover,who,choice)
+        assigned=shadow.defense(
+            mover,choice.defense,attack_key=f"preflight:opportunity:{who}")
+        if assigned!=value:
+            raise AssertionError("Predicted G0 defensive state diverged")
+        if hit:
+            shadow.g4.apply_profile_hit(
+                who,mover,choice.profile,die_face=choice.damage_face,
+                confirmed_hit=True,critical=critical,
+                critical_dice=tuple(choice.critical_dice),
+                vigor_die=choice.vigor_die,
+                wound_location_roll=choice.wound_location_roll)
+    shadow.check()
+
+
 def step(g5,mover,delta,*,decisions,cautious=False):
     """Move one real G1 square; source-authored Opportunity responses resolve
     during the *actual* live pre-step G0 window, before MP/position payment.
@@ -131,17 +177,15 @@ def step(g5,mover,delta,*,decisions,cautious=False):
     eligible=e.g1._threats(mover,dest,cautious)
     if set(decisions)!=set(eligible):
         raise UnresolvedDecision("Author exactly each eligible native Opportunity, including declines")
-    for who in eligible:
-        if decisions[who] is not None:
-            _validated(g5,mover,who,decisions[who])
+    _preflight_sequence(g5,mover,eligible,decisions)
     # Dynamic G1 eligibility runs only AFTER source-authorized Interceptions.
     # This policy has no hidden or unsupported interception effects.
     def choices(live):
         if set(live)!=set(eligible):
             raise UnresolvedDecision("Opportunity eligibility changed before G0 commitment")
-        for who in live:
-            if decisions[who] is not None:
-                _validated(g5,mover,who,decisions[who])
+        # Recompute after G1 has resolved any source Interceptions, but
+        # still BEFORE native G0 commits any Opportunity capacity.
+        _preflight_sequence(g5,mover,live,decisions)
         return tuple(Response(who,"opportunity","g5:ordinary_sword_offturn")
                      for who in live if decisions[who] is not None)
 
