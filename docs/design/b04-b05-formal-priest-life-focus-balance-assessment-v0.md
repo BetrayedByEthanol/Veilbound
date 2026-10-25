@@ -29,6 +29,23 @@ The JSON `cohort_observations` groups by **stratum + exact Focus role + exact au
 
 Native damage and restoration naturally depend on VP, finite Shelter budget, recipient HP deficit, real regeneration throughput, line of effect, initiative and explicit Reaction availability. An unchanged HP result can mean an effect had no eligible opportunity to help, **not** that the spell is ineffective. Conversely, the number of snapshots where a fixed policy helps is **not** a general-play reliability rate. Aggregate "party HP" counts in a *single multi-recipient cell* describe resource units, not a utility function or weighted win criterion.
 
+## Verified seed-0 results snapshot (bounded, not a ranking)
+
+The CI-backed source-native assessment with **seed 0** produced assessment digest `672703891adb31865a64947469c8653826ab0708a645b08974c679913a899cd5` before this documentation-only addition. These counts are illustrative fixed-policy observations from `B05_FORMAL_SOURCE_COUNTS` in the 1,294-test B05 verification; they are **not rates, posterior probabilities or head-to-head Focus scores**.
+
+| Native cohort (separate source stratum) | Witnesses | Same realized exposure | Higher terminal HP than own baseline | Higher terminal Vigor than own baseline | Additional native evidence |
+|---|---:|---:|---:|---:|---|
+| H High, extended paid Heal cycle | 72 | 42 | 30 | 42 | No healing after an imagined early stop; HP/Vigor improvement frequencies only count like-exposure cells |
+| B Low, extended L3 Exaltation | 24 | 21 | 6 | 14 | Three scenarios had a different realized round count and are excluded from endpoint-benefit tallies |
+| H High, L3 external dual prepared wards | 8 | 8 | 6 | 3 | Genuine two-target maintained effects; no Basic Heal receipt in this policy |
+| M Medium, L3 Guided Intercession | 8 | 8 | 6 | 0 | **4** genuine other-beneficiary G0 Step-2 Intercession receipts |
+| M Medium, L3 Shelter Intercession | 8 | 8 | 0 | 4 | **4** genuine native Sentry G5/G4 Direct Vigor Intercession receipts |
+| A Low, external Basic Heal triage | 24 | 24 | 9 | 24 | **47** real paid external Heal receipts across 24 independent scenes |
+| B Low, self Chosen Shelter in multi-target scene | 24 | 24 | 0 | 6 | **0** external Basic Heal receipts; original mace-and-shield access restriction preserved |
+| B Low, two-round self L3 Exaltation | 2 | 2 | 0 | 2 | Only two deterministic self-defense witnesses; not a general survival rate |
+
+**Reading the table:** Each row uses its **own H, M, A or B no-magic source baseline** at the same authored conditions. “Higher terminal HP/Vigor” counts *scene endpoints*, not gained point totals, and it does not equate one HP with one Vigor or one saved party member with another. In multi-target scenes, the HP/Vigor comparison combines the existing three party recipients **within each same-source scenario only**; it is never a cross-Focus utility weighting. Cohorts with different source AP/VP prices, targeting access, enemy policy, pressure or realized exposure are **not commensurate**. The H Heal cohort has 30 different-exposure scenarios; these are not interpreted as a bonus from missing attacks. Re-run the assessment after source changes; this snapshot is diagnostic evidence, not an immutable balancing target.
+
 ## Focus-by-Focus formal assessment
 
 | Focus | Proven native mechanical niche (L1–3) | Countervailing cost or restriction | Balance disposition |
