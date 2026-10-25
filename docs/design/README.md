@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Restricted MVP Pilot Roster and Gifted/Anointed Readiness v0](b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.md) — fresh source-backed Tier-1 census (13 techniques / 10 selected Aspects), explicit limited pilot candidates, eight-link Gifted legality, six missing Focus implementation contracts, decision register and strict non-certification boundary. No new canonical effects or player permissions.
+
 - [B06 — Native Off-Turn Opportunity Attack Resolution v0](b06-native-offturn-opportunity-attack-resolution-v0.md) — live G0/G1 source-bound Soldier/Sentry and Medium/Low Scholar Sword Opportunity delivery, G4/G4.5 authentic damage/critical/wound binding, capacity and movement continuity; 9 complete two-Soldier native source witnesses.
 
 - [B04/B05 — Scholar Three-Focus Mobile and Multi-Enemy Tactical Integration v0](b04-b05-scholar-three-focus-mobile-multi-enemy-tactical-integration-v0.md) — 27 complete three-round two-Soldier mobile source-native cases plus 9 genuine G0 Opportunity response probes explicitly blocked on missing off-turn G5 delivery; no full Focus certification.
