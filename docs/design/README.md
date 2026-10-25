@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B04/B05 — Scholar Three-Focus Mobile and Multi-Enemy Tactical Integration v0](b04-b05-scholar-three-focus-mobile-multi-enemy-tactical-integration-v0.md) — 27 complete three-round two-Soldier mobile source-native cases plus 9 genuine G0 Opportunity response probes explicitly blocked on missing off-turn G5 delivery; no full Focus certification.
+
 - [B04/B05 — Scholar Three-Focus Tactical Encounter and Resource Attrition Verification v0](b04-b05-scholar-three-focus-tactical-encounter-resource-attrition-v0.md) — 48 source-bound four-round native Soldier cases for Focus-specific offense, G2 cover, live Dodge/Sword Guard, Stone/Guided commitment and Vigor-limited Step2; no Focus certification or tuning.
 
 - [B04/B05 — Medium/Low Scholar Native Physical Offense and Weapon Readiness v0](b04-b05-medium-low-scholar-native-physical-offense-weapon-readiness-v0.md) — source-bound wielded Sword Cut G0/G4/G5 actions, 19 opposed native cases, Stone/Guided overlap, guarded weapon-readiness changes, and L3 Low two-action proofs.
