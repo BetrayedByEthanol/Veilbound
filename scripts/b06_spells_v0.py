@@ -38,6 +38,7 @@ class SpellState:
         self.e = encounter
         self.effects = {}
         self.next_effect = 0
+        self.medium_scholar = None  # Source-bound S Inward adapter only.
         self.reactive_stone_claimed = set()
         self.reactive_stone_claims = {}
         self.reactive_stone_serial = 0
@@ -565,8 +566,12 @@ class SpellState:
 
     def regen_throughput(self,actor_id):
         # No invented instant Regeneration Step; augment one actual G0 Step.
-        ordinary = int(any(x.kind=="Guided Regeneration" and x.recipient==actor_id
-                           for x in self.effects.values()))
+        scholar=self.medium_scholar
+        inward=(scholar.regen_bonus(actor_id)
+                if scholar is not None else None)
+        ordinary = (inward if inward is not None else
+                    int(any(x.kind=="Guided Regeneration" and x.recipient==actor_id
+                            for x in self.effects.values())))
         medium = getattr(self, "medium_life", None)
         bonus = medium.bonus_for_regen(actor_id) if medium is not None else 0
         if ordinary and bonus:
@@ -629,6 +634,9 @@ class SpellState:
         low=getattr(self,"low_life",None)
         if low is not None:
             low.on_host_end(effect)
+        scholar=self.medium_scholar
+        if scholar is not None:
+            scholar.on_host_end(effect)
         if effect.committed:
             self.e.release_vp(effect.caster,effect.committed,label="g3:"+reason)
         self.e.log("g3_effect_ended",caster=effect.caster,effect=effect.ident,

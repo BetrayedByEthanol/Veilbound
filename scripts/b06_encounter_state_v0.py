@@ -254,6 +254,28 @@ def party_actor(role, level, actor_id, team, *, occupied):
                       p["physical_action_ap"], p["projection_action_ap"],
                       "Sword", p["guard_value"], p["normal_guard_capacity"],
                       occupied=tuple(tuple(c) for c in occupied))
+    elif role == "S":
+        # Structural Medium Scholar, independent from M Medium Priest.
+        # No unauthored normal melee-attack authorization is conferred.
+        from scripts.b05_medium_scholar_l1_l3_v0 import profile
+        p=profile(level)
+        path="scripts/b05_medium_scholar_l1_l3_v0.py"
+        equipment=tuple(sorted((name,
+            "worn" if name == "Leather armor" else
+            "wielded" if name == "Sword" else "carried")
+            for name in p["equipment_sp"]))
+        source=Source(path,"S",_fingerprint(path),"STRUCTURAL_B05_ONLY",
+                      tuple(sorted(p["abilities"].items())),
+                      tuple(sorted(p["weapon_training"].items())),
+                      equipment, (), f"L{level}-medium-scholar-inward")
+        a=p["abilities"]
+        actor=Actor(actor_id,team,source,level,"Medium",p["initiative"],
+                    a["Awareness"],a["Agility"],p["hp_max"],p["vigor_max"],
+                    p["vp_max"],p["hp_max"],p["vigor_max"],p["vp_max"],0,0,
+                    p["normal_regen_throughput"],p["turn_ap"],
+                    p["physical_action_ap"],p["projection_action_ap"],
+                    "Sword",p["guard_value"],p["normal_guard_capacity"],
+                    occupied=tuple(tuple(c) for c in occupied))
     elif role in ("R", "F"):
         if role == "R":
             from scripts.b05_bow_vanguard_l1_l3_v0 import profile
@@ -579,6 +601,10 @@ class Encounter:
         mp_penalty=(self.g4.toxins.modifier(actor_id,"mp")
                     if self.g4 is not None else 0)
         a.mp_remaining = max(0,12+mp_penalty)
+        scholar=(getattr(self.g3,"medium_scholar",None)
+                 if self.g3 is not None else None)
+        if scholar is not None:
+            scholar.on_turn_resources(actor_id)
         a.blink_debt_due = a.blink_debt_next
         a.blink_debt_next = 0
         self.log("turn_resources", actor=actor_id, ap=a.ap_remaining,
