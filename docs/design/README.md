@@ -15,9 +15,11 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
-**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint after merged B06 G7-H (PR #125). The document owns the **current** 17-area progress table, B01–B07 blockers, six unchanged MVP exit gates and the proposed next milestone sequence. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint after merged G8 (#127) and formal Priest Life balance assessment (#137). The document owns the **current** 17-area progress table, B01–B07 blockers, six unchanged MVP exit gates and the proposed next milestone sequence. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
 
 ## Active design records
+
+- [B04/B05 — Eight Combat Playstyles: Build Identity and Evaluation Framework v0](b04-b05-eight-combat-playstyles-evaluation-framework-v0.md) — eight non-class-locked combat identities, resource rhythms, source-authorized build cards, PS-01–PS-08 future role checks, L1–3 drift and nonbinding balance tolerance; **no changed rules, completed scenarios or MVP certification**.
 
 - [B04/B05 — Formal Priest Life Focus Balance Assessment v0](b04-b05-formal-priest-life-focus-balance-assessment-v0.md) — source-replayed 1,384-case three-stratum audit with 36 separately classified historical H/M ally cases, per-policy exposure-aware observations, six decision gates and explicit retain-values/no-ranking recommendation.
 
@@ -36,7 +38,7 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 - [B04/B05 — Priest Focus Comparative Balance Audit v0 (L1–3)](b04-b05-priest-focus-comparative-balance-audit-v0.md) — source-verified High/Medium/Low capacities, AP/VP/recovery and source-bound Low/M examples; reuses the 27 native Medium policies, explicitly withholds matched three-Focus balance certification and recommends no mechanical retuning.
 
 
-- [B06 G8 — Soldier/Sentry Full Encounter Pack v0 (bounded native three-terminal matrix candidate)](b06-g8-soldier-sentry-full-encounter-pack-v0.md) — authored L2/L3 four-PC A/B/R/F victory, real enemy full-party defeat and opposed four-member scene exit against genuine Soldier and cold/prepared Firebound Sentry fixtures; G5 permits an opt-in source A/B vs named benchmark foe. Fixed face/decision policy, no representative win rate, general Bow damage, independent Focus acceptance or numerical CR. **Proposed PR scope, not merged baseline until reviewed and merged.**
+- [B06 G8 — Soldier/Sentry Full Encounter Pack v0 (bounded native three-terminal matrix candidate)](b06-g8-soldier-sentry-full-encounter-pack-v0.md) — authored L2/L3 four-PC A/B/R/F victory, real enemy full-party defeat and opposed four-member scene exit against genuine Soldier and cold/prepared Firebound Sentry fixtures; G5 permits an opt-in source A/B vs named benchmark foe. Fixed face/decision policy, no representative win rate, general Bow damage, independent Focus acceptance or numerical CR. **Merged PR #127; bounded evidence only, not a full representative encounter pack.**
 
 - [B06 G7-H — Complete Mixed-Party Encounter Certification v0 (bounded terminal matrix)](b06-g7h-mixed-party-encounter-certification-v0.md) — one native L2/L3 A/B/R/F scene with separately source-attested Hunter death, all-party defeat and opposed scene exit. Victory adds a genuine source R Chosen Guided Rite to A/B/R/F damage roles; strictly audited native 3-terminal **bounded** coverage, not full representative pack, universal healing/protection policy, sampled win rate or Hunter CR.
 
