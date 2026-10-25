@@ -19,6 +19,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Active design records
 
+- [B05 — Scholar Inward Boost and Embodiment Profiles v0](b05-scholar-inward-embodiment-profiles-v0.md) — four individually authored T1 Medium Inward / Low Embodiment options from Stone Skin and Guided Regeneration, provisional Routing/Overroute/Intensification contracts and isolated model regressions; **no full Scholar build or native G1/G3/G4 outcome proof**.
+
 - [B04/B05 — Priest Life Role Decision-Gate Playtests v0](b04-b05-priest-life-role-decision-gate-playtests-v0.md) — proposed four-variant source-native L1–3 H/M/Low role matrix with authentic G5 hit/miss vs Dodge, alternate initiative/target pressure, same-source baselines, paid Intercession and explicit unverified PS-01/02/08 role boundaries. **Candidate review scope; not yet merged or full role certification.**
 
 - [B04/B05 — Eight Combat Playstyles: Build Identity and Evaluation Framework v0](b04-b05-eight-combat-playstyles-evaluation-framework-v0.md) — eight non-class-locked combat identities, resource rhythms, source-authorized build cards, PS-01–PS-08 future role checks, L1–3 drift and nonbinding balance tolerance; **no changed rules, completed scenarios or MVP certification**.

@@ -272,6 +272,12 @@ Low Scholar rewards **preparation and commitment**.
 
 Its preferred escalation is to Intensify a good prepared choice rather than repeatedly replace it.
 
+### Explicit Tier-1 Medium/Low profile permissions (provisional)
+
+[Scholar Inward Boost and Embodiment Profiles v0](../07-veil-magic/scholar-inward-embodiment-profiles-v0.md) now authors four **exact** Focus-specific alternatives: Medium Stone Skin Body and Guided Regeneration Regeneration **Inwards**, and Low Stone Skin / Guided Regeneration Self **Embodiments**. Each requires independently **learned** technique identity and, for Low, **prepared** selection. No general `Self` Projection conversion, extra acquisition, free timing, Priest discount, or unlimited Focus configuration follows.
+
+The [B05 evidence record](../../design/b05-scholar-inward-embodiment-profiles-v0.md) verifies **isolated AP/VP and configuration contracts**. Independent source-authored Medium/Low Scholar character sheets, genuine G0/G1/G3/G4 effects and end-to-end role certification remain **open**. In particular, provisional L3 Overroute movement loss and Low Intensification still require native event binding.
+
 ## Three-Focus Scholar distinction
 
 | Focus | Scholar expression |
@@ -285,5 +291,5 @@ Its preferred escalation is to Intensify a good prepared choice rather than repe
 The following remain outside the locked structural foundation:
 
 - final balance of **authored provisional L1–3 known counts (5/4/3 → 6/5/4)**, Low **2/3/3 prepared** and High **1/2 prepared formulas**;
-- technique-specific Intensification costs/effects;
+- wider technique-specific Intensification costs/effects beyond the provisional two Earth/Life Scholar modes and actual native Step/G4 proof;
 - numerical Composite Casting burst calibration once High Projection Tempo supports multiple Projection Actions.
