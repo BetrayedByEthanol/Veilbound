@@ -160,6 +160,13 @@ class ScholarMobileMultiEnemyV0Tests(unittest.TestCase):
                     self.assertEqual(m["flame_launches"],0)
                     self.assertGreater(m["physical_ap_paid"],0)
                     self.assertEqual(m["enemy_target_orders"],["alpha","beta"])
+                    # The Stone-first Scholar has not advanced from (2,2).
+                    # The same Soldier therefore needs an actual G1
+                    # movement receipt before its first source G5 attack.
+                    approach=[x for x in ev(r,"g1_movement_step",actor="alpha")
+                              if x["round"]==1]
+                    self.assertEqual(len(approach),1)
+                    self.assertEqual(approach[0]["detail"]["new"],[[3,2]])
                 self.assertTrue(all(x["detail"]["actor"]=="scholar"
                                     for x in ev(r,"regeneration_step",
                                                 actor="scholar")))

@@ -307,6 +307,13 @@ def run_case(*,focus,level,policy,seed=0):
                     if focus=="High":
                         _move(e,who,((-1,0) if who=="alpha" or rnd>1
                                      else (-1,-1)))
+                    elif (policy=="stone_weave" and who=="alpha"
+                          and rnd==1):
+                        # S/T spent round one projecting Stone at (2,2).
+                        # Alpha at (4,2) is two squares out: it must pay
+                        # the actual G1 one-square approach to (3,2)
+                        # BEFORE declaring its ordinary G5 melee hit.
+                        _move(e,"alpha",(-1,0))
                     elif who=="beta" and rnd==1:
                         _move(e,"beta",(-1,-1))
                     # Two enemies make one independently funded native
