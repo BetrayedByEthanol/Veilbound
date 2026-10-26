@@ -31,6 +31,7 @@ class Technique:
     action_ap: int
     tags: frozenset
     choices: tuple = ()
+    min_range: int = 0
     max_range: int = 0
     radius: int = 0
     duration_ticks: int = 0
@@ -56,7 +57,7 @@ def thrown_flame(tier=1):
         raise ValueError("Only authored T1/T2 Thrown Flame")
     return Technique("Conjure Flame", "Fire", "Conflagration", 1, tier,
                      2 * tier, 20, frozenset({"Projection"}),
-                     ("Potency", "Reach", "Precision"), max_range=3,
+                     ("Potency", "Reach", "Precision"), min_range=1, max_range=3,
                      attack=True, damage_die=8, damage_type="Fire",
                      damage_resource="HP+Vigor", profile="Thrown Projectile")
 
@@ -78,7 +79,7 @@ def instability_dc(tier):
 
 def legal_target(target, technique, *, reach=False):
     return (target.eligible and target.open_path and
-            0 <= target.distance <= technique.max_range + int(reach))
+            technique.min_range <= target.distance <= technique.max_range + int(reach))
 
 
 def choose_replacement(original, catalogue, choice_index):
@@ -99,7 +100,8 @@ def choose_replacement(original, catalogue, choice_index):
 
 def miscast(roll, technique, original_target, *, other_targets=(),
             choice_index=0, catalogue=(), available_vp=0,
-            committed_cast_vp=0, scatter_legal=False, extra_choices=()):
+            committed_cast_vp=0, scatter_legal=False, extra_choices=(),
+            surviving_options=(), selected_options=()):
     """Resolve one recorded d20 miscast (no rerolls/GM-created replacement).
 
     Returns instructions rather than applying combat packets. An independent
@@ -112,19 +114,33 @@ def miscast(roll, technique, original_target, *, other_targets=(),
         raise ValueError("Invalid unspent available VP")
     if type(committed_cast_vp) is not int or committed_cast_vp < 0:
         raise ValueError("Invalid VP-spent receipt")
+    # The risky Step was attempted (and lost). Its category still counts as
+    # selected for the no-duplicate-on-this-cast constraint; safe and paid
+    # Surge categories survive until a specific outcome removes them.
+    if (len(set(selected_options)) != len(selected_options)
+            or len(set(surviving_options)) != len(surviving_options)
+            or any(x not in technique.choices for x in selected_options)
+            or not set(surviving_options).issubset(selected_options)):
+        raise ValueError("Invalid recorded Amplification choices")
+    retained_reach = "Reach" in surviving_options
     r = {"d20": roll, "status": "resolve", "target": original_target.name,
          "bonus": None, "penalty": None, "replacement": None,
          "self_damage": None, "extra_spent_vp": 0}
     def fizzle():
         r.update(status="fizzle", target=None, bonus=None, penalty=None)
     alternatives = tuple(t for t in other_targets if
-                         t.name != original_target.name and legal_target(t, technique))
+                         t.name != original_target.name and
+                         legal_target(t, technique, reach=retained_reach))
     if roll in (1, 2):
         fizzle()
         if roll == 2:
             r["bonus"] = "harmless visible same-Aspect dissipation"
     elif roll == 3:
         r["penalty"] = "remove all Amplifications (including Surge)"
+        # Any previously legal distance 4 allowed solely by Reach is now
+        # out of range. The miscast must not attest an impossible hit.
+        if not legal_target(original_target, technique):
+            fizzle()
     elif roll in (4, 5):
         if alternatives:
             if roll == 5:
@@ -140,7 +156,7 @@ def miscast(roll, technique, original_target, *, other_targets=(),
         # No applicable positional scatter: original effect resolves.
     elif roll == 7:
         if technique.max_range > 0:
-            if original_target.distance > max(0, technique.max_range - 1):
+            if original_target.distance > max(0, technique.max_range + int(retained_reach) - 1):
                 fizzle()
             else:
                 r["penalty"] = "range -1 square"
@@ -181,7 +197,9 @@ def miscast(roll, technique, original_target, *, other_targets=(),
         if (replacement is None or replacement.spent_vp > technique.spent_vp
                 or replacement.action_ap > technique.action_ap
                 or replacement.used_tier > technique.used_tier
-                or not legal_target(original_target, replacement)):
+                or not legal_target(
+                    original_target, replacement,
+                    reach=(retained_reach and replacement == technique))):
             fizzle()
         else:
             r["replacement"] = replacement.name + " / " + replacement.profile
@@ -189,7 +207,10 @@ def miscast(roll, technique, original_target, *, other_targets=(),
         if technique.damage_die:
             r["bonus"] = "one original damage die at maximum"
     elif roll == 20:
-        available = tuple(x for x in extra_choices if x in technique.choices)
+        available = tuple(dict.fromkeys(
+            x for x in extra_choices
+            if x in technique.choices and x not in selected_options
+        ))
         if available:
             if type(choice_index) is not int or not 0 <= choice_index < len(available):
                 raise ValueError("Invalid recorded bonus-Option selection")
@@ -290,7 +311,10 @@ class HighGiftedWindow:
                               available_vp=self.vp-technique.spent_vp-surcharge,
                               committed_cast_vp=technique.spent_vp+surcharge,
                               extra_choices=extra_choices,
-                              scatter_legal=scatter_legal)
+                              scatter_legal=scatter_legal,
+                              surviving_options=tuple(x for x in (safe, surge)
+                                                      if x is not None),
+                              selected_options=options)
         additional = outcome["extra_spent_vp"] if outcome else 0
         if additional > self.vp-technique.spent_vp-surcharge:
             raise AssertionError("Post-preflight leakage mismatch")
@@ -330,6 +354,7 @@ def amplified_parameters(technique, selected):
     if "Precision" in selected and not technique.attack:
         raise ValueError("Precision needs an actual attack roll")
     return {"roll_one_damage_die_twice_keep_higher": "Potency" in selected,
+            "min_range": technique.min_range,
             "max_range": technique.max_range + int("Reach" in selected),
             "radius": technique.radius + int("Extent" in selected),
             "duration_ticks": technique.duration_ticks * (2 if "Persistence" in selected else 1),

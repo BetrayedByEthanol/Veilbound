@@ -117,6 +117,79 @@ class HighGiftedAmplificationTests(unittest.TestCase):
         self.assertFalse(legal_target(far, self.flame))
         self.assertTrue(legal_target(far, self.flame, reach=True))
 
+
+    def test_minimum_thrown_range_applies_before_costs_and_with_reach(self):
+        self.assertEqual(self.flame.min_range, 1)
+        self.assertFalse(legal_target(Target("same_square", 0), self.flame))
+        self.assertFalse(legal_target(Target("same_square", 0), self.flame,
+                                      reach=True))
+        self.assertTrue(legal_target(Target("one_square", 1), self.flame))
+        self.assertEqual(amplified_parameters(self.flame, ("Reach",))["min_range"], 1)
+        w = HighGiftedWindow(1, "Joy", initial_intensity="heightened")
+        before = (w.ap, w.vp, w.safe_step, w.surge_allowance)
+        for options in ({}, {"safe": "Reach"}, {"surge": "Reach"}):
+            with self.assertRaises(ValueError):
+                w.cast(self.flame, Target("same_square", 0), **options)
+        self.assertEqual((w.ap, w.vp, w.safe_step, w.surge_allowance), before)
+        self.assertEqual(w.cast(self.flame, Target("one_square", 1),
+                                safe="Reach")["paid_vp"], 2)
+
+    def test_severe_miscast_retains_only_surviving_reach_for_range_and_targets(self):
+        reaction = replace(self.flame, action_ap=0)  # isolated, not native
+        def attempt(roll, *, safe="Reach", risky="Precision", surge=None,
+                    target=None, others=(), choice=0):
+            w = HighGiftedWindow(1, "Joy", initial_intensity="heightened")
+            w.overload()
+            return w.cast(reaction, target or self.soldier, safe=safe,
+                          risky=risky, surge=surge, instability_roll=1,
+                          miscast_roll=roll, other_targets=others,
+                          choice_index=choice)["miscast"]
+        # Base max 3; the surviving Reach makes it 4, reduced to 3.
+        outcome = attempt(7)
+        self.assertEqual(outcome["status"], "resolve")
+        self.assertEqual(outcome["penalty"], "range -1 square")
+        self.assertEqual(attempt(7, target=Target("far", 4))["status"], "fizzle")
+        # A risky Reach is lost after severe failure and cannot save range.
+        self.assertEqual(attempt(7, safe="Precision", risky="Reach")["status"],
+                         "fizzle")
+        distant_ally = Target("ally", 4)
+        for roll in (4, 5):
+            self.assertEqual(attempt(roll, others=(distant_ally,))["target"],
+                             "ally")
+            self.assertEqual(attempt(roll, safe="Precision", risky="Reach",
+                                     others=(distant_ally,))["target"], "soldier")
+        # Removing all Amplification also removes its reach, no illegal hit.
+        self.assertEqual(attempt(3, target=Target("far", 4))["status"],
+                         "fizzle")
+        self.assertEqual(attempt(3)["status"], "resolve")
+
+    def test_unexpected_amplification_excludes_all_selected_categories(self):
+        reaction = replace(self.flame, action_ap=0)  # isolated, not native
+        def attempt(extras, *, index=0):
+            w = HighGiftedWindow(1, "Joy", initial_intensity="heightened")
+            w.overload()
+            return w.cast(reaction, self.soldier, safe="Reach",
+                          risky="Precision", surge="Potency",
+                          instability_roll=1, miscast_roll=20,
+                          extra_choices=extras,
+                          choice_index=index)["miscast"]
+        self.assertIsNone(attempt(("Reach",))["bonus"])
+        self.assertIsNone(attempt(("Potency", "Precision"))["bonus"])
+        self.assertIsNone(attempt(("Expression",))["bonus"])
+        self.assertEqual(attempt(("Reach", "Potency", "Precision"))["status"],
+                         "resolve")
+        # A remaining authored category works for a technique with more
+        # choices; duplicating entries cannot bias the uniform draw.
+        wide = replace(reaction, choices=CATEGORIES, radius=2,
+                       duration_ticks=2, pressure=True)
+        w = HighGiftedWindow(1, "Joy", initial_intensity="heightened")
+        w.overload()
+        result = w.cast(wide, self.soldier, safe="Reach", risky="Precision",
+                        surge="Potency", instability_roll=1, miscast_roll=20,
+                        extra_choices=("Reach", "Extent", "Extent", "Persistence"),
+                        choice_index=1)["miscast"]
+        self.assertEqual(result["bonus"], "Persistence")
+
     def test_instability_dc(self):
         self.assertEqual([instability_dc(t) for t in range(10)],
                          [12, 13, 13, 14, 14, 15, 15, 16, 16, 17])
