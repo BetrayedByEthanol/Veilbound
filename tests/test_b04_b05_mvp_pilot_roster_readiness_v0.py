@@ -127,7 +127,7 @@ class MvpPilotRosterReadinessTests(unittest.TestCase):
             self.assertIn(f"| {emotion} | **{pillar} / {aspect}** | **{rating}** |", old)
         self.assertNotIn(("Mind", "Insight"), available)
 
-    def test_all_six_gaps_and_no_false_certification(self):
+    def test_historical_six_gaps_and_current_noncertification(self):
         doc = DOC.read_text(encoding="utf-8")
         for name in ("High Gifted (A08)", "Medium Gifted (A09)",
                      "Low Gifted (A10)", "High Anointed (A11/A12)",
@@ -140,8 +140,9 @@ class MvpPilotRosterReadinessTests(unittest.TestCase):
         roadmap = ROADMAP.read_text(encoding="utf-8")
         self.assertEqual(6, sum(line.startswith("| [ ] **")
                                 for line in roadmap.splitlines()))
-        self.assertIn("**6/12**", roadmap)
+        self.assertIn("**7/12**", roadmap)
         self.assertIn("**0/12**", roadmap)
+        self.assertIn("five** structural pairings", roadmap.lower())
         self.assertIn(DOC.name, INDEX.read_text(encoding="utf-8"))
 
 
