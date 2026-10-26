@@ -273,11 +273,23 @@ class WoundContinuation:
             attacker,target,profile_id,die_face=die_face,
             critical=critical,critical_dice=critical_dice,
             vigor_die=vigor_die,wound_location_roll=wound_location_roll)
-        result=e.g4.apply_profile_hit(
-            attacker,target,profile_id,die_face=die_face,
-            confirmed_hit=True,critical=critical,
-            critical_dice=critical_dice,vigor_die=vigor_die,
-            wound_location_roll=wound_location_roll)
+        # G0's live spontaneous receipt is the ONLY off-turn Ward
+        # authority. Ordinary G5 uses a separate paid Turn-AP action index.
+        # Scope the exact G1 pending / G0 response pair through the G4 call;
+        # an unattested direct profile delivery can never forge this bridge.
+        if e.g4._live_ward_opportunity is not None:
+            raise UnresolvedDecision("Nested Ward Opportunity delivery")
+        e.g4._live_ward_opportunity=(
+            "live",attacker,target,profile_id,
+            response_index,pending_index,trigger.key)
+        try:
+            result=e.g4.apply_profile_hit(
+                attacker,target,profile_id,die_face=die_face,
+                confirmed_hit=True,critical=critical,
+                critical_dice=critical_dice,vigor_die=vigor_die,
+                wound_location_roll=wound_location_roll)
+        finally:
+            e.g4._live_ward_opportunity=None
         e.log("g45_opportunity_attested_hit",
               attacker=attacker,target=target,profile=profile_id,
               response_index=response_index,pending_index=pending_index,

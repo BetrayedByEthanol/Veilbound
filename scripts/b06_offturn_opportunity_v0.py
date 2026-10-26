@@ -123,6 +123,11 @@ def _preflight_sequence(g5,mover,ordered,decisions):
         if choice is not None:
             _source(g5,who,choice.profile)
     shadow=deepcopy(e)
+    # This entire simulation belongs to a detached encounter. Its scoped
+    # Opportunity receipt may consume a *shadow-only* Ward Pulse so later
+    # responders see the correct sequential defender state. No G0 capacity,
+    # Ward Pulse, G1 MP, or ledger event escapes to the actual encounter.
+    shadow.g4._ward_shadow_preflight=True
     for who in ordered:
         choice=decisions[who]
         if choice is None:
@@ -139,12 +144,28 @@ def _preflight_sequence(g5,mover,ordered,decisions):
         if assigned!=value:
             raise AssertionError("Predicted G0 defensive state diverged")
         if hit:
-            shadow.g4.apply_profile_hit(
-                who,mover,choice.profile,die_face=choice.damage_face,
-                confirmed_hit=True,critical=critical,
-                critical_dice=tuple(choice.critical_dice),
-                vigor_die=choice.vigor_die,
-                wound_location_roll=choice.wound_location_roll)
+            if shadow.g4._live_ward_opportunity is not None:
+                raise UnresolvedDecision("Nested detached Ward Opportunity")
+            defense_index=shadow.ledger[-1]["index"]
+            # The receipt records the exact, newly validated source choice
+            # and sequentially committed *shadow* defense, not an invented
+            # real G0 paid response. Only a detached preflight accepts it.
+            shadow.log("g5_opportunity_preflight_roll",
+                       attacker=who,mover=mover,profile=choice.profile,
+                       defense_index=defense_index,hit=True)
+            shadow.g4._live_ward_opportunity=(
+                "preflight",who,mover,choice.profile,
+                defense_index,None,None)
+            try:
+                shadow.g4.apply_profile_hit(
+                    who,mover,choice.profile,die_face=choice.damage_face,
+                    confirmed_hit=True,critical=critical,
+                    critical_dice=tuple(choice.critical_dice),
+                    vigor_die=choice.vigor_die,
+                    wound_location_roll=choice.wound_location_roll)
+            finally:
+                shadow.g4._live_ward_opportunity=None
+    shadow.g4._ward_shadow_preflight=False
     shadow.check()
 
 

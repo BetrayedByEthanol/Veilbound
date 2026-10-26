@@ -74,6 +74,8 @@ class DamageState:
         self._live_ward_profile = None
         # Only G4.5's exact G0-paid source action can attest Ward G5 delivery.
         self._live_ward_action = None
+        # Scoped G4.5 Opportunity receipt; detached rehearsal has its own marker.
+        self._live_ward_opportunity = None
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]

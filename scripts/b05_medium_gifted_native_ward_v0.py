@@ -290,24 +290,93 @@ class MediumGiftedWardNative:
                 raise UnresolvedDecision("Ward needs G4's exact native profile hit")
             attacker = source[0]
             paid = self.e.g4._live_ward_action
-            if (paid is None or paid[:3] != (attacker,recipient,profile_id)
-                    or type(paid[3]) is not int):
-                raise UnresolvedDecision("Ward needs exact live G4.5 paid action")
-            action_index = paid[3]
-            if not any(ev["kind"] == "g5_melee_roll" and
-                       ev["round"] == self.e.round and
-                       ev["turn"] == self.e.current and
-                       ev["detail"].get("attacker") == attacker and
-                       ev["detail"].get("target") == recipient and
-                       ev["detail"].get("profile") == profile_id and
-                       ev["detail"].get("action_index") == action_index and
-                       ev["detail"].get("hit") is True
+            offturn = self.e.g4._live_ward_opportunity
+            if paid is not None and offturn is not None:
+                raise UnresolvedDecision("Ward cannot mix paid and off-turn authority")
+            if paid is not None:
+                if (paid[:3] != (attacker,recipient,profile_id)
+                        or type(paid[3]) is not int):
+                    raise UnresolvedDecision("Ward needs exact live G4.5 paid action")
+                action_index = paid[3]
+                if not any(ev["kind"] == "g5_melee_roll" and
+                           ev["round"] == self.e.round and
+                           ev["turn"] == self.e.current and
+                           ev["detail"].get("attacker") == attacker and
+                           ev["detail"].get("target") == recipient and
+                           ev["detail"].get("profile") == profile_id and
+                           ev["detail"].get("action_index") == action_index and
+                           ev["detail"].get("hit") is True
+                           for ev in self.e.ledger):
+                    raise UnresolvedDecision("Ward G5 roll disagrees with exact paid slot")
+                if any(ev["kind"] in ("g45_attested_hit","g5_melee_resolved") and
+                       ev["detail"].get("action_index") == action_index
                        for ev in self.e.ledger):
-                raise UnresolvedDecision("Ward G5 roll disagrees with exact paid slot")
-            if any(ev["kind"] in ("g45_attested_hit","g5_melee_resolved") and
-                   ev["detail"].get("action_index") == action_index
-                   for ev in self.e.ledger):
-                raise UnresolvedDecision("Ward cannot reuse already completed G5 slot")
+                    raise UnresolvedDecision("Ward cannot reuse completed G5 slot")
+            elif offturn is not None:
+                (mode,who,mover,source_profile,reference,
+                 pending_index,trigger_key) = offturn
+                if ((who,mover,source_profile) !=
+                        (attacker,recipient,profile_id)
+                        or type(reference) is not int):
+                    raise UnresolvedDecision("Ward Opportunity source does not match packet")
+                if mode == "live":
+                    if (type(pending_index) is not int or
+                            not isinstance(trigger_key,str) or
+                            not 0<=reference<len(self.e.ledger) or
+                            not 0<=pending_index<len(self.e.ledger)):
+                        raise UnresolvedDecision("Ward missing native Opportunity indices")
+                    paid_response=self.e.ledger[reference]
+                    pending=self.e.ledger[pending_index]
+                    if (paid_response["kind"]!="spontaneous_committed" or
+                            paid_response["round"]!=self.e.round or
+                            paid_response["detail"].get("actor")!=attacker or
+                            paid_response["detail"].get("response_kind")!="opportunity" or
+                            paid_response["detail"].get("label")!="g5:ordinary_sword_offturn" or
+                            paid_response["detail"].get("trigger")!=trigger_key or
+                            pending["kind"]!="g1_movement_opportunity_pending" or
+                            pending["detail"].get("trigger")!=trigger_key or
+                            pending["detail"].get("attacker")!=attacker or
+                            pending["detail"].get("mover")!=recipient):
+                        raise UnresolvedDecision("Ward Opportunity lacks genuine G0/G1 receipt")
+                    if not any(ev["kind"]=="g5_opportunity_roll" and
+                               ev["round"]==self.e.round and
+                               ev["detail"].get("response_index")==reference and
+                               ev["detail"].get("attacker")==attacker and
+                               ev["detail"].get("mover")==recipient and
+                               ev["detail"].get("profile")==profile_id and
+                               ev["detail"].get("hit") is True
+                               for ev in self.e.ledger):
+                        raise UnresolvedDecision("Ward Opportunity roll must match G0 response")
+                    if any(ev["kind"] in ("g45_opportunity_attested_hit",
+                                         "g5_opportunity_resolved",
+                                         "g5_opportunity_cancelled") and
+                           ev["detail"].get("response_index")==reference
+                           for ev in self.e.ledger):
+                        raise UnresolvedDecision("Ward Opportunity response already consumed")
+                elif mode == "preflight":
+                    # Only off-turn G5's deep-copied sequential rehearsal
+                    # may author this receipt. It is never a live payment.
+                    if (getattr(self.e.g4,"_ward_shadow_preflight",False) is not True
+                            or not 0<=reference<len(self.e.ledger)):
+                        raise UnresolvedDecision("Ward shadow rehearsal scope missing")
+                    roll=self.e.ledger[-1]
+                    if (roll["kind"]!="g5_opportunity_preflight_roll" or
+                            roll["detail"].get("attacker")!=attacker or
+                            roll["detail"].get("mover")!=recipient or
+                            roll["detail"].get("profile")!=profile_id or
+                            roll["detail"].get("defense_index")!=reference or
+                            roll["detail"].get("hit") is not True):
+                        # G4 logs no other event before the Pulse, so this
+                        # must be the most recent detached source declaration.
+                        raise UnresolvedDecision("Ward shadow choice no longer matches")
+                    defense=self.e.ledger[reference]
+                    if (defense["kind"]!="defense_assigned" or
+                            defense["detail"].get("actor")!=recipient):
+                        raise UnresolvedDecision("Ward shadow defense not source-bound")
+                else:
+                    raise UnresolvedDecision("Unknown Ward Opportunity authority mode")
+            else:
+                raise UnresolvedDecision("Ward needs exact live G4.5 action/response")
         elif cause == "g3:thrown_flame":
             if self.e.g4._live_flame_delivery is None:
                 raise UnresolvedDecision("Ward needs a confirmed live G3 Flame")
