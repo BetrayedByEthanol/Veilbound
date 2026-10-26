@@ -15,9 +15,11 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
-**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged High Gifted native PR #153 plus this proposed Medium Gifted Conduit design. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 7/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged Medium Gifted Ward design PR #154 plus the new L1–3 structural build candidate. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 8/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
 
 ## Active design records
+
+- [B04/B05 — Medium Gifted L1–3 Character Build and Verification v0](b04-b05-medium-gifted-l1-l3-character-build-verification-v0.md) — **eighth structural pairing on merge** with all nine starting abilities, eight fixed links, equipment/Training/Talent, Level 1–3 VP/AP and Grade I–III Ward setup/countercases; also promotes the reviewed #154 Ward design to a **provisional L1–3 expression rule**. Isolated event budgets, no native G4 prevention or independent Focus certification.
 
 - [B04/B05 — Medium Gifted L1–3 Conduit Expression Design v0](b04-b05-medium-gifted-l1-l3-conduit-expression-design-v0.md) — **proposed, not canonical** Ward Form with explicit Fear/Earth and Trust/Kinship Grade I–III Pulse expressions; isolated VP/AP, Dormancy, retuning and Reconduction proofs. **No eighth structural pairing**, native prevention, full certification, or catalogue census increment.
 
