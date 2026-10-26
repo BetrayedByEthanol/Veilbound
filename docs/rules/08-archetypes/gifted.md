@@ -1,6 +1,6 @@
 # Gifted Foundation
 
-> Canonical extraction from Core Rules Audit v34 plus the locked High/Medium foundation details from the immediately preceding Gifted design pass. Structural rules are promoted here; Aspect-specific expression content and several numeric surcharges remain calibration work.
+> Canonical Gifted foundation from Core Rules Audit v34, amended by [High Gifted Amplification and Genuine Miscasts v0](../07-veil-magic/high-gifted-amplification-and-miscasts-v0.md). Structural Focus boundaries remain unchanged; other Focus/Aspect-specific expression content still requires authoring and balance verification.
 
 ## Archetype identity
 
@@ -93,11 +93,11 @@ Amplification:
 
 - never raises technique tier;
 - is technique-specific;
-- may modify authored categories such as Potency, Reach, Extent, Persistence, Penetration, or Expression;
+- uses only **Potency, Reach, Extent, Persistence, Penetration, or Precision** with their exact conservative numerical effects in [High Gifted Amplification and Genuine Miscasts v0](../07-veil-magic/high-gifted-amplification-and-miscasts-v0.md);
 - does not add VP cost by default;
 - cannot duplicate the same option unless the technique says otherwise.
 
-Unused Steps expire with the Emotion Window.
+**Expression/damage-type swapping is not a generic Amplification.** An individual spell/profile must explicitly authorize every available option. Unused Steps expire with the Emotion Window.
 
 ### Natural Heightening
 
@@ -142,11 +142,9 @@ Outcomes:
 
 - success: both Steps function;
 - failure by 1–4: first Step functions, second Step is lost;
-- failure by 5+: first Step functions, second Step is lost, and an Aspect-appropriate **Manifestation Spill** occurs.
+- failure by 5+: the risky second Step is lost and the spell undergoes **one genuine d20 miscast**, including possible fizzle, legal random retargeting (allies included), self-backlash, same-Aspect technique substitution, or rare beneficial accidents; the result may override or cancel the original spell.
 
-Instability remains an uncontrolled expression of the **same Aspect**. It does not generically invert healing into damage, swap elements, cast a different technique, or randomly retarget unrelated creatures.
-
-Aspect-specific Instability Profiles remain future content.
+The canonical [universal d20 table, pre-response timing, no-reroll fallbacks, costs, and same-Aspect replacement constraints](../07-veil-magic/high-gifted-amplification-and-miscasts-v0.md#universal-miscast-table-roll-d20-exactly-once-no-table-rerolls) **supersede** the old severe-only Manifestation Spill protection and former ban on retargeting an original spell. No unrelated Pillar/type conversion, free attacks or automatic hits.
 
 ## Emotional Transition
 
@@ -190,7 +188,7 @@ Projected Surge:
 
 Levels 1–4 normally allow **one Projected Surge allowance per Emotion Window**.
 
-The current surcharge benchmark is proportional to the technique's VP cost and remains provisional. The established design direction is approximately 25% of technique VP, minimum 1, with level-4 efficiency reducing the surcharge by 1 VP to a minimum of 1. Final numbers require calibration.
+**L1–3 surcharge:** `ceil(positive effective technique VP cost / 4)` **additional Spent VP** per purchased Step; exact source-qualified [activation, reserve, and preflight rules](../07-veil-magic/high-gifted-amplification-and-miscasts-v0.md#projected-surge--high-gifted-l13) apply. A zero-VP technique does not qualify without explicit future authorization. The existing level-4 efficiency direction (−1 VP, minimum 1) remains provisional and is **not** added to the L1–3 implementation.
 
 ### Level 5 — Full projected expression
 
@@ -357,10 +355,10 @@ The current foundation supersedes:
 
 ## Calibration/content still unresolved
 
-- Aspect-specific Amplification options;
-- final Projected Surge surcharge;
+- Amplification permissions for techniques beyond the explicitly authored v0 profile;
+- numeric calibration of the finalized L1–3 Projected Surge cost;
 - final level-4 High Gifted surcharge reduction;
 - Medium Conduit Form expressions and Grade scaling;
 - Low Embodied and Deep Embodiment expressions;
-- Aspect-specific Instability Profiles;
+- source-bound native combat integration for genuine miscast retargeting, Scatter, typed damage and response windows;
 - persistent Rider/Pulse numbers against the maximum applicable Physical or Projection Tempo.

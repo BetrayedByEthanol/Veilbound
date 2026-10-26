@@ -2,6 +2,8 @@
 
 This directory is the human-readable source of truth for Veilbound's current rules.
 
+- [High Gifted Amplification and Genuine Miscasts v0](07-veil-magic/high-gifted-amplification-and-miscasts-v0.md) — six conservative Amplification options, exact L1–3 Projected Surge price, genuine d20 miscasts, and one explicitly supported Conjure Flame profile; native integration and full High Gifted character certification remain open.
+
 ## Editing principle
 
 A rules file should answer **how the game currently works**, not narrate every design alternative considered.
