@@ -1,6 +1,6 @@
 # Veilbound — Development Roadmap, Milestones and Level 1–3 MVP Readiness
 
-> **Active checkpoint: 26 October 2026, through merged #152 High Gifted L1–3 structural build and its passing final-head CI.** This subsequent B04/B05 change adds **bounded High Gifted native Flame encounter integration**; it does not claim a complete Focus certificate or an additional B06 milestone. Earlier #150/#151 and Priest/Scholar/Hunter evidence remains bounded. No blocker or strict MVP gate closes here.
+> **Active checkpoint: 26 October 2026, through merged #153 High Gifted L1–3 native Flame encounter integration and passing final-head CI.** This B04/B05 PR introduces **Medium Gifted Ward Conduit expression design candidates** with isolated VP/AP and Pulse feasibility tests; the new expressions are **not canonical rules, a new structural build, or a native damage implementation**. Existing B06 G0–G8 and all MVP counts are unchanged.
 > This is the repository's current **planning and MVP acceptance register**, not a canonical gameplay rule.
 > [Canonical rules](../rules/) and [structured content](../../content/) outrank design/audit commentary.
 > Individual [design records](README.md) retain their own scope, results and historical limitations.
@@ -20,7 +20,7 @@
 | Indicator | Accepted state | Qualification |
 |---|---|---|
 | Archetype × Focus architectures | **12/12 defined** | Architecture does not establish complete playable content |
-| Structural L1→3 Focus pairings | **7/12** | Priest High/Medium/Low Life, Scholar High Fire / Medium Earth-Life Inward / Low Earth-Life Embodiment, **High Gifted eight-link pilot**. Low Priest A/B/R count as **one** Low pairing; High Gifted is **structural only**, not native/certified |
+| Structural L1→3 Focus pairings | **7/12** | Priest High/Medium/Low Life, Scholar High Fire / Medium Earth-Life Inward / Low Earth-Life Embodiment, **High Gifted eight-link pilot**. Low Priest A/B/R count as **one** Low pairing; High Gifted has **bounded native Flame evidence #153**, but is not independently certified |
 | Independently full-certified Focus pairings | **0/12** | No complete combat + noncombat evidence at every level |
 | Selected MVP Pillars | **8/8 represented** | Not full repertoires |
 | Authored Tier-1 Aspects | **10/24**, **14** still missing | Last explicit content census; no fresh full-catalogue audit in this documentation PR |
@@ -35,7 +35,7 @@
 | Scholar three-Focus evidence | **F/S/T L1–3 bounded native integration** | #146: 48 four-round cases; #147: 27 complete mobile/two-Soldier cases + 9 historical pending-response probes; #148: 9 *separate* source-native completed off-turn witnesses. These do not establish full Focus certification or representative encounter calibration |
 | Hunter challenge rating | **Unrated** | No trustworthy complete encounter success-rate denominators |
 | B01–B07 blocker definitions closed | **3/7** | B04/B05/B06/B07 remain blocking |
-| Last merged implementation CI verification | **#152 final head passed all 3 workflows** | Corrected #152 head `5de3d72da94634bfb5d0afbac69683e92a8ab468`; this PR's native integration requires independent head CI and remains bounded, not a Focus certificate |
+| Last merged implementation CI verification | **#153 final head passed all 3 workflows** | Corrected #153 head `74fae160598f3df1da6cb401ca9b59ecbaa5f48c`; the pending Medium Gifted design PR has its **own** CI and does not imply an eighth structural pairing |
 
 **Frozen historical Hunter Phase 3 SHA-256:** c02c9830d10f1bcaf7d80ccedfe81102c1d4d9b28f4f004e9f715560b184ca5b.
 
@@ -56,7 +56,7 @@ The [eight-combat-playstyle B04/B05 framework](b04-b05-eight-combat-playstyles-e
 | 5 | Movement and hazards | Explicit grid, rigid 1×2 Hunter, interception/response windows and #148 actual G0→G5 off-turn Sword outcomes, falling and eleven mundane toxin examples | Terrain/traversal and hazards required by pilot; exceptional Hunter/Prone/magic Opportunity authority only if actually used |
 | 6 | Combat calibration | Hunter G7-A–H and Soldier/Sentry G8 bounded terminals; Priest 1,384 primary comparison cases plus distinct #139 decision cases; Scholar bounded two-foe/attrition witnesses | Representative varied encounters, human/GM tactics, honest exposure and complete outcome denominators; Hunter CR still unrated |
 | 7 | Techniques and Veil magic | Inspection/Blink, 48 Aspect identities, eight selected Pillars, 13 Tier-1 techniques, G3 spell engine | Missing MVP Aspect breadth, named T2/T3 Life Miracles, Focus-specific playable actions and costs |
-| 8 | Archetype and Focus content | 12 architectures; **all three Priest Life** and **all three Scholar F/S/T** L1–3 structural/native pairings; **High Gifted structural #152 and bounded native Flame in this PR**; PS taxonomy and bounded Priest role cases | **Five Gifted/Anointed** pairing builds/effects plus independent combat, role and noncombat certification of all twelve |
+| 8 | Archetype and Focus content | 12 architectures; **all three Priest Life** and **all three Scholar F/S/T** L1–3 structural/native pairings; **High Gifted structural #152 and bounded native Flame #153; proposed Medium Gifted Ward design in this PR**; PS taxonomy and bounded Priest role cases | **Five Gifted/Anointed** pairing builds/effects plus independent combat, role and noncombat certification of all twelve |
 | 9 | Advancement | L1–3 resource/Training/Talent architecture, 32 B07 L1–5 Talents and **seven** selected L1→3 structural source pairings | All twelve source-legal level choices/scene use, level-drift checks and explicit pilot XP/milestone award policy |
 | 10 | Equipment and economy | 150 sp starter budget, loadouts, prices, armor/weapons and ammo | Needed Reach/Brace/handling identities and starter balance |
 | 11 | Crafting | Basic trade/discipline resolution | **Deferred:** recipe, rune, magical manufacturing and advanced economy |
@@ -73,7 +73,7 @@ The [eight-combat-playstyle B04/B05 framework](b04-b05-eight-combat-playstyles-e
 |---|---|---|---|
 | **Priest** | **Structural/native Life A/B/R**; one Focus pairing | **Structural/native Life M** | **Structural/native Life H** |
 | **Scholar** | **Structural/native Earth-Life T L1→3 (Embodiment)** | **Structural/native Earth-Life S L1→3 (Inward)** | **Structural/native Fire F L1→3** |
-| **Gifted** | Content/build open | Content/build open | **Structural L1→3 pilot (#152)**; this PR adds bounded native Joy/Thrown Flame, while genuine live miscast and independent combat/noncombat certification remain open |
+| **Gifted** | Content/build open | Content/build open | **Structural L1→3 pilot (#152)**, **bounded native Joy/Thrown Flame (#153)**; this PR proposes a Medium Gifted Conduit Form but no Medium structural build. Genuine live miscast and independent combat/noncombat certification remain open |
 | **Anointed** | Content/build open | Content/build open | Content/build open |
 
 **7/12 structurally verified Focus pairings; 0/12 independently end-to-end certified.** The remaining **five** structural pairings are Gifted Low/Medium and Anointed Low/Medium/High. Multiple Low Life variants still count once. A bounded native encounter is not a complete role and noncombat certificate.
