@@ -1,0 +1,69 @@
+# B04/B05 — Low Gifted L1–3 Focus Design and Starting Access v0
+
+> **Provisional DESIGN / approval candidate, not canonical rule text, a native G0–G5 adapter, completed character sheet, player-granted ability or independent Focus certificate.** The existing [Gifted foundation](../rules/08-archetypes/gifted.md) remains authoritative for Anchor, Emotion Window, Break Anchor, L2 Instinctive Expression and L3 Settled Emotion. The two **new numerical effects below are proposals**: approval and native binding are separate subsequent work. Structural Focus progress remains **8/12**; independently certified **0/12**.
+
+## Exact source and inherited starting access
+
+- Use the already source-verified **6 Strong / 2 Plausible** eight-link candidate from [Restricted MVP Pilot Roster](b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.md). There is one Aspect from each of eight distinct Pillars, fixed at character creation. Joy/Fire and Anger/Mind are *Plausible* and need a one-time coherent justification; after creation they have no mechanical penalty. Other legal mappings outside this restricted example are not abolished.
+- The full **individually authored ordinary linked-Aspect catalogue**, subject to current Active Emotion and actual spell permission, is inherited. The Gifted does **not** learn these one by one, prepare them like a Priest, purchase separate technique slots, or gain High Gifted amplification/Surge or Medium Gifted Conduits. No Anchor expression follows automatically merely because an Aspect has an ordinary technique with a `[Self]`, `[Projection]` or `[Embodiment]` tag.
+- Universal **Veil Inspection** is known at L1 (full Action, base 2 **Spent** VP, one held item, subject to actual requirements); **Blink** is known at L3 (base 10 **Spent** VP, normal Low-Focus Projection Action 30 AP, or separately legal Reaction and AP debt). Neither is an emotion link, an Anchor creator, a free cast or a price discount. At Veil Affinity 0 **L3 Max VP is only 6**, so merely knowing Blink does not make it affordable.
+
+| Emotion | Fixed linked Pillar / Aspect | Rating | Individual *ordinary* Tier-1 technique(s) | NEW proposed Anchor output |
+|---|---|:---:|---|---|
+| Joy | Fire / Conflagration | P | Conjure Flame | None |
+| Sadness | Life / Restoration | S | Basic Heal; Guided Regeneration | None |
+| Anger | Mind / Psionics | P | Minor Telekinesis | None |
+| Fear | Earth / Fortification | S | Stone Skin | **Rooted Guard** (candidate) |
+| Surprise | Secrets / Hallucination | S | Phantom Sound | None |
+| Disgust | Liberty / Defiance | S | Weaken Restraints | **Unbound Step** (candidate) |
+| Trust | Kinship / Guardian | S | Protective Ward | None |
+| Anticipation | Arts / Inspiration | S | Spark of Inspiration | None |
+
+**Tier:** L1–2 have the universal **Used Tier 1 ceiling**. L3 has ceiling 2, but *only* the individually authored upcasts of Conjure Flame, Basic Heal and Minor Telekinesis are represented in the restricted source fixture. A ceiling alone is not a new Tier-2 spell, upcast for every Tier-1 technique or special Low Focus Embodiment. The isolated budget witness prices **only** source-supported Conjure Flame, Basic Heal and T1 Stone Skin; all other published individual techniques retain their own exact mode, VP, range, target, trigger and action requirements and cannot borrow those three prices.
+
+## Provisional finite Anchored Embodiments (not approved)
+
+**Identity and host:** Low Gifted's chosen **Anchored Emotion**, not the currently fashionable ordinary spell. At combat start establish one Anchor under the existing emotion rule. While that Anchor genuinely remains **Active**, its expression is **self-centered** on the Gifted's living body. No independent field, friendly-target buff, free reaction, direct Veil attack, new Tier-1 technique, persistent Stone Skin or separate VP commitment exists. Emotions other than the two exact candidate pairings have **no new Anchor effect** in this proposal; they still allow lawful ordinary linked-Aspect magic.
+
+| Parameter | **Fear → Earth / Fortification: Rooted Guard** | **Disgust → Liberty / Defiance: Unbound Step** |
+|---|---|---|
+| Effect **(candidate)** | **+1 to the Guard defense value** of one otherwise legal, actually committed Guard **against an incoming Physical weapon attack targeting self**. Must be declared before that attack roll; changes only the one guard value, never HP/Vigor directly | Reduce an **already lawful and paid difficult-terrain movement step's added MP surcharge by 1**, down to zero surcharge, **never below normal base step cost**; no free traversal or permission to move into a blocked space |
+| L1 integration | Source-legally held Guard instrument and remaining Guard capacity required, with the full real Guard response committed. No automatic Guard | An actual G1 difficult-terrain paid movement step with a strictly positive surcharge; the model previews the resulting MP cost rather than moving a body |
+| **L2 Instinctive** candidate widening | **Guard or Dodge**, but only one authentic chosen, committed, self-defensive response; not both. A Dodge receives the same +1 to its one actual defense score | Same once-window **1 MP surcharge** discount may alternatively apply to the *extra cost* of an otherwise lawful cautious step; not an additional movement, immunity to Opportunity or an excuse to ignore path/terrain legality |
+| L3 | Same **+1** finite output, **not** extra per Physical Tempo; canonical **Settled Emotion** works separately | Same **1 MP** finite output, **not** cumulative per MP spent; canonical **Settled Emotion** works separately |
+| AP, VP, and cadence | **No new AP/VP cost** for the *Anchor rider itself*; the underlying Guard/Dodge must be legal and pay its own real capacity/response. **One total candidate Pulse per Emotion Window across both possible Anchor expressions** | Same: ordinary real movement pays its own MP; the one candidate Pulse is not an alternate cost pool, refreshable on Break, or freely stockpiled |
+| End/countercase | Loss of matching Active Anchor, a failed eligibility check, or a prior spent Pulse prevents output; unchanged Guard capacity/Reaction/AP and normal damage rules | No benefit on ordinary zero-surcharge ground, unavailable/nonexistent MP, an illegal or unpaid step, a second candidate movement event in the Window, or remote/allied movement |
+
+**Why these candidates:** Fortification strengthens the *caster's physical defensive footing*, rather than duplicating Stone Skin's continuous resistance or the Medium Gifted's post-mitigation damage Ward. Defiance helps physically push against an **existing movement restriction** rather than granting magical teleportation, automatic removal of restraints or global immunity to movement rules. The exact +1 numbers and level-2 widened eligibility require explicit game-design approval and calibration; they are **not yet player permissions**.
+
+### Anchor lifecycle, source budget and no-refresh
+
+1. **Combat start:** choose an authored linked emotion as Anchor. If no dominant competing emotion interferes, it is the Active Emotion. The initial Anchor does **not** require a new external cast, paid 24-AP establishment, Spent VP or Committed VP. This differs from a Medium Conduit.
+2. **Following Emotion Establishment Steps:** uninterrupted chosen Anchor automatically becomes Active again. A genuinely dominant competing emotion may disrupt it; **the candidate effect ends immediately**. Do not silently treat a competing Active Emotion as newly chosen Anchor or claim permanent immunity to emotional interference. Reassertion uses the existing paid **24-AP General Tempo Emotional Transition** with the actual check (DC 12 Heightened or DC 15 Overwhelming before any properly authored more-severe modifier). On failure, competing Active Emotion remains and the Anchor effect stays inactive.
+3. **Voluntary Break Anchor:** **24 AP**, evoke the new legal linked emotion, and replace the old Anchor. No extra VP tax, no mid-window free spell, no instant second attack. Once an Anchor changes, any previously successful L3 Settled Heightening ends. **A Break/return, reassertion or forced emotional change cannot refresh the single per-window candidate Pulse**; only a genuinely new Emotion Establishment Step opens a new window.
+4. **L3 Settled Emotion:** if the **same Anchor genuinely persisted from the previous turn**, attempt Deepen Emotion at **0 General Tempo AP** (still the actual `d20 + Awareness + Emotional Discipline + Resonance vs DC12` check and once-per-window limit). On success the Heightened Anchor **continues across subsequent uninterrupted turns**. Breaking/disrupting ends that persistence. An initial/nonsettled Deepen still costs **24 AP**. This is a base Low Gifted rule, not extra charge or permission from either candidate effect; no assumed natural Heightening or Overwhelming.
+5. **Native binding still required:** the design model's `paid`, `source_legal`, `self_target` and surcharge claims are **caller declarations**. Only a future G0/G1/G2/G5 adapter that validates the original action/response, G1 path and source packet can commit a real +1 defense or subtract actual MP. A pure preview is neither a native resolved movement nor a legal G0 Guard/Dodge event. No new damage, extra attack, poison immunity, double defensive response or action comes from this candidate.
+
+## Focus budget cross-check (source locked, zero Veil Affinity)
+
+| Character level | Low Max VP `2×Level` | Turn AP | Physical / Projection / General AP | Physical Tempo / Guard capacity | Notes |
+|---:|---:|---:|---|---:|---|
+| 1 | **2** | **30** | 20 / 30 / 24 | **1** | One 30-AP Projection or one 24-AP Break; ordinary T1 Flame/Basic Heal uses 2 Spent VP if separately legal |
+| 2 | **4** | **36** | 20 / 30 / 24 | **1** | Instinctive wider eligible physical trigger proposed; still no free defense/MP |
+| 3 | **6** | **42** | 20 / 30 / 24 | **2** | Two 20-AP Physical Actions possible, but no repeated Anchor Pulse; L3 Blink known and **not normally affordable** at VA0 |
+
+Example source prices: T1 Conjure Flame / Basic Heal **2 Spent VP and one Low Projection Action (30 AP)**; L3 T2 authorised primary use **4 Spent VP**, subject to real source mode. T1 Stone Skin **`ceil(Max VP/3)` Committed VP = 1/2/2** at L1/2/3 for this VA0 budget. Stone Skin itself is a separate paid maintained technique, **never a free Fear Anchor**. Successful L3 *settled*, free-AP Deepen can coexist with one otherwise legal 30-AP Projection in the same 42-AP turn; an **ordinary paid** 24-AP Deepen plus 30-AP Projection (**54 AP**) cannot. An ordinary 24-AP Break plus another 24-AP Deepen (**48 AP**) is also impossible at L3, even though either action is individually permitted. Using a +Veil Affinity sheet changes VP but never the AP cost, and it must be an **independently paid, valid starting Ability allocation** in the later full build.
+
+## Evidence delivered and explicit decisions still open
+
+The companion **isolated source-data design model** (`scripts/b05_low_gifted_anchor_design_v0.py`) and **14 regression groups** cover the unchanged eight links, starting technique access and Tier ceiling, Low VP/AP/Guard arithmetic, exact Pulse/no-refresh, paid physical requirements, L2 eligibility differences, voluntary break and forced disruption, paid Transition, L3 free Deepen/persistent Heightening, false emotional rolls, independent normal technique prices, missing real-actor receipt and no automatic Blink affordability. These fixtures are intentionally neither a native Actor nor a new spell executor. Local unit tests are not GM/human sessions or a proof of physical encounter balance.
+
+Before any canonical player grant: (a) explicitly review/accept or revise the two **candidate** outputs and their L2 widening; (b) write an exact canonical Low Gifted Anchor profile with timing/constraints; (c) complete one **source-legal 28-point nine-Ability, Discipline 4/2/2, weapon, Talent, equipment and coin L1→3 Low Gifted character** with actual 2/4/6-or-allocated-VA VP; (d) bind one declared Guard/Dodge and G1 terrain/cautious action to its **real** native source index and test damage/movement in G0–G5; (e) add real noncombat Anchor use, Emotion Transition and representative encounter/role calibration and independent Focus certificate. Missing L4/5 Deep Embodiment and L5 expanded content are **not** invented to finish an L1–3 pilot.
+
+**Counting:** 12/12 architecture identities, **8/12** structural pairings, **0/12** independent full certifications, **3/7** original blockers closed, **0/6** strict MVP acceptance gates. Low Gifted remains one of **four** missing structural pairings alongside High/Medium/Low Anointed. The original B06 G0–G8 milestone taxonomy is unchanged; no B06 G9.
+
+## Reproduce isolated verification
+
+```sh
+python -m unittest discover -s tests -p 'test_b05_low_gifted_anchor_design_v0.py' -v
+```
