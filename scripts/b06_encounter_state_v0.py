@@ -742,6 +742,16 @@ class Encounter:
                 raise ValueError("Active G3 effect has invalid committed VP funding")
             if a.vp_committed - points < owned:
                 raise ValueError("Cannot refund VP owned by active G3 effects")
+        ward=(getattr(self.g4,"medium_gifted",None)
+              if self.g4 is not None else None)
+        if ward is not None and actor_id==ward.caster:
+            # A generic G0 release cannot strand the still-established Ward.
+            owned_ward=sum(c.grade for c in ward.conduits)
+            g3_owned = (sum(effect.committed for effect in self.g3.effects.values()
+                            if effect.caster == actor_id)
+                        if self.g3 is not None else 0)
+            if a.vp_committed - points < owned_ward + g3_owned:
+                raise ValueError("Cannot refund VP owned by Ward/G3 effects")
         a.vp_committed -= points
         a.vp_available += points
         self.log("vp_release", actor=actor_id, points=points, label=label)

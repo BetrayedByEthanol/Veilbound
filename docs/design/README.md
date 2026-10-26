@@ -15,9 +15,11 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
-**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged Medium Gifted Ward design PR #154 plus the new L1–3 structural build candidate. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 8/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged Medium Gifted structural PR #155 and this bounded native Ward encounter integration. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 8/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
 
 ## Active design records
+
+- [B04/B05 — Medium Gifted Native Ward Conduit Encounter Integration v0](b04-b05-medium-gifted-native-ward-encounter-integration-v0.md) — source-fingerprinted L1–3 Medium Gifted, genuine G0/G1/G4/G5 Soldier/Sentry hits, paid Ward placements, Fear HP and Trust ally Vigor one-Pulse prevention, shared damage/wound preflight, and unsupported finite-budget overlap rejection. **No new Focus pairing or full certification.**
 
 - [B04/B05 — Medium Gifted L1–3 Character Build and Verification v0](b04-b05-medium-gifted-l1-l3-character-build-verification-v0.md) — **eighth structural pairing on merge** with all nine starting abilities, eight fixed links, equipment/Training/Talent, Level 1–3 VP/AP and Grade I–III Ward setup/countercases; also promotes the reviewed #154 Ward design to a **provisional L1–3 expression rule**. Isolated event budgets, no native G4 prevention or independent Focus certification.
 

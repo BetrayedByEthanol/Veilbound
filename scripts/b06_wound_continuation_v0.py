@@ -183,12 +183,21 @@ class WoundContinuation:
         # G0 supplied the exact sequence payment and target/profile binding;
         # G4 supplies source JSON attack packets,
         # mitigation, exact one-event wound and native effects.
-        result=self.d.apply_profile_hit(
-            attacker,target,profile_id,die_face=die_face,
-            confirmed_hit=True,critical=critical,
-            critical_dice=critical_dice,vigor_die=vigor_die,
-            wound_location_roll=wound_location_roll,
-            medium_intercessor=medium_intercessor)
+        # The Ward may protect ONLY this live G4.5-attested, G0-paid
+        # G5 action. Merely finding a plausible earlier melee_roll in the
+        # ledger must not let direct G4 callers mint a Ward Pulse.
+        if self.d._live_ward_action is not None:
+            raise UnresolvedDecision("Nested paid Ward source action")
+        self.d._live_ward_action=(attacker,target,profile_id,action_index)
+        try:
+            result=self.d.apply_profile_hit(
+                attacker,target,profile_id,die_face=die_face,
+                confirmed_hit=True,critical=critical,
+                critical_dice=critical_dice,vigor_die=vigor_die,
+                wound_location_roll=wound_location_roll,
+                medium_intercessor=medium_intercessor)
+        finally:
+            self.d._live_ward_action=None
         self.seen_actions.add(action_index)
         # A Hunter Bite's delivered toxin must consume the newest G4 hit
         # synchronously, before G4.5 appends its own provenance event.
@@ -264,11 +273,23 @@ class WoundContinuation:
             attacker,target,profile_id,die_face=die_face,
             critical=critical,critical_dice=critical_dice,
             vigor_die=vigor_die,wound_location_roll=wound_location_roll)
-        result=e.g4.apply_profile_hit(
-            attacker,target,profile_id,die_face=die_face,
-            confirmed_hit=True,critical=critical,
-            critical_dice=critical_dice,vigor_die=vigor_die,
-            wound_location_roll=wound_location_roll)
+        # G0's live spontaneous receipt is the ONLY off-turn Ward
+        # authority. Ordinary G5 uses a separate paid Turn-AP action index.
+        # Scope the exact G1 pending / G0 response pair through the G4 call;
+        # an unattested direct profile delivery can never forge this bridge.
+        if e.g4._live_ward_opportunity is not None:
+            raise UnresolvedDecision("Nested Ward Opportunity delivery")
+        e.g4._live_ward_opportunity=(
+            "live",attacker,target,profile_id,
+            response_index,pending_index,trigger.key)
+        try:
+            result=e.g4.apply_profile_hit(
+                attacker,target,profile_id,die_face=die_face,
+                confirmed_hit=True,critical=critical,
+                critical_dice=critical_dice,vigor_die=vigor_die,
+                wound_location_roll=wound_location_roll)
+        finally:
+            e.g4._live_ward_opportunity=None
         e.log("g45_opportunity_attested_hit",
               attacker=attacker,target=target,profile=profile_id,
               response_index=response_index,pending_index=pending_index,
