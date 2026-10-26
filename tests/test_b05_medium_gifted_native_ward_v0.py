@@ -87,8 +87,14 @@ class MediumGiftedNativeWardTests(unittest.TestCase):
         damage=event(e,"g4_damage_applied")[-1]
         self.assertEqual(damage["medium_gifted_ward"]["conduit_serial"],1)
         self.assertEqual(before-e.actors["gifted"].hp,damage["packets"][0]["mitigated"])
-        self.assertEqual(damage["packets"][0]["raw"]-3-2,
-                         damage["packets"][0]["mitigated"])
+        # Soldier source Penetration reduces effective weapon Armor;
+        # never subtract all 3 Leather points without the native profile.
+        packets=e.g4._profile_hit_packets(
+            "foe","gifted","B06-AT-03",die_face=5)[2]
+        self.assertEqual(len(packets),1)
+        post_armor=e.g4._mitigate_hp(e.actors["gifted"],packets[0])
+        self.assertEqual(max(0,post_armor-2),damage["packets"][0]["mitigated"])
+        self.assertEqual(pulses[0]["original_post_mitigation"],post_armor)
         leftover=w.preview("gifted",(DamagePacket("hp","Cut",5,armor_rule="weapon"),),(2,))
         self.assertEqual(leftover["prevention"],0)
         e.check()
@@ -115,8 +121,13 @@ class MediumGiftedNativeWardTests(unittest.TestCase):
         self.assertEqual((pulse["recipient"],pulse["prevented"],pulse["emotion"]),
                          ("friend",2,"Trust"))
         detail=event(e,"g4_damage_applied")[-1]
+        # Prepared Sentry Sword has multiple HP packets before its
+        # Direct Vigor packet: derive the correct resource, never index 1.
+        vigor_packets=[p for p in detail["packets"] if p["resource"]=="vigor"]
+        self.assertEqual(len(vigor_packets),1)
         self.assertEqual(detail["vigor_details"][0]["applied"],
-                         detail["packets"][1]["mitigated"])
+                         min(initial,vigor_packets[0]["mitigated"]))
+        self.assertEqual(vigor_packets[0]["raw"]-vigor_packets[0]["mitigated"],2)
         self.assertEqual(initial-e.actors["friend"].vigor,
                          detail["vigor_details"][0]["applied"])
         self.assertEqual(detail["medium_gifted_ward"]["prevented"],2)
