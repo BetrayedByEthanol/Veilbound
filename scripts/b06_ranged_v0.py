@@ -182,7 +182,10 @@ class RangedCombat:
         return tuple(route), tuple(corner_sides)
 
     def lane(self, shooter_id, target_id, *, exposures=(), origin=None,
-             target_cell=None, range_kind="bow", drop_departed_screens=False):
+             target_cell=None, range_kind="bow", drop_departed_screens=False,
+             max_flame_squares=3):
+        if range_kind != "flame" and max_flame_squares != 3:
+            raise ValueError("Flame Reach cannot modify another ranged profile")
         if shooter_id not in self.e.actors or target_id not in self.e.actors:
             raise ValueError("Unknown G2 shooter or target")
         shooter, target = self.e.actors[shooter_id], self.e.actors[target_id]
@@ -251,8 +254,12 @@ class RangedCombat:
             if band is None:
                 raise ValueError("Beyond 120-square bow range")
         elif range_kind == "flame":
-            if squares < 1 or squares > 3:
-                raise ValueError("Thrown Flame range is exactly 1–3 squares")
+            # A source-specific G3 caller alone may authorize the High Gifted
+            # +1 Reach Step. G2 performs geometry; it does not grant a cast.
+            if max_flame_squares not in (3, 4):
+                raise ValueError("No authored Thrown Flame range modifier")
+            if squares < 1 or squares > max_flame_squares:
+                raise ValueError("Thrown Flame target outside effective 1–3/4 squares")
             band = 0  # Conjure Flame explicit +0, not Bow Close -2.
         else:
             raise UnresolvedDecision("Only bow and F physical flame previews are G2")
