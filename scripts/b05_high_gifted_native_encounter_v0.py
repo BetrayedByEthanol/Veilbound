@@ -249,7 +249,12 @@ class GiftedNative:
         else:
             outcome = "ordinary_miss"
         used_die = max(vigor_die, potency_die) if potency_die is not None else vigor_die
-        packets = ({"fire_hp": fire_hp, "vigor": 2 + ceil(used_die*tier/3)}
+        # Conjure Flame Thrown Primary: V 2 + ceil(d8*T/3) + max(0, VC).
+        # The source is already attested by _ready(); VC is not scaled by
+        # level and is applied ONCE after the (possibly Potency-selected) die.
+        caster_vc = max(0, dict(a.source.abilities)["Veil Control"])
+        packets = ({"fire_hp": fire_hp,
+                    "vigor": 2 + ceil(used_die*tier/3) + caster_vc}
                    if outcome == "direct_hit_pending_G4" else None)
         receipt = {"outcome": outcome, "attack_total": attack,
                    "base_defense": base, "final_defense": effective_def,
@@ -263,6 +268,7 @@ class GiftedNative:
                    gifted_emotion=self.window["emotion"], gifted_window=self.turn_key,
                    gifted_options=list(selected), gifted_surge_spent=surcharge,
                    potency_die=potency_die, effective_die=used_die,
+                   caster_veil_control=caster_vc,
                    physical_range=lane.distance, **receipt)
         if outcome == "direct_hit_pending_G4":
             receipt["g4_damage"] = self.e.g4.apply_flame(

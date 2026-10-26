@@ -52,6 +52,7 @@ class HighGiftedNativeTests(unittest.TestCase):
                              (12, 12*level, 6*level, 30+6*(level-1)))
             self.assertEqual(e.order, ("gifted", "soldier"))
             w.establish("Joy")
+            soldier_vigor_before = e.actors["soldier"].vigor
             r = cast(w)
             self.assertEqual(r["outcome"], "direct_hit_resolved_G4")
             self.assertEqual(r["attack_total"], 18)
@@ -59,7 +60,16 @@ class HighGiftedNativeTests(unittest.TestCase):
             self.assertEqual(a.ap_remaining, a.ap_total-20)
             self.assertEqual(a.vp_spent, 2)
             self.assertEqual(len(events(e, "g4_damage_applied")), 1)
-            self.assertEqual(events(e, "g3_flame_launched")[-1]["detail"]["source_id"], "G")
+            launch = events(e, "g3_flame_launched")[-1]["detail"]
+            applied = events(e, "g4_damage_applied")[-1]["detail"]
+            # Primary T1: 2 + ceil(5/3) + max(0, caster VC1) = 5.
+            self.assertEqual(dict(a.source.abilities)["Veil Control"], 1)
+            self.assertEqual(launch["caster_veil_control"], 1)
+            self.assertEqual(launch["packets_pending_g4"]["vigor"], 5)
+            self.assertEqual(applied["packets"][1]["raw"], 5)
+            self.assertEqual(applied["vigor_details"][0]["applied"], 5)
+            self.assertEqual(soldier_vigor_before - e.actors["soldier"].vigor, 5)
+            self.assertEqual(launch["source_id"], "G")
             e.check()
 
     def test_natural_heightened_reach_and_paid_surge_at_four_squares(self):
@@ -92,8 +102,34 @@ class HighGiftedNativeTests(unittest.TestCase):
         w.establish("Joy", natural_heightening=True, rationale="Source-authorized")
         r = cast(w, vigor_die=2, potency_die=8, safe="Potency")
         d = events(e, "g3_flame_launched")[-1]["detail"]
+        # Potency picks the higher original d8 before scaling; VC1 is
+        # applied once AFTER ceiling: 2 + ceil(8/3) + 1 = 6.
         self.assertEqual((d["die"], d["potency_die"], d["effective_die"],
-                          d["packets_pending_g4"]["vigor"]), (2, 8, 8, 5))
+                          d["caster_veil_control"],
+                          d["packets_pending_g4"]["vigor"]), (2, 8, 8, 1, 6))
+        damage = events(e, "g4_damage_applied")[-1]["detail"]
+        self.assertEqual(damage["packets"][1]["raw"], 6)
+        self.assertEqual(damage["vigor_details"][0]["applied"], 6)
+        self.assertEqual(r["packets_pending_g4"]["vigor"], 6)
+
+    def test_tier_two_potency_adds_source_vc_once_to_native_vigor(self):
+        e, w, _ = scene(3)
+        w.establish("Joy", natural_heightening=True, rationale="Source-authorized")
+        initial_vigor = e.actors["soldier"].vigor
+        r = cast(w, tier=2, vigor_die=2, potency_die=8, safe="Potency")
+        launch = events(e, "g3_flame_launched")[-1]["detail"]
+        damage = events(e, "g4_damage_applied")[-1]["detail"]
+        # T2: 2 + ceil(max(2, 8) * 2 / 3) + VC1 = 9, not 8 or 10.
+        self.assertEqual((launch["die"], launch["potency_die"],
+                          launch["effective_die"], launch["caster_veil_control"],
+                          launch["packets_pending_g4"]["vigor"]),
+                         (2, 8, 8, 1, 9))
+        self.assertEqual(r["packets_pending_g4"]["vigor"], 9)
+        self.assertEqual(damage["packets"][1]["raw"], 9)
+        self.assertEqual(damage["vigor_details"][0]["applied"], 9)
+        self.assertEqual(initial_vigor - e.actors["soldier"].vigor, 9)
+        self.assertEqual(e.actors["gifted"].vp_spent, 4)
+        e.check()
 
     def test_level_three_two_projection_actions_no_step_refresh(self):
         e, w, _ = scene(3)
@@ -105,6 +141,10 @@ class HighGiftedNativeTests(unittest.TestCase):
         a = e.actors["gifted"]
         self.assertEqual((a.ap_remaining, a.vp_spent), (2, 3+4))
         self.assertEqual(len(events(e, "g3_flame_launched")), 2)
+        self.assertEqual(events(e, "g3_flame_launched")[-1]["detail"]
+                         ["packets_pending_g4"]["vigor"], 7)
+        self.assertEqual(events(e, "g4_damage_applied")[-1]["detail"]
+                         ["packets"][1]["raw"], 7)
         with self.assertRaises(ValueError):
             cast(w, surge="Potency")
         with self.assertRaises(ValueError):
