@@ -110,6 +110,101 @@ class HighGiftedNativeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             w.establish("Joy", natural_heightening=True, rationale="no second window")
 
+    def test_unset_window_first_legal_linked_cast_establishes_evoked_joy(self):
+        for level in (1, 2, 3):
+            with self.subTest(level=level):
+                e, w, _ = scene(level)
+                w.establish(None)
+                original_key = w.turn_key
+                self.assertEqual(w.window["emotion"], None)
+                self.assertTrue(w.surge_remaining)
+                self.assertFalse(w.safe_remaining)
+                r = cast(w, surge="Precision")
+                self.assertEqual(r["outcome"], "direct_hit_resolved_G4")
+                self.assertEqual(r["vp_spent"], 3)
+                self.assertEqual(w.window, {"emotion": "Joy", "intensity": "evoked"})
+                self.assertEqual(w.turn_key, original_key)
+                self.assertFalse(w.safe_remaining)
+                self.assertFalse(w.surge_remaining)
+                established = events(e, "b05_gifted_emotion_established")
+                automatic = events(e, "b05_gifted_first_linked_emotion")
+                self.assertEqual((len(established), len(automatic)), (1, 1))
+                self.assertIsNone(established[0]["detail"]["emotion"])
+                self.assertEqual(automatic[0]["detail"]["window"], original_key)
+                self.assertEqual(events(e, "g3_flame_launched")[0]["detail"]["gifted_window"],
+                                 original_key)
+                with self.assertRaises(ValueError):
+                    w.establish("Joy")
+                e.check()
+
+    def test_failed_deferred_cast_does_not_lock_joy_or_refresh_steps(self):
+        e, w, _ = scene(level=1, distance=4)
+        w.establish(None)
+        before = (e.actors["gifted"].ap_remaining,
+                  e.actors["gifted"].vp_spent, w.turn_key)
+        with self.assertRaises(ValueError):
+            cast(w)
+        with self.assertRaises(ValueError):
+            cast(w, safe="Reach")
+        self.assertEqual(w.window["emotion"], None)
+        self.assertEqual((e.actors["gifted"].ap_remaining,
+                          e.actors["gifted"].vp_spent, w.turn_key), before)
+        self.assertTrue(w.surge_remaining)
+        self.assertFalse(w.safe_remaining)
+        self.assertFalse(events(e, "b05_gifted_first_linked_emotion"))
+        r = cast(w, surge="Reach")
+        self.assertEqual(r["outcome"], "direct_hit_resolved_G4")
+        self.assertEqual(w.window["emotion"], "Joy")
+        self.assertFalse(w.surge_remaining)
+        self.assertEqual(len(events(e, "b05_gifted_first_linked_emotion")), 1)
+
+    def test_unset_window_can_defer_joy_until_first_cast_after_movement(self):
+        e, w, _ = scene()
+        w.establish(None)
+        key = w.turn_key
+        self.assertTrue(e.g1.step("gifted", (0, 1), responses=()))
+        self.assertEqual(len(events(e, "g1_movement_step")), 1)
+        result = cast(w)
+        self.assertEqual(result["outcome"], "direct_hit_resolved_G4")
+        self.assertEqual(w.window["emotion"], "Joy")
+        self.assertEqual(w.turn_key, key)
+        self.assertEqual(len(events(e, "b05_gifted_emotion_established")), 1)
+        self.assertEqual(len(events(e, "b05_gifted_first_linked_emotion")), 1)
+        self.assertTrue(w.surge_remaining)
+        self.assertFalse(w.safe_remaining)
+        e.check()
+
+    def test_initial_establishment_rejected_after_ordinary_movement(self):
+        e, w, _ = scene()
+        self.assertTrue(e.g1.step("gifted", (0, 1), responses=()))
+        before = (e.actors["gifted"].ap_remaining,
+                  e.actors["gifted"].vp_spent, e.actors["gifted"].mp_remaining)
+        with self.assertRaises(ValueError):
+            w.establish("Joy", natural_heightening=True,
+                        rationale="Would be a late fictional choice")
+        with self.assertRaises(ValueError):
+            w.establish(None)
+        self.assertEqual((e.actors["gifted"].ap_remaining,
+                          e.actors["gifted"].vp_spent,
+                          e.actors["gifted"].mp_remaining), before)
+        self.assertIsNone(w.window)
+        self.assertFalse(events(e, "b05_gifted_emotion_established"))
+
+    def test_initial_establishment_rejected_after_mp_reservation_or_stand(self):
+        e, w, _ = scene()
+        e.g1.reserve_movement("gifted", "test-window", 1, label="movement")
+        with self.assertRaises(ValueError):
+            w.establish("Joy")
+        self.assertIsNone(w.window)
+
+        e, w, _ = scene()
+        e.actors["gifted"].conditions.append("Prone")
+        self.assertTrue(e.g1.stand("gifted"))
+        with self.assertRaises(ValueError):
+            w.establish("Joy", natural_heightening=True,
+                        rationale="Heightening cannot follow a Stand")
+        self.assertIsNone(w.window)
+
     def test_late_establishment_cannot_refresh_after_paid_action(self):
         e, w, _ = scene()
         e.spend_ap("gifted", "general", label="legal_prior_general_action")

@@ -89,10 +89,20 @@ class GiftedNative:
         turn_key = resources[-1]["index"]
         if turn_key == self.turn_key:
             raise ValueError("An Emotion Window cannot be refreshed mid-turn")
-        if any(v["kind"] in ("action_committed", "vp_transition")
+        # Step 5 must precede Step 6's real MP decisions as well as AP/VP
+        # actions. G1 movement uses no AP and cannot be detected by the
+        # former action-only guard. Only this Gifted's own post-Step-5
+        # commitments close the initial choice; other actors' responses do
+        # not masquerade as their movement.
+        late_decisions = {
+            "action_committed", "vp_transition", "g1_movement_step",
+            "g1_allied_transit_step", "g6_stand_started",
+            "g1_movement_mp_reserved",
+        }
+        if any(v["kind"] in late_decisions
                and v["detail"].get("actor") == self.caster
                and v["index"] > turn_key for v in self.e.ledger):
-            raise ValueError("Emotion Establishment precedes normal actions")
+            raise ValueError("Emotion Establishment precedes normal movement and actions")
         if emotion not in PILOT_LINKS and emotion is not None:
             raise ValueError("Emotion must be one of the eight permanent links")
         if type(natural_heightening) is not bool:
@@ -123,7 +133,10 @@ class GiftedNative:
             raise ValueError("No active source-bound Gifted Emotion Window")
         if a.hp <= 0 or a.dead:
             raise ValueError("Incapacitated Gifted cannot cast")
-        if self.window["emotion"] != "Joy":
+        # Explicitly unset at Step 5 means the FIRST linked technique may
+        # evoke its own matching emotion later without reopening the Window.
+        # Another already-established emotion still blocks Fire access.
+        if self.window["emotion"] not in (None, "Joy"):
             raise ValueError("Conjure Flame requires currently Active Joy")
         if set(self.e.g2.wielded[self.caster]) != {"Dagger"}:
             raise UnresolvedDecision("Authored wielded dagger/hand state changed")
@@ -140,6 +153,7 @@ class GiftedNative:
         are Potency/Reach/Precision. Risky Overwhelming has no legal v0 entry.
         """
         a, p = self._ready()
+        deferred_joy = self.window["emotion"] is None
         if (type(tier) is not int or tier not in (1, 2)
                 or tier > p["max_used_tier"]):
             raise ValueError("Inaccessible Flame Used Tier")
@@ -206,6 +220,15 @@ class GiftedNative:
         if a.vp_available < total_vp or a.ap_remaining < a.projection_ap:
             raise ValueError("Combined AP/VP unavailable; no partial cast")
         self.e.spend_ap(self.caster, "projection", label="b05:gifted_thrown_flame:T"+str(tier))
+        # The paid first legal linked cast establishes the previously unset
+        # emotion. Do not refresh Window identity, safe Step, Surge allowance
+        # or natural intensity; unsuccessful preflights never lock the link.
+        if deferred_joy:
+            self.window["emotion"] = "Joy"
+            self.e.log("b05_gifted_first_linked_emotion", caster=self.caster,
+                       window=self.turn_key, emotion="Joy",
+                       intensity=self.window["intensity"],
+                       technique="Conjure Flame", profile="Thrown Projectile Primary")
         # No user callback is accepted between preflight, payment and impact.
         self.e.spend_vp(self.caster, t.spent_vp, mode="spent", label="b05:gifted_flame_base")
         if surcharge:
