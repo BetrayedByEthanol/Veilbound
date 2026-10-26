@@ -12,6 +12,7 @@
 | Focus | High / Medium / Low; each pays their normal AP category for the selected profile |
 | Components | **Hands or Held**: a functioning available hand for a free-thrown manifestation, or the held weapon/launcher carrying a weapon/ammunition effect; requires the ability to perform the chosen action. No free-hand requirement on top of an otherwise legal two-handed bow shot. |
 | Interaction | Thrown flame = independently manifested physical projectile; weapon/ammunition = ordinary weapon/carrier with magical on-hit packets |
+| High Gifted expression | **[Projection]** **only** on the `Thrown Projectile` **Primary** profile; Gifted Amplification options are **Potency, Reach, Precision** under [High Gifted v0](high-gifted-amplification-and-miscasts-v0.md). Not automatically granted to `Ammunition Shot`, `Weapon Enchantment`, Secondary or Rider |
 | Damage | Separately authored **Fire HP** and **Vigor burn** packets; Fire Resistance affects only Fire HP by default |
 | Veil Control v0 | **VC = max(0, Veil Control)** in each authored formula; **custom output coefficient**, **not** Standard VC × Character Level. Applied **once on each eligible hit**, with ammunition snapshots as defined below. |
 | Durations | Thrown: immediate; Reserved Weapon: while channel valid; Ammunition Shot: one fired projectile |
@@ -39,6 +40,10 @@
 - A future authorized **item conversion** or environmental downgrade can select Secondary under its own rules, including a standalone weakened cast; this technique grants no such item or environmental effect by itself.
 
 **Reversing roles is legal only where both profiles and permissions exist:** Conjure Flame Primary with another spell Secondary and another spell Primary with Conjure Flame Secondary are **different composites**, and both are subject to known-technique, profile, tier, action and VP constraints. A magically created rock using **`Thrown Projectile`** can potentially combine with this technique in either role; an **`Ammunition Shot`** arrow profile is not interchangeable with **`Thrown Projectile`** merely because both travel through the air.
+
+## High Gifted — `Thrown Projectile` Primary Amplification only
+
+This particular independently manifested projectile is **[Projection]** for High Gifted's Projected Surge at levels 1–3. Its authored options are **Potency** (two d8, higher, **once** for the primary Vigor expression before `ceil(d8×T/3)`; Fire HP fixed 2 unchanged), **Reach** (+1 square: legal range 1–4 squares with unchanged +0 Range Difficulty at square 4, ordinary cover/path/defenses still apply), and **Precision** (+1 to the existing Throwing-based projectile attack roll). One option per Step, no duplicate category. Exactly `2×T Spent VP` base and 20 AP High Projection; a paid Surge costs an extra `ceil((2×T)/4) Spent VP`, one Surge allowance per Emotion Window. Inapplicable types/radii/durations and damage conversion remain unavailable. See [universal Instability and miscasts](high-gifted-amplification-and-miscasts-v0.md). This does not add an Ignite, area, guaranteed hit, free reactive throw or composite authorization.
 
 ## A. Thrown Flame — `Thrown Projectile`
 
