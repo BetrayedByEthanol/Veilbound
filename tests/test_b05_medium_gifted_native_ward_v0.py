@@ -9,6 +9,8 @@ from scripts.b06_encounter_state_v0 import (
     Encounter, RegenerationChoice, UnresolvedDecision, enemy_actor, party_actor,
 )
 from scripts.b06_movement_v0 import GridMovement
+from scripts.b06_ranged_v0 import RangedCombat
+from scripts.b06_offturn_opportunity_v0 import OpportunityChoice, _preflight_sequence
 from scripts.b06_spells_v0 import SpellState
 from scripts.b06_damage_v0 import DamageState, DamagePacket
 from scripts.b06_soldier_sentry_g5_v0 import SourceMelee
@@ -26,6 +28,40 @@ def scene(level=1, *, enemy="B06-EN-02", ally=False):
                 scenario="B04-B05-Medium-Ward-native",policy="source-dice",
                 objective="bounded_native_ward")
     GridMovement(e,width=10,height=7,scene_id="medium-ward-grid")
+    SpellState(e)
+    DamageState(e)
+    melee=SourceMelee(e)
+    ward=MediumGiftedWardNative(e,"gifted")
+    e.begin_round()
+    e.start_turn("gifted")
+    return e,ward,melee
+
+
+def opportunity_scene(*, level=1, two=False, trust=False):
+    gifted=gifted_actor(level,"gifted","party",occupied=((2,2),))
+    actors=[gifted]
+    if trust:
+        # The caster stays adjacent to the actual moving, allied recipient.
+        friend=party_actor("R",1,"friend","party",occupied=((3,2),))
+        sentry=enemy_actor("B06-EN-01","foe","enemy",
+                            start_state="prepared_start",occupied=((4,2),))
+        actors += [friend,sentry]
+        scores={"gifted":50,"friend":40,"foe":20}
+    else:
+        foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((3,2),))
+        actors.append(foe)
+        scores={"gifted":50,"foe":30}
+        if two:
+            second=enemy_actor("B06-EN-02","beta","enemy",
+                               occupied=((3,3),))
+            actors.append(second)
+            scores["beta"]=20
+    e=Encounter(actors,scores,seed=2066,
+                scenario="B04-B05-Medium-Ward-native-opportunity",
+                policy="predeclared_g5_opportunity",
+                objective="bounded_native_ward_offturn")
+    GridMovement(e,width=8,height=7,scene_id="medium-ward-opportunity")
+    RangedCombat(e)
     SpellState(e)
     DamageState(e)
     melee=SourceMelee(e)
@@ -290,6 +326,119 @@ class MediumGiftedNativeWardTests(unittest.TestCase):
         self.assertEqual((e.actors["gifted"].vp_committed,
                           e.actors["gifted"].vp_spent),(3,0))
         e.check()
+
+
+    def test_17_real_soldier_opportunity_ward_allows_legal_step(self):
+        e,w,g5=opportunity_scene()
+        w.establish_emotion("Fear")
+        w.place(2)
+        initial_hp=e.actors["gifted"].hp
+        initial_mp=e.actors["gifted"].mp_remaining
+        # Explicitly verify detached rehearsal is prediction only: no real
+        # G0 response, G4 receipt, HP change or Pulse consumption.
+        choice=OpportunityChoice("B06-AT-03",12,damage_face=4)
+        before=len(e.ledger)
+        _preflight_sequence(g5,"gifted",("foe",),{"foe":choice})
+        self.assertEqual(len(e.ledger),before)
+        self.assertEqual(e.actors["gifted"].hp,initial_hp)
+        self.assertNotEqual(w.conduits[0].pulse_window,w.window)
+        self.assertIsNone(e.g4._live_ward_opportunity)
+        self.assertTrue(g5.opportunity_step(
+            "gifted",(0,-1),decisions={"foe":choice}))
+        self.assertEqual(e.actors["gifted"].occupied,((2,1),))
+        self.assertEqual(e.actors["gifted"].mp_remaining,initial_mp-2)
+        self.assertEqual(len(event(e,"spontaneous_committed")),1)
+        self.assertEqual(len(event(e,"g45_opportunity_attested_hit")),1)
+        self.assertEqual(len(event(e,"g4_damage_applied")),1)
+        pulse=event(e,"b05_medium_ward_pulse")
+        self.assertEqual(len(pulse),1)
+        self.assertEqual((pulse[0]["emotion"],pulse[0]["prevented"]),("Fear",2))
+        self.assertEqual(e.actors["gifted"].hp,
+                         initial_hp-(pulse[0]["original_post_mitigation"]-2))
+        self.assertEqual(
+            event(e,"g45_opportunity_attested_hit")[0]["response_index"],
+            event(e,"g5_opportunity_roll")[0]["response_index"])
+        self.assertIsNone(e.g4._live_ward_opportunity)
+        self.assertIsNone(e.g4._live_ward_action)
+        e.check()
+
+    def test_18_two_ordered_opportunities_consume_one_ward_pulse(self):
+        e,w,g5=opportunity_scene(two=True)
+        w.establish_emotion("Fear")
+        w.place(2)
+        before=e.actors["gifted"].hp
+        self.assertTrue(g5.opportunity_step("gifted",(0,1),decisions={
+            "foe":OpportunityChoice("B06-AT-03",12,damage_face=1),
+            "beta":OpportunityChoice("B06-AT-03",12,damage_face=1)}))
+        self.assertEqual(len(event(e,"g45_opportunity_attested_hit")),2)
+        self.assertEqual(len(event(e,"g4_damage_applied")),2)
+        self.assertEqual(len(event(e,"b05_medium_ward_pulse")),1)
+        first,second=event(e,"g4_damage_applied")
+        self.assertEqual(first["medium_gifted_ward"]["prevented"],2)
+        self.assertIsNone(second["medium_gifted_ward"]["receipt"])
+        self.assertEqual(before-e.actors["gifted"].hp,
+                         first["packets"][0]["mitigated"]+
+                         second["packets"][0]["mitigated"])
+        self.assertEqual(e.actors["gifted"].occupied,((2,3),))
+        e.check()
+
+    def test_19_trust_ally_vigor_opportunity_uses_paid_response(self):
+        e,w,g5=opportunity_scene(level=2,trust=True)
+        w.establish_emotion("Trust")
+        w.place(2)
+        e.end_turn()
+        e.start_turn("friend")
+        before=e.actors["friend"].vigor
+        choice=OpportunityChoice("B06-AT-02",12,damage_face=1,vigor_die=6)
+        self.assertTrue(g5.opportunity_step(
+            "friend",(0,-1),decisions={"foe":choice}))
+        pulse=event(e,"b05_medium_ward_pulse")
+        self.assertEqual(len(pulse),1)
+        self.assertEqual((pulse[0]["recipient"],pulse[0]["prevented"],
+                          pulse[0]["emotion"]),("friend",2,"Trust"))
+        applied=event(e,"g4_damage_applied")[-1]
+        details=applied["vigor_details"]
+        self.assertEqual(len(details),1)
+        self.assertEqual(before-e.actors["friend"].vigor,details[0]["applied"])
+        self.assertEqual(pulse[0]["original_post_mitigation"]-2,
+                         details[0]["applied"])
+        self.assertEqual(e.actors["friend"].occupied,((3,1),))
+        self.assertEqual(len(event(e,"g45_opportunity_attested_hit")),1)
+        e.check()
+
+    def test_20_invalid_opportunity_preflight_keeps_pulse_and_mp(self):
+        e,w,g5=opportunity_scene()
+        w.establish_emotion("Fear")
+        w.place(2)
+        actor=e.actors["gifted"]
+        before=(actor.hp,actor.mp_remaining,len(e.ledger),
+                e.actors["foe"].opportunity_used)
+        with self.assertRaises((ValueError,UnresolvedDecision)):
+            g5.opportunity_step("gifted",(0,-1),decisions={
+                "foe":OpportunityChoice("B06-AT-03",20,damage_face=6,
+                       confirmation_face=20,critical_dice=(4,4))})
+        self.assertEqual(
+            (actor.hp,actor.mp_remaining,len(e.ledger),
+             e.actors["foe"].opportunity_used),before)
+        self.assertNotEqual(w.conduits[0].pulse_window,w.window)
+        self.assertIsNone(e.g4._live_ward_opportunity)
+
+
+    def test_21_forged_offturn_roll_without_live_response_cannot_pulse(self):
+        e,w,_=opportunity_scene()
+        w.establish_emotion("Fear")
+        w.place(2)
+        original=e.actors["gifted"].hp
+        # A plausible prior roll is not an active G1/G0 spontaneous window
+        # and must never replace the actual G4.5 authorization.
+        e.log("g5_opportunity_roll",attacker="foe",mover="gifted",
+              response_index=9,profile="B06-AT-03",hit=True)
+        with self.assertRaises(UnresolvedDecision):
+            e.g4.apply_profile_hit(
+                "foe","gifted","B06-AT-03",die_face=4,confirmed_hit=True)
+        self.assertEqual(e.actors["gifted"].hp,original)
+        self.assertFalse(event(e,"b05_medium_ward_pulse"))
+        self.assertIsNone(e.g4._live_ward_opportunity)
 
 
 if __name__ == "__main__":
