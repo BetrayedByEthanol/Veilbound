@@ -190,6 +190,79 @@ class HighGiftedAmplificationTests(unittest.TestCase):
                         choice_index=1)["miscast"]
         self.assertEqual(result["bonus"], "Persistence")
 
+
+    def test_failed_risky_reach_fizzles_after_legal_preflight_and_pays_costs(self):
+        # Reaction is a pure zero-AP test fixture, not an authored off-turn
+        # Conjure Flame permission. Base maximum is 3; risky Reach allows 4
+        # only while that Step actually functions.
+        reaction = replace(self.flame, action_ap=0)
+        far = Target("far", 4)
+        near = Target("near", 2)
+
+        def attempt(instability, outcome=None, *, safe="Precision", risky="Reach",
+                    surge=None, others=(), choice=0):
+            w = HighGiftedWindow(1, "Joy", initial_intensity="heightened")
+            w.overload()
+            receipt = w.cast(
+                reaction, far, safe=safe, risky=risky, surge=surge,
+                instability_roll=instability, miscast_roll=outcome,
+                other_targets=others, choice_index=choice,
+                catalogue=(reaction,), extra_choices=("Potency",),
+            )
+            self.assertEqual(receipt["paid_vp"], 2 + int(surge is not None)
+                             + (receipt["miscast"]["extra_spent_vp"]
+                                if receipt["miscast"] else 0))
+            self.assertEqual((w.ap, w.vp, w.safe_step, w.risky_step,
+                              w.instability_used),
+                             (6, 6-receipt["paid_vp"], 0, 0, True))
+            return receipt
+
+        # DC 13, roll 10 fails by 3, so NO miscast die is used.
+        mild = attempt(10)
+        self.assertIsNone(mild["miscast"])
+        self.assertEqual(mild["status"], "fizzle")
+        # Severe failure plus positive/negative backlash cannot certify an
+        # out-of-range spell. The separately rolled backlash is preserved.
+        for die in (3, 8, 14, 15, 16, 17, 19, 20):
+            receipt = attempt(1, die)
+            self.assertEqual(receipt["status"], "fizzle", die)
+            self.assertEqual(receipt["miscast"]["status"], "fizzle", die)
+        backlash = attempt(1, 14)
+        self.assertEqual(backlash["miscast"]["self_damage"],
+                         ("Vigor", "Vigor", 2))
+        # Retargeting uses surviving base range. Alternative target rescues
+        # the attack; fallback to original must fizzle if none is valid.
+        for die in (4, 5):
+            self.assertEqual(attempt(1, die)["status"], "fizzle")
+            rescued = attempt(1, die, others=(near,))
+            self.assertEqual(rescued["status"], "resolve")
+            self.assertEqual(rescued["miscast"]["target"], "near")
+            self.assertEqual(attempt(1, die, others=(Target("too_far", 4),))
+                             ["status"], "fizzle")
+        # On success risky Reach is retained and the same target is legal.
+        self.assertEqual(attempt(13)["status"], "resolve")
+        # A surviving safe or paid Surge Reach protects legal delivery.
+        self.assertEqual(attempt(10, safe="Reach", risky="Precision")
+                         ["status"], "resolve")
+        self.assertEqual(attempt(10, safe="Precision", risky="Potency",
+                                 surge="Reach")["status"], "resolve")
+
+    def test_standalone_miscast_validates_final_delivery_not_original_preflight(self):
+        t = self.flame
+        far = Target("far", 4)
+        for die in (3, 4, 5, 14, 17, 19, 20):
+            result = miscast(die, t, far, selected_options=("Reach",),
+                             extra_choices=("Precision",),
+                             committed_cast_vp=2)
+            self.assertEqual(result["status"], "fizzle", die)
+        # A different legal replacement may resolve with its own range.
+        longer = replace(t, name="Different Conflagration", max_range=4)
+        replaced = miscast(18, t, far, catalogue=(longer,), choice_index=0,
+                          selected_options=("Reach",))
+        self.assertEqual(replaced["status"], "resolve")
+        self.assertEqual(replaced["replacement"],
+                         "Different Conflagration / Thrown Projectile")
+
     def test_instability_dc(self):
         self.assertEqual([instability_dc(t) for t in range(10)],
                          [12, 13, 13, 14, 14, 15, 15, 16, 16, 17])
@@ -230,7 +303,7 @@ class HighGiftedAmplificationTests(unittest.TestCase):
     def test_inapplicable_penalties_not_made_worse_by_fizzle(self):
         nondamage = replace(self.flame, damage_die=0, damage_type="",
                             damage_resource="", attack=False, pressure=False,
-                            max_range=0, radius=0, duration_ticks=0)
+                            min_range=0, max_range=0, radius=0, duration_ticks=0)
         subject = Target("self", 0)
         for x in (7, 8, 9, 10, 11, 12, 13, 19, 20):
             self.assertEqual(miscast(x, nondamage, subject)["status"], "resolve")

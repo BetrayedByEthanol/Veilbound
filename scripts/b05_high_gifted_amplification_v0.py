@@ -128,6 +128,8 @@ def miscast(roll, technique, original_target, *, other_targets=(),
          "self_damage": None, "extra_spent_vp": 0}
     def fizzle():
         r.update(status="fizzle", target=None, bonus=None, penalty=None)
+    delivery_target = original_target
+    delivery_technique = technique
     alternatives = tuple(t for t in other_targets if
                          t.name != original_target.name and
                          legal_target(t, technique, reach=retained_reach))
@@ -148,7 +150,8 @@ def miscast(roll, technique, original_target, *, other_targets=(),
                 alternatives = tuple(x for x in alternatives if x.distance == nearest)
             if type(choice_index) is not int or not 0 <= choice_index < len(alternatives):
                 raise ValueError("Invalid recorded target-selection die")
-            r["target"] = alternatives[choice_index].name
+            delivery_target = alternatives[choice_index]
+            r["target"] = delivery_target.name
     elif roll == 6:
         if scatter_legal:
             r["status"] = "scatter_pending_native_position_and_defenses"
@@ -202,6 +205,7 @@ def miscast(roll, technique, original_target, *, other_targets=(),
                     reach=(retained_reach and replacement == technique))):
             fizzle()
         else:
+            delivery_technique = replacement
             r["replacement"] = replacement.name + " / " + replacement.profile
     elif roll == 19:
         if technique.damage_die:
@@ -215,6 +219,18 @@ def miscast(roll, technique, original_target, *, other_targets=(),
             if type(choice_index) is not int or not 0 <= choice_index < len(available):
                 raise ValueError("Invalid recorded bonus-Option selection")
             r["bonus"] = available[choice_index]
+    # A lost risky Reach cannot keep an illegal delivery alive. Check the
+    # ACTUAL final target/profile, not just the original preflight (which
+    # quite rightly allowed the attempted risky Reach). Retargeting can
+    # legitimately rescue the spell if the new target is within range.
+    # A Scatter still awaits native position/path/defense resolution and
+    # must never claim a successful hit here.
+    if r["status"] == "resolve":
+        effective_reach = (retained_reach and roll != 3
+                           and delivery_technique == technique)
+        if not legal_target(delivery_target, delivery_technique,
+                            reach=effective_reach):
+            fizzle()
     return r
 
 
@@ -315,6 +331,15 @@ class HighGiftedWindow:
                               surviving_options=tuple(x for x in (safe, surge)
                                                       if x is not None),
                               selected_options=options)
+        # Mild failure loses its risky category but does not roll a miscast.
+        # Resolve cannot be attested if the remaining safe/Surge categories
+        # no longer support the original target's lawful delivery.
+        surviving = tuple(x for x in (safe, surge) if x is not None)
+        mild_fizzle = (deficit is not None and 1 <= deficit <= 4
+                       and not legal_target(target, technique,
+                                            reach="Reach" in surviving))
+        delivery_status = (outcome["status"] if outcome is not None else
+                           "fizzle" if mild_fizzle else "resolve")
         additional = outcome["extra_spent_vp"] if outcome else 0
         if additional > self.vp-technique.spent_vp-surcharge:
             raise AssertionError("Post-preflight leakage mismatch")
@@ -328,7 +353,7 @@ class HighGiftedWindow:
             self.instability_used = True
         if surge is not None:
             self.surge_allowance = 0
-        return {"action_ap": technique.action_ap,
+        return {"status": delivery_status, "action_ap": technique.action_ap,
                 "paid_vp": technique.spent_vp+surcharge+additional,
                 "surge_vp": surcharge, "options": options,
                 "instability_deficit": deficit,
