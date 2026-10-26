@@ -15,9 +15,11 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
-**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged #148. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 6/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged #151 plus High Gifted structural candidate #152. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 7/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
 
 ## Active design records
+
+- [B04/B05 — High Gifted L1–3 Character Build and Verification v0](b04-b05-high-gifted-l1-l3-character-build-verification-v0.md) — one explicit eight-emotion 6S/2P source-legal High Gifted L1–3 sheet, training/gear/Talent/VP/AP/Surge, all eight conditional technique paths and noncombat hooks, plus action-economy/countercase regressions. **Structural 7/12** upon merge; still **0/12 independently certified**, no native genuine-miscast combat claim.
 
 - [B04/B05 — Restricted MVP Pilot Roster and Gifted/Anointed Readiness v0](b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.md) — fresh source-backed Tier-1 census (13 techniques / 10 selected Aspects), explicit limited pilot candidates, eight-link Gifted legality, six missing Focus implementation contracts, decision register and strict non-certification boundary. No new canonical effects or player permissions.
 

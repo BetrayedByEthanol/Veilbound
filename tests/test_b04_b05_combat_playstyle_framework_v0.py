@@ -39,9 +39,13 @@ class CombatPlaystyleFrameworkTests(unittest.TestCase):
         cells = [cell.strip() for line in focus_rows
                  for cell in line.split("|")[2:5]]
         self.assertEqual(len(cells), 12)
-        delivered = sum(cell.startswith("**Structural/native")
-                        for cell in cells)
-        self.assertIn("**%d/12**" % delivered, text)
+        # Both fully native and source-verified structural-only builds
+        # count as structural pairings, but not as independent MVP
+        # certification. Do not silently exclude non-native High Gifted.
+        delivered = sum(cell.startswith("**Structural") for cell in cells)
+        status_row = next(line for line in text.splitlines()
+                          if line.startswith("| Structural L1→3 Focus pairings |"))
+        self.assertIn("**%d/12**" % delivered, status_row)
         self.assertIn("**0/12**", text)
         self.assertIn("**3/7**", text)
         # Preserve the original B06 milestone taxonomy even when new
