@@ -225,6 +225,8 @@ Changing Active Emotion does not itself count as Reconduction and costs no VP be
 
 If the newly Active Aspect has no authored expression for the current Conduit Form, that conduit becomes **Dormant** for that emotion rather than improvising an unsupported effect.
 
+For the restricted L1–3 **Ward Form**, see [Medium Gifted Ward Conduit v0](../07-veil-magic/medium-gifted-ward-conduit-v0.md): the exact self-anchor, **24-AP initial placement**, Fear/Trust Grade I–III Pulse effects, Dormancy, release lockout and native-integration limits are deliberately **specific to Ward**. Other Conduit Forms are not granted by this link.
+
 ### Conduit Grade
 
 Each conduit has a fixed Grade while established:

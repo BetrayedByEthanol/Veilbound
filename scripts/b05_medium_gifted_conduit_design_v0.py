@@ -53,6 +53,8 @@ class MediumGiftedWardDesign:
         self.window = 0
         self.emotion = None
         self.conduits = []
+        self.next_serial = 0
+        self.released_ward_window = -1
         self.seen_events = set()
 
     @property
@@ -123,12 +125,15 @@ class MediumGiftedWardDesign:
             raise ValueError("No other executable Form/anchor is proposed")
         if type(grade) is not int or grade not in (1, 2, 3):
             raise ValueError("Grade I-III only")
+        if self.released_ward_window == self.window:
+            raise ValueError("Released Ward anchor is locked until next Emotion Window")
         if len(self.conduits) >= self.slot_cap or self.available < grade:
             raise ValueError("Slot or Grade VP unavailable")
         self.ap -= 24
         self.available -= grade
         self.committed += grade
-        conduit = Conduit(len(self.conduits) + 1, form, anchor, grade)
+        self.next_serial += 1
+        conduit = Conduit(self.next_serial, form, anchor, grade)
         self.conduits.append(conduit)
         self._retune()
         self.check()
@@ -141,11 +146,11 @@ class MediumGiftedWardDesign:
         Changing Grade in-window never grants a second Pulse.
         """
         self._ready()
-        if type(serial) is not int or serial < 1 or serial > len(self.conduits):
+        if type(serial) is not int or not any(c.serial == serial for c in self.conduits):
             raise ValueError("Only an existing owned Conduit can be reconducted")
         if type(new_grade) is not int or new_grade not in (1, 2, 3):
             raise ValueError("Grade I-III only")
-        c = self.conduits[serial - 1]
+        c = next(c for c in self.conduits if c.serial == serial)
         if new_grade == c.grade:
             raise ValueError("No reconfiguration is requested")
         delta = new_grade - c.grade
@@ -156,6 +161,22 @@ class MediumGiftedWardDesign:
         self.spent += 3
         self.committed += delta
         c.grade = new_grade
+        self.check()
+        return c
+
+    def release(self, serial):
+        """Voluntary one-Ward release; replacement locked to next Window."""
+        if self.turn == 0 or self.ap is None:
+            raise ValueError("Voluntary release requires a live modeled own turn")
+        if type(serial) is not int:
+            raise ValueError("An actual existing Conduit serial is required")
+        c = next((c for c in self.conduits if c.serial == serial), None)
+        if c is None:
+            raise ValueError("No such active Conduit")
+        self.conduits.remove(c)
+        self.committed -= c.grade
+        self.available += c.grade
+        self.released_ward_window = self.window
         self.check()
         return c
 
