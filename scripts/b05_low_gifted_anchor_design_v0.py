@@ -95,13 +95,23 @@ class LowGiftedAnchorDesign:
     def begin_window(self, *, dominant=None):
         if dominant is not None:
             self._eligible_emotion(dominant)
+        if self.window > 0 and self.anchor is None:
+            raise ValueError("Choose the initial Anchor in the combat-start window")
         prior = self.anchor is not None and not self.disrupted and self.active == self.anchor
+        # A matching dominant emotion is not interference. In particular it
+        # must not erase L3 Settled Heightening or make the next Deepen paid.
+        competes = self.anchor is not None and dominant is not None and dominant != self.anchor
         self.window += 1
         self.ap_remaining = self.source["turn_ap"]
-        self.persisted_from_previous = prior and dominant is None
-        # Canonical L3 Settled Heightening survives a genuinely unbroken Anchor.
+        self.persisted_from_previous = prior and not competes
         self.heightened = bool(self.level == 3 and self.persisted_from_previous and self.heightened)
-        if dominant is not None and dominant != self.anchor:
+        if self.anchor is None:
+            # Combat-start dominance is observed BEFORE the player chooses an
+            # Anchor. The choice below, not this observation, decides whether
+            # a real competing-emotion transition is required.
+            self.active = dominant
+            self.disrupted = False
+        elif competes:
             self.disrupted = True
             self.active = dominant
             self.persisted_from_previous = False
@@ -112,14 +122,23 @@ class LowGiftedAnchorDesign:
         self.history.append(("window", self.window, self.anchor, self.active))
 
     def establish_anchor(self, emotion):
-        """Combat start: once, not an unrestricted same-window switch."""
+        """Combat-start choice: record an Anchor even under interference.
+
+        If a different emotion dominates, it stays Active and the chosen
+        Anchor is disrupted until an independently paid, successful reassert.
+        """
         self._eligible_emotion(emotion)
-        if self.window != 1 or self.anchor is not None or self.disrupted:
+        if self.window != 1 or self.anchor is not None:
             raise ValueError("Initial Anchor exists only at combat start")
-        if self.active is not None and self.active != emotion:
-            raise ValueError("Dominant competing emotion needs transition")
-        self.anchor = self.active = emotion
+        dominant = self.active
+        self.anchor = emotion
+        self.disrupted = dominant is not None and dominant != emotion
+        self.active = dominant if self.disrupted else emotion
+        self.persisted_from_previous = False
+        self.heightened = False
         self.history.append(("initial_anchor", self.window, emotion))
+        if self.disrupted:
+            self.history.append(("disruption", self.window, dominant))
 
     def break_anchor(self, new_emotion):
         self._eligible_emotion(new_emotion)

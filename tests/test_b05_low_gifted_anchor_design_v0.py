@@ -148,6 +148,100 @@ class LowGiftedAnchorDesignTests(unittest.TestCase):
         self.assertFalse(m.heightened)
         self.assertIsNone(m.guarded_defense(kind="guard",paid=False,self_target=True,source_legal=True).expression)
 
+    def test_15_matching_dominant_preserves_settled_and_free_deepen(self):
+        m=LowGiftedAnchorDesign(3)
+        m.begin_window(dominant="Fear")
+        m.establish_anchor("Fear")
+        self.assertEqual((m.anchor,m.active,m.disrupted),("Fear","Fear",False))
+        self.assertFalse(m.persisted_from_previous)  # combat start, not L3 settled
+        self.assertEqual(m.deepen(die=1,awareness=0,discipline=0)["ap_spent"],24)
+        m.begin_window(dominant="Fear")
+        self.assertTrue(m.persisted_from_previous)
+        self.assertFalse(m.disrupted)
+        first=m.deepen(die=12,awareness=0,discipline=0)
+        self.assertEqual((first["ap_spent"],first["settled"],m.ap_remaining),(0,True,42))
+        self.assertTrue(m.heightened)
+        m.begin_window(dominant="Fear")
+        self.assertTrue(m.persisted_from_previous)
+        self.assertEqual((m.active,m.disrupted,m.heightened),("Fear",False,True))
+        with self.assertRaises(ValueError):
+            m.deepen(die=12,awareness=0,discipline=0)
+
+    def test_16_initial_matching_dominant_allows_first_anchor(self):
+        for level in (1,2,3):
+            m=LowGiftedAnchorDesign(level)
+            m.begin_window(dominant="Disgust")
+            self.assertIsNone(m.anchor)
+            self.assertFalse(m.disrupted)
+            m.establish_anchor("Disgust")
+            self.assertEqual((m.anchor,m.active,m.disrupted),("Disgust","Disgust",False))
+            self.assertFalse(m.persisted_from_previous)
+            self.assertEqual(m.ap_remaining,starting_access(level)["turn_ap"])
+            step=m.movement_step(kind="normal_difficult",paid=True,
+                                 source_legal=True,base_mp=1,surcharge_mp=2)
+            self.assertEqual(step.mp_reduction,1)
+            with self.assertRaises(ValueError):m.establish_anchor("Fear")
+
+    def test_17_initial_competing_dominant_requires_paid_reassert(self):
+        for level in (1,2,3):
+            m=LowGiftedAnchorDesign(level)
+            m.begin_window(dominant="Joy")
+            m.establish_anchor("Fear")
+            self.assertEqual((m.anchor,m.active,m.disrupted),("Fear","Joy",True))
+            self.assertFalse(m.guarded_defense(kind="guard",paid=True,
+                             self_target=True,source_legal=True).applicable)
+            before=m.ap_remaining
+            self.assertFalse(m.reassert(die=1,awareness=0,discipline=0))
+            self.assertEqual((m.anchor,m.active,m.disrupted),("Fear","Joy",True))
+            self.assertEqual(m.ap_remaining,before-24)
+        m=LowGiftedAnchorDesign(3)
+        m.begin_window(dominant="Joy")
+        m.establish_anchor("Fear")
+        self.assertTrue(m.reassert(die=12,awareness=0,discipline=0))
+        self.assertEqual((m.anchor,m.active,m.disrupted),("Fear","Fear",False))
+        self.assertFalse(m.persisted_from_previous)
+        self.assertTrue(m.guarded_defense(kind="guard",paid=True,self_target=True,
+                                        source_legal=True).applicable)
+        # First-turn recovery cannot claim settled status or another 24 AP.
+        with self.assertRaises(ValueError):m.deepen(die=12,awareness=0,discipline=0)
+        m.begin_window(dominant="Fear")
+        self.assertTrue(m.persisted_from_previous)
+        self.assertEqual(m.deepen(die=12,awareness=0,discipline=0)["ap_spent"],0)
+
+    def test_18_existing_disruption_not_cleared_by_matching_dominant(self):
+        m=LowGiftedAnchorDesign(3)
+        m.begin_window()
+        m.establish_anchor("Fear")
+        m.begin_window()
+        m.deepen(die=12,awareness=0,discipline=0)
+        self.assertTrue(m.heightened)
+        m.force_disruption("Joy")
+        m.begin_window(dominant="Fear")
+        self.assertEqual((m.anchor,m.active,m.disrupted),("Fear","Fear",True))
+        self.assertFalse(m.persisted_from_previous)
+        self.assertFalse(m.heightened)
+        self.assertFalse(m.guarded_defense(kind="guard",paid=True,
+                         self_target=True,source_legal=True).applicable)
+        self.assertTrue(m.reassert(die=12,awareness=0,discipline=0))
+        # Transition actually consumed the 24 AP; no free Settled use and
+        # not enough remaining L3 AP for a second paid 24 AP Deepen.
+        with self.assertRaises(ValueError):
+            m.deepen(die=12,awareness=0,discipline=0)
+        m.begin_window(dominant="Fear")
+        self.assertTrue(m.persisted_from_previous)
+        self.assertEqual(m.deepen(die=12,awareness=0,discipline=0)["ap_spent"],0)
+
+    def test_19_no_skipping_initial_anchor_choice(self):
+        for dominant in (None,"Fear"):
+            m=LowGiftedAnchorDesign(3)
+            m.begin_window(dominant=dominant)
+            with self.assertRaises(ValueError):m.begin_window()
+            m.establish_anchor("Fear")
+            self.assertEqual(m.window,1)
+        m=LowGiftedAnchorDesign(2)
+        with self.assertRaises(ValueError):m.begin_window(dominant="NotLinked")
+        self.assertEqual(m.window,0)
+
     def test_14_two_candidates_are_aspect_specific_not_spell_copies(self):
         self.assertEqual(CANDIDATE["Fear"]["pillar"],"Earth")
         self.assertEqual(CANDIDATE["Disgust"]["aspect"],"Defiance")
