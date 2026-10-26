@@ -15,9 +15,11 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
-**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged Medium Gifted structural PR #155 and this bounded native Ward encounter integration. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 8/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
+**Start here:** [Development roadmap, completed milestones and Level 1–3 MVP readiness](veilbound-roadmap-and-mvp-readiness.md) — active checkpoint through merged Medium Gifted native Ward PR #156 and the new bounded tactical/attrition comparison PR. This living register owns the **17-area roadmap, unchanged B01–B07 blockers, six strict MVP gates, 8/12 structural Focus pairings (0/12 independently certified), and the remaining critical path**. B06 remains its original fixed **G0–G8** structure; later source-specific integrations are not new milestones. The individual design records below retain historical bounded evidence and **do not supersede the active status register or canonical rules**.
 
 ## Active design records
+
+- [B04/B05 — Medium Gifted L1–3 Native Encounter and Tactical Balance Verification v0](b04-b05-medium-gifted-native-tactical-balance-v0.md) — **21 actual multi-round G0–G5 source-bound Soldier/Sentry policy witnesses** across all 3 levels. Compares paid Fear HP Wards versus Dormant/Dodge/retuned, and Trust ally Vigor prevention versus Dormant/real G1 diagonal reposition; includes Step-2 HP/Vigor and source-replayed signed ledgers. **No new structural pairing, full Focus certificate, CR, or tuning authorization.**
 
 - [B04/B05 — Medium Gifted Native Ward Conduit Encounter Integration v0](b04-b05-medium-gifted-native-ward-encounter-integration-v0.md) — source-fingerprinted L1–3 Medium Gifted, genuine G0/G1/G4/G5 Soldier/Sentry hits, paid Ward placements, Fear HP and Trust ally Vigor one-Pulse prevention, shared damage/wound preflight, and unsupported finite-budget overlap rejection. **No new Focus pairing or full certification.**
 
