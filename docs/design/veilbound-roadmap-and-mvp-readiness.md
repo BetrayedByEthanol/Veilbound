@@ -73,7 +73,7 @@ The [eight-combat-playstyle B04/B05 framework](b04-b05-eight-combat-playstyles-e
 |---|---|---|---|
 | **Priest** | **Structural/native Life A/B/R**; one Focus pairing | **Structural/native Life M** | **Structural/native Life H** |
 | **Scholar** | **Structural/native Earth-Life T L1→3 (Embodiment)** | **Structural/native Earth-Life S L1→3 (Inward)** | **Structural/native Fire F L1→3** |
-| **Gifted** | Content/build open | Content/build open | **High Gifted structural (#152) and bounded native Joy/Thrown Flame (#153)**; **Medium Gifted provisional Ward rule and L1–3 structural build (this PR)**. Neither has independent combat/noncombat certification. Genuine live miscast and independent combat/noncombat certification remain open |
+| **Gifted** | Content/build open | **Structural Medium Gifted Ward L1→3 (this PR on merge)**; proposed provisional rule, isolated budgets, no native G4 prevention or independent certificate | **Structural High Gifted L1→3 (#152)**; bounded native Joy/Thrown Flame (#153), but no independent certificate |
 | **Anointed** | Content/build open | Content/build open | Content/build open |
 
 **8/12 structurally verified Focus pairings on merge; 0/12 independently end-to-end certified.** The remaining **four** structural pairings are Low Gifted and Anointed Low/Medium/High. Multiple Low Life variants still count once. A bounded native encounter is not a complete role and noncombat certificate.
