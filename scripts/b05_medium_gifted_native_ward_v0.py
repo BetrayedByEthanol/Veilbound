@@ -289,15 +289,25 @@ class MediumGiftedWardNative:
                     (recipient,profile_id,tuple(packets))):
                 raise UnresolvedDecision("Ward needs G4's exact native profile hit")
             attacker = source[0]
+            paid = self.e.g4._live_ward_action
+            if (paid is None or paid[:3] != (attacker,recipient,profile_id)
+                    or type(paid[3]) is not int):
+                raise UnresolvedDecision("Ward needs exact live G4.5 paid action")
+            action_index = paid[3]
             if not any(ev["kind"] == "g5_melee_roll" and
                        ev["round"] == self.e.round and
                        ev["turn"] == self.e.current and
                        ev["detail"].get("attacker") == attacker and
                        ev["detail"].get("target") == recipient and
                        ev["detail"].get("profile") == profile_id and
+                       ev["detail"].get("action_index") == action_index and
                        ev["detail"].get("hit") is True
                        for ev in self.e.ledger):
-                raise UnresolvedDecision("Ward needs a genuine G5 confirmed hit")
+                raise UnresolvedDecision("Ward G5 roll disagrees with exact paid slot")
+            if any(ev["kind"] in ("g45_attested_hit","g5_melee_resolved") and
+                   ev["detail"].get("action_index") == action_index
+                   for ev in self.e.ledger):
+                raise UnresolvedDecision("Ward cannot reuse already completed G5 slot")
         elif cause == "g3:thrown_flame":
             if self.e.g4._live_flame_delivery is None:
                 raise UnresolvedDecision("Ward needs a confirmed live G3 Flame")

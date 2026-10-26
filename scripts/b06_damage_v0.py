@@ -72,6 +72,8 @@ class DamageState:
         self.medium_gifted = None
         self._live_ward_delivery = None
         self._live_ward_profile = None
+        # Only G4.5's exact G0-paid source action can attest Ward G5 delivery.
+        self._live_ward_action = None
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
