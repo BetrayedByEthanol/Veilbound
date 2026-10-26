@@ -68,6 +68,10 @@ class DamageState:
         # Intercession; direct G3 calls must never fabricate a packet.
         self._live_medium_vigor = None
         self._flame_consumptions = {}
+        # Optional source-bound Medium Gifted Ward adapter; no implicit effects.
+        self.medium_gifted = None
+        self._live_ward_delivery = None
+        self._live_ward_profile = None
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
@@ -165,8 +169,14 @@ class DamageState:
         low=(getattr(self.e.g3,"low_life",None)
              if self.e.g3 is not None else None)
         if low is None:
-            return resolved,None
-        return low.preview_hp(recipient,packets,resolved)
+            after, low_proposal = resolved, None
+        else:
+            after, low_proposal = low.preview_hp(recipient, packets, resolved)
+        if self.medium_gifted is not None:
+            proposal = self.medium_gifted.preview(
+                recipient, packets, after, low_proposal=low_proposal)
+            after = proposal["remaining"]
+        return after, low_proposal
 
     def apply_damage(self, recipient, packets, *, event_key, cause,
                      devastating=False, wound_location_roll=None,
@@ -203,6 +213,22 @@ class DamageState:
             # Fail closed before any HP/Vigor or wound mutation.
             self.e.g3.medium_life.preflight_vigor(medium_intercessor,recipient)
         resolved,lp_proposal=self._preview_damage_packets(recipient,packets)
+        ward=self.medium_gifted
+        ward_proposal=None
+        if ward is not None:
+            base=tuple(self._mitigate_hp(a,p) if p.resource=="hp"
+                       else p.raw for p in packets)
+            low_for_preview=(getattr(self.e.g3,"low_life",None)
+                             if self.e.g3 is not None else None)
+            if low_for_preview is not None:
+                base,_=low_for_preview.preview_hp(recipient,packets,base)
+            ward_proposal=ward.preview(
+                recipient,packets,base,low_proposal=lp_proposal)
+            if ward_proposal["remaining"]!=resolved:
+                raise UnresolvedDecision("Ward G4 preflight diverged from damage plan")
+            if ward_proposal["prevention"] and medium_intercessor is not None:
+                raise UnresolvedDecision(
+                    "Ward and Medium Intercession finite prevention ordering unauthored")
         low=(getattr(self.e.g3,"low_life",None)
              if self.e.g3 is not None else None)
         hp_loss = sum(x for p, x in zip(packets, resolved) if p.resource == "hp")
@@ -261,6 +287,15 @@ class DamageState:
             finally:
                 self._live_medium_vigor = None
             interceded_packet = (index,residual)
+        if ward_proposal is not None and ward_proposal["prevention"]:
+            if self._live_ward_delivery is not None:
+                raise UnresolvedDecision("Nested native Ward delivery")
+            self._live_ward_delivery=(recipient,event_key,cause,packets)
+            try:
+                ward.commit(recipient,packets,ward_proposal,
+                            event_key=event_key,cause=cause)
+            finally:
+                self._live_ward_delivery=None
         if lp_proposal is not None:
             low.commit_hp(recipient,lp_proposal,event_key=event_key)
         a.hp = hp_after
@@ -314,6 +349,8 @@ class DamageState:
             a.ap_remaining = 0
             if self.e.g3 is not None:
                 self.e.g3.sync_consciousness(recipient)
+            if ward is not None:
+                ward.sync_consciousness(recipient)
         self.used_events.add(event_key)
         self.e.log("g4_damage_applied", event_key=event_key, cause=cause,
                    recipient=recipient, hp_before=before_hp, hp_after=a.hp,
@@ -321,7 +358,9 @@ class DamageState:
                    packets=[{"resource":p.resource, "type":p.damage_type,
                              "raw":p.raw, "mitigated":n, "armor_rule":p.armor_rule}
                             for p,n in zip(packets,resolved)],
-                   vigor_details=vigor_details, wound=severity, dead=a.dead)
+                   vigor_details=vigor_details, wound=severity, dead=a.dead,
+                   medium_gifted_ward=(ward_proposal["receipt"]
+                                      if ward_proposal is not None else None))
         # EX-LR-01 payout happens only after native HP loss, wound,
         # and Dying/death rules. The event ledger keeps the gross loss and
         # a separate paid post-hit Exaltation receipt.
@@ -538,14 +577,20 @@ class DamageState:
             attacker,target,profile_id,die_face=die_face,
             critical=critical,critical_dice=critical_dice,
             vigor_die=vigor_die)
-        result = self.apply_damage(
-            target, packets,
-            event_key=f"g4:profile:{attacker}:{target}:{profile_id}:{len(self.e.ledger)}",
-            cause=f"source-profile:{profile_id}",
-            devastating=(critical=="devastating"),
-            wound_location_roll=wound_location_roll,
-            wound_trauma=main["damage_type"],
-            medium_intercessor=medium_intercessor)
+        if self._live_ward_profile is not None:
+            raise UnresolvedDecision("Nested source profile delivery")
+        self._live_ward_profile=(attacker,target,profile_id,packets)
+        try:
+            result = self.apply_damage(
+                target, packets,
+                event_key=f"g4:profile:{attacker}:{target}:{profile_id}:{len(self.e.ledger)}",
+                cause=f"source-profile:{profile_id}",
+                devastating=(critical=="devastating"),
+                wound_location_roll=wound_location_roll,
+                wound_trauma=main["damage_type"],
+                medium_intercessor=medium_intercessor)
+        finally:
+            self._live_ward_profile=None
         result["injection_eligible"] = bool(p.get("toxin_delivery")
                                             and result["hp_packets"][0] > 0)
         # Qualification only: the Hunter's toxin still requires real
