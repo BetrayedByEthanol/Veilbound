@@ -85,6 +85,9 @@ class LowGiftedAnchorDesign:
         self.disrupted = False
         self.persisted_from_previous = False
         self.heightened = False
+        # Only a successful *Settled* (0-AP) Deepen carries Heightening
+        # into later unbroken Emotion Windows. A paid success is local.
+        self.settled_heightening = False
         self.deepen_window = None
         self.history = []
 
@@ -104,7 +107,10 @@ class LowGiftedAnchorDesign:
         self.window += 1
         self.ap_remaining = self.source["turn_ap"]
         self.persisted_from_previous = prior and not competes
-        self.heightened = bool(self.level == 3 and self.persisted_from_previous and self.heightened)
+        carry_settled = bool(self.level == 3 and self.persisted_from_previous
+                             and self.heightened and self.settled_heightening)
+        self.heightened = carry_settled
+        self.settled_heightening = carry_settled
         if self.anchor is None:
             # Combat-start dominance is observed BEFORE the player chooses an
             # Anchor. The choice below, not this observation, decides whether
@@ -136,6 +142,7 @@ class LowGiftedAnchorDesign:
         self.active = dominant if self.disrupted else emotion
         self.persisted_from_previous = False
         self.heightened = False
+        self.settled_heightening = False
         self.history.append(("initial_anchor", self.window, emotion))
         if self.disrupted:
             self.history.append(("disruption", self.window, dominant))
@@ -153,6 +160,7 @@ class LowGiftedAnchorDesign:
         self.disrupted = False
         self.persisted_from_previous = False
         self.heightened = False
+        self.settled_heightening = False
         # Do not reset pulse_window: a Break cannot mint a fresh window.
         self.history.append(("break_anchor", self.window, new_emotion, 24))
 
@@ -164,6 +172,7 @@ class LowGiftedAnchorDesign:
         self.disrupted = True
         self.persisted_from_previous = False
         self.heightened = False
+        self.settled_heightening = False
         self.history.append(("disruption", self.window, emotion))
 
     def reassert(self, *, die, awareness, discipline, resonance=0, overwhelming=False):
@@ -229,6 +238,10 @@ class LowGiftedAnchorDesign:
         self.deepen_window = self.window
         success = die + awareness + discipline + resonance >= 12
         self.heightened = success
+        # A successful ordinary paid Deepen lasts in THIS window only;
+        # permanent Settled persistence is earned on a successful free
+        # Deepen after the same Anchor actually survived a prior window.
+        self.settled_heightening = success and cost == 0
         self.history.append(("deepen", self.window, success, cost))
         return {"success": success, "ap_spent": cost,
                 "settled": cost == 0}

@@ -242,6 +242,84 @@ class LowGiftedAnchorDesignTests(unittest.TestCase):
         with self.assertRaises(ValueError):m.begin_window(dominant="NotLinked")
         self.assertEqual(m.window,0)
 
+    def test_20_paid_l3_deepen_heightening_ends_at_next_matching_window(self):
+        # The *first*, paid success is ordinary Heightening. Matching
+        # dominance makes the Anchor persistent, not that Heightening.
+        for dominant in (None, "Fear"):
+            with self.subTest(dominant=dominant):
+                m=LowGiftedAnchorDesign(3)
+                m.begin_window(dominant=dominant)
+                m.establish_anchor("Fear")
+                paid=m.deepen(die=12,awareness=0,discipline=0)
+                self.assertEqual(paid,{"success":True,"ap_spent":24,
+                                       "settled":False})
+                self.assertTrue(m.heightened)
+                self.assertFalse(m.settled_heightening)
+                m.begin_window(dominant=dominant)
+                self.assertTrue(m.persisted_from_previous)
+                self.assertFalse(m.heightened)
+                self.assertFalse(m.settled_heightening)
+                free=m.deepen(die=12,awareness=0,discipline=0)
+                self.assertEqual(free,{"success":True,"ap_spent":0,
+                                       "settled":True})
+                self.assertTrue(m.settled_heightening)
+                m.begin_window(dominant=dominant)
+                self.assertTrue(m.heightened)
+                self.assertTrue(m.settled_heightening)
+                with self.assertRaises(ValueError):
+                    m.deepen(die=12,awareness=0,discipline=0)
+
+    def test_21_paid_l1_l2_heightening_is_never_carried(self):
+        for level in (1,2):
+            with self.subTest(level=level):
+                m=LowGiftedAnchorDesign(level)
+                m.begin_window(dominant="Fear")
+                m.establish_anchor("Fear")
+                self.assertTrue(m.deepen(die=20,awareness=0,
+                                         discipline=0)["success"])
+                self.assertFalse(m.settled_heightening)
+                m.begin_window(dominant="Fear")
+                self.assertTrue(m.persisted_from_previous)
+                self.assertFalse(m.heightened)
+                again=m.deepen(die=12,awareness=0,discipline=0)
+                self.assertEqual((again["success"],again["ap_spent"],
+                                  again["settled"]),(True,24,False))
+                self.assertFalse(m.settled_heightening)
+
+    def test_22_failed_settled_then_success_only_carries_second_attempt(self):
+        m=LowGiftedAnchorDesign(3)
+        m.begin_window();m.establish_anchor("Fear")
+        self.assertTrue(m.deepen(die=12,awareness=0,discipline=0)["success"])
+        m.begin_window(dominant="Fear")
+        failed=m.deepen(die=1,awareness=0,discipline=0)
+        self.assertEqual((failed["success"],failed["settled"]),(False,True))
+        self.assertFalse(m.settled_heightening)
+        m.begin_window(dominant="Fear")
+        self.assertFalse(m.heightened)
+        again=m.deepen(die=12,awareness=0,discipline=0)
+        self.assertEqual((again["success"],again["settled"]),(True,True))
+        m.begin_window(dominant="Fear")
+        self.assertTrue(m.heightened)
+        self.assertTrue(m.settled_heightening)
+
+    def test_23_successful_settled_loses_provenance_on_break_or_disruption(self):
+        for change in ("break", "disrupt"):
+            with self.subTest(change=change):
+                m=LowGiftedAnchorDesign(3)
+                m.begin_window();m.establish_anchor("Fear")
+                m.begin_window()
+                self.assertTrue(m.deepen(die=12,awareness=0,discipline=0)["success"])
+                self.assertTrue(m.settled_heightening)
+                if change == "break":
+                    m.break_anchor("Disgust")
+                else:
+                    m.force_disruption("Disgust")
+                self.assertFalse(m.heightened)
+                self.assertFalse(m.settled_heightening)
+                m.begin_window(dominant="Disgust")
+                self.assertFalse(m.settled_heightening)
+                self.assertFalse(m.heightened)
+
     def test_14_two_candidates_are_aspect_specific_not_spell_copies(self):
         self.assertEqual(CANDIDATE["Fear"]["pillar"],"Earth")
         self.assertEqual(CANDIDATE["Disgust"]["aspect"],"Defiance")
