@@ -1,0 +1,37 @@
+# B04/B05 — High Gifted L1–3 Native Encounter Integration v0
+
+> **Bounded native combat evidence, not independent High Gifted Focus certification.** Follows merged #151 (Amplification/Genuine Miscasts) and #152 (source-backed L1–3 structural build). Uses existing B06 **G0–G5**, not an additional G9 milestone. No new technique, naturally Overwhelming trigger, Reactive Thrown Flame, free Reaction or AP exception is introduced.
+
+## Exact source and delivery
+
+- `gifted_actor(level, ...)` projects the unchanged **High Gifted eight-link pilot** from `scripts/b05_high_gifted_l1_l3_v0.py` to a real G0 `Actor`, with digest-pinned source identity `G`, armor/wielded dagger, AP/VP/HP/Vigor, Guard, and L1–3 progression. The attacker source cannot be replaced by Scholar `F`.
+- The `GiftedNative` adapter is installed on a genuine G3 `SpellState` alongside G1 `GridMovement`, G2 `RangedCombat` and G4 `DamageState`. It requires a ready G0 actor turn and a single **Emotion Establishment Step** each time that actor receives new turn resources.
+- A real `turn_resources` ledger index identifies the **Emotion Window**. The initial Emotion Establishment choice belongs to Step 5, **before** normal Step-6 movement, MP reservations, standing and AP/VP actions. Once the Gifted has moved or committed such a decision, they may not retroactively choose initial Active Emotion or natural Heightening. Attempts to establish twice in the same window or reuse a stale window are rejected.
+- Choosing `establish(None)` **on time** deliberately leaves Active Emotion unset. The first **legal**, source-linked Joy/Conjure Flame cast subsequently establishes **Evoked Joy** at no extra AP without creating a new window, safe Amplification Step or Surge allowance. The deferred activation occurs only after native cast preflight and the successful action commitment; invalid attempted casts leave the emotion unset. This remains legal even after movement, since the turn-start choice was already to leave emotion unset. A non-Joy Active Emotion continues to reject Conjure Flame. Natural Heightening at the initial step requires an explicitly asserted fictional rationale; **Evoked** grants no safe Step.
+- Only `Conjure Flame / Thrown Projectile / Primary` has the authorized High Gifted options **Potency**, **Reach** and **Precision**. The profile is explicitly tagged `[Projection]`; buying one extra Step by **Surge** spends `ceil((2×Used Tier)/4)` extra **Spent VP**, once per Emotion Window. The safe Step and Surge allowance are consumed independently, not refreshed per cast/attack.
+- G2 supplies the real path, wall/corner, cover and screen geometry. **Reach** raises maximum direct delivery from 3 to 4 squares without changing minimum 1 square. No Range Band borrowed from a Bow is used.
+- The original G2 shield/Guard/Dodge/Take Hit decision and pressure are committed as normal. **Precision** adds +1 to the single authored Flame attack roll. **Potency** rolls the original eligible d8 twice and uses the higher *before* the canonical `2 + ceil(d8×Used Tier/3) + max(0, caster VC)` Vigor packet. The source-backed High Gifted pilot has **Veil Control +1**, added **exactly once after the die scaling**, never once per die or per level. Fixed 2 Fire HP is unchanged.
+- The cast pays **20 Turn AP**, then its base and Surge Spent VP through native G0 transitions, emits a `g3_flame_launched` source-digest/Emotion-Window/Amp receipt and immediately consumes confirmed hits through **G4.apply_flame**, including real HP/Vigor mitigation and wound preflight. Explicit natural-20 confirmation and required critical dice are mandatory for completed native resolution.
+- The adapter does not accept a post-commit callback; threatened casting requiring Opportunity response, interposed living screens and unsupported live reactions remain **rejected**, not silently resolved. Existing Scholar Flame remains separately source-authorized.
+
+## Bounded verification scenarios
+
+`tests/test_b05_high_gifted_native_encounter_v0.py` checks:
+- Source-legal **L1/L2/L3** normal direct Flame hits, paid AP/VP, source ID, G3 launch and exactly one genuine G4 damaging event each.
+- Real range-four G2 lane with naturally Heightened safe Reach and paid Surge Precision, plus Evoked Surge without a Heightened Step.
+- Potency's d8 selection and source damage scaling, including **G3 and G4 matching raw/applied Vigor** for normal T1 (5 Vigor on d8=5, VC1), Potency T1 (6 Vigor on d8=2/8, VC1), normal T2 (7 Vigor on d8=5, VC1), and Potency T2 (9 Vigor on d8=2/8, VC1); L3's two ordinary Projection Actions sharing one Surge and one safe Step.
+- G2 aware Dodge pressure, failed unqualified Dodge, source Soldier G1 contact and **G5** retaliation.
+- Early no-cost refusal of wrong emotion, missing/emotionally unjustified Heightening, stale/duplicate windows, unprepared tier, illegal options or dice, missing Reach, insufficient AP/VP, tampered source and changed wielded equipment.
+- **Codex review corrections:** source-bound `establish(None)` followed by a valid first linked cast activates Evoked Joy in the **existing** window without refreshing safe/Surge resources; failed cast preflights cannot force the link. A late *initial* establishment after actual G1 movement, MP reservation, or Stand is rejected, while prior **on-time unset** establishment still permits the deferred first linked cast after moving.
+
+**Unresolved deliberately:** the currently approved L1–3 rules do not provide a lawful same-turn **Overload 24 AP + normal Flame 20 AP = 44 AP** (maximum Turn AP 42). The isolated zero-AP test fixture does not authorize Reactive Thrown Flame. Consequently this PR **does not** claim a lawful native risky Step or miscast witness, broaden to all eight technique catalogues, assert off-turn magic, or invent severe-failure delivery. Those require separately approved source mechanics.
+
+## Acceptance accounting
+
+This refines B04/B05 High Gifted within existing B06 G0–G5; High Gifted remains **one structural pairing plus bounded native evidence**, not an independent certified Focus. Structural **7/12**, certified **0/12**, strict MVP gates **0/6**, blocker definitions **3/7** and representative encounter packs **0** remain unchanged. The original G0–G8 taxonomy, signed historical denominators and Hunter CR status remain unchanged.
+
+Verification commands:
+```sh
+python -m unittest tests.test_b05_high_gifted_native_encounter_v0 -v
+python -m unittest discover -s tests -v
+```
