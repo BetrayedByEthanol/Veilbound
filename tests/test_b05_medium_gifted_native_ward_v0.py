@@ -375,7 +375,7 @@ class MediumGiftedNativeWardTests(unittest.TestCase):
         self.assertEqual(len(event(e,"b05_medium_ward_pulse")),1)
         first,second=event(e,"g4_damage_applied")
         self.assertEqual(first["medium_gifted_ward"]["prevented"],2)
-        self.assertIsNone(second["medium_gifted_ward"]["receipt"])
+        self.assertIsNone(second["medium_gifted_ward"])
         self.assertEqual(before-e.actors["gifted"].hp,
                          first["packets"][0]["mitigated"]+
                          second["packets"][0]["mitigated"])
