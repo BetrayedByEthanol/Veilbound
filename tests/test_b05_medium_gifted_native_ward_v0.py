@@ -254,5 +254,43 @@ class MediumGiftedNativeWardTests(unittest.TestCase):
             w.place(1)
 
 
+    def test_15_fabricated_g5_roll_cannot_authorize_direct_g4_ward(self):
+        e,w,_=scene()
+        w.establish_emotion("Fear")
+        w.place(2)
+        advance_to_foe(e)
+        original=e.actors["gifted"].hp
+        # A caller can append a plausible-looking ledger description but
+        # cannot manufacture the live G4.5 paid action binding.
+        e.log("g5_melee_roll",attacker="foe",target="gifted",
+              profile="B06-AT-03",action_index=123,hit=True)
+        with self.assertRaises(UnresolvedDecision):
+            e.g4.apply_profile_hit(
+                "foe","gifted","B06-AT-03",die_face=5,confirmed_hit=True)
+        self.assertEqual(e.actors["gifted"].hp,original)
+        self.assertFalse(event(e,"b05_medium_ward_pulse"))
+        self.assertFalse(event(e,"g4_damage_applied"))
+        self.assertNotEqual(w.conduits[0].pulse_window,w.window)
+
+
+    def test_16_level_three_grade_three_real_g5_damage(self):
+        e,w,melee=scene(3)
+        w.establish_emotion("Fear")
+        w.place(3)
+        advance_to_foe(e)
+        before=e.actors["gifted"].hp
+        hit(melee,damage=5)
+        applied=event(e,"g4_damage_applied")[-1]
+        pulse=event(e,"b05_medium_ward_pulse")[-1]
+        self.assertEqual((pulse["grade"],pulse["prevented"]),(3,3))
+        self.assertEqual(before-e.actors["gifted"].hp,
+                         applied["packets"][0]["mitigated"])
+        self.assertEqual(pulse["original_post_mitigation"]-3,
+                         applied["packets"][0]["mitigated"])
+        self.assertEqual((e.actors["gifted"].vp_committed,
+                          e.actors["gifted"].vp_spent),(3,0))
+        e.check()
+
+
 if __name__ == "__main__":
     unittest.main()
