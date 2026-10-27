@@ -27,6 +27,7 @@ class AnointedRestorationSignatureDesignTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.doc = DOC.read_text(encoding="utf-8")
+        cls.clean_doc = cls.doc.replace("**", "").replace("`", "")
         cls.canon = RULE.read_text(encoding="utf-8")
 
     def test_01_design_only_and_index(self):
@@ -40,7 +41,7 @@ class AnointedRestorationSignatureDesignTests(unittest.TestCase):
                        "extraordinary public celebration", "collective",
                        "Life / Restoration", "Make recovery possible where injury",
                        "not a Pillar-issued order", "not required"):
-            self.assertIn(phrase.lower(), self.doc.lower())
+            self.assertIn(phrase.lower(), self.clean_doc.lower())
         self.assertIn("Conflicted", self.canon)
         self.assertIn("Forsaken", self.canon)
 
@@ -48,7 +49,7 @@ class AnointedRestorationSignatureDesignTests(unittest.TestCase):
         for phrase in ("one Signature", "High — Project", "Medium — Invest",
                        "Low — Embody", "20 AP", "24 AP",
                        "Regeneration Step", "once per", "0 VP"):
-            self.assertIn(phrase.lower(), self.doc.lower())
+            self.assertIn(phrase.lower(), self.clean_doc.lower())
         self.assertIn("**0 VP** baseline", self.canon)
 
     def test_04_conserves_vigor_normal_pulse(self):
@@ -70,9 +71,9 @@ class AnointedRestorationSignatureDesignTests(unittest.TestCase):
     def test_06_authority_cost_is_a_distinct_exception(self):
         self.assertEqual((7, 20), pulse(5, 12, 20, 2, authority=True))
         self.assertEqual((7, 0), pulse(5, 12, 0, 2, authority=True))
-        for phrase in ("1 Destiny", "no new action", "Spare the Reserve",
+        for phrase in ("1 Destiny", "no additional target, action, pulse", "Spare the Reserve",
                        "not automatically compatible"):
-            self.assertIn(phrase.lower(), self.doc.lower())
+            self.assertIn(phrase.lower(), self.clean_doc.lower())
 
     def test_07_refusals_and_dying(self):
         self.assertIsNone(pulse(0, 12, 10, 2))
@@ -80,7 +81,7 @@ class AnointedRestorationSignatureDesignTests(unittest.TestCase):
         self.assertIsNone(pulse(12, 12, 10, 2, authority=True))
         for phrase in ("+8 barrier", "zero direct Vigor",
                        "Repair Progress", "unobstructed", "no pulse"):
-            self.assertIn(phrase.lower(), self.doc.lower())
+            self.assertIn(phrase.lower(), self.clean_doc.lower())
 
     def test_08_no_unearned_implementation(self):
         for phrase in ("not an extra natural Regeneration Step",
@@ -88,7 +89,7 @@ class AnointedRestorationSignatureDesignTests(unittest.TestCase):
                        "medium/low event-driven pulses",
                        "out-of-initiative recovery clock",
                        "zero completed Anointed L1–3 sheets"):
-            self.assertIn(phrase.lower(), self.doc.lower())
+            self.assertIn(phrase.lower(), self.clean_doc.lower())
 
 
 if __name__ == "__main__":
