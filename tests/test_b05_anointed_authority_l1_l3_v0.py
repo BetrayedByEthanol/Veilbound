@@ -69,6 +69,13 @@ class AnointedL1L3Foundation(unittest.TestCase):
         base=dict(target_id="fighter",recipient_hp=5,recipient_max_hp=12,recipient_vigor=8,ap_available=20)
         with self.assertRaises(ValueError): returning_step(actor,receipt="r",distance=4,**base)
         with self.assertRaises(ValueError): returning_step(actor,receipt="r",beneficial_intrusion_legal=False,**base)
+        resisted=returning_step(actor,receipt="resisted",lesser=True,
+                intrusion_succeeded=False,**base)
+        self.assertEqual((0,0,1,20),
+                         (resisted.hp_restored,resisted.recipient_vigor_spent,
+                          resisted.actor.destiny,resisted.ap_spent))
+        with self.assertRaises(ValueError):
+            returning_step(resisted.actor,receipt="resisted",lesser=True,**base)
         with self.assertRaises(ValueError): returning_step(actor,receipt="r",recipient_living=False,**base)
         with self.assertRaises(ValueError): returning_step(actor,receipt="r",**(base|{"recipient_hp":0}))
         with self.assertRaises(ValueError): returning_step(actor,receipt="r",path_visible=False,**base)

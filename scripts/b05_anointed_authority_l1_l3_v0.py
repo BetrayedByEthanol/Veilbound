@@ -114,6 +114,7 @@ def returning_step(actor: Anointed, *, receipt: str, target_id: str,
                    lesser: bool = False, ap_available: int = 0,
                    distance: int = 0, path_visible: bool = True,
                    beneficial_intrusion_legal: bool = True,
+                   intrusion_succeeded: bool = True,
                    authenticated_regeneration_step: bool = False,
                    focus_turn_id: str | None = None,
                    recipient_living: bool = True) -> SignatureOutcome:
@@ -146,6 +147,11 @@ def returning_step(actor: Anointed, *, receipt: str, target_id: str,
     if amount == 0:
         raise ValueError("normal Signature cannot restore HP without Vigor")
     new_actor = _commit(actor, receipt, lesser=lesser, focus_turn_id=one_turn)
+    # A genuinely legal beneficial Intrusion with a valid target may still be
+    # consciously resisted. Such an application spends Destiny on the attempt;
+    # an externally resolved successful contest is needed to apply HP/Vigor.
+    if not intrusion_succeeded:
+        return SignatureOutcome(actor=new_actor, ap_spent=cost)
     return SignatureOutcome(actor=new_actor, ap_spent=cost, hp_restored=amount,
                             recipient_vigor_spent=0 if lesser else amount)
 
