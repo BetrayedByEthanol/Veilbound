@@ -79,6 +79,9 @@ class DamageState:
         # High Anointed Returning Step: one synchronous actual G0-paid G4 packet.
         self._live_high_anointed = None
         self.high_anointed = None
+        # A queued Medium patient pulse is authorized only in this genuine G4 Step.
+        self.medium_anointed = None
+        self._live_medium_anointed = None
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
@@ -839,16 +842,26 @@ class DamageState:
         if a.id in e.regen_done:
             raise ValueError("Regeneration Step already resolved this round")
         if a.dead:
+            if self.medium_anointed is not None:
+                self.medium_anointed._on_dead_step(a)
             e.regen_done.add(a.id)
             e.log("regeneration_dead",actor=a.id)
             return
+        medium=self.medium_anointed
+        # This is the *actual* G0 Step-2 invocation, not a caller-supplied
+        # regeneration flag. Preview is pure until choice preflight succeeds.
+        pulse=medium._preview_step(a) if medium is not None else None
+        pulse_hp=pulse.hp_restored if pulse is not None else 0
+        pulse_vigor=pulse.recipient_vigor_spent if pulse is not None else 0
+        effective_hp=a.hp+pulse_hp
+        effective_vigor=a.vigor-pulse_vigor
         throughput=max(0,a.regen
                        +(e.g3.regen_throughput(a.id) if e.g3 is not None else 0)
                        +self.toxins.modifier(a.id,"regen_throughput"))
         incomplete=[w for w in a.wounds if w.progress < w.requirement]
         repairable=[w for w in incomplete if w.repairable]
-        missing=(a.hp<a.hp_max or bool(repairable))
-        if missing and a.vigor>0 and throughput>0 and choice is None:
+        missing=(effective_hp<a.hp_max or bool(repairable))
+        if missing and effective_vigor>0 and throughput>0 and choice is None:
             e.log("unresolved_decision",actor=a.id,choice="regeneration_allocation")
             raise UnresolvedDecision("Explicit regeneration allocation required")
         choice=choice or RegenerationChoice()
@@ -863,9 +876,9 @@ class DamageState:
             raise ValueError("Cannot cancel Dying loss above 0 HP")
         survival=int(dying and choice.cancel_dying_loss)
         debit=survival+choice.hp+choice.repair
-        if debit>throughput or debit>a.vigor:
+        if debit>throughput or debit>effective_vigor:
             raise ValueError("Natural regeneration exceeds throughput or available Vigor")
-        if choice.hp>a.hp_max-a.hp:
+        if choice.hp>a.hp_max-effective_hp:
             raise ValueError("Natural HP regeneration exceeds missing HP")
         allocation=()
         if dying:
@@ -907,7 +920,16 @@ class DamageState:
             raise ValueError("Dying HP blocked by incomplete wound repair")
         if dying and not survival and a.hp-1<=-a.hp_max and debit:
             raise ValueError("Cannot spend regeneration after lethal Dying loss")
-        # All checks above are preflight; no partial Vigor/wound mutations.
+        # All checks above are preflight; invalid natural allocations MUST
+        # NOT leave a partially applied Medium pulse or Destiny deduction.
+        if pulse is not None:
+            if self._live_medium_anointed is not None:
+                raise ValueError("Nested Medium G4 Step authority forbidden")
+            self._live_medium_anointed=(a.id,e.round)
+            try:
+                medium._apply_step(a,pulse)
+            finally:
+                self._live_medium_anointed=None
         e.regen_done.add(a.id)
         hp_before, vigor_before=a.hp,a.vigor
         if dying and not survival:
