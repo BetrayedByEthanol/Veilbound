@@ -214,6 +214,11 @@ def party_actor(role, level, actor_id, team, *, occupied):
     _integer(level, "level", 1)
     if level not in (1, 2, 3):
         raise ValueError("G0 only adapts authored L1–3")
+    if role in ("AH", "AM", "AL"):
+        # Keep the original G0 source IDs untouched. Anointed's isolated
+        # Signature/Destiny referee is NOT a native action/Step engine yet.
+        from scripts.b05_anointed_native_g0_actor_v0 import anointed_party_actor
+        return anointed_party_actor(role, level, actor_id, team, occupied=occupied)
     if role == "H":
         from scripts.b05_high_priest_life_l1_l3_v0 import profile
         p=profile(level)
@@ -373,7 +378,7 @@ def party_actor(role, level, actor_id, team, *, occupied):
                       p["guard"], ap // 20 + extra_guard,
                       occupied=tuple(tuple(c) for c in occupied))
     else:
-        raise ValueError("G0 supports only A/B/R/F sources")
+        raise ValueError("G0 supports only expressly sourced player roles")
     actor.validate()
     return actor
 
