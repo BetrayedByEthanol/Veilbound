@@ -76,6 +76,9 @@ class DamageState:
         self._live_ward_action = None
         # Scoped G4.5 Opportunity receipt; detached rehearsal has its own marker.
         self._live_ward_opportunity = None
+        # High Anointed Returning Step: one synchronous actual G0-paid G4 packet.
+        self._live_high_anointed = None
+        self.high_anointed = None
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
@@ -630,6 +633,60 @@ class DamageState:
             blocks |= DamageState._validate_heal_blocks(
                 restoration_check(encounter,caster,recipient))
         return blocks
+
+    def apply_high_anointed_returning_step(
+            self, caster, recipient, *, action_index, hp_restored,
+            recipient_vigor_spent, lesser):
+        """Bounded G4 restoration only from live G0-paid High Anointed adapter.
+
+        Independently revalidate exact AH source action/level, current living
+        recipient and bounded 2-HP packet; no standalone caller can turn
+        claimed AP/Destiny booleans into native healing.
+        """
+        if (self._live_high_anointed != (caster, recipient, action_index)
+                or getattr(self, "high_anointed", None) is None
+                or self.high_anointed.caster != caster):
+            raise ValueError("No live authenticated High Anointed G0/G4 application")
+        a = self._actor(caster)
+        b = self._actor(recipient)
+        if (type(action_index) is not int or not 0 <= action_index < len(self.e.ledger)
+                or type(hp_restored) is not int or type(recipient_vigor_spent) is not int
+                or type(lesser) is not bool
+                or self.e.current != caster or self.e.pending_regeneration is not None
+                or a.source.source_id != "AH" or a.focus != "High"
+                or b.dead or b.hp <= 0 or b.hp >= b.hp_max):
+            raise ValueError("Invalid native Anointed application/recipient state")
+        ev = self.e.ledger[action_index]
+        details = ev["detail"]
+        if (ev["kind"] != "action_committed" or ev["round"] != self.e.round
+                or ev["turn"] != caster or details.get("actor") != caster
+                or details.get("action_class") != "projection"
+                or details.get("ap_spent") != 20
+                or details.get("label") != "anointed:high:returning_step"
+                or any(x["kind"] == "g4_anointed_returning_step_applied"
+                       and x["detail"].get("action_index") == action_index
+                       for x in self.e.ledger)):
+            raise ValueError("Replay, forged or stale G0 High Signature action")
+        actual = min(2, b.hp_max-b.hp,
+                     (b.hp_max if lesser else b.vigor))
+        expected_vigor = 0 if lesser else actual
+        if (actual <= 0 or hp_restored != actual
+                or recipient_vigor_spent != expected_vigor):
+            raise ValueError("G4 packet differs from current source-governed HP/Vigor")
+        old_hp, old_vigor = b.hp, b.vigor
+        b.hp += actual
+        b.vigor -= expected_vigor
+        self.e.log("g4_anointed_returning_step_applied",
+                   caster=caster, recipient=recipient, action_index=action_index,
+                   source_digest=a.source.digest, lesser=lesser,
+                   hp_before=old_hp, hp_after=b.hp, hp_restored=actual,
+                   vigor_before=old_vigor, vigor_after=b.vigor,
+                   recipient_vigor_spent=expected_vigor,
+                   destiny_cost=int(lesser), vp_spent=0,
+                   native_source="G0_Projection_and_G4_live_recipient")
+        self.e.check()
+        return {"hp_restored":actual,
+                "recipient_vigor_spent":expected_vigor}
 
     def resolve_heal(self, recipient, *, contribution, vigor_amount,
                      wound_id=None, source="Basic Heal",blocked_components=()):
