@@ -140,9 +140,9 @@ class MvpPilotRosterReadinessTests(unittest.TestCase):
         roadmap = ROADMAP.read_text(encoding="utf-8")
         self.assertEqual(6, sum(line.startswith("| [ ] **")
                                 for line in roadmap.splitlines()))
-        self.assertIn("**11/12**", roadmap)
+        self.assertIn("**12/12**", roadmap)
         self.assertIn("**0/12**", roadmap)
-        self.assertIn("one** structural pairing", roadmap.lower())
+        self.assertIn("all twelve** still need independently reviewed", roadmap.lower())
         self.assertIn(DOC.name, INDEX.read_text(encoding="utf-8"))
 
 
