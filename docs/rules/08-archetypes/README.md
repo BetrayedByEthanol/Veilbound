@@ -7,6 +7,7 @@ Veilbound has four base Archetypes:
 - [Scholar](scholar.md)
 - [Gifted](gifted.md)
 - [Anointed](anointed.md)
+  - [Anointed Signature, Destiny and Lesser Authority L1–3 v0](anointed-signature-authority-l1-3-v0.md) — **canonical bounded two-Aspect pilot**, first-party Destiny/packet/receipt implementation; native encounter and character builds still open
 
 See [Archetype Identities](archetype-identities.md) for the concise cross-archetype comparison and access model.
 
