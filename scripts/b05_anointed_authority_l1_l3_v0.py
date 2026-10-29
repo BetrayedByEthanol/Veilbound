@@ -161,6 +161,7 @@ def kindled_flame(actor: Anointed, *, receipt: str, hit: bool,
                   lesser: bool = False, ap_available: int = 0,
                   distance: int = 1, path_visible: bool = True,
                   carrier_attack_authentic: bool = False,
+                  carrier_attack_on_own_turn: bool = False,
                   target_legal: bool = True, turn_id: str | None = None,
                   invested_weapon_id: str | None = None,
                   active_wielded_weapon_id: str | None = None) -> SignatureOutcome:
@@ -179,13 +180,13 @@ def kindled_flame(actor: Anointed, *, receipt: str, hit: bool,
             raise ValueError("High projectile requires paid 20-AP legal path/range")
         cost, turn_slot = 20, None
     elif actor.focus == "Medium":
-        if (not carrier_attack_authentic or not turn_id or not invested_weapon_id
+        if (not carrier_attack_authentic or not carrier_attack_on_own_turn or not turn_id or not invested_weapon_id
                 or actor.invested_vessel != invested_weapon_id
                 or active_wielded_weapon_id != invested_weapon_id):
             raise ValueError("Medium needs one actually paid invested-weapon attack")
         cost, turn_slot = 0, "conflagration-medium:"+turn_id
     else:
-        if (not actor.embodied or not carrier_attack_authentic or not turn_id
+        if (not actor.embodied or not carrier_attack_authentic or not carrier_attack_on_own_turn or not turn_id
                 or not active_wielded_weapon_id):
             raise ValueError("Low needs one paid own-turn wielded-weapon attack")
         cost, turn_slot = 0, "conflagration-low:"+turn_id
@@ -244,6 +245,7 @@ def guided_regeneration_l3(actor: Anointed, *, receipt: str,
                            active_paid_guided_instance: bool,
                            mode: str, profile: str,
                            authenticated_regeneration_step: bool,
+                           guided_bonus_unsuppressed: bool = False,
                            vessel_matches: bool = False,
                            recipient_self: bool = False,
                            recipient_dying: bool = False) -> TechniqueAuthorityOutcome:
@@ -255,12 +257,13 @@ def guided_regeneration_l3(actor: Anointed, *, receipt: str,
     if actor.level < 3 or actor.aspect != "Restoration" or not actor.active_bond:
         raise ValueError("not an eligible L3 Restoration Anointed")
     if (not active_paid_guided_instance or mode not in ("Fixed", "Maintained")
-            or not authenticated_regeneration_step or recipient_dying
+            or not authenticated_regeneration_step or not guided_bonus_unsuppressed
+             or recipient_dying
             or type(recipient_missing_hp_after_ordinary) is not int
             or recipient_missing_hp_after_ordinary < 1):
         raise ValueError("missing eligible +1 HP Guided incremental restoration")
     if actor.focus == "Low":
-        if profile != "Self" or not recipient_self:
+        if profile != "Self" or not recipient_self or not actor.embodied:
             raise ValueError("Low requires actual self [Embodiment] Guided")
     else:
         if profile != "Single Target" or (actor.focus == "Medium" and (actor.invested_vessel is None or not vessel_matches)):

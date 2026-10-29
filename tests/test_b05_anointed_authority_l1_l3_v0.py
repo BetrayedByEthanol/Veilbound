@@ -130,18 +130,24 @@ class AnointedL1L3Foundation(unittest.TestCase):
     def test_08_medium_low_flame_one_per_turn_no_free_carrier(self):
         medium=Anointed(3,"Medium","Conflagration")
         medium,_=invest(medium,"w1",ap_available=42,legal_vessel=True,consent_or_other_delivery_valid=True)
-        args=dict(hit=True,target_hp=12,target_vigor=36,carrier_attack_authentic=True,turn_id="own:R1",
+        args=dict(hit=True,target_hp=12,target_vigor=36,carrier_attack_authentic=True,carrier_attack_on_own_turn=True,turn_id="own:R1",
                   invested_weapon_id="w1",active_wielded_weapon_id="w1")
         x=kindled_flame(medium,receipt="w1-hit",**args)
         self.assertEqual(1,x.vigor_damage_packet)
+        with self.assertRaises(ValueError):
+            kindled_flame(medium,receipt="offturn",**(args|{"carrier_attack_on_own_turn":False}))
         with self.assertRaises(ValueError): kindled_flame(x.actor,receipt="w2-hit",**args)
         with self.assertRaises(ValueError): kindled_flame(medium,receipt="w3-hit",**(args|{"carrier_attack_authentic":False}))
         low=Anointed(3,"Low","Conflagration")
         k=kindled_flame(low,receipt="swing",hit=True,target_hp=12,target_vigor=9,
-                        carrier_attack_authentic=True,turn_id="own:R1",active_wielded_weapon_id="sword",lesser=True)
+                        carrier_attack_authentic=True,carrier_attack_on_own_turn=True,turn_id="own:R1",active_wielded_weapon_id="sword",lesser=True)
         self.assertEqual((4,1), (k.vigor_damage_packet,k.actor.destiny))
+        with self.assertRaises(ValueError):
+            kindled_flame(low,receipt="offturn",hit=True,target_hp=12,target_vigor=9,
+                carrier_attack_authentic=True,carrier_attack_on_own_turn=False,
+                turn_id="reaction:R1",active_wielded_weapon_id="sword")
         with self.assertRaises(ValueError): kindled_flame(k.actor,receipt="swing2",hit=True,
-                  target_hp=12,target_vigor=9,carrier_attack_authentic=True,
+                  target_hp=12,target_vigor=9,carrier_attack_authentic=True,carrier_attack_on_own_turn=True,
                   turn_id="own:R1",active_wielded_weapon_id="sword")
 
     def test_09_l3_conjure_exact_profile_and_payment(self):
@@ -183,13 +189,14 @@ class AnointedL1L3Foundation(unittest.TestCase):
         high=Anointed(3,"High","Restoration")
         args=dict(receipt="step1",recipient_missing_hp_after_ordinary=2,
                   active_paid_guided_instance=True,mode="Maintained",profile="Single Target",
-                  authenticated_regeneration_step=True)
+                  authenticated_regeneration_step=True,guided_bonus_unsuppressed=True)
         x=guided_regeneration_l3(high,**args)
         self.assertEqual((1,1),(x.additional_hp_without_vigor,x.actor.destiny))
         with self.assertRaises(ValueError): guided_regeneration_l3(x.actor,**args)
         with self.assertRaises(ValueError): guided_regeneration_l3(high,**(args|{"recipient_missing_hp_after_ordinary":0}))
         with self.assertRaises(ValueError): guided_regeneration_l3(high,**(args|{"recipient_dying":True}))
         with self.assertRaises(ValueError): guided_regeneration_l3(high,**(args|{"active_paid_guided_instance":False}))
+        with self.assertRaises(ValueError): guided_regeneration_l3(high,**(args|{"guided_bonus_unsuppressed":False}))
         med=Anointed(3,"Medium","Restoration",invested_vessel="patient")
         with self.assertRaises(ValueError): guided_regeneration_l3(med,**args)
         with self.assertRaises(ValueError):
@@ -200,6 +207,8 @@ class AnointedL1L3Foundation(unittest.TestCase):
         low=Anointed(3,"Low","Restoration")
         with self.assertRaises(ValueError): guided_regeneration_l3(low,**args)
         self.assertEqual(1,guided_regeneration_l3(low,**(args|{"profile":"Self","recipient_self":True})).additional_hp_without_vigor)
+        with self.assertRaises(ValueError):
+            guided_regeneration_l3(replace(low,embodied=False),**(args|{"profile":"Self","recipient_self":True}))
 
     def test_11_ledger_no_same_receipt_cross_effect_and_no_implicit_grades(self):
         a=Anointed(3,"High","Conflagration")
