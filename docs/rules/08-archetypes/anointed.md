@@ -1,6 +1,6 @@
 # Anointed Foundation
 
-> Canonical extraction from Core Rules Audit v34 plus the finalized Mission-state definitions from the preceding Anointed design pass. The structural foundation is resolved; Destiny numbers and Aspect-specific content remain provisional.
+> Canonical extraction from Core Rules Audit v34 and finalized Mission states. **L1–3 Destiny and exactly two pilot-Aspect Signatures/Authority procedures** are now authored in [Anointed L1–3 Signature, Destiny and Lesser Authority v0](anointed-signature-authority-l1-3-v0.md); later-level Destiny and remaining Aspect content remain provisional.
 
 ## Archetype identity
 
@@ -140,7 +140,7 @@ Shared principles:
 - deliberately modest enough to coexist with normal techniques and ordinary actions;
 - uses Aspect/Birth-Imprint-specific scaling rather than one universal legacy damage/healing table.
 
-Focus changes how the Signature is expressed.
+Focus changes how the Signature is expressed. **At L1–3, the complete authored Restoration and Conflagration pilot rules, exact legal targets, tempo, once-per-Step/turn cadence and finite Authority modifications are defined in [Anointed L1–3 Signature and Authority](anointed-signature-authority-l1-3-v0.md)**. Those two pilots do not grant Signature mechanics to other unauthored Aspects.
 
 ## Aspect Authority
 
@@ -157,29 +157,15 @@ Authority:
 
 ## Destiny
 
-Current numerical foundation remains provisional.
-
-Baseline under calibration:
+**Canonical for Levels 1–3 only:** Maximum Destiny **2**, beginning at 2, with **1 Destiny recovery per completed six-hour elapsed interval**, capped at 2. Partial time carries to the next completed interval and never grants early recovery. An Anointed with a **Dormant** bond does not recover/generate Destiny while Dormant. This is the L1–3 specialization of the earlier provisional formula:
 
 ```
 Maximum Destiny = 2 + floor(Level / 5)
 ```
 
-- levels 1–4: 2;
-- 5–9: 3;
-- 10–14: 4;
-- 15–19: 5;
-- level 20: 6.
+That formula's **Level 4–20 numerical behavior remains provisional**; at L1–3 it yields exactly 2. The adopted v0 six-hour recovery is 25% of the L1–3 maximum, half-up with minimum 1. See the [L1–3 definitive action/packet/payment rules](anointed-signature-authority-l1-3-v0.md).
 
-Provisional recovery:
-
-- 25% Maximum Destiny per completed 6-hour elapsed interval;
-- nearest whole;
-- minimum 1.
-
-Meaningful Mission Fulfillment may additionally restore Destiny or grant a temporary Destiny benefit.
-
-Mission rewards are not the sole recovery source.
+A **Meaningful Mission Event** is one GM-recognized significant story beat, not a finite Mission objective or numbered Mission milestone. It may restore **+1 Destiny** capped at maximum, with each distinct recognized event counted at most once. Routine repeated activities do not automatically earn Destiny; the Mission remains lifelong and interpreted by the Anointed. This award supplements—not replaces—six-hour recovery. Mission state (Aligned/Conflicted/Forsaken) remains independent of Resonance and of any Destiny award.
 
 ## High Anointed — Projected Authority
 
@@ -235,7 +221,7 @@ Once per turn, one compatible `[Projection]` Signature or bonded-Aspect techniqu
 
 Pay full Destiny cost for both.
 
-No tier increase, discount, extra action, or second technique is created.
+No tier increase, discount, extra action, or second technique is created. **Two grades of the same Aspect Authority never count as two separate compatible Authority Expressions**; the L1–3 pilot supplies only one Lesser Authority. Its L5 extension/replacement is a distinct future decision; this paragraph grants neither Greater/Supreme early access nor an unapproved second expression.
 
 ## Medium Anointed — Aspect Investment
 
@@ -416,10 +402,10 @@ Destiny pays for exceptional Authority.
 
 ## Calibration/content still unresolved
 
-- final Destiny capacity/recovery;
+- higher-level (L4–20) Destiny capacity/recovery; L1–3 is fixed at 2 maximum/1 per six hours in the dedicated rule;
 - final High +1 Maximum Destiny decision;
-- full Signature Expressions and Expanded Projection profiles;
-- Aspect-specific Authority catalogues/costs;
+- Signature Expressions and Expanded Projection profiles outside the two authored L1–3 Restoration/Conflagration pilot packages;
+- higher-level Authority grades and remaining unimplemented Aspect-specific Authority effects (L1–3 Lesser is authored for the two pilots);
 - Medium hostile-investment details;
 - Medium Total Investment Synergies;
 - final Swift Rechanneling cadence;

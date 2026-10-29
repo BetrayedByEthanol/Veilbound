@@ -92,6 +92,7 @@ Do **not** silently fill an unresolved Veilbound rule with a D&D/5e default. If 
 ### 08 — Archetypes
 
 - [Archetype index](08-archetypes/README.md)
+- [Anointed L1–3 Signature, Destiny and Lesser Authority v0](08-archetypes/anointed-signature-authority-l1-3-v0.md) — canonical Restoration/Conflagration L1–3 pilot; native event authentication and full Focus certificates remain open
 - [Archetype Identities](08-archetypes/archetype-identities.md)
 
 ### 09 — Focus
