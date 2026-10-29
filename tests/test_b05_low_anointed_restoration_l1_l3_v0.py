@@ -71,7 +71,7 @@ class LowAnointedRestorationL1L3Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             returning_step(first.actor,receipt="second-same-turn",**base)
         with self.assertRaises(ValueError):
-            returning_step(first.actor,receipt="same-receipt",
+            returning_step(first.actor,receipt="self-pulse",
                            **(base|{"focus_turn_id":"self:turn2"}))
         fresh=returning_step(first.actor,receipt="next-step",**(base|{"focus_turn_id":"self:turn2"}))
         self.assertEqual(1,fresh.hp_restored)
