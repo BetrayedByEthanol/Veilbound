@@ -159,6 +159,13 @@ class AnointedL1L3Foundation(unittest.TestCase):
         with self.assertRaises(ValueError): conjure_flame_l3(high,receipt="not-paid",profile="Thrown Projectile",
                           used_tier=2,hit=True,target_vigor_after_base=5,adequate_spent_vp=True,
                           authentic_paid_attack=False)
+        # A caller-supplied "matches" flag cannot substitute for an active Vessel.
+        uninvested=Anointed(3,"Medium","Conflagration")
+        with self.assertRaises(ValueError):
+            conjure_flame_l3(uninvested,receipt="no-invest",profile="Weapon Enchantment",
+                 used_tier=1,hit=True,target_vigor_after_base=9,active_reserve=True,
+                 reserved_vp=4,vessel_weapon_matches=True,weapon_wielded=True,
+                 authentic_paid_attack=True)
         med=Anointed(3,"Medium","Conflagration",invested_vessel="weapon")
         w=conjure_flame_l3(med,receipt="paid-w",profile="Weapon Enchantment",used_tier=1,
                            hit=False,target_vigor_after_base=36,active_reserve=True,reserved_vp=4,
@@ -185,6 +192,11 @@ class AnointedL1L3Foundation(unittest.TestCase):
         with self.assertRaises(ValueError): guided_regeneration_l3(high,**(args|{"active_paid_guided_instance":False}))
         med=Anointed(3,"Medium","Restoration",invested_vessel="patient")
         with self.assertRaises(ValueError): guided_regeneration_l3(med,**args)
+        with self.assertRaises(ValueError):
+            guided_regeneration_l3(Anointed(3,"Medium","Restoration"),
+                                   **(args|{"vessel_matches":True}))
+        self.assertEqual(1,guided_regeneration_l3(med,
+                         **(args|{"vessel_matches":True})).additional_hp_without_vigor)
         low=Anointed(3,"Low","Restoration")
         with self.assertRaises(ValueError): guided_regeneration_l3(low,**args)
         self.assertEqual(1,guided_regeneration_l3(low,**(args|{"profile":"Self","recipient_self":True})).additional_hp_without_vigor)

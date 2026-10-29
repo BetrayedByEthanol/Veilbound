@@ -230,7 +230,7 @@ def conjure_flame_l3(actor: Anointed, *, receipt: str, profile: str,
     else:
         if (profile != "Weapon Enchantment" or not authentic_paid_attack
                 or not active_reserve or not weapon_wielded or reserved_vp < 4*used_tier
-                or (actor.focus == "Medium" and not vessel_weapon_matches)):
+                or (actor.focus == "Medium" and (actor.invested_vessel is None or not vessel_weapon_matches))):
             raise ValueError("Medium/Low require one legal paid active Reserved Weapon hit")
         required_vp, committed = 0, 4*used_tier
     updated = _commit(actor, receipt, lesser=True)
@@ -263,7 +263,7 @@ def guided_regeneration_l3(actor: Anointed, *, receipt: str,
         if profile != "Self" or not recipient_self:
             raise ValueError("Low requires actual self [Embodiment] Guided")
     else:
-        if profile != "Single Target" or (actor.focus == "Medium" and not vessel_matches):
+        if profile != "Single Target" or (actor.focus == "Medium" and (actor.invested_vessel is None or not vessel_matches)):
             raise ValueError("High/Medium require exact Single Target and Vessel when Medium")
     updated = _commit(actor, receipt, lesser=True)
     return TechniqueAuthorityOutcome(updated, additional_hp_without_vigor=1)
