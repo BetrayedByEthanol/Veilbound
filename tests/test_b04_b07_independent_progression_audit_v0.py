@@ -838,6 +838,10 @@ class IndependentProgressionTests(unittest.TestCase):
                 # published pilot leaves one selection explicitly unspent.
                 # Account for it rather than granting a free third Talent.
                 if focus == "Low":
+                    # L2 already earned two awards; only one was spent.
+                    # A legitimate deferred L3 purchase must be backed
+                    # by that saved L2 selection, not just the L3 ledger.
+                    l2["saved_talent_selections"] = 1
                     l3["saved_talent_selections"] = 1
                 findings = {x["code"] for x in _sheet_issues(
                     "Scholar/"+focus, 3, l3, l1, l2, gates)}
