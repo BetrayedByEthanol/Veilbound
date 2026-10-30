@@ -1,7 +1,8 @@
 """B04/B05 — source-constrained Low Gifted L1–3 structural sheet.
 
-Anchor benefits remain PR #158 PROVISIONAL candidates. No native G0/G1/G5
-receipt, automatic player-granted effect or independent Focus certification.
+PR #158's Anchor numbers are approved as provisional restricted pilot
+expressions. No native G0/G1/G5 effect, automatic unverified response,
+or independent Focus certification is implied.
 """
 from copy import deepcopy
 import json
@@ -91,7 +92,7 @@ def profile(level):
         "emotion_intensity": None, "prepared_techniques": None,
         "individually_learned_pillar_techniques": None,
         "anchor_expressions": {
-            e: {**CANDIDATE[e], "status": "PROVISIONAL_UNAPPROVED"}
+            e: {**CANDIDATE[e], "status": "PILOT_PROVISIONAL_APPROVED_NOT_NATIVE"}
             for e in CANDIDATE
         },
         "anchor_host": "own body", "anchor_candidate_pulse_per_window": 1,
@@ -182,7 +183,7 @@ def anchor_witness(level):
             "competing_inactive":not inactive.applicable,"paid_transition":transition,
             "transition_ap_remaining":n.ap_remaining,"reasserted_defense":active.bonus,
             "level3_settled":settled,
-            "native_receipt":False,"canonical_anchor_approved":False}
+            "native_receipt":False,"canonical_anchor_approved":True}
 
 
 def verify():

@@ -13,9 +13,10 @@ class LowGiftedAnchorDesignTests(unittest.TestCase):
             self.assertEqual(len({v["pillar"] for v in p["links"].values()}),8)
             self.assertEqual(len({v["aspect"] for v in p["links"].values()}),8)
             self.assertEqual([e for e in p["links"] if p["links"][e]["compatibility"]=="P"],["Joy","Anger"])
-            self.assertEqual([e for e in p["links"] if p["links"][e]["anchor_expression_candidate"]],["Fear","Disgust"])
+            self.assertEqual([e for e in p["links"] if p["links"][e]["anchor_expression_pilot"]],["Fear","Disgust"])
             self.assertFalse(p["structural_character_build_complete"])
-            self.assertFalse(p["canonical_anchor_expression_authored"])
+            self.assertTrue(p["canonical_anchor_expression_authored"])
+            self.assertFalse(p["anchor_native_effect_certified"])
             self.assertEqual(p["universal_known"], ["Veil Inspection"]+(["Blink"] if level==3 else []))
 
     def test_02_vp_action_tempo_and_blink_stay_low(self):
