@@ -158,6 +158,13 @@ class GridMovement:
             return (self.e.g2 is not None
                     and self.genuine_scholar_sword_ready(actor_id)
                     and a.hp > 0 and not a.dead and at in self.reach(actor_id))
+        if a.source.source_id in ("AH","AM","AL"):
+            # Anointed's ordinary Dagger/Sword is not an innate or
+            # automatically wielded melee ability. Current G2 readiness
+            # must match its exact authored physical source.
+            return (self.e.g2 is not None
+                    and self.genuine_anointed_weapon_ready(actor_id)
+                    and a.hp > 0 and not a.dead and at in self.reach(actor_id))
         return self._can_melee(a) and at in self.reach(actor_id)
 
     def genuine_scholar_sword_ready(self,actor_id):
@@ -171,6 +178,21 @@ class GridMovement:
         try:
             scholar_sword_profile(a,SWORD_IDS[a.source.source_id],encounter=self.e)
         except UnresolvedDecision:
+            return False
+        return True
+
+    def genuine_anointed_weapon_ready(self,actor_id):
+        """Authoritative G1/G2 readiness used by native Anointed G5."""
+        from scripts.b05_anointed_native_melee_v0 import (
+            MELEE_IDS,anointed_weapon_profile,
+        )
+        a=self.e.actors[actor_id]
+        if a.source.source_id not in MELEE_IDS:
+            return False
+        try:
+            anointed_weapon_profile(
+                a,MELEE_IDS[a.source.source_id],encounter=self.e)
+        except (UnresolvedDecision,ValueError):
             return False
         return True
 

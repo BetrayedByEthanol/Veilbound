@@ -2,8 +2,10 @@
 
 This is an ACTOR-STATE bridge, not a native Signature/Destiny/Authority engine.
 The real G0/Step-2 actor ledger is available for future integration. The
-structural source has no authored mundane G5 attack profile or established
-G3 technique instance, and Actor has no Anointed Destiny or Vessel ledger.
+structural source now exposes precisely one source-derived mundane weapon
+G5 profile per role, but live G1/G2 wielding and G0/G4/G5 still gate attacks.
+No G3 technique instance is automatically established, and Actor has no
+Anointed Destiny or Vessel ledger.
 """
 from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as high_profile
 from scripts.b05_medium_anointed_restoration_l1_l3_v0 import profile as medium_profile
@@ -50,7 +52,10 @@ def anointed_party_actor(role, level, actor_id, team, *, occupied):
     source = Source(
         path, role, _fingerprint(path), "STRUCTURAL_B05_ONLY",
         tuple(sorted(a.items())), tuple(sorted(p["weapon_training"].items())),
-        gear, (), f"L{level}-{focus.lower()}-anointed-restoration-structural",
+        gear, ({"AH":"B05-PC-AH-DAGGER-PIERCE",
+                "AM":"B05-PC-AM-DAGGER-PIERCE",
+                "AL":"B05-PC-AL-SWORD-CUT"}[role],),
+        f"L{level}-{focus.lower()}-anointed-restoration-structural",
     )
     actor = Actor(
         id=actor_id, team=team, source=source, level=level, focus=focus,

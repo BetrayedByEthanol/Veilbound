@@ -495,11 +495,16 @@ class DamageState:
             profile,_=scholar_sword_profile(
                 source,profile_id,encounter=self.e)
             profs=[profile]
+        elif source.source.source_id in ("AH","AM","AL"):
+            from scripts.b05_anointed_native_melee_v0 import anointed_weapon_profile
+            profile,_=anointed_weapon_profile(
+                source,profile_id,encounter=self.e)
+            profs=[profile]
         elif source.source.source_id in ENEMIES:
             obj = json.loads((ROOT / source.source.path).read_text(encoding="utf-8"))
             profs = [p for p in obj["attack_profiles"] if p["id"] == profile_id]
         else:
-            raise UnresolvedDecision("Only sourced enemy or explicitly audited player melee damage supported")
+            raise UnresolvedDecision("Only source-audited enemy or player melee damage supported")
         if len(profs) != 1 or profs[0]["primary_hp_packet"] is None:
             raise ValueError("Unknown or non-damaging source attack")
         if source.hp <= 0 or source.dead:

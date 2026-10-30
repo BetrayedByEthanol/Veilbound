@@ -219,8 +219,12 @@ class SourceMelee:
             from scripts.b05_scholar_native_sword_v0 import scholar_sword_profile
             _,bonus=scholar_sword_profile(a,profile_id,encounter=self.e)
             return bonus
+        if a.source.source_id in ("AH","AM","AL"):
+            from scripts.b05_anointed_native_melee_v0 import anointed_weapon_profile
+            _,bonus=anointed_weapon_profile(a,profile_id,encounter=self.e)
+            return bonus
         if a.source.source_id not in ("B06-EN-01","B06-EN-02","B06-EN-03"):
-            raise UnresolvedDecision("G5/G6 only resolves sourced enemy or A/B melee")
+            raise UnresolvedDecision("G5/G6 only resolves sourced enemy or audited player melee")
         if (a.source.source_id=="B06-EN-03"
                 and profile_id not in ("B06-AT-04","B06-AT-05")):
             raise UnresolvedDecision("G6 Pounce and Horn Drive need their own commitment path")
@@ -791,7 +795,9 @@ class SourceMelee:
                 not e.actors[target].ready_guard or
                 not e.actors[target].guard_instrument or
                 (e.actors[target].source.source_id in ("S","T")
-                 and not e.g1.genuine_scholar_sword_ready(target)))):
+                 and not e.g1.genuine_scholar_sword_ready(target))
+                or (e.actors[target].source.source_id in ("AH","AM","AL")
+                 and not e.g1.genuine_anointed_weapon_ready(target)))):
             raise UnresolvedDecision("Changed Guard requires native defensive fallback")
         attack_face=_face(attack_face,20,"initial melee attack")
         if attack_face==20:
@@ -822,7 +828,8 @@ class SourceMelee:
             raise ValueError("Exact critical d4 faces required")
         venom_exposure_key=None
         if hit:
-            _face(damage_face,6,"source melee damage")
+            source_die=4 if e.actors[attacker].source.source_id in ("AH","AM") else 6
+            _face(damage_face,source_die,"source melee damage")
             # G4 owns the exact profile's typed packets, source Vigor die,
             # resistance/Armor calculation and wound-location requirement.
             # Run that preflight BEFORE response windows or roll logs, so

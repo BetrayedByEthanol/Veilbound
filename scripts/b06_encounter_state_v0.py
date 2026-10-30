@@ -792,6 +792,10 @@ class Encounter:
                     and (self.g1 is None or
                          not self.g1.genuine_scholar_sword_ready(actor_id))):
                 raise ValueError("Scholar Sword Guard requires current wielding")
+            if (a.source.source_id in ("AH","AM","AL")
+                    and (self.g1 is None or
+                         not self.g1.genuine_anointed_weapon_ready(actor_id))):
+                raise ValueError("Anointed weapon Guard requires real G2 wielding")
             if (a.guard_remaining == 0 or a.guard_value is None
                     or not a.guard_instrument or not a.ready_guard):
                 raise ValueError("Cannot Guard without ready legal instrument/capacity")
@@ -868,7 +872,10 @@ class Encounter:
                 or not t.guard_instrument
                 or (t.source.source_id in ("S","T") and
                     (self.g1 is None or
-                     not self.g1.genuine_scholar_sword_ready(target))))):
+                     not self.g1.genuine_scholar_sword_ready(target)))
+                or (t.source.source_id in ("AH","AM","AL") and
+                    (self.g1 is None or
+                     not self.g1.genuine_anointed_weapon_ready(target))))):
             raise ValueError("Insufficient legal Guard assignments")
         self.seen_sequences.add((attacker, target))
         for i, p in enumerate(profiles):
