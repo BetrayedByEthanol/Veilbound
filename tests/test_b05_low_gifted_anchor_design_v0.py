@@ -321,12 +321,13 @@ class LowGiftedAnchorDesignTests(unittest.TestCase):
                 self.assertFalse(m.settled_heightening)
                 self.assertFalse(m.heightened)
 
-    def test_14_two_candidates_are_aspect_specific_not_spell_copies(self):
+    def test_14_two_pilot_expressions_are_aspect_specific_not_native(self):
         self.assertEqual(CANDIDATE["Fear"]["pillar"],"Earth")
         self.assertEqual(CANDIDATE["Disgust"]["aspect"],"Defiance")
         self.assertEqual(CANDIDATE["Fear"]["bonus"],1)
         self.assertEqual(CANDIDATE["Disgust"]["mp_surcharge_reduction"],1)
-        self.assertFalse(starting_access(3)["canonical_anchor_expression_authored"])
+        self.assertTrue(starting_access(3)["canonical_anchor_expression_authored"])
+        self.assertFalse(starting_access(3)["anchor_native_effect_certified"])
 
 
 if __name__ == "__main__":
