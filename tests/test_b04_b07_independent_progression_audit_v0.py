@@ -54,8 +54,20 @@ class IndependentProgressionTests(unittest.TestCase):
         forged["talents"].append("TAL-C07 Reactive Aim")
         found={x["code"] for x in _sheet_issues(
             "Anointed/High",2,forged,base,base,gates)}
-        self.assertTrue({"vp_formula","learned_budget","universal_award",
-                         "talent_overaward","talent_gate"} <= found)
+        # Medicine 2->3 is an invalid rank: do not sum it merely to
+        # manufacture a learned-budget result after numeric preflight.
+        self.assertTrue({"vp_formula","learned_ranks","learned_progression",
+                         "universal_award","talent_overaward",
+                         "talent_gate"} <= found)
+        # A separately forged allocation with all legal numeric ranks still
+        # proves over-budget learned points are rejected independently.
+        overspent = deepcopy(good)
+        overspent["learned_disciplines"]["Unawarded Training"] = 1
+        overspent_found = {x["code"] for x in _sheet_issues(
+            "Anointed/High", 2, overspent, base, base, gates)}
+        self.assertIn("learned_budget", overspent_found)
+        self.assertIn("learned_progression", overspent_found)
+        self.assertNotIn("learned_ranks", overspent_found)
 
     def test_06_focus_ap_prices_reject_self_consistent_forged_tempos(self):
         from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as high
