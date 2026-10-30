@@ -191,6 +191,7 @@ class IndependentProgressionTests(unittest.TestCase):
     def test_11_no_new_capacity_or_focus_cost_findings_on_authored_builds(self):
         prohibited={"focus_action_cost", "general_action_cost",
                     "physical_tempo", "projection_tempo",
+                    "scholar_known_access", "gifted_link_identity",
                     "scholar_known_capacity", "scholar_preparation_capacity",
                     "scholar_formula_capacity", "scholar_formula_legality",
                     "scholar_medium_preparation", "priest_capacity",
@@ -480,6 +481,26 @@ class IndependentProgressionTests(unittest.TestCase):
                         self.assertTrue({"gifted_links"} <= errors if kind in
                                         ("missing_emotion", "foreign_emotion") else
                                         {"gifted_link_identity"} <= errors)
+
+    def test_23_gifted_bad_birth_links_fail_even_if_persisted_at_all_levels(self):
+        from scripts import b05_high_gifted_l1_l3_v0 as module
+        original = module.profile
+
+        def forged_at_creation_and_carried(level):
+            sheet = original(level)
+            sheet["emotion_aspect_links"]["Joy"] = deepcopy(
+                sheet["emotion_aspect_links"]["Fear"])
+            return sheet
+
+        with patch.object(module, "profile",
+                          side_effect=forged_at_creation_and_carried):
+            report = audit()
+        issues = {(x["pairing"], x["level"], x["code"])
+                  for x in report["issues"]}
+        self.assertTrue({("Gifted/High", level, "gifted_link_identity")
+                         for level in (1, 2, 3)} <= issues)
+        self.assertNotIn(("Gifted/High", 2, "gifted_link_mutation"), issues)
+        self.assertNotIn(("Gifted/High", 3, "gifted_link_mutation"), issues)
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
