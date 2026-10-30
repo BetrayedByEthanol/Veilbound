@@ -275,6 +275,15 @@ class WorldClock:
         if self.mode != "exploration" or self.e.current is not None or (
                 self.e.round and self.e.cursor not in (0,len(self.e.order))):
             raise ValueError("Initiative entry requires an exploration boundary")
+        # A source-bound Anointed Destiny bridge may have uncredited real
+        # exploration time. Settle it while still at the valid exploration
+        # boundary, BEFORE entering initiative or spending another Lesser.
+        # In particular, six hours elapsed at the Destiny cap must never
+        # reimburse a future in-combat expenditure on initiative exit.
+        # Optional B05 integration; G4.2 has no dependency on its referee.
+        destiny_bridge=getattr(self.g4,"anointed_destiny_exploration",None)
+        if destiny_bridge is not None:
+            destiny_bridge.sync_world_time()
         entry = self._round_label()
         self.mode = "initiative"
         self.entry_round = entry
