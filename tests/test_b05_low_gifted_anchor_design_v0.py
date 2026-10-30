@@ -13,9 +13,10 @@ class LowGiftedAnchorDesignTests(unittest.TestCase):
             self.assertEqual(len({v["pillar"] for v in p["links"].values()}),8)
             self.assertEqual(len({v["aspect"] for v in p["links"].values()}),8)
             self.assertEqual([e for e in p["links"] if p["links"][e]["compatibility"]=="P"],["Joy","Anger"])
-            self.assertEqual([e for e in p["links"] if p["links"][e]["anchor_expression_candidate"]],["Fear","Disgust"])
+            self.assertEqual([e for e in p["links"] if p["links"][e]["anchor_expression_pilot"]],["Fear","Disgust"])
             self.assertFalse(p["structural_character_build_complete"])
-            self.assertFalse(p["canonical_anchor_expression_authored"])
+            self.assertTrue(p["canonical_anchor_expression_authored"])
+            self.assertFalse(p["anchor_native_effect_certified"])
             self.assertEqual(p["universal_known"], ["Veil Inspection"]+(["Blink"] if level==3 else []))
 
     def test_02_vp_action_tempo_and_blink_stay_low(self):
@@ -320,12 +321,13 @@ class LowGiftedAnchorDesignTests(unittest.TestCase):
                 self.assertFalse(m.settled_heightening)
                 self.assertFalse(m.heightened)
 
-    def test_14_two_candidates_are_aspect_specific_not_spell_copies(self):
+    def test_14_two_pilot_expressions_are_aspect_specific_not_native(self):
         self.assertEqual(CANDIDATE["Fear"]["pillar"],"Earth")
         self.assertEqual(CANDIDATE["Disgust"]["aspect"],"Defiance")
         self.assertEqual(CANDIDATE["Fear"]["bonus"],1)
         self.assertEqual(CANDIDATE["Disgust"]["mp_surcharge_reduction"],1)
-        self.assertFalse(starting_access(3)["canonical_anchor_expression_authored"])
+        self.assertTrue(starting_access(3)["canonical_anchor_expression_authored"])
+        self.assertFalse(starting_access(3)["anchor_native_effect_certified"])
 
 
 if __name__ == "__main__":

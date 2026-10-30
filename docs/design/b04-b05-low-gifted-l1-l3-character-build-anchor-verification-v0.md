@@ -1,5 +1,7 @@
 # B04/B05 — Low Gifted L1–3 Character Build and Anchor Verification v0
 
+> **Update (30 October 2026):** The two Low Gifted Rooted Guard +1 / Unbound Step −1 MP values formerly labeled **PROVISIONAL_UNAPPROVED** in this original #159 build report are now **provisionally approved for the restricted L1–3 pilot**; see [current pilot rules](../rules/08-archetypes/low-gifted-anchored-expressions-l1-3-v0.md). The original build remains structural: no native Anchor receipt or independently verified Focus play has been supplied by this later approval.
+
 > **Ninth source-verified STRUCTURAL Archetype × Focus L1–3 pairing on merge.** Not an independent Focus certificate, a native G0/G1/G5 encounter or authorization to use new Anchor effects. The numerical Rooted Guard / Unbound Step expressions from [Low Gifted Focus Design #158](b04-b05-low-gifted-l1-l3-focus-design-starting-access-v0.md) remain **PROVISIONAL_UNAPPROVED**. This PR changes no canonical rules, tier-1 technique identities, B06 milestones, independent Focus certification or original blocker definitions.
 
 ## Canonical source basis

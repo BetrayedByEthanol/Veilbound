@@ -281,6 +281,8 @@ A full technique-scale instance of damage, healing, Vigor restoration, strong co
 
 Low Gifted gains value from committing to one emotion and maintaining it.
 
+**Restricted L1–3 pilot expression authority:** [Rooted Guard / Unbound Step v0](low-gifted-anchored-expressions-l1-3-v0.md) approves the existing Fear/Fortification +1 committed defense and Disgust/Defiance −1 MP surcharge as **provisional watch values**. This does not authorize unsigned/unvalidated native response or movement receipts, other Anchor effects or full Focus certification.
+
 ### Active Emotion vs Anchored Emotion
 
 - Active Emotion is the universal current Gifted link.

@@ -1,5 +1,7 @@
 # B04/B05 — Low Gifted L1–3 Focus Design and Starting Access v0
 
+> **Update (30 October 2026, restricted MVP pilot approval):** The original numerical proposals in this historical design record, **Rooted Guard +1 defense** and **Unbound Step −1 MP surcharge**, including the stated L2 widening and once-window constraints, are now **approved for provisional L1–3 playtesting**, as recorded in [Pilot Approvals and Watches v0](b04-b05-b07-mvp-pilot-approvals-and-watches-v0.md) and [canonical restricted expression rules](../rules/08-archetypes/low-gifted-anchored-expressions-l1-3-v0.md). The original candidate-only status below is the historical proposal at its PR checkpoint. Native G0/G1/G2/G4/G5 integration and independent balance/Focal certification remain open.
+
 > **Provisional DESIGN / approval candidate, not canonical rule text, a native G0–G5 adapter, completed character sheet, player-granted ability or independent Focus certificate.** The existing [Gifted foundation](../../rules/08-archetypes/gifted.md) remains authoritative for Anchor, Emotion Window, Break Anchor, L2 Instinctive Expression and L3 Settled Emotion. The two **new numerical effects below are proposals**: approval and native binding are separate subsequent work. Structural Focus progress remains **8/12**; independently certified **0/12**.
 
 ## Exact source and inherited starting access

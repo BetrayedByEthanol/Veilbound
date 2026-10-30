@@ -87,11 +87,17 @@ The [B07 Talent Framework](talents-framework-v0.md) defines player-selected **Ta
 
 The structural design direction is **Low Focus receives more selections than Medium, which receives more than High**. The current **provisional** level-1–5 award schedule is **High: 1 and 5; Medium: 1, 3 and 5; Low: 1, 2, 3 and 5**. These Talent selections are separate from both B04 Training budgets and Ability increases. The longer-level schedule (6–20), retraining and final numerical Talent balance are **not locked**. Do not import D&D feats.
 
+## Restricted L1–3 MVP pilot — milestone awards (approved 30 October 2026)
+
+For the **3–5-session MVP adventure only**, characters begin at **Level 1** and advance to **Level 2** and then **Level 3** by **two distinct, explicitly GM-declared story milestones** during the authored adventure. The GM identifies and records the completed event and level award in the adventure/session record; neither a fixed encounter win, character performance metric, clock interval, XP total nor an Anointed's personal Mission/Destiny story beat **automatically grants a character level**. If a significant personal Mission event also occurs, it remains separately adjudicated under its own rules. A milestone advances **one level at a time** and may not be reused for a second award or skip a level. Placement of the two events in the adventure is an **authored GM/pilot task**, not an invented universal session-number trigger.
+
+On an actual L1→L2 or L2→L3 award, use only the already-authored legal Archetype/Focus/Training/Talent/VP/AP/universal Veil acquisition schedule for that new level and independently check the resulting sheet and available resources. No automatic spell affordability, new Aspect/Anchor/Authority, extra Talent, new VP refresh, or general XP conversion is implied. **Provisional watch:** evaluate whether two milestones within 3–5 sessions provide sufficient time to explore each Focus at L1, L2 and L3 and whether character role changes remain meaningful; revise placement after actual GM/player evidence. This is a pilot procedure, **not a general level-award rule for L4–20 or all campaigns**.
+
 ## Not yet canonical
 
 The audit does not yet provide complete native rules for:
 
-- XP or milestone level gain;
+- general campaign XP or milestone level gain **outside the restricted L1–3 MVP pilot**;
 - complete level 6–20 Talent progression and final Talent balance;
 - general multiclassing;
 - how VP, Focus, technique progression, and innate archetype traits combine under multiclassing;

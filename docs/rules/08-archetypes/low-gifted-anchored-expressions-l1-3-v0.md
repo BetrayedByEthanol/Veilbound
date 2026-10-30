@@ -1,0 +1,22 @@
+# Low Gifted — Restricted L1–3 Anchored Expressions v0
+
+> **Approved for provisional MVP pilot playtesting (30 October 2026).** This page is the authority for the exact two Low Gifted Anchor effects below in the selected eight-link L1–3 pilot. It promotes the unchanged #158 candidate values; it does **not** certify native G0/G1/G2/G4/G5 implementation, balance, noncombat role, or an independent Archetype × Focus pairing. The [Gifted Foundation](gifted.md) retains control of Emotion Establishment, Anchor continuity, Break Anchor, Instinctive Expression and Settled Emotion.
+
+## Restricted source identities and outputs
+
+| Source Anchor | L1 (and L3) expression | L2 Instinctive widening |
+|---|---|---|
+| **Fear → Earth / Fortification: Rooted Guard** | Add **+1** to exactly **one** already legal, genuinely **committed Guard** defense against a Physical weapon attack targeting the Low Gifted **self**, declared **before** the attack roll. It modifies only the chosen defense value, not damage, Vigor, Guard capacity or a new response. | The same once-window **+1** may instead apply to **one genuinely committed self Dodge**, under its own legal response window; choose **Guard or Dodge**, never both for the same Pulse. |
+| **Disgust → Liberty / Defiance: Unbound Step** | Reduce the **extra MP surcharge** of **one** otherwise legal, actually paid **difficult-terrain** movement step by **1 MP**, to a minimum surcharge of zero. Never reduce the normal base movement cost or allow blocked/illegal movement. | The once-window **1 MP** surcharge reduction may instead apply to the extra MP cost of **one legal cautious step**. No extra movement or avoidance of Opportunity is granted. |
+
+**Cadence and cost.** Exactly **one total Anchor Pulse per genuine Emotion Establishment Window** across both expressions, not one per Guard, Dodge, step, turn, Physical Tempo or emotion. Neither expression has an additional AP, Spent VP or Committed VP cost, but the underlying Guard/Dodge or movement must already be valid and paid, with the actual source actor, target, location and response timing attested. A failed eligibility check cannot spend or create a Pulse. Switching Anchor by the existing **24 AP** Break, reasserting, or forced emotional change does **not** refresh the current Window's spent Pulse; only a genuine new Emotion Establishment Step does.
+
+**Host and ending.** Anchor is chosen at the original combat-start Emotion window; only its **matching Active Emotion** while genuinely uninterrupted permits the self-centered effect. An incompatible dominant emotion disrupts it; normal paid Emotional Transition is needed to reassert. An unbroken matching emotion preserves the L3 Settled provenance, but no paid Deepen receives free persistence. Dormant/unlinked emotions and the other six restricted linked emotions grant **no new Anchor rider** from this v0. These are **not** ordinary Tier-1 spells, Stone Skin, wards, free reactions, attacks, teleportation or universal granted expressions for every Aspect. Separate ordinary technique VP/AP/Used-Tier limits continue to apply.
+
+## Implementation and balance watch
+
+The historical [#158 design candidate](../../design/b04-b05-low-gifted-l1-l3-focus-design-starting-access-v0.md) supplies the precise eligibility/cadence and negative cases and remains a historical proposal. Its isolated `LowGiftedAnchorDesign` witness may preview expenses but **cannot commit** a real Guard, Dodge, MP movement, attack or damage event: caller-provided `paid` and `source_legal` booleans are **untrusted**. A subsequent native PR must bind exact G0/G1/G2/G5 source receipts, real defensive response and terrain costs, and reject duplicate/stale/forged Pulse and window inputs before claiming executable combat benefit.
+
+**Provisional watch, not final balance:** observe +1 Guard/Dodge effect on hit avoidance, cadence versus Guard/Dodge pressure and tempo, 1 MP terrain/cautious movement cost and Opportunity exposure, genuine Anchor disruption/reassertion, meaningful alternatives and Level 1/2/3 viability. Keep **+1 defense / −1 MP** unchanged until actual playtest data warrants a separate reviewed adjustment. Do not silently tune or declare globally balanced.
+
+**Readiness stays 12/12 structural Focus builds, 0/12 independent full Focus certificates, 0/6 strict MVP exits.** These two expressions are a bounded pilot grant, not approval of all remaining Low Gifted Aspect Embodiments, Level 5 Deep Embodiment or 6–20 balance.

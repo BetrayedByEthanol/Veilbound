@@ -1,8 +1,9 @@
-"""B04/B05 Low Gifted L1–3 restricted Anchor DESIGN CANDIDATE.
+"""B04/B05 Low Gifted L1–3 restricted Anchor preview and pilot authority.
 
-Not canonical, not a native G0/G1/G4 effect and not a complete character.
-Inputs describing Guard/Dodge/movement must be independently source-attested
-before any future integration. Never treat preview results as resolved effects.
+The original #158 +1 defense / -1 MP outputs are approved *provisionally*
+for the restricted L1–3 pilot. Still not a native G0/G1/G4 effect.
+Untrusted caller declarations must be independently source-attested before
+this preview becomes a resolved defense or movement. No full certificate.
 """
 from dataclasses import dataclass
 
@@ -11,7 +12,7 @@ from scripts.b05_high_gifted_l1_l3_v0 import AUTHORED_ACCESS, AUTHORED_UPCAST_T2
 
 EMOTIONS = tuple(PILOT_LINKS)
 LEVELS = (1, 2, 3)
-# CANDIDATE numbers, not executable permissions or published techniques.
+# Exact restricted-pilot provisional numbers; no native action authorization.
 CANDIDATE = {
     "Fear": {"pillar": "Earth", "aspect": "Fortification",
              "name": "Rooted Guard", "cadence": "one paid-defense Pulse/window",
@@ -35,6 +36,8 @@ def starting_access(level, *, veil_affinity=0):
     links = {e: {"pillar": p, "aspect": a, "compatibility": rating,
                  "ordinary_techniques": list(AUTHORED_ACCESS[e]),
                  "anchor_expression_candidate":
+                     CANDIDATE[e]["name"] if e in CANDIDATE else None,
+                 "anchor_expression_pilot":
                      CANDIDATE[e]["name"] if e in CANDIDATE else None}
              for e, (p, a, rating) in PILOT_LINKS.items()}
     assert len(links) == 8 and len({v["pillar"] for v in links.values()}) == 8
@@ -54,7 +57,8 @@ def starting_access(level, *, veil_affinity=0):
             "anchor_at_start": None,
             "anchor_extra_vp_cost_candidate": 0,
             "break_anchor_general_ap": 24,
-            "canonical_anchor_expression_authored": False,
+            "canonical_anchor_expression_authored": True,
+            "anchor_native_effect_certified": False,
             "structural_character_build_complete": False}
 
 

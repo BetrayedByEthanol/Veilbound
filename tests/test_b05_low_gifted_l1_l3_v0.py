@@ -114,11 +114,11 @@ class LowGiftedBuildTests(unittest.TestCase):
             self.assertIsNone(s["active_emotion"])
             self.assertIsNone(s["anchored_emotion"])
 
-    def test_07_candidate_anchor_not_canon_or_native_authority(self):
+    def test_07_provisional_pilot_anchor_is_not_native_authority(self):
         for level in LEVELS:
             s=profile(level)
             self.assertEqual(set(s["anchor_expressions"]),{"Fear","Disgust"})
-            self.assertTrue(all(e["status"]=="PROVISIONAL_UNAPPROVED"
+            self.assertTrue(all(e["status"]=="PILOT_PROVISIONAL_APPROVED_NOT_NATIVE"
                                 for e in s["anchor_expressions"].values()))
             self.assertEqual(s["anchor_candidate_pulse_per_window"],1)
             self.assertEqual((s["anchor_extra_spent_vp"],s["anchor_extra_committed_vp"]),(0,0))
@@ -172,7 +172,7 @@ class LowGiftedBuildTests(unittest.TestCase):
             self.assertEqual(w["transition_ap_remaining"],profile(level)["turn_ap"]-24)
             self.assertEqual(w["reasserted_defense"],1)
             self.assertFalse(w["native_receipt"])
-            self.assertFalse(w["canonical_anchor_approved"])
+            self.assertTrue(w["canonical_anchor_approved"])
 
     def test_11_initial_paid_deepen_does_not_permanently_heighten_l3(self):
         z=anchor_witness(3)["level3_settled"]
