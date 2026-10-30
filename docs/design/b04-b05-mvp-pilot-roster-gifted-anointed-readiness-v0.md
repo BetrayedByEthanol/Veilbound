@@ -1,5 +1,7 @@
 # B04/B05 — Restricted MVP Pilot Roster and Gifted/Anointed Readiness v0
 
+> **Current decision overlay (30 October 2026):** This record is the **historical PR #149 candidate roster**, not the active decision register. The user has now approved the unchanged Low Gifted **Rooted Guard +1 / Unbound Step −1 MP** as provisional pilot effects, retained the last explicitly audited **13 Tier-1 identities / 10 of 24 authored selected Aspects** as a **playtest watch**, and selected **two GM-declared L2/L3 milestones** for the 3–5-session pilot. See [current approval and watch register](b04-b05-b07-mvp-pilot-approvals-and-watches-v0.md). Later #150–178 work supersedes older 'missing build / approval' counts below; all twelve structural pairings are complete, but 0/12 independently certified and 0/6 exits closed.
+
 > **Planning / authoring audit, not canonical game rules, new magic, new player entitlements, or an MVP certificate.** Source checkpoint: `main` after merged PR #149 (25 October 2026). All examples below require the actual source-authored Archetype, Focus, level, tag, AP, VP, target and mode permissions; a restricted **pilot fixture** is not a repeal of broader world or character-creation canon. The active [MVP readiness register](veilbound-roadmap-and-mvp-readiness.md) remains authoritative for merged progress.
 
 ## Scope and decision boundaries
