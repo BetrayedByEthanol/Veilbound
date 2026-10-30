@@ -587,7 +587,11 @@ class Encounter:
         if actor_id != self.order[self.cursor]:
             raise ValueError("Actor is not next in Initiative order")
         a = self.actors[actor_id]
-        if self.pending_regeneration is None:
+        # pending_regeneration already identifies the original Step-1 entry.
+        # Its start-only Embodiment window must not reopen when an unresolved
+        # or invalid Step-2 allocation is retried later on the same turn.
+        first_step_entry = self.pending_regeneration is None
+        if first_step_entry:
             # Preflight debt before beginning Step 1; invalid debt is not
             # allowed to partially expire reservations or start a turn.
             if a.blink_debt_due > a.ap_total:
@@ -608,11 +612,15 @@ class Encounter:
                 raise ValueError("Regeneration response must be callable")
             if self._live_regeneration_ready_callback is not None:
                 raise ValueError("Nested own-turn start callback forbidden")
-            self._live_regeneration_ready_callback = actor_id
+            # Other regeneration policy callbacks may still run on retries;
+            # only the genuine first entry grants Low Embodiment authority.
+            if first_step_entry:
+                self._live_regeneration_ready_callback = actor_id
             try:
                 on_regeneration_ready(self, actor_id)
             finally:
-                self._live_regeneration_ready_callback = None
+                if first_step_entry:
+                    self._live_regeneration_ready_callback = None
         low = (getattr(self.g3,"low_life",None)
                if self.g3 is not None else None)
         if low is not None:

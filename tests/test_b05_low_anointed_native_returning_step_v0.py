@@ -268,6 +268,86 @@ class LowAnointedNativeTests(unittest.TestCase):
                           e.actors["low"].vp_committed,e.actors["low"].vp_spent))
         e.end_turn()
 
+    def test_13_missing_allocation_retry_cannot_resume_suppressed_embodiment(self):
+        # Codex P2: the original Step 1 was already entered without a
+        # callback; Step-2's missing allocation MUST NOT create a new
+        # Embodiment window just because a later retry supplies a callback.
+        e,low,_=scene(2,hp=5,vigor=7)
+        def suppress(encounter,recipient):
+            self.assertFalse(low.toggle_embodiment(manifested=False))
+        e.start_turn("low",regen_choice=RegenerationChoice(),
+                     on_regeneration_ready=suppress)
+        self.assertFalse(low.state.embodied)
+        e.end_turn()
+        e.begin_round()
+        original_expiries=len(events(e,"turn_start_expiry"))
+        with self.assertRaises(UnresolvedDecision):
+            e.start_turn("low")  # Missing natural regeneration allocation.
+        self.assertEqual("low",e.pending_regeneration)
+        self.assertEqual("low",e.current)
+        self.assertIsNone(e._live_regeneration_ready_callback)
+        callback_retried=[]
+        def forbidden_late_resume(encounter,recipient):
+            callback_retried.append(recipient)
+            self.assertIsNone(encounter._live_regeneration_ready_callback)
+            with self.assertRaises(ValueError):
+                low.toggle_embodiment(manifested=True)
+            with self.assertRaises(ValueError):
+                low.declare_pulse()
+        e.start_turn("low",regen_choice=RegenerationChoice(hp=1),
+                     on_regeneration_ready=forbidden_late_resume)
+        self.assertEqual(["low"],callback_retried)
+        self.assertFalse(low.state.embodied)
+        self.assertEqual((6,6,2),(e.actors["low"].hp,
+                                   e.actors["low"].vigor,low.state.destiny))
+        self.assertEqual(original_expiries+1,len(events(e,"turn_start_expiry")))
+        self.assertFalse(events(e,"g4_anointed_low_returning_step_applied"))
+        self.assertEqual(1,len(events(e,"b05_low_anointed_embodiment_set")))
+        self.assertIsNone(e._live_regeneration_ready_callback)
+        e.check()
+
+    def test_14_invalid_allocation_retry_cannot_toggle_again_but_next_turn_can(self):
+        # A legitimate first-entry toggle (even when Step 2 later fails)
+        # consumes its original timing window. The retry callback may make
+        # normal policy choices but must not gain another toggle capability.
+        e,low,_=scene(2,hp=11,vigor=7)
+        def first_entry(encounter,recipient):
+            self.assertEqual(recipient,encounter._live_regeneration_ready_callback)
+            self.assertFalse(low.toggle_embodiment(manifested=False))
+        with self.assertRaises(ValueError):
+            e.start_turn("low",regen_choice=RegenerationChoice(hp=2),
+                         on_regeneration_ready=first_entry)
+        self.assertFalse(low.state.embodied)
+        self.assertEqual("low",e.pending_regeneration)
+        self.assertIsNone(e._live_regeneration_ready_callback)
+        retried=[]
+        def late(encounter,recipient):
+            retried.append(recipient)
+            self.assertIsNone(encounter._live_regeneration_ready_callback)
+            with self.assertRaises(ValueError):
+                low.toggle_embodiment(manifested=True)
+            with self.assertRaises(ValueError):
+                low.declare_pulse()
+        e.start_turn("low",regen_choice=RegenerationChoice(hp=1),
+                     on_regeneration_ready=late)
+        self.assertEqual(["low"],retried)
+        self.assertFalse(low.state.embodied)
+        self.assertEqual((12,6,2),(e.actors["low"].hp,
+                                    e.actors["low"].vigor,low.state.destiny))
+        self.assertEqual(1,len(events(e,"b05_low_anointed_embodiment_set")))
+        self.assertFalse(events(e,"g4_anointed_low_returning_step_applied"))
+        e.end_turn()
+        e.begin_round()
+        def next_real_turn(encounter,recipient):
+            self.assertEqual(recipient,encounter._live_regeneration_ready_callback)
+            self.assertTrue(low.toggle_embodiment(manifested=True))
+        e.start_turn("low",regen_choice=RegenerationChoice(),
+                     on_regeneration_ready=next_real_turn)
+        self.assertTrue(low.state.embodied)
+        self.assertEqual(2,len(events(e,"b05_low_anointed_embodiment_set")))
+        self.assertIsNone(e._live_regeneration_ready_callback)
+        e.check()
+
     def test_12_source_binding_and_no_unsupported_focus_certificate(self):
         for role in ("AH","AM"):
             wrong=party_actor(role,1,"a","party",occupied=((0,0),))
