@@ -183,7 +183,11 @@ class AnointedRestorationNativeDefenseTests(unittest.TestCase):
         combat,native=scene(focus="Low",level=3,opponent="soldier",
                             policy="signature",seed=0)
         e=combat.e
-        self.assertEqual((),e.actors["anointed"].source.attack_profiles)
+        # Source now declares one audited mundane weapon profile, but
+        # this defensive witness never commits Anointed offensive AP.
+        self.assertEqual(("B05-PC-AL-SWORD-CUT",),
+                         e.actors["anointed"].source.attack_profiles)
+        self.assertIsNone(e.g2)
         self.assertEqual(0,len(rows({"ledger":e.ledger},"g5_melee_resolved")))
         self.assertFalse(hasattr(e.actors["anointed"],"destiny"))
         self.assertFalse(e.g4.anointed_guided)

@@ -7,6 +7,8 @@ from scripts.b05_anointed_native_g0_actor_v0 import ROLES, anointed_party_actor
 from scripts.b06_encounter_state_v0 import (
     Encounter, RegenerationChoice, UnresolvedDecision, party_actor,
 )
+from scripts.b06_movement_v0 import GridMovement
+from scripts.b06_ranged_v0 import RangedCombat
 
 ROOT = Path(__file__).resolve().parents[1]
 FOCUS_DATA = {
@@ -36,7 +38,7 @@ class AnointedG0ActorBridge(unittest.TestCase):
                                      (a.vp_available,a.vp_committed,a.vp_spent))
                     self.assertEqual("STRUCTURAL_B05_ONLY",a.source.status)
                     self.assertEqual(role,a.source.source_id)
-                    self.assertEqual((),a.source.attack_profiles)
+                    self.assertEqual(({"AH":"B05-PC-AH-DAGGER-PIERCE","AM":"B05-PC-AM-DAGGER-PIERCE","AL":"B05-PC-AL-SWORD-CUT"}[role],),a.source.attack_profiles)
                     self.assertEqual(sha256((ROOT/a.source.path).read_bytes()).hexdigest(),
                                      a.source.digest)
                     self.assertIn((weapon,"wielded"),a.source.equipment)
@@ -79,6 +81,10 @@ class AnointedG0ActorBridge(unittest.TestCase):
     def test_03_low_l3_real_guard_reserve_and_two_physical_costs(self):
         a=party_actor("AL",3,"low","party",occupied=((1,1),))
         e=Encounter([a],{"low":20},seed=1)
+        # A paid Guard needs live G1/G2 wielding, not just source equipment.
+        GridMovement(e,width=6,height=6,scene_id="b05-anointed-g0-guard")
+        RangedCombat(e,scene_id="b05-anointed-g2-guard")
+        self.assertTrue(e.g1.genuine_anointed_weapon_ready("low"))
         e.begin_round()
         self.assertEqual(3,a.guard_remaining)
         self.assertEqual([13,13,13],[e.defense("low","guard",attack_key=f"h{n}")
@@ -102,7 +108,7 @@ class AnointedG0ActorBridge(unittest.TestCase):
             self.assertFalse(hasattr(a,"destiny"))
             self.assertFalse(hasattr(a,"invested_vessel"))
             self.assertFalse(hasattr(a,"anointed_signature"))
-            self.assertEqual((),a.source.attack_profiles)
+            self.assertEqual(({"AH":"B05-PC-AH-DAGGER-PIERCE","AM":"B05-PC-AM-DAGGER-PIERCE","AL":"B05-PC-AL-SWORD-CUT"}[role],),a.source.attack_profiles)
             self.assertEqual("STRUCTURAL_B05_ONLY",a.source.status)
             self.assertNotIn(("Conjure Flame","carried"),a.source.equipment)
 

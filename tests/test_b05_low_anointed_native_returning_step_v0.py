@@ -358,7 +358,7 @@ class LowAnointedNativeTests(unittest.TestCase):
                 LowAnointedRestoration(e,"a")
         e,low,_=scene(3)
         self.assertEqual("STRUCTURAL_B05_ONLY",e.actors["low"].source.status)
-        self.assertEqual((),e.actors["low"].source.attack_profiles)
+        self.assertEqual(("B05-PC-AL-SWORD-CUT",),e.actors["low"].source.attack_profiles)
         self.assertFalse(hasattr(e.actors["low"],"destiny"))
         self.assertFalse(events(e,"g5_melee_resolved"))
         doc=(ROOT/"docs/design/b04-b05-low-anointed-restoration-native-embodied-step-v0.md").read_text()
