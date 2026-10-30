@@ -206,6 +206,7 @@ class IndependentProgressionTests(unittest.TestCase):
                     "anointed_technique_access",
                     "gifted_technique_access",
                     "scholar_known_access", "gifted_link_identity",
+                    "scholar_knowledge_grant",
                     "scholar_known_capacity", "scholar_preparation_capacity",
                     "scholar_formula_capacity", "scholar_formula_legality",
                     "scholar_medium_preparation", "priest_capacity",
@@ -796,6 +797,77 @@ class IndependentProgressionTests(unittest.TestCase):
                 self.assertIn(("Anointed/High", changed, "equipment_budget"), found)
                 self.assertEqual(39, report["level_snapshots_checked"])
                 self.assertEqual(12, report["pairings_checked"])
+
+    def test_33_scholar_l3_cannot_claim_unused_l2_knowledge_grant(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
+        from scripts.b05_medium_scholar_l1_l3_v0 import profile as medium
+        from scripts.b05_low_scholar_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            with self.subTest(focus=focus):
+                l1, l2, l3 = (make(n) for n in (1, 2, 3))
+                l2["known_pillar_techniques"] = deepcopy(
+                    l1["known_pillar_techniques"])
+                # L2 leaves its newly awarded slot empty; this does not
+                # itself mint a new L3 acquisition entitlement.
+                l2_findings = {x["code"] for x in _sheet_issues(
+                    "Scholar/"+focus, 2, l2, l1, l1, gates)}
+                self.assertNotIn("scholar_knowledge_grant", l2_findings)
+                # The L3 source still contains the genuine L2-added name.
+                l3_findings = {x["code"] for x in _sheet_issues(
+                    "Scholar/"+focus, 3, l3, l1, l2, gates)}
+                self.assertIn("scholar_knowledge_grant", l3_findings)
+                self.assertNotIn("scholar_known_capacity", l3_findings)
+
+    def test_34_legally_new_talent_grants_one_not_retroactive_technique(self):
+        from scripts.b05_medium_scholar_l1_l3_v0 import profile as medium
+        from scripts.b05_low_scholar_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("Medium", medium), ("Low", low)):
+            with self.subTest(focus=focus):
+                l1, l2, l3 = (make(n) for n in (1, 2, 3))
+                # Legitimate L3 TAL-S01 purchase authorizes one more
+                # individual technique even though base L3 awards none.
+                l3["talents"] = (l3["talents"][0],
+                                 "TAL-S01 Expanded Repertoire")
+                l3["known_pillar_techniques"] = tuple(
+                    l3["known_pillar_techniques"]) + ("Phantom Sound",)
+                l3["known_capacity"] += 1
+                findings = {x["code"] for x in _sheet_issues(
+                    "Scholar/"+focus, 3, l3, l1, l2, gates)}
+                self.assertNotIn("scholar_knowledge_grant", findings)
+                self.assertNotIn("scholar_known_capacity", findings)
+                self.assertNotIn("talent_gate", findings)
+                self.assertNotIn("talent_unaccounted", findings)
+                # The exact same Talent still owned at L3 cannot be used
+                # to add a further late technique after it was acquired.
+                prior = deepcopy(l2)
+                prior["talents"] = ("TAL-S01 Expanded Repertoire",)
+                prior["known_capacity"] += 1
+                # This fabricated prior snapshot only tests the grant
+                # comparison: it has a valid level-2 Talent allowance.
+                findings = {x["code"] for x in _sheet_issues(
+                    "Scholar/"+focus, 3, l3, l1, prior, gates)}
+                self.assertIn("scholar_knowledge_grant", findings)
+
+    def test_35_l2_one_grant_does_not_fill_multiple_empty_slots(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
+        gates = talent_minimums()
+        l1, l2 = high(1), high(2)
+        # Start with three known techniques and two empty L1 slots.
+        l1["known_pillar_techniques"] = list(
+            l1["known_pillar_techniques"])[:3]
+        l2["known_pillar_techniques"] = list(
+            l1["known_pillar_techniques"]) + ["Vital Shelter", "Phantom Sound"]
+        self.assertEqual(5, len(l2["known_pillar_techniques"]))
+        findings = {x["code"] for x in _sheet_issues(
+            "Scholar/High", 2, l2, l1, l1, gates)}
+        self.assertIn("scholar_knowledge_grant", findings)
+        # Only one new actual technique is allowed by the L2 grant.
+        l2["known_pillar_techniques"].pop()
+        findings = {x["code"] for x in _sheet_issues(
+            "Scholar/High", 2, l2, l1, l1, gates)}
+        self.assertNotIn("scholar_knowledge_grant", findings)
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[

@@ -491,8 +491,46 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "scholar_known_capacity",
               "Independent known count; only earned TAL-S01 adds one")
         if prior:
-            check(set(prior["known_pillar_techniques"]) <= set(known),
-                  "scholar_level_access", "No forgotten known technique on level award")
+            # Capacity is *not* a learning grant. A genuine level-2 award
+            # permits one new individual technique, but level 3 permits none.
+            # TAL-S01 adds exactly one at the level it is first legally
+            # selected; a previously held Talent cannot refill an unused slot.
+            prior_known = prior.get("known_pillar_techniques")
+            prior_known_valid = (
+                isinstance(prior_known, (tuple, list)) and
+                all(type(name) is str for name in prior_known))
+            prior_names = set(prior_known) if prior_known_valid else set()
+            current_names = set(known) if proper_known else set()
+            check(proper_known and prior_known_valid
+                  and prior_names <= current_names,
+                  "scholar_level_access",
+                  "No forgotten known technique on level award")
+            previous_talents = prior.get("talents", ())
+            previous_talents_valid = isinstance(previous_talents, (list, tuple))
+            previous_ids = []
+            if previous_talents_valid:
+                for talent in previous_talents:
+                    matched = re.match(r"^(TAL-[A-Z]\\d{2})\\b", str(talent))
+                    if matched is None:
+                        previous_talents_valid = False
+                        break
+                    previous_ids.append(matched.group(1))
+            previous_talents_valid = (previous_talents_valid
+                                      and len(set(previous_ids)) == len(previous_ids)
+                                      and len(previous_ids) <= sum(
+                                          n <= level-1 for n in TALENT_AWARDS[focus]))
+            gained_repertoire_talent = (
+                valid_selection and previous_talents_valid
+                and "TAL-S01" in selected
+                and "TAL-S01" not in previous_ids
+                and level in TALENT_AWARDS[focus])
+            new_grant_count = int(level == 2) + int(gained_repertoire_talent)
+            check(proper_known and prior_known_valid and previous_talents_valid
+                  and len(current_names - prior_names) <= new_grant_count,
+                  "scholar_knowledge_grant",
+                  "Only the L2 individual learning award or newly selected "
+                  "eligible TAL-S01 grants an additional known technique; "
+                  "empty earlier slots and the L3 tier ceiling do not")
         if focus == "High":
             formulas = sheet.get("prepared_composite_formulas", ())
             formula_cap = SCHOLAR_FORMULAS[level-1]
