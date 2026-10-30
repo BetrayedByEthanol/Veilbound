@@ -33,6 +33,19 @@ SCHOLAR_KNOWN = {
 }
 SCHOLAR_FORMULAS = (1, 2, None)
 SCHOLAR_LOW_PREPARED = (2, 3, 3)
+# Positive permissions from stone-skin-v0.md (High Scholar composite
+# sections A/B), basic-heal-v0.md and vital-shelter-v0.md. The Scholar
+# feature alone does not authorize a mismatched key, unsupported Secondary,
+# reactive composition, alternative host mode or reversed component order.
+# This is a fail-closed v0 registry for the source-selected formulas, not
+# an assertion that all future High Scholar compositions must use Stone Skin.
+COMPOSITE_FIELDS = ("primary", "secondary", "profile", "delivery", "mode")
+HIGH_SCHOLAR_COMPOSITE_PERMISSIONS = frozenset({
+    ("Stone Skin", "Basic Heal", "Self", "normal on-turn Projection",
+     "Stone Skin maintained + Basic Heal instantaneous Secondary"),
+    ("Stone Skin", "Vital Shelter", "Self", "normal on-turn Projection",
+     "Stone Skin maintained + Vital Shelter subordinate maintained Secondary"),
+})
 # priest.md: base *before* Accord and explicitly acquired TAL-P01.
 PRIEST_BASE_PREPARED = {
     "High": (3, 4, 4), "Medium": (2, 3, 3), "Low": (1, 2, 2),
@@ -239,12 +252,15 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
     awarded = sum(n <= level for n in TALENT_AWARDS[focus])
     check(len(selected) <= awarded, "talent_overaward",
           "More selected Talents than Focus's earned awards")
-    # An unspent earned selection is LEGAL in B07, but these source sheets
-    # do not explicitly account for an actual saved/available award.
-    if len(selected) < awarded:
-        saved = sheet.get("saved_talent_selections")
-        check(saved == awarded-len(selected), "talent_unaccounted",
-              "No explicit saved-selection ledger for earned unused Talent")
+    # Reconcile every level, even when all awards are already selected.
+    # Missing saved selections mean zero only if none are outstanding; bool
+    # is not a legal integer balance. Count actual slots used, not only
+    # regex-parsed IDs: identity validity is checked independently.
+    saved = sheet.get("saved_talent_selections", 0)
+    legal_saved = (type(saved) is int and saved >= 0
+                   and len(talents) + saved == awarded)
+    check(legal_saved, "talent_unaccounted",
+          "Selected plus nonnegative saved Talents must equal earned awards")
     if prior:
         previous = prior.get("talents", [])
         old_matches = [re.match(r"^(TAL-[A-Z]\d{2})\b", str(t))
@@ -264,7 +280,8 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                        and all(t in gates and gates[t] <= level for t in selected)
                        and all(t in archetype_access
                                and archetype in archetype_access[t]
-                               for t in selected))
+                               for t in selected)
+                       and legal_saved)
     if archetype == "Scholar":
         known = sheet.get("known_pillar_techniques", ())
         expanded = int(valid_selection and "TAL-S01" in selected)
@@ -291,12 +308,25 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                       and len(formulas) <= formula_cap,
                       "scholar_formula_capacity",
                       "High formula cap is 1 at L1 and 2 at L2; no Talent adds slots")
-            check(len({json.dumps(f, sort_keys=True) for f in formulas})
-                  == len(formulas) and
-                  all(f.get("primary") in known and f.get("secondary") in known
-                      for f in formulas),
+            # Source-provided primary/secondary strings, profile names,
+            # delivery claims and descriptive modes are NOT authorization.
+            # Only positively authored ordered pairs with their exact shared
+            # contribution key and execution method may occupy a slot.
+            shape_valid = (isinstance(formulas, (tuple, list))
+                           and all(type(f) is dict and
+                                   set(f) == set(COMPOSITE_FIELDS) and
+                                   all(type(f[k]) is str for k in COMPOSITE_FIELDS)
+                                   for f in formulas))
+            formula_keys = ([tuple(f[k] for k in COMPOSITE_FIELDS)
+                             for f in formulas] if shape_valid else [])
+            check(shape_valid
+                  and len(set(formula_keys)) == len(formula_keys)
+                  and all(key in HIGH_SCHOLAR_COMPOSITE_PERMISSIONS
+                          and key[0] in known and key[1] in known
+                          for key in formula_keys),
                   "scholar_formula_legality",
-                  "Formulas must be unique and use genuinely known components")
+                  "Only authorized ordered Primary/Secondary, exact shared "
+                  "profile, normal delivery and subordinate mode may compose")
         elif focus == "Medium":
             check(sheet.get("prepared_technique_subset") is None
                   and sheet.get("prepared_capacity") is None,

@@ -249,6 +249,81 @@ class IndependentProgressionTests(unittest.TestCase):
         self.assertEqual(12, report["pairings_checked"])
         self.assertEqual(0, report["independently_certified_full_focuses"])
 
+    def test_15_high_scholar_composite_requires_authored_pair_profile_and_mode(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile
+        gates = talent_minimums()
+        cases = (
+            {"primary": "Conjure Flame", "secondary": "Phantom Sound",
+             "profile": "Self", "delivery": "normal on-turn Projection",
+             "mode": "illicit"},
+            {"primary": "Basic Heal", "secondary": "Stone Skin",
+             "profile": "Self", "delivery": "normal on-turn Projection",
+             "mode": "Stone Skin maintained + Basic Heal instantaneous Secondary"},
+            {"primary": "Stone Skin", "secondary": "Basic Heal",
+             "profile": "Single Target"},
+            {"primary": "Stone Skin", "secondary": "Basic Heal",
+             "delivery": "reactive Projection"},
+            {"primary": "Stone Skin", "secondary": "Basic Heal",
+             "mode": "Stone Skin maintained + recurring Basic Heal Secondary"},
+            {"primary": "Stone Skin", "secondary": "Phantom Sound",
+             "profile": "Self"},
+        )
+        for level in (1, 2):
+            original = profile(level)
+            source_issues = {i["code"] for i in _sheet_issues(
+                "Scholar/High", level, original, profile(1),
+                profile(level-1) if level > 1 else None, gates)}
+            self.assertNotIn("scholar_formula_legality", source_issues)
+            for case in cases:
+                with self.subTest(level=level, case=case):
+                    forged = deepcopy(original)
+                    forged["prepared_composite_formulas"][0].update(case)
+                    problems = {i["code"] for i in _sheet_issues(
+                        "Scholar/High", level, forged, profile(1),
+                        profile(level-1) if level > 1 else None, gates)}
+                    self.assertIn("scholar_formula_legality", problems)
+            for malformed in (None, "Stone Skin", {"primary": "Stone Skin"}):
+                with self.subTest(level=level, malformed=malformed):
+                    forged = deepcopy(original)
+                    forged["prepared_composite_formulas"][0] = malformed
+                    problems = {i["code"] for i in _sheet_issues(
+                        "Scholar/High", level, forged, profile(1),
+                        profile(level-1) if level > 1 else None, gates)}
+                    self.assertIn("scholar_formula_legality", problems)
+
+    def test_16_saved_talents_reconcile_even_when_every_award_spent(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
+        from scripts.b05_low_scholar_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        genuine = high(1)
+        self.assertNotIn("talent_unaccounted", {x["code"] for x in _sheet_issues(
+            "Scholar/High", 1, genuine, genuine, None, gates)})
+        for invalid in (99, 1, -1, True, 0.0, "0", None):
+            with self.subTest(invalid=invalid):
+                forged = deepcopy(genuine)
+                forged["saved_talent_selections"] = invalid
+                issues = {x["code"] for x in _sheet_issues(
+                    "Scholar/High", 1, forged, genuine, None, gates)}
+                self.assertIn("talent_unaccounted", issues)
+        explicit_zero = deepcopy(genuine)
+        explicit_zero["saved_talent_selections"] = 0
+        issues = {x["code"] for x in _sheet_issues(
+            "Scholar/High", 1, explicit_zero, genuine, None, gates)}
+        self.assertNotIn("talent_unaccounted", issues)
+        for level in (2, 3):
+            with self.subTest(saved_low_scholar_level=level):
+                original = low(level)
+                # Existing authored snapshot omits this earned L2 award.
+                issues = {x["code"] for x in _sheet_issues(
+                    "Scholar/Low", level, original, low(1),
+                    low(level-1), gates)}
+                self.assertIn("talent_unaccounted", issues)
+                original["saved_talent_selections"] = 1
+                issues = {x["code"] for x in _sheet_issues(
+                    "Scholar/Low", level, original, low(1),
+                    low(level-1), gates)}
+                self.assertNotIn("talent_unaccounted", issues)
+
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
             {"event_id":"bridge", "character_id":"pilot-1",
