@@ -72,14 +72,43 @@ def _issue(issues, code, *, level, detail):
     issues.append({"code": code, "level": level, "detail": detail})
 
 
-def talent_minimums():
-    """Read actual authored Talent IDs and minimum levels, not source claims."""
+def talent_rules():
+    """Independently extract level and Archetype gates from the B07 catalogue.
+
+    Fail closed when the 32-entry catalogue gains an unrecognized eligibility
+    qualifier; do not infer Archetype permission from TAL-P/S/G/A ID prefixes
+    or any untrusted character sheet.
+    """
     text = (ROOT / CATALOGUE).read_text(encoding="utf-8")
-    found = re.findall(r"^### (TAL-[A-Z]\d{2})[^\n]*\n\*\*L (\d+)\b",
-                       text, flags=re.MULTILINE)
-    if len(found) != 32 or len({name for name, _ in found}) != 32:
-        raise ValueError("B07 catalogue identity/gate shape changed; re-audit")
-    return {name: int(lvl) for name, lvl in found}
+    entries = re.findall(
+        r"^### (TAL-[A-Z]\d{2})[^\n]*\n\*\*L (\d+) · ([^·\n]+?) ·",
+        text, flags=re.MULTILINE,
+    )
+    if len(entries) != 32 or len({name for name, _, _ in entries}) != 32:
+        raise ValueError("B07 catalogue identity/eligibility shape changed; re-audit")
+    archetypes = frozenset(("Priest", "Scholar", "Gifted", "Anointed"))
+    all_access = {"Any", "Any Archetype/Focus"}
+    rules = {}
+    for name, minimum, label in entries:
+        qualifier = label.strip()
+        if qualifier in all_access:
+            permitted = archetypes
+        elif qualifier.endswith(" only") and qualifier[:-5] in archetypes:
+            permitted = frozenset((qualifier[:-5],))
+        else:
+            raise ValueError("Unrecognized B07 Archetype qualifier: "+qualifier)
+        rules[name] = {"level": int(minimum), "archetypes": permitted}
+    return rules
+
+
+def talent_minimums():
+    """Keep the existing level-gate API for cross-source callers."""
+    return {name: data["level"] for name, data in talent_rules().items()}
+
+
+def talent_archetypes():
+    """Read catalogue-only Archetype eligibility, never the character's claims."""
+    return {name: data["archetypes"] for name, data in talent_rules().items()}
 
 
 def _sheet_issues(pairing, level, sheet, first, prior, gates):
@@ -202,6 +231,11 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
           "talent_identity", "Selected Talent IDs must be unique catalogue entries")
     check(all(t in gates and gates[t] <= level for t in selected),
           "talent_gate", "Selected Talent must exist and meet its minimum level")
+    archetype_access = talent_archetypes()
+    check(all(t in archetype_access and archetype in archetype_access[t]
+              for t in selected),
+          "talent_archetype",
+          "Selected Talent must meet its catalogue Archetype prerequisites")
     awarded = sum(n <= level for n in TALENT_AWARDS[focus])
     check(len(selected) <= awarded, "talent_overaward",
           "More selected Talents than Focus's earned awards")
@@ -212,17 +246,25 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
         check(saved == awarded-len(selected), "talent_unaccounted",
               "No explicit saved-selection ledger for earned unused Talent")
     if prior:
-        old = [re.match(r"^(TAL-[A-Z]\d{2})\b", str(t)).group(1)
-               for t in prior.get("talents", [])]
-        check(set(old) <= set(selected), "talent_retraining",
-              "No free Talent replacement/retraining at L2–3")
+        previous = prior.get("talents", [])
+        old_matches = [re.match(r"^(TAL-[A-Z]\d{2})\b", str(t))
+                       for t in previous]
+        old = [match.group(1) for match in old_matches if match]
+        # Preserve the source's L1 identity failure in the aggregate, and
+        # report an invalid advancement path instead of raising AttributeError.
+        check(len(old) == len(previous) and set(old) <= set(selected),
+              "talent_retraining",
+              "Prior Talents must be well-formed and carried forward legally")
     # Only an eligible, nonduplicated selection within the earned Focus
     # awards can modify a native repertoire limit. Missing/saved choices
     # and invented extra Talents do not enlarge it.
     valid_selection = (len(selected) == len(talents)
                        and len(set(selected)) == len(selected)
                        and len(selected) <= awarded
-                       and all(t in gates and gates[t] <= level for t in selected))
+                       and all(t in gates and gates[t] <= level for t in selected)
+                       and all(t in archetype_access
+                               and archetype in archetype_access[t]
+                               for t in selected))
     if archetype == "Scholar":
         known = sheet.get("known_pillar_techniques", ())
         expanded = int(valid_selection and "TAL-S01" in selected)

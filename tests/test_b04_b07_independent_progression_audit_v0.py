@@ -1,9 +1,11 @@
 """Independent cross-source B04/B07 progression and deliberately bounded status."""
 import unittest
 from copy import deepcopy
+from unittest.mock import patch
 
 from scripts.b04_b07_independent_progression_audit_v0 import (
-    audit, _sheet_issues, talent_minimums, validate_pilot_milestones,
+    audit, _sheet_issues, talent_minimums, talent_rules,
+    validate_pilot_milestones,
 )
 
 
@@ -194,6 +196,58 @@ class IndependentProgressionTests(unittest.TestCase):
         new=[(x["pairing"],x["level"],x["code"]) for x in self.report["issues"]
              if x["code"] in prohibited]
         self.assertEqual([],new)
+
+    def test_12_catalogue_archetype_gates_are_source_derived(self):
+        rules = talent_rules()
+        self.assertEqual(32, len(rules))
+        for prefix, expected in (
+            ("TAL-P", "Priest"), ("TAL-S", "Scholar"),
+            ("TAL-G", "Gifted"), ("TAL-A", "Anointed"),
+        ):
+            self.assertTrue(all(entry["archetypes"] == frozenset((expected,))
+                                for name, entry in rules.items()
+                                if name.startswith(prefix)))
+        for name in ("TAL-C01", "TAL-M01", "TAL-U01"):
+            self.assertEqual(frozenset(("Priest", "Scholar", "Gifted", "Anointed")),
+                             rules[name]["archetypes"])
+
+    def test_13_foreign_archetype_talent_is_rejected_at_valid_level(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as anointed
+        from scripts.b05_high_priest_life_l1_l3_v0 import profile as priest
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as scholar
+        from scripts.b05_high_gifted_l1_l3_v0 import profile as gifted
+        gates = talent_minimums()
+        for pairing, make, foreign in (
+            ("Anointed/High", anointed, "TAL-P01 Expanded Liturgy"),
+            ("Priest/High", priest, "TAL-G01 Emotional Poise"),
+            ("Scholar/High", scholar, "TAL-A01 Imprint Recall"),
+            ("Gifted/High", gifted, "TAL-S01 Expanded Repertoire"),
+        ):
+            with self.subTest(pairing=pairing, foreign=foreign):
+                profile = make(1)
+                profile["talents"] = [foreign]
+                detected = {issue["code"] for issue in _sheet_issues(
+                    pairing, 1, profile, make(1), None, gates)}
+                self.assertIn("talent_archetype", detected)
+                self.assertNotIn("talent_gate", detected)
+
+    def test_14_malformed_l1_talent_preserves_audit_issue_registry(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        def malformed(level):
+            sheet = original(level)
+            if level == 1:
+                sheet["talents"] = ["TAL-NOT-AN-ID"]
+            return sheet
+        with patch.object(module, "profile", side_effect=malformed):
+            report = audit()
+        observed = {(issue["pairing"], issue["level"], issue["code"])
+                    for issue in report["issues"]}
+        self.assertIn(("Anointed/High", 1, "talent_identity"), observed)
+        self.assertIn(("Anointed/High", 2, "talent_retraining"), observed)
+        self.assertEqual(39, report["level_snapshots_checked"])
+        self.assertEqual(12, report["pairings_checked"])
+        self.assertEqual(0, report["independently_certified_full_focuses"])
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
