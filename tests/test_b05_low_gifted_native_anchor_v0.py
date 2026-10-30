@@ -12,9 +12,11 @@ from scripts.b06_ranged_v0 import RangedCombat
 from scripts.b06_spells_v0 import SpellState
 from scripts.b06_damage_v0 import DamageState
 from scripts.b06_soldier_sentry_g5_v0 import SourceMelee
+from scripts.b05_high_anointed_native_returning_step_v0 import HighAnointedRestoration
+from scripts.b05_anointed_native_guided_authority_v0 import AnointedGuidedAuthority
 
 
-def scene(level,*,anchor="Fear",first="foe",terrain=None,attached=True):
+def scene(level,*,anchor="Fear",first="foe",terrain=None,attached=True,dominant=None):
     actor=party_actor("GL",level,"gifted","party",occupied=((2,2),))
     foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((3,2),))
     e=Encounter([actor,foe],{
@@ -26,7 +28,7 @@ def scene(level,*,anchor="Fear",first="foe",terrain=None,attached=True):
     RangedCombat(e,scene_id="b05-low-gifted-g2-wielded")
     SpellState(e)
     DamageState(e)
-    native=(LowGiftedNativeAnchor(e,"gifted",anchor=anchor)
+    native=(LowGiftedNativeAnchor(e,"gifted",anchor=anchor,dominant=dominant)
             if attached else None)
     combat=SourceMelee(e)
     e.begin_round()
@@ -329,6 +331,122 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
                       and x["detail"].get("anchor_bonus")==1]
             self.assertEqual([1,2],[x["detail"]["anchor_window"]
                                      for x in receipts])
+
+
+    def test_16_real_ah_guided_payout_after_gl_step_advances_window(self):
+        ah=party_actor("AH",3,"anointed","party",occupied=((1,1),))
+        gl=party_actor("GL",3,"gifted","party",occupied=((2,2),))
+        gl.hp-=2
+        e=Encounter([ah,gl],{"anointed":40,"gifted":30},seed=17,
+                    scenario="B05-GL-AH-Guided-Step",
+                    policy="explicit_choice",objective="authentic_G4_payout_then_G1")
+        GridMovement(e,width=8,height=8,terrain={(2,3):"difficult"})
+        RangedCombat(e)
+        SpellState(e)
+        DamageState(e)
+        low=LowGiftedNativeAnchor(e,"gifted",anchor="Disgust")
+        HighAnointedRestoration(e,"anointed")
+        guide=AnointedGuidedAuthority(e,"anointed")
+        e.begin_round()
+        e.start_turn("anointed",regen_choice=RegenerationChoice())
+        guide.cast("gifted",mode="maintained",visible=True,unopposed=True)
+        e.end_turn()
+        guide.declare_waiver("gifted",visible=True,unopposed=True)
+        e.start_turn("gifted",regen_choice=RegenerationChoice())
+        step=[x for x in e.ledger if x["kind"]=="regeneration_step"
+              and x["detail"]["actor"]=="gifted"][-1]
+        waiver=[x for x in e.ledger
+                if x["kind"]=="g4_anointed_guided_waiver_applied"][-1]
+        window=[x for x in e.ledger
+                if x["kind"]=="b05_low_gifted_emotion_window"][-1]
+        self.assertLess(step["index"],waiver["index"])
+        self.assertLess(waiver["index"],window["index"])
+        self.assertEqual((1,2),(low.own_steps,low.model.window))
+        low.choose_step((0,1))
+        self.assertTrue(e.g1.step("gifted",(0,1)))
+        self.assertEqual(3,[x for x in e.ledger
+                            if x["kind"]=="g1_movement_step"][-1]["detail"]["cost"])
+        e.end_turn()
+        e.begin_round()
+        e.start_turn("anointed",regen_choice=RegenerationChoice())
+        e.end_turn()
+        e.start_turn("gifted",regen_choice=RegenerationChoice())
+        self.assertEqual((2,3),(low.own_steps,low.model.window))
+        self.assertEqual(2,len([x for x in e.ledger
+                                if x["kind"]=="b05_low_gifted_emotion_window"]))
+
+    def test_17_g0_alone_gl_missing_sword_rejects_without_ap_or_lock(self):
+        gl=party_actor("GL",2,"gifted","party",occupied=((2,2),))
+        foe=enemy_actor("B06-EN-02","foe","enemy",occupied=((3,2),))
+        e=Encounter([gl,foe],{"foe":40,"gifted":30},seed=17,
+                    scenario="B05-G0-Standalone-Guard",
+                    policy="explicit_choice",objective="precommit_GL_sword")
+        GridMovement(e,width=8,height=8)
+        RangedCombat(e)
+        DamageState(e)
+        LowGiftedNativeAnchor(e,"gifted",anchor="Fear")
+        e.begin_round()
+        e.start_turn("foe",regen_choice=RegenerationChoice())
+        before=(e.actors["foe"].ap_remaining,gl.guard_remaining,
+                len(e.seen_sequences))
+        e.g2.wielded["gifted"].clear()
+        with self.assertRaises(ValueError):
+            e.declare_sequence("foe","gifted",("B06-AT-03",),("guard",))
+        self.assertEqual(before,(e.actors["foe"].ap_remaining,
+                                 gl.guard_remaining,len(e.seen_sequences)))
+        self.assertFalse(any(x["kind"] in ("action_committed",
+                                         "attack_sequence_committed",
+                                         "defense_assigned")
+                             for x in e.ledger))
+        e.g2.wielded["gifted"].add("Sword")
+        e.declare_sequence("foe","gifted",("B06-AT-03",),("guard",))
+        self.assertEqual(before[0]-foe.physical_ap,e.actors["foe"].ap_remaining)
+        self.assertEqual(before[1]-1,gl.guard_remaining)
+        self.assertEqual(1,len(e.seen_sequences))
+
+    def test_18_preview_break_reassert_cannot_authorize_native_effects(self):
+        e,low,combat=scene(2,first="gifted",anchor="Fear",
+                            terrain={(2,3):"difficult"})
+        combat.bridge.start_next_turn(RegenerationChoice())
+        real_ap=e.actors["gifted"].ap_remaining
+        low.model.break_anchor("Disgust")
+        self.assertTrue(low.model._ready("Disgust"))
+        with self.assertRaises(ValueError):
+            low.choose_step((0,1))
+        self.assertTrue(e.g1.step("gifted",(0,1)))
+        self.assertEqual(4,[x for x in e.ledger
+                            if x["kind"]=="g1_movement_step"][-1]["detail"]["cost"])
+        self.assertEqual(real_ap,e.actors["gifted"].ap_remaining)
+        self.assertFalse(any(x["kind"]=="b05_low_gifted_unbound_step_applied"
+                             for x in e.ledger))
+        # A successful preview-only Reassert also leaves source Fear disabled.
+        e,low,combat=scene(2,anchor="Fear",dominant="Disgust")
+        combat.bridge.start_next_turn(RegenerationChoice())
+        self.assertTrue(low.model.reassert(die=20,awareness=0,discipline=0))
+        self.assertTrue(low.model._ready("Fear"))
+        with self.assertRaises(ValueError):
+            low.choose_defense("foe:gifted:0","guard")
+        seq=combat.declare("foe","gifted",profiles=("B06-AT-03",),
+                           defenses=("guard",))
+        d=[x for x in e.ledger if x["kind"]=="defense_assigned"][-1]
+        self.assertEqual(17,d["detail"]["defense_value"])
+        self.assertNotIn("anchor_bonus",d["detail"])
+        combat.resolve(seq,0,attack_face=1)
+        self.assertIsNone(low._native_model.pulse_window)
+
+    def test_19_next_own_step_ignores_preview_only_emotion_transition(self):
+        e,low,combat=scene(2,first="gifted",anchor="Fear")
+        combat.bridge.start_next_turn(RegenerationChoice())
+        low.model.break_anchor("Disgust")
+        combat.bridge.end_current_turn()
+        combat.bridge.start_next_turn(RegenerationChoice())
+        combat.bridge.end_current_turn()
+        combat.bridge.begin_next_round()
+        combat.bridge.start_next_turn(RegenerationChoice())
+        self.assertEqual((2,3,"Fear"),(low.own_steps,low.model.window,
+                                      low.model.anchor))
+        self.assertFalse(low._ready("Disgust"))
+        self.assertTrue(low._ready("Fear"))
 
 
 if __name__=="__main__":
