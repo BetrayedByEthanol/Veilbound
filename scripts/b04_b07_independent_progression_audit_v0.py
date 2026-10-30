@@ -19,6 +19,24 @@ ABILITIES = ("Strength", "Agility", "Precision", "Intellect", "Awareness",
              "Presence", "Vitality", "Veil Affinity", "Veil Control")
 TALENT_AWARDS = {"High": (1,), "Medium": (1, 3), "Low": (1, 2, 3)}
 VP_PER_LEVEL = {"High": 6, "Medium": 4, "Low": 2}
+# Canonical action-categories-and-physical-tempo.md: one shared Turn AP
+# pool, with Focus-specific prices. Never derive prices from audited sheets.
+FOCUS_ACTION_COSTS = {
+    "High": (30, 20, 24),
+    "Medium": (24, 24, 24),
+    "Low": (20, 30, 24),
+}
+# scholar.md, L1–3 individual repertoire and preparation limits. None
+# denotes L3 Formula Fluency (no required prepared-formula list).
+SCHOLAR_KNOWN = {
+    "High": (5, 6, 6), "Medium": (4, 5, 5), "Low": (3, 4, 4),
+}
+SCHOLAR_FORMULAS = (1, 2, None)
+SCHOLAR_LOW_PREPARED = (2, 3, 3)
+# priest.md: base *before* Accord and explicitly acquired TAL-P01.
+PRIEST_BASE_PREPARED = {
+    "High": (3, 4, 4), "Medium": (2, 3, 3), "Low": (1, 2, 2),
+}
 SOURCE_MODULES = {
     "Priest/High": "b05_high_priest_life_l1_l3_v0",
     "Priest/Medium": "b05_medium_priest_life_l1_l3_v0",
@@ -146,19 +164,23 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "vp_formula", "Max VP depends on Focus, Veil Affinity and level")
     check(sheet.get("turn_ap") == 30 + 6 * (level-1),
           "turn_ap", "L1/L2/L3 ordinary Turn AP must be 30/36/42")
-    check(type(sheet.get("physical_action_ap")) is int
-          and type(sheet.get("projection_action_ap")) is int
-          and sheet["physical_action_ap"] > 0
-          and sheet["projection_action_ap"] > 0,
-          "action_cost", "Positive Focus action costs required")
+    physical_ap, projection_ap, general_ap = FOCUS_ACTION_COSTS[focus]
+    check((sheet.get("physical_action_ap"), sheet.get("projection_action_ap"))
+          == (physical_ap, projection_ap), "focus_action_cost",
+          "Focus Physical/Projection AP must match canonical 30/20, 24/24, 20/30")
+    if "general_action_ap" in sheet:
+        check(sheet["general_action_ap"] == general_ap,
+              "general_action_cost", "General Tempo Action costs 24 AP at all Focuses")
+    # Tempo is evaluated against the independent canonical price, even if
+    # a forged source changes BOTH its price and its matching derived tempo.
     if sheet.get("physical_tempo") is not None:
         check(sheet["physical_tempo"] ==
-              sheet["turn_ap"] // sheet["physical_action_ap"],
-              "physical_tempo", "Real physical tempo based on AP cost")
+              (30 + 6*(level-1)) // physical_ap,
+              "physical_tempo", "Physical Tempo from canonical Focus AP")
     if sheet.get("projection_tempo") is not None:
         check(sheet["projection_tempo"] ==
-              sheet["turn_ap"] // sheet["projection_action_ap"],
-              "projection_tempo", "Real projection tempo based on AP cost")
+              (30 + 6*(level-1)) // projection_ap,
+              "projection_tempo", "Projection Tempo from canonical Focus AP")
 
     universals = (sheet.get("universals") if "universals" in sheet
                   else sheet.get("universal"))
@@ -194,25 +216,81 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                for t in prior.get("talents", [])]
         check(set(old) <= set(selected), "talent_retraining",
               "No free Talent replacement/retraining at L2–3")
+    # Only an eligible, nonduplicated selection within the earned Focus
+    # awards can modify a native repertoire limit. Missing/saved choices
+    # and invented extra Talents do not enlarge it.
+    valid_selection = (len(selected) == len(talents)
+                       and len(set(selected)) == len(selected)
+                       and len(selected) <= awarded
+                       and all(t in gates and gates[t] <= level for t in selected))
     if archetype == "Scholar":
         known = sheet.get("known_pillar_techniques", ())
-        check(len(known) == sheet.get("known_capacity") and
-              len(set(known)) == len(known),
-              "scholar_known", "Authorised known Pillar count and uniqueness")
+        expanded = int(valid_selection and "TAL-S01" in selected)
+        known_cap = SCHOLAR_KNOWN[focus][level-1] + expanded
+        check(sheet.get("known_capacity") == known_cap
+              and len(known) <= known_cap and len(set(known)) == len(known),
+              "scholar_known_capacity",
+              "Independent known count; only earned TAL-S01 adds one")
         if prior:
             check(set(prior["known_pillar_techniques"]) <= set(known),
                   "scholar_level_access", "No forgotten known technique on level award")
-        if focus == "Low":
+        if focus == "High":
+            formulas = sheet.get("prepared_composite_formulas", ())
+            formula_cap = SCHOLAR_FORMULAS[level-1]
+            if formula_cap is None:
+                # Formula Fluency removes the preparation requirement at L3.
+                # No invented numeric prepared-formula allowance exists.
+                check(sheet.get("formula_fluency") is True
+                      and sheet.get("prepared_formula_capacity") in (None, 0),
+                      "scholar_formula_capacity",
+                      "L3 Formula Fluency has no required prepared-formula slots")
+            else:
+                check(sheet.get("prepared_formula_capacity") == formula_cap
+                      and len(formulas) <= formula_cap,
+                      "scholar_formula_capacity",
+                      "High formula cap is 1 at L1 and 2 at L2; no Talent adds slots")
+            check(len({json.dumps(f, sort_keys=True) for f in formulas})
+                  == len(formulas) and
+                  all(f.get("primary") in known and f.get("secondary") in known
+                      for f in formulas),
+                  "scholar_formula_legality",
+                  "Formulas must be unique and use genuinely known components")
+        elif focus == "Medium":
+            check(sheet.get("prepared_technique_subset") is None
+                  and sheet.get("prepared_capacity") is None,
+                  "scholar_medium_preparation",
+                  "Medium Scholar has no general prepared-technique limit")
+        else:
             prepared = sheet.get("prepared_techniques", ())
-            check(len(prepared) == sheet.get("prepared_capacity")
+            prepared_cap = SCHOLAR_LOW_PREPARED[level-1]
+            check(sheet.get("prepared_capacity") == prepared_cap
+                  and len(prepared) <= prepared_cap
                   and len(set(prepared)) == len(prepared)
-                  and set(prepared) <= set(known), "scholar_preparation",
-                  "Prepared repertoire must be a legal known subset")
+                  and set(prepared) <= set(known),
+                  "scholar_preparation_capacity",
+                  "Low prepared cap is 2/3/3; subset of known; no Talent adds slots")
     if archetype == "Priest":
         prayer = sheet.get("prepared_prayers", ())
-        check(len(prayer) + sheet.get("open_prayer_slots", 0)
-              == sheet.get("prepared_capacity") and len(set(prayer)) == len(prayer),
-              "priest_preparation", "Prepared plus explicitly open slots = capacity")
+        accord = sheet.get("accord")
+        # These published L1–3 pilot snapshots start at Accord +1 and do
+        # not attest a later GM or Petition change. A source-only larger
+        # Accord is not independent permission for extra slots.
+        check(type(accord) is int and accord == first.get("accord") == 1,
+              "priest_accord_provenance",
+              "Starting Accord +1 carried without an authenticated change")
+        effective = max(1, PRIEST_BASE_PREPARED[focus][level-1]
+                        + (accord if type(accord) is int else 0)
+                        + int(valid_selection and "TAL-P01" in selected))
+        check(sheet.get("prepared_capacity") == effective,
+              "priest_capacity",
+              "Independent base + actual Accord + earned TAL-P01 capacity")
+        open_slots = sheet.get("open_prayer_slots", 0)
+        check(type(open_slots) is int and 0 <= open_slots
+              <= int(focus == "High" and level == 3)
+              and len(prayer)+open_slots <= effective
+              and len(set(prayer)) == len(prayer),
+              "priest_preparation",
+              "Chosen-Pillar prayers, optional High L3 Open slot, within real cap")
     if archetype == "Gifted":
         links = sheet.get("emotion_aspect_links", {})
         check(len(links) == 8 and

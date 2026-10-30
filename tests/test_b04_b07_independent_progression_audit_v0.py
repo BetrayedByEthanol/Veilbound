@@ -53,6 +53,118 @@ class IndependentProgressionTests(unittest.TestCase):
         self.assertTrue({"vp_formula","learned_budget","universal_award",
                          "talent_overaward","talent_gate"} <= found)
 
+    def test_06_focus_ap_prices_reject_self_consistent_forged_tempos(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as high
+        from scripts.b05_medium_anointed_restoration_l1_l3_v0 import profile as medium
+        from scripts.b05_low_anointed_restoration_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    genuine = make(level)
+                    baseline = {x["code"] for x in _sheet_issues(
+                        "Anointed/"+focus, level, genuine, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertFalse({"focus_action_cost", "general_action_cost",
+                                      "physical_tempo", "projection_tempo"} & baseline)
+                    forged = deepcopy(genuine)
+                    forged["physical_action_ap"] = forged["projection_action_ap"] = 1
+                    forged["general_action_ap"] = 1
+                    forged["physical_tempo"] = forged["projection_tempo"] = forged["turn_ap"]
+                    detected = {x["code"] for x in _sheet_issues(
+                        "Anointed/"+focus, level, forged, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertTrue({"focus_action_cost", "general_action_cost",
+                                     "physical_tempo", "projection_tempo"} <= detected)
+
+    def test_07_scholar_known_capacity_rejects_coupled_source_inflation(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
+        from scripts.b05_medium_scholar_l1_l3_v0 import profile as medium
+        from scripts.b05_low_scholar_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    original = make(level)
+                    forged = deepcopy(original)
+                    forged["known_pillar_techniques"] = list(forged["known_pillar_techniques"])
+                    forged["known_pillar_techniques"].append("Guided Regeneration" if
+                        "Guided Regeneration" not in forged["known_pillar_techniques"]
+                        else "Phantom Sound")
+                    forged["known_capacity"] += 1
+                    found = {x["code"] for x in _sheet_issues(
+                        "Scholar/"+focus, level, forged, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertIn("scholar_known_capacity", found)
+
+    def test_08_derived_prepared_and_formula_caps_reject_coupled_changes(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
+        from scripts.b05_low_scholar_l1_l3_v0 import profile as low
+        from scripts.b05_high_priest_life_l1_l3_v0 import profile as priest_high
+        from scripts.b05_medium_priest_life_l1_l3_v0 import profile as priest_medium
+        gates = talent_minimums()
+        for level in (1, 2):
+            forged = high(level)
+            forged["prepared_composite_formulas"].append(
+                dict(forged["prepared_composite_formulas"][0], mode="invented"))
+            forged["prepared_formula_capacity"] += 1
+            codes = {x["code"] for x in _sheet_issues(
+                "Scholar/High", level, forged, high(1),
+                high(level-1) if level > 1 else None, gates)}
+            self.assertIn("scholar_formula_capacity", codes)
+        for level in (1, 2, 3):
+            with self.subTest(level=level):
+                forged = low(level)
+                forged["prepared_techniques"] = list(forged["prepared_techniques"])
+                forged["prepared_techniques"].append(
+                    "Conjure Flame" if level == 1 else "Basic Heal")
+                forged["prepared_capacity"] += 1
+                codes = {x["code"] for x in _sheet_issues(
+                    "Scholar/Low", level, forged, low(1),
+                    low(level-1) if level > 1 else None, gates)}
+                self.assertIn("scholar_preparation_capacity", codes)
+        for focus, make in (("High", priest_high), ("Medium", priest_medium)):
+            for level in (1, 2, 3):
+                with self.subTest(priest=focus, level=level):
+                    forged = make(level)
+                    forged["prepared_prayers"] = list(forged["prepared_prayers"])
+                    forged["prepared_prayers"].append("Bonus unearned prayer")
+                    forged["prepared_capacity"] += 1
+                    codes = {x["code"] for x in _sheet_issues(
+                        "Priest/"+focus, level, forged, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertIn("priest_capacity", codes)
+
+    def test_09_legitimately_earned_repertoire_talents_adjust_only_own_caps(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as scholar
+        from scripts.b05_high_priest_life_l1_l3_v0 import profile as priest
+        gates = talent_minimums()
+        expanded = scholar(1)
+        expanded["talents"] = ["TAL-S01 Expanded Repertoire"]
+        expanded["known_pillar_techniques"].append("Guided Regeneration")
+        expanded["known_capacity"] += 1
+        # Already known? Use a new distinct authored Technique for this source.
+        self.assertEqual(6, len(set(expanded["known_pillar_techniques"])))
+        found = {x["code"] for x in _sheet_issues(
+            "Scholar/High", 1, expanded, scholar(1), None, gates)}
+        self.assertNotIn("scholar_known_capacity", found)
+        expanded["talents"].append("TAL-U01 Veil Insight")  # no earned second choice
+        found = {x["code"] for x in _sheet_issues(
+            "Scholar/High", 1, expanded, scholar(1), None, gates)}
+        self.assertTrue({"talent_overaward","scholar_known_capacity"} <= found)
+        liturgy = priest(1)
+        liturgy["talents"] = ("TAL-P01 Expanded Liturgy",)
+        liturgy["prepared_prayers"] = tuple(liturgy["prepared_prayers"]) + ("Venom Endurance",)
+        liturgy["prepared_capacity"] += 1
+        found = {x["code"] for x in _sheet_issues(
+            "Priest/High", 1, liturgy, priest(1), None, gates)}
+        self.assertNotIn("priest_capacity", found)
+        liturgy["accord"] = 2
+        liturgy["prepared_capacity"] += 1
+        found = {x["code"] for x in _sheet_issues(
+            "Priest/High", 1, liturgy, priest(1), None, gates)}
+        self.assertIn("priest_accord_provenance", found)
+
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
             {"event_id":"bridge", "character_id":"pilot-1",
