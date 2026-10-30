@@ -550,7 +550,7 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                                and archetype in archetype_access[t]
                                for t in selected)
                        and legal_saved and valid_prerequisites)
-    if type(aff) is int:
+    if type(vit) is int and type(aff) is int:
         # Validate talents first: only legitimately selected TAL-M01 applies.
         # Add the canonical +2 once AFTER the level-scaled Focus/VA term.
         reserve = (deep_volition_reserve_bonus()
