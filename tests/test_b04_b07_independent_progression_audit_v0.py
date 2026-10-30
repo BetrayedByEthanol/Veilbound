@@ -8,6 +8,7 @@ from scripts.b04_b07_independent_progression_audit_v0 import (
     authored_scholar_techniques, anointed_signature_bonds,
     canonical_aspect_pairs, gifted_core_emotions, talent_minimums, talent_rules,
     utility_talent_requirements, _has_direct_utility_training,
+    deep_volition_reserve_bonus,
     validate_pilot_milestones,
 )
 
@@ -1009,6 +1010,142 @@ class IndependentProgressionTests(unittest.TestCase):
                 for issue in report["issues"]}
         self.assertTrue({("Scholar/High", n, "talent_prerequisite")
                          for n in (1, 2, 3)} <= seen)
+        self.assertEqual((12, 39), (report["pairings_checked"],
+                                    report["level_snapshots_checked"]))
+
+    def test_41_deep_volition_reserve_is_flat_and_earned(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as high
+        from scripts.b05_medium_anointed_restoration_l1_l3_v0 import profile as medium
+        from scripts.b05_low_anointed_restoration_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        self.assertEqual(2, deep_volition_reserve_bonus())
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    baseline = make(level)
+                    earned = deepcopy(baseline)
+                    earned["talents"] = ["TAL-M01 Deep Volition Reserve"]
+                    earned["vp_max"] += 2
+                    # Low/Medium L3 have multiple awards; conserve the
+                    # remaining earned selection rather than fabricating it.
+                    existing = len(baseline["talents"])
+                    if existing > 1:
+                        earned["talents"] += list(baseline["talents"])[1:]
+                    codes = {x["code"] for x in _sheet_issues(
+                        "Anointed/"+focus, level, earned, earned, None, gates)}
+                    self.assertNotIn("vp_formula", codes)
+                    self.assertNotIn("talent_unaccounted", codes)
+                    self.assertNotIn("talent_gate", codes)
+                    # Owning the Talent without its +2 bonus is also invalid.
+                    missing_bonus = deepcopy(earned)
+                    missing_bonus["vp_max"] -= 2
+                    codes = {x["code"] for x in _sheet_issues(
+                        "Anointed/"+focus, level, missing_bonus,
+                        earned, None, gates)}
+                    self.assertIn("vp_formula", codes)
+                    # The flat +2 does not scale with character level.
+                    if level > 1:
+                        inflated = deepcopy(earned)
+                        inflated["vp_max"] += 2 * (level - 1)
+                        codes = {x["code"] for x in _sheet_issues(
+                            "Anointed/"+focus, level, inflated,
+                            earned, None, gates)}
+                        self.assertIn("vp_formula", codes)
+                    unauthorized = deepcopy(baseline)
+                    unauthorized["vp_max"] += 2
+                    codes = {x["code"] for x in _sheet_issues(
+                        "Anointed/"+focus, level, unauthorized,
+                        baseline, None, gates)}
+                    self.assertIn("vp_formula", codes)
+
+    def test_42_saved_l2_learned_discipline_point_can_be_spent_at_l3(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as high
+        from scripts.b05_medium_anointed_restoration_l1_l3_v0 import profile as medium
+        from scripts.b05_low_anointed_restoration_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            with self.subTest(focus=focus):
+                sheets = [make(n) for n in (1, 2, 3)]
+                sheets[1]["learned_disciplines"] = deepcopy(
+                    sheets[0]["learned_disciplines"])
+                sheets[1]["learned_points"] = 8
+                sheets[1]["saved_learned_discipline_points"] = 1
+                sheets[2]["saved_learned_discipline_points"] = 0
+                for index, sheet in enumerate(sheets):
+                    codes = {x["code"] for x in _sheet_issues(
+                        "Anointed/"+focus, index+1, sheet, sheets[0],
+                        sheets[index-1] if index else None, gates)}
+                    self.assertNotIn("learned_budget", codes)
+                    self.assertNotIn("learned_progression", codes)
+                    self.assertNotIn("learned_total", codes)
+                    self.assertNotIn("learned_ranks", codes)
+
+    def test_43_invalid_saved_learned_balances_and_false_spending_fail(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile
+        gates = talent_minimums()
+        for malformed in ("1", None, 1.0, True, -1, 2):
+            with self.subTest(saved=malformed):
+                forged = profile(2)
+                forged["saved_learned_discipline_points"] = malformed
+                codes = {x["code"] for x in _sheet_issues(
+                    "Anointed/High", 2, forged, profile(1),
+                    profile(1), gates)}
+                self.assertIn("learned_budget", codes)
+                if type(malformed) is not int or malformed < 0:
+                    self.assertIn("learned_progression", codes)
+        # A valid-looking L3 extra +1 without a saved point is not earned.
+        forged = profile(3)
+        forged["learned_disciplines"]["Unawarded Lore"] = 1
+        forged["learned_points"] += 1
+        codes = {x["code"] for x in _sheet_issues(
+            "Anointed/High", 3, forged, profile(1), profile(2), gates)}
+        self.assertIn("learned_budget", codes)
+        self.assertIn("learned_progression", codes)
+        # An L3 rank decrease does not become a free refund to saved points.
+        forged = profile(3)
+        forged["learned_disciplines"]["Medicine"] -= 1
+        forged["learned_points"] -= 1
+        forged["saved_learned_discipline_points"] = 1
+        codes = {x["code"] for x in _sheet_issues(
+            "Anointed/High", 3, forged, profile(1), profile(2), gates)}
+        self.assertIn("learned_progression", codes)
+        self.assertNotIn("learned_budget", codes)
+
+    def test_44_cross_source_audit_accepts_deferred_learned_point(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        def saved_at_l2(level):
+            sheet = original(level)
+            if level == 2:
+                initial = original(1)
+                sheet["learned_disciplines"] = initial["learned_disciplines"]
+                sheet["learned_points"] = 8
+                sheet["saved_learned_discipline_points"] = 1
+            return sheet
+        with patch.object(module, "profile", side_effect=saved_at_l2):
+            report = audit()
+        found = {(x["pairing"], x["level"], x["code"])
+                 for x in report["issues"]}
+        for level in (2, 3):
+            self.assertNotIn(("Anointed/High", level, "learned_budget"), found)
+            self.assertNotIn(("Anointed/High", level, "learned_progression"), found)
+        self.assertEqual((12, 39), (report["pairings_checked"],
+                                    report["level_snapshots_checked"]))
+
+    def test_45_cross_source_audit_accepts_flat_talent_vp(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        def reserve_at_creation(level):
+            sheet = original(level)
+            sheet["talents"] = ["TAL-M01 Deep Volition Reserve"]
+            sheet["vp_max"] += 2
+            return sheet
+        with patch.object(module, "profile", side_effect=reserve_at_creation):
+            report = audit()
+        found = {(x["pairing"], x["level"], x["code"])
+                 for x in report["issues"]}
+        for level in (1, 2, 3):
+            self.assertNotIn(("Anointed/High", level, "vp_formula"), found)
         self.assertEqual((12, 39), (report["pairings_checked"],
                                     report["level_snapshots_checked"]))
 
