@@ -158,6 +158,9 @@ class GridMovement:
             return (self.e.g2 is not None
                     and self.genuine_scholar_sword_ready(actor_id)
                     and a.hp > 0 and not a.dead and at in self.reach(actor_id))
+        if a.source.source_id=="GL":
+            return (self.genuine_low_gifted_sword_ready(actor_id)
+                    and a.hp>0 and not a.dead and at in self.reach(actor_id))
         if a.source.source_id in ("AH","AM","AL"):
             # Anointed's ordinary Dagger/Sword is not an innate or
             # automatically wielded melee ability. Current G2 readiness
@@ -195,6 +198,10 @@ class GridMovement:
         except (UnresolvedDecision,ValueError):
             return False
         return True
+
+    def genuine_low_gifted_sword_ready(self,actor_id):
+        from scripts.b05_low_gifted_native_anchor_v0 import actual_sword_ready
+        return actual_sword_ready(self.e,actor_id)
 
     def melee_contact(self, attacker_id, target_id, *, hunter_front=False):
         a, t = self.e.actors[attacker_id], self.e.actors[target_id]
@@ -371,7 +378,14 @@ class GridMovement:
         dest, cost, kind, allies = self.preview(
             actor_id, delta=delta, pivot=pivot, clockwise=clockwise,
             cautious=cautious, crawl=crawl)
-        if self._budget(actor_id, reserved) < cost:
+        native=getattr(self.e,"low_gifted_anchor",None)
+        discount=(native.preview_discount(
+            actor_id,delta=delta,cautious=cautious,crawl=crawl,reserved=reserved,
+            destination=dest,full_cost=cost)
+            if native is not None and delta is not None else 0)
+        if discount not in (0,1):
+            raise AssertionError("Only approved one-MP Low Gifted surcharge rider")
+        if self._budget(actor_id, reserved) < cost-discount:
             raise ValueError("Insufficient movement MP")
         initial = a.occupied
         threats = self._threats(actor_id, dest, cautious)
@@ -503,16 +517,20 @@ class GridMovement:
             self.e.log("g1_step_cancelled", actor=actor_id, trigger=key,
                        reason="original_position_or_cost_changed", mp_charged=0)
             return False
-        if self._budget(actor_id, reserved) < cost or a.hp <= 0 or a.dead:
+        latest_discount=(native.preview_discount(
+            actor_id,delta=delta,cautious=cautious,crawl=crawl,reserved=reserved,
+            destination=latest,full_cost=new_cost)
+            if native is not None and delta is not None else 0)
+        if latest_discount!=discount or self._budget(actor_id, reserved)<cost-discount or a.hp <= 0 or a.dead:
             self.e.log("g1_step_cancelled", actor=actor_id, trigger=key,
-                       reason="response_removed_mobility", mp_charged=0)
+                       reason="response_removed_mobility_or_anchor", mp_charged=0)
             return False
         if self.pounce and self.pounce.hunter_id == actor_id:
             run = self.pounce
             if not run.committed and run.spent_mp + cost > 18:
                 self._pay_pounce_ap(actor_id, "g1:pounce:cutoff")
                 run.committed = True
-        self._commit_mp(actor_id, cost, reserved)
+        self._commit_mp(actor_id, cost-discount, reserved)
         a.occupied = latest
         if self.e.g2 is not None:
             self.e.g2.on_position_change(actor_id)
@@ -522,10 +540,20 @@ class GridMovement:
         self.e.log("g1_movement_step", actor=actor_id,
                    old=initial, new=latest, step_kind=kind,
                    direction=delta, pivot_anchor=pivot, clockwise=clockwise,
-                   cautious=cautious, crawl=crawl, cost=cost,
+                   cautious=cautious, crawl=crawl, cost=cost-discount,
                    mp_remaining=self._budget(actor_id, reserved),
                    opportunity_sources=decided_sources, segment=self.segment[actor_id],
-                   reserved=bool(reserved))
+                   reserved=bool(reserved),
+                   **({"source_cost":cost,"anchor_mp_saved":discount}
+                      if discount else {}))
+        if native is not None and delta is not None and actor_id==native.actor_id:
+            if discount:
+                native.commit_step(actor_id,delta=delta,cautious=cautious,
+                                   source_cost=cost,paid_cost=cost-discount,
+                                   movement_index=len(self.e.ledger)-1)
+            else:
+                native.finish_uncredited_step(actor_id,delta=delta,cautious=cautious,
+                                              movement_index=len(self.e.ledger)-1)
         self.e.check()
         return True
 
