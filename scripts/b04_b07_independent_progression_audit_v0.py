@@ -85,6 +85,9 @@ SCHOLAR_RULE_SOURCES = (
 )
 CANONICAL_ASPECTS = "docs/world/aspect-identities-and-boundaries.md"
 GIFTED_FOUNDATION = "docs/rules/08-archetypes/gifted.md"
+ANOINTED_SIGNATURE_AUTHORITY = (
+    "docs/rules/08-archetypes/anointed-signature-authority-l1-3-v0.md"
+)
 SOURCE_MODULES = {
     "Priest/High": "b05_high_priest_life_l1_l3_v0",
     "Priest/Medium": "b05_medium_priest_life_l1_l3_v0",
@@ -263,6 +266,29 @@ def authored_scholar_techniques():
     return identities
 
 
+def anointed_signature_bonds():
+    """Read the two explicitly authored Signature/Aspect packages, not sheets.
+
+    A Signature label, a bond independently canonical in the world matrix,
+    and persistent source state do not alone prove a compatible allocation.
+    """
+    lines = (ROOT / ANOINTED_SIGNATURE_AUTHORITY).read_text(
+        encoding="utf-8").splitlines()
+    packages = re.findall(
+        r"^### (Returning Step|Kindled Flame) — ([A-Za-z]+) / ([A-Za-z]+)$",
+        "\n".join(lines), flags=re.MULTILINE,
+    )
+    if len(packages) != 2 or len({name for name, _, _ in packages}) != 2:
+        raise ValueError("Anointed L1-3 Signature package identity changed")
+    canonical = canonical_aspect_pairs()
+    permissions = {}
+    for name, pillar, aspect in packages:
+        if (pillar, aspect) not in canonical:
+            raise ValueError("Anointed Signature bond is not canonical: " + name)
+        permissions[name] = {"pillar": pillar, "aspect": aspect}
+    return permissions
+
+
 def _sheet_issues(pairing, level, sheet, first, prior, gates):
     """Independent policy checks; does not call profile.verify()."""
     issues = []
@@ -289,21 +315,35 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
         check(False, "ability_budget", "Unknown ability allocation/cost")
 
     learned = sheet.get("learned_disciplines", {})
-    check(isinstance(learned, dict) and
-          all(type(n) is int and 0 <= n <= 2 for n in learned.values()),
-          "learned_ranks", "L1–3 direct-invested discipline rank maximum +2")
-    if isinstance(learned, dict):
-        check(sum(learned.values()) == 8 + int(level >= 2),
-              "learned_budget", "Eight at creation; one point at L2, none at L3")
+    learned_valid = (isinstance(learned, dict) and
+                     all(type(n) is int and 0 <= n <= 2
+                         for n in learned.values()))
+    check(learned_valid, "learned_ranks",
+          "L1–3 direct-invested discipline ranks must be integers 0–2")
+    # Do not sum string/None/float/bool ranks after reporting invalid input.
+    # Invalid current or prior snapshots remain machine-readable findings.
+    if learned_valid:
+        total = sum(learned.values())
+        check(total == 8 + int(level >= 2), "learned_budget",
+              "Eight at creation; one point at L2, none at L3")
         if "learned_points" in sheet:
-            check(sheet["learned_points"] == sum(learned.values()),
-                  "learned_total", "Reported learned points differ")
-        if prior:
-            delta = {key: learned.get(key, 0)-prior["learned_disciplines"].get(key, 0)
-                     for key in set(learned) | set(prior["learned_disciplines"])}
-            check(all(x >= 0 for x in delta.values())
-                  and sum(delta.values()) == int(level == 2),
-                  "learned_progression", "Only one eligible L2 point; no free L3 change")
+            check(sheet["learned_points"] == total, "learned_total",
+                  "Reported learned points differ")
+    if prior:
+        prior_learned = prior.get("learned_disciplines")
+        prior_valid = (isinstance(prior_learned, dict) and
+                       all(type(n) is int and 0 <= n <= 2
+                           for n in prior_learned.values()))
+        if learned_valid and prior_valid:
+            delta = {key: learned.get(key, 0) - prior_learned.get(key, 0)
+                     for key in set(learned) | set(prior_learned)}
+            progression_ok = (all(x >= 0 for x in delta.values())
+                              and sum(delta.values()) == int(level == 2))
+        else:
+            progression_ok = False
+        check(progression_ok, "learned_progression",
+              "Only one eligible L2 point, no free L3 change; both snapshots "
+              "must contain valid numeric ranks")
     weapon = sheet.get("weapon_training", {})
     check(isinstance(weapon, dict) and
           sum(weapon.values()) == 2 and all(type(v) is int and 0 <= v <= 2
@@ -556,11 +596,20 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
             check(links == prior["emotion_aspect_links"], "gifted_link_mutation",
                   "No free re-binding of eight linked Aspects at level award")
     if archetype == "Anointed":
-        check(sheet.get("bond_active") is True and
-              sheet.get("signature") == "Returning Step"
+        permissions = anointed_signature_bonds()
+        expected_bond = permissions.get(sheet.get("signature"))
+        # The selected L1-3 pilot is Returning Step/Restoration: knowing a
+        # valid *different* Signature does not authorize changing this build.
+        check(sheet.get("bond") == permissions["Returning Step"]
+              and sheet.get("signature") == "Returning Step"
+              and expected_bond == sheet.get("bond")
+              and type(sheet.get("bond")) is dict
+              and sheet.get("bond_active") is True
               and sheet.get("max_destiny") == 2
               and sheet.get("destiny_initial_at_creation_only") == 2,
-              "anointed_bond", "One Restoration bond, fixed Signature and Destiny cap")
+              "anointed_bond",
+              "Actual starting Life/Restoration bond must match Returning "
+              "Step Signature, remain active, and retain canonical Destiny")
         if prior:
             check(sheet.get("bond") == prior.get("bond")
                   and sheet.get("mission") == prior.get("mission"),

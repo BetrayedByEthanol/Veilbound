@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 from scripts.b04_b07_independent_progression_audit_v0 import (
     audit, _sheet_issues, authored_priest_techniques,
-    authored_scholar_techniques, canonical_aspect_pairs, gifted_core_emotions,
-    talent_minimums, talent_rules,
+    authored_scholar_techniques, anointed_signature_bonds,
+    canonical_aspect_pairs, gifted_core_emotions, talent_minimums, talent_rules,
     validate_pilot_milestones,
 )
 
@@ -501,6 +501,82 @@ class IndependentProgressionTests(unittest.TestCase):
                          for level in (1, 2, 3)} <= issues)
         self.assertNotIn(("Gifted/High", 2, "gifted_link_mutation"), issues)
         self.assertNotIn(("Gifted/High", 3, "gifted_link_mutation"), issues)
+
+    def test_24_anointed_signature_is_tied_to_authored_initial_bond(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as high
+        from scripts.b05_medium_anointed_restoration_l1_l3_v0 import profile as medium
+        from scripts.b05_low_anointed_restoration_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        self.assertEqual({
+            "Returning Step": {"pillar": "Life", "aspect": "Restoration"},
+            "Kindled Flame": {"pillar": "Fire", "aspect": "Conflagration"},
+        }, anointed_signature_bonds())
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    original = make(level)
+                    baseline = {x["code"] for x in _sheet_issues(
+                        "Anointed/"+focus, level, original, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertNotIn("anointed_bond", baseline)
+                    for forged_bond in (
+                        {"pillar": "Fire", "aspect": "Conflagration"},
+                        {"pillar": "Life", "aspect": "Preservation"},
+                        {"pillar": "Life", "aspect": "Invented"},
+                        {"pillar": "Life", "aspect": "Restoration", "extra": 1},
+                        None,
+                    ):
+                        forged = deepcopy(original)
+                        forged["bond"] = forged_bond
+                        findings = {x["code"] for x in _sheet_issues(
+                            "Anointed/"+focus, level, forged, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertIn("anointed_bond", findings)
+
+    def test_25_consistently_wrong_anointed_bond_is_found_across_full_audit(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        def bad_bond(level):
+            sheet = original(level)
+            sheet["bond"] = {"pillar": "Fire", "aspect": "Conflagration"}
+            return sheet
+        with patch.object(module, "profile", side_effect=bad_bond):
+            report = audit()
+        issues = {(x["pairing"], x["level"], x["code"])
+                  for x in report["issues"]}
+        self.assertTrue({("Anointed/High", n, "anointed_bond")
+                         for n in (1, 2, 3)} <= issues)
+        self.assertNotIn(("Anointed/High", 2, "anointed_bond_mutation"), issues)
+        self.assertNotIn(("Anointed/High", 3, "anointed_bond_mutation"), issues)
+        self.assertEqual(39, report["level_snapshots_checked"])
+
+    def test_26_malformed_learned_ranks_never_abort_multi_focus_audit(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        gates = talent_minimums()
+        for invalid in ("2", None, 2.0, True, -1, 3):
+            with self.subTest(invalid=invalid):
+                forged = original(1)
+                forged["learned_disciplines"]["Medicine"] = invalid
+                issues = {x["code"] for x in _sheet_issues(
+                    "Anointed/High", 1, forged, forged, None, gates)}
+                self.assertIn("learned_ranks", issues)
+        # L1 malformed but L2 otherwise valid: reject the transition and
+        # preserve the full report rather than attempting invalid subtraction.
+        def malformed_first(level):
+            sheet = original(level)
+            if level == 1:
+                sheet["learned_disciplines"]["Medicine"] = "2"
+            return sheet
+        with patch.object(module, "profile", side_effect=malformed_first):
+            report = audit()
+        issues = {(x["pairing"], x["level"], x["code"])
+                  for x in report["issues"]}
+        self.assertIn(("Anointed/High", 1, "learned_ranks"), issues)
+        self.assertIn(("Anointed/High", 2, "learned_progression"), issues)
+        self.assertEqual(12, report["pairings_checked"])
+        self.assertEqual(39, report["level_snapshots_checked"])
+        self.assertEqual(0, report["independently_certified_full_focuses"])
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
