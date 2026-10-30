@@ -7,6 +7,7 @@ from scripts.b04_b07_independent_progression_audit_v0 import (
     audit, _sheet_issues, authored_priest_techniques,
     authored_scholar_techniques, anointed_signature_bonds,
     canonical_aspect_pairs, gifted_core_emotions, talent_minimums, talent_rules,
+    utility_talent_requirements, _has_direct_utility_training,
     validate_pilot_milestones,
 )
 
@@ -206,7 +207,7 @@ class IndependentProgressionTests(unittest.TestCase):
                     "anointed_technique_access",
                     "gifted_technique_access",
                     "scholar_known_access", "gifted_link_identity",
-                    "scholar_knowledge_grant",
+                    "scholar_knowledge_grant", "talent_prerequisite",
                     "scholar_known_capacity", "scholar_preparation_capacity",
                     "scholar_formula_capacity", "scholar_formula_legality",
                     "scholar_medium_preparation", "priest_capacity",
@@ -897,6 +898,115 @@ class IndependentProgressionTests(unittest.TestCase):
                          (report["pairings_checked"],
                           report["level_snapshots_checked"]))
         self.assertEqual(0, report["independently_certified_full_focuses"])
+
+    def test_37_saved_high_scholar_award_grants_later_knowledge(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile
+        gates = talent_minimums()
+        for acquired_at in (2, 3):
+            with self.subTest(acquired_at=acquired_at):
+                sheets = [profile(n) for n in (1, 2, 3)]
+                # Save High's only L1 Talent instead of spending it.
+                sheets[0]["talents"] = []
+                sheets[0]["saved_talent_selections"] = 1
+                sheets[1]["talents"] = []
+                sheets[1]["saved_talent_selections"] = 1
+                bought = sheets[acquired_at-1]
+                bought["talents"] = ["TAL-S01 Expanded Repertoire"]
+                bought["saved_talent_selections"] = 0
+                bought["known_pillar_techniques"].append("Guided Regeneration")
+                bought["known_capacity"] += 1
+                if acquired_at == 2:
+                    sheets[2]["talents"] = list(bought["talents"])
+                    sheets[2]["known_pillar_techniques"].append("Guided Regeneration")
+                    sheets[2]["known_capacity"] += 1
+                for i, sheet in enumerate(sheets):
+                    codes = {issue["code"] for issue in _sheet_issues(
+                        "Scholar/High", i+1, sheet, sheets[0],
+                        sheets[i-1] if i else None, gates)}
+                    for code in ("scholar_knowledge_grant",
+                                 "scholar_known_capacity",
+                                 "talent_unaccounted", "talent_retraining"):
+                        self.assertNotIn(code, codes)
+
+    def test_38_spent_or_fake_saved_selection_does_not_mint_knowledge(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile
+        gates = talent_minimums()
+        original = profile(1)
+        forged = profile(2)
+        forged["talents"] = ["TAL-S01 Expanded Repertoire"]
+        forged["known_capacity"] += 1
+        forged["known_pillar_techniques"].append("Guided Regeneration")
+        # L1 was already spent on Veil Insight, not saved.
+        findings = {issue["code"] for issue in _sheet_issues(
+            "Scholar/High", 2, forged, original, original, gates)}
+        self.assertIn("scholar_knowledge_grant", findings)
+        self.assertIn("talent_retraining", findings)
+        # Falsely claim the saved L1 award was zero despite 0 selected.
+        fake = deepcopy(original)
+        fake["talents"] = []
+        fake["saved_talent_selections"] = 0
+        findings = {issue["code"] for issue in _sheet_issues(
+            "Scholar/High", 2, forged, fake, fake, gates)}
+        self.assertIn("scholar_knowledge_grant", findings)
+
+    def test_39_utility_talents_require_direct_investment(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile
+        gates = talent_minimums()
+        rules = utility_talent_requirements()
+        self.assertEqual(set(rules), {"TAL-U01", "TAL-U02", "TAL-U03",
+                                      "TAL-U04", "TAL-U05"})
+        choices = {
+            "TAL-U01": ("Veil Theory", "Pillar Lore (Life)"),
+            "TAL-U02": ("Smithing", "Engineering", "Trade (Glassblowing)"),
+            "TAL-U03": ("Medicine",),
+            "TAL-U04": ("Navigation", "Tracking"),
+        }
+        for talent_id, disciplines in choices.items():
+            for discipline in disciplines:
+                with self.subTest(talent=talent_id, discipline=discipline):
+                    sheet = profile(1)
+                    sheet["talents"] = [talent_id+" candidate"]
+                    sheet["learned_disciplines"] = {
+                        discipline: 1, "Other": 2, "Culture": 2,
+                        "Fieldcraft": 2, "Background": 1,
+                    }
+                    self.assertEqual(8, sum(sheet["learned_disciplines"].values()))
+                    codes = {issue["code"] for issue in _sheet_issues(
+                        "Scholar/High", 1, sheet, sheet, None, gates)}
+                    self.assertNotIn("talent_prerequisite", codes)
+            with self.subTest(talent=talent_id, missing=True):
+                sheet = profile(1)
+                sheet["talents"] = [talent_id+" candidate"]
+                sheet["learned_disciplines"] = {
+                    "Veil Theory": 0, "Pillar Lore (Life)": 0,
+                    "Smithing": 0, "Trade (Glassblowing)": 0,
+                    "Medicine": 0, "Navigation": 0, "Tracking": 0,
+                    "Other": 2, "Culture": 2, "Fieldcraft": 2,
+                    "Background": 2,
+                }
+                codes = {issue["code"] for issue in _sheet_issues(
+                    "Scholar/High", 1, sheet, sheet, None, gates)}
+                self.assertIn("talent_prerequisite", codes)
+        self.assertTrue(_has_direct_utility_training({"Medicine": 2}, *rules["TAL-U05"]))
+        for invalid in ({"Medicine": 1}, {"Medicine": "2"},
+                        {"Medicine": True}, {"Medicine": None}):
+            self.assertFalse(_has_direct_utility_training(invalid, *rules["TAL-U05"]))
+
+    def test_40_ineligible_route_familiarity_fails_full_audit(self):
+        from scripts import b05_high_scholar_fire_l1_l3_v0 as module
+        original = module.profile
+        def invalid(level):
+            sheet = original(level)
+            sheet["talents"] = ["TAL-U04 Route Familiarity"]
+            return sheet
+        with patch.object(module, "profile", side_effect=invalid):
+            report = audit()
+        seen = {(issue["pairing"], issue["level"], issue["code"])
+                for issue in report["issues"]}
+        self.assertTrue({("Scholar/High", n, "talent_prerequisite")
+                         for n in (1, 2, 3)} <= seen)
+        self.assertEqual((12, 39), (report["pairings_checked"],
+                                    report["level_snapshots_checked"]))
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[

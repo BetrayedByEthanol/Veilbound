@@ -175,7 +175,7 @@ def utility_talent_requirements():
         if match is None:
             raise ValueError("Missing utility Talent: " + talent_id)
         tail = catalogue[match.end():]
-        next_section = re.search(r"^##? ", tail, flags=re.MULTILINE)
+        next_section = re.search(r"^#{2,3} ", tail, flags=re.MULTILINE)
         section = tail[:next_section.start()] if next_section else tail
         if section.count("Prerequisite:") != 1 or clause not in section:
             raise ValueError("Utility Talent prerequisite changed: " + talent_id)
