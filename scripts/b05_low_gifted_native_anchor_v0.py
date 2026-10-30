@@ -4,6 +4,7 @@ Only two approved provisional pilot expressions: Rooted Guard +1 and
 Unbound Step -1 MP surcharge. No new off-turn action, spell, G0 Step,
 generalized Gifted source ability or independent Focus certification.
 """
+from copy import deepcopy
 from scripts.b05_low_gifted_anchor_design_v0 import LowGiftedAnchorDesign
 from scripts.b05_low_gifted_l1_l3_v0 import profile
 from scripts.b06_encounter_state_v0 import Actor,Source,_fingerprint,UnresolvedDecision
@@ -66,6 +67,9 @@ class LowGiftedNativeAnchor:
             dict(a.source.abilities)["Veil Affinity"])
         self.model.begin_window(dominant=dominant)
         self.model.establish_anchor(anchor)
+        # Isolated preview transitions never debit G0 AP or authenticate G1/G5.
+        # This private snapshot changes only on genuine source-native events.
+        self._native_model=deepcopy(self.model)
         self.own_steps=0
         self.defense_choice=None
         self.step_choice=None
@@ -85,6 +89,10 @@ class LowGiftedNativeAnchor:
             raise UnresolvedDecision("Low Gifted source identity changed")
         return a
 
+    def _preview_authenticated(self):
+        """Reject preview-only Break, Reassert, disruption and Pulse edits."""
+        return vars(self.model)==vars(self._native_model)
+
     def on_own_step_completed(self):
         """One new Emotion Window per genuine completed own G0 Step."""
         self._source()
@@ -93,20 +101,21 @@ class LowGiftedNativeAnchor:
                and ev["detail"]["actor"]==self.actor_id]
         if (e.current!=self.actor_id or
                 e.pending_regeneration!=self.actor_id or
-                not e.ledger or e.ledger[-1]["kind"]!="regeneration_step"
-                or e.ledger[-1]["detail"]["actor"]!=self.actor_id
-                or e.ledger[-1]["round"]!=e.round
-                or len(steps)!=self.own_steps+1):
+                len(steps)!=self.own_steps+1
+                or steps[-1]["round"]!=e.round):
             raise UnresolvedDecision("No new real Low Gifted G0 Step to establish")
         # Combat-start window 1 is separate from the first own-turn
         # Emotion Establishment Step. Refresh on EVERY genuine own Step,
         # including the first, without replaying a suspended Step.
         self.own_steps+=1
-        self.model.begin_window()
+        # Advance ONLY genuine native state; preview calls cannot promote
+        # unpaid emotional transitions at the next authentic G0 Step.
+        self._native_model.begin_window()
         if self.own_steps==1:
             # Combat-start is not an earlier own turn. Opening the first
             # own-turn window never grants L3 Settled free-AP Deepen.
-            self.model.persisted_from_previous=False
+            self._native_model.persisted_from_previous=False
+        self.model=deepcopy(self._native_model)
         self.e.log("b05_low_gifted_emotion_window",actor=self.actor_id,
                    window=self.model.window,anchor=self.model.anchor,
                    active=self.model.active,source_digest=self._source().source.digest)
@@ -122,7 +131,8 @@ class LowGiftedNativeAnchor:
                          and event["detail"]["actor"]==self.actor_id)
         if (self.own_steps!=native_steps
                 or self.model.window!=native_steps+1
-                or not self.model._ready(emotion)):
+                or not self._preview_authenticated()
+                or not self._native_model._ready(emotion)):
             return False
         for event in self.e.ledger:
             detail=event["detail"]
@@ -161,7 +171,8 @@ class LowGiftedNativeAnchor:
     def commit_defense(self,choice,attack_key,defense_index):
         if (self.defense_choice !=
                 (self.e.round,self.e.current,attack_key,choice)
-                or not self.model._ready("Fear")):
+                or not self._preview_authenticated()
+                or not self._native_model._ready("Fear")):
             raise AssertionError("Source defense cannot commit unselected Anchor")
         proof=self.e.ledger[defense_index]
         if (proof["kind"]!="defense_assigned"
@@ -174,6 +185,7 @@ class LowGiftedNativeAnchor:
                                       source_legal=True,physical=True)
         if not got.applicable or got.bonus!=1:
             raise AssertionError("Model and source G0 defense diverged")
+        self._native_model=deepcopy(self.model)
         self.defense_choice=None
 
     def choose_step(self,delta,*,cautious=False):
@@ -229,7 +241,8 @@ class LowGiftedNativeAnchor:
     def commit_step(self,actor_id,*,delta,cautious,source_cost,paid_cost,
                     movement_index):
         if (self.step_choice!=(self.e.round,actor_id,tuple(delta),cautious)
-                or source_cost-paid_cost!=1):
+                or source_cost-paid_cost!=1 or not self._preview_authenticated()
+                or not self._native_model._ready("Disgust")):
             raise AssertionError("Only exact selected paid G1 step qualifies")
         event=self.e.ledger[movement_index]
         if (event["kind"]!="g1_movement_step"
@@ -245,6 +258,7 @@ class LowGiftedNativeAnchor:
             surcharge_mp=source_cost-base)
         if not result.applicable or result.mp_reduction!=1 or result.remaining_mp_cost!=paid_cost:
             raise AssertionError("Native paid MP and Anchor preview diverged")
+        self._native_model=deepcopy(self.model)
         self.step_choice=None
         self.e.log("b05_low_gifted_unbound_step_applied",
                    actor=actor_id,window=self.model.window,

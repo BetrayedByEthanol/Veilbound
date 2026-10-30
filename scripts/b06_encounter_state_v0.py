@@ -639,9 +639,13 @@ class Encounter:
         # regeneration_dead never establishes a new Emotion Window.
         low_gifted=getattr(self,"low_gifted_anchor",None)
         if (low_gifted is not None and low_gifted.actor_id==actor_id
-                and not a.dead and self.ledger
-                and self.ledger[-1]["kind"]=="regeneration_step"
-                and self.ledger[-1]["detail"]["actor"]==actor_id):
+                and not a.dead
+                and any(ev["kind"]=="regeneration_step"
+                        and ev["detail"].get("actor")==actor_id
+                        and ev["round"]==self.round
+                        for ev in self.ledger)):
+            # G4 Guided Authority may append a payout AFTER regeneration_step.
+            # Authenticate the actor/round receipt, not the ledger tail.
             low_gifted.on_own_step_completed()
         if low_scholar is not None:
             low_scholar.on_step_complete(actor_id)
@@ -906,7 +910,10 @@ class Encounter:
                      not self.g1.genuine_scholar_sword_ready(target)))
                 or (t.source.source_id in ("AH","AM","AL") and
                     (self.g1 is None or
-                     not self.g1.genuine_anointed_weapon_ready(target))))):
+                     not self.g1.genuine_anointed_weapon_ready(target)))
+                or (t.source.source_id=="GL" and
+                    (self.g1 is None or
+                     not self.g1.genuine_low_gifted_sword_ready(target))))):
             raise ValueError("Insufficient legal Guard assignments")
         self.seen_sequences.add((attacker, target))
         for i, p in enumerate(profiles):
