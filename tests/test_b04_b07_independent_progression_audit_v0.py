@@ -874,6 +874,30 @@ class IndependentProgressionTests(unittest.TestCase):
             "Scholar/High", 2, l2, l1, l1, gates)}
         self.assertNotIn("scholar_knowledge_grant", findings)
 
+    def test_36_full_audit_rejects_delayed_medium_scholar_acquisition(self):
+        from scripts import b05_medium_scholar_l1_l3_v0 as module
+        original = module.profile
+
+        def with_unfilled_l2_slot(level):
+            result = original(level)
+            if level == 2:
+                result["known_pillar_techniques"] = (
+                    original(1)["known_pillar_techniques"])
+            return result
+
+        with patch.object(module, "profile",
+                          side_effect=with_unfilled_l2_slot):
+            report = audit()
+        issues = {(x["pairing"], x["level"], x["code"])
+                  for x in report["issues"]}
+        self.assertIn(("Scholar/Medium", 3, "scholar_knowledge_grant"), issues)
+        self.assertNotIn(("Scholar/Medium", 2, "scholar_knowledge_grant"), issues)
+        self.assertNotIn(("Scholar/Medium", 3, "scholar_known_capacity"), issues)
+        self.assertEqual((12, 39),
+                         (report["pairings_checked"],
+                          report["level_snapshots_checked"]))
+        self.assertEqual(0, report["independently_certified_full_focuses"])
+
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
             {"event_id":"bridge", "character_id":"pilot-1",
