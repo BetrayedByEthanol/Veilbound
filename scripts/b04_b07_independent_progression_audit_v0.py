@@ -76,6 +76,12 @@ SCHOLAR_RULE_SOURCES = (
     ("Phantom Sound", "Secrets", "Hallucination", "phantom-sound-v0.md"),
     ("Vital Shelter", "Life", "Preservation", "vital-shelter-v0.md"),
     ("Guided Regeneration", "Life", "Restoration", "guided-regeneration-v0.md"),
+    ("Gentle Growth", "Life", "Nature", "gentle-growth-v0.md"),
+    ("Venom Endurance", "Life", "Preservation", "venom-endurance-v0.md"),
+    ("Woodland Rapport", "Life", "Nature", "woodland-rapport-v0.md"),
+    ("Protective Ward", "Kinship", "Guardian", "protective-ward-v0.md"),
+    ("Spark of Inspiration", "Arts", "Inspiration", "spark-of-inspiration-v0.md"),
+    ("Weaken Restraints", "Liberty", "Defiance", "weaken-restraints-v0.md"),
 )
 CANONICAL_ASPECTS = "docs/world/aspect-identities-and-boundaries.md"
 GIFTED_FOUNDATION = "docs/rules/08-archetypes/gifted.md"
@@ -237,11 +243,14 @@ def authored_scholar_techniques():
         if (pillar, aspect) not in canonical:
             raise ValueError("Scholar technique Aspect outside canonical matrix: "+name)
         base_rows = [line for line in lines
-                     if line.startswith("| Base") and "Tier" in line.split("|")[1]]
+                     if line.startswith("| Base") and "Tier" in line.split("|")[1]
+                     or line.startswith("| Tier and acquisition |")]
         if len(base_rows) != 1:
             raise ValueError("Missing or ambiguous Scholar Base Tier: "+filename)
         cells = base_rows[0].split("|")
-        match = re.match(r"\s*\*\*(?:Tier[ -](\d+)|Base T(\d+)|(\d+))\b", cells[2])
+        match = re.match(
+            r"\s*\*\*(?:Tier[ -](\d+)|Base T(\d+)|(\d+)|"
+            r"Base and Used Tier (\d+))\b", cells[2])
         if match is None:
             raise ValueError("Unrecognized Scholar Base Tier: "+filename)
         base_tier = int(next(n for n in match.groups() if n is not None))

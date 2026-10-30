@@ -392,12 +392,15 @@ class IndependentProgressionTests(unittest.TestCase):
 
     def test_20_scholar_repertoire_uses_authored_pillar_techniques(self):
         rules = authored_scholar_techniques()
-        self.assertEqual(7, len(rules))
+        self.assertEqual(13, len(rules))
         self.assertEqual({1}, {r["base_tier"] for r in rules.values()})
         self.assertTrue(all((r["pillar"], r["aspect"]) in
                             canonical_aspect_pairs() for r in rules.values()))
         for name in ("Blink", "Veil Inspection", "Phantom Image"):
             self.assertNotIn(name, rules)
+        self.assertTrue({"Protective Ward", "Weaken Restraints",
+                         "Spark of Inspiration", "Gentle Growth",
+                         "Venom Endurance", "Woodland Rapport"} <= set(rules))
 
     def test_21_scholar_rejects_universal_unauthored_and_early_tier_techniques(self):
         from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
@@ -422,6 +425,11 @@ class IndependentProgressionTests(unittest.TestCase):
                             "Scholar/"+focus, level, forged, make(1),
                             make(level-1) if level > 1 else None, gates)}
                         self.assertIn("scholar_known_access", errors)
+        legal = high(1)
+        legal["known_pillar_techniques"][0] = "Spark of Inspiration"
+        codes = {x["code"] for x in _sheet_issues(
+            "Scholar/High", 1, legal, high(1), None, gates)}
+        self.assertNotIn("scholar_known_access", codes)
         # No Tier-2-only technique exists in this bounded source census.
         # Simulate future authored metadata to prove L1-2 reject before L3.
         canonical = authored_scholar_techniques()
