@@ -165,6 +165,36 @@ class IndependentProgressionTests(unittest.TestCase):
             "Priest/High", 1, liturgy, priest(1), None, gates)}
         self.assertIn("priest_accord_provenance", found)
 
+    def test_10_high_l3_fluency_and_medium_preparation_cannot_mint_caps(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
+        from scripts.b05_medium_scholar_l1_l3_v0 import profile as medium
+        gates=talent_minimums()
+        high_forged=high(3)
+        high_forged["prepared_formula_capacity"]=12
+        high_forged["prepared_composite_formulas"].append({
+            "primary":"Stone Skin","secondary":"Basic Heal",
+            "profile":"Self","mode":"invented"})
+        codes={x["code"] for x in _sheet_issues(
+            "Scholar/High",3,high_forged,high(1),high(2),gates)}
+        self.assertIn("scholar_formula_capacity",codes)
+        medium_forged=medium(2)
+        medium_forged["prepared_capacity"]=99
+        medium_forged["prepared_technique_subset"]=("Stone Skin",)
+        codes={x["code"] for x in _sheet_issues(
+            "Scholar/Medium",2,medium_forged,medium(1),medium(1),gates)}
+        self.assertIn("scholar_medium_preparation",codes)
+
+    def test_11_no_new_capacity_or_focus_cost_findings_on_authored_builds(self):
+        prohibited={"focus_action_cost", "general_action_cost",
+                    "physical_tempo", "projection_tempo",
+                    "scholar_known_capacity", "scholar_preparation_capacity",
+                    "scholar_formula_capacity", "scholar_formula_legality",
+                    "scholar_medium_preparation", "priest_capacity",
+                    "priest_accord_provenance"}
+        new=[(x["pairing"],x["level"],x["code"]) for x in self.report["issues"]
+             if x["code"] in prohibited]
+        self.assertEqual([],new)
+
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
             {"event_id":"bridge", "character_id":"pilot-1",
