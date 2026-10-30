@@ -98,12 +98,14 @@ class LowGiftedNativeAnchor:
                 or e.ledger[-1]["round"]!=e.round
                 or len(steps)!=self.own_steps+1):
             raise UnresolvedDecision("No new real Low Gifted G0 Step to establish")
+        # Combat-start window 1 is separate from the first own-turn
+        # Emotion Establishment Step. Refresh on EVERY genuine own Step,
+        # including the first, without replaying a suspended Step.
         self.own_steps+=1
-        if self.own_steps>1:
-            self.model.begin_window()
-            self.e.log("b05_low_gifted_emotion_window",actor=self.actor_id,
-                       window=self.model.window,anchor=self.model.anchor,
-                       active=self.model.active,source_digest=self._source().source.digest)
+        self.model.begin_window()
+        self.e.log("b05_low_gifted_emotion_window",actor=self.actor_id,
+                   window=self.model.window,anchor=self.model.anchor,
+                   active=self.model.active,source_digest=self._source().source.digest)
         self.defense_choice=None
         self.step_choice=None
 
@@ -115,7 +117,7 @@ class LowGiftedNativeAnchor:
                          if event["kind"]=="regeneration_step"
                          and event["detail"]["actor"]==self.actor_id)
         if (self.own_steps!=native_steps
-                or self.model.window!=max(1,native_steps)
+                or self.model.window!=native_steps+1
                 or not self.model._ready(emotion)):
             return False
         for event in self.e.ledger:

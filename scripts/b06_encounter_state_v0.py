@@ -634,12 +634,14 @@ class Encounter:
         if low_scholar is not None:
             low_scholar.on_step_start(actor_id)
         self._regenerate(a, regen_choice)
-        # Only the first genuinely completed G0 Step 2 for each Low Gifted
-        # own turn opens its native subsequent Emotion Window. Suspended
-        # regeneration retries cannot mint another Pulse.
+        # Notify only on a genuinely completed living Regeneration Step.
+        # An unresolved/invalid allocation can complete on a later retry;
+        # regeneration_dead never establishes a new Emotion Window.
         low_gifted=getattr(self,"low_gifted_anchor",None)
-        if (first_step_entry and low_gifted is not None
-                and low_gifted.actor_id==actor_id):
+        if (low_gifted is not None and low_gifted.actor_id==actor_id
+                and not a.dead and self.ledger
+                and self.ledger[-1]["kind"]=="regeneration_step"
+                and self.ledger[-1]["detail"]["actor"]==actor_id):
             low_gifted.on_own_step_completed()
         if low_scholar is not None:
             low_scholar.on_step_complete(actor_id)

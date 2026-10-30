@@ -153,7 +153,7 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
                      "b05_low_gifted_unbound_step_applied"]
             self.assertEqual(1,len(effects))
             self.assertEqual(steps[0]["index"],effects[0]["detail"]["g1_movement_index"])
-            self.assertEqual(1,native.model.pulse_window)
+            self.assertEqual(2,native.model.pulse_window)
             self.assertTrue(e.g1.step("gifted",(0,1)))
             self.assertEqual(4,steps[0]["detail"]["source_cost"])
             self.assertEqual(5,e.actors["gifted"].mp_remaining) # 12-3-4
@@ -196,7 +196,7 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
         native.choose_step((0,1))
         with self.assertRaises(ValueError):native.choose_step((0,1))
         self.assertTrue(e.g1.step("gifted",(0,1)))
-        self.assertEqual(1,native.model.pulse_window)
+        self.assertEqual(2,native.model.pulse_window)
         with self.assertRaises(ValueError):native.choose_step((0,1))
         self.assertFalse(native.model._ready("Disgust"))
         with self.assertRaises(UnresolvedDecision):
@@ -208,13 +208,13 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
         combat.bridge.start_next_turn(RegenerationChoice())
         native.choose_step((0,1))
         self.assertTrue(e.g1.step("gifted",(0,1)))
-        self.assertEqual((1,1),(native.model.window,native.model.pulse_window))
+        self.assertEqual((2,2),(native.model.window,native.model.pulse_window))
         combat.bridge.end_current_turn()
         combat.bridge.start_next_turn(RegenerationChoice())
         combat.bridge.end_current_turn()
         combat.bridge.begin_next_round()
         combat.bridge.start_next_turn(RegenerationChoice())
-        self.assertEqual((2,1),(native.model.window,native.model.pulse_window))
+        self.assertEqual((3,2),(native.model.window,native.model.pulse_window))
         self.assertTrue(native.model._ready("Disgust"))
         self.assertFalse(native.model.disrupted)
         self.assertEqual(2,native.own_steps)
@@ -247,6 +247,87 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
         self.assertTrue(e.g1.step("gifted",(0,1)))
         self.assertEqual(1,len([x for x in e.ledger if x["kind"]==
                                  "b05_low_gifted_unbound_step_applied"]))
+
+
+    def test_13_resumed_regeneration_opens_exactly_one_own_window(self):
+        # Codex P1: no premature window for missing/invalid Step-2
+        # allocation; successful continuation opens exactly one.
+        for level in (1,2,3):
+            e,native,combat=scene(level,first="gifted",anchor="Disgust",
+                                  terrain={(2,3):"difficult"})
+            actor=e.actors["gifted"]
+            actor.hp-=2
+            with self.assertRaises(UnresolvedDecision):
+                combat.bridge.start_next_turn()
+            self.assertEqual(("gifted",0,1),(
+                e.pending_regeneration,native.own_steps,native.model.window))
+            self.assertEqual(0,len([x for x in e.ledger
+                if x["kind"]=="regeneration_step" and
+                   x["detail"]["actor"]=="gifted"]))
+            with self.assertRaises(ValueError):
+                combat.bridge.start_next_turn(RegenerationChoice(hp=3))
+            self.assertEqual((0,1),(native.own_steps,native.model.window))
+            combat.bridge.start_next_turn(RegenerationChoice(hp=1))
+            self.assertEqual((1,2),(native.own_steps,native.model.window))
+            steps=[x for x in e.ledger if x["kind"]=="regeneration_step"
+                   and x["detail"]["actor"]=="gifted"]
+            windows=[x for x in e.ledger
+                     if x["kind"]=="b05_low_gifted_emotion_window"]
+            self.assertEqual((1,1),(len(steps),len(windows)))
+            self.assertLess(steps[0]["index"],windows[0]["index"])
+            self.assertTrue(native._ready("Disgust"))
+            native.choose_step((0,1))
+            self.assertTrue(e.g1.step("gifted",(0,1)))
+            self.assertEqual(2,native.model.pulse_window)
+
+    def test_14_dead_low_gifted_does_not_open_window_or_block_turn(self):
+        # Codex P2: the dead-turn source receipt is regeneration_dead.
+        e,native,combat=scene(2,first="gifted")
+        actor=e.actors["gifted"]
+        actor.hp=0
+        actor.vigor=0
+        actor.dead=True
+        combat.bridge.start_next_turn(RegenerationChoice())
+        self.assertIsNone(e.pending_regeneration)
+        self.assertEqual("gifted",e.current)
+        self.assertEqual((0,1),(native.own_steps,native.model.window))
+        self.assertEqual(1,len([x for x in e.ledger
+                                if x["kind"]=="regeneration_dead"
+                                and x["detail"]["actor"]=="gifted"]))
+        self.assertFalse(any(x["kind"]=="b05_low_gifted_emotion_window"
+                             for x in e.ledger))
+        combat.bridge.end_current_turn()
+        combat.bridge.start_next_turn(RegenerationChoice())
+        combat.bridge.end_current_turn()
+        self.assertEqual(len(e.order),e.cursor)
+
+    def test_15_first_own_step_refreshes_spent_combat_start_pulse(self):
+        # Codex P2: a pre-own-turn Guard uses initial window 1;
+        # the very first authentic own Step must offer fresh window 2.
+        for level in (1,2,3):
+            e,native,combat=scene(level,anchor="Fear",first="foe")
+            combat.bridge.start_next_turn(RegenerationChoice())
+            native.choose_defense("foe:gifted:0","guard")
+            first,_=enemy_attack(e,combat,choice="guard",face=12)
+            self.assertEqual("miss",first["outcome"])
+            self.assertEqual((1,0,1),(
+                native.model.pulse_window,native.own_steps,native.model.window))
+            combat.bridge.end_current_turn()
+            combat.bridge.start_next_turn(RegenerationChoice())
+            self.assertEqual((1,2,1),(
+                native.own_steps,native.model.window,native.model.pulse_window))
+            self.assertTrue(native._ready("Fear"))
+            combat.bridge.end_current_turn()
+            combat.bridge.begin_next_round()
+            combat.bridge.start_next_turn(RegenerationChoice())
+            native.choose_defense("foe:gifted:0","guard")
+            second,_=enemy_attack(e,combat,choice="guard",face=12)
+            self.assertEqual("miss",second["outcome"])
+            self.assertEqual(2,native.model.pulse_window)
+            receipts=[x for x in e.ledger if x["kind"]=="defense_assigned"
+                      and x["detail"].get("anchor_bonus")==1]
+            self.assertEqual([1,2],[x["detail"]["anchor_window"]
+                                     for x in receipts])
 
 
 if __name__=="__main__":
