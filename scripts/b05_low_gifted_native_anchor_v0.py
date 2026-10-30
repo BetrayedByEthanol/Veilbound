@@ -111,7 +111,11 @@ class LowGiftedNativeAnchor:
         # The preview model is intentionally public and mutable. Native
         # authority is the actual count of G0 Steps and source ledger
         # effects, NEVER a caller-forced model window or cleared Pulse.
-        if (self.model.window!=max(1,self.own_steps)
+        native_steps=sum(1 for event in self.e.ledger
+                         if event["kind"]=="regeneration_step"
+                         and event["detail"]["actor"]==self.actor_id)
+        if (self.own_steps!=native_steps
+                or self.model.window!=max(1,native_steps)
                 or not self.model._ready(emotion)):
             return False
         for event in self.e.ledger:

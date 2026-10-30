@@ -236,6 +236,12 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
         native.model.begin_window()
         with self.assertRaises(ValueError):
             native.choose_step((0,1))
+        # Even corrupting the adapter's public counter cannot impersonate
+        # an absent second G0 Step: native ledger receipts are authoritative.
+        native.own_steps=2
+        with self.assertRaises(ValueError):
+            native.choose_step((0,1))
+        native.own_steps=1
         with self.assertRaises(UnresolvedDecision):
             native.on_own_step_completed()
         self.assertTrue(e.g1.step("gifted",(0,1)))
