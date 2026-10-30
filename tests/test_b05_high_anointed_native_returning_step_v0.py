@@ -169,7 +169,7 @@ class NativeHighAnointedRestorationTests(unittest.TestCase):
         self.assertFalse(any(v["kind"] in (
             "g5_melee_resolved","g3_effect_established",
             "g4_basic_heal_applied") for v in e.ledger))
-        self.assertEqual((),e.actors["high"].source.attack_profiles)
+        self.assertEqual(("B05-PC-AH-DAGGER-PIERCE",),e.actors["high"].source.attack_profiles)
         self.assertEqual("STRUCTURAL_B05_ONLY",e.actors["high"].source.status)
         doc=(ROOT/"docs/design/b04-b05-high-anointed-restoration-native-returning-step-v0.md").read_text()
         for phrase in ("0/12","0/6","20 AP","G0","G4","+8 Intrusion","G5"):

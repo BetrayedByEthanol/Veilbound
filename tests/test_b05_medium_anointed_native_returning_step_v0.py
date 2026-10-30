@@ -81,7 +81,7 @@ class MediumAnointedNativeTests(unittest.TestCase):
                                  pulse["detail"]["source_digest"])
                 self.assertEqual(2,med.state.destiny)
                 self.assertIsNone(med.pending)
-                self.assertEqual((),e.actors["medium"].source.attack_profiles)
+                self.assertEqual(("B05-PC-AM-DAGGER-PIERCE",),e.actors["medium"].source.attack_profiles)
                 e.check()
 
     def test_02_lesser_one_destiny_at_zero_vigor_and_no_double_step(self):

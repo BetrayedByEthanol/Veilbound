@@ -36,7 +36,7 @@ class AnointedG0ActorBridge(unittest.TestCase):
                                      (a.vp_available,a.vp_committed,a.vp_spent))
                     self.assertEqual("STRUCTURAL_B05_ONLY",a.source.status)
                     self.assertEqual(role,a.source.source_id)
-                    self.assertEqual((),a.source.attack_profiles)
+                    self.assertEqual(({"AH":"B05-PC-AH-DAGGER-PIERCE","AM":"B05-PC-AM-DAGGER-PIERCE","AL":"B05-PC-AL-SWORD-CUT"}[role],),a.source.attack_profiles)
                     self.assertEqual(sha256((ROOT/a.source.path).read_bytes()).hexdigest(),
                                      a.source.digest)
                     self.assertIn((weapon,"wielded"),a.source.equipment)
@@ -102,7 +102,7 @@ class AnointedG0ActorBridge(unittest.TestCase):
             self.assertFalse(hasattr(a,"destiny"))
             self.assertFalse(hasattr(a,"invested_vessel"))
             self.assertFalse(hasattr(a,"anointed_signature"))
-            self.assertEqual((),a.source.attack_profiles)
+            self.assertEqual(({"AH":"B05-PC-AH-DAGGER-PIERCE","AM":"B05-PC-AM-DAGGER-PIERCE","AL":"B05-PC-AL-SWORD-CUT"}[role],),a.source.attack_profiles)
             self.assertEqual("STRUCTURAL_B05_ONLY",a.source.status)
             self.assertNotIn(("Conjure Flame","carried"),a.source.equipment)
 
