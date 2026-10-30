@@ -112,6 +112,19 @@ LOW_PRIEST = {
           "talents": ("TAL-C05", "TAL-C01", "TAL-C09")},
 }
 CATALOGUE = "docs/rules/10-advancement/talents-level-1-5-v0.md"
+# Positive B07 prerequisite clauses; fail closed if an authored rule changes.
+UTILITY_TALENT_PREREQUISITES = {
+    "TAL-U01": (1, ("Veil Theory", "Pillar Lore"),
+        "Prerequisite: at least **+1 directly invested** in **Veil Theory** or **Pillar Lore**."),
+    "TAL-U02": (1, ("Smithing", "Engineering", "Carpentry", "Tailoring", "Trade"),
+        "Prerequisite: **+1 directly invested** in Smithing, Engineering, Carpentry, Tailoring or a relevant named Trade."),
+    "TAL-U03": (1, ("Medicine",),
+        "Prerequisite: **+1 directly invested Medicine**."),
+    "TAL-U04": (1, ("Navigation", "Tracking"),
+        "Prerequisite: **+1 directly invested Navigation or Tracking**."),
+    "TAL-U05": (2, ("*",),
+        "Prerequisite: **+2 directly invested** in one named Learned Discipline."),
+}
 LOW_RECORD = "docs/design/b05-life-low-priest-l3-build-exaltation-verification-v0.md"
 
 
@@ -150,6 +163,43 @@ def talent_rules():
             raise ValueError("Unrecognized B07 Archetype qualifier: "+qualifier)
         rules[name] = {"level": int(minimum), "archetypes": permitted}
     return rules
+
+
+def utility_talent_requirements():
+    """Authenticate the B07 catalogue's directly invested prerequisites."""
+    catalogue = (ROOT / CATALOGUE).read_text(encoding="utf-8")
+    rules = {}
+    for talent_id, (rank, disciplines, clause) in UTILITY_TALENT_PREREQUISITES.items():
+        match = re.search(r"^### " + re.escape(talent_id) + r" — [^\n]+$",
+                          catalogue, flags=re.MULTILINE)
+        if match is None:
+            raise ValueError("Missing utility Talent: " + talent_id)
+        tail = catalogue[match.end():]
+        next_section = re.search(r"^##? ", tail, flags=re.MULTILINE)
+        section = tail[:next_section.start()] if next_section else tail
+        if section.count("Prerequisite:") != 1 or clause not in section:
+            raise ValueError("Utility Talent prerequisite changed: " + talent_id)
+        rules[talent_id] = (rank, disciplines)
+    return rules
+
+
+def _has_direct_utility_training(learned, required_rank, disciplines):
+    """Require actual numerical direct investment, not a derived bonus."""
+    if not isinstance(learned, dict):
+        return False
+    def eligible(name, discipline):
+        if name == discipline:
+            return True
+        if discipline in ("Pillar Lore", "Trade"):
+            prefix = discipline + " ("
+            return (name.startswith(prefix) and name.endswith(")")
+                    and bool(name[len(prefix):-1].strip()))
+        return False
+    return any(type(name) is str and type(rank) is int
+               and rank >= required_rank and
+               (disciplines == ("*",) or any(
+                   eligible(name, d) for d in disciplines))
+               for name, rank in learned.items())
 
 
 def talent_minimums():
@@ -438,6 +488,13 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               for t in selected),
           "talent_archetype",
           "Selected Talent must meet its catalogue Archetype prerequisites")
+    utility_rules = utility_talent_requirements()
+    valid_prerequisites = (learned_valid and all(
+        _has_direct_utility_training(learned, *utility_rules[t])
+        for t in selected if t in utility_rules))
+    check(valid_prerequisites, "talent_prerequisite",
+          "Utility Talents require actual directly invested prerequisite "
+          "discipline ranks in the audited character sheet")
     awarded = sum(n <= level for n in TALENT_AWARDS[focus])
     check(len(selected) <= awarded, "talent_overaward",
           "More selected Talents than Focus's earned awards")
@@ -470,7 +527,7 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                        and all(t in archetype_access
                                and archetype in archetype_access[t]
                                for t in selected)
-                       and legal_saved)
+                       and legal_saved and valid_prerequisites)
     if archetype == "Scholar":
         known = sheet.get("known_pillar_techniques", ())
         authored_known = authored_scholar_techniques()
@@ -515,17 +572,22 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                         previous_talents_valid = False
                         break
                     previous_ids.append(matched.group(1))
-            previous_talents_valid = (previous_talents_valid
-                                      and len(set(previous_ids)) == len(previous_ids)
-                                      and len(previous_ids) <= sum(
-                                          n <= level-1 for n in TALENT_AWARDS[focus]))
+            prior_awarded = sum(
+                n <= level-1 for n in TALENT_AWARDS[focus])
+            prior_saved = prior.get("saved_talent_selections", 0)
+            previous_talents_valid = (
+                previous_talents_valid
+                and len(set(previous_ids)) == len(previous_ids)
+                and type(prior_saved) is int and prior_saved >= 0
+                and len(previous_talents) + prior_saved == prior_awarded
+                and set(previous_ids) <= set(selected))
+            # A purchase can spend a prior earned saved selection at L2/L3.
             gained_repertoire_talent = (
                 valid_selection and previous_talents_valid
                 and "TAL-S01" in selected
-                and "TAL-S01" not in previous_ids
-                and level in TALENT_AWARDS[focus])
+                and "TAL-S01" not in previous_ids)
             new_grant_count = int(level == 2) + int(gained_repertoire_talent)
-            check(proper_known and prior_known_valid and previous_talents_valid
+            check(proper_known and prior_known_valid
                   and len(current_names - prior_names) <= new_grant_count,
                   "scholar_knowledge_grant",
                   "Only the L2 individual learning award or newly selected "
