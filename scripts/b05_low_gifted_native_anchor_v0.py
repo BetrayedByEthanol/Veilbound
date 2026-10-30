@@ -103,6 +103,10 @@ class LowGiftedNativeAnchor:
         # including the first, without replaying a suspended Step.
         self.own_steps+=1
         self.model.begin_window()
+        if self.own_steps==1:
+            # Combat-start is not an earlier own turn. Opening the first
+            # own-turn window never grants L3 Settled free-AP Deepen.
+            self.model.persisted_from_previous=False
         self.e.log("b05_low_gifted_emotion_window",actor=self.actor_id,
                    window=self.model.window,anchor=self.model.anchor,
                    active=self.model.active,source_digest=self._source().source.digest)

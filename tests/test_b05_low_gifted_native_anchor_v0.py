@@ -284,9 +284,9 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
         # Codex P2: the dead-turn source receipt is regeneration_dead.
         e,native,combat=scene(2,first="gifted")
         actor=e.actors["gifted"]
-        actor.hp=0
+        actor.hp=-actor.hp_max
         actor.vigor=0
-        actor.dead=True
+        actor.dead=True  # canonical death threshold is HP <= -Max HP
         combat.bridge.start_next_turn(RegenerationChoice())
         self.assertIsNone(e.pending_regeneration)
         self.assertEqual("gifted",e.current)
@@ -316,6 +316,7 @@ class NativeLowGiftedAnchorTests(unittest.TestCase):
             combat.bridge.start_next_turn(RegenerationChoice())
             self.assertEqual((1,2,1),(
                 native.own_steps,native.model.window,native.model.pulse_window))
+            self.assertFalse(native.model.persisted_from_previous)
             self.assertTrue(native._ready("Fear"))
             combat.bridge.end_current_turn()
             combat.bridge.begin_next_round()
