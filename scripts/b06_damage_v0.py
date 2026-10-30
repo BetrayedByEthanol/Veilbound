@@ -85,6 +85,9 @@ class DamageState:
         # Low self-Embodiment is authorized solely inside its true G4 Step.
         self.low_anointed = None
         self._live_low_anointed = None
+        # Source-bound L3 Guided +1 Authority is separate from Returning Step.
+        self.anointed_guided = {}
+        self._live_anointed_guided = None
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
@@ -849,6 +852,8 @@ class DamageState:
                 self.medium_anointed._on_dead_step(a)
             if self.low_anointed is not None:
                 self.low_anointed._on_dead_step(a)
+            for guided in self.anointed_guided.values():
+                guided._on_dead_step(a)
             e.regen_done.add(a.id)
             e.log("regeneration_dead",actor=a.id)
             return
@@ -864,13 +869,30 @@ class DamageState:
         if medium_pulse is not None and low_pulse is not None:
             raise UnresolvedDecision("Simultaneous Medium/Low Signature pulses need authored ordering")
         pulse=medium_pulse if medium_pulse is not None else low_pulse
+        candidates=[g for g in self.anointed_guided.values()
+                    if g.pending is not None and g.pending.recipient==a.id]
+        if len(candidates)>1:
+            raise UnresolvedDecision("Two Guided Authority hosts require authored priority")
+        guided=candidates[0] if candidates else None
+        if guided is not None and pulse is not None:
+            raise UnresolvedDecision("Returning Step and Guided Authority need authored same-Step ordering")
+        if guided is not None:
+            guided._preview_step(a)
         pulse_hp=pulse.hp_restored if pulse is not None else 0
         pulse_vigor=pulse.recipient_vigor_spent if pulse is not None else 0
         effective_hp=a.hp+pulse_hp
         effective_vigor=a.vigor-pulse_vigor
-        throughput=max(0,a.regen
-                       +(e.g3.regen_throughput(a.id) if e.g3 is not None else 0)
-                       +self.toxins.modifier(a.id,"regen_throughput"))
+        spell_bonus=(e.g3.regen_throughput(a.id) if e.g3 is not None else 0)
+        toxin_bonus=self.toxins.modifier(a.id,"regen_throughput")
+        throughput=max(0,a.regen+spell_bonus+toxin_bonus)
+        # Guided Lesser consumes only its already-paid +1 throughput slot.
+        # Ordinary HP/Repair allocation cannot also spend that same slot.
+        # Requiring the actual marginal +1 rejects suppressed/stacked buffs.
+        if guided is not None:
+            base=max(0,a.regen+toxin_bonus)
+            if spell_bonus!=1 or throughput-base!=1:
+                raise UnresolvedDecision("Guided +1 missing, stacked or fully suppressed")
+        ordinary_throughput=throughput-int(guided is not None)
         incomplete=[w for w in a.wounds if w.progress < w.requirement]
         repairable=[w for w in incomplete if w.repairable]
         missing=(effective_hp<a.hp_max or bool(repairable))
@@ -889,8 +911,8 @@ class DamageState:
             raise ValueError("Cannot cancel Dying loss above 0 HP")
         survival=int(dying and choice.cancel_dying_loss)
         debit=survival+choice.hp+choice.repair
-        if debit>throughput or debit>effective_vigor:
-            raise ValueError("Natural regeneration exceeds throughput or available Vigor")
+        if debit>ordinary_throughput or debit>effective_vigor:
+            raise ValueError("Natural regeneration exceeds normal throughput or available Vigor")
         if choice.hp>a.hp_max-effective_hp:
             raise ValueError("Natural HP regeneration exceeds missing HP")
         allocation=()
@@ -933,6 +955,12 @@ class DamageState:
             raise ValueError("Dying HP blocked by incomplete wound repair")
         if dying and not survival and a.hp-1<=-a.hp_max and debit:
             raise ValueError("Cannot spend regeneration after lethal Dying loss")
+        # Guided Authority is a Vigor-free +1 *after* an otherwise legal
+        # non-Dying ordinary Step, not a replacement for wound progress.
+        # Preflight its isolated Destiny result before ANY HP/Vigor mutation.
+        guided_out=(guided._preview_payout(
+            a,missing_after_ordinary=a.hp_max-(effective_hp+choice.hp))
+            if guided is not None else None)
         # All checks above are preflight: no partial source Signature or
         # Destiny debit on invalid natural HP/Vigor/wound allocation.
         if medium_pulse is not None:
@@ -969,6 +997,14 @@ class DamageState:
               repair_points=choice.repair if not a.dead else 0,
               throughput_spent=debit if not a.dead else 0,
               wound_allocations=list(allocation),dead=a.dead)
+        if guided_out is not None:
+            if self._live_anointed_guided is not None:
+                raise ValueError("Nested native Guided Authority payout forbidden")
+            self._live_anointed_guided=(guided.caster,a.id,e.round)
+            try:
+                guided._apply_step(a,guided_out)
+            finally:
+                self._live_anointed_guided=None
         if a.dead and hp_before > -a.hp_max:
             # Native Step 2 Dying loss is another real death transition.
             self.venom.on_recipient_death(a.id)
