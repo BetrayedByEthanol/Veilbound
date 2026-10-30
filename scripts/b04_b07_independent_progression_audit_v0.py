@@ -202,6 +202,20 @@ def _has_direct_utility_training(learned, required_rank, disciplines):
                for name, rank in learned.items())
 
 
+def deep_volition_reserve_bonus():
+    """Read the B07 TAL-M01 flat VP increase; never multiply it by level."""
+    catalogue = (ROOT / CATALOGUE).read_text(encoding="utf-8")
+    match = re.search(
+        r"^### TAL-M01 — Deep Volition Reserve\n"
+        r"\*\*L 1 · Any · Passive · Veil-assisted\.\*\* "
+        r"Increase \*\*Max VP by \+(\d+) flat\*\*, not "
+        r"`\+2 × Level`\.",
+        catalogue, flags=re.MULTILINE)
+    if match is None:
+        raise ValueError("Canonical TAL-M01 flat VP modifier changed")
+    return int(match.group(1))
+
+
 def talent_minimums():
     """Keep the existing level-gate API for cross-source callers."""
     return {name: data["level"] for name, data in talent_rules().items()}
@@ -370,30 +384,42 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                          for n in learned.values()))
     check(learned_valid, "learned_ranks",
           "L1–3 direct-invested discipline ranks must be integers 0–2")
-    # Do not sum string/None/float/bool ranks after reporting invalid input.
-    # Invalid current or prior snapshots remain machine-readable findings.
-    if learned_valid:
-        total = sum(learned.values())
-        check(total == 8 + int(level >= 2), "learned_budget",
-              "Eight at creation; one point at L2, none at L3")
-        if "learned_points" in sheet:
-            check(sheet["learned_points"] == total, "learned_total",
-                  "Reported learned points differ")
+    # Direct investment and retained points are separate. The named saved
+    # ledger defaults to zero for existing pilot builds, which spend their
+    # full L2 award. Never add malformed source ranks or saved balances.
+    saved_learned = sheet.get("saved_learned_discipline_points", 0)
+    saved_valid = type(saved_learned) is int and saved_learned >= 0
+    invested = sum(learned.values()) if learned_valid else None
+    earned = 8 + int(level >= 2)
+    check(learned_valid and saved_valid and invested + saved_learned == earned,
+          "learned_budget",
+          "Direct investment plus nonnegative saved Learned Discipline "
+          "points must equal eight at creation plus the L2 award")
+    if learned_valid and "learned_points" in sheet:
+        check(sheet["learned_points"] == invested,
+              "learned_total", "Reported invested Learned Discipline points differ")
     if prior:
         prior_learned = prior.get("learned_disciplines")
         prior_valid = (isinstance(prior_learned, dict) and
                        all(type(n) is int and 0 <= n <= 2
                            for n in prior_learned.values()))
-        if learned_valid and prior_valid:
+        prior_saved = prior.get("saved_learned_discipline_points", 0)
+        prior_saved_valid = type(prior_saved) is int and prior_saved >= 0
+        if learned_valid and prior_valid and saved_valid and prior_saved_valid:
+            previous_invested = sum(prior_learned.values())
+            prior_earned = 8 + int(level > 2)
             delta = {key: learned.get(key, 0) - prior_learned.get(key, 0)
                      for key in set(learned) | set(prior_learned)}
-            progression_ok = (all(x >= 0 for x in delta.values())
-                              and sum(delta.values()) == int(level == 2))
+            spent_change = sum(delta.values())
+            progression_ok = (
+                previous_invested + prior_saved == prior_earned
+                and all(change >= 0 for change in delta.values())
+                and spent_change + saved_learned - prior_saved == int(level == 2))
         else:
             progression_ok = False
         check(progression_ok, "learned_progression",
-              "Only one eligible L2 point, no free L3 change; both snapshots "
-              "must contain valid numeric ranks")
+              "Direct ranks never decrease; newly invested plus change "
+              "in saved points equals the earned L2 award (zero at L3)")
     weapon = sheet.get("weapon_training", {})
     # Reject strings, floats, booleans and None before arithmetic. The
     # complete cross-source audit must still return an issue register.
@@ -439,10 +465,6 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
         check(sheet.get("hp_max") == hp
               and sheet.get("vigor_max") == hp * level,
               "hp_vigor", "HP constant at L1–3; Max Vigor scales by level")
-        # Explicit Deep Volition Reserve would modify this; none of the
-        # selected 12 source builds acquires that Talent in this pilot.
-        check(sheet.get("vp_max") == max(1, VP_PER_LEVEL[focus] + aff) * level,
-              "vp_formula", "Max VP depends on Focus, Veil Affinity and level")
     check(sheet.get("turn_ap") == 30 + 6 * (level-1),
           "turn_ap", "L1/L2/L3 ordinary Turn AP must be 30/36/42")
     physical_ap, projection_ap, general_ap = FOCUS_ACTION_COSTS[focus]
@@ -528,6 +550,16 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                                and archetype in archetype_access[t]
                                for t in selected)
                        and legal_saved and valid_prerequisites)
+    if type(aff) is int:
+        # Validate talents first: only legitimately selected TAL-M01 applies.
+        # Add the canonical +2 once AFTER the level-scaled Focus/VA term.
+        reserve = (deep_volition_reserve_bonus()
+                   if valid_selection and "TAL-M01" in selected else 0)
+        check(sheet.get("vp_max") ==
+              max(1, VP_PER_LEVEL[focus] + aff) * level + reserve,
+              "vp_formula",
+              "Focus and Veil Affinity times level, plus any earned flat "
+              "Deep Volition Reserve bonus")
     if archetype == "Scholar":
         known = sheet.get("known_pillar_techniques", ())
         authored_known = authored_scholar_techniques()
