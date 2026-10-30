@@ -86,9 +86,15 @@ class AnointedGuidedAuthority:
         if len(a.occupied) != 1 or len(b.occupied) != 1:
             raise UnresolvedDecision("Multicell Guided magical path not authored")
         origin,dest=a.occupied[0],b.occupied[0]
-        distance=max(abs(origin[0]-dest[0]),abs(origin[1]-dest[1]))
+        # Guided Regeneration has a technique-local 3D metric, NOT G1's
+        # Chebyshev movement/range metric. The bounded G1 map is 2D, so
+        # dz=0; preserve the exact half-square increments (e.g. 3,1 -> 3.5).
+        a_offset,b_offset,c_offset=sorted((
+            abs(origin[0]-dest[0]),abs(origin[1]-dest[1]),0),
+            reverse=True)
+        distance=a_offset+0.5*b_offset+0.5*c_offset
         if distance > 3:
-            raise ValueError("Guided Primary stays within 0–3 squares")
+            raise ValueError("Guided Primary exceeds 3 weighted square-equivalents")
         if distance and self.caster != recipient:
             cells,corners=RangedCombat._ray(origin,dest)
             walls=e.g1.walls

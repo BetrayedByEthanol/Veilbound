@@ -239,7 +239,71 @@ class AnointedGuidedNativeTests(unittest.TestCase):
         guide.cancel_waiver()
         e.start_turn(recipient,regen_choice=RegenerationChoice())
 
-    def test_11_no_extra_focus_certification_or_technique_discount(self):
+    def test_11_guided_weighted_diagonals_reject_paid_cast_without_ap_vp_loss(self):
+        # Authoritative Guided 3D-equivalent distance is a + b/2 + c/2,
+        # not Chebyshev. Both (3,1,0)=3.5 and (3,3,0)=4.5 are illegal.
+        for role in ("AH","AM"):
+            for target in ((4,2),(4,4)):
+                with self.subTest(role=role,target=target):
+                    e,native,guide,recipient=scene(role,patient_at=target)
+                    e.start_turn("caster",regen_choice=RegenerationChoice())
+                    if role=="AM":
+                        native.invest(recipient,consenting=True)
+                        e.end_turn()
+                        e.start_turn(recipient,regen_choice=RegenerationChoice())
+                        e.end_turn()
+                        e.begin_round()
+                        e.start_turn("caster",regen_choice=RegenerationChoice())
+                    actor=e.actors["caster"]
+                    before=(actor.ap_remaining,actor.vp_available,
+                            actor.vp_spent,actor.vp_committed,native.state.destiny)
+                    with self.assertRaises(ValueError):
+                        guide.cast(recipient,mode="maintained",
+                                   visible=True,unopposed=True)
+                    self.assertEqual(before,
+                                     (actor.ap_remaining,actor.vp_available,
+                                      actor.vp_spent,actor.vp_committed,
+                                      native.state.destiny))
+                    self.assertFalse(entries(e,"b05_anointed_guided_host_established"))
+                    self.assertFalse(e.g3.active("caster","Guided Regeneration"))
+                    self.assertIsNone(guide.host)
+                    e.check()
+
+    def test_12_guided_weighted_boundary_admits_axis_three_and_diagonal_two_two(self):
+        # Exactly 3 square-equivalents is legal: (3,0)=3 and (2,2)=3.
+        for role in ("AH","AM"):
+            for target in ((4,1),(3,3)):
+                with self.subTest(role=role,target=target):
+                    e,native,guide,recipient=scene(role,patient_at=target)
+                    host=funded(e,native,guide,recipient)
+                    self.assertEqual(3.0,guide._delivery(recipient,visible=True))
+                    self.assertEqual(recipient,host.recipient)
+                    self.assertEqual(1,len(entries(e,"b05_anointed_guided_host_established")))
+                    self.assertEqual(2,host.committed)
+                    e.check()
+
+    def test_13_guided_authority_declaration_rechecks_weighted_range_without_destiny(self):
+        # Establish valid paid Guided at (2,0), then move outside authored
+        # range: declaration must not resurrect Chebyshev and spend Destiny.
+        for role in ("AH","AM"):
+            for target in ((4,2),(4,4)):
+                with self.subTest(role=role,target=target):
+                    e,native,guide,recipient=scene(role,patient_at=(3,1))
+                    funded(e,native,guide,recipient)
+                    e.actors[recipient].occupied=(target,)
+                    before=(native.state.destiny,e.actors[recipient].hp,
+                            e.actors[recipient].vigor)
+                    with self.assertRaises(ValueError):
+                        guide.declare_waiver(recipient,visible=True,unopposed=True)
+                    self.assertEqual(before,(native.state.destiny,
+                                             e.actors[recipient].hp,
+                                             e.actors[recipient].vigor))
+                    self.assertIsNone(guide.pending)
+                    self.assertFalse(entries(e,"b05_anointed_guided_waiver_declared"))
+                    self.assertFalse(entries(e,"g4_anointed_guided_waiver_applied"))
+                    e.check()
+
+    def test_14_no_extra_focus_certification_or_technique_discount(self):
         e,native,guide,recipient=scene("AH")
         funded(e,native,guide,recipient)
         self.assertEqual("STRUCTURAL_B05_ONLY",e.actors["caster"].source.status)
