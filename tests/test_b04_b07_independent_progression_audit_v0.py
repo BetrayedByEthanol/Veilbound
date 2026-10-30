@@ -833,6 +833,11 @@ class IndependentProgressionTests(unittest.TestCase):
                 l3["known_pillar_techniques"] = tuple(
                     l3["known_pillar_techniques"]) + ("Phantom Sound",)
                 l3["known_capacity"] += 1
+                # Low has three earned Talent awards by L3 but this
+                # published pilot leaves one selection explicitly unspent.
+                # Account for it rather than granting a free third Talent.
+                if focus == "Low":
+                    l3["saved_talent_selections"] = 1
                 findings = {x["code"] for x in _sheet_issues(
                     "Scholar/"+focus, 3, l3, l1, l2, gates)}
                 self.assertNotIn("scholar_knowledge_grant", findings)

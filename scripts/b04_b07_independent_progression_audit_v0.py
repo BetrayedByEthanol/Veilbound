@@ -510,7 +510,7 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
             previous_ids = []
             if previous_talents_valid:
                 for talent in previous_talents:
-                    matched = re.match(r"^(TAL-[A-Z]\\d{2})\\b", str(talent))
+                    matched = re.match(r"^(TAL-[A-Z]\d{2})\b", str(talent))
                     if matched is None:
                         previous_talents_valid = False
                         break
