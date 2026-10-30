@@ -82,6 +82,9 @@ class DamageState:
         # A queued Medium patient pulse is authorized only in this genuine G4 Step.
         self.medium_anointed = None
         self._live_medium_anointed = None
+        # Low self-Embodiment is authorized solely inside its true G4 Step.
+        self.low_anointed = None
+        self._live_low_anointed = None
         # Actors may carry wounds across encounters. Resume beyond *all*
         # recorded G4 identifiers, including wounds belonging to other actors.
         existing = [w.ident for a in encounter.actors.values() for w in a.wounds]
@@ -844,13 +847,23 @@ class DamageState:
         if a.dead:
             if self.medium_anointed is not None:
                 self.medium_anointed._on_dead_step(a)
+            if self.low_anointed is not None:
+                self.low_anointed._on_dead_step(a)
             e.regen_done.add(a.id)
             e.log("regeneration_dead",actor=a.id)
             return
         medium=self.medium_anointed
-        # This is the *actual* G0 Step-2 invocation, not a caller-supplied
-        # regeneration flag. Preview is pure until choice preflight succeeds.
-        pulse=medium._preview_step(a) if medium is not None else None
+        low=self.low_anointed
+        # These previews occur only in actual G0 Step 2, never from declared
+        # caller-supplied "authenticated" flags or fabricated time ticks.
+        medium_pulse=medium._preview_step(a) if medium is not None else None
+        low_pulse=low._preview_step(a) if low is not None else None
+        # Two distinct Signatures on the SAME recipient Step require an
+        # explicitly authored stacking/ordering policy: do not silently mint
+        # a second pulse or privilege one by adapter attachment order.
+        if medium_pulse is not None and low_pulse is not None:
+            raise UnresolvedDecision("Simultaneous Medium/Low Signature pulses need authored ordering")
+        pulse=medium_pulse if medium_pulse is not None else low_pulse
         pulse_hp=pulse.hp_restored if pulse is not None else 0
         pulse_vigor=pulse.recipient_vigor_spent if pulse is not None else 0
         effective_hp=a.hp+pulse_hp
@@ -920,16 +933,24 @@ class DamageState:
             raise ValueError("Dying HP blocked by incomplete wound repair")
         if dying and not survival and a.hp-1<=-a.hp_max and debit:
             raise ValueError("Cannot spend regeneration after lethal Dying loss")
-        # All checks above are preflight; invalid natural allocations MUST
-        # NOT leave a partially applied Medium pulse or Destiny deduction.
-        if pulse is not None:
+        # All checks above are preflight: no partial source Signature or
+        # Destiny debit on invalid natural HP/Vigor/wound allocation.
+        if medium_pulse is not None:
             if self._live_medium_anointed is not None:
                 raise ValueError("Nested Medium G4 Step authority forbidden")
             self._live_medium_anointed=(a.id,e.round)
             try:
-                medium._apply_step(a,pulse)
+                medium._apply_step(a,medium_pulse)
             finally:
                 self._live_medium_anointed=None
+        if low_pulse is not None:
+            if self._live_low_anointed is not None:
+                raise ValueError("Nested Low G4 Step authority forbidden")
+            self._live_low_anointed=(a.id,e.round)
+            try:
+                low._apply_step(a,low_pulse)
+            finally:
+                self._live_low_anointed=None
         e.regen_done.add(a.id)
         hp_before, vigor_before=a.hp,a.vigor
         if dying and not survival:
