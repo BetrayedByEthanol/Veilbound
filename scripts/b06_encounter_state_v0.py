@@ -431,6 +431,9 @@ class Encounter:
         self.seen_sequences = set()
         self.regen_done = set()
         self.pending_regeneration = None
+        # Own-turn start callbacks have transient authority for authored
+        # Embodiment toggles; suspended/replayed calls cannot claim this.
+        self._live_regeneration_ready_callback = None
         # Only the actual currently executing spontaneous callback may
         # apply pre-roll effects. A historical ledger entry is NOT proof
         # that the response window remains open; nested windows restore it.
@@ -603,7 +606,13 @@ class Encounter:
         if on_regeneration_ready is not None:
             if not callable(on_regeneration_ready):
                 raise ValueError("Regeneration response must be callable")
-            on_regeneration_ready(self, actor_id)
+            if self._live_regeneration_ready_callback is not None:
+                raise ValueError("Nested own-turn start callback forbidden")
+            self._live_regeneration_ready_callback = actor_id
+            try:
+                on_regeneration_ready(self, actor_id)
+            finally:
+                self._live_regeneration_ready_callback = None
         low = (getattr(self.g3,"low_life",None)
                if self.g3 is not None else None)
         if low is not None:
