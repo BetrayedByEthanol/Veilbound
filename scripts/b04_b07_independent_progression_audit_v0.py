@@ -65,6 +65,20 @@ PRIEST_LIFE_RULE_SOURCES = (
     ("Venom Endurance", "Preservation", "venom-endurance-v0.md"),
     ("Gentle Growth", "Nature", "gentle-growth-v0.md"),
 )
+# Independent known-Pillar repertoire census for the three authored Scholar
+# pilot builds. Each entry requires its own executable, canonical rule page:
+# the other automatic Universal Veil procedures NEVER occupy known slots.
+SCHOLAR_RULE_SOURCES = (
+    ("Conjure Flame", "Fire", "Conflagration", "conjure-flame-v0.md"),
+    ("Stone Skin", "Earth", "Fortification", "stone-skin-v0.md"),
+    ("Basic Heal", "Life", "Restoration", "basic-heal-v0.md"),
+    ("Minor Telekinesis", "Mind", "Psionics", "minor-telekinesis-v0.md"),
+    ("Phantom Sound", "Secrets", "Hallucination", "phantom-sound-v0.md"),
+    ("Vital Shelter", "Life", "Preservation", "vital-shelter-v0.md"),
+    ("Guided Regeneration", "Life", "Restoration", "guided-regeneration-v0.md"),
+)
+CANONICAL_ASPECTS = "docs/world/aspect-identities-and-boundaries.md"
+GIFTED_FOUNDATION = "docs/rules/08-archetypes/gifted.md"
 SOURCE_MODULES = {
     "Priest/High": "b05_high_priest_life_l1_l3_v0",
     "Priest/Medium": "b05_medium_priest_life_l1_l3_v0",
@@ -170,6 +184,74 @@ def authored_priest_techniques():
     if len(techniques) != len(PRIEST_LIFE_RULE_SOURCES):
         raise ValueError("Duplicate Life technique identities")
     return techniques
+
+
+def canonical_aspect_pairs():
+    """Parse the canonical 16 Pillar x 3 Aspect identity matrix, fail closed."""
+    lines = (ROOT / CANONICAL_ASPECTS).read_text(encoding="utf-8").splitlines()
+    try:
+        first_row = lines.index("| Pillar | External | Internal | Transform |") + 2
+    except ValueError as exc:
+        raise ValueError("Canonical 16-Pillar Aspect matrix changed") from exc
+    pairs = set()
+    pillars = set()
+    for line in lines[first_row:]:
+        if not line.startswith("| "):
+            break
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) != 4 or cells[0] in pillars:
+            raise ValueError("Malformed or duplicate canonical Pillar row")
+        pillars.add(cells[0])
+        pairs.update((cells[0], aspect) for aspect in cells[1:])
+    if len(pillars) != 16 or len(pairs) != 48 or len({a for _, a in pairs}) != 48:
+        raise ValueError("Canonical matrix must contain 16 distinct Pillars / 48 Aspects")
+    return frozenset(pairs)
+
+
+def gifted_core_emotions():
+    """Read the eight fixed Gifted emotions from the canonical foundation."""
+    lines = (ROOT / GIFTED_FOUNDATION).read_text(encoding="utf-8").splitlines()
+    try:
+        start = lines.index("The eight core emotions are:") + 1
+    except ValueError as exc:
+        raise ValueError("Gifted canonical emotion list changed") from exc
+    labels = [line[2:] for line in lines[start:]
+              if line.startswith("- ")]
+    # Only the first eight bullets following the heading are relevant.
+    emotions = tuple(labels[:8])
+    if len(emotions) != 8 or len(set(emotions)) != 8 or not all(
+            re.fullmatch(r"[A-Z][a-z]+", e) for e in emotions):
+        raise ValueError("Gifted eight-emotion creation list changed")
+    return frozenset(emotions)
+
+
+def authored_scholar_techniques():
+    """Validate positive individual technique identities via canonical pages."""
+    canonical = canonical_aspect_pairs()
+    identities = {}
+    for name, pillar, aspect, filename in SCHOLAR_RULE_SOURCES:
+        path = ROOT / "docs/rules/07-veil-magic" / filename
+        lines = path.read_text(encoding="utf-8").splitlines()
+        if not lines or lines[0] != f"# {name} v0 — {pillar} / {aspect}":
+            raise ValueError("Scholar technique identity/Pillar mismatch: " + filename)
+        if (pillar, aspect) not in canonical:
+            raise ValueError("Scholar technique Aspect outside canonical matrix: "+name)
+        base_rows = [line for line in lines
+                     if line.startswith("| Base") and "Tier" in line.split("|")[1]]
+        if len(base_rows) != 1:
+            raise ValueError("Missing or ambiguous Scholar Base Tier: "+filename)
+        cells = base_rows[0].split("|")
+        match = re.match(r"\s*\*\*(?:Tier[ -](\d+)|Base T(\d+)|(\d+))\b", cells[2])
+        if match is None:
+            raise ValueError("Unrecognized Scholar Base Tier: "+filename)
+        base_tier = int(next(n for n in match.groups() if n is not None))
+        identities[name] = {
+            "pillar": pillar, "aspect": aspect, "base_tier": base_tier,
+            "source": str(path.relative_to(ROOT)),
+        }
+    if len(identities) != len(SCHOLAR_RULE_SOURCES):
+        raise ValueError("Duplicate Scholar technique identities")
+    return identities
 
 
 def _sheet_issues(pairing, level, sheet, first, prior, gates):
@@ -332,6 +414,17 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                        and legal_saved)
     if archetype == "Scholar":
         known = sheet.get("known_pillar_techniques", ())
+        authored_known = authored_scholar_techniques()
+        proper_known = (isinstance(known, (tuple, list)) and
+                        all(type(technique) is str for technique in known))
+        ceiling = 2 if level == 3 else 1
+        check(proper_known and all(
+              name in authored_known and
+              authored_known[name]["base_tier"] <= ceiling
+              for name in known), "scholar_known_access",
+              "Known Pillar entries require an independently authored "
+              "technique at the normal level-tier ceiling; Universal "
+              "Veil procedures occupy no Scholar known slots")
         expanded = int(valid_selection and "TAL-S01" in selected)
         known_cap = SCHOLAR_KNOWN[focus][level-1] + expanded
         check(sheet.get("known_capacity") == known_cap
@@ -431,9 +524,25 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "Chosen-Pillar prayers, optional High L3 Open slot, within real cap")
     if archetype == "Gifted":
         links = sheet.get("emotion_aspect_links", {})
-        check(len(links) == 8 and
+        emotions = gifted_core_emotions()
+        canonical = canonical_aspect_pairs()
+        proper_links = (isinstance(links, dict) and set(links) == emotions and
+                        all(type(link) is dict and
+                            type(link.get("pillar")) is str and
+                            type(link.get("aspect")) is str
+                            for link in links.values()))
+        check(proper_links and
               set(links) == set(sheet.get("authored_linked_techniques", {})),
-              "gifted_links", "Eight authored Emotion/Aspect links")
+              "gifted_links", "Exactly the canonical eight emotion links")
+        pairs = ([(link["pillar"], link["aspect"])
+                  for link in links.values()] if proper_links else [])
+        check(proper_links and
+              all(pair in canonical for pair in pairs) and
+              len({pillar for pillar, _ in pairs}) == 8 and
+              len({aspect for _, aspect in pairs}) == 8,
+              "gifted_link_identity",
+              "Eight emotions must link to eight distinct Pillars and "
+              "eight distinct canonical Aspects without fabricated pairs")
         if prior:
             check(links == prior["emotion_aspect_links"], "gifted_link_mutation",
                   "No free re-binding of eight linked Aspects at level award")

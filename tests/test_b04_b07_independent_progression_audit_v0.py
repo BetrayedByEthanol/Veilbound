@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from scripts.b04_b07_independent_progression_audit_v0 import (
     audit, _sheet_issues, authored_priest_techniques,
+    authored_scholar_techniques, canonical_aspect_pairs, gifted_core_emotions,
     talent_minimums, talent_rules,
     validate_pilot_milestones,
 )
@@ -388,6 +389,89 @@ class IndependentProgressionTests(unittest.TestCase):
                         profile(level-1) if level > 1 else None, gates)}
                     self.assertEqual(level < 3,
                                      "priest_prepared_access" in issues)
+
+    def test_20_scholar_repertoire_uses_authored_pillar_techniques(self):
+        rules = authored_scholar_techniques()
+        self.assertEqual(7, len(rules))
+        self.assertEqual({1}, {r["base_tier"] for r in rules.values()})
+        self.assertTrue(all((r["pillar"], r["aspect"]) in
+                            canonical_aspect_pairs() for r in rules.values()))
+        for name in ("Blink", "Veil Inspection", "Phantom Image"):
+            self.assertNotIn(name, rules)
+
+    def test_21_scholar_rejects_universal_unauthored_and_early_tier_techniques(self):
+        from scripts.b05_high_scholar_fire_l1_l3_v0 import profile as high
+        from scripts.b05_medium_scholar_l1_l3_v0 import profile as medium
+        from scripts.b05_low_scholar_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    original = make(level)
+                    baseline = {x["code"] for x in _sheet_issues(
+                        "Scholar/"+focus, level, original, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertNotIn("scholar_known_access", baseline)
+                    for bad in ("Blink", "Veil Inspection",
+                                "Phantom Image", "Unauthored Tier-1 Spell"):
+                        forged = deepcopy(original)
+                        known = list(forged["known_pillar_techniques"])
+                        known[0] = bad
+                        forged["known_pillar_techniques"] = known
+                        errors = {x["code"] for x in _sheet_issues(
+                            "Scholar/"+focus, level, forged, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertIn("scholar_known_access", errors)
+        # No Tier-2-only technique exists in this bounded source census.
+        # Simulate future authored metadata to prove L1-2 reject before L3.
+        canonical = authored_scholar_techniques()
+        modified = deepcopy(canonical)
+        modified["Stone Skin"]["base_tier"] = 2
+        with patch("scripts.b04_b07_independent_progression_audit_v0."
+                   "authored_scholar_techniques", return_value=modified):
+            for level in (1, 2, 3):
+                p = high(level)
+                codes = {x["code"] for x in _sheet_issues(
+                    "Scholar/High", level, p, high(1),
+                    high(level-1) if level > 1 else None, gates)}
+                self.assertEqual(level < 3, "scholar_known_access" in codes)
+
+    def test_22_gifted_links_require_distinct_valid_canonical_pillars_and_aspects(self):
+        from scripts.b05_high_gifted_l1_l3_v0 import profile as high
+        from scripts.b05_medium_gifted_l1_l3_v0 import profile as medium
+        from scripts.b05_low_gifted_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        self.assertEqual(48, len(canonical_aspect_pairs()))
+        self.assertEqual({"Joy", "Sadness", "Anger", "Fear", "Surprise",
+                          "Disgust", "Trust", "Anticipation"}, gifted_core_emotions())
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    original = make(level)
+                    baseline = {x["code"] for x in _sheet_issues(
+                        "Gifted/"+focus, level, original, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertNotIn("gifted_link_identity", baseline)
+                    for kind in ("duplicate", "mismatched", "invented",
+                                 "missing_emotion", "foreign_emotion"):
+                        forged = deepcopy(original)
+                        links = forged["emotion_aspect_links"]
+                        if kind == "duplicate":
+                            links["Joy"] = deepcopy(links["Fear"])
+                        elif kind == "mismatched":
+                            links["Joy"]["pillar"] = "Earth"  # wrong Fire Aspect
+                        elif kind == "invented":
+                            links["Joy"]["aspect"] = "Never-Authored Aspect"
+                        elif kind == "missing_emotion":
+                            links["Extra"] = links.pop("Joy")
+                        else:
+                            links["Anger"] = links.pop("Joy")  # loses Joy
+                        errors = {x["code"] for x in _sheet_issues(
+                            "Gifted/"+focus, level, forged, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertTrue({"gifted_links"} <= errors if kind in
+                                        ("missing_emotion", "foreign_emotion") else
+                                        {"gifted_link_identity"} <= errors)
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
