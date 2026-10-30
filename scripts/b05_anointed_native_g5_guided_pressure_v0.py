@@ -102,8 +102,31 @@ def run_policy(*,focus,opponent="soldier",mode="maintained",
     if not (natural[0]["index"]<natural[1]["index"]
             and (not waivers or natural[1]["index"]<waivers[0]["index"])):
         raise AssertionError("L3 Guided must apply after natural source Step")
+    # _metrics() is shared with Returning Step comparisons and reports
+    # total shared Destiny debit under "signature_destiny_spent". This
+    # Guided-only witness must attribute each point to its actual G4 source
+    # event rather than reporting the same point under two mechanisms.
+    signature_kinds=frozenset((
+        "g4_anointed_returning_step_applied",
+        "g4_anointed_medium_returning_step_applied",
+        "g4_anointed_low_returning_step_applied",
+    ))
+    signature_events=[event for event in e.ledger
+                      if event["kind"] in signature_kinds]
+    signature_destiny_spent=sum(
+        event["detail"]["destiny_cost"] for event in signature_events)
+    guided_destiny_spent=sum(
+        event["detail"]["destiny_cost"] for event in waivers)
+    total_destiny_spent=2-native.state.destiny
+    if (signature_events or data["signature_receipts"]!=0
+            or guided_destiny_spent!=int(policy=="lesser_guided")
+            or signature_destiny_spent+guided_destiny_spent!=total_destiny_spent):
+        raise AssertionError(
+            "Source G4 Destiny payments must reconcile without double attribution")
     source_host=host_events[0]["detail"]
     data.update({
+        "signature_destiny_spent":signature_destiny_spent,
+        "total_destiny_spent":total_destiny_spent,
         "guided_host":source_host["host"],
         "guided_host_ap_index":source_host["ap_index"],
         "guided_host_vp_index":source_host["vp_index"],
@@ -112,7 +135,7 @@ def run_policy(*,focus,opponent="soldier",mode="maintained",
         "guided_host_committed_vp":source_host["vp_committed"],
         "guided_waiver_count":len(waivers),
         "guided_additional_hp":sum(x["detail"]["hp_restored"] for x in waivers),
-        "guided_destiny_spent":2-native.state.destiny,
+        "guided_destiny_spent":guided_destiny_spent,
         "ordinary_hp_restored":sum(x["detail"]["hp_restored"] for x in natural),
         "ordinary_regen_recipient_vigor_spent":sum(
             x["detail"]["throughput_spent"] for x in natural),

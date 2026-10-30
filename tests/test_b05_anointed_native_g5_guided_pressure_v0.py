@@ -161,7 +161,40 @@ class GuidedG5PressureTests(unittest.TestCase):
                         self.assertLess(b["recipient_regen_step_indices"][1],
                                         waiver[0]["index"])
 
-    def test_07_source_g5_baseline_has_same_hit_and_no_guided_for_free(self):
+    def test_07_guided_destiny_is_not_also_reported_as_signature_destiny(self):
+        # _metrics() originates in the Returning Step runner, but this
+        # Guided-only report must never double-count its shared Destiny debit.
+        signature_kinds=(
+            "g4_anointed_returning_step_applied",
+            "g4_anointed_medium_returning_step_applied",
+            "g4_anointed_low_returning_step_applied",
+        )
+        for r in self.reports:
+            with self.subTest(focus=r["focus"],opponent=r["opponent"],
+                              mode=r["mode"],policy=r["policy"]):
+                m=r["metrics"]
+                signatures=[event for kind in signature_kinds
+                            for event in rows(r,kind)]
+                guided=rows(r,"g4_anointed_guided_waiver_applied")
+                signature_cost=sum(e["detail"]["destiny_cost"] for e in signatures)
+                guided_cost=sum(e["detail"]["destiny_cost"] for e in guided)
+                expected=int(r["policy"]=="lesser_guided")
+                self.assertEqual([],signatures)
+                self.assertEqual((0,0,0),(
+                    m["signature_receipts"],m["signature_hp_restored"],
+                    m["signature_destiny_spent"]))
+                self.assertEqual(signature_cost,m["signature_destiny_spent"])
+                self.assertEqual(expected,guided_cost)
+                self.assertEqual(guided_cost,m["guided_destiny_spent"])
+                self.assertEqual(expected,m["total_destiny_spent"])
+                self.assertEqual(m["signature_destiny_spent"]+
+                                 m["guided_destiny_spent"],
+                                 m["total_destiny_spent"])
+                self.assertEqual(m["total_destiny_spent"],
+                                 2-m["anointed_destiny_remaining"])
+                self.assertEqual(2-expected,m["anointed_destiny_remaining"])
+
+    def test_08_source_g5_baseline_has_same_hit_and_no_guided_for_free(self):
         for opponent in OPPONENTS:
             for focus in FOCUSES:
                 r=self.by_case[focus,opponent,"maintained","ordinary_guided"]
@@ -177,7 +210,7 @@ class GuidedG5PressureTests(unittest.TestCase):
                                  r["metrics"]["g5_hit_events"])
                 self.assertEqual(2,r["metrics"]["anointed_destiny_remaining"])
 
-    def test_08_policy_report_replays_full_ledger_and_rejects_rehashed_forgery(self):
+    def test_09_policy_report_replays_full_ledger_and_rejects_rehashed_forgery(self):
         for focus in FOCUSES:
             r=self.by_case[focus,"sentry_prepared","fixed","lesser_guided"]
             self.assertEqual(r,attest_policy(r,focus=focus,opponent="sentry_prepared",
@@ -195,7 +228,7 @@ class GuidedG5PressureTests(unittest.TestCase):
             attest_policy(forged,focus="Medium",opponent="soldier",
                           mode="fixed",policy="lesser_guided")
 
-    def test_09_reject_unsourced_level_and_unknown_inputs_before_scene(self):
+    def test_10_reject_unsourced_level_and_unknown_inputs_before_scene(self):
         for args in (
             {"focus":"none","opponent":"soldier","mode":"fixed","policy":"lesser_guided"},
             {"focus":"Low","opponent":"hunter","mode":"fixed","policy":"ordinary_guided"},
@@ -211,7 +244,7 @@ class GuidedG5PressureTests(unittest.TestCase):
             AnointedGuidedAuthority(combat.e,"anointed")
         self.assertEqual(2,native.state.destiny)
 
-    def test_10_documented_scope_and_mvp_exits_stay_uncertified(self):
+    def test_11_documented_scope_and_mvp_exits_stay_uncertified(self):
         path=Path(__file__).resolve().parents[1]/"docs/design/b04-b05-anointed-g5-guided-pressure-v0.md"
         doc=path.read_text().lower()
         for word in ("24","12/12","0/12","0/6","g0","g3","g4","g5",
