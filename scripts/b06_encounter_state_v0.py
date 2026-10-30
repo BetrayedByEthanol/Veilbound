@@ -214,6 +214,9 @@ def party_actor(role, level, actor_id, team, *, occupied):
     _integer(level, "level", 1)
     if level not in (1, 2, 3):
         raise ValueError("G0 only adapts authored L1–3")
+    if role == "GL":
+        from scripts.b05_low_gifted_native_anchor_v0 import low_gifted_party_actor
+        return low_gifted_party_actor(level,actor_id,team,occupied=occupied)
     if role in ("AH", "AM", "AL"):
         # Keep the original G0 source IDs untouched. Anointed's isolated
         # Signature/Destiny referee is NOT a native action/Step engine yet.
@@ -440,6 +443,7 @@ class Encounter:
         self._live_spontaneous_response = None
         self.g1 = None  # Optional native physical grid; G0-only stays supported.
         self.g2 = None  # Optional G2 ranged executor; never adds phantom shots.
+        self.low_gifted_anchor = None  # Optional source-bound provisional pilot rider.
         self.g3 = None  # Optional source-bound spell state; G0-only is unchanged.
         self.g4 = None  # Optional injury executor; G0/G3 stand-alone paths unchanged.
         rank = {v: i for i, v in enumerate(tie_order)}
@@ -630,6 +634,19 @@ class Encounter:
         if low_scholar is not None:
             low_scholar.on_step_start(actor_id)
         self._regenerate(a, regen_choice)
+        # Notify only on a genuinely completed living Regeneration Step.
+        # An unresolved/invalid allocation can complete on a later retry;
+        # regeneration_dead never establishes a new Emotion Window.
+        low_gifted=getattr(self,"low_gifted_anchor",None)
+        if (low_gifted is not None and low_gifted.actor_id==actor_id
+                and not a.dead
+                and any(ev["kind"]=="regeneration_step"
+                        and ev["detail"].get("actor")==actor_id
+                        and ev["round"]==self.round
+                        for ev in self.ledger)):
+            # G4 Guided Authority may append a payout AFTER regeneration_step.
+            # Authenticate the actor/round receipt, not the ledger tail.
+            low_gifted.on_own_step_completed()
         if low_scholar is not None:
             low_scholar.on_step_complete(actor_id)
         # The actual completed G0 Step 2 is the only legal EX-LR-01
@@ -796,6 +813,10 @@ class Encounter:
                     and (self.g1 is None or
                          not self.g1.genuine_anointed_weapon_ready(actor_id))):
                 raise ValueError("Anointed weapon Guard requires real G2 wielding")
+            if a.source.source_id=="GL":
+                if (self.g1 is None or
+                        not self.g1.genuine_low_gifted_sword_ready(actor_id)):
+                    raise ValueError("Low Gifted Sword Guard requires current G1/G2 wielding")
             if (a.guard_remaining == 0 or a.guard_value is None
                     or not a.guard_instrument or not a.ready_guard):
                 raise ValueError("Cannot Guard without ready legal instrument/capacity")
@@ -809,9 +830,23 @@ class Encounter:
             a.dodge_pressure += 2
         else:
             value = None  # Take Hit is not an invented guaranteed-hit melee roll.
+        # Optional pre-roll source-bound Low Gifted rider applies only after
+        # the real G0 Guard capacity or Dodge Pressure is consumed. G5
+        # reuses this exact defense_assigned index and committed value;
+        # extra stand-alone logs here would break sequential source indices.
+        native=getattr(self,"low_gifted_anchor",None)
+        bonus=(native.defense_bonus(choice,attack_key)
+               if native is not None and native.actor_id==actor_id
+               and choice in ("guard","dodge") else 0)
+        if bonus:
+            value+=bonus
         self.log("defense_assigned", actor=actor_id, defense=choice,
                  attack_key=attack_key, defense_value=value,
-                 guard_remaining=a.guard_remaining, dodge_pressure=a.dodge_pressure)
+                 guard_remaining=a.guard_remaining, dodge_pressure=a.dodge_pressure,
+                 **({"anchor_bonus":bonus,"anchor_window":native.model.window,
+                     "anchor_source_digest":a.source.digest} if bonus else {}))
+        if bonus:
+            native.commit_defense(choice,attack_key,len(self.ledger)-1)
         return value
 
     def declare_sequence(self, attacker, target, profiles, defenses):
@@ -875,7 +910,10 @@ class Encounter:
                      not self.g1.genuine_scholar_sword_ready(target)))
                 or (t.source.source_id in ("AH","AM","AL") and
                     (self.g1 is None or
-                     not self.g1.genuine_anointed_weapon_ready(target))))):
+                     not self.g1.genuine_anointed_weapon_ready(target)))
+                or (t.source.source_id=="GL" and
+                    (self.g1 is None or
+                     not self.g1.genuine_low_gifted_sword_ready(target))))):
             raise ValueError("Insufficient legal Guard assignments")
         self.seen_sequences.add((attacker, target))
         for i, p in enumerate(profiles):

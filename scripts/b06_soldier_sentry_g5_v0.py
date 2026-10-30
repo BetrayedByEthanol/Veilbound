@@ -316,7 +316,9 @@ class SourceMelee:
         # committed. G0 repeats this preflight for callers without G5.
         if "guard" in defenses and (
                 not t.guard_instrument or not t.ready_guard
-                or t.guard_value is None):
+                or t.guard_value is None or
+                (t.source.source_id=="GL" and
+                 not e.g1.genuine_low_gifted_sword_ready(target))):
             raise ValueError("Cannot Guard without ready legal instrument/capacity")
         bonuses=[self._profile(attacker,p) for p in profiles]
         before=len(e.ledger)
@@ -797,7 +799,9 @@ class SourceMelee:
                 (e.actors[target].source.source_id in ("S","T")
                  and not e.g1.genuine_scholar_sword_ready(target))
                 or (e.actors[target].source.source_id in ("AH","AM","AL")
-                 and not e.g1.genuine_anointed_weapon_ready(target)))):
+                 and not e.g1.genuine_anointed_weapon_ready(target))
+                or (e.actors[target].source.source_id=="GL"
+                    and not e.g1.genuine_low_gifted_sword_ready(target)))):
             raise UnresolvedDecision("Changed Guard requires native defensive fallback")
         attack_face=_face(attack_face,20,"initial melee attack")
         if attack_face==20:
