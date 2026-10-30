@@ -50,6 +50,21 @@ HIGH_SCHOLAR_COMPOSITE_PERMISSIONS = frozenset({
 PRIEST_BASE_PREPARED = {
     "High": (3, 4, 4), "Medium": (2, 3, 3), "Low": (1, 2, 2),
 }
+# These are *independently fixed* chosen Pillars for the selected pilot
+# sources. Do not let a modified sheet invent a different Pillar in order
+# to make a newly inserted foreign prayer seem legal.
+PRIEST_PILOT_PILLARS = {"Priest/High": "Life", "Priest/Medium": "Life"}
+# Positive v0 authored technique census: rule files, not LIFE_T1 from
+# the audited High/Medium Priest profile modules. Every entry is checked
+# against the canonical rule file's own Pillar/Aspect and Base Tier.
+PRIEST_LIFE_RULE_SOURCES = (
+    ("Basic Heal", "Restoration", "basic-heal-v0.md"),
+    ("Guided Regeneration", "Restoration", "guided-regeneration-v0.md"),
+    ("Vital Shelter", "Preservation", "vital-shelter-v0.md"),
+    ("Woodland Rapport", "Nature", "woodland-rapport-v0.md"),
+    ("Venom Endurance", "Preservation", "venom-endurance-v0.md"),
+    ("Gentle Growth", "Nature", "gentle-growth-v0.md"),
+)
 SOURCE_MODULES = {
     "Priest/High": "b05_high_priest_life_l1_l3_v0",
     "Priest/Medium": "b05_medium_priest_life_l1_l3_v0",
@@ -122,6 +137,39 @@ def talent_minimums():
 def talent_archetypes():
     """Read catalogue-only Archetype eligibility, never the character's claims."""
     return {name: data["archetypes"] for name, data in talent_rules().items()}
+
+
+def authored_priest_techniques():
+    """Prove the bounded pilot Life list using published technique metadata.
+
+    Do not trust a source's private repertoire constant, prepared-capacity
+    ledger, or arbitrary label claiming to be from the chosen Pillar.
+    A new Life technique requires a reviewed canonical-source addition.
+    """
+    techniques = {}
+    for name, aspect, filename in PRIEST_LIFE_RULE_SOURCES:
+        path = ROOT / "docs/rules/07-veil-magic" / filename
+        lines = path.read_text(encoding="utf-8").splitlines()
+        if not lines or lines[0] != f"# {name} v0 — Life / {aspect}":
+            raise ValueError("Life technique identity/Pillar changed: " + filename)
+        # All six published Life technique pages have explicit identity
+        # table cells for Base Tier; read those instead of inferring Tier
+        # from the filename, a source module, or mentions in prose.
+        base_rows = [line for line in lines
+                     if line.startswith("| Base") and "Tier" in line.split("|")[1]]
+        if len(base_rows) != 1:
+            raise ValueError("Missing/ambiguous Life Base Tier: " + filename)
+        cells = base_rows[0].split("|")
+        match = re.match(r"\s*\*\*(?:Tier[ -](\d+)|Base T(\d+))\b",
+                         cells[2])
+        if match is None:
+            raise ValueError("Unrecognized Life Base Tier: " + filename)
+        base_tier = int(next(n for n in match.groups() if n is not None))
+        techniques[name] = {"pillar": "Life", "aspect": aspect,
+                            "base_tier": base_tier, "source": str(path.relative_to(ROOT))}
+    if len(techniques) != len(PRIEST_LIFE_RULE_SOURCES):
+        raise ValueError("Duplicate Life technique identities")
+    return techniques
 
 
 def _sheet_issues(pairing, level, sheet, first, prior, gates):
@@ -344,6 +392,23 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
     if archetype == "Priest":
         prayer = sheet.get("prepared_prayers", ())
         accord = sheet.get("accord")
+        expected_pillar = PRIEST_PILOT_PILLARS.get(pairing)
+        check(sheet.get("pillar") == expected_pillar and
+              expected_pillar == first.get("pillar"),
+              "priest_pillar",
+              "Pilot source retains its independently recorded chosen Pillar")
+        authored = authored_priest_techniques()
+        proper_prayers = (isinstance(prayer, (list, tuple))
+                          and all(type(name) is str for name in prayer))
+        ceiling = 2 if level == 3 else 1
+        check(proper_prayers and
+              all(name in authored and
+                  authored[name]["pillar"] == expected_pillar and
+                  authored[name]["base_tier"] <= ceiling
+                  for name in prayer),
+              "priest_prepared_access",
+              "Every prepared prayer must be an authored chosen-Pillar "
+              "technique within the independent level tier ceiling")
         # These published L1–3 pilot snapshots start at Accord +1 and do
         # not attest a later GM or Petition change. A source-only larger
         # Accord is not independent permission for extra slots.
@@ -357,7 +422,8 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "priest_capacity",
               "Independent base + actual Accord + earned TAL-P01 capacity")
         open_slots = sheet.get("open_prayer_slots", 0)
-        check(type(open_slots) is int and 0 <= open_slots
+        check(proper_prayers
+              and type(open_slots) is int and 0 <= open_slots
               <= int(focus == "High" and level == 3)
               and len(prayer)+open_slots <= effective
               and len(set(prayer)) == len(prayer),

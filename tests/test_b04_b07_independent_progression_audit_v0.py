@@ -4,7 +4,8 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from scripts.b04_b07_independent_progression_audit_v0 import (
-    audit, _sheet_issues, talent_minimums, talent_rules,
+    audit, _sheet_issues, authored_priest_techniques,
+    talent_minimums, talent_rules,
     validate_pilot_milestones,
 )
 
@@ -323,6 +324,70 @@ class IndependentProgressionTests(unittest.TestCase):
                     "Scholar/Low", level, original, low(1),
                     low(level-1), gates)}
                 self.assertNotIn("talent_unaccounted", issues)
+
+    def test_17_priest_preparation_uses_canonical_life_catalogue(self):
+        authored = authored_priest_techniques()
+        self.assertEqual({"Basic Heal", "Guided Regeneration",
+                          "Vital Shelter", "Woodland Rapport",
+                          "Venom Endurance", "Gentle Growth"}, set(authored))
+        self.assertEqual({"Life"}, {v["pillar"] for v in authored.values()})
+        self.assertEqual({1}, {v["base_tier"] for v in authored.values()})
+        self.assertEqual({"Restoration", "Preservation", "Nature"},
+                         {v["aspect"] for v in authored.values()})
+        self.assertTrue(all(v["source"].startswith("docs/rules/07-veil-magic/")
+                            for v in authored.values()))
+
+    def test_18_priest_rejects_out_of_pillar_and_invented_prepared_prayers(self):
+        from scripts.b05_high_priest_life_l1_l3_v0 import profile as high
+        from scripts.b05_medium_priest_life_l1_l3_v0 import profile as medium
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    original = make(level)
+                    base = {x["code"] for x in _sheet_issues(
+                        "Priest/" + focus, level, original, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertNotIn("priest_prepared_access", base)
+                    self.assertNotIn("priest_pillar", base)
+                    for foreign in ("Conjure Flame", "Phantom Sound",
+                                    "Unpublished Life Miracle", "Veil Inspection"):
+                        forged = deepcopy(original)
+                        prayers = list(forged["prepared_prayers"])
+                        prayers[0] = foreign
+                        forged["prepared_prayers"] = tuple(prayers)
+                        issues = {x["code"] for x in _sheet_issues(
+                            "Priest/" + focus, level, forged, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertIn("priest_prepared_access", issues)
+                    forged = deepcopy(original)
+                    forged["pillar"] = "Fire"
+                    forged["prepared_prayers"] = ("Conjure Flame",) + tuple(
+                        original["prepared_prayers"][1:])
+                    issues = {x["code"] for x in _sheet_issues(
+                        "Priest/" + focus, level, forged, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertTrue({"priest_pillar",
+                                     "priest_prepared_access"} <= issues)
+
+    def test_19_priest_preparation_enforces_base_tier_independent_of_sheet(self):
+        from scripts.b05_medium_priest_life_l1_l3_v0 import profile
+        gates = talent_minimums()
+        original_catalogue = authored_priest_techniques()
+        # Synthetic catalogue metadata exercises the tier gate without
+        # claiming a real Tier-2-only Life technique has been authored.
+        modified = deepcopy(original_catalogue)
+        modified["Basic Heal"]["base_tier"] = 2
+        with patch("scripts.b04_b07_independent_progression_audit_v0."
+                   "authored_priest_techniques", return_value=modified):
+            for level in (1, 2, 3):
+                with self.subTest(level=level):
+                    p = profile(level)
+                    issues = {x["code"] for x in _sheet_issues(
+                        "Priest/Medium", level, p, profile(1),
+                        profile(level-1) if level > 1 else None, gates)}
+                    self.assertEqual(level < 3,
+                                     "priest_prepared_access" in issues)
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[
