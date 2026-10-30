@@ -15,8 +15,8 @@ MELEE_IDS={
     "AL":"B05-PC-AL-SWORD-CUT",
 }
 SOURCES={
-    "AH":("scripts/b05_high_anointed_restoration_l1_l3_v0.py",high,"High","Dagger","Small Blades",2,0,"d4","Pierce"),
-    "AM":("scripts/b05_medium_anointed_restoration_l1_l3_v0.py",medium,"Medium","Dagger","Small Blades",2,0,"d4","Pierce"),
+    "AH":("scripts/b05_high_anointed_restoration_l1_l3_v0.py",high,"High","Dagger","Small Blades",2,0,"d4","Piercing"),
+    "AM":("scripts/b05_medium_anointed_restoration_l1_l3_v0.py",medium,"Medium","Dagger","Small Blades",2,0,"d4","Piercing"),
     "AL":("scripts/b05_low_anointed_restoration_l1_l3_v0.py",low,"Low","Sword","One-Handed Swords",3,2,"d6","Cut"),
 }
 

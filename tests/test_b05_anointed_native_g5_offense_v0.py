@@ -124,7 +124,26 @@ class AnointedNativeMeleeTests(unittest.TestCase):
                         self.assertEqual(1,strike["player_g5_hits"])
                         self.assertEqual(0,base["player_g5_hits"])
 
-    def test_05_no_g2_does_not_grant_g1_threat_or_g5_attack(self):
+    def test_05_dagger_piercing_packet_is_accepted_by_live_g4(self):
+        # G4 requires the exact canonical typed "Piercing" damage packet.
+        for role in ("AH","AM"):
+            with self.subTest(role=role):
+                combat=scene(role)
+                e=combat.e
+                profile,bonus=anointed_weapon_profile(
+                    e.actors["anointed"],MELEE_IDS[role],encounter=e)
+                self.assertEqual(3,bonus)
+                self.assertEqual("Piercing",profile["primary_hp_packet"]["damage_type"])
+                _,main,packets=e.g4._profile_hit_packets(
+                    "anointed","foe",MELEE_IDS[role],die_face=4)
+                self.assertEqual("Piercing",main["damage_type"])
+                self.assertEqual(1,len(packets))
+                self.assertEqual(("hp","Piercing",0,"weapon"),
+                                 (packets[0].resource,packets[0].damage_type,
+                                  packets[0].penetration,packets[0].armor_rule))
+                self.assertEqual(6,packets[0].raw)
+
+    def test_06_no_g2_does_not_grant_g1_threat_or_g5_attack(self):
         for role in MELEE_IDS:
             combat=scene(role,g2=False)
             e=combat.e
@@ -138,7 +157,7 @@ class AnointedNativeMeleeTests(unittest.TestCase):
             self.assertEqual(before,(a.ap_remaining,len(e.ledger)))
             self.assertFalse(any(x["kind"]=="action_committed" for x in e.ledger))
 
-    def test_06_lost_g2_wielding_rejects_before_any_attack_payment(self):
+    def test_07_lost_g2_wielding_rejects_before_any_attack_payment(self):
         for role in MELEE_IDS:
             combat=scene(role)
             e=combat.e
@@ -151,7 +170,7 @@ class AnointedNativeMeleeTests(unittest.TestCase):
                                defenses=("take_hit",))
             self.assertEqual(before,(a.ap_remaining,len(e.ledger)))
 
-    def test_07_forged_sha_or_wrong_profile_cannot_claim_g5_damage(self):
+    def test_08_forged_sha_or_wrong_profile_cannot_claim_g5_damage(self):
         for role in MELEE_IDS:
             combat=scene(role)
             e=combat.e
@@ -168,7 +187,7 @@ class AnointedNativeMeleeTests(unittest.TestCase):
             self.assertTrue(e.g1.melee_contact("anointed","foe"))
             self.assertFalse(any(x["kind"]=="action_committed" for x in e.ledger))
 
-    def test_08_dagger_rejects_d6_face_after_g0_payment_without_false_hit(self):
+    def test_09_dagger_rejects_d6_face_after_g0_payment_without_false_hit(self):
         for role in ("AH","AM"):
             combat=scene(role)
             e=combat.e
@@ -187,7 +206,7 @@ class AnointedNativeMeleeTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 combat.resolve(seq,0,attack_face=12,damage_face=4)
 
-    def test_09_exact_report_replay_rejects_forged_and_rehashed_receipts(self):
+    def test_10_exact_report_replay_rejects_forged_and_rehashed_receipts(self):
         for focus in FOCUSES:
             r=self.lookup[focus,3,"sentry_prepared","strike"]
             self.assertEqual(r,attest_policy(r,focus=focus,level=3,
@@ -204,7 +223,7 @@ class AnointedNativeMeleeTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             attest_policy(r,focus="Low",level=3,opponent="soldier")
 
-    def test_10_invalid_source_policy_or_level_rejected(self):
+    def test_11_invalid_source_policy_or_level_rejected(self):
         for args in (
             {"focus":"Wrong","level":1,"opponent":"soldier","policy":"strike"},
             {"focus":"High","level":4,"opponent":"soldier","policy":"strike"},
@@ -215,7 +234,7 @@ class AnointedNativeMeleeTests(unittest.TestCase):
             with self.subTest(args=args),self.assertRaises(ValueError):
                 run_policy(**args)
 
-    def test_11_documented_bounded_scope_and_mvp_counts(self):
+    def test_12_documented_bounded_scope_and_mvp_counts(self):
         from pathlib import Path
         root=Path(__file__).resolve().parents[1]
         doc=(root/"docs/design/b04-b05-anointed-mundane-native-g5-offense-v0.md").read_text().lower()

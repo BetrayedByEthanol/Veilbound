@@ -6,11 +6,13 @@
 
 | Focus | G0 source role/profile | Authoritative source equipment/Training | G5 attack bonus | Exact canonical ordinary damage |
 |---|---|---|---:|---|
-| High Restoration | `AH` / `B05-PC-AH-DAGGER-PIERCE` | Wielded **Dagger**; Small Blades 2 | **+3** (Strength 0 + Agility 1 + Training 2) | **2+d4 Pierce, Penetration 0**, Light physical contribution +0 |
-| Medium Restoration | `AM` / `B05-PC-AM-DAGGER-PIERCE` | Wielded **Dagger**; Small Blades 2 | **+3** | **2+d4 Pierce, Penetration 0**, Light +0 |
+| High Restoration | `AH` / `B05-PC-AH-DAGGER-PIERCE` | Wielded **Dagger**; Small Blades 2 | **+3** (Strength 0 + Agility 1 + Training 2) | **2+d4 Piercing, Penetration 0**, Light physical contribution +0 |
+| Medium Restoration | `AM` / `B05-PC-AM-DAGGER-PIERCE` | Wielded **Dagger**; Small Blades 2 | **+3** | **2+d4 Piercing, Penetration 0**, Light +0 |
 | Low Restoration | `AL` / `B05-PC-AL-SWORD-CUT` | Wielded **Sword**; One-Handed Swords 2 | **+3** | **3+d6 Cut, Penetration 2**, Light +0 |
 
 [Native weapon referee](../../scripts/b05_anointed_native_melee_v0.py) checks each actual sheet's path/SHA256, source status, exact L1–3 start state, Ability/Training/gear selection, current HP/Vigor/AP/Focus/Guard/resource formula and a **genuinely wielded G2 weapon** in the actual G1 encounter. A purchased item, a stale Guard, spoofed source hash or fabricated alternate spell profile cannot authorize a hit. G0 exposes **only one sourced mundane profile per Anointed Focus**. Neither a free weapon enchantment, a new Aspect power, extra AP, changed Destiny nor new wound mechanics is granted.
+
+The Dagger’s weapon mode is called “Pierce” in equipment terminology; the actual **G4 physical damage packet is `Piercing`**, the precise canonical typed-damage value. The existing `B05-PC-AH-DAGGER-PIERCE` and `B05-PC-AM-DAGGER-PIERCE` attack IDs remain unchanged. The Low L3 Guard-capacity fixture now installs real G1/G2 weapon readiness before all three Guard uses, without bypassing the new readiness requirement.
 
 **Native G1 contact** must have true G2 weapon readiness before G5 declarations. Both G0 Guard commitment and G5 Guard rechecks require current wielding, so the source sheet's Guard number by itself is insufficient. G5 uses the actual **d4 for High/Medium Dagger** and the existing **d6 for Low Sword/Soldier/Sentry**; its pre-roll validation and G4 typed damage use the identical source packet. G4.5 binds the G0 paid Physical Action to its exact source profile and target; G4 resolves the ordinary Armor/Penetration, confirmation and Wound rules without introducing a second damage or spell effect.
 
@@ -20,7 +22,7 @@ The [native source-offense runner](../../scripts/b05_anointed_native_g5_offense_
 
 Against the same initialized opponent and fixed dice, the **Dagger** changes Soldier HP by **1** and prepared Sentry HP by **3**, whereas the **Sword** changes them by **4** and **6**, respectively. This follows canonical Armor mitigation and physical Penetration. Ordinary attacks do not drain source VP, trigger the Returning Step, create an extra G4 Regeneration Step or spend Destiny. This is not an optimization study, an Anointed melee-specialist class grant, automatic Opportunity, Riposte, magical attack, hostile Intrusion, or representative AI play.
 
-The [eleven native regression methods](../../tests/test_b05_anointed_native_g5_offense_v0.py) cover all 36 cases, the exact d4/d6/Penetration delta and same-exposure `hold` control, true G0 Paid Action → G5 source profile → G4.5 consumed hit → G4 damage, source fingerprint, actual G1/G2 wielded contact, invalid/missing G2 readiness, invalid dagger d6 face with retry before roll/damage, spoofed source/profile denial, deterministic full-ledger replay and recomputed-hash forgery rejection. The older native actor, High/Medium/Low Signature and #172 defensive-witness tests are updated **only** to recognize the one ordinary source profile; none of their previously bounded Signature/Authority behavior is changed.
+The [twelve native regression methods](../../tests/test_b05_anointed_native_g5_offense_v0.py) cover all 36 cases, the exact d4/d6/Penetration delta and same-exposure `hold` control, true G0 Paid Action → G5 source profile → G4.5 consumed hit → G4 damage, source fingerprint, actual G1/G2 wielded contact, invalid/missing G2 readiness, invalid dagger d6 face with retry before roll/damage, spoofed source/profile denial, deterministic full-ledger replay and recomputed-hash forgery rejection. The older native actor, High/Medium/Low Signature and #172 defensive-witness tests are updated **only** to recognize the one ordinary source profile; none of their previously bounded Signature/Authority behavior is changed.
 
 ## Remaining B04/B05 and MVP readiness
 
