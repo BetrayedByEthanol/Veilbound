@@ -203,6 +203,7 @@ class IndependentProgressionTests(unittest.TestCase):
     def test_11_no_new_capacity_or_focus_cost_findings_on_authored_builds(self):
         prohibited={"focus_action_cost", "general_action_cost",
                     "physical_tempo", "projection_tempo",
+                    "gifted_technique_access",
                     "scholar_known_access", "gifted_link_identity",
                     "scholar_known_capacity", "scholar_preparation_capacity",
                     "scholar_formula_capacity", "scholar_formula_legality",
@@ -589,6 +590,110 @@ class IndependentProgressionTests(unittest.TestCase):
         self.assertEqual(12, report["pairings_checked"])
         self.assertEqual(39, report["level_snapshots_checked"])
         self.assertEqual(0, report["independently_certified_full_focuses"])
+
+    def test_27_gifted_techniques_match_each_emotion_aspect_and_tier(self):
+        from scripts.b05_high_gifted_l1_l3_v0 import profile as high
+        from scripts.b05_medium_gifted_l1_l3_v0 import profile as medium
+        from scripts.b05_low_gifted_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    genuine = make(level)
+                    original = {issue["code"] for issue in _sheet_issues(
+                        "Gifted/"+focus, level, genuine, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertNotIn("gifted_technique_access", original)
+                    for emotion, name in (
+                        ("Fear", "Conjure Flame"),  # Earth -> Fire
+                        ("Joy", "Stone Skin"),      # Fire -> Earth
+                        ("Sadness", "Venom Endurance"),  # Life, wrong Aspect
+                        ("Trust", "Blink"),          # Universal procedure
+                        ("Surprise", "Phantom Image"),  # unauthored
+                        ("Joy", "Unknown Magic"),    # invented
+                    ):
+                        tampered = deepcopy(genuine)
+                        tampered["authored_linked_techniques"][emotion] = [name]
+                        findings = {issue["code"] for issue in _sheet_issues(
+                            "Gifted/"+focus, level, tampered, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertIn("gifted_technique_access", findings)
+                    invalid_shape = deepcopy(genuine)
+                    invalid_shape["authored_linked_techniques"]["Fear"] = "Stone Skin"
+                    findings = {issue["code"] for issue in _sheet_issues(
+                        "Gifted/"+focus, level, invalid_shape, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertIn("gifted_links", findings)
+                    self.assertIn("gifted_technique_access", findings)
+                    duplicate = deepcopy(genuine)
+                    duplicate["authored_linked_techniques"]["Fear"] = [
+                        "Stone Skin", "Stone Skin"]
+                    findings = {issue["code"] for issue in _sheet_issues(
+                        "Gifted/"+focus, level, duplicate, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertIn("gifted_technique_access", findings)
+        # A legitimately authored T2-only entry is unavailable until L3.
+        authored = authored_scholar_techniques()
+        future = deepcopy(authored)
+        future["Stone Skin"]["base_tier"] = 2
+        with patch("scripts.b04_b07_independent_progression_audit_v0."
+                   "authored_scholar_techniques", return_value=future):
+            for level in (1, 2, 3):
+                with self.subTest(level=level, base_tier=2):
+                    profile = high(level)
+                    codes = {i["code"] for i in _sheet_issues(
+                        "Gifted/High", level, profile, high(1),
+                        high(level-1) if level > 1 else None, gates)}
+                    self.assertEqual(level < 3, "gifted_technique_access" in codes)
+
+    def test_28_out_of_aspect_technique_carried_through_levels_is_detected(self):
+        from scripts import b05_high_gifted_l1_l3_v0 as module
+        original = module.profile
+        def forged(level):
+            sheet = original(level)
+            sheet["authored_linked_techniques"]["Fear"] = ["Conjure Flame"]
+            return sheet
+        with patch.object(module, "profile", side_effect=forged):
+            report = audit()
+        issues = {(x["pairing"], x["level"], x["code"])
+                  for x in report["issues"]}
+        self.assertTrue({("Gifted/High", n, "gifted_technique_access")
+                         for n in (1, 2, 3)} <= issues)
+        self.assertEqual(39, report["level_snapshots_checked"])
+        self.assertEqual(12, report["pairings_checked"])
+
+    def test_29_invalid_weapon_ranks_do_not_abort_the_audit(self):
+        from scripts import b05_high_gifted_l1_l3_v0 as module
+        original = module.profile
+        gates = talent_minimums()
+        for invalid in ("2", None, 2.0, True, -1, 3):
+            with self.subTest(invalid=invalid):
+                sheet = original(1)
+                sheet["weapon_training"]["Small Blades"] = invalid
+                findings = {i["code"] for i in _sheet_issues(
+                    "Gifted/High", 1, sheet, sheet, None, gates)}
+                self.assertIn("weapon_budget", findings)
+        # A valid integer with the wrong total is still a budget violation.
+        sheet = original(1)
+        sheet["weapon_training"]["Small Blades"] = 1
+        findings = {i["code"] for i in _sheet_issues(
+            "Gifted/High", 1, sheet, sheet, None, gates)}
+        self.assertIn("weapon_budget", findings)
+        for changed_level in (1, 2):
+            with self.subTest(changed_level=changed_level):
+                def forged(level):
+                    sheet = original(level)
+                    if level == changed_level:
+                        sheet["weapon_training"]["Small Blades"] = "2"
+                    return sheet
+                with patch.object(module, "profile", side_effect=forged):
+                    report = audit()
+                issues = {(x["pairing"], x["level"], x["code"])
+                          for x in report["issues"]}
+                self.assertIn(("Gifted/High", changed_level, "weapon_budget"),
+                              issues)
+                self.assertEqual(39, report["level_snapshots_checked"])
+                self.assertEqual(12, report["pairings_checked"])
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[

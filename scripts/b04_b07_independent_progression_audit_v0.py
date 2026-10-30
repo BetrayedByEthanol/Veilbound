@@ -345,9 +345,12 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "Only one eligible L2 point, no free L3 change; both snapshots "
               "must contain valid numeric ranks")
     weapon = sheet.get("weapon_training", {})
-    check(isinstance(weapon, dict) and
-          sum(weapon.values()) == 2 and all(type(v) is int and 0 <= v <= 2
-                                            for v in weapon.values()),
+    # Reject strings, floats, booleans and None before arithmetic. The
+    # complete cross-source audit must still return an issue register.
+    valid_weapon_ranks = (isinstance(weapon, dict) and
+                          all(type(v) is int and 0 <= v <= 2
+                              for v in weapon.values()))
+    check(valid_weapon_ranks and sum(weapon.values()) == 2,
           "weapon_budget", "Two independent direct Weapon Development points")
     if isinstance(weapon, dict):
         if "weapon_development_points" in sheet:
@@ -580,9 +583,13 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
                             type(link.get("pillar")) is str and
                             type(link.get("aspect")) is str
                             for link in links.values()))
-        check(proper_links and
-              set(links) == set(sheet.get("authored_linked_techniques", {})),
-              "gifted_links", "Exactly the canonical eight emotion links")
+        access = sheet.get("authored_linked_techniques", {})
+        proper_access = (isinstance(access, dict) and set(access) == emotions and
+                         all(isinstance(names, (list, tuple)) and
+                             all(type(name) is str for name in names)
+                             for names in access.values()))
+        check(proper_links and proper_access, "gifted_links",
+              "Exactly the canonical eight emotion and technique-map keys")
         pairs = ([(link["pillar"], link["aspect"])
                   for link in links.values()] if proper_links else [])
         check(proper_links and
@@ -592,6 +599,23 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "gifted_link_identity",
               "Eight emotions must link to eight distinct Pillars and "
               "eight distinct canonical Aspects without fabricated pairs")
+        # The source-provided technique map is not proof of Aspect access.
+        # Canonical technique pages independently establish Pillar, Aspect
+        # and Base Tier; the current level supplies the tier ceiling.
+        authored = authored_scholar_techniques()
+        tier_ceiling = 2 if level == 3 else 1
+        check(proper_links and proper_access and all(
+              len(set(names)) == len(names) and all(
+                  name in authored
+                  and authored[name]["pillar"] == links[emotion]["pillar"]
+                  and authored[name]["aspect"] == links[emotion]["aspect"]
+                  and authored[name]["base_tier"] <= tier_ceiling
+                  for name in names)
+              for emotion, names in access.items()),
+              "gifted_technique_access",
+              "Every linked technique requires an authored identity, "
+              "the emotion's exact Pillar/Aspect and a legal level tier; "
+              "Universal Veil procedures are not linked-Aspect techniques")
         if prior:
             check(links == prior["emotion_aspect_links"], "gifted_link_mutation",
                   "No free re-binding of eight linked Aspects at level award")
