@@ -203,6 +203,7 @@ class IndependentProgressionTests(unittest.TestCase):
     def test_11_no_new_capacity_or_focus_cost_findings_on_authored_builds(self):
         prohibited={"focus_action_cost", "general_action_cost",
                     "physical_tempo", "projection_tempo",
+                    "anointed_technique_access",
                     "gifted_technique_access",
                     "scholar_known_access", "gifted_link_identity",
                     "scholar_known_capacity", "scholar_preparation_capacity",
@@ -692,6 +693,107 @@ class IndependentProgressionTests(unittest.TestCase):
                           for x in report["issues"]}
                 self.assertIn(("Gifted/High", changed_level, "weapon_budget"),
                               issues)
+                self.assertEqual(39, report["level_snapshots_checked"])
+                self.assertEqual(12, report["pairings_checked"])
+
+    def test_30_anointed_bonded_techniques_require_authored_matching_aspect(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile as high
+        from scripts.b05_medium_anointed_restoration_l1_l3_v0 import profile as medium
+        from scripts.b05_low_anointed_restoration_l1_l3_v0 import profile as low
+        gates = talent_minimums()
+        for focus, make in (("High", high), ("Medium", medium), ("Low", low)):
+            for level in (1, 2, 3):
+                with self.subTest(focus=focus, level=level):
+                    original = make(level)
+                    baseline = {i["code"] for i in _sheet_issues(
+                        "Anointed/"+focus, level, original, make(1),
+                        make(level-1) if level > 1 else None, gates)}
+                    self.assertNotIn("anointed_technique_access", baseline)
+                    for foreign in ("Conjure Flame", "Stone Skin",
+                                    "Vital Shelter", "Blink",
+                                    "Veil Inspection", "Unknown Technique"):
+                        forged = deepcopy(original)
+                        forged["known_bonded_techniques"] = [foreign]
+                        findings = {i["code"] for i in _sheet_issues(
+                            "Anointed/"+focus, level, forged, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertIn("anointed_technique_access", findings)
+                    for nonbonded in (["Stone Skin"], ["Conjure Flame"],
+                                      ["Basic Heal"], None, "Stone Skin"):
+                        forged = deepcopy(original)
+                        forged["known_other_aspect_techniques"] = nonbonded
+                        findings = {i["code"] for i in _sheet_issues(
+                            "Anointed/"+focus, level, forged, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertIn("anointed_technique_access", findings)
+                    for bad in (["Basic Heal", "Basic Heal"],
+                                "Basic Heal", [None], [42]):
+                        forged = deepcopy(original)
+                        forged["known_bonded_techniques"] = bad
+                        findings = {i["code"] for i in _sheet_issues(
+                            "Anointed/"+focus, level, forged, make(1),
+                            make(level-1) if level > 1 else None, gates)}
+                        self.assertIn("anointed_technique_access", findings)
+        # Higher-base-tier technique can appear only at a legal tier.
+        catalogue = authored_scholar_techniques()
+        future = deepcopy(catalogue)
+        future["Basic Heal"]["base_tier"] = 2
+        with patch("scripts.b04_b07_independent_progression_audit_v0."
+                   "authored_scholar_techniques", return_value=future):
+            for level in (1, 2, 3):
+                original = high(level)
+                codes = {i["code"] for i in _sheet_issues(
+                    "Anointed/High", level, original, high(1),
+                    high(level-1) if level > 1 else None, gates)}
+                self.assertEqual(level < 3, "anointed_technique_access" in codes)
+
+    def test_31_anointed_out_of_aspect_list_persists_and_fails_full_audit(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        def forged(level):
+            sheet = original(level)
+            sheet["known_bonded_techniques"] = ["Conjure Flame"]
+            sheet["known_other_aspect_techniques"] = ["Stone Skin"]
+            return sheet
+        with patch.object(module, "profile", side_effect=forged):
+            report = audit()
+        issues = {(x["pairing"], x["level"], x["code"])
+                  for x in report["issues"]}
+        self.assertTrue({("Anointed/High", n, "anointed_technique_access")
+                         for n in (1, 2, 3)} <= issues)
+        self.assertEqual(12, report["pairings_checked"])
+        self.assertEqual(39, report["level_snapshots_checked"])
+        self.assertEqual(0, report["independently_certified_full_focuses"])
+
+    def test_32_malformed_equipment_prices_preserve_audit_register(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        gates = talent_minimums()
+        for invalid in ("4", None, True, 4.0, -1):
+            with self.subTest(invalid=invalid):
+                sheet = original(1)
+                sheet["equipment_sp"]["Dagger"] = invalid
+                findings = {i["code"] for i in _sheet_issues(
+                    "Anointed/High", 1, sheet, sheet, None, gates)}
+                self.assertIn("equipment_budget", findings)
+        # Valid integer but inconsistent sum/remainder is still rejected.
+        sheet = original(1)
+        sheet["equipment_sp"]["Dagger"] = 5
+        findings = {i["code"] for i in _sheet_issues(
+            "Anointed/High", 1, sheet, sheet, None, gates)}
+        self.assertIn("equipment_budget", findings)
+        for changed in (1, 2):
+            with self.subTest(changed_level=changed):
+                def forged(level):
+                    sheet = original(level)
+                    if level == changed:
+                        sheet["equipment_sp"]["Dagger"] = "4"
+                    return sheet
+                with patch.object(module, "profile", side_effect=forged):
+                    report = audit()
+                found = {(x["pairing"], x["level"], x["code"])
+                         for x in report["issues"]}
+                self.assertIn(("Anointed/High", changed, "equipment_budget"), found)
                 self.assertEqual(39, report["level_snapshots_checked"])
                 self.assertEqual(12, report["pairings_checked"])
 

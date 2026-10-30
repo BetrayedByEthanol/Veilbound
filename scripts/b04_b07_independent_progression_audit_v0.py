@@ -364,12 +364,19 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
     if not isinstance(gear, dict):
         check(False, "equipment", "No sourced starting equipment ledger")
     else:
-        price = sum(gear.values())
+        # Never add untrusted string, float, bool or None price entries.
+        # Reject the malformed ledger while continuing to all other builds.
+        valid_prices = all(type(v) is int and v >= 0 for v in gear.values())
         remainder = next((sheet[k] for k in ("silver_remaining", "silver_remaining_sp",
                                             "starting_silver_left") if k in sheet), None)
-        check(all(type(v) is int and v >= 0 for v in gear.values())
-              and price <= 150 and remainder == 150-price, "equipment_budget",
-              "Starting purchases and retained silver must reconcile to 150 sp")
+        if valid_prices:
+            price = sum(gear.values())
+            reconciled = price <= 150 and remainder == 150-price
+        else:
+            reconciled = False
+        check(reconciled, "equipment_budget",
+              "Starting prices must be nonnegative integers; purchases "
+              "and retained silver must reconcile to 150 sp")
         if prior:
             old = prior.get("equipment_sp") or prior.get("starting_equipment_sp")
             check(gear == old, "free_level_equipment",
@@ -634,6 +641,32 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "anointed_bond",
               "Actual starting Life/Restoration bond must match Returning "
               "Step Signature, remain active, and retain canonical Destiny")
+        # A real bond grants its own authored Aspect catalogue, not arbitrary
+        # names written by the source or another-Aspect technique knowledge.
+        # Reuse the independent canonical page census already applied to
+        # Scholars and Gifted; all Pillar/Aspect types are checked there.
+        authored = authored_scholar_techniques()
+        bonded = sheet.get("known_bonded_techniques")
+        other = sheet.get("known_other_aspect_techniques")
+        valid_bonded_list = (isinstance(bonded, (list, tuple)) and
+                             all(type(name) is str for name in bonded))
+        valid_other_list = isinstance(other, (list, tuple)) and len(other) == 0
+        bond = sheet.get("bond")
+        valid_bond = (type(bond) is dict and
+                      type(bond.get("pillar")) is str and
+                      type(bond.get("aspect")) is str)
+        ceiling = 2 if level == 3 else 1
+        check(valid_bond and valid_bonded_list and valid_other_list
+              and len(set(bonded)) == len(bonded)
+              and all(name in authored
+                      and authored[name]["pillar"] == bond["pillar"]
+                      and authored[name]["aspect"] == bond["aspect"]
+                      and authored[name]["base_tier"] <= ceiling
+                      for name in bonded),
+              "anointed_technique_access",
+              "Known bonded techniques must be authored, unique and inside "
+              "the one bonded Aspect's legal tier; no other-Aspect "
+              "techniques or Universal procedures in bonded access")
         if prior:
             check(sheet.get("bond") == prior.get("bond")
                   and sheet.get("mission") == prior.get("mission"),
