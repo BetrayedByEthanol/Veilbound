@@ -10,7 +10,8 @@ from scripts.b05_anointed_native_noncombat_destiny_v0 import (
 from scripts.b05_anointed_native_destiny_exploration_v0 import (
     AnointedDestinyExploration,
 )
-from scripts.b06_encounter_state_v0 import UnresolvedDecision
+from scripts.b06_encounter_state_v0 import UnresolvedDecision,RegenerationChoice
+from scripts.b05_anointed_native_defensive_encounter_v0 import _one_enemy_hit
 from scripts.b06_g7a_native_terminal_census_v0 import canonical_digest
 
 
@@ -188,6 +189,89 @@ class NativeAnointedNoncombatDestinyTests(unittest.TestCase):
                      "story beat","mission","g0","g4","g5","worldclock",
                      "unopposed","not certified","noncombat"):
             self.assertIn(word,doc)
+
+
+    def test_11_initiative_entry_reconciles_elapsed_time_and_partial_minutes(self):
+        # A caller need not explicitly synchronize before re-entering combat.
+        for focus in FOCUSES:
+            with self.subTest(focus=focus):
+                e,native=_spent_lesser_scene(focus,2,"soldier",seed=0)
+                bridge=AnointedDestinyExploration(e,native)
+                clock=e.g4.clock
+                self.assertEqual(1,native.state.destiny)
+                clock.advance_exploration(21540)
+                before=len(e.ledger)
+                clock.enter_initiative()
+                new=e.ledger[before:]
+                sync=[x for x in new if x["kind"]=="b05_anointed_destiny_time_reconciled"]
+                entry=[x for x in new if x["kind"]=="g42_initiative_entered"]
+                self.assertEqual((1,1),(len(sync),len(entry)))
+                self.assertLess(sync[0]["index"],entry[0]["index"])
+                self.assertEqual((0,359,1),(
+                    sync[0]["detail"]["destiny_recovered"],
+                    native.state.six_hour_remainder_minutes,native.state.destiny))
+                clock.leave_initiative()
+                clock.advance_exploration(60)
+                before=len(e.ledger)
+                clock.enter_initiative()
+                new=e.ledger[before:]
+                sync=[x for x in new if x["kind"]=="b05_anointed_destiny_time_reconciled"]
+                entry=[x for x in new if x["kind"]=="g42_initiative_entered"]
+                self.assertEqual((1,1),(len(sync),len(entry)))
+                self.assertLess(sync[0]["index"],entry[0]["index"])
+                self.assertEqual((1,2,0),(
+                    sync[0]["detail"]["destiny_recovered"],native.state.destiny,
+                    native.state.six_hour_remainder_minutes))
+                clock.leave_initiative()
+                self.assertEqual(0,bridge.sync_world_time())
+                self.assertEqual(2,native.state.destiny)
+
+    def test_12_elapsed_time_at_cap_cannot_refund_later_native_lesser(self):
+        # Reproduce the reported P2 with a second REAL G5 encounter:
+        # 6h earned at Destiny 2 cannot reimburse a Round-4 Lesser spend.
+        e,native=_spent_lesser_scene("High",2,"soldier",seed=0)
+        bridge=AnointedDestinyExploration(e,native)
+        clock=e.g4.clock
+        self.assertEqual(1,bridge.record_mission_event(
+            "gm:prior_significant_beat",gm_recognized=True))
+        self.assertEqual(2,native.state.destiny)
+        clock.advance_exploration(21600)
+        before=len(e.ledger)
+        clock.enter_initiative()
+        new=e.ledger[before:]
+        sync=[x for x in new if x["kind"]=="b05_anointed_destiny_time_reconciled"]
+        entry=[x for x in new if x["kind"]=="g42_initiative_entered"]
+        self.assertEqual((1,1),(len(sync),len(entry)))
+        self.assertLess(sync[0]["index"],entry[0]["index"])
+        self.assertEqual((360,2,2,0),(
+            sync[0]["detail"]["eligible_minutes"],
+            sync[0]["detail"]["destiny_before"],
+            sync[0]["detail"]["destiny_after"],
+            sync[0]["detail"]["destiny_recovered"]))
+        combat=e.g5
+        for round_no in (3,4):
+            combat.bridge.begin_next_round()
+            for who in e.order:
+                combat.bridge.start_next_turn(RegenerationChoice())
+                if round_no==3 and who=="foe":
+                    _one_enemy_hit(combat,"soldier","patient")
+                if round_no==4 and who=="anointed":
+                    native.project("patient",lesser=True,visible=True,unopposed=True)
+                combat.bridge.end_current_turn()
+        hit=[x for x in e.ledger[before:]
+             if x["kind"]=="g5_melee_resolved"]
+        spent=[x for x in e.ledger[before:]
+               if x["kind"]=="g4_anointed_returning_step_applied"]
+        self.assertEqual((1,1),(len(hit),len(spent)))
+        self.assertEqual((1,4),(spent[0]["detail"]["destiny_cost"],
+                              spent[0]["round"]))
+        self.assertEqual(1,native.state.destiny)
+        clock.leave_initiative()
+        self.assertEqual(0,bridge.sync_world_time())
+        self.assertEqual((1,0),(native.state.destiny,
+                               native.state.six_hour_remainder_minutes))
+        self.assertEqual(0,sum(x["detail"]["destiny_recovered"] for x in
+            entries({"ledger":e.ledger},"b05_anointed_destiny_time_reconciled")))
 
 
 if __name__=="__main__":
