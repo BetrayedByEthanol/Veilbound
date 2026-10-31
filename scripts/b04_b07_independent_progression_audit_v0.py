@@ -987,6 +987,16 @@ def _low_full_issues(role, level, sheet, actor, first, prior, gates):
     def check(ok, code, message):
         if not ok:
             _issue(issues, code, level=level, detail=message)
+    # Talent eligibility alone cannot replace the authored A/B selections.
+    # Cross-check BOTH full-sheet representations against the independent
+    # original A/B ledger, including the actual award order at every level.
+    required_talents = LOW_PRIEST[role]["talents"][:level]
+    check(type(sheet.get("talents")) in (tuple, list)
+          and type(sheet.get("selected_talents_by_level")) in (tuple, list)
+          and tuple(sheet["talents"]) == required_talents
+          and tuple(sheet["selected_talents_by_level"]) == required_talents,
+          "low_talent_source",
+          "Full A/B selected Talents must match every original level award")
     required = expected["preparations"][:2 if level == 1 else 3]
     disciplines = {**expected["disciplines"],
                    **(expected["later"] if level >= 2 else {})}

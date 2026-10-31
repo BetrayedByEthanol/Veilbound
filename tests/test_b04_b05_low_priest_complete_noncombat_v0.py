@@ -162,6 +162,50 @@ class LowPriestFullNoncombatTests(unittest.TestCase):
                                        profile("B",2),gates)
                 self.assertTrue(found, kind)
 
+    def test_09_legal_l3_talent_substitution_rejected_by_full_audit_and_roster(self):
+        # Codex P2: C10 -> C09 for A (and C09 -> C10 for B) is
+        # individually legal. Neither is the original source-selected build.
+        from scripts.b04_b07_twelve_focus_certification_protocol_v0 import _source_roster
+        original_profile = profile
+        for role, legal_replacement in (("A", "TAL-C09"), ("B", "TAL-C10")):
+            with self.subTest(role=role):
+                def substitute(selected_role, level):
+                    sheet = original_profile(selected_role, level)
+                    if selected_role == role and level == 3:
+                        forged = tuple(sheet["talents"][:2]) + (legal_replacement,)
+                        sheet["talents"] = forged
+                        sheet["selected_talents_by_level"] = forged
+                    return sheet
+
+                # The ordinary checks already accept these level-legal
+                # Talent replacements. Exact source identity must not.
+                with patch("scripts.b05_low_priest_life_l1_l3_v0.profile",
+                           side_effect=substitute):
+                    result = audit()
+                findings = [issue for issue in result["pairings"]["Priest/Low"]["issues"]
+                            if issue["variant"] == role and issue["level"] == 3]
+                self.assertIn("low_talent_source", {x["code"] for x in findings})
+                with patch("scripts.b04_b07_twelve_focus_certification_protocol_v0.audit",
+                           return_value=result):
+                    low = next(x for x in _source_roster.__wrapped__()
+                               if x["pairing"] == "Priest/Low")
+                self.assertIn("low_talent_source",
+                              {x["code"] for x in low["source_issues"]})
+                self.assertFalse(low["independently_full_certified"])
+
+    def test_09b_talent_selected_ledger_cannot_disagree_with_talents(self):
+        gates = talent_minimums()
+        for role in ("A", "B"):
+            for field in ("talents", "selected_talents_by_level"):
+                with self.subTest(role=role, field=field):
+                    sheet = deepcopy(profile(role, 3))
+                    sheet[field] = tuple(sheet[field][:2]) + (
+                        "TAL-C09" if role == "A" else "TAL-C10",)
+                    actor = party_actor(role, 3, "low", "party", occupied=((1, 1),))
+                    issues = _low_full_issues(role, 3, sheet, actor,
+                                              profile(role, 1), profile(role, 2), gates)
+                    self.assertIn("low_talent_source", {i["code"] for i in issues})
+
     def test_09_source_tampering_cannot_upgrade_noncombat_training(self):
         original=profile("A",1)
         forged=deepcopy(original)
