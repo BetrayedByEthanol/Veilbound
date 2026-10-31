@@ -72,7 +72,8 @@ def profile(level,*,preparation="standard"):
         "accord":1,"resonance":0,"miracle_debt":0,
         "prepared_prayers":prayers,
         "prepared_capacity":capacity,"open_prayer_slots":open_slot,
-        "talents":(("TAL-C02",) if level<3 else ("TAL-C02","TAL-M03")),
+        # High Focus earns its next Talent selection at L5, not L3.
+        "talents":("TAL-C02",),
         "hp_max":hp,"vigor_max":hp*level,
         "vp_max":(6+a["Veil Affinity"])*level,
         "turn_ap":30+6*(level-1),
@@ -100,6 +101,7 @@ def verify():
             assert p["projection_action_ap"]==20
             assert len(p["prepared_prayers"])+p["open_prayer_slots"]==p["prepared_capacity"]
             assert p["silver_remaining"]==80
+            assert p["talents"]==("TAL-C02",)
     return {"source_legal_structural":True,"profiles":9,
             "full_encounter_certified":False,
             "independent_mvp_focus_certified":False}

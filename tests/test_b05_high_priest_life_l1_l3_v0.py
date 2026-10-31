@@ -49,6 +49,8 @@ class HighLifeV0Tests(unittest.TestCase):
                                      (4,1,17))
                     self.assertEqual(p["silver_remaining"],80)
                     self.assertEqual((p["accord"],p["resonance"]),(1,0))
+                    self.assertEqual(p["talents"], ("TAL-C02",))
+                    self.assertNotIn("TAL-M03", p["talents"])
                     self.assertEqual(sum(p["learned_disciplines"].values()),
                                      8 if level==1 else 9)
                     self.assertEqual(a.source.source_id,"H")

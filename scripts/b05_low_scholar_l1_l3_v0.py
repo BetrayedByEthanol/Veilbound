@@ -63,8 +63,12 @@ def profile(level):
             **DISCIPLINES_L1, **({"Navigation": 1} if level >= 2 else {})},
         "background_familiarities": (
             "Technical guild study", "Local professional trades network"),
+        # The L2 Talent award is saved; at L3 the third earned
+        # selection funds Combat Awareness and the saved L2 award
+        # remains unspent. No retroactive Talent effect is conferred.
         "talents": ((TALENT_L1,) if level < 3 else
                     (TALENT_L1, TALENT_L3)),
+        "saved_talent_selections": int(level >= 2),
         "known_pillar_techniques": known,
         "known_capacity": KNOWN_CAP["Low"][level-1],
         "prepared_techniques": prepared,
@@ -117,6 +121,9 @@ def verify():
         assert p["known_capacity"]==(3 if level==1 else 4)
         assert p["physical_action_ap"]==20 and p["projection_action_ap"]==30
         assert p["movement_points"]==12
+        assert p["talents"] == ((TALENT_L1,) if level < 3 else
+                                (TALENT_L1, TALENT_L3))
+        assert p["saved_talent_selections"] == int(level >= 2)
         if previous:
             assert set(previous["known_pillar_techniques"]).issubset(
                 p["known_pillar_techniques"])

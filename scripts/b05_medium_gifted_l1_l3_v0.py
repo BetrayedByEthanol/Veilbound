@@ -75,7 +75,11 @@ def profile(level):
         },
         "weapon_training": deepcopy(WEAPONS),
         "weapon_development_points": sum(WEAPONS.values()),
-        "talents": [TALENT], "talent_selections_available": 1,
+        # Medium Focus gains its second selection at L3; this pilot
+        # deliberately saves it rather than inventing a new paid effect.
+        "talents": [TALENT],
+        "talent_selections_available": 1 + int(level >= 3),
+        "saved_talent_selections": int(level >= 3),
         "background_familiarities": ["Village festival work", "Field medical practice"],
         "emotion_aspect_links": {emotion: {
             "pillar": PILOT_LINKS[emotion][0],
@@ -170,6 +174,9 @@ def verify():
         assert s["learned_points"] == 8 + int(level >= 2)
         assert s["starting_spent_sp"] + s["silver_remaining_sp"] == 150
         assert (s["hp_max"], s["vigor_max"], s["vp_max"]) == (12, 12 * level, 4 * level)
+        assert s["talents"] == [TALENT]
+        assert (s["talent_selections_available"], s["saved_talent_selections"]) == (
+            1 + int(level >= 3), int(level >= 3))
         assert s["physical_tempo"] == s["projection_tempo"] == s["guard_capacity"] == 1
         assert not s["two_initial_conduits_same_turn"]
         assert not s["deepening_plus_t1_flame_same_turn"]
