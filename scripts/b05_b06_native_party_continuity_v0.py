@@ -162,6 +162,24 @@ def _preflight_destination(previous, following):
             or any(key[0] in PARTY for key in following.g3.effects)):
         raise UnresolvedDecision("Destination already owns a party effect/host")
 
+    # G4.3/G4.4 toxins, even rejected/expired exposure histories, are
+    # live source-owned state. Unlike G3 effects, an active legacy TX-HM
+    # can have NO actor modifier or clock milestone and so can pass every
+    # other pristine-scene check. Never erase its remaining ticks, replay
+    # keys or existing Endurance merely by importing a different party.
+    d = following.g4
+    if (d.short_toxins or d.toxins.instances or d.toxins.exposure_ids
+            or d.venom.effects or d.venom.next_effect != 0
+            or d.venom.hit_keys or d.venom.hunter_keys
+            or d.used_events
+            or getattr(d, "legacy_toxin_provenance", {})):
+        raise UnresolvedDecision(
+            "Destination G4 toxin, Endurance or exposure history is not pristine")
+    if any(getattr(a, "toxin_modifiers", {})
+           for a in following.actors.values()):
+        raise UnresolvedDecision(
+            "Destination has pre-existing G4 toxin penalties")
+
     # Only one original Recovery checkpoint per actor is permitted in the
     # new scene. Any caller-supplied milestone or colliding future Recovery
     # ID must be refused BEFORE the prior clock advances even one second.

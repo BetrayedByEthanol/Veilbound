@@ -318,5 +318,90 @@ class CrossEncounterEffectContinuationTests(unittest.TestCase):
                          receipt["vigor_before_pulse"]-1)
 
 
+    def test_13_active_destination_legacy_tx_hm_rejected_without_losing_ticks(self):
+        # Codex P2: real TX-HM makes NO G4.2 marker, G4.3 exposure ID or
+        # actor-level toxin modifier. It must nevertheless block importing
+        # another party and must never vanish from a prepared destination.
+        for carry_effects in (False, True):
+            with self.subTest(carry_effects=carry_effects):
+                source=_first_withdrawal(3,0)
+                destination=fresh()
+                destination.g4.schedule_hemotoxin(
+                    "guardian",exposure_key="destination:txhm:five-ticks",
+                    actual_exposure=True,resistance_total=1,
+                    wound_location_roll=8)
+                toxin=deepcopy(destination.g4.short_toxins[0])
+                self.assertEqual(toxin["left"],5)
+                self.assertFalse(destination.g4.toxins.exposure_ids)
+                self.assertFalse(destination.g4.toxins.instances)
+                self.assertFalse(
+                    getattr(destination.actors["guardian"],"toxin_modifiers",{}))
+                self.assertEqual(
+                    {ev.kind for ev in destination.g4.clock._pending()},
+                    {"recovery"})
+                source_ledger=deepcopy(source.ledger)
+                source_events=deepcopy(source.g4.clock.events)
+                source_party=party_state(source)
+                destination_ledger=deepcopy(destination.ledger)
+                with self.assertRaises(UnresolvedDecision):
+                    handoff(
+                        source,destination,elapsed_seconds=100,
+                        travel_ref="GM:reject-contaminated-destination",
+                        carry_effects=carry_effects)
+                self.assertEqual(source.g4.clock.world_seconds,0)
+                self.assertEqual(source.g4.clock.events,source_events)
+                self.assertEqual(source.ledger,source_ledger)
+                self.assertEqual(party_state(source),source_party)
+                self.assertEqual(destination.g4.short_toxins,[toxin])
+                self.assertEqual(destination.ledger,destination_ledger)
+                self.assertEqual(destination.g4.clock.world_seconds,0)
+                self.assertEqual(destination.g4.short_toxins[0]["left"],5)
+
+    def test_14_destination_toxin_and_endurance_histories_must_be_pristine(self):
+        # Even an expired effect or ignored/rejected exposure has original
+        # identity and replay history which import must never overwrite.
+        def history_only(d):
+            result=d.toxins.apply(
+                "guardian","TX-EN",
+                exposure_key="dest:rejected-exposure-history",
+                source="GM:documented-ration",route="ingestion",
+                delivery_verified=False)
+            self.assertEqual(result["outcome"],"not_delivered")
+
+        cases={
+            "unified_active":lambda d: d.toxins.apply(
+                "guardian","TX-MY",exposure_key="dest:active-my",
+                source="GM:independent-injection",route="injection",
+                delivery_verified=True,breach_verified=True,resistance_die=1),
+            "exposure_history":history_only,
+            "venom_effect_history":lambda d: d.venom.effects.update(
+                {"historical-G44":{"active":False}}),
+            "venom_effect_serial":lambda d: setattr(d.venom,"next_effect",1),
+            "hunter_key_history":lambda d: d.venom.hunter_keys.add("prior-bite"),
+            "hunter_hit_history":lambda d: d.venom.hit_keys.add(17),
+            "g4_used_packet_history":lambda d: d.used_events.add("toxin:old:1"),
+            "legacy_provenance_history":lambda d: setattr(
+                d,"legacy_toxin_provenance",{"old":"witness"}),
+            "recorded_penalty":lambda d: setattr(
+                d.e.actors["guardian"],"toxin_modifiers",{"mp":-2}),
+        }
+        for label,prepare in cases.items():
+            with self.subTest(history=label):
+                source=_first_withdrawal(3,0)
+                destination=fresh()
+                prepare(destination.g4)
+                source_ledger=deepcopy(source.ledger)
+                source_clock=deepcopy(source.g4.clock.events)
+                source_party=party_state(source)
+                with self.assertRaises(UnresolvedDecision):
+                    handoff(source,destination,elapsed_seconds=10800,
+                            travel_ref="GM:reject-G4-history",
+                            carry_effects=True)
+                self.assertEqual(source.g4.clock.world_seconds,0)
+                self.assertEqual(source.g4.clock.events,source_clock)
+                self.assertEqual(source.ledger,source_ledger)
+                self.assertEqual(party_state(source),source_party)
+
+
 if __name__=="__main__":
     unittest.main()
