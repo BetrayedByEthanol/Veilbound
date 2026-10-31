@@ -2,6 +2,8 @@
 
 > **Planning snapshot: 31 October 2026; based on merged `main` at `0e31d2f0ddb3cd445d6a3b2cb477fd18d581feca`, through [PR #182](https://github.com/BetrayedByEthanol/Veilbound/pull/182).** Read alongside the [active roadmap](veilbound-roadmap-and-mvp-readiness.md). This register fixes the **remaining acceptance boundary**, not new game rules, Focus certificates, GM session records or additional B06 G-stages. Canonical `docs/rules/` and `content/` outrank design commentary.
 
+**Post-#190 live supplement (not part of this original #182 planning snapshot):** [B04/B07 Flexible Multi-Cohort Pilot Evidence v0](b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md) is proposed to permit actual GM milestone events at different scenes and independent party attribution. It provides no verified external sessions, awards, new certified Focuses or closed gates. The original #190 candidate runbook was merged; 0/12 full certificates and 0/6 strict exits remain unchanged.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
