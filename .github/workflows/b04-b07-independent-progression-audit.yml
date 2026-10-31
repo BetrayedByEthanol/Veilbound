@@ -7,6 +7,9 @@ on:
       - 'scripts/b04_b07_independent_progression_audit_v0.py'
       - 'scripts/b04_b07_twelve_focus_certification_protocol_v0.py'
       - 'scripts/b04_b05_focus_combat_noncombat_evidence_v0.py'
+      - 'scripts/b04_b05_noncombat_scene_resolution_v0.py'
+      - 'tests/test_b04_b05_noncombat_scene_resolution_v0.py'
+      - 'docs/design/b04-b05-source-legal-noncombat-scene-resolution-v0.md'
       - 'tests/test_b04_b05_focus_combat_noncombat_evidence_v0.py'
       - 'docs/design/b04-b05-focus-specific-combat-noncombat-evidence-v0.md'
       - 'tests/test_b04_b07_twelve_focus_certification_protocol_v0.py'
@@ -84,6 +87,13 @@ jobs:
           mkdir -p build
           python -m scripts.b04_b05_focus_combat_noncombat_evidence_v0 > build/b04-b05-focus-combat-noncombat-evidence-v0.json
           python -m json.tool build/b04-b05-focus-combat-noncombat-evidence-v0.json > /dev/null
+      - name: Run focused canonical noncombat scene resolution regressions
+        run: python -m unittest discover -s tests -p 'test_b04_b05_noncombat_scene_resolution_v0.py' -v
+      - name: Produce canonical noncombat scene/check receipt matrix
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_noncombat_scene_resolution_v0 > build/b04-b05-noncombat-scene-resolution-v0.json
+          python -m json.tool build/b04-b05-noncombat-scene-resolution-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -94,4 +104,5 @@ jobs:
             build/b04-b07-independent-l1-l3-audit.json
             build/b04-b07-twelve-focus-candidate-roster.json
             build/b04-b05-focus-combat-noncombat-evidence-v0.json
+            build/b04-b05-noncombat-scene-resolution-v0.json
           if-no-files-found: error
