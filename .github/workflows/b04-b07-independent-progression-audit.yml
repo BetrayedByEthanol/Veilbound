@@ -3,10 +3,26 @@ name: B04/B07 Independent L1-3 Progression Audit
 on:
   pull_request:
     paths:
+      # Audit code and tests.
       - 'scripts/b04_b07_independent_progression_audit_v0.py'
       - 'tests/test_b04_b07_independent_progression_audit_v0.py'
-      - 'docs/design/b04-b07-independent-l1-l3-build-progression-audit-v0.md'
       - '.github/workflows/b04-b07-independent-progression-audit.yml'
+      # All eleven directly imported B05 pilot sheets and their B05 helpers.
+      - 'scripts/b05_*.py'
+      # Low Priest A/B native source and actor construction.
+      - 'scripts/b06_hunter_party_exchanges_v0.py'
+      - 'scripts/b06_encounter_state_v0.py'
+      # Canonical rule inputs for capacities, techniques, talents,
+      # Weapon Training families, starter prices and Aspect identities.
+      - 'docs/rules/05-combat/**'
+      - 'docs/rules/07-veil-magic/**'
+      - 'docs/rules/08-archetypes/**'
+      - 'docs/rules/10-advancement/**'
+      - 'docs/rules/11-equipment/**'
+      - 'docs/world/aspect-identities-and-boundaries.md'
+      # Independent audit and Low Priest A/B source-build evidence.
+      - 'docs/design/b04-b07-independent-l1-l3-build-progression-audit-v0.md'
+      - 'docs/design/b05-life-low-priest-l3-build-exaltation-verification-v0.md'
   workflow_dispatch:
 
 permissions:
