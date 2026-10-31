@@ -50,7 +50,7 @@ def party_state(e):
     } for ident in PARTY}
 
 
-def _boundary(e):
+def _boundary(e, *, carry_effects=False):
     if (not e.round or e.current is not None or
             e.cursor != len(e.order) or e.pending_regeneration is not None
             or not any(v["kind"] == "round_end" and v["round"] == e.round
@@ -73,27 +73,37 @@ def _boundary(e):
         raise UnresolvedDecision("Unresolved Bow Aim cannot disappear between scenes")
     # B06 G4.3/G4.4 and delayed short toxin effects require their complete
     # event/phase interpreters. Do not copy just a misleading HP snapshot.
-    if (any(t.get("left", 0) for t in e.g4.short_toxins
+    if not carry_effects and (any(t.get("left", 0) for t in e.g4.short_toxins
             if t.get("recipient") in PARTY)
             or any(t.get("active") and t.get("recipient") in PARTY
                    for t in e.g4.toxins.instances.values())
             or any(t.get("active") and t.get("recipient") in PARTY
                    for t in e.g4.venom.effects.values())):
         raise UnresolvedDecision("Active poison/Endurance requires dedicated source handoff")
-    if any(v.kind != "recovery" and v.actor_id in PARTY
+    if not carry_effects and any(v.kind != "recovery" and v.actor_id in PARTY
            and not v.consumed and not v.canceled
            for v in e.g4.clock.events.values()):
         raise UnresolvedDecision("Active non-recovery milestone cannot be dropped")
-    if any(getattr(e.actors[n], "toxin_modifiers", {}) for n in PARTY):
+    if not carry_effects and any(getattr(e.actors[n], "toxin_modifiers", {}) for n in PARTY):
         raise UnresolvedDecision("Unhandled actor toxin modifiers")
     for ident in PARTY:
         a=e.actors[ident]
         effects=[v for v in e.g3.effects.values()
                  if v.caster==ident or v.recipient==ident]
-        if (any(v.kind not in HOLD_EFFECTS or v.caster != ident
-                or v.recipient != ident or v.committed != 1
-                or not v.chosen or v.anchor is not None
-                or v.parent is not None or v.expiry_round is not None
+        if (any(
+                not (
+                    (v.kind == "Guided Regeneration"
+                     and a.source.source_id=="R" and v.committed==1
+                     and v.chosen and v.resistance==0)
+                    or
+                    (carry_effects and v.kind=="Stone Skin"
+                     and a.source.source_id=="F"
+                     and v.committed==(a.vp_max+2)//3
+                     and not v.chosen and v.resistance==2)
+                )
+                or v.caster != ident or v.recipient != ident
+                or v.anchor is not None or v.parent is not None
+                or v.expiry_round is not None
                 for v in effects)
                 or {v.ident for v in effects} != set(a.maintained)
                 or sum(v.committed for v in effects) != a.vp_committed):
@@ -105,6 +115,9 @@ def _boundary(e):
     if any(a.hp <= 0 or a.dead for n,a in e.actors.items() if n in PARTY):
         raise UnresolvedDecision("This pilot requires a living mobile party")
     e.check()
+    if carry_effects:
+        from scripts.b05_b06_cross_encounter_effect_continuity_v0 import validate_source
+        validate_source(e)
 
 
 def _preflight_destination(previous, following):
@@ -149,6 +162,24 @@ def _preflight_destination(previous, following):
             or any(key[0] in PARTY for key in following.g3.effects)):
         raise UnresolvedDecision("Destination already owns a party effect/host")
 
+    # G4.3/G4.4 toxins, even rejected/expired exposure histories, are
+    # live source-owned state. Unlike G3 effects, an active legacy TX-HM
+    # can have NO actor modifier or clock milestone and so can pass every
+    # other pristine-scene check. Never erase its remaining ticks, replay
+    # keys or existing Endurance merely by importing a different party.
+    d = following.g4
+    if (d.short_toxins or d.toxins.instances or d.toxins.exposure_ids
+            or d.venom.effects or d.venom.next_effect != 0
+            or d.venom.hit_keys or d.venom.hunter_keys
+            or d.used_events
+            or getattr(d, "legacy_toxin_provenance", {})):
+        raise UnresolvedDecision(
+            "Destination G4 toxin, Endurance or exposure history is not pristine")
+    if any(getattr(a, "toxin_modifiers", {})
+           for a in following.actors.values()):
+        raise UnresolvedDecision(
+            "Destination has pre-existing G4 toxin penalties")
+
     # Only one original Recovery checkpoint per actor is permitted in the
     # new scene. Any caller-supplied milestone or colliding future Recovery
     # ID must be refused BEFORE the prior clock advances even one second.
@@ -181,7 +212,8 @@ def _preflight_destination(previous, following):
     following.check()
 
 
-def handoff(previous, following, *, elapsed_seconds, travel_ref):
+def handoff(previous, following, *, elapsed_seconds, travel_ref,
+            carry_effects=False):
     """Bind TWO live encounter objects; no caller-authored snapshot injection.
 
     previous: source-attested complete G5 terminal and exited G4.2 initiative
@@ -192,14 +224,24 @@ def handoff(previous, following, *, elapsed_seconds, travel_ref):
         raise ValueError("Elapsed travel is source-paid whole seconds")
     if type(travel_ref) is not str or not travel_ref.strip():
         raise ValueError("A distinct authored between-scene route reference is required")
-    _boundary(previous)
+    if type(carry_effects) is not bool:
+        raise ValueError("Effect continuation must be an explicit boolean")
+    _boundary(previous, carry_effects=carry_effects)
     # Destination feasibility is a read-only precondition. A rejected actor,
     # item, G3 effect or ClockEvent must not consume source travel or Recovery;
     # correcting that destination and retrying the same interval is safe.
     _preflight_destination(previous, following)
-    # Only now may the real source-owned G4.2 clock process authored travel.
+    if carry_effects:
+        # Genuine scheduled toxins can deliver fatal damage or expire through
+        # recovery. Evaluate a DEEP native copy before spending the original
+        # party's world time, so unsupported after-travel state cannot charge
+        # the same route twice when a destination must be corrected.
+        trial=deepcopy(previous)
+        trial.g4.clock.advance_exploration(elapsed_seconds)
+        _boundary(trial, carry_effects=True)
+    # All authorizations are settled before actual source world time moves.
     previous.g4.clock.advance_exploration(elapsed_seconds)
-    _boundary(previous)
+    _boundary(previous, carry_effects=carry_effects)
     outgoing=party_state(previous)
     old_clock=previous.g4.clock
     next_clock=following.g4.clock
@@ -234,6 +276,9 @@ def handoff(previous, following, *, elapsed_seconds, travel_ref):
     next_clock.sequence=old_clock.sequence+len(
         [v for v in next_clock.events.values() if v.actor_id not in PARTY])
     next_clock.world_seconds=old_clock.world_seconds
+    if carry_effects:
+        from scripts.b05_b06_cross_encounter_effect_continuity_v0 import restore
+        restore(previous, following)
     following.check()
     incoming=party_state(following)
     # Positions intentionally belong to the independently authored new
@@ -241,6 +286,11 @@ def handoff(previous, following, *, elapsed_seconds, travel_ref):
     if incoming != outgoing:
         raise AssertionError("Actual G0/G2/G3 carried state changed on import")
     previous_digest=canonical_digest(previous.ledger)
+    if carry_effects:
+        from scripts.b05_b06_cross_encounter_effect_continuity_v0 import effect_state
+        effect_digest=canonical_digest(effect_state(following))
+    else:
+        effect_digest=None
     receipt={
         "travel_ref":travel_ref,"elapsed_seconds":elapsed_seconds,
         "prior_scene":previous.scenario,"next_scene":following.scenario,
@@ -254,6 +304,8 @@ def handoff(previous, following, *, elapsed_seconds, travel_ref):
                if v.kind=="recovery" and v.actor_id==n]
             for n in PARTY},
         "no_free_restore":True,
+        "native_effect_continuation_sha256":effect_digest,
+        "effect_continuation_enabled":carry_effects,
         "new_scene_positions_author_declared_not_G1_teleport":True,
     }
     following.log("b05_b06_native_party_handoff",**receipt)
@@ -261,7 +313,7 @@ def handoff(previous, following, *, elapsed_seconds, travel_ref):
 
 
 def _new_scene(opponent, level, seed, *, previous=None, elapsed_seconds=0,
-               travel_ref="", prepared_only=False):
+               travel_ref="", prepared_only=False, carry_effects=False):
     _inputs(opponent,level,seed,"party_victory")
     source,state=OPPONENTS[opponent]
     actors=[enemy_actor(source,"foe","enemy",start_state=state,
@@ -282,7 +334,8 @@ def _new_scene(opponent, level, seed, *, previous=None, elapsed_seconds=0,
             raise ValueError("Prepared-only scene cannot import yet")
         return e,None
     receipt=handoff(previous,e,elapsed_seconds=elapsed_seconds,
-                    travel_ref=travel_ref) if previous is not None else None
+                    travel_ref=travel_ref,
+                    carry_effects=carry_effects) if previous is not None else None
     e.g4.clock.enter_initiative()
     e.begin_round()
     combat=SourceMelee(e,player_benchmark_target="foe")
