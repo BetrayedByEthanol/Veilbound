@@ -126,8 +126,11 @@ class MvpPilotApprovalsTests(unittest.TestCase):
         self.assertIn("0/12",source)
         self.assertIn("0/6",roadmap)
         self.assertEqual(6,sum(s.startswith("| [ ] **") for s in roadmap.splitlines()))
-        self.assertIn("merged #178",roadmap)
-        self.assertIn("not native",doc.lower())
+        self.assertIn("#178",roadmap)
+        self.assertIn("bounded native",doc.lower())
+        self.assertIn("not itself",doc.lower())
+        self.assertIn("merged #180",doc.lower())
+        self.assertIn("0/12",doc)
 
 
 if __name__=="__main__":

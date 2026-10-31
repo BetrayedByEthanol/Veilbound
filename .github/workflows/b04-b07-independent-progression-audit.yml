@@ -20,6 +20,14 @@ on:
       - 'docs/rules/10-advancement/**'
       - 'docs/rules/11-equipment/**'
       - 'docs/world/aspect-identities-and-boundaries.md'
+      # Audit/acceptance living documents, watched pilot decisions and tests.
+      - 'tests/test_b04_b07_mvp_acceptance_register_refresh_v0.py'
+      - 'tests/test_b04_b07_mvp_pilot_approvals_v0.py'
+      - 'docs/design/veilbound-roadmap-and-mvp-readiness.md'
+      - 'docs/design/b04-b07-mvp-acceptance-register-refresh-v0.md'
+      - 'docs/design/b04-b05-b07-mvp-pilot-approvals-and-watches-v0.md'
+      - 'docs/design/b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.md'
+      - 'docs/design/README.md'
       # Independent audit and Low Priest A/B source-build evidence.
       - 'docs/design/b04-b07-independent-l1-l3-build-progression-audit-v0.md'
       - 'docs/design/b05-life-low-priest-l3-build-exaltation-verification-v0.md'

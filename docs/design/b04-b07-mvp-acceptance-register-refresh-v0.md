@@ -1,0 +1,96 @@
+# B04/B07 — Roadmap and MVP Acceptance Register Refresh v0
+
+> **Planning snapshot: 31 October 2026; based on merged `main` at `0e31d2f0ddb3cd445d6a3b2cb477fd18d581feca`, through [PR #182](https://github.com/BetrayedByEthanol/Veilbound/pull/182).** Read alongside the [active roadmap](veilbound-roadmap-and-mvp-readiness.md). This register fixes the **remaining acceptance boundary**, not new game rules, Focus certificates, GM session records or additional B06 G-stages. Canonical `docs/rules/` and `content/` outrank design commentary.
+
+## Scope, evidence and status
+
+| Layer | Verified current count | What it means / does **not** mean |
+|---|---:|---|
+| Archetype × Focus architectures | **12/12** | All twelve identities exist |
+| L1→L3 structural source pairings | **12/12** | Original example sheets and source-derived resource/action constraints |
+| Independent **structural/progression** audit | **12 pairings / 13 variants / 39 snapshots** | [Merged #181](b04-b07-independent-l1-l3-build-progression-audit-v0.md); does not self-certify gameplay |
+| Former Talent-ledger inconsistencies | **3 corrected source cases / 4 original issue instances** | [Merged #182](https://github.com/BetrayedByEthanol/Veilbound/pull/182): High Priest L3 overaward removed; Medium Gifted L3 saved; Low Scholar L2/L3 saved |
+| Independently **full-play-certified** Focus pairings | **0/12** | Every L1–3 Focus still lacks complete separately reviewed combat **and** noncombat evidence |
+| Representative **complete** GM encounter packs | **0** | Soldier, Sentry and Hunter are executable fixtures, not certified representative packs |
+| Strict MVP exit gates | **0/6** | Create, Act, Resolve, Advance, Challenge, Observe all open |
+| Original blocker definitions closed | **3/7** | B01–B03 closed as v0 rules; B04–B07 remain MVP-blocking |
+
+**B06 distinction:** original G0–G8 and subphases remain delivered as **bounded implementation**. No G9, additional blocker IDs or inferred encounter win rates. Hunter challenge rating remains **unrated**. Preserve the frozen original Hunter census digest and Priest **1,384 primary deterministic cases** without reclassifying them as human samples.
+
+## Refreshed restricted Tier-1 catalogue census
+
+Source pass against the `docs/rules/07-veil-magic/` directory at the SHA above: the 13 **individual authored base-Tier-1 Pillar technique pages** still cover **10 distinct Aspects among the selected eight Pillars' 24 Aspects**. This rechecks, rather than expands, the [historical 25 October identity list](b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.md#fresh-source-backed-tier-1-identity-census).
+
+| Pillar | Individually authored Aspects and Tier-1 technique identities |
+|---|---|
+| Fire | Conflagration — Conjure Flame |
+| Life | Nature — Gentle Growth, Woodland Rapport; Preservation — Vital Shelter, Venom Endurance; Restoration — Basic Heal, Guided Regeneration |
+| Earth | Fortification — Stone Skin |
+| Liberty | Defiance — Weaken Restraints |
+| Mind | Psionics — Minor Telekinesis |
+| Kinship | Guardian — Protective Ward |
+| Secrets | Hallucination — Phantom Sound |
+| Arts | Inspiration — Spark of Inspiration |
+| **Total** | **13 identities / 10 Aspects; 14 of the selected 24 without individual base-T1 authoring** |
+
+**Counting exclusions:** Universal Veil Inspection/Blink, Scholar mode profiles, Low Priest Exaltation properties, Gifted Conduit/Amplification and Anointed Signature/Authority packages are not additional individual Pillar techniques. A higher **Used** Tier of a T1-base technique is not a new Base-T2 identity. The eight-Pillar restriction is a **pilot testing menu**, not a rule deleting the full 16-Pillar/48-Aspect world. The 14 currently unrepresented Aspects are **OP-01 watch items, not 14 new mandatory content tickets**: author additional source-legal options only where actual pilot roles or choices require them.
+
+## Six unchanged strict MVP acceptance gates
+
+An item becomes **accepted only after independently attributable evidence**, not from a scripted test name, a populated self-reported intake record or a structural sheet.
+
+| Gate | Current status | Minimum independent acceptance evidence | Remaining workstream |
+|---|---|---|---|
+| **Create** | **OPEN — 0/12 full certificates** | All 12 Focus example characters independently reviewed at L1, L2 and L3: mandatory choices; Ability, Training, Talent (including saved ledgers), gear, AP/VP/HP/Vigor, known/prepared/linked/bonded techniques and legal Focus features; adverse cases | **B04/B07** verify actual complete selected records, not merely `profile.verify()` |
+| **Act** | **OPEN — bounded native options only** | Every pairing uses meaningful **combat and noncombat** choices at L1–3, with affordable source-legal actions, role strengths, opportunity costs and countercases; no unsupported magic or free refreshes | **B04/B05** Focus-specific positive/weakness and utility scenes |
+| **Resolve** | **OPEN — G0–G8 bounded** | Representative complete native encounters showing real action/response/target legality, mixed protection/healing, terrain, injury/wounds/Dying, withdrawal and post-scene consequences; meaningful opposing policies | **B06** integrate source actions into terminal-to-aftermath GM scenes |
+| **Advance** | **OPEN — hypothetical receipts only** | Independently checked L1→L2→L3 actual characters, purchase/save ledgers and affordable scene use, plus **two distinct actually GM-declared group-story milestone events** in the adventure; no XP, free refills, automatic mission-derived level | **B04/B07** real adventure awards and level-drift observation |
+| **Challenge** | **OPEN — 0 complete representative packs** | Runnable 3–5-session adventure: varied Soldier/Sentry/Hunter challenge encounters plus meaningful exploration, investigation/social, downtime, world clock/recovery and branching GM decisions; complete exposure/outcome/aftermath receipts | **B05/B06/B07** author and review one integrated GM pilot |
+| **Observe** | **OPEN — no verified representative sessions** | Real players and GM(s), externally attributable decision/session records, repeated representative alternatives, role/pacing/attrition calibration with honest denominators; independently assessed balance watches and explicit six-gate sign-off | **B04–B07** pilot execution, review and source fixes if needed |
+
+**Counting:** A physical A/B/R Low Priest variant is still **one Priest/Low pairing**. The Anointed nine-slot [evidence intake](b04-b05-anointed-field-pilot-evidence-v0.md) is structurally useful but **self-reported and unverified**. The #181 structural audit covers all 39 snapshots; it does not satisfy Create/Advance's **full-play** requirement by itself.
+
+## Fixed B01–B07 blockers and direct next action
+
+| ID | Status | Actual next action to close (or maintain) |
+|---|---|---|
+| **B01 — Dodge Pressure** | **CLOSED v0** | Retain defensive pressure sign regression; playtest numbers under P02 |
+| **B02 — Critical damage** | **CLOSED definition v0** | Retain Strong +1d4, Critical +2d4, Devastating +2d4 plus wound trigger; balance watch only |
+| **B03 — Wounds/overkill** | **CLOSED definition v0** | Retain deterministic severity and 10/20/30 Vigor repair thresholds; balance watch only |
+| **B04 — Creation** | **OPEN** | Full independent end-to-end creation/level sources, noncombat role and actual gameplay legality for all 12 pairings |
+| **B05 — Techniques/starting access** | **OPEN** | Verify actual paid defining effects and distinctive positive/weakness/utility choices; introduce only discovered necessary pilot options |
+| **B06 — Encounters** | **OPEN despite G0–G8 delivered** | Representative complete Soldier/Sentry/Hunter GM encounters, mixed parties, terrain, withdrawal and aftermath |
+| **B07 — Advancement** | **OPEN** | Independent complete progression/scene use and two actual GM milestone events; **#182 source-ledger defect correction is done** |
+
+## Priority work queue — implementation versus evidence
+
+| Sequence | Coherent deliverable | Implementation left | Separate review / external evidence | Closure affected |
+|---|---|---|---|---|
+| **1** | **Independent Focus certification protocol and pilot roster v0** | A reusable twelve-pairing evidence checklist; source IDs/role options and negative-case requirements for L1–3 | Assign truly independent reviewers; verify each character's legal choices and resource deltas | B04/B07, Create/Advance **partial only** |
+| **2** | **Focus-role native & noncombat evidence slices** | Integrate live #148 Sword Opportunity with multi-round Scholar mobile scenes where still needed; legal Priest protection/Intercession, Gifted Amplification/Ward/Anchor, Anointed Signature/Authority and actual utility decisions | Positive/weakness alternatives and source-paid actions per level; noncombat checks and GM rulings | B05, Act |
+| **3** | **Representative encounter packs** | Build from three source-backed enemy fixtures; vary party and enemy policy, terrain, wound/withdrawal/aftereffects; capture complete exposures | Independent policy/ledger and difficulty review; no fabricated Hunter CR | B06, Resolve/Challenge |
+| **4** | **3–5-session integrated adventure** | GM scenes for exploration, social/investigation, attrition/recovery/downtime and **two distinct group-story milestone opportunities** | Actual GM recognition and player decisions, rather than pre-declared automatic level ups | B05/B06/B07, Advance/Challenge |
+| **5** | **Representative play and six-gate review** | Correct observed source defects and record robust actual choices/outcomes | Human/GM sessions with independent verification, role/pacing/calibration and closure decisions | All remaining blockers/gates |
+
+**Conditional, not silent mandatory expansions:** contested Anointed Intrusion or unusual response authority, Hunter exceptional Opportunities, distinct Tier-2/Tier-3 Life Miracles, additional Aspect breadth, higher levels, extensive crafting and full PWA are **only strict pilot dependencies if a chosen scene or required identity cannot legally function otherwise**. No new B06 G-stage is authorized by this register.
+
+## Decision status — which choices actually require user input?
+
+| Topic | State | Decision needed **now**? |
+|---|---|---|
+| Restricted eight-Pillar / 12-Focus pilot | **DECIDED** | No; no expansion to all 24 selected Aspects required |
+| Low Gifted Rooted Guard **+1** and Unbound Step **−1 MP** | **APPROVED provisionally, native #180 merged** | No; measure RG-01/US-01 under actual play |
+| Existing AP/VP, Talent and critical/wound numbers | **RETAIN & WATCH** | No; adjust only if evidenced |
+| Medium Gifted L3 and Low Scholar L2/L3 saved Talent choices | **#182 corrected** | No; later real purchases use normal prerequisites |
+| Pilot L2/L3 progress | **TWO GM-DECLARED MILESTONES approved** | No new XP decision; author events and record actual GM verdicts |
+| Assigning independent reviewers and scheduling 12-Focus coverage | **PILOT EXECUTION ARRANGEMENT** | Must arrange before acceptance, not a new rules-design approval |
+| Selecting the particular adventure beats, GM scene constraints and whether hostile Intrusion is included | **ADVENTURE AUTHORING** | Decide when designing that scenario; if hostile Intrusion is chosen, its unresolved authority becomes an explicit implementation dependency |
+| Extra techniques, broad Aspect authoring, numerical tuning | **CONDITIONAL** | Only if representative play shows specific missing role options or imbalance |
+
+## Scope and historical preservation
+
+- [PR #180](https://github.com/BetrayedByEthanol/Veilbound/pull/180) delivered real Low Gifted G0/G1/G2/G5 Rooted Guard / Unbound Step receipts; it is **not** pending, and is **not** independent full Focus certification.
+- [PR #181](https://github.com/BetrayedByEthanol/Veilbound/pull/181) merged independent structural/progression audit and PR-trigger coverage, not human play.
+- [PR #182](https://github.com/BetrayedByEthanol/Veilbound/pull/182) merged source Talent-ledger correction for three builds, without inventing new Talent awards.
+- Original B06 G0–G8 registers, #147 pending-Opportunity historical probes, three-terminal reachability matrices, the signed Priest comparison denominator and Hunter census are retained without revision.
+- No canonical costs, game rules, character source choices, scenario records, numerical challenge rating, GM verdict or external pilot session was modified to produce this planning refresh.
