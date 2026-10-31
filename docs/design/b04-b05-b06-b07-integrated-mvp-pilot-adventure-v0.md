@@ -8,6 +8,8 @@
 
 **Later Low Priest source completion:** [B04/B05 complete A/B L1–3 source and noncombat verification](b04-b05-low-priest-complete-character-noncombat-v0.md) provides the missing selected training, Prayer, equipment and hand ledger for Low Priest participants, while the original #190 runbook's warning about its then-physical-only G0 fixtures remains a historical limitation. This follow-up still does not turn fixed A/B encounter snapshots into a campaign's live party or establish real independent play.
 
+**Subsequent candidate encounter handoff:** [B05/B06 Native Cross-Encounter Party Resource Continuity v0](b05-b06-native-cross-encounter-party-resource-continuity-v0.md) demonstrates a Soldier withdrawal followed by a Sentry conflict with retained native HP, Vigor, VP, arrows, partial recovery and bounded maintained Guided; requires a distinct authored route. Original candidate itinerary does not become a played campaign, nor are unmodeled toxins/effects or arbitrary unsafe pursuit silently resolved.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.

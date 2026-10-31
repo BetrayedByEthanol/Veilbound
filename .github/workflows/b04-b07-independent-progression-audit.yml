@@ -7,6 +7,9 @@ on:
       - 'scripts/b04_b07_independent_progression_audit_v0.py'
       - 'scripts/b05_low_priest_life_l1_l3_v0.py'
       - 'scripts/b04_b05_low_priest_complete_noncombat_v0.py'
+      - 'scripts/b05_b06_native_party_continuity_v0.py'
+      - 'tests/test_b05_b06_native_party_continuity_v0.py'
+      - 'docs/design/b05-b06-native-cross-encounter-party-resource-continuity-v0.md'
       - 'tests/test_b04_b05_low_priest_complete_noncombat_v0.py'
       - 'docs/design/b04-b05-low-priest-complete-character-noncombat-v0.md'
       - 'scripts/b04_b07_twelve_focus_certification_protocol_v0.py'
@@ -171,6 +174,13 @@ jobs:
           mkdir -p build
           python -m scripts.b04_b05_low_priest_complete_noncombat_v0 > build/b04-b05-low-priest-full-noncombat-v0.json
           python -m json.tool build/b04-b05-low-priest-full-noncombat-v0.json > /dev/null
+      - name: Run focused native cross-encounter party state continuity
+        run: python -m unittest discover -s tests -p 'test_b05_b06_native_party_continuity_v0.py' -v
+      - name: Produce source-bound inherited HP VP wound arrow and recovery evidence
+        run: |
+          mkdir -p build
+          python -m scripts.b05_b06_native_party_continuity_v0 > build/b05-b06-native-party-continuity-v0.json
+          python -m json.tool build/b05-b06-native-party-continuity-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -194,4 +204,5 @@ jobs:
             build/b04-b07-blank-flexible-cohort-preflight-v0.json
             build/b04-b05-b06-l1-source-native-combat-v0.json
             build/b04-b05-low-priest-full-noncombat-v0.json
+            build/b05-b06-native-party-continuity-v0.json
           if-no-files-found: error

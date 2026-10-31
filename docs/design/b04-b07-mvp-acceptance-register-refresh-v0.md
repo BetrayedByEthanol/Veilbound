@@ -8,6 +8,8 @@
 
 **Post-#192 proposed full Low Priest source bridge:** [B04/B05 Low Priest Complete Character & Noncombat v0](b04-b05-low-priest-complete-character-noncombat-v0.md) independently audits all six A/B selected sheets and adds G0-paid Inspection/eligible Rapport and real Learned Discipline resolutions, while retaining historical physical G0 actor and original #185 proxy-only evidence separately. No Focus certificate, independently observed GM session or gate is awarded.
 
+**Post-#193 proposed resource-chain witness:** [B05/B06 Native Cross-Encounter Party Resource Continuity v0](b05-b06-native-cross-encounter-party-resource-continuity-v0.md) uses two actual G8 source terminals with a direct live-instance G0/G4.2 transfer of attrition, arrows, VP, wounds and supported maintained Guideds. Strictly not full campaign persistence: other ongoing toxins, wards and source clocks fail closed. No GM human play/certification accepted.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
