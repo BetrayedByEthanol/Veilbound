@@ -68,6 +68,10 @@ An item becomes **accepted only after independently attributable evidence**, not
 
 Authentic human/GM decisions, independently authenticated reviewers, source-paid external evidence and actual level-up events **remain missing**.
 
+## Focus-specific combat & noncombat bounded evidence — proposed follow-up
+
+[B04/B05 source evidence v0](b04-b05-focus-specific-combat-noncombat-evidence-v0.md) is **proposed in the current PR**, not yet merged or certified. The matrix runs two real native combat policies per level for **12 Focus pairings × 3 levels**, recording 72 bounded combat ledger digests; its noncombat column deliberately keeps **24 Training-only access preflights, nine Anointed G4.2 elapsed-clock replays with no external GM verdict, and three Low Priest A/B physical-proxy-only gaps** separate. These are source evidence candidates for the [C1–C7 independent protocol](b04-b07-independent-twelve-focus-certification-protocol-pilot-roster-v0.md), **not** real human choices, a GM-authenticated social check or a level award. **0/12** full Focus certificates and **0/6** strict MVP gates remain closed.
+
 ## Priority work queue — implementation versus evidence
 
 | Sequence | Coherent deliverable | Implementation left | Separate review / external evidence | Closure affected |
