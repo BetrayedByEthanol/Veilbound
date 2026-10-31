@@ -10,6 +10,12 @@ The shared preflight authenticates the original G8 terminal and **validates the 
 
 Once authorized, **only G4.2** advances actual exploration seconds. Copy the actual `ClockEvent` keys, original chronological orders, pending deadline seconds and serials already handled by #194. The new adapter also copies the native interpreters tied to them: G4.3 active and historical toxin state, both short-interval and event-based long profiles; the G4 legacy TX-HM six-second phase and already-consumed packet identities; G4.4 Endurance ward/suppression IDs, fixed 60-second expiry, prepaid Spent VP, units and partial local six-second suppression phase; and authenticated Hunter exposure stages/onset/escalation/expiry marker keys where a **genuine original G4.4 Bite** supplied them. Old Bite *ledger indexes* are encounter-local and deliberately do **not** become attack authority in the new scene; persistent exposure IDs remain protected against replay. No source-independent Hunter bite or venom is manufactured for the sample party.
 
+### Multi-encounter TX-HM provenance and pulse evidence
+
+Legacy G4 `schedule_hemotoxin()` records `g4_toxin_scheduled` in the original encounter ledger, **not** in G4.3 `toxins.exposure_ids`. Its provenance therefore travels separately as the original recipient/source digest, scene and native schedule event index, together with the still-existing historical TX-HM record. No extra G4.3 exposure identity is manufactured and no exposure is reapplied in later encounters. After a second real Soldier combat has advanced the remaining legacy Step-3 ticks, a third live handoff can still authenticate the original TX-HM; removing its carried provenance must fail before committing route time.
+
+The JSON evidence matrix records the **original pending arrival marker ID before advancing the G4.2 clock**, then checks that this same event was consumed by the native pulse. The next newly scheduled marker is reported separately. A false original-marker identity now fails evidence generation instead of producing a misleading successful witness.
+
 ### Maintained G3 effects
 
 - Source R's Chosen **Self Guided Regeneration** continues as in #194: one original host, 1 Committed VP, no recast or additional regeneration Step.

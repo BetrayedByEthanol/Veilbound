@@ -295,7 +295,7 @@ def handoff(previous, following, *, elapsed_seconds, travel_ref,
 
 
 def _new_scene(opponent, level, seed, *, previous=None, elapsed_seconds=0,
-               travel_ref="", prepared_only=False):
+               travel_ref="", prepared_only=False, carry_effects=False):
     _inputs(opponent,level,seed,"party_victory")
     source,state=OPPONENTS[opponent]
     actors=[enemy_actor(source,"foe","enemy",start_state=state,
@@ -316,7 +316,8 @@ def _new_scene(opponent, level, seed, *, previous=None, elapsed_seconds=0,
             raise ValueError("Prepared-only scene cannot import yet")
         return e,None
     receipt=handoff(previous,e,elapsed_seconds=elapsed_seconds,
-                    travel_ref=travel_ref) if previous is not None else None
+                    travel_ref=travel_ref,
+                    carry_effects=carry_effects) if previous is not None else None
     e.g4.clock.enter_initiative()
     e.begin_round()
     combat=SourceMelee(e,player_benchmark_target="foe")

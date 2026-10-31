@@ -3,7 +3,7 @@ import unittest
 from copy import deepcopy
 
 from scripts.b05_b06_native_party_continuity_v0 import (
-    _first_withdrawal, _new_scene, handoff, party_state,
+    _first_withdrawal, _new_scene, _resolve_victory, handoff, party_state,
 )
 from scripts.b05_b06_cross_encounter_effect_continuity_v0 import effect_state
 from scripts.b06_encounter_state_v0 import UnresolvedDecision
@@ -244,6 +244,78 @@ class CrossEncounterEffectContinuationTests(unittest.TestCase):
         self.assertTrue(receipt["effect_continuation_enabled"])
         self.assertIsNotNone(receipt["native_effect_continuation_sha256"])
         self.assertEqual(receipt["prior_party_sha256"],receipt["incoming_party_sha256"])
+
+
+    def test_11_legacy_source_receipt_survives_two_real_native_encounter_handoffs(self):
+        # G4 legacy TX-HM does not claim a G4.3 exposure_id. The first G8
+        # encounter has the genuine schedule entry; the *second* G8 ledger
+        # has only toxin ticks, not a fresh exposure/schedule authorization.
+        first=_first_withdrawal(3,0)
+        first.g4.schedule_hemotoxin(
+            "guardian",exposure_key="native:legacy:three-scenes",
+            actual_exposure=True,resistance_total=1,wound_location_roll=8)
+        original_receipts=[ev for ev in first.ledger
+                           if ev["kind"]=="g4_toxin_scheduled"
+                           and ev["detail"]["key"]=="native:legacy:three-scenes"]
+        self.assertEqual(len(original_receipts),1)
+        self.assertNotIn("native:legacy:three-scenes",
+                         first.g4.toxins.exposure_ids)
+        self.assertEqual(first.g4.short_toxins[0]["left"],5)
+
+        second,receipt=_new_scene(
+            "soldier",3,0,previous=first,elapsed_seconds=0,
+            travel_ref="GM:gate-to-second-soldier",
+            carry_effects=True)
+        self.assertTrue(receipt["effect_continuation_enabled"])
+        origin=effect_state(second.e)["legacy_toxin_provenance"]
+        self.assertIn("native:legacy:three-scenes",origin)
+        self.assertEqual(
+            origin["native:legacy:three-scenes"]["native_schedule_index"],
+            original_receipts[0]["index"])
+        self.assertEqual(_resolve_victory(second,"soldier"),
+                         "soldier_defeat")
+        mid=second.e
+        self.assertGreater(mid.g4.short_toxins[0]["left"],0)
+        self.assertFalse(any(
+            ev["kind"]=="g4_toxin_scheduled"
+            for ev in mid.ledger))
+        self.assertNotIn("native:legacy:three-scenes",
+                         mid.g4.toxins.exposure_ids)
+
+        third,_=_new_scene("sentry_cold",3,0,prepared_only=True)
+        start=mid.g4.clock.world_seconds
+        # A lost transported receipt is not a substitute for the original
+        # native G4 schedule; fail closed before charging travel.
+        carried=mid.g4.legacy_toxin_provenance
+        mid.g4.legacy_toxin_provenance={}
+        with self.assertRaises(UnresolvedDecision):
+            handoff(mid,third,elapsed_seconds=100,
+                    travel_ref="GM:no-provenance",carry_effects=True)
+        self.assertEqual(mid.g4.clock.world_seconds,start)
+        mid.g4.legacy_toxin_provenance=carried
+
+        receipt3=handoff(
+            mid,third,elapsed_seconds=1,
+            travel_ref="GM:second-soldier-to-sentry",carry_effects=True)
+        self.assertEqual(receipt3["world_seconds"],start+1)
+        self.assertEqual(third.g4.short_toxins[0]["key"],
+                         "native:legacy:three-scenes")
+        self.assertEqual(effect_state(third)["legacy_toxin_provenance"],origin)
+        self.assertNotIn("native:legacy:three-scenes",
+                         third.g4.toxins.exposure_ids)
+        self.assertEqual(receipt3["native_effect_continuation_sha256"],
+                         canonical_digest(effect_state(third)))
+
+    def test_12_evidence_witness_attests_original_consumed_marker(self):
+        from scripts.b05_b06_cross_encounter_effect_continuity_v0 import matrix
+        receipt=matrix()
+        self.assertTrue(receipt["same_authenticated_marker"])
+        self.assertEqual(receipt["delivered_original_marker_id"],
+                         receipt["next_native_toxin_event"])
+        self.assertNotEqual(receipt["delivered_original_marker_id"],
+                            receipt["subsequent_native_toxin_event"])
+        self.assertEqual(receipt["vigor_after_pulse"],
+                         receipt["vigor_before_pulse"]-1)
 
 
 if __name__=="__main__":

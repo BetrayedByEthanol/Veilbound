@@ -13,12 +13,67 @@ PARTY = ("vanguard", "guardian", "archer", "scholar")
 CLOCK_TAGS = ("mundane:", "hunter:", "endurance:")
 
 
+def _legacy_provenance(e):
+    """Authenticate legacy TX-HM from native G4 receipt or prior live import.
+
+    The original G4 schedule deliberately does NOT claim a G4.3 exposure ID.
+    Carry its authenticated source event as a separate, immutable-by-copy
+    lineage record; never invent a G4.3 exposure or duplicate a scheduled
+    poison on the receiving encounter.
+    """
+    carried=getattr(e.g4,"legacy_toxin_provenance",{})
+    if type(carried) is not dict:
+        raise UnresolvedDecision("Invalid carried legacy toxin provenance")
+    witnessed={}
+    for ev in e.ledger:
+        if ev["kind"]!="g4_toxin_scheduled":
+            continue
+        facts=ev["detail"]
+        key,recipient=facts.get("key"),facts.get("recipient")
+        if (type(key) is not str or not key or recipient not in e.actors
+                or facts.get("profile")!="TX-HM" or key in witnessed):
+            raise UnresolvedDecision("Malformed native legacy toxin witness")
+        witnessed[key]={
+            "recipient":recipient,
+            "origin_scene":e.scenario,
+            "origin_source_id":e.actors[recipient].source.source_id,
+            "origin_source_sha256":e.actors[recipient].source.digest,
+            "native_schedule_index":ev["index"],
+        }
+    if any(key in witnessed and witnessed[key]!=value
+           for key,value in carried.items()):
+        raise UnresolvedDecision("Conflicting original legacy toxin provenance")
+    provenance={**carried,**witnessed}
+    live={t["key"]:t for t in e.g4.short_toxins}
+    if len(live)!=len(e.g4.short_toxins) or set(provenance)!=set(live):
+        raise UnresolvedDecision("Legacy toxin source evidence must match historical instances")
+    for key,t in live.items():
+        witness=provenance[key]
+        if (type(witness) is not dict
+                or set(witness)!={
+                    "recipient","origin_scene","origin_source_id",
+                    "origin_source_sha256","native_schedule_index"}
+                or witness["recipient"]!=t["recipient"]
+                or witness["recipient"] not in PARTY
+                or type(witness["origin_scene"]) is not str
+                or not witness["origin_scene"]
+                or type(witness["origin_source_id"]) is not str
+                or not witness["origin_source_id"]
+                or type(witness["origin_source_sha256"]) is not str
+                or len(witness["origin_source_sha256"])!=64
+                or type(witness["native_schedule_index"]) is not int
+                or witness["native_schedule_index"]<0):
+            raise UnresolvedDecision("Legacy toxin has no authenticated source lineage")
+    return provenance
+
+
 def effect_state(e):
     """Stable receipts including active and historical unique hazard keys."""
     d = e.g4
     return {
         "short_toxins": deepcopy([t for t in d.short_toxins
                                   if t["recipient"] in PARTY]),
+        "legacy_toxin_provenance": deepcopy(_legacy_provenance(e)),
         "unified_instances": deepcopy({
             k:v for k,v in d.toxins.instances.items() if k in PARTY}),
         "exposure_ids": sorted(d.toxins.exposure_ids),
@@ -51,6 +106,7 @@ def _active_marker(e, actor, ident, source):
 def validate_source(e):
     """Read-only validation for party hazards before committing any travel."""
     d=e.g4
+    legacy_provenance=_legacy_provenance(e)
     for n in PARTY:
         a=e.actors[n]
         if a.dead or a.hp<=0:
@@ -59,10 +115,8 @@ def validate_source(e):
         if len(legacy)>1:
             raise UnresolvedDecision("More than one legacy toxin on one recipient")
         for t in legacy:
-            if (t["key"] not in d.toxins.exposure_ids
-                    and not any(ev["kind"]=="g4_toxin_scheduled"
-                                and ev["detail"].get("key")==t["key"]
-                                for ev in e.ledger)):
+            if (t["key"] not in legacy_provenance
+                    or legacy_provenance[t["key"]]["recipient"]!=n):
                 raise UnresolvedDecision("Legacy toxin has no native source")
             if (type(t["phase"]) is not int or not 0<=t["phase"]<6
                     or type(t["applied"]) is not int or t["applied"]<0):
@@ -160,6 +214,9 @@ def restore(previous, following):
     p,f=previous.g4,following.g4
     f.short_toxins=deepcopy([v for v in p.short_toxins
                             if v["recipient"] in PARTY])
+    # Preserve the authenticated original G4 schedule witness for a third
+    # (or later) handoff. The new encounter ledger does not replay exposure.
+    f.legacy_toxin_provenance=deepcopy(_legacy_provenance(previous))
     f.toxins.instances=deepcopy({k:v for k,v in p.toxins.instances.items()
                                 if k in PARTY})
     f.toxins.exposure_ids=set(p.toxins.exposure_ids)
@@ -199,12 +256,23 @@ def matrix():
     if canonical_digest(arrival)!=receipt["native_effect_continuation_sha256"]:
         raise AssertionError("G4 toxin/clock receipt changed on arrival")
     t=dest.g4.toxins.active("guardian")
-    marker=dest.g4.clock.events[t["marker"]]
+    # The live toxin record will replace marker after a scheduled pulse.
+    # Snapshot the ORIGINAL authenticated arrival marker before advancing.
+    original_marker_id=t["marker"]
+    marker=dest.g4.clock.events[original_marker_id]
     seconds=marker.due_seconds-dest.g4.clock.world_seconds
     before=dest.actors["guardian"].vigor
     dest.g4.clock.advance_exploration(seconds)
     if dest.actors["guardian"].vigor!=before-1:
         raise AssertionError("Native scheduled toxin pulse did not deliver")
+    delivered=(original_marker_id in arrival["clock_events"]
+               and marker.consumed and not marker.canceled
+               and any(ev["kind"]=="g42_milestone_due"
+                       and ev["detail"].get("event_id")==original_marker_id
+                       for ev in dest.ledger)
+               and t["marker"]!=original_marker_id)
+    if not delivered:
+        raise AssertionError("Original arrival pulse marker was not consumed")
     return {
         "version":"B05-B06-Effect-Duration-Continuation-v0",
         "scope":"actual_G8_live_instance_no_human_play",
@@ -212,10 +280,12 @@ def matrix():
         "source_effect_sha256":canonical_digest(prior),
         "arrival_effect_sha256":canonical_digest(arrival),
         "remaining_seconds_until_native_pulse":seconds,
-        "next_native_toxin_event":t["marker"],
+        "next_native_toxin_event":original_marker_id,
+        "delivered_original_marker_id":original_marker_id,
+        "subsequent_native_toxin_event":t["marker"],
         "vigor_before_pulse":before,
         "vigor_after_pulse":dest.actors["guardian"].vigor,
-        "same_authenticated_marker":t["marker"] in arrival["clock_events"],
+        "same_authenticated_marker":delivered,
         "independent_focus_certificates":0,"human_pilot_sessions":0,
         "mvp_exit_gates":0,
     }
