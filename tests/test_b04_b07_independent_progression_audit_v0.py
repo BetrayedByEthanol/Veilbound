@@ -343,16 +343,18 @@ class IndependentProgressionTests(unittest.TestCase):
         for level in (2, 3):
             with self.subTest(saved_low_scholar_level=level):
                 original = low(level)
-                # Existing authored snapshot omits this earned L2 award.
-                issues = {x["code"] for x in _sheet_issues(
-                    "Scholar/Low", level, original, low(1),
-                    low(level-1), gates)}
-                self.assertIn("talent_unaccounted", issues)
-                original["saved_talent_selections"] = 1
+                # After the source correction, the L2 award is genuinely
+                # retained at both L2 and L3. The negative case must
+                # deliberately erase that saved balance instead.
                 issues = {x["code"] for x in _sheet_issues(
                     "Scholar/Low", level, original, low(1),
                     low(level-1), gates)}
                 self.assertNotIn("talent_unaccounted", issues)
+                original["saved_talent_selections"] = 0
+                issues = {x["code"] for x in _sheet_issues(
+                    "Scholar/Low", level, original, low(1),
+                    low(level-1), gates)}
+                self.assertIn("talent_unaccounted", issues)
 
     def test_17_priest_preparation_uses_canonical_life_catalogue(self):
         authored = authored_priest_techniques()
