@@ -55,21 +55,32 @@ Each witness records the original source-file SHA-256 and its independent findin
 
 The verifier separately checks *hypothetical* GM-declared L1→L2→L3 receipts: exactly two distinct, explicit story-event IDs, correct character, one level at a time, and non-automatic awards. No two events have actually occurred. This validation does not award levels, grant new Training/Talents, refill Available VP, refill Destiny, add known techniques, or infer XP. Only a real GM session/adventure record can establish the milestones happened.
 
-## Findings requiring follow-up
+## Source Talent ledger reconciliation — corrective branch
 
-| Source pairing | Level | Finding | Classification / next action |
-|---|---|---|---|
-| **High Priest / Life** | L3 | Sheet includes a second selected Talent, **TAL-M03 Frugal Technique**, although the adopted provisional High Focus schedule awards only the L1 selection before L5 | **Over-award / structural progression inconsistency**. Remove or separately explain the extra selection through a documented authorized rule; do not presume its effects legal |
-| **Medium Gifted / Ward** | L3 | Only the L1 Talent is shown although Medium Focus earns a second selection at L3 | **Unaccounted earned selection**, not necessarily illegal. Choose a legal L3 Talent or explicitly record it as saved, with no free effect |
-| **Low Scholar / Embodiment** | L2–L3 | The build shows L1 Talent and adds a Talent at L3, without accounting for the distinct L2 award | **Unaccounted earned selection**, not necessarily illegal. Identify an actual L2 choice or explicitly record the saved award. No retroactive free combat effect |
+The findings originally reported by merged PR #181 are reconciled
+against the [canonical Focus Talent schedule](../rules/10-advancement/talents-framework-v0.md).
+Saved selections confer **no effect** until a legal purchase.
 
-These are **source observations**, not silently corrected character choices. The executable audit produces machine-readable pairing/level issue codes. A future corrective PR should reconcile source snapshots, the rule's Talent ledger, associated independent checks, native actor-derived Talent modifiers, and any affected bounded evidence before claiming that the relevant L1→3 structural progression is fully validated. In particular, removing High Priest's unauthorized L3 Talent is more than a documentation change if prior encounters relied on its VP discount.
+| Pairing | L1 selected / saved | L2 selected / saved | L3 selected / saved | Resolution |
+|---|---|---|---|---|
+| **High Priest / Life** | TAL-C02 / 0 | TAL-C02 / 0 | TAL-C02 / 0 | Remove unearned L3 TAL-M03; preserve TAL-C02's actual +1 Regeneration |
+| **Medium Gifted / Ward** | TAL-G01 / 0 | TAL-G01 / 0 | TAL-G01 / 1 | Save earned Medium L3 selection; no new Ward/Conduit effect |
+| **Low Scholar / Embodiment** | TAL-U01 / 0 | TAL-U01 / 1 | TAL-U01, TAL-C01 / 1 | Save L2 award through L3; spend new L3 award on Combat Awareness and preserve its +2 Initiative |
+
+The four former issue instances (High L3 overaward, Medium L3 and Low
+L2/L3 unaccounted) must disappear from independent findings. Full-audit
+negative regressions reintroduce each invalid ledger and verify rejection.
+High Priest's historic native fixed-policy witnesses did not activate
+the optional unauthorized L3 TAL-M03 discount; **Medium Priest** L3 may
+still select TAL-M03 under Medium's genuine L3 award. None of these source
+fixes creates a new Talent effect, retrospective scenario result,
+actual GM level award or independent Focus certificate.
 
 ## Verification vs certification matrix
 
-- **Checked now:** original source provenance and independent bounded budget/award/progression validation across the twelve pairings; three Talent-accounting discrepancies discovered and explicitly retained.
+- **Checked now:** original source provenance and independent bounded budget/award/progression validation across the twelve pairings; three Talent-accounting discrepancies discovered in PR #181 reconciled in source, with rejection regressions retained.
 - **Not yet checked as independent full-Focus evidence:** complete L1, L2 and L3 combat **and** noncombat role alternatives, meaningfully weak options/counterplay, all required native spell/technique/pilot choices, level-transition actual resource conservation across real sessions, genuine GM-authored consequences, and independent acceptance sign-off.
-- **Strict MVP exit gates:** still **0/6**. Independent full Focus certificates still **0/12**. Original B01–B07 closure remains **3/7**. Structural source pairings remain **12/12 present**, but mechanical progression corrections are open. Original B06 G0–G8 milestones remain fixed.
+- **Strict MVP exit gates:** still **0/6**. Independent full Focus certificates still **0/12**. Original B01–B07 closure remains **3/7**. Structural source pairings remain **12/12 present**, but real scene-use and independent Focus certification remain open. Original B06 G0–G8 milestones remain fixed.
 
 ## Reproduce
 

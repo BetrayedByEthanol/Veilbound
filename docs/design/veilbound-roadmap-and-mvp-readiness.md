@@ -1,6 +1,6 @@
 # Veilbound — Development Roadmap, Milestones and Level 1–3 MVP Readiness
 
-> **Active checkpoint: 30 October 2026, PR #180 merged: Low Gifted native G0/G1/G2/G5 Rooted Guard +1 / Unbound Step −1 MP with review corrections.** This B04/B07 audit proposes **independent structural/progression source checking** for all 12 L1–3 pairings (13 A/B variants, 39 snapshots). It identifies High Priest L3 Talent over-award and unaccounted L2 Low Scholar / L3 Medium Gifted awards; it neither chooses those Talents nor claims full independent combat/noncombat Focus certification. Approved pilot uses **two distinct GM-declared L2/L3 milestones**, with no automatic refresh. **12/12 source structural, 0/12 independently full-certified, 0/6 strict exits**; B04–B07 open, original B06 G0–G8 fixed.
+> **Current checkpoint: 31 October 2026, PR #181 merged: independent B04/B07 L1–3 source/progression audit.** It checked 12 pairings, 13 source variants and 39 snapshots, exposing three Talent ledger inconsistencies. **This corrective branch proposes** removing unearned High Priest L3 TAL-M03 and saving Medium Gifted L3 / Low Scholar L2–3 unused awards; this is pending normal PR review. No additional Talent effects or GM milestones are awarded. **12/12 structural, 0/12 independently full-certified, 0/6 strict exits; 3/7 blockers closed.** B06 G0–G8 remains fixed.
 > This is the repository's current **planning and MVP acceptance register**, not a canonical gameplay rule.
 > [Canonical rules](../rules/) and [structured content](../../content/) outrank design/audit commentary.
 > Individual [design records](README.md) retain their own scope, results and historical limitations.
@@ -37,7 +37,7 @@
 | B01–B07 blocker definitions closed | **3/7** | B04/B05/B06/B07 remain blocking |
 | Last merged integration delivery | **#180 merged: source-native Low Gifted G0/G1/G2/G5 Guard/Dodge and movement** | This audit PR checks all 12 source pairings and flags three B07 Talent-accounting gaps; independent combat/noncombat role evidence and actual GM milestones remain open |
 
-**B04/B07 independent progression review (this PR):** [Twelve-pairing level-1–3 audit](b04-b07-independent-l1-l3-build-progression-audit-v0.md) checks 13 source variants and 39 snapshots against separately encoded creation/progression schedules, with no self-verified source certificates. **High Priest L3 has an unauthorized second Talent; Low Scholar L2 and Medium Gifted L3 do not account for their earned Talent selections.** This is an open correction register, not an invented new choice, actual milestone award or Focus certificate. **0/12 full Focus certificates, 0/6 exits; 3/7 blockers closed.**
+**B04/B07 independent progression review (#181 merged; reconciliation in review):** The [twelve-pairing audit](b04-b07-independent-l1-l3-build-progression-audit-v0.md) independently checked 39 source snapshots. Its three source-ledger discrepancies (four issue instances) have an explicit corrective follow-up with negative regressions, but do not count as merged until PR approval. No independent combat/noncombat Focus certificate or actual GM milestone is inferred. **0/12 full certificates, 0/6 exits, 3/7 closed blockers.**
 
 **Frozen historical Hunter Phase 3 SHA-256:** c02c9830d10f1bcaf7d80ccedfe81102c1d4d9b28f4f004e9f715560b184ca5b.
 
