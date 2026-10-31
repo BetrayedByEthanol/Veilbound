@@ -16,6 +16,7 @@ from scripts.b06_movement_v0 import GridMovement
 from scripts.b06_ranged_v0 import RangedCombat, ShotChoice
 from scripts.b06_spells_v0 import SpellState
 from scripts.b06_damage_v0 import DamageState
+from scripts.b06_world_clock_v0 import SIX_HOURS
 from scripts.b06_soldier_sentry_g5_v0 import SourceMelee
 from scripts.b06_g7a_native_terminal_census_v0 import canonical_digest
 from scripts.b06_g8_soldier_sentry_full_pack_v0 import (
@@ -106,6 +107,80 @@ def _boundary(e):
     e.check()
 
 
+def _preflight_destination(previous, following):
+    """Validate the entire destination before G4.2 travel can change source.
+
+    Party G0 actors, G2 equipment, G3 hosts and G4.2 event identities must
+    still be their source-created defaults. A Sentry's preauthored foe-host
+    remains legal; no destination party effect or edited clock does.
+    """
+    if (following.round != 0 or following.current is not None
+            or following.pending_regeneration is not None
+            or following.g4 is None or following.g3 is None
+            or following.g2 is None or following.g1 is None
+            or getattr(following, "g5", None) is not None
+            or set(PARTY) - set(following.actors)):
+        raise UnresolvedDecision("Fresh G0-G4 scene required; cannot overwrite live actions")
+
+    for n in PARTY:
+        candidate = following.actors[n]
+        fresh = party_actor(ROLES[n], candidate.level, n, "party",
+                            occupied=candidate.occupied)
+        source_equipment = {
+            item for item, state in candidate.source.equipment
+            if state is True or state == "wielded"
+        }
+        if (candidate.source != previous.actors[n].source
+                or candidate.level != previous.actors[n].level
+                or candidate.team != "party"
+                or candidate.source != fresh.source
+                or any(getattr(candidate, f) != getattr(fresh, f)
+                       for f in CARRY_FIELDS)
+                or following.g2.wielded.get(n) != source_equipment
+                or following.g2.aims.get(n) is not None
+                or following.g2.own_turn_number.get(n) != 0):
+            raise UnresolvedDecision("Following actor must be pristine SAME source")
+
+    # Existing party-owned/targeted G3 effects cannot be overwritten. The
+    # original enemy's prepared Reserve (if any) is separately preserved.
+    if (following.g3.next_effect != 0
+            or any(v.caster in PARTY or v.recipient in PARTY
+                   for v in following.g3.effects.values())
+            or any(key[0] in PARTY for key in following.g3.effects)):
+        raise UnresolvedDecision("Destination already owns a party effect/host")
+
+    # Only one original Recovery checkpoint per actor is permitted in the
+    # new scene. Any caller-supplied milestone or colliding future Recovery
+    # ID must be refused BEFORE the prior clock advances even one second.
+    clock = following.g4.clock
+    expected = {f"recovery:{ident}:1" for ident in following.actors}
+    if (clock.mode != "exploration" or clock.world_seconds != 0
+            or clock.entry_round is not None
+            or set(clock.events) != expected
+            or set(clock.recovery_serial) != set(following.actors)
+            or clock.sequence != len(expected)):
+        raise UnresolvedDecision("Destination clock is not a pristine source clock")
+    for ident, actor in following.actors.items():
+        ev = clock.events[f"recovery:{ident}:1"]
+        if (ev.actor_id != ident
+                or ev.actor_source != actor.source.source_id
+                or ev.source_digest != actor.source.digest
+                or ev.kind != "recovery"
+                or ev.phase != "recovery"
+                or ev.source != "canonical:6h-recovery"
+                or ev.due_seconds != SIX_HOURS
+                or ev.original_order != SIX_HOURS
+                or ev.due_round is not None
+                or ev.consumed or ev.canceled
+                or clock.recovery_serial[ident] != 2):
+            raise UnresolvedDecision("Destination recovery checkpoint was altered")
+    if any(key in clock.events and clock.events[key].actor_id not in PARTY
+           for key, ev in previous.g4.clock.events.items()
+           if ev.actor_id in PARTY):
+        raise UnresolvedDecision("Recovery/milestone ID collision")
+    following.check()
+
+
 def handoff(previous, following, *, elapsed_seconds, travel_ref):
     """Bind TWO live encounter objects; no caller-authored snapshot injection.
 
@@ -117,42 +192,19 @@ def handoff(previous, following, *, elapsed_seconds, travel_ref):
         raise ValueError("Elapsed travel is source-paid whole seconds")
     if type(travel_ref) is not str or not travel_ref.strip():
         raise ValueError("A distinct authored between-scene route reference is required")
-    if (following.round != 0 or following.current is not None
-            or following.g4 is None or following.g3 is None
-            or following.g2 is None or following.g1 is None
-            or getattr(following, "g5", None) is not None
-            or set(PARTY) - set(following.actors)):
-        raise UnresolvedDecision("Fresh G0-G4 scene required; cannot overwrite live actions")
     _boundary(previous)
-    # Source clock advances through REAL G4.2 intervals before carrying over
-    # recovery event identities and phases. Zero elapsed seconds earns nothing.
+    # Destination feasibility is a read-only precondition. A rejected actor,
+    # item, G3 effect or ClockEvent must not consume source travel or Recovery;
+    # correcting that destination and retrying the same interval is safe.
+    _preflight_destination(previous, following)
+    # Only now may the real source-owned G4.2 clock process authored travel.
     previous.g4.clock.advance_exploration(elapsed_seconds)
     _boundary(previous)
     outgoing=party_state(previous)
-    # A new encounter's actor is a source-default placeholder, not caller-
-    # adjustable state. An altered arrow count, wound, spent VP or source
-    # attribute is rejected rather than silently overwritten by the import.
-    for n in PARTY:
-        candidate=following.actors[n]
-        fresh=party_actor(ROLES[n],candidate.level,n,"party",
-                          occupied=candidate.occupied)
-        if (candidate.source != previous.actors[n].source
-                or candidate.level != previous.actors[n].level
-                or candidate.team != "party"
-                or candidate.source != fresh.source
-                or any(getattr(candidate,f) != getattr(fresh,f)
-                       for f in CARRY_FIELDS)):
-            raise UnresolvedDecision("Following actor must be pristine SAME source")
-    if any(following.g3.effects.get((n,v["ident"])) for n in PARTY
-           for v in outgoing[n]["effects"]):
-        raise UnresolvedDecision("Maintained host ID collision")
     old_clock=previous.g4.clock
     next_clock=following.g4.clock
     carried_events={key:deepcopy(v) for key,v in old_clock.events.items()
                     if v.actor_id in PARTY}
-    if any(key in next_clock.events and next_clock.events[key].actor_id not in PARTY
-           for key in carried_events):
-        raise UnresolvedDecision("Recovery/milestone ID collision")
     for n in PARTY:
         a=following.actors[n]
         source=previous.actors[n]

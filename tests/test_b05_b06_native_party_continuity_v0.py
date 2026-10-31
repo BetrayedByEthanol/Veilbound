@@ -126,6 +126,67 @@ class NativePartyContinuityTests(unittest.TestCase):
         with self.assertRaises(UnresolvedDecision):
             handoff(first,following,elapsed_seconds=0,travel_ref="test:not-pristine")
 
+    def test_07b_rejected_three_hour_destination_cannot_double_charge_travel(self):
+        # Codex P2: source must be byte-for-byte/clock-for-clock untouched
+        # when a destination's ammunition was altered before the handoff.
+        first = _first_withdrawal(3, 0)
+        next_scene, _ = _new_scene("sentry_cold", 3, 0, prepared_only=True)
+        next_scene.actors["archer"].ammunition = 999
+        source_digest = canonical_digest(first.ledger)
+        source_party = party_state(first)
+        source_events = deepcopy(first.g4.clock.events)
+        source_serial = deepcopy(first.g4.clock.recovery_serial)
+        with self.assertRaises(UnresolvedDecision):
+            handoff(first, next_scene, elapsed_seconds=10800,
+                    travel_ref="source:three-hour-route")
+        self.assertEqual(first.g4.clock.world_seconds, 0)
+        self.assertEqual(first.g4.clock.events, source_events)
+        self.assertEqual(first.g4.clock.recovery_serial, source_serial)
+        self.assertEqual(party_state(first), source_party)
+        self.assertEqual(canonical_digest(first.ledger), source_digest)
+        self.assertFalse(any(ev["kind"] == "g4_six_hour_recovery"
+                             for ev in first.ledger))
+
+        # Correct only the destination; the original three hours are paid
+        # exactly once. Otherwise a second 10800 would spuriously award 6h.
+        next_scene.actors["archer"].ammunition = 20
+        receipt = handoff(first, next_scene, elapsed_seconds=10800,
+                          travel_ref="source:three-hour-route")
+        self.assertEqual(first.g4.clock.world_seconds, 10800)
+        self.assertEqual(next_scene.g4.clock.world_seconds, 10800)
+        self.assertEqual(receipt["world_seconds"], 10800)
+        self.assertTrue(receipt["no_free_restore"])
+        self.assertFalse(any(ev["kind"] == "g4_six_hour_recovery"
+                             for ev in first.ledger))
+        self.assertEqual(receipt["prior_party_sha256"],
+                         receipt["incoming_party_sha256"])
+
+    def test_07c_destination_host_clock_and_gear_collisions_preflight(self):
+        from scripts.b06_spells_v0 import SpellEffect
+        first = _first_withdrawal(3, 0)
+        source_digest = canonical_digest(first.ledger)
+        clock_events = deepcopy(first.g4.clock.events)
+        for fault in ("party_effect", "future_recovery_collision", "wielded"):
+            with self.subTest(fault=fault):
+                next_scene, _ = _new_scene("sentry_cold", 3, 0,
+                                           prepared_only=True)
+                if fault == "party_effect":
+                    next_scene.g3.effects[("archer", "G3-0001")] = SpellEffect(
+                        "G3-0001", "archer", "Guided Regeneration",
+                        "archer", 1, chosen=True)
+                elif fault == "future_recovery_collision":
+                    next_scene.g4.clock.events["recovery:archer:2"] = replace(
+                        next_scene.g4.clock.events["recovery:foe:1"],
+                        ident="recovery:archer:2")
+                else:
+                    next_scene.g2.wielded["archer"].clear()
+                with self.assertRaises(UnresolvedDecision):
+                    handoff(first, next_scene, elapsed_seconds=10800,
+                            travel_ref="source:rejected-transition")
+                self.assertEqual(first.g4.clock.world_seconds, 0)
+                self.assertEqual(first.g4.clock.events, clock_events)
+                self.assertEqual(canonical_digest(first.ledger), source_digest)
+
     def test_08_unhandled_poison_or_live_nonrecovery_clock_rejected(self):
         first=_first_withdrawal(3,0)
         new,_=_new_scene("sentry_cold",3,0,prepared_only=True)
