@@ -6,6 +6,9 @@ on:
       # Audit code and tests.
       - 'scripts/b04_b07_independent_progression_audit_v0.py'
       - 'scripts/b04_b07_twelve_focus_certification_protocol_v0.py'
+      - 'scripts/b04_b05_focus_combat_noncombat_evidence_v0.py'
+      - 'tests/test_b04_b05_focus_combat_noncombat_evidence_v0.py'
+      - 'docs/design/b04-b05-focus-specific-combat-noncombat-evidence-v0.md'
       - 'tests/test_b04_b07_twelve_focus_certification_protocol_v0.py'
       - 'tests/test_b04_b07_independent_progression_audit_v0.py'
       - '.github/workflows/b04-b07-independent-progression-audit.yml'
@@ -74,6 +77,13 @@ jobs:
           python -m scripts.b04_b07_twelve_focus_certification_protocol_v0 --roster > build/b04-b07-twelve-focus-candidate-roster.json
           python -m json.tool build/b04-b07-independent-l1-l3-audit.json > /dev/null
           python -m json.tool build/b04-b07-twelve-focus-candidate-roster.json > /dev/null
+      - name: Run focused twelve-Focus combat/noncombat evidence regressions
+        run: python -m unittest discover -s tests -p 'test_b04_b05_focus_combat_noncombat_evidence_v0.py' -v
+      - name: Produce bounded native Focus evidence and noncombat gap matrix
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_focus_combat_noncombat_evidence_v0 > build/b04-b05-focus-combat-noncombat-evidence-v0.json
+          python -m json.tool build/b04-b05-focus-combat-noncombat-evidence-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -83,4 +93,5 @@ jobs:
           path: |
             build/b04-b07-independent-l1-l3-audit.json
             build/b04-b07-twelve-focus-candidate-roster.json
+            build/b04-b05-focus-combat-noncombat-evidence-v0.json
           if-no-files-found: error
