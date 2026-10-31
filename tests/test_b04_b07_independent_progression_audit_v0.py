@@ -1351,7 +1351,7 @@ class IndependentProgressionTests(unittest.TestCase):
                     ".github/workflows/b04-b07-independent-progression-audit.yml"
                     ).read_text(encoding="utf-8")
         match = re.search(
-            r"(?ms)^  pull_request:\n    paths:\n(?P<paths>(?:      - '[^']+'\n)+)",
+            r"(?ms)^  pull_request:\n    paths:\n(?P<paths>.*?)(?=^  workflow_dispatch:)",
             workflow)
         self.assertIsNotNone(match)
         patterns = re.findall(r"^      - '([^']+)'$",
