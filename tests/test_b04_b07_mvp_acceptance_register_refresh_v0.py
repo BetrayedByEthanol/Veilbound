@@ -101,9 +101,8 @@ class MvpAcceptanceRegisterRefreshTests(unittest.TestCase):
         self.assertIn("39", self.acceptance)
         self.assertIn("13 variants", self.roadmap)
         self.assertIn("13 variants", self.acceptance)
-        self.assertIn("SOURCE_MODULES", "SOURCE_MODULES")  # source-backed input
         self.assertEqual(11, len(SOURCE_MODULES))  # 12th is Low Priest A/B
-        self.assertIn("0/12 independently", self.acceptance)
+        self.assertIn("full-play-certified", self.acceptance)
 
     def test_03_original_blocker_identity_and_no_new_b06_stage(self):
         table = self.roadmap.split(

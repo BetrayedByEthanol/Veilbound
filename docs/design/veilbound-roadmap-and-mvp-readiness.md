@@ -43,6 +43,14 @@
 
 Milestones: [G7-H #125](https://github.com/BetrayedByEthanol/Veilbound/pull/125), [G8 #127](https://github.com/BetrayedByEthanol/Veilbound/pull/127), Priest builds/encounters #128–133, Priest comparison #134–136, [formal assessment #137](https://github.com/BetrayedByEthanol/Veilbound/pull/137), [playstyle/readiness #138](https://github.com/BetrayedByEthanol/Veilbound/pull/138), [Priest role decisions #139](https://github.com/BetrayedByEthanol/Veilbound/pull/139), Scholar Inward/Embodiment/builds #140–142, Scholar comparative/offense/attrition/mobile #143–147, and [G1/G5 native off-turn Sword responses #148](https://github.com/BetrayedByEthanol/Veilbound/pull/148).
 
+### Historical PR design/integration snapshots (original as-of counts, not active status)
+
+The following dated proposals and merge descriptions retain their **historical**
+scope and original source claims. Their old "9/12", "this PR" and
+"not-native" statements **must not be used as current status**. The active
+checkpoint, independent acceptance register, blocker table and current
+progress checklist above/below control the present state.
+
 **Anointed Life/Restoration design candidate (not an MVP delivery):** [Birth Circumstances, Mission and shared Signature baseline v0](b04-b05-anointed-restoration-birth-mission-signature-baseline-v0.md) records a positively extraordinary collective-Volition origin, one personal Imprint/Mission and a **provisional** 0-VP recipient-Vigor-to-HP Signature with High/Medium/Low delivery and one Destiny exception. It changes **no** canonical effect, technique identity, three missing Anointed structural pairings, native evidence, **9/12** structural total or **0/12** independent certifications. Out-of-initiative cadence, numeric calibration and L3 Authority technique compatibility remain open.
 
 **B04/B05 Anointed Authority and Destiny — provisional source-bound design only:** [Conflagration/Restoration cross-Aspect Authority comparison](b04-b05-anointed-authority-destiny-cross-aspect-balance-v0.md) tests one 0-VP Signature + graded 1/2/3-Destiny enhancement against the actual Soldier/Sentry/Hunter fixture resources in 96 isolated next-Step cases, plus 15 Focus AP opportunity envelopes. A GM-recognized significant **Mission Event**, not a Mission milestone/completion, is proposed as an extra capped +1 Destiny award. This is **not native encounter integration, canonical progression, level-3 paid-technique compatibility, or a complete Anointed sheet**. Keep **9/12** structural, **0/12** certified, B04/B05/B06/B07 open and all six exit gates unchanged.

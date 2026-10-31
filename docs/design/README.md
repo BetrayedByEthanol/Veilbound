@@ -19,7 +19,7 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 **Historical record warning:** The individual designs indexed below describe their own original source/PR checkpoints. Older `9/12` character tallies, unapproved Anchor candidates and Anointed-not-native statements are **historical**, not competing current status. Canonical rules and the active roadmap outrank design-record commentary.
 
-## Active design records
+## Design record index — historical checkpoints and scoped evidence
 
 **Canonical L1–3 promotion:** [Anointed Signature, Destiny and Lesser Authority v0](../rules/08-archetypes/anointed-signature-authority-l1-3-v0.md) — bounded rule implementation for Life/Restoration and Fire/Conflagration; 0-VP High/Medium/Low Signatures, 2 maximum/1-per-completed-six-hours Destiny, GM Meaningful Mission Event, 1-Destiny Lesser Authority and exact L3 Conjure Flame/Guided Regeneration permissions. **12 focused isolated rule-referee tests; native G0/G4/G5 receipt binding, full Anointed sheets, balance certification and L4+ upgrades remain open.** Does not advance **9/12 structural**, **0/12 independently certified**, or **0/6 strict MVP exits**.
 
