@@ -174,7 +174,8 @@ def preflight(packet):
     Even valid strings, a different reviewer name, matching hashes and
     purported GM milestone refs may be entirely fabricated by a submitter.
     """
-    if type(packet) is not dict or packet.get("pairing") not in FOCUS_TASKS:
+    if (type(packet) is not dict or type(packet.get("pairing")) is not str
+            or packet["pairing"] not in FOCUS_TASKS):
         raise ValueError("Unknown pairing or packet")
     expected = blank_packet(packet["pairing"])
     if set(packet) != set(expected):

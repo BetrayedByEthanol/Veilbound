@@ -122,6 +122,11 @@ class TwelveFocusProtocolTests(unittest.TestCase):
                 bad[key] = forged
                 with self.assertRaises(ValueError):
                     preflight(bad)
+        for malformed_pairing in ([], {}, None, True):
+            bad = deepcopy(good)
+            bad["pairing"] = malformed_pairing
+            with self.assertRaises(ValueError):
+                preflight(bad)
         for key in ("full_focus_certified", "mvp_accepted",
                     "authenticated_gm", "independently_certified"):
             bad = deepcopy(good)
