@@ -11,6 +11,9 @@ on:
       - 'scripts/b04_b05_focus_noncombat_technique_integration_v0.py'
       - 'scripts/b05_b06_integrated_noncombat_adventure_v0.py'
       - 'scripts/b06_representative_gm_encounter_packs_v0.py'
+      - 'scripts/b04_b05_b06_b07_integrated_pilot_adventure_v0.py'
+      - 'tests/test_b04_b05_b06_b07_integrated_pilot_adventure_v0.py'
+      - 'docs/design/b04-b05-b06-b07-integrated-mvp-pilot-adventure-v0.md'
       - 'tests/test_b06_representative_gm_encounter_packs_v0.py'
       - 'docs/design/b06-representative-soldier-sentry-hunter-gm-encounter-packs-v0.md'
       - 'tests/test_b05_b06_integrated_noncombat_adventure_v0.py'
@@ -124,6 +127,17 @@ jobs:
           mkdir -p build
           python -m scripts.b06_representative_gm_encounter_packs_v0 > build/b06-representative-gm-encounter-packs-v0.json
           python -m json.tool build/b06-representative-gm-encounter-packs-v0.json > /dev/null
+      - name: Run focused integrated three-to-five-session pilot regressions
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_b07_integrated_pilot_adventure_v0.py' -v
+      - name: Produce source-bound multi-session GM candidate and blank intake
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_b06_b07_integrated_pilot_adventure_v0 --sessions 3 > build/b04-b07-mvp-3-session-candidate-v0.json
+          python -m scripts.b04_b05_b06_b07_integrated_pilot_adventure_v0 --sessions 4 > build/b04-b07-mvp-4-session-candidate-v0.json
+          python -m scripts.b04_b05_b06_b07_integrated_pilot_adventure_v0 --sessions 5 > build/b04-b07-mvp-5-session-candidate-v0.json
+          python -m scripts.b04_b05_b06_b07_integrated_pilot_adventure_v0 --sessions 4 --blank-intake > build/b04-b07-mvp-blank-external-play-intake-v0.json
+          python -m scripts.b04_b05_b06_b07_integrated_pilot_adventure_v0 --check build/b04-b07-mvp-blank-external-play-intake-v0.json > build/b04-b07-mvp-blank-intake-preflight-v0.json
+          for candidate in build/b04-b07-mvp-*v0.json; do python -m json.tool "$candidate" > /dev/null; done
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -138,4 +152,9 @@ jobs:
             build/b04-b05-focus-noncombat-techniques-v0.json
             build/b05-b06-integrated-noncombat-adventure-v0.json
             build/b06-representative-gm-encounter-packs-v0.json
+            build/b04-b07-mvp-3-session-candidate-v0.json
+            build/b04-b07-mvp-4-session-candidate-v0.json
+            build/b04-b07-mvp-5-session-candidate-v0.json
+            build/b04-b07-mvp-blank-external-play-intake-v0.json
+            build/b04-b07-mvp-blank-intake-preflight-v0.json
           if-no-files-found: error
