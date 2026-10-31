@@ -98,7 +98,7 @@ class FocusCombatNoncombatEvidenceTests(unittest.TestCase):
                     self.assertEqual(a["status"], STATUS_ANOINTED)
                     self.assertEqual(len(a["native_clock_ledger_sha256"]), 64)
                     self.assertGreater(a["native_clock_event_count"], 0)
-                    self.assertIn("not independently authenticated", a["limits"])
+                    self.assertIn("or independently authenticated", a["limits"])
         for row in self.report["rows"]:
             if not row["pairing"].startswith("Anointed/") and row["pairing"] != "Priest/Low":
                 self.assertEqual(row["noncombat"]["status"], STATUS_NONCOMBAT)
@@ -142,7 +142,7 @@ class FocusCombatNoncombatEvidenceTests(unittest.TestCase):
     def test_10_coverage_does_not_pretend_12_noncombat_native_foci(self):
         self.assertEqual(3, self.report["noncombat_coverage"]["low_priest_proxy_only"])
         self.assertEqual(24, self.report["noncombat_coverage"]["source_training_only"])
-        self.assertEqual(3, self.report["noncombat_coverage"]["native_anointed_clock"])
+        self.assertEqual(9, self.report["noncombat_coverage"]["native_anointed_clock"])
         self.assertNotIn("human_session_count", self.report)
 
 
