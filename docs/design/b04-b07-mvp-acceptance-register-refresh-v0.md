@@ -12,6 +12,8 @@
 
 **New bounded effect-state follow-up:** [B05/B06 Cross-Encounter Toxin, Maintained Effect & Duration Continuity v0](b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md) retains authentic G4.2 scheduled consequences, G4.3/4.4 source poison keys and Endurance intervals and legal G3 maintained hosts through G8 encounter transitions. Active unknown effect types stay blocked; no independent GM acceptance or MVP gate is awarded.
 
+**Pilot progression chain supplement:** [B04/B06/B07 Integrated L1–3 Milestone Advancement & Persistent Party Adventure v0](b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md) executes two explicit candidate GM milestone transitions on one live source-bounded party, preserving wounds, ammunition, HP/Vigor and original clock obligations through L2/L3 G8 battle. It does not transform either author-fixture level award into an authenticated human GM declaration or improve strict gate/certification counts.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
