@@ -1067,7 +1067,7 @@ def audit():
         "issues": [dict(issue, variant=entry["variant"])
                    for entry in low_results for issue in entry["issues"]],
         "full_focus_certified": False,
-        "boundary": "Complete source-selected A/B sheets independently checked; unchanged physical G0 proxies remain limited"}
+        "boundary": "Complete source-selected A/B sheets independently checked; physical A/B proxy still only covers G0 combat, not full spell actions"}
     issues = [dict(x, pairing=pairing)
               for pairing, record in sorted(pairings.items())
               for x in record["issues"]]
