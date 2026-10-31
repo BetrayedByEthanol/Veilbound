@@ -48,7 +48,7 @@ Before each scene, record **four actual party characters and source-legal L2/3 s
 | Hunter G7-H, 3 terminal policies | 3 | 3 | **6** | Source-native bounded terminal |
 | Hunter G7-F forest ordinary/pounce, P3+P4 | 4 | 4 | **8** | Short-window tactical, censored/unresolved when no real terminal |
 | Hunter G7-F warned/protection, P4 | 0 | 4 | **4** | Short-window tactical, censored/unresolved when no real terminal |
-| **Total** | **13** | **23** | **36** | **Not 36 independent GM sessions** |
+| **Total** | **16** | **20** | **36** | **Not 36 independent GM sessions** |
 
 The runner preserves a **36-observation denominator**, source IDs, predeclared seed, original canonical ledger SHA-256, per-scenario policy and any genuine terminal/cutoff. For full native G8/G7-H traces it records actual actor final **HP, Vigor, available/committed VP, ammo, wounds, Dying/death** and exit receipts. G7-F tactical cases expose **only** their original independently attested aggregate HP changes, Pounce/protective witnesses and cutoff/terminal evidence. Do not pool those final states into invented HP measurements. There is **no empirical win rate, confidence interval, numeric encounter CR, encounter frequency roll, treatment effect, AI model or representative difficulty threshold**.
 
