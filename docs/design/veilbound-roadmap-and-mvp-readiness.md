@@ -1,6 +1,6 @@
 # Veilbound — Development Roadmap, Milestones and Level 1–3 MVP Readiness
 
-> **Active checkpoint: 30 October 2026, merged #179 restricted L1–3 pilot decisions (Low Gifted Rooted Guard +1 / Unbound Step −1 MP provisionally approved, existing authored option count watched, two GM-declared milestone awards).** This B04/B05 PR proposes the first **source-native Low Gifted G0/G1/G2/G5 Guard/Dodge and paid movement effects** for the approved values, with exact initial/own-Step Emotion Windows and source-authenticated defense/MP receipts. Provisional values remain subject to real player/GM calibration; no general Low Gifted offensive G5 profile or full Focus certificate is inferred. **12/12 structural, 0/12 independently certified, 0/6 strict MVP exits**; B04–B07 open, original B06 G0–G8 fixed.
+> **Active checkpoint: 30 October 2026, PR #180 merged: Low Gifted native G0/G1/G2/G5 Rooted Guard +1 / Unbound Step −1 MP with review corrections.** This B04/B07 audit proposes **independent structural/progression source checking** for all 12 L1–3 pairings (13 A/B variants, 39 snapshots). It identifies High Priest L3 Talent over-award and unaccounted L2 Low Scholar / L3 Medium Gifted awards; it neither chooses those Talents nor claims full independent combat/noncombat Focus certification. Approved pilot uses **two distinct GM-declared L2/L3 milestones**, with no automatic refresh. **12/12 source structural, 0/12 independently full-certified, 0/6 strict exits**; B04–B07 open, original B06 G0–G8 fixed.
 > This is the repository's current **planning and MVP acceptance register**, not a canonical gameplay rule.
 > [Canonical rules](../rules/) and [structured content](../../content/) outrank design/audit commentary.
 > Individual [design records](README.md) retain their own scope, results and historical limitations.
@@ -35,7 +35,9 @@
 | Scholar three-Focus evidence | **F/S/T L1–3 bounded native integration** | #146: 48 four-round cases; #147: 27 complete mobile/two-Soldier cases + 9 historical pending-response probes; #148: 9 *separate* source-native completed off-turn witnesses. These do not establish full Focus certification or representative encounter calibration |
 | Hunter challenge rating | **Unrated** | No trustworthy complete encounter success-rate denominators |
 | B01–B07 blocker definitions closed | **3/7** | B04/B05/B06/B07 remain blocking |
-| Last merged integration delivery | **#179 merged: Low Gifted provisional +1/-1 MP approval, authored option-count playtest watch and two pilot milestone awards** | Current PR adds bounded source-native GL self-defense/MP binding for those approved pilot values; actual human/GM and independent role evidence remain open |
+| Last merged integration delivery | **#180 merged: source-native Low Gifted G0/G1/G2/G5 Guard/Dodge and movement** | This audit PR checks all 12 source pairings and flags three B07 Talent-accounting gaps; independent combat/noncombat role evidence and actual GM milestones remain open |
+
+**B04/B07 independent progression review (this PR):** [Twelve-pairing level-1–3 audit](b04-b07-independent-l1-l3-build-progression-audit-v0.md) checks 13 source variants and 39 snapshots against separately encoded creation/progression schedules, with no self-verified source certificates. **High Priest L3 has an unauthorized second Talent; Low Scholar L2 and Medium Gifted L3 do not account for their earned Talent selections.** This is an open correction register, not an invented new choice, actual milestone award or Focus certificate. **0/12 full Focus certificates, 0/6 exits; 3/7 blockers closed.**
 
 **Frozen historical Hunter Phase 3 SHA-256:** c02c9830d10f1bcaf7d80ccedfe81102c1d4d9b28f4f004e9f715560b184ca5b.
 
