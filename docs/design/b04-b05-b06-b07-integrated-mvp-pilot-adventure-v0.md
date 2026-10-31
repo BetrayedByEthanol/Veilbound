@@ -2,6 +2,8 @@
 
 > **A playable GM adventure proposal, session allocation and source-bound human evidence intake—not proof that anyone has played it.** The restricted MVP remains **L1→L2→L3, three to five actual tabletop sessions, twelve Archetype × Focus pairings**, approved eight-Pillar pilot options and **two distinct GM-declared group-story milestone awards**. The user approved milestone advancement, not automatic awards at a session boundary. This document creates no new universal technique, healing/cure effect, XP threshold, enemy AI, Hunter CR, terrain modifier, recovery rule or B06 G9.
 
+**After this v0 was merged in PR #190:** Use [B04/B07 Pilot Evidence Intake Flexibility & Multi-Cohort Attribution v0](b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md) for externally reported cohorts with actual GM milestone placements beyond the example gate/shrine windows. The original #190 planner and versioned form remain the fixed illustrative intake; neither format certifies actual play.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.
