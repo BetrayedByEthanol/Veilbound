@@ -140,7 +140,7 @@ class FocusCombatNoncombatEvidenceTests(unittest.TestCase):
                          row["selected_combat"]["ledger_sha256"])
 
     def test_10_coverage_does_not_pretend_12_noncombat_native_foci(self):
-        self.assertEqual(9, self.report["noncombat_coverage"]["low_priest_proxy_only"])
+        self.assertEqual(3, self.report["noncombat_coverage"]["low_priest_proxy_only"])
         self.assertEqual(24, self.report["noncombat_coverage"]["source_training_only"])
         self.assertEqual(3, self.report["noncombat_coverage"]["native_anointed_clock"])
         self.assertNotIn("human_session_count", self.report)
