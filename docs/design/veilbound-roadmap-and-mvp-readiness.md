@@ -200,6 +200,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **B04/B07 proposed follow-up:** [Pilot Evidence Intake Flexibility & Multi-Cohort Attribution v0](b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md) supports real GM-declared milestones at non-fixed scenes and source-bound multi-party evidence attribution. This is candidate validation, not a real awarded level, independent review or accepted Focus certificate. The earlier #190 example itinerary remains unchanged.
 
+**B04/B05/B06 next candidate L1 evidence:** [Level 1 Source-Native Soldier Combat v0](b04-b05-b06-l1-source-native-combat-v0.md) adds direct L1 F/S/T source actors against the **unchanged L3-equivalent Soldier**, with real G0–G5 offense and opposed border withdrawal. This narrow reference does not certify 12 L1 Focuses, prove encounter difficulty, down-level an NPC or close a strict gate.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.

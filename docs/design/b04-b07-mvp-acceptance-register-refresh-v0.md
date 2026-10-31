@@ -4,6 +4,8 @@
 
 **Post-#190 live supplement (not part of this original #182 planning snapshot):** [B04/B07 Flexible Multi-Cohort Pilot Evidence v0](b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md) is proposed to permit actual GM milestone events at different scenes and independent party attribution. It provides no verified external sessions, awards, new certified Focuses or closed gates. The original #190 candidate runbook was merged; 0/12 full certificates and 0/6 strict exits remain unchanged.
 
+**Additional post-#191 candidate evidence:** [B04/B05/B06 L1 Source-Native Combat v0](b04-b05-b06-l1-source-native-combat-v0.md) addresses the explicit missing L1 Soldier hostile-reference case through real L1 Scholar sources and the unchanged L3-equivalent enemy. Not independent full Focus certification, empirical level-one balance or a new B06 stage.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |

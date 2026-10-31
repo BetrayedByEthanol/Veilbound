@@ -4,6 +4,8 @@
 
 **After this v0 was merged in PR #190:** Use [B04/B07 Pilot Evidence Intake Flexibility & Multi-Cohort Attribution v0](b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md) for externally reported cohorts with actual GM milestone placements beyond the example gate/shrine windows. The original #190 planner and versioned form remain the fixed illustrative intake; neither format certifies actual play.
 
+**Later source reference for the L1 road gate:** [B04/B05/B06 L1 Source-Native Combat v0](b04-b05-b06-l1-source-native-combat-v0.md) demonstrates one real L1 Scholar group against the original L3-equivalent Soldier with an offensive terminal and a source-paid withdrawal. This is a demanding bounded reference, not an automatically safe L1 fight, generic encounter generation or all twelve Focuses' L1 evidence. The original #190 fixture limitations remain historical.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.

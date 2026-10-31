@@ -12,6 +12,9 @@ on:
       - 'scripts/b05_b06_integrated_noncombat_adventure_v0.py'
       - 'scripts/b06_representative_gm_encounter_packs_v0.py'
       - 'scripts/b04_b05_b06_b07_integrated_pilot_adventure_v0.py'
+      - 'scripts/b04_b05_b06_l1_source_native_combat_v0.py'
+      - 'tests/test_b04_b05_b06_l1_source_native_combat_v0.py'
+      - 'docs/design/b04-b05-b06-l1-source-native-combat-v0.md'
       - 'scripts/b04_b07_pilot_evidence_cohorts_v0.py'
       - 'tests/test_b04_b07_pilot_evidence_cohorts_v0.py'
       - 'docs/design/b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md'
@@ -150,6 +153,13 @@ jobs:
           python -m scripts.b04_b07_pilot_evidence_cohorts_v0 --check build/b04-b07-blank-flexible-cohort-v0.json > build/b04-b07-blank-flexible-cohort-preflight-v0.json
           python -m json.tool build/b04-b07-blank-flexible-cohort-v0.json > /dev/null
           python -m json.tool build/b04-b07-blank-flexible-cohort-preflight-v0.json > /dev/null
+      - name: Run Level 1 native Soldier combat/withdrawal regressions
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_l1_source_native_combat_v0.py' -v
+      - name: Produce Level 1 source-native combat and withdrawal receipts
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_b06_l1_source_native_combat_v0 > build/b04-b05-b06-l1-source-native-combat-v0.json
+          python -m json.tool build/b04-b05-b06-l1-source-native-combat-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -171,4 +181,5 @@ jobs:
             build/b04-b07-mvp-blank-intake-preflight-v0.json
             build/b04-b07-blank-flexible-cohort-v0.json
             build/b04-b07-blank-flexible-cohort-preflight-v0.json
+            build/b04-b05-b06-l1-source-native-combat-v0.json
           if-no-files-found: error
