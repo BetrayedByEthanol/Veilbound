@@ -1,5 +1,12 @@
 # B04/B05 — Medium Gifted L1–3 Character Build and Verification v0
 
+> **Current-source B04/B07 correction (31 October 2026):** Medium Focus
+> earns its second Talent selection at **L3**. The current build retains
+> **TAL-G01 Emotional Poise** and explicitly saves the other choice:
+> L1/L2 selected 1 and saved 0; L3 selected 1 and saved 1. This does
+> not create an additional Ward, Conduit or free effect. Existing
+> bounded tactical witnesses remain unchanged.
+
 > **Source-constrained structural Focus candidate for explicit PR review, not an independent full Focus certification.** This PR proposes promotion of the merged #154 Ward design into a [provisional rule expression](../rules/07-veil-magic/medium-gifted-ward-conduit-v0.md) so the character actually has an eligible Medium signature. This build and the isolated budget tests do **not** assert genuine G0/G4 prevention, complete noncombat success, numeric balance, a full Conduit Form catalogue or new G9 milestone.
 
 ## Rules and restricted identity

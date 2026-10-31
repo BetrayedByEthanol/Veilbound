@@ -1,5 +1,13 @@
 # B04/B05 — High Priest Life L1–3 Character Build and Open Invocation Verification v0
 
+> **Current-source B04/B07 correction (31 October 2026):** The L3
+> `TAL-M03 Frugal Technique` selection described in the historical
+> character paragraph below was **not earned by High Focus**. The
+> corrected source selects **TAL-C02 only at L1–3**; no TAL-M03 discount
+> is available to this High Priest. The existing bounded native
+> policies did not use that optional discount. No HP/VP/AP or native
+> outcome is retroactively changed by this ledger erratum.
+
 **Scope:** executable **structural build + G0/G3/G4 Life primary casting**, distinct High Priest prepared/Open Invocation/Open Prayer access receipts. This is not a High Priest's independently certified full character/encounter or a three-Focus matched balance run. All prices remain provisional and unchanged.
 
 ## Sourced character

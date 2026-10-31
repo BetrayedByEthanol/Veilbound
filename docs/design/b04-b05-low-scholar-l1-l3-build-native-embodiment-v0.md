@@ -1,5 +1,12 @@
 # B04/B05 — Low Scholar L1–3 Character Build and Native Embodiment Verification v0
 
+> **Current-source B04/B07 correction (31 October 2026):** Low Focus
+> earns Talents at L1, L2 and L3. The current source retains
+> **TAL-U01** from L1, explicitly **saves** its L2 selection, and
+> purchases **TAL-C01 Combat Awareness** with L3's award. L2 and L3
+> each report **one saved selection**. TAL-C01 still grants +2 L3
+> Initiative; saved Talents grant no effect or free retraining.
+
 > **Source-grounded candidate sixth structural Archetype × Focus pairing.** Native G0/G1/G3/G4/G5 *bounded* Earth/Life Embodiment and Soldier evidence; **not** independent three-to-five-session combat/noncombat certification, PS-03 Spellblade completion, encounter balance, or a new general enchantment.
 
 ## Authored source sheet (T)
