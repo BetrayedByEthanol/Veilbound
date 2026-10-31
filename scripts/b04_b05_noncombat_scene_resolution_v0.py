@@ -108,7 +108,14 @@ def _character(pairing, level, *, low_variant):
         role = low_variant
     else:
         role = ROLES[pairing]
-    actor = party_actor(role, level, "pilot", "party", occupied=((1, 1),))
+    if pairing == "Gifted/High":
+        from scripts.b05_high_gifted_native_encounter_v0 import gifted_actor
+        actor = gifted_actor(level, "pilot", "party", occupied=((1, 1),))
+    elif pairing == "Gifted/Medium":
+        from scripts.b05_medium_gifted_native_ward_v0 import gifted_actor
+        actor = gifted_actor(level, "pilot", "party", occupied=((1, 1),))
+    else:
+        actor = party_actor(role, level, "pilot", "party", occupied=((1, 1),))
     provenance = _sources()[pairing]
     if provenance["source_issues"]:
         raise ValueError("Source has unresolved structural audit issues")
