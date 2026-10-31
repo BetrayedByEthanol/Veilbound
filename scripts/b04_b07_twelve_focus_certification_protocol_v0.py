@@ -117,6 +117,8 @@ def _source_roster():
         paths = {item["source"]: item["source_sha256"]}
         if "build_record" in item:
             paths[item["build_record"]] = item["build_record_sha256"]
+        if "full_source" in item:
+            paths[item["full_source"]] = item["full_source_sha256"]
         if item["variants"] != (2 if pairing == "Priest/Low" else 1):
             raise ValueError("Unexpected Low Priest A/B variant accounting")
         for path, digest in paths.items():

@@ -53,7 +53,8 @@ PRIEST_BASE_PREPARED = {
 # These are *independently fixed* chosen Pillars for the selected pilot
 # sources. Do not let a modified sheet invent a different Pillar in order
 # to make a newly inserted foreign prayer seem legal.
-PRIEST_PILOT_PILLARS = {"Priest/High": "Life", "Priest/Medium": "Life"}
+PRIEST_PILOT_PILLARS = {"Priest/High": "Life", "Priest/Medium": "Life",
+                         "Priest/Low": "Life"}
 # Positive v0 authored technique census: rule files, not LIFE_T1 from
 # the audited High/Medium Priest profile modules. Every entry is checked
 # against the canonical rule file's own Pillar/Aspect and Base Tier.
@@ -141,6 +142,29 @@ UTILITY_TALENT_PREREQUISITES = {
         "Prerequisite: **+2 directly invested** in one named Learned Discipline."),
 }
 LOW_RECORD = "docs/design/b05-life-low-priest-l3-build-exaltation-verification-v0.md"
+LOW_FULL_SOURCE = "scripts/b05_low_priest_life_l1_l3_v0.py"
+# Independent checks for two previously document-only Low Priest selections.
+# Never infer spell/training authority from the physical-only G0 proxy.
+LOW_SELECTED = {
+    "A": {"chosen": "Guided Regeneration",
+          "preparations": ("Guided Regeneration", "Basic Heal", "Woodland Rapport"),
+          "disciplines": {"Veil Theory": 2, "Life Pillar Lore": 2,
+                          "Medicine": 2, "Acrobatics": 2},
+          "later": {"Survival": 1},
+          "weapon_training": {"One-Handed Swords": 2},
+          "gear": {"Leather armor": 25, "Sword": 22,
+                   "Medical kit": 15, "Adventuring pack": 8},
+          "hands": 1},
+    "B": {"chosen": "Vital Shelter",
+          "preparations": ("Vital Shelter", "Basic Heal", "Venom Endurance"),
+          "disciplines": {"Medicine": 2, "Herbalism": 2, "Survival": 2,
+                          "Life Pillar Lore": 2},
+          "later": {"Veil Theory": 1},
+          "weapon_training": {"Blunt Weapons": 2},
+          "gear": {"Brigandine": 95, "Mace": 16, "Shield": 16,
+                   "Medical kit": 15, "Adventuring pack": 8},
+          "hands": 0},
+}
 
 
 def _sha(path):
@@ -956,6 +980,64 @@ def _low_priest_issues(role, level, actor, gates):
     return issues
 
 
+def _low_full_issues(role, level, sheet, actor, first, prior, gates):
+    """Independent full-sheet + exact legacy G0 projection reconciliation."""
+    issues = _sheet_issues("Priest/Low", level, sheet, first, prior, gates)
+    expected = LOW_SELECTED[role]
+    def check(ok, code, message):
+        if not ok:
+            _issue(issues, code, level=level, detail=message)
+    # Talent eligibility alone cannot replace the authored A/B selections.
+    # Cross-check BOTH full-sheet representations against the independent
+    # original A/B ledger, including the actual award order at every level.
+    required_talents = LOW_PRIEST[role]["talents"][:level]
+    check(type(sheet.get("talents")) in (tuple, list)
+          and type(sheet.get("selected_talents_by_level")) in (tuple, list)
+          and tuple(sheet["talents"]) == required_talents
+          and tuple(sheet["selected_talents_by_level"]) == required_talents,
+          "low_talent_source",
+          "Full A/B selected Talents must match every original level award")
+    required = expected["preparations"][:2 if level == 1 else 3]
+    disciplines = {**expected["disciplines"],
+                   **(expected["later"] if level >= 2 else {})}
+    check(sheet.get("variant") == role and
+          sheet.get("chosen_devotion") == expected["chosen"] and
+          sheet.get("prepared_prayers") == required and
+          sheet.get("active_devotional_rite_cap") == 1,
+          "low_chosen_source",
+          "Actual selected Life prayer, one Chosen host and Rite cap required")
+    check(sheet.get("learned_disciplines") == disciplines and
+          sheet.get("weapon_training") == expected["weapon_training"],
+          "low_training_source",
+          "Documented A/B noncombat and weapon allocation, no invented ranks")
+    check(sheet.get("equipment_sp") == expected["gear"] and
+          sheet.get("free_hands") == expected["hands"] and
+          sheet.get("basic_heal_hand_available_in_authored_loadout") is
+              (expected["hands"] > 0),
+          "low_gear_hands",
+          "Original equipment and Basic Heal free-hand restriction required")
+    check(dict(actor.source.abilities) == sheet.get("abilities") and
+          actor.level == level and actor.hp_max == sheet.get("hp_max") and
+          actor.vigor_max == sheet.get("vigor_max") and
+          actor.vp_max == sheet.get("vp_max") and
+          actor.ap_total == sheet.get("turn_ap") and
+          actor.physical_ap == sheet.get("physical_action_ap") and
+          actor.projection_ap == sheet.get("projection_action_ap") and
+          actor.regen == sheet.get("normal_regen_throughput") and
+          actor.guard_value == sheet.get("guard_value") and
+          actor.guard_capacity == sheet.get("normal_guard_capacity") and
+          actor.initiative_bonus == sheet.get("initiative"),
+          "low_full_native_bridge",
+          "Full selected character sheet must match existing unchanged A/B G0")
+    check(sheet.get("exaltation_property") ==
+          (("EX-LR-01 Held Renewal" if role == "A" else
+            "EX-LP-01 Vital Interposition") if level == 3 else None)
+          and sheet.get("blink_affordable_at_initial_full_vp") is False,
+          "low_feature_source",
+          "Only L3 authored Exaltation; L3 10-Spent Blink is unaffordable")
+    return issues
+
+
 def audit():
     """Independent static progression receipts; certificate count intentionally zero."""
     gates = talent_minimums()
@@ -973,23 +1055,29 @@ def audit():
             "source_sha256": _sha(path), "issues": faults,
             "full_focus_certified": False}
     from scripts.b06_encounter_state_v0 import party_actor
+    from scripts.b05_low_priest_life_l1_l3_v0 import profile as low_profile
     low_results = []
     for role in ("A", "B"):
         actor_issues = []
-        for level in LEVELS:
+        sheets = [low_profile(role, n) for n in LEVELS]
+        for i, level in enumerate(LEVELS):
             actor = party_actor(role, level, "audit-"+role, "party",
                                 occupied=((1,1),))
             actor_issues.extend(_low_priest_issues(role, level, actor, gates))
+            actor_issues.extend(_low_full_issues(
+                role, level, sheets[i], actor, sheets[0],
+                sheets[i-1] if i else None, gates))
         low_results.append({"variant": role, "issues": actor_issues})
     pairings["Priest/Low"] = {
         "variants": 2, "levels_checked": 3,
         "source": "scripts/b06_hunter_party_exchanges_v0.py",
         "source_sha256": _sha("scripts/b06_hunter_party_exchanges_v0.py"),
         "build_record": LOW_RECORD, "build_record_sha256": _sha(LOW_RECORD),
+        "full_source": LOW_FULL_SOURCE, "full_source_sha256": _sha(LOW_FULL_SOURCE),
         "issues": [dict(issue, variant=entry["variant"])
                    for entry in low_results for issue in entry["issues"]],
         "full_focus_certified": False,
-        "boundary": "G0 physical A/B proxy plus documented build; not full sheet"}
+        "boundary": "Complete source-selected A/B sheets independently checked; physical A/B proxy still only covers G0 combat, not full spell actions"}
     issues = [dict(x, pairing=pairing)
               for pairing, record in sorted(pairings.items())
               for x in record["issues"]]

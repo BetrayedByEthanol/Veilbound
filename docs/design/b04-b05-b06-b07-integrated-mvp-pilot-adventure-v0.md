@@ -6,6 +6,8 @@
 
 **Later source reference for the L1 road gate:** [B04/B05/B06 L1 Source-Native Combat v0](b04-b05-b06-l1-source-native-combat-v0.md) demonstrates one real L1 Scholar group against the original L3-equivalent Soldier with an offensive terminal and a source-paid withdrawal. This is a demanding bounded reference, not an automatically safe L1 fight, generic encounter generation or all twelve Focuses' L1 evidence. The original #190 fixture limitations remain historical.
 
+**Later Low Priest source completion:** [B04/B05 complete A/B L1–3 source and noncombat verification](b04-b05-low-priest-complete-character-noncombat-v0.md) provides the missing selected training, Prayer, equipment and hand ledger for Low Priest participants, while the original #190 runbook's warning about its then-physical-only G0 fixtures remains a historical limitation. This follow-up still does not turn fixed A/B encounter snapshots into a campaign's live party or establish real independent play.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.

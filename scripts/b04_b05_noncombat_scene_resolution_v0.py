@@ -125,16 +125,41 @@ def _character(pairing, level, *, low_variant):
             or _fingerprint(source_path) != fingerprint):
         raise ValueError("Native actor mismatches independently audited source")
     if pairing == "Priest/Low":
-        # G0 physical A/B is NOT a full Low Priest character sheet. The
-        # ability values are source-attested, but Learned Disciplines are not.
+        # The G0 actor deliberately remains the original physical proxy,
+        # but a SECOND, independently audited source provides the complete
+        # A/B selected L1-3 character, discipline, prayer and hand ledger.
+        from scripts.b05_low_priest_life_l1_l3_v0 import profile
+        from scripts.b04_b07_independent_progression_audit_v0 import LOW_FULL_SOURCE, LOW_SELECTED
+        sheet = profile(low_variant, level)
         source_abilities = dict(actor.source.abilities)
         expected = LOW_PRIEST[low_variant]["abilities"]
         keys = ("Strength", "Agility", "Precision", "Intellect",
                 "Awareness", "Presence", "Vitality", "Veil Affinity",
                 "Veil Control")
-        if tuple(source_abilities[k] for k in keys) != expected:
-            raise ValueError("Low Priest physical proxy abilities changed")
-        return actor, source_abilities, {}, "LOW_PRIEST_G0_ABILITIES_ONLY"
+        fingerprint = provenance["source_fingerprints"].get(LOW_FULL_SOURCE)
+        fixed = LOW_SELECTED[low_variant]
+        learned = {**fixed["disciplines"],
+                   **(fixed["later"] if level >= 2 else {})}
+        if (sheet["learned_disciplines"] != learned
+                or sheet["weapon_training"] != fixed["weapon_training"]
+                or sheet["prepared_prayers"] !=
+                    fixed["preparations"][:2 if level == 1 else 3]
+                or sheet["chosen_devotion"] != fixed["chosen"]
+                or sheet["equipment_sp"] != fixed["gear"]
+                or sheet["free_hands"] != fixed["hands"]
+                or tuple(source_abilities[k] for k in keys) != expected
+                or sheet["abilities"] != source_abilities
+                or fingerprint is None or _fingerprint(LOW_FULL_SOURCE) != fingerprint
+                or sheet["hp_max"] != actor.hp_max
+                or sheet["vigor_max"] != actor.vigor_max
+                or sheet["vp_max"] != actor.vp_max
+                or sheet["turn_ap"] != actor.ap_total
+                or sheet["normal_regen_throughput"] != actor.regen
+                or sheet["normal_guard_capacity"] != actor.guard_capacity
+                or sheet["chosen_devotion"] not in sheet["prepared_prayers"]):
+            raise ValueError("Low Priest full selected sheet/G0 bridge mismatch")
+        return (actor, source_abilities, sheet["learned_disciplines"],
+                "LOW_PRIEST_FULL_SELECTED_SHEET_NATIVE_G0_PHYSICAL_ONLY")
     module = import_module("scripts." + source_path.split("/")[-1][:-3])
     p = module.profile(level)
     abilities, disciplines = p["abilities"], p["learned_disciplines"]
@@ -270,7 +295,11 @@ def matrix():
         "domains": list(DOMAIN_POLICIES),
         "mechanically_resolved_fixed_fixtures": len(rows),
         "low_priest_ability_only_fixtures": sum(
-            r["pairing"] == "Priest/Low" for r in rows),
+            r["source_scope"] == "LOW_PRIEST_G0_ABILITIES_ONLY" for r in rows),
+        "low_priest_full_sheet_core_check_fixtures": sum(
+            r["source_scope"] ==
+            "LOW_PRIEST_FULL_SELECTED_SHEET_NATIVE_G0_PHYSICAL_ONLY"
+            for r in rows),
         "full_low_priest_noncombat_certificates": 0,
         **NO_CERTIFICATION, "rows": rows,
     }

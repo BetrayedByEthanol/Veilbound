@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
+**Current Low Priest follow-up:** [B04/B05 Low Priest L1–3 Complete Character & Noncombat Verification v0](b04-b05-low-priest-complete-character-noncombat-v0.md) independently reconciles A/B full technical/prayer/equipment/Talent sheets with the unchanged physical G0 actors, and documents real source-paid ordinary check/Inspection/Rapport receipts. Existing #185 proxy-only observations remain historical; this is not human play or certification.
+
 **Level-one hostile combat reference:** [B04/B05/B06 L1 Source-Native Soldier Contact v0](b04-b05-b06-l1-source-native-combat-v0.md) supplies an original L1 Scholar group and real paid Soldier contact/withdrawal; the existing enemy is *L3-equivalent*, not re-leveled or calibrated for L1. This is bounded candidate evidence, not external play or a certificate.
 
 **After merged PR #190:** [B04/B07 Pilot Evidence Intake Flexibility & Multi-Cohort Attribution v0](b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md) adds a candidate-only flexible milestone/cohort record, without claiming actual human play, 12-Focus full certification or an MVP exit.

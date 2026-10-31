@@ -6,6 +6,8 @@
 
 **Additional post-#191 candidate evidence:** [B04/B05/B06 L1 Source-Native Combat v0](b04-b05-b06-l1-source-native-combat-v0.md) addresses the explicit missing L1 Soldier hostile-reference case through real L1 Scholar sources and the unchanged L3-equivalent enemy. Not independent full Focus certification, empirical level-one balance or a new B06 stage.
 
+**Post-#192 proposed full Low Priest source bridge:** [B04/B05 Low Priest Complete Character & Noncombat v0](b04-b05-low-priest-complete-character-noncombat-v0.md) independently audits all six A/B selected sheets and adds G0-paid Inspection/eligible Rapport and real Learned Discipline resolutions, while retaining historical physical G0 actor and original #185 proxy-only evidence separately. No Focus certificate, independently observed GM session or gate is awarded.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |

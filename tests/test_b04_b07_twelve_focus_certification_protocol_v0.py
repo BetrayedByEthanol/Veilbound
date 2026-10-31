@@ -56,6 +56,7 @@ class TwelveFocusProtocolTests(unittest.TestCase):
                 expected = {pair["source"]: pair["source_sha256"]}
                 if row["pairing"] == "Priest/Low":
                     expected[pair["build_record"]] = pair["build_record_sha256"]
+                    expected[pair["full_source"]] = pair["full_source_sha256"]
                     self.assertEqual(row["structural_variants"], 2)
                 else:
                     self.assertEqual(row["structural_variants"], 1)
