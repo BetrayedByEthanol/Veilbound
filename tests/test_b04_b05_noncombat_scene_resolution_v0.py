@@ -119,13 +119,22 @@ class NoncombatSceneResolutionTests(unittest.TestCase):
                         "take20": 20, "safe_roll": 14}[mode]
             self.assertEqual(result["check_base"], expected)
             self.assertEqual(result["elapsed_seconds"],
-                             0 if mode == "passive" else 90)
+                             0 if mode == "passive" else 900 if mode == "take20" else 90)
         with self.assertRaises(ValueError):
             resolve_scene("Scholar/Medium", 2, "social", "petition",
                           mode="take20", face=None)
         with self.assertRaises(ValueError):
             resolve_scene("Scholar/Medium", 2, "social", "petition",
                           mode="passive", face=None)
+        with self.assertRaises(ValueError):
+            resolve_scene("Scholar/Medium", 2, "exploration", "balance",
+                          mode="take20", face=None)
+        with self.assertRaises(ValueError):
+            resolve_scene("Scholar/Medium", 2, "investigation", "diagnose",
+                          mode="take10", face=None)
+        incidental = resolve_scene("Scholar/Medium", 2, "exploration", "survey",
+                                   mode="passive", face=None)
+        self.assertEqual(incidental["elapsed_seconds"], 0)
 
     def test_07_consequence_and_approach_change_without_free_bonuses(self):
         a = resolve_scene("Priest/High", 1, "exploration", "balance", face=8)

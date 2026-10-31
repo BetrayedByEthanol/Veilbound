@@ -73,6 +73,14 @@ SCENES = {
 # Canonical Core Resolution ladder, not a new DC scale.
 DIFFICULTY = {-3: 7, -1: 9, 0: 10, 2: 12, 5: 15, 8: 18, 10: 20}
 ALLOWED_MODES = ("pressure", "passive", "safe_roll", "take10", "take20")
+# These are SPECIFIC alternative fictional premises: no arbitrary safe
+# retries at a pressured ford, contested NPC request, or pressured diagnosis.
+SAFE_EFFORT = frozenset({("investigation", "observe")})
+PASSIVE_NOTICE = frozenset({
+    ("investigation", "observe"), ("exploration", "survey"),
+})
+# GM-authored safe investigation timing, not a universal Take20 multiplier.
+SAFE_OBSERVE_SECONDS = {"safe_roll": 90, "take10": 90, "take20": 900}
 SOURCE_ONLY = "AUTHORED_GM_FIXTURE_NOT_HUMAN_ADJUDICATION"
 NO_CERTIFICATION = {
     "human_player_choices": 0,
@@ -162,11 +170,14 @@ def resolve_scene(pairing, level, domain, policy, *, face=12, mode="pressure",
     ability = abilities[spec["ability"]]
     if type(ability) is not int or not -2 <= ability <= 5:
         raise ValueError("Unrecognized source Ability modifier")
-    # GM pre-declared fixed task premise has consequences; Take 10/20 are
-    # unavailable under pressure. Separate safe variants represent a
-    # distinctly AUTHORED no-risk test fixture, never a player workaround.
-    if mode != "pressure" and domain == "social":
-        raise ValueError("No safe repetition/passive NPC influence fixture")
+    # Do not mutate the same pressured encounter into a risk-free Take20.
+    # The one explicitly safe sample is an unhurried, repeatable laboratory
+    # observation without a serious failure consequence. Passive modes are
+    # ordinary incidental noticing, not deliberate NPC persuasion.
+    if mode in ("safe_roll", "take10", "take20") and (domain, policy) not in SAFE_EFFORT:
+        raise ValueError("Safe effort requires the separately authored low-risk premise")
+    if mode == "passive" and (domain, policy) not in PASSIVE_NOTICE:
+        raise ValueError("Passive detection requires an authored natural-noticing premise")
     if mode == "pressure" or mode == "safe_roll":
         base = face
     else:
@@ -175,7 +186,19 @@ def resolve_scene(pairing, level, domain, policy, *, face=12, mode="pressure",
     total = base + ability + rank + situational_modifier
     passed = total >= target
     # No universal noncombat natural-1 miss or natural-20 success.
-    cost_seconds = 0 if mode == "passive" else spec["time_seconds"]
+    cost_seconds = (0 if mode == "passive" else
+                    SAFE_OBSERVE_SECONDS[mode] if mode in SAFE_OBSERVE_SECONDS
+                    else spec["time_seconds"])
+    premise = (("Unhurried repeatable laboratory observation, no serious failure risk"
+                if mode in SAFE_OBSERVE_SECONDS else
+                "Notice an existing detail while passing, no deliberate search")
+               if mode != "pressure" else spec["premise"])
+    consequence = (("Found visible stains" if passed else
+                     "No stains found during this chosen safe effort")
+                   if mode in SAFE_OBSERVE_SECONDS else
+                   ("Existing detail noticed" if passed else "Existing detail unnoticed")
+                   if mode == "passive" else
+                   spec["success"] if passed else spec["failure"])
     encounter = Encounter(
         [actor], {"pilot": 40}, seed=0,
         scenario="B04-B05-Canonical-Noncombat-Fixture-v0",
@@ -198,7 +221,7 @@ def resolve_scene(pairing, level, domain, policy, *, face=12, mode="pressure",
         situational_modifier=situational_modifier, face=face,
         base=base, total=total, target=target,
         success=passed, fixture_time_seconds=cost_seconds,
-        outcome=spec["success"] if passed else spec["failure"],
+        outcome=consequence,
         gm_verdict="FIXED_AUTHOR_SCENARIO_NOT_AN_EXTERNAL_GM",
         strict_mvp_exits_met=0, independent_focus_certified=False,
     )
@@ -206,13 +229,13 @@ def resolve_scene(pairing, level, domain, policy, *, face=12, mode="pressure",
     return {
         "pairing": pairing, "level": level, "low_variant": low_variant,
         "domain": domain, "policy": policy, "mode": mode,
-        "premise": spec["premise"],
+        "premise": premise,
         "ability": spec["ability"], "ability_modifier": ability,
         "training": training_name if rank else None, "trained_rank": rank,
         "situational_modifier": situational_modifier,
         "d20_face": face, "check_base": base, "total": total,
         "difficulty_modifier": spec["target_modifier"], "target": target,
-        "success": passed, "consequence": spec["success"] if passed else spec["failure"],
+        "success": passed, "consequence": consequence,
         "elapsed_seconds": encounter.g4.clock.world_seconds,
         "native_g42_event_count": len(encounter.ledger),
         "native_ledger_sha256": canonical_digest(encounter.ledger),
