@@ -72,6 +72,10 @@ Authentic human/GM decisions, independently authenticated reviewers, source-paid
 
 [B04/B05 source evidence v0](b04-b05-focus-specific-combat-noncombat-evidence-v0.md) is **proposed in the current PR**, not yet merged or certified. The matrix runs two real native combat policies per level for **12 Focus pairings × 3 levels**, recording 72 bounded combat ledger digests; its noncombat column deliberately keeps **24 Training-only access preflights, nine Anointed G4.2 elapsed-clock replays with no external GM verdict, and three Low Priest A/B physical-proxy-only gaps** separate. These are source evidence candidates for the [C1–C7 independent protocol](b04-b07-independent-twelve-focus-certification-protocol-pilot-roster-v0.md), **not** real human choices, a GM-authenticated social check or a level award. **0/12** full Focus certificates and **0/6** strict MVP gates remain closed.
 
+## Ordinary noncombat core-check scene resolution — proposed follow-up
+
+[Source-Legal Noncombat Scene Resolution v0](b04-b05-source-legal-noncombat-scene-resolution-v0.md) is **proposed in this PR**. It resolves **216** author-fixture exploration/investigation/social pressure checks across 12 Focuses × L1–3 × 3 situations × 2 competing approaches, using actual sourced Abilities and narrowly relevant Learned Disciplines, the canonical difficulty ladder and real G4.2 elapsed exploration time. It leaves contested NPC permission, externally set difficulty, real player choice and human/GM authenticity unverified; Low Priest A/B remains **ability-only physical G0 proxy** (18 of the fixture forks). Safe effort and passive noticing are scoped to distinct eligible premises; no new opposed/social/Stealth/progress-clock engine is invented. **#184/#185 merged**, but **0/12 full Focus certificates** and **0/6** strict exits remain.
+
 ## Priority work queue — implementation versus evidence
 
 | Sequence | Coherent deliverable | Implementation left | Separate review / external evidence | Closure affected |
