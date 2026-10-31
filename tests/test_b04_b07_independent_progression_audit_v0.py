@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from scripts.b04_b07_independent_progression_audit_v0 import (
     audit, _sheet_issues, authored_priest_techniques,
+    canonical_weapon_families, canonical_starter_item_prices,
     authored_scholar_techniques, anointed_signature_bonds,
     canonical_aspect_pairs, gifted_core_emotions, talent_minimums, talent_rules,
     utility_talent_requirements, _has_direct_utility_training,
@@ -1148,6 +1149,107 @@ class IndependentProgressionTests(unittest.TestCase):
             self.assertNotIn(("Anointed/High", level, "vp_formula"), found)
         self.assertEqual((12, 39), (report["pairings_checked"],
                                     report["level_snapshots_checked"]))
+
+    def test_46_canonical_starter_item_prices_and_weapon_families(self):
+        catalogue = canonical_starter_item_prices()
+        self.assertEqual(4, catalogue["Dagger"])
+        self.assertEqual(25, catalogue["Leather"])
+        self.assertEqual(25, catalogue["Leather armor"])
+        self.assertEqual(15, catalogue["Medical kit"])
+        self.assertEqual(15, catalogue["Basic medical kit"])
+        self.assertEqual(8, catalogue["Adventuring pack"])
+        self.assertEqual(8, catalogue["Standard adventuring pack"])
+        self.assertEqual(55, catalogue["Heavy crossbow"])
+        self.assertEqual(5, catalogue["20 arrows"])
+        self.assertNotIn("Ordinary clothing / light robes", catalogue)
+        self.assertNotIn("Heavy padded / battle robes", catalogue)
+        self.assertNotIn("Made-up discount", catalogue)
+        self.assertEqual(30, len(catalogue))  # 29 rows - 2 banned + 3 aliases
+        self.assertEqual({
+            "Small Blades", "One-Handed Swords", "Two-Handed Swords",
+            "Polearms", "Axes", "Blunt Weapons", "Bows", "Crossbows",
+        }, canonical_weapon_families())
+
+    def test_47_discount_forgery_with_matching_silver_still_fails(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile
+        gates = talent_minimums()
+        base = profile(1)
+        baseline = {i["code"] for i in _sheet_issues(
+            "Anointed/High", 1, base, base, None, gates)}
+        self.assertNotIn("equipment_budget", baseline)
+        for forged_name, forged_price in (
+                ("Dagger", 0), ("Dagger", 3),
+                ("Leather armor", 0), ("Basic medical kit", 1),
+                ("Standard adventuring pack", 0)):
+            with self.subTest(item=forged_name, price=forged_price):
+                sheet = deepcopy(base)
+                original_price = sheet["equipment_sp"][forged_name]
+                sheet["equipment_sp"][forged_name] = forged_price
+                sheet["silver_remaining_sp"] += original_price-forged_price
+                codes = {i["code"] for i in _sheet_issues(
+                    "Anointed/High", 1, sheet, base, None, gates)}
+                self.assertIn("equipment_budget", codes)
+        for item in ("Nonexistent equipment", "Heavy padded / battle robes",
+                     "Ordinary clothing / light robes"):
+            with self.subTest(unauthored=item):
+                sheet = deepcopy(base)
+                sheet["equipment_sp"][item] = 1
+                sheet["silver_remaining_sp"] -= 1
+                codes = {i["code"] for i in _sheet_issues(
+                    "Anointed/High", 1, sheet, base, None, gates)}
+                self.assertIn("equipment_budget", codes)
+        original = deepcopy(base)
+        original["equipment_sp"]["Dagger"] = 4
+        codes = {i["code"] for i in _sheet_issues(
+            "Anointed/High", 1, original, base, None, gates)}
+        self.assertNotIn("equipment_budget", codes)
+
+    def test_48_weapon_training_requires_exact_authored_family(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile
+        gates = talent_minimums()
+        base = profile(1)
+        for invalid in ("Shields", "Shield Training", "Throwing",
+                        "Daggers", "Unknown Family", 7, None):
+            with self.subTest(family=invalid):
+                sheet = deepcopy(base)
+                sheet["weapon_training"] = {invalid: 2}
+                codes = {i["code"] for i in _sheet_issues(
+                    "Anointed/High", 1, sheet, base, None, gates)}
+                self.assertIn("weapon_budget", codes)
+        for legal in canonical_weapon_families():
+            with self.subTest(family=legal):
+                sheet = deepcopy(base)
+                sheet["weapon_training"] = {legal: 2}
+                codes = {i["code"] for i in _sheet_issues(
+                    "Anointed/High", 1, sheet, base, None, gates)}
+                self.assertNotIn("weapon_budget", codes)
+        split = deepcopy(base)
+        split["weapon_training"] = {"Small Blades": 1, "Bows": 1}
+        codes = {i["code"] for i in _sheet_issues(
+            "Anointed/High", 1, split, base, None, gates)}
+        self.assertNotIn("weapon_budget", codes)
+
+    def test_49_full_audit_detects_persistently_forged_prices_and_shields(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        make = module.profile
+        def forged(level):
+            sheet = make(level)
+            sheet["weapon_training"] = {"Shields": 2}
+            sheet["equipment_sp"]["Dagger"] = 0
+            sheet["silver_remaining_sp"] += 4
+            return sheet
+        with patch.object(module, "profile", side_effect=forged):
+            report = audit()
+        found = {(i["pairing"], i["level"], i["code"])
+                 for i in report["issues"]}
+        self.assertTrue({
+            ("Anointed/High", n, code)
+            for n in (1, 2, 3)
+            for code in ("weapon_budget", "equipment_budget")
+        } <= found)
+        self.assertEqual(12, report["pairings_checked"])
+        self.assertEqual(39, report["level_snapshots_checked"])
+        self.assertEqual(0, report["independently_certified_full_focuses"])
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[

@@ -112,6 +112,21 @@ LOW_PRIEST = {
           "talents": ("TAL-C05", "TAL-C01", "TAL-C09")},
 }
 CATALOGUE = "docs/rules/10-advancement/talents-level-1-5-v0.md"
+EQUIPMENT_CATALOGUE = "docs/rules/11-equipment/economy-and-starter-equipment-v0.md"
+WEAPON_TRAINING_CATALOGUE = "docs/rules/05-combat/weapon-training-and-refinements-v0.md"
+# Provenance gates for canonical rules; these labels are not read from a
+# character sheet, and changes to v0's eight family identities need review.
+EXPECTED_WEAPON_FAMILIES = frozenset((
+    "Small Blades", "One-Handed Swords", "Two-Handed Swords",
+    "Polearms", "Axes", "Blunt Weapons", "Bows", "Crossbows",
+))
+# Existing source sheets use these straightforward display-name aliases.
+# Every alias must resolve to a real row in the independent price table.
+STARTER_ITEM_ALIASES = {
+    "Leather armor": "Leather",
+    "Medical kit": "Basic medical kit",
+    "Adventuring pack": "Standard adventuring pack",
+}
 # Positive B07 prerequisite clauses; fail closed if an authored rule changes.
 UTILITY_TALENT_PREREQUISITES = {
     "TAL-U01": (1, ("Veil Theory", "Pillar Lore"),
@@ -214,6 +229,75 @@ def deep_volition_reserve_bonus():
     if match is None:
         raise ValueError("Canonical TAL-M01 flat VP modifier changed")
     return int(match.group(1))
+
+
+def canonical_weapon_families():
+    """Authenticate the eight eligible families in independent B04 rules."""
+    lines = (ROOT / WEAPON_TRAINING_CATALOGUE).read_text(
+        encoding="utf-8").splitlines()
+    try:
+        start = lines.index("## Weapon families")
+        end = lines.index("## Investment and effective ranks", start+1)
+    except ValueError as exc:
+        raise ValueError("Weapon family rule headings changed") from exc
+    rows = [line for line in lines[start:end] if line.startswith("|")]
+    if len(rows) != 10 or rows[0] != "| Weapon Training family | Current weapons |":
+        raise ValueError("Expected eight authored Weapon Training rows")
+    names = []
+    for line in rows[2:]:
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) != 2 or not cells[0] or not cells[1]:
+            raise ValueError("Invalid authored Weapon Training family row")
+        names.append(cells[0])
+    if len(set(names)) != 8 or set(names) != EXPECTED_WEAPON_FAMILIES:
+        raise ValueError("Weapon Training family identities changed; re-audit")
+    return frozenset(names)
+
+
+def canonical_starter_item_prices():
+    """Read real starter prices, not a sheet's claimed item/price ledger.
+
+    Parse three separate tables from the canonical economy rules. Fail closed
+    on structure changes; exclude the two explicitly non-starter robe rows.
+    """
+    text = (ROOT / EQUIPMENT_CATALOGUE).read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if ("cannot be selected or purchased with the level-1 starting budget as armor"
+            not in text):
+        raise ValueError("Starter armor eligibility rule changed; re-audit")
+    prices = {}
+    for heading, count, columns in (
+            ("## Armor prices", 10, 3),
+            ("## Weapon prices", 9, 4),
+            ("## Shields, ammunition and ordinary kits", 10, 2)):
+        try:
+            start = lines.index(heading)+1
+        except ValueError as exc:
+            raise ValueError("Starter price table heading changed: "+heading) from exc
+        stop = next((i for i in range(start, len(lines))
+                     if lines[i].startswith("## ")), len(lines))
+        rows = [line for line in lines[start:stop] if line.startswith("|")]
+        if len(rows) != count+2:
+            raise ValueError("Starter price catalogue row count changed: "+heading)
+        for line in rows[2:]:
+            cells = [cell.strip() for cell in line.strip("|").split("|")]
+            if len(cells) != columns or not re.fullmatch(
+                    r"[0-9][0-9,]*", cells[-1]):
+                raise ValueError("Malformed canonical starter item price: "+line)
+            name = cells[0]
+            if not name or name in prices:
+                raise ValueError("Duplicate or empty canonical starter item: "+name)
+            prices[name] = int(cells[-1].replace(",", ""))
+    for name in ("Ordinary clothing / light robes",
+                 "Heavy padded / battle robes"):
+        if name not in prices:
+            raise ValueError("Excluded non-starter armor missing: "+name)
+        del prices[name]
+    for alias, target in STARTER_ITEM_ALIASES.items():
+        if alias in prices or target not in prices:
+            raise ValueError("Starter item alias conflicts with catalogue: "+alias)
+        prices[alias] = prices[target]
+    return prices
 
 
 def talent_minimums():
@@ -426,8 +510,12 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
     valid_weapon_ranks = (isinstance(weapon, dict) and
                           all(type(v) is int and 0 <= v <= 2
                               for v in weapon.values()))
-    check(valid_weapon_ranks and sum(weapon.values()) == 2,
-          "weapon_budget", "Two independent direct Weapon Development points")
+    legal_families = canonical_weapon_families()
+    check(valid_weapon_ranks and set(weapon).issubset(legal_families)
+          and sum(weapon.values()) == 2,
+          "weapon_budget",
+          "Two direct Weapon Development points in canonical weapon "
+          "families only; shields and Learned Disciplines are not families")
     if isinstance(weapon, dict):
         if "weapon_development_points" in sheet:
             check(sheet["weapon_development_points"] == 2,
@@ -445,14 +533,25 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
         valid_prices = all(type(v) is int and v >= 0 for v in gear.values())
         remainder = next((sheet[k] for k in ("silver_remaining", "silver_remaining_sp",
                                             "starting_silver_left") if k in sheet), None)
-        if valid_prices:
+        # Canonical reference prices also establish eligibility. A fabricated
+        # discount is not an independent 150-sp reconciliation, even when the
+        # source adjusts its claimed silver remainder in lockstep.
+        canonical_prices = canonical_starter_item_prices()
+        prices_authentic = (valid_prices and
+                            all(type(item) is str and
+                                item in canonical_prices and
+                                cost == canonical_prices[item]
+                                for item, cost in gear.items()))
+        if prices_authentic:
             price = sum(gear.values())
-            reconciled = price <= 150 and remainder == 150-price
+            reconciled = (price <= 150 and type(remainder) is int
+                          and remainder == 150-price)
         else:
             reconciled = False
         check(reconciled, "equipment_budget",
-              "Starting prices must be nonnegative integers; purchases "
-              "and retained silver must reconcile to 150 sp")
+              "Every starter item must have its independently authored "
+              "canonical price and eligibility; purchases and remaining "
+              "silver must reconcile to 150 sp without discounts")
         if prior:
             old = prior.get("equipment_sp") or prior.get("starting_equipment_sp")
             check(gear == old, "free_level_equipment",
