@@ -129,7 +129,8 @@ def _l1():
 def _safe_award_boundary(e, current):
     if (e.g4 is None or e.g4.clock.mode!="exploration" or
             e.current is not None or e.pending_regeneration is not None or
-            e.reservations or (e.g5 is not None and e.g5.pending_attack_slots())):
+            e.reservations or (getattr(e, "g5", None) is not None and
+                               e.g5.pending_attack_slots())):
         raise UnresolvedDecision("Advancement requires completed exploration boundary")
     if current==1:
         if (e.round!=0 or
