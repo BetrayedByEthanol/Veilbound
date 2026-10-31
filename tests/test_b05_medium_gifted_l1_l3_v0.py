@@ -24,6 +24,10 @@ class MediumGiftedBuildTests(unittest.TestCase):
             self.assertEqual(s["abilities"], ABILITIES)
             self.assertEqual(s["resonance"], 0)
             self.assertEqual(s["talents"], [TALENT])
+            self.assertEqual(
+                (s["talent_selections_available"],
+                 s["saved_talent_selections"]),
+                (1 + int(level == 3), int(level == 3)))
             self.assertEqual(s["learned_family_allocation_l1"],
                              {"Cultural and Specialized": 4,
                               "Physical and Fieldcraft": 2,

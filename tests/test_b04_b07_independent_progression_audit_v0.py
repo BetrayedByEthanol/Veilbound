@@ -37,14 +37,17 @@ class IndependentProgressionTests(unittest.TestCase):
         self.assertTrue(all(len(x["source_sha256"]) == 64
                             for x in report["pairings"].values()))
 
-    def test_02_report_real_talent_gaps_not_false_full_certificates(self):
-        issues={(x["pairing"], x["level"], x["code"])
-                for x in self.report["issues"]}
-        self.assertIn(("Priest/High", 3, "talent_overaward"), issues)
-        self.assertIn(("Scholar/Low", 2, "talent_unaccounted"), issues)
-        self.assertIn(("Scholar/Low", 3, "talent_unaccounted"), issues)
-        self.assertIn(("Gifted/Medium", 3, "talent_unaccounted"), issues)
-        self.assertEqual((0,0),(
+    def test_02_reconciled_talent_ledgers_do_not_fake_certification(self):
+        issues = {(x["pairing"], x["level"], x["code"])
+                  for x in self.report["issues"]}
+        for pairing, level, original_code in (
+                ("Priest/High", 3, "talent_overaward"),
+                ("Scholar/Low", 2, "talent_unaccounted"),
+                ("Scholar/Low", 3, "talent_unaccounted"),
+                ("Gifted/Medium", 3, "talent_unaccounted")):
+            self.assertNotIn((pairing, level, original_code), issues)
+        # Audit receipt closure is not a full-played Focus certificate.
+        self.assertEqual((0, 0), (
             self.report["independently_certified_full_focuses"],
             self.report["strict_mvp_exits_met"]))
         self.assertFalse(any(p["full_focus_certified"]
@@ -1379,6 +1382,86 @@ class IndependentProgressionTests(unittest.TestCase):
                         for entry in SCHOLAR_RULE_SOURCES)
         missing = sorted(path for path in required if not covered(path))
         self.assertEqual([], missing)
+
+    def test_54_reconciled_talent_source_ledgers_preserve_focus_awards(self):
+        from scripts.b05_high_priest_life_l1_l3_v0 import profile as priest
+        from scripts.b05_medium_gifted_l1_l3_v0 import profile as gifted
+        from scripts.b05_low_scholar_l1_l3_v0 import profile as scholar
+        from scripts.b04_b07_independent_progression_audit_v0 import TALENT_AWARDS
+        cases = (
+            ("Priest/High", "High", priest,
+             (("TAL-C02",), ("TAL-C02",), ("TAL-C02",)), (0, 0, 0)),
+            ("Gifted/Medium", "Medium", gifted,
+             (("TAL-G01",), ("TAL-G01",), ("TAL-G01",)), (0, 0, 1)),
+            ("Scholar/Low", "Low", scholar,
+             (("TAL-U01",), ("TAL-U01",),
+              ("TAL-U01", "TAL-C01")), (0, 1, 1)),
+        )
+        gates = talent_minimums()
+        for pairing, focus, make, ids, saved in cases:
+            sheets = [make(level) for level in (1, 2, 3)]
+            for index, sheet in enumerate(sheets):
+                level = index+1
+                with self.subTest(pairing=pairing, level=level):
+                    actual = tuple(t.split()[0] for t in sheet["talents"])
+                    self.assertEqual(ids[index], actual)
+                    self.assertEqual(
+                        sheet.get("saved_talent_selections", 0), saved[index])
+                    self.assertEqual(len(actual)+saved[index], sum(
+                        award <= level for award in TALENT_AWARDS[focus]))
+                    codes = {x["code"] for x in _sheet_issues(
+                        pairing, level, sheet, sheets[0],
+                        sheets[index-1] if index else None, gates)}
+                    self.assertFalse({
+                        "talent_identity", "talent_overaward",
+                        "talent_unaccounted", "talent_gate",
+                        "talent_archetype", "talent_retraining",
+                    } & codes)
+
+        self.assertEqual([priest(n)["normal_regen_throughput"]
+                          for n in (1, 2, 3)], [4, 4, 4])
+        self.assertEqual([scholar(n)["initiative"] for n in (1, 2, 3)],
+                         [4, 4, 6])
+        self.assertEqual(gifted(3)["talent_selections_available"], 2)
+
+    def test_55_ledger_tampering_reopens_independently_reported_findings(self):
+        from scripts import b05_high_priest_life_l1_l3_v0 as pmod
+        from scripts import b05_medium_gifted_l1_l3_v0 as gmod
+        from scripts import b05_low_scholar_l1_l3_v0 as smod
+        original = {m: m.profile for m in (pmod, gmod, smod)}
+        def forbidden_high(level):
+            sheet = original[pmod](level)
+            if level == 3:
+                sheet["talents"] = ("TAL-C02", "TAL-M03")
+            return sheet
+        def missing_medium(level):
+            sheet = original[gmod](level)
+            if level == 3:
+                sheet.pop("saved_talent_selections")
+            return sheet
+        def missing_low(level):
+            sheet = original[smod](level)
+            if level >= 2:
+                sheet["saved_talent_selections"] = 0
+            return sheet
+        for module, replacement, expected in (
+                (pmod, forbidden_high,
+                 {("Priest/High", 3, "talent_overaward")}),
+                (gmod, missing_medium,
+                 {("Gifted/Medium", 3, "talent_unaccounted")}),
+                (smod, missing_low,
+                 {("Scholar/Low", 2, "talent_unaccounted"),
+                  ("Scholar/Low", 3, "talent_unaccounted")}),
+        ):
+            with self.subTest(module=module.__name__):
+                with patch.object(module, "profile", side_effect=replacement):
+                    report = audit()
+                found = {(x["pairing"], x["level"], x["code"])
+                         for x in report["issues"]}
+                self.assertTrue(expected <= found)
+                self.assertEqual((12, 39), (report["pairings_checked"],
+                                            report["level_snapshots_checked"]))
+                self.assertEqual(0, report["independently_certified_full_focuses"])
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[

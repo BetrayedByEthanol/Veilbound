@@ -57,6 +57,10 @@ class LowScholarNativeTests(unittest.TestCase):
         for level in (1,2,3):
             with self.subTest(level=level):
                 p=profile(level)
+                self.assertEqual(p["saved_talent_selections"], int(level >= 2))
+                self.assertEqual(tuple(p["talents"]), (
+                    ("TAL-U01 Veil Insight",) if level < 3 else
+                    ("TAL-U01 Veil Insight", "TAL-C01 Combat Awareness")))
                 a=party_actor("T",level,"scholar","party",occupied=((2,2),))
                 self.assertEqual((p["hp_max"],p["vigor_max"],p["vp_max"]),
                                  (12,12*level,2*level))
