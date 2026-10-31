@@ -9,6 +9,9 @@ on:
       - 'scripts/b04_b05_focus_combat_noncombat_evidence_v0.py'
       - 'scripts/b04_b05_noncombat_scene_resolution_v0.py'
       - 'scripts/b04_b05_focus_noncombat_technique_integration_v0.py'
+      - 'scripts/b05_b06_integrated_noncombat_adventure_v0.py'
+      - 'tests/test_b05_b06_integrated_noncombat_adventure_v0.py'
+      - 'docs/design/b05-b06-integrated-noncombat-adventure-scenes-consequences-v0.md'
       - 'tests/test_b04_b05_focus_noncombat_technique_integration_v0.py'
       - 'docs/design/b04-b05-focus-noncombat-technique-integration-v0.md'
       - 'tests/test_b04_b05_noncombat_scene_resolution_v0.py'
@@ -104,6 +107,13 @@ jobs:
           mkdir -p build
           python -m scripts.b04_b05_focus_noncombat_technique_integration_v0 > build/b04-b05-focus-noncombat-techniques-v0.json
           python -m json.tool build/b04-b05-focus-noncombat-techniques-v0.json > /dev/null
+      - name: Run focused B05/B06 continuous adventure/scene regressions
+        run: python -m unittest discover -s tests -p 'test_b05_b06_integrated_noncombat_adventure_v0.py' -v
+      - name: Produce continuous scene/VP/clock consequence evidence
+        run: |
+          mkdir -p build
+          python -m scripts.b05_b06_integrated_noncombat_adventure_v0 > build/b05-b06-integrated-noncombat-adventure-v0.json
+          python -m json.tool build/b05-b06-integrated-noncombat-adventure-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -116,4 +126,5 @@ jobs:
             build/b04-b05-focus-combat-noncombat-evidence-v0.json
             build/b04-b05-noncombat-scene-resolution-v0.json
             build/b04-b05-focus-noncombat-techniques-v0.json
+            build/b05-b06-integrated-noncombat-adventure-v0.json
           if-no-files-found: error
