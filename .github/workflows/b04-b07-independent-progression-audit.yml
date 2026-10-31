@@ -5,6 +5,8 @@ on:
     paths:
       # Audit code and tests.
       - 'scripts/b04_b07_independent_progression_audit_v0.py'
+      - 'scripts/b04_b07_twelve_focus_certification_protocol_v0.py'
+      - 'tests/test_b04_b07_twelve_focus_certification_protocol_v0.py'
       - 'tests/test_b04_b07_independent_progression_audit_v0.py'
       - '.github/workflows/b04-b07-independent-progression-audit.yml'
       # All eleven directly imported B05 pilot sheets and their B05 helpers.
@@ -25,6 +27,7 @@ on:
       - 'tests/test_b04_b07_mvp_pilot_approvals_v0.py'
       - 'docs/design/veilbound-roadmap-and-mvp-readiness.md'
       - 'docs/design/b04-b07-mvp-acceptance-register-refresh-v0.md'
+      - 'docs/design/b04-b07-independent-twelve-focus-certification-protocol-pilot-roster-v0.md'
       - 'docs/design/b04-b05-b07-mvp-pilot-approvals-and-watches-v0.md'
       - 'docs/design/b04-b05-mvp-pilot-roster-gifted-anointed-readiness-v0.md'
       - 'docs/design/README.md'
@@ -62,16 +65,22 @@ jobs:
         run: python -m pip install 'jsonschema>=4.21,<5'
       - name: Run focused independent progression regressions
         run: python -m unittest discover -s tests -p 'test_b04_b07_independent_progression_audit_v0.py' -v
-      - name: Produce machine-readable audit findings
+      - name: Run focused twelve-Focus protocol intake regressions
+        run: python -m unittest discover -s tests -p 'test_b04_b07_twelve_focus_certification_protocol_v0.py' -v
+      - name: Produce machine-readable structural audit and noncertifying pilot roster
         run: |
           mkdir -p build
           python -m scripts.b04_b07_independent_progression_audit_v0 > build/b04-b07-independent-l1-l3-audit.json
+          python -m scripts.b04_b07_twelve_focus_certification_protocol_v0 --roster > build/b04-b07-twelve-focus-candidate-roster.json
           python -m json.tool build/b04-b07-independent-l1-l3-audit.json > /dev/null
+          python -m json.tool build/b04-b07-twelve-focus-candidate-roster.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
         uses: actions/upload-artifact@v4
         with:
           name: b04-b07-independent-l1-l3-audit
-          path: build/b04-b07-independent-l1-l3-audit.json
+          path: |
+            build/b04-b07-independent-l1-l3-audit.json
+            build/b04-b07-twelve-focus-candidate-roster.json
           if-no-files-found: error

@@ -74,7 +74,6 @@ class TwelveFocusProtocolTests(unittest.TestCase):
                               "noncombat_requirement", "countercase_requirement"):
                     self.assertGreater(len(row[field]), 20)
                 self.assertEqual(row["levels"], list(LEVELS))
-        self.assertIn("A/B", "Low Priest A/B")  # variant is an evidence choice
         self.assertIn("Sword", FOCUS_TASKS["Anointed/Low"]["combat"])
         self.assertIn("Open Prayer", FOCUS_TASKS["Priest/High"]["combat"])
         self.assertIn("native Opportunity", FOCUS_TASKS["Scholar/Medium"]["combat"])
