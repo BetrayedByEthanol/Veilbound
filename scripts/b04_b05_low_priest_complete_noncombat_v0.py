@@ -66,8 +66,9 @@ def native_utility(role, level, technique, *, animal_mass_kg=12,
     e.begin_round()
     e.start_turn("pilot", regen_choice=RegenerationChoice())
     ap_before, vp_before = actor.ap_remaining, actor.vp_available
-    e.spend_ap("pilot", "full" if technique == "inspection" else "projection",
-               label="b04_b05_low_priest_" + technique)
+    ap_paid = e.spend_ap(
+        "pilot", "full" if technique == "inspection" else "projection",
+        label="b04_b05_low_priest_" + technique)
     e.spend_vp("pilot", 2, mode="spent",
                label="b04_b05_low_priest_" + technique)
     observation = (
@@ -86,14 +87,14 @@ def native_utility(role, level, technique, *, animal_mass_kg=12,
     e.check()
     spent = vp_before - actor.vp_available
     if (spent != 2 or actor.vp_spent != 2
-            or ap_before-actor.ap_remaining !=
+            or ap_paid !=
                 (sheet["turn_ap"] if technique == "inspection" else 30)):
         raise AssertionError("Source G0 AP/VP utility cost missing")
     return {
         "role": role, "level": level, "technique": technique,
         "source_path": actor.source.path, "source_sha256": actor.source.digest,
         "full_source_prepared": tuple(sheet["prepared_prayers"]),
-        "ap_before": ap_before, "ap_paid": ap_before-actor.ap_remaining,
+        "ap_before": ap_before, "ap_paid": ap_paid,
         "vp_before": vp_before, "vp_spent": spent,
         "vp_after": actor.vp_available,
         "observation": observation, "ledger": deepcopy(e.ledger),
