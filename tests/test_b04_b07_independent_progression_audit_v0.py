@@ -1,10 +1,16 @@
 """Independent cross-source B04/B07 progression and deliberately bounded status."""
 import unittest
+from fnmatch import fnmatchcase
+from pathlib import Path
+import re
 from copy import deepcopy
 from unittest.mock import patch
 
 from scripts.b04_b07_independent_progression_audit_v0 import (
     audit, _sheet_issues, authored_priest_techniques,
+    SOURCE_MODULES, PRIEST_LIFE_RULE_SOURCES, SCHOLAR_RULE_SOURCES,
+    CANONICAL_ASPECTS, GIFTED_FOUNDATION, ANOINTED_SIGNATURE_AUTHORITY,
+    EQUIPMENT_CATALOGUE, WEAPON_TRAINING_CATALOGUE, CATALOGUE, LOW_RECORD,
     canonical_weapon_families, canonical_starter_item_prices,
     authored_scholar_techniques, anointed_signature_bonds,
     canonical_aspect_pairs, gifted_core_emotions, talent_minimums, talent_rules,
@@ -1250,6 +1256,129 @@ class IndependentProgressionTests(unittest.TestCase):
         self.assertEqual(12, report["pairings_checked"])
         self.assertEqual(39, report["level_snapshots_checked"])
         self.assertEqual(0, report["independently_certified_full_focuses"])
+
+    def test_50_saved_weapon_points_are_spendable_after_creation(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile
+        gates = talent_minimums()
+        for focus_profile in (1, 0):
+            with self.subTest(initial_invested=focus_profile):
+                sheets = [profile(n) for n in (1, 2, 3)]
+                sheets[0]["weapon_training"] = {"Small Blades": focus_profile}
+                sheets[0]["saved_weapon_development_points"] = 2-focus_profile
+                # An unused L1 point can remain unspent at L2.
+                sheets[1]["weapon_training"] = {"Small Blades": focus_profile}
+                sheets[1]["saved_weapon_development_points"] = 2-focus_profile
+                # L3 spends all earlier saved points; there is no L3 award.
+                sheets[2]["weapon_training"] = {"Small Blades": 2}
+                sheets[2]["saved_weapon_development_points"] = 0
+                for i, sheet in enumerate(sheets):
+                    issues = {x["code"] for x in _sheet_issues(
+                        "Anointed/High", i+1, sheet, sheets[0],
+                        sheets[i-1] if i else None, gates)}
+                    self.assertNotIn("weapon_budget", issues)
+                    self.assertNotIn("weapon_progression", issues)
+                    self.assertNotIn("weapon_total", issues)
+        # Spend exactly one point at L2 and keep the remaining point.
+        l1, l2 = profile(1), profile(2)
+        l1["weapon_training"] = {"Small Blades": 0}
+        l1["saved_weapon_development_points"] = 2
+        l2["weapon_training"] = {"Small Blades": 1}
+        l2["saved_weapon_development_points"] = 1
+        issues = {x["code"] for x in _sheet_issues(
+            "Anointed/High", 2, l2, l1, l1, gates)}
+        self.assertNotIn("weapon_progression", issues)
+        self.assertNotIn("weapon_budget", issues)
+
+    def test_51_weapon_saved_balances_do_not_allow_unearned_or_refunded_ranks(self):
+        from scripts.b05_high_anointed_restoration_l1_l3_v0 import profile
+        gates = talent_minimums()
+        for invalid in ("1", 1.0, None, True, -1, 2):
+            with self.subTest(saved=invalid):
+                sheet = profile(1)
+                sheet["weapon_training"] = {"Small Blades": 1}
+                sheet["saved_weapon_development_points"] = invalid
+                codes = {x["code"] for x in _sheet_issues(
+                    "Anointed/High", 1, sheet, sheet, None, gates)}
+                if invalid != 1 or type(invalid) is not int:
+                    self.assertIn("weapon_budget", codes)
+        l1, l2 = profile(1), profile(2)
+        # Inverting ranks into a fictitious saved point is a refund.
+        l2["weapon_training"] = {"Small Blades": 1}
+        l2["saved_weapon_development_points"] = 1
+        codes = {x["code"] for x in _sheet_issues(
+            "Anointed/High", 2, l2, l1, l1, gates)}
+        self.assertNotIn("weapon_budget", codes)
+        self.assertIn("weapon_progression", codes)
+        # Two ranks cannot be purchased with no available saved balance.
+        l1["weapon_training"] = {"Small Blades": 1}
+        l1["saved_weapon_development_points"] = 1
+        l2["weapon_training"] = {"Small Blades": 2, "Bows": 1}
+        l2["saved_weapon_development_points"] = 0
+        codes = {x["code"] for x in _sheet_issues(
+            "Anointed/High", 2, l2, l1, l1, gates)}
+        self.assertIn("weapon_budget", codes)
+        self.assertIn("weapon_progression", codes)
+        # A malformed prior balance must not satisfy an authentic delta.
+        bad_prior = profile(1)
+        bad_prior["saved_weapon_development_points"] = "0"
+        codes = {x["code"] for x in _sheet_issues(
+            "Anointed/High", 2, profile(2), bad_prior, bad_prior, gates)}
+        self.assertIn("weapon_progression", codes)
+
+    def test_52_full_audit_allows_late_saved_weapon_spending(self):
+        from scripts import b05_high_anointed_restoration_l1_l3_v0 as module
+        original = module.profile
+        def saved_at_creation(level):
+            sheet = original(level)
+            if level in (1, 2):
+                sheet["weapon_training"] = {"Small Blades": 1}
+                sheet["saved_weapon_development_points"] = 1
+            return sheet
+        with patch.object(module, "profile", side_effect=saved_at_creation):
+            report = audit()
+        found = {(x["pairing"], x["level"], x["code"])
+                 for x in report["issues"]}
+        for level in (1, 2, 3):
+            self.assertNotIn(("Anointed/High", level, "weapon_budget"), found)
+            self.assertNotIn(("Anointed/High", level, "weapon_progression"), found)
+        self.assertEqual((12, 39), (report["pairings_checked"],
+                                    report["level_snapshots_checked"]))
+
+    def test_53_workflow_triggers_for_every_audited_source_and_ruleset(self):
+        # Missing a PR path prevents the independently audited source from
+        # ever reaching these tests, regardless of how correct the audit is.
+        workflow = (Path(__file__).resolve().parents[1] /
+                    ".github/workflows/b04-b07-independent-progression-audit.yml"
+                    ).read_text(encoding="utf-8")
+        match = re.search(
+            r"(?ms)^  pull_request:\n    paths:\n(?P<paths>(?:      - '[^']+'\n)+)",
+            workflow)
+        self.assertIsNotNone(match)
+        patterns = re.findall(r"^      - '([^']+)'$",
+                              match.group("paths"), flags=re.MULTILINE)
+        self.assertGreater(len(patterns), 0)
+        def covered(path):
+            return any(fnmatchcase(path, pattern) for pattern in patterns)
+        required = {
+            "scripts/b04_b07_independent_progression_audit_v0.py",
+            "tests/test_b04_b07_independent_progression_audit_v0.py",
+            ".github/workflows/b04-b07-independent-progression-audit.yml",
+            "scripts/b06_hunter_party_exchanges_v0.py",
+            "scripts/b06_encounter_state_v0.py",
+            LOW_RECORD, CATALOGUE, WEAPON_TRAINING_CATALOGUE,
+            EQUIPMENT_CATALOGUE, CANONICAL_ASPECTS, GIFTED_FOUNDATION,
+            ANOINTED_SIGNATURE_AUTHORITY,
+            "docs/rules/08-archetypes/scholar.md",
+            "docs/rules/08-archetypes/priest.md",
+            "docs/rules/05-combat/action-categories-and-physical-tempo.md",
+        }
+        required.update("scripts/" + name + ".py" for name in SOURCE_MODULES.values())
+        required.update("docs/rules/07-veil-magic/" + entry[-1]
+                        for entry in PRIEST_LIFE_RULE_SOURCES)
+        required.update("docs/rules/07-veil-magic/" + entry[-1]
+                        for entry in SCHOLAR_RULE_SOURCES)
+        missing = sorted(path for path in required if not covered(path))
+        self.assertEqual([], missing)
 
     def test_04_award_chronology_requires_two_distinct_gm_events(self):
         good=[

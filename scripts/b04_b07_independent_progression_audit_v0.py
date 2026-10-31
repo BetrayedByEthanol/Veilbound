@@ -505,24 +505,47 @@ def _sheet_issues(pairing, level, sheet, first, prior, gates):
               "Direct ranks never decrease; newly invested plus change "
               "in saved points equals the earned L2 award (zero at L3)")
     weapon = sheet.get("weapon_training", {})
-    # Reject strings, floats, booleans and None before arithmetic. The
-    # complete cross-source audit must still return an issue register.
+    legal_families = canonical_weapon_families()
+    # Creation grants two points, not a mandate to spend both immediately.
+    # Source snapshots lacking the new field are the original all-spent
+    # pilots; reject fabricated non-integer/negative retained balances.
+    saved_weapon = sheet.get("saved_weapon_development_points", 0)
+    saved_weapon_valid = type(saved_weapon) is int and saved_weapon >= 0
     valid_weapon_ranks = (isinstance(weapon, dict) and
+                          set(weapon).issubset(legal_families) and
                           all(type(v) is int and 0 <= v <= 2
                               for v in weapon.values()))
-    legal_families = canonical_weapon_families()
-    check(valid_weapon_ranks and set(weapon).issubset(legal_families)
-          and sum(weapon.values()) == 2,
+    invested_weapon = sum(weapon.values()) if valid_weapon_ranks else None
+    check(valid_weapon_ranks and saved_weapon_valid
+          and invested_weapon + saved_weapon == 2,
           "weapon_budget",
-          "Two direct Weapon Development points in canonical weapon "
-          "families only; shields and Learned Disciplines are not families")
-    if isinstance(weapon, dict):
-        if "weapon_development_points" in sheet:
-            check(sheet["weapon_development_points"] == 2,
-                  "weapon_total", "Incorrect source Weapon Development account")
-        if prior:
-            check(weapon == prior["weapon_training"], "early_weapon_increase",
-                  "No Weapon Development award before L4")
+          "Two earned Weapon Development points must reconcile as direct "
+          "ranks in canonical families plus nonnegative saved points")
+    if isinstance(weapon, dict) and "weapon_development_points" in sheet:
+        check(sheet["weapon_development_points"] == 2,
+              "weapon_total", "Incorrect source Weapon Development account")
+    if prior:
+        old_weapon = prior.get("weapon_training")
+        prior_saved_weapon = prior.get("saved_weapon_development_points", 0)
+        prior_saved_valid = (type(prior_saved_weapon) is int
+                             and prior_saved_weapon >= 0)
+        old_weapon_valid = (isinstance(old_weapon, dict) and
+                            set(old_weapon).issubset(legal_families) and
+                            all(type(v) is int and 0 <= v <= 2
+                                for v in old_weapon.values()))
+        if (valid_weapon_ranks and old_weapon_valid and
+                saved_weapon_valid and prior_saved_valid):
+            changes = {family: weapon.get(family, 0) - old_weapon.get(family, 0)
+                       for family in set(weapon) | set(old_weapon)}
+            progression_ok = (
+                sum(old_weapon.values()) + prior_saved_weapon == 2
+                and all(change >= 0 for change in changes.values())
+                and sum(changes.values()) + saved_weapon - prior_saved_weapon == 0)
+        else:
+            progression_ok = False
+        check(progression_ok, "weapon_progression",
+              "No L2/L3 Weapon Development award: direct ranks cannot "
+              "decrease, and later investment must consume prior saved points")
 
     gear = (sheet.get("equipment_sp") or sheet.get("starting_equipment_sp"))
     if not isinstance(gear, dict):
