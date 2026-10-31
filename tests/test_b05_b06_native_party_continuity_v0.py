@@ -80,7 +80,10 @@ class NativePartyContinuityTests(unittest.TestCase):
                  if x.actor_id=="guardian" and x.kind=="recovery"
                  and not x.consumed]
         self.assertEqual(len(pending),1)
-        self.assertEqual(pending[0].due_round,3601)
+        # G4.2 credits the already completed combat boundaries before the
+        # source's first six-hour event; do not restart a fresh 3600-round
+        # interval on import. Its exact native conversion is 3598 here.
+        self.assertEqual(pending[0].due_round,3598)
         self.assertTrue(any(x["kind"]=="g4_six_hour_recovery"
                             and x["detail"]["actor"]=="guardian"
                             for x in first.ledger))
