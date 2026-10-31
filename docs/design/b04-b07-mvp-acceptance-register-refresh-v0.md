@@ -76,6 +76,10 @@ Authentic human/GM decisions, independently authenticated reviewers, source-paid
 
 [Source-Legal Noncombat Scene Resolution v0](b04-b05-source-legal-noncombat-scene-resolution-v0.md) is **proposed in this PR**. It resolves **216** author-fixture exploration/investigation/social pressure checks across 12 Focuses × L1–3 × 3 situations × 2 competing approaches, using actual sourced Abilities and narrowly relevant Learned Disciplines, the canonical difficulty ladder and real G4.2 elapsed exploration time. It leaves contested NPC permission, externally set difficulty, real player choice and human/GM authenticity unverified; Low Priest A/B remains **ability-only physical G0 proxy** (18 of the fixture forks). Safe effort and passive noticing are scoped to distinct eligible premises; no new opposed/social/Stealth/progress-clock engine is invented. **#184/#185 merged**, but **0/12 full Focus certificates** and **0/6** strict exits remain.
 
+## Source-paid noncombat Veil technique integration — proposed follow-up
+
+[Focus-Specific Noncombat Technique Integration v0](b04-b05-focus-noncombat-technique-integration-v0.md) is **proposed in this PR**, extending merged #186 core-check resolution with 47 bounded native source-paid G0 actions across L1–3. **36 Universal Veil Inspection** actions are known to all twelve Focuses; **11 Focus-restricted actions** include prepared High Priest Woodland Rapport, known High Scholar Phantom Sound and High/Medium Scholar Minor Telekinesis at their actual level gates. Each makes real G0 AP and Available→Spent VP transitions with conserved source balances; invented cross-Focus access, invalid subjects and unsupported discounts reject. Target/item/NPC circumstances are **author fixtures**, not independently authenticated GM play or actual stateful maintained magic. **0/12 full Focus certificates, 0/6 exits.**
+
 ## Priority work queue — implementation versus evidence
 
 | Sequence | Coherent deliverable | Implementation left | Separate review / external evidence | Closure affected |
