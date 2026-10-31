@@ -268,7 +268,9 @@ def preflight(packet):
                 "player_choice_refs","native_evidence_refs") for x in entry[key]):
             raise ValueError("Empty session player/native evidence reference")
         if entry["status"]=="REPORTED":
-            required=tuple(k for k in SESSION_FIELDS if not k.endswith("_refs"))
+            required=tuple(k for k in SESSION_FIELDS
+                           if not k.endswith("_refs") and
+                           (k!="incoming_handoff_ref" or index>0))
             if (not packet["report_author_ref"].strip()
                     or any(not entry[k].strip() for k in required)
                     or not entry["player_choice_refs"]
