@@ -167,7 +167,8 @@ class IntegratedNoncombatAdventureTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             play("Priest/Low",1,low_variant="X")
         b=play("Priest/Low",1,low_variant="B")
-        self.assertEqual(b["source_scope"],"LOW_PRIEST_G0_ABILITIES_ONLY")
+        self.assertEqual(b["source_scope"],
+                         "LOW_PRIEST_FULL_SELECTED_SHEET_NATIVE_G0_PHYSICAL_ONLY")
         self.assertEqual(b["native_turns_taken"],0)
         self.assertFalse(b["independent_focus_certified"])
 

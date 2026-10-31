@@ -34,7 +34,8 @@ class NoncombatSceneResolutionTests(unittest.TestCase):
                 for domain, approaches in DOMAIN_POLICIES.items():
                     for policy in approaches:
                         self.assertIn((pairing, level, domain, policy), self.by)
-        self.assertEqual(self.all["low_priest_ability_only_fixtures"], 18)
+        self.assertEqual(self.all["low_priest_ability_only_fixtures"], 0)
+        self.assertEqual(self.all["low_priest_full_sheet_core_check_fixtures"], 18)
 
     def test_02_native_source_receipts_and_real_elapsed_g42_seconds(self):
         for r in self.all["rows"]:
@@ -79,18 +80,26 @@ class NoncombatSceneResolutionTests(unittest.TestCase):
                                  ("Disguise", "Emotional Discipline",
                                   "Negotiation", "Oratory", "Command"))
 
-    def test_04_low_priest_a_b_are_source_proxies_without_trainings(self):
+    def test_04_low_priest_a_b_have_source_purchased_technical_trainings(self):
         for level in (1, 2, 3):
             a = resolve_scene("Priest/Low", level, "investigation", "diagnose",
                               low_variant="A")
             b = resolve_scene("Priest/Low", level, "investigation", "diagnose",
                               low_variant="B")
             for row in (a, b):
-                self.assertEqual(row["source_scope"], "LOW_PRIEST_G0_ABILITIES_ONLY")
-                self.assertIsNone(row["training"])
-                self.assertEqual(row["trained_rank"], 0)
+                self.assertEqual(
+                    row["source_scope"],
+                    "LOW_PRIEST_FULL_SELECTED_SHEET_NATIVE_G0_PHYSICAL_ONLY")
+                self.assertEqual((row["training"], row["trained_rank"]),
+                                 ("Medicine", 2))
                 self.assertFalse(row["independent_focus_certified"])
             self.assertNotEqual(a["ability_modifier"], b["ability_modifier"])
+            acrobat = resolve_scene("Priest/Low", level, "exploration", "balance",
+                                    low_variant="A")
+            guardian = resolve_scene("Priest/Low", level, "exploration", "balance",
+                                     low_variant="B")
+            self.assertEqual(acrobat["trained_rank"], 2)
+            self.assertEqual(guardian["trained_rank"], 0)
         self.assertEqual(self.all["full_low_priest_noncombat_certificates"], 0)
 
     def test_05_roll_natural_one_twenty_have_no_special_noncombat_rule(self):
