@@ -10,6 +10,8 @@
 
 **Subsequent candidate encounter handoff:** [B05/B06 Native Cross-Encounter Party Resource Continuity v0](b05-b06-native-cross-encounter-party-resource-continuity-v0.md) demonstrates a Soldier withdrawal followed by a Sentry conflict with retained native HP, Vigor, VP, arrows, partial recovery and bounded maintained Guided; requires a distinct authored route. Original candidate itinerary does not become a played campaign, nor are unmodeled toxins/effects or arbitrary unsafe pursuit silently resolved.
 
+**Candidate effect persistence supplement:** [B05/B06 toxin/effect/duration continuation](b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md) permits actual native pending poison pulses, source-supported Endurance expiry and maintained G3 host reservations to carry into subsequent combat without resetting VP or deadlines; not a fully observed adventure session or authorization to ignore unresolved dangers.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.

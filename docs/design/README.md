@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
+**Current B05/B06 expansion:** [Cross-Encounter Toxin, Maintained Effect & Duration Continuity v0](b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md) extends the live G8 party-state handoff with original G4.2/G4.3/G4.4 toxin and Endurance interpreters and source-maintained Stone Skin; unsupported spell/timer classes fail closed rather than silently resetting. No human pilot or independent certification.
+
 **Latest B05/B06 source-bound handoff:** [Native Cross-Encounter Party Resource Continuity v0](b05-b06-native-cross-encounter-party-resource-continuity-v0.md) carries actual G0 HP, Vigor, VP, wounds, G2 arrows/gear, one compatible G3 self-Guided host and G4.2 recovery checkpoints from an authenticated G8 scene into another without default-sheet resets. Unsupported active hazards fail closed; not a general campaign serializer or human certification.
 
 **Current Low Priest follow-up:** [B04/B05 Low Priest L1–3 Complete Character & Noncombat Verification v0](b04-b05-low-priest-complete-character-noncombat-v0.md) independently reconciles A/B full technical/prayer/equipment/Talent sheets with the unchanged physical G0 actors, and documents real source-paid ordinary check/Inspection/Rapport receipts. Existing #185 proxy-only observations remain historical; this is not human play or certification.

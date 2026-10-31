@@ -206,6 +206,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **Proposed next B05/B06 source integration:** [Native Cross-Encounter Party Resource Continuity v0](b05-b06-native-cross-encounter-party-resource-continuity-v0.md) carries original live G8 party consequences between two hostile scenes, without resetting source resources. Adds exact G4.2 six-hour phase, native arrow expenditure and supported Chosen self-Guided VP host continuity. Other magical, toxic and wound-effect timelines remain fail-closed pending dedicated adapters. Not actual pilot play, certification, or CR.
 
+**Proposed B05/B06 follow-up:** [Cross-Encounter Toxin, Maintained Effect & Duration Continuity v0](b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md) retains original G4.3/4.4 hazard keys, precommitted wounds/interval units, Endurance expiry and actual source-supported G3 maintained hosts between source G8 encounters; explicitly rejects unsupported round-based duration conversion. It does not independently certify a Focus, human pilot, or arbitrary campaign persistence.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.

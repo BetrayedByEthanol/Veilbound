@@ -10,6 +10,8 @@
 
 **Post-#193 proposed resource-chain witness:** [B05/B06 Native Cross-Encounter Party Resource Continuity v0](b05-b06-native-cross-encounter-party-resource-continuity-v0.md) uses two actual G8 source terminals with a direct live-instance G0/G4.2 transfer of attrition, arrows, VP, wounds and supported maintained Guideds. Strictly not full campaign persistence: other ongoing toxins, wards and source clocks fail closed. No GM human play/certification accepted.
 
+**New bounded effect-state follow-up:** [B05/B06 Cross-Encounter Toxin, Maintained Effect & Duration Continuity v0](b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md) retains authentic G4.2 scheduled consequences, G4.3/4.4 source poison keys and Endurance intervals and legal G3 maintained hosts through G8 encounter transitions. Active unknown effect types stay blocked; no independent GM acceptance or MVP gate is awarded.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
