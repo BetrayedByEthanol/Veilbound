@@ -190,7 +190,7 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 | Priority | Coherent delivery | Work to implement or author | Distinct acceptance evidence |
 |---:|---|---|---|
-| **1** | **B04/B07 — independent twelve-Focus acceptance protocol** | Standardize complete character/progression legality and role/negative-case witnesses; use #181/#182 as structural baseline | Independently reviewed actual L1–3 builds and scene-use evidence, not self-certification |
+| **1 — protocol in PR review** | **B04/B07 — independent twelve-Focus certification protocol and pilot roster** | This PR proposes a source-bound 12-pairing/13-variant digest roster, three-level combat/noncombat/countercase candidate forms and reviewer/GM milestone references; **not merged or play-certified yet** | Actual independently reviewed full L1–3 characters, source-paid scene use and real GM events remain required |
 | **2** | **B04/B05 — Focus role and noncombat verification** | Complete live source-specific Priest protection/Intercession, Scholar #148 Opportunity mobile replay, Gifted Anchor/Ward/Surge and Anointed Signature/Authority choice paths **only as required by the pilot** | Positive and weakness/affordability countercases; exploration/social/investigation choices at every level |
 | **3** | **B06 — representative GM encounter packs** | Assemble Soldier, Sentry and Hunter into varied mixed-party complete encounters with terrain, wounds, withdrawal and aftermath | Source-paid outcomes, policy coverage and honestly counted exposure denominators; Hunter CR still unrated |
 | **4** | **B04/B05/B06/B07 — one 3–5-session adventure** | Author combat/noncombat scenes, downtime/world-clock consequences, two candidate group-story milestone events | Real GM-declared L2 then L3 awards and independent session records; no XP policy decision |
@@ -209,6 +209,7 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 - [x] Independent structural/progression audit of **12 pairings, 13 source variants, 39 snapshots** merged **#181**.
 - [x] All three known source Talent-ledger discrepancies reconciled **#182**, no free additional Talent effects.
 - [x] **31 October source census:** 13 individual base-T1 techniques covering **10/24** selected Aspects; 14 remain an option watch, not required content expansion.
+- [ ] **B04/B07 twelve-Focus certification protocol and pilot roster:** [source-bound evidence contract](b04-b07-independent-twelve-focus-certification-protocol-pilot-roster-v0.md) is **proposed in this PR** (not merged); distinguishes **12 pairings**, **13 structural variants**, **39 audited source snapshots** and **36 pairing × level acceptance slots** without certifying actual play.
 - [ ] **12/12 independently full certified** legal L1–3 characters with source-paid **combat and noncombat** role choices (**0/12**).
 - [ ] New integrated multi-round **Scholar #148 Opportunity** mobile scenes and source-backed Priest/Gifted/Anointed positive/weakness/counterplay scenarios.
 - [ ] Representative complete **Soldier/Sentry/Hunter** GM encounter packs with measured exposure, withdrawal/aftermath, variable tactics.

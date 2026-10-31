@@ -62,6 +62,12 @@ An item becomes **accepted only after independently attributable evidence**, not
 | **B06 — Encounters** | **OPEN despite G0–G8 delivered** | Representative complete Soldier/Sentry/Hunter GM encounters, mixed parties, terrain, withdrawal and aftermath |
 | **B07 — Advancement** | **OPEN** | Independent complete progression/scene use and two actual GM milestone events; **#182 source-ledger defect correction is done** |
 
+## Twelve-Focus independent certification protocol — proposed follow-up
+
+[Source-bound twelve-Focus roster and evidence intake](b04-b07-independent-twelve-focus-certification-protocol-pilot-roster-v0.md) is **proposed in the current PR**; do not record it as merged until approved. It defines per-pairing L1–3 build/advancement ledgers, source-paid real combat and noncombat alternatives, negative countercases, external reviewer/GM references and two separate milestone claims. The roster distinguishes **12 full-certification pairings / 36 pairing-level acceptance slots** from **13 structural variants / 39 source snapshots** (Low Priest A/B remains one pairing). The intake `--check` validates only untrusted candidate structure and retains **0/12 independently certified Focuses and 0/6 closed MVP exits**, regardless of populated references.
+
+Authentic human/GM decisions, independently authenticated reviewers, source-paid external evidence and actual level-up events **remain missing**.
+
 ## Priority work queue — implementation versus evidence
 
 | Sequence | Coherent deliverable | Implementation left | Separate review / external evidence | Closure affected |
