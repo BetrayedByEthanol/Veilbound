@@ -4,6 +4,8 @@
 
 **First-cohort execution handoff:** [Alpha Pilot Execution & Independent Evidence Verification v0](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) moves the Alpha planning cohort into a *blank, structured execution packet*: participant/source manifest, actual scene and GM milestone intake, 84 C1–C7 review tasks and optional local evidence-file hash comparison. Requires real players/GM/independent reviewer and actual source-legal Alpha scenes; no CI output is presented as actual play.
 
+**Current Alpha pilot runbook (after merged #202):** [B04/B05/B06/B07 Alpha GM Execution Handoff v0](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md) updates the operational GM and independent-review stop/go list while preserving this earlier persistent A/B/R/F candidate-readiness snapshot. The native Alpha A/B four-Focus scenes now cover bounded L1–3 actions and same-level venom, not human-selected arbitrary actions or automatic milestone/certification decisions.
+
 ## Verified starting point — different evidence is not interchangeable
 
 | Evidence | What is already source-backed | What is still missing |
