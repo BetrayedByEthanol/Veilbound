@@ -21,6 +21,8 @@ This is the existing **COHORT-ALPHA** allocation from readiness #197, not the hi
 
 **Original four-Focus Alpha level-two/three source witness:** [B04/B05/B06 Alpha L2–L3 Mixed-Party Encounter & Advancement v0](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) adds narrow no-refill L1→L2→L3 source progression, Hunter head-forward Bite attempts and cold Sentry Chosen Reserve, with strict clean native source boundaries. The two milestone proposals remain authored candidates. This is neither an actual GM/story award, a complete Hunter venom scene, general cross-level effect rebinding nor human evidence in the blank Alpha pilot packet.
 
+**Alpha L2 actual native hazard witness:** [B04/B05/B06 Hunter Venom, Sentry Damage & Persistent Effects v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) supplements clean L1–L3 fixed cases with authenticated Hunter puncture/G4.4 venom, selected B-only Venom Endurance, same-level effect and recovery transfer and source-enhanced Sentry HP/Fire/Vigor hit. Still machine-only and explicitly **not** a claim of legal cross-level active poison progression or independently witnessed real GM/player evidence.
+
 ## Before real sessions
 
 The GM and independent reviewer examine all four full original L1 sheets, source hashes, legal gear, selected/saved Talent/Training, initial HP/Vigor/VP/AP and native action eligibility. Select L2/L3 advancement choices without awarding levels in advance. A first-cohort packet leaves Low Priest A/B selection blank until the **player actually chooses**. Assign participant, GM, author and separate reviewer responsibilities outside the repository; keep personally identifying data and raw private session evidence in controlled local storage, never in these PR fixtures.

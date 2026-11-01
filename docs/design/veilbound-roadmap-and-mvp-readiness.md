@@ -220,6 +220,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **B04/B05/B06 — original Alpha L2–L3 source-native mixed encounters and advancement v0:** [Source chain and trust boundaries](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md). The actual Priest/Low A/B, Scholar/High, Gifted/High, Anointed/Medium party carries native HP/Vigor/VP, equipment and 6-hour Recovery events from L1 Soldier through two distinct nonautomatic author-candidate milestones, L2 source Hunter Bite/withdrawal and L3 source cold Sentry Reserve/withdrawal. This **bounded fixed policy** cannot certify real GM story milestones, representative damage/venom tests or Focus readiness; 0/12 and 0/6 remain unchanged.
 
+**Original Alpha L2 native venoms and same-level G4 effect persistence (bounded):** [B04/B05/B06 Hunter Venom, Sentry Damage & Persistent Effects v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md). Distinct true A/B source choices produce one actual Hunter Bite and Full G4.4 injection, source-eligible B-only Venom Endurance, live G4.2 same-level effect handoff and Sentry's paid enhanced sword HP/Fire/Direct Vigor attack; native venom onset/expiry are traced. The clean milestone chain must **still reject** live venom crossing levels. Independent Focus certifications 0/12 and MVP exits 0/6.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.

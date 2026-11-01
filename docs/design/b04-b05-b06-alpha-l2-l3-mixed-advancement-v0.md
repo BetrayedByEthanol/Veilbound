@@ -2,6 +2,8 @@
 
 > **Author-fixture source integration only.** Continues the complete selected four-Focus Alpha roster (Priest/Low A or B, Scholar/High, Gifted/High, Anointed/Medium) through L1, L2 and L3 without substituting historical A/B/R/F G8 characters. All source events are reproducible native G0–G5. A machine-generated story beat is **not** a GM's actual milestone, a human session, representative opposition calibration or independent Focus certification.
 
+**Separate live-hazard companion (same L2 only):** [Alpha Native Hunter Venom, Endurance, Sentry Damage and G4.2/G4.4 Continuity v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) demonstrates one actual Hunter Bite and Full poison, source-eligible L2 B-only Venom Endurance, a second same-level Sentry fight with actual enhanced HP/Fire/Vigor damage and retained poison timers. The clean three-level progression shown here **does not** splice that ongoing hazard into an invented L2→L3 advancement; it still rejects it.
+
 ## Integrated L1–L3 pilot spine
 
 | Stage | Source-native event | Actual native proof / strict limit |

@@ -24,6 +24,8 @@
 
 **Original Alpha four-Focus L2–L3 mechanical continuation:** [B04/B05/B06 Alpha Mixed Hunter/Sentry & Advancement v0](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) now carries selected full Low Priest A/B, High Scholar, High Gifted and Medium Anointed source state across original-source Hunter and Sentry scenes. Uses explicit separate author-candidate gate/shrine milestones only after original G5 source withdrawals, without refilling HP/Vigor/Available VP or authenticating GM/player evidence. Live cross-level toxin/magic remains a blocking gap; Focus and MVP acceptance counts stay zero.
 
+**Alpha original Hunter/Sentry mechanical gap — bounded source evidence:** [B04/B05/B06 Hunter Venom, Sentry Damage & Persistent Effects v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) adds a true source Hunter Bite, G4.4 delayed toxin, paid prepared B-only Venom Endurance vs A refusal and same-level native G4 history/clock handoff into cold Sentry original HP/Fire/Vigor damage. This is a fixed author fixture and **not** a legal general cross-level maintained/hazard importer, verified human campaign, representative combat calibration or any newly accepted exit gate.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
