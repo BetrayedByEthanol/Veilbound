@@ -226,7 +226,10 @@ def validate_worksheet(value):
                 c[k]!=template[k] for k in ("character_id","pairing")):
             raise ValueError("Cannot substitute historical G8 proxies or another cohort")
         variant=_ref(c["selected_variant"],"selected variant")
-        if variant not in (("A","B") if c["pairing"]=="Priest/Low" else ("","default")):
+        # The unobserved first-cohort worksheet intentionally leaves A/B
+        # unselected until the actual player decides. A reported L1 source
+        # sheet still requires an explicit nonblank legal variant below.
+        if variant not in (("","A","B") if c["pairing"]=="Priest/Low" else ("","default")):
             raise ValueError("Only original Low Priest A/B or other unchanged Focus")
         for key in ("l1_selected_sheet_ref","player_ref","starting_resources_ref"):
             _ref(c[key],key)
