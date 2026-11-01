@@ -20,6 +20,52 @@ RULE_PINS=(
 )
 CHOICES={"A":"Guided Regeneration","B":"Vital Shelter"}
 
+FULL_SOURCE="scripts/b05_low_priest_life_l1_l3_v0.py"
+FULL_STATUS="B04_B05_SELECTED_FULL_LOW_PRIEST"
+
+
+def full_low_priest_actor(role,level,actor_id,team,*,occupied):
+    """Full legal A/B selected sheet, NOT a Hunter-era G0 physical proxy.
+
+    This actor intentionally does not grant G5 proxy attack identities.
+    The bounded Alpha scene uses an actual source-paid G3 Chosen Rite.
+    """
+    from scripts.b05_low_priest_life_l1_l3_v0 import profile
+    from scripts.b06_encounter_state_v0 import Actor,Source,_fingerprint
+    p=profile(role,level)
+    a=p["abilities"]
+    wielded=set(p["wielded_items"])
+    equipment=tuple(sorted((name,
+        "worn" if name in ("Leather armor","Brigandine") else
+        "wielded" if name in wielded else "carried")
+        for name in p["equipment_sp"]))
+    src=Source(FULL_SOURCE,role,_fingerprint(FULL_SOURCE),FULL_STATUS,
+               tuple(sorted(a.items())),
+               tuple(sorted(p["weapon_training"].items())),
+               equipment,(),f"L{level}-full-low-life-{role}-chosen")
+    out=Actor(actor_id,team,src,level,"Low",p["initiative"],
+              a["Awareness"],a["Agility"],p["hp_max"],p["vigor_max"],
+              p["vp_max"],p["hp_max"],p["vigor_max"],p["vp_max"],0,0,
+              p["normal_regen_throughput"],p["turn_ap"],
+              p["physical_action_ap"],p["projection_action_ap"],
+              p["guard_instrument"],p["guard_value"],
+              p["normal_guard_capacity"],occupied=tuple(tuple(c) for c in occupied))
+    out.validate()
+    return out
+
+
+def _expected_low_actor(actor):
+    if actor.source.source_id not in CHOICES:
+        return None
+    if (actor.source.path==FULL_SOURCE and actor.source.status==FULL_STATUS):
+        return full_low_priest_actor(actor.source.source_id,actor.level,
+                                     actor.id,actor.team,occupied=actor.occupied)
+    if actor.source.path==SOURCE and actor.source.status=="B05_UNBUFFED_PHYSICAL_PROXY":
+        return party_actor(actor.source.source_id,actor.level,actor.id,
+                           actor.team,occupied=actor.occupied)
+    return None
+
+
 
 class LowLifeNativeRites:
     def __init__(self,encounter,caster):
@@ -32,8 +78,7 @@ class LowLifeNativeRites:
         if caster not in encounter.actors:
             raise ValueError("Missing chosen Priest")
         a=encounter.actors[caster]
-        expected=party_actor(a.source.source_id,a.level,"source-proof","party",
-                             occupied=a.occupied) if a.source.source_id in CHOICES else None
+        expected=_expected_low_actor(a)
         design=(ROOT/DESIGN).read_text(encoding="utf-8")
         rules=(ROOT/RULE).read_text(encoding="utf-8")
         if any(pin not in rules for pin in RULE_PINS):
@@ -43,12 +88,13 @@ class LowLifeNativeRites:
                 or a.vigor_max!=expected.vigor_max
                 or a.ap_total!=expected.ap_total
                 or a.physical_ap!=expected.physical_ap
-                or a.focus!="Low" or a.source.path!=SOURCE
-                or a.source.digest!=sha256((ROOT/SOURCE).read_bytes()).hexdigest()
-                or a.source.status!="B05_UNBUFFED_PHYSICAL_PROXY"
-                or a.vp_max!=2*a.level or a.projection_ap!=30
+                or a.focus!="Low" or a.vp_max!=2*a.level
+                or a.projection_ap!=30
                 or a.level not in (1,2,3)
-                or a.regen!=6
+                or a.regen!=expected.regen
+                or a.guard_capacity!=expected.guard_capacity
+                or a.guard_instrument!=expected.guard_instrument
+                or a.guard_value!=expected.guard_value
                 or "Level-1 Prepared / Chosen" not in design):
             raise UnresolvedDecision("Exact audited A/B Low Life build required")
         self.e=encounter
@@ -69,18 +115,18 @@ class LowLifeNativeRites:
         if caster!=self.caster:
             raise UnresolvedDecision("Wrong Low Life caster")
         a=self.e.actors[caster]
-        expected=party_actor(self.role,a.level,"source-proof","party",
-                             occupied=a.occupied)
-        if (a.source!=expected.source
+        expected=_expected_low_actor(a)
+        if (expected is None or a.source!=expected.source
                 or a.hp_max!=expected.hp_max
                 or a.vigor_max!=expected.vigor_max
                 or a.ap_total!=expected.ap_total
                 or a.physical_ap!=expected.physical_ap
-                or a.source.source_id!=self.role or a.source.path!=SOURCE
-                or a.source.status!="B05_UNBUFFED_PHYSICAL_PROXY"
-                or a.source.digest!=sha256((ROOT/SOURCE).read_bytes()).hexdigest()
+                or a.source.source_id!=self.role
                 or a.focus!="Low" or a.vp_max!=2*a.level
-                or a.projection_ap!=30 or a.regen!=6):
+                or a.projection_ap!=30 or a.regen!=expected.regen
+                or a.guard_capacity!=expected.guard_capacity
+                or a.guard_instrument!=expected.guard_instrument
+                or a.guard_value!=expected.guard_value):
             raise UnresolvedDecision("Low source identity/resources changed")
         return a
 
