@@ -27,6 +27,8 @@ This is the existing **COHORT-ALPHA** allocation from readiness #197, not the hi
 
 **Session 1 preparation and recording:** [B04/B05/B06/B07 Alpha Session 1 GM Packet v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) is the actionable L1 supply/road-gate GM play aid following the merged #203 handoff. Its four distinct source stage cards and blank private worksheet are **not another acceptance intake**. Only transfer genuine raw source/action/clock/referee notes into this existing Alpha canonical 84-slot packet and preserve its original immutable source scope.
 
+**Original Session 1 local live-intake crosscheck:** [B04/B05/B06/B07 Alpha Session 1 Preflight & Live Evidence Intake v0](b04-b05-b06-b07-alpha-session-one-live-intake-v0.md) is a read-only validator for original local SHA256 evidence, exact canonical supply/gate source decisions, four selected L1 source sheets and genuine reported GM Milestone One. It preserves all 84 original C1–C7 rows, marks unobserved and blocked stages honestly, and does not automatically authenticate human choices or reviewers.
+
 ## Before real sessions
 
 The GM and independent reviewer examine all four full original L1 sheets, source hashes, legal gear, selected/saved Talent/Training, initial HP/Vigor/VP/AP and native action eligibility. Select L2/L3 advancement choices without awarding levels in advance. A first-cohort packet leaves Low Priest A/B selection blank until the **player actually chooses**. Assign participant, GM, author and separate reviewer responsibilities outside the repository; keep personally identifying data and raw private session evidence in controlled local storage, never in these PR fixtures.

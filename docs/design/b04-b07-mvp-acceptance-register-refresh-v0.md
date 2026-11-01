@@ -30,6 +30,8 @@
 
 **First real Alpha session preflight — no claimed play:** [B04/B05/B06/B07 Alpha Session 1 GM Preparation & Execution Packet v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) narrows the merged #203 operational GM handoff to genuine L1 supply diagnosis, crossing/records alternatives and optional original Soldier gate conflict. Source numerical examples and an unobserved local worksheet feed the *unchanged* Alpha private 84-slot intake, never externally authenticate sessions or grant the candidate gate milestone. The six gates and Focus certifications remain open.
 
+**Session 1 actual evidence intake — new read-only preflight:** [B04/B05/B06/B07 Alpha Session 1 Live Evidence Intake v0](b04-b05-b06-b07-alpha-session-one-live-intake-v0.md) binds original player/GM source decisions, alternatives, clock/resource snapshots, true optional Soldier conflict, original L1 source sheets and milestone declarations between the GM worksheet and existing original Alpha 84-slot packet. It requires local-file SHA256 verification for a submitted intake, rejects invented scene/source/clock references and keeps source-blocked actions on hold. It does not credit real players, independent Focus certifications or six MVP gates.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |

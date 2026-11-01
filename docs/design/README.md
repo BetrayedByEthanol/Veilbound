@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
+**Alpha Session 1 actual-table evidence preflight:** [B04/B05/B06/B07 Session 1 Preflight & Live Evidence Intake v0](b04-b05-b06-b07-alpha-session-one-live-intake-v0.md) crosschecks the real source-selected L1 GM/player worksheet against the original private first-cohort Alpha packet, verifies local primary bytes using the existing SHA-256 manifest validator, and holds blocked choices or mismatched scene/milestone records. It never manufactures actual play, reviewers, Focus certifications or MVP gates.
+
 **Actual Alpha Session 1 GM preparation:** [B04/B05/B06/B07 Alpha Session 1 GM Preparation & Execution Packet v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) provides the L1 supply/crossing/cache and Soldier gate prompts, original numerical *author examples*, selected full-party legal spotlight questions, real alternative outcomes, explicit GM/milestone stop rules, and private unobserved source-reference worksheet. It does not replace the Alpha 84-slot intake or add human sessions.
 
 **Alpha actual-tabletop GM execution handoff:** [B04/B05/B06/B07 — Alpha Pilot Readiness & GM Execution Handoff v0](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md) audits merged four-Focus L1–3 native scenes, distinguishes bounded automated options from GM/player choices, preserves the 84-slot private evidence intake and produces a no-fabricated-session operational go/no-go matrix. It does **not** issue a new Focus certificate or MVP gate.

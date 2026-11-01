@@ -2,6 +2,8 @@
 
 > **Playable GM preparation, not performed play or a new rule.** The actual first Alpha table is Priest/Low (player-selected complete A or B), Scholar/High Fire, Gifted/High Flame and Anointed/Medium Restoration at L1. This packet expands the [Alpha GM handoff](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md), [3–5-session adventure](b04-b05-b06-b07-integrated-mvp-pilot-adventure-v0.md), [first-cohort private evidence intake](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md), [source noncombat fixture](b05-b06-integrated-noncombat-adventure-scenes-consequences-v0.md) and [L1 defensive responses](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md). Canonical rules and actual original sheets outrank illustrative source fixture data.
 
+**Private operational handoff:** [Alpha Session 1 Preflight & Live Evidence Intake v0](b04-b05-b06-b07-alpha-session-one-live-intake-v0.md) shows how to check actual GM/source readiness, record each original L1 supply/gate decision, register private primary files in the **existing first-cohort manifest** and verify exact corresponding canonical scene fields. This packet is still a GM preparation aid, not a live session or independently certified record.
+
 ## Before the table — GM-only truth and source signoff
 
 The first of four *candidate* sessions covers **Supply → Gate, both L1**. This is one valid grouping in the approved 3–5-session structure. The date, choices and any milestone cannot be set by a machine run.

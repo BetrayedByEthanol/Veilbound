@@ -14,6 +14,9 @@ on:
       - 'scripts/b04_b05_b06_b07_first_cohort_pilot_v0.py'
       - 'scripts/b04_b05_b06_b07_alpha_pilot_handoff_v0.py'
       - 'scripts/b04_b05_b06_b07_alpha_session_one_v0.py'
+      - 'scripts/b04_b05_b06_b07_alpha_session_one_live_intake_v0.py'
+      - 'tests/test_b04_b05_b06_b07_alpha_session_one_live_intake_v0.py'
+      - 'docs/design/b04-b05-b06-b07-alpha-session-one-live-intake-v0.md'
       - 'tests/test_b04_b05_b06_b07_alpha_session_one_v0.py'
       - 'docs/design/b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md'
       - 'tests/test_b04_b05_b06_b07_alpha_pilot_handoff_v0.py'
@@ -308,6 +311,15 @@ jobs:
           python -m json.tool build/b04-b05-b06-b07-alpha-session1-gm-cards-v0.json > /dev/null
           python -m json.tool build/b04-b05-b06-b07-alpha-session1-blank-v0.json > /dev/null
           python -m json.tool build/b04-b05-b06-b07-alpha-session1-preflight-v0.json > /dev/null
+      - name: Verify Alpha Session 1 live-intake structural source binding and local-byte safety
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_b07_alpha_session_one_live_intake_v0.py' -v
+      - name: Produce safe unobserved Alpha Session 1 preflight only
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_b06_b07_alpha_session_one_live_intake_v0 > build/b04-b05-b06-b07-alpha-session1-live-intake-blank-preflight-v0.json
+          python -m scripts.b04_b05_b06_b07_alpha_session_one_live_intake_v0 --preflight build/b04-b05-b06-b07-alpha-session1-blank-v0.json > build/b04-b05-b06-b07-alpha-session1-live-intake-explicit-blank-v0.json
+          python -m json.tool build/b04-b05-b06-b07-alpha-session1-live-intake-blank-preflight-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-b07-alpha-session1-live-intake-explicit-blank-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -347,6 +359,8 @@ jobs:
             build/b04-b05-b06-b07-alpha-gm-blank-v0.json
             build/b04-b05-b06-b07-alpha-gm-handoff-v0.json
             build/b04-b05-b06-b07-alpha-session1-gm-cards-v0.json
+            build/b04-b05-b06-b07-alpha-session1-live-intake-blank-preflight-v0.json
+            build/b04-b05-b06-b07-alpha-session1-live-intake-explicit-blank-v0.json
             build/b04-b05-b06-b07-alpha-session1-blank-v0.json
             build/b04-b05-b06-b07-alpha-session1-preflight-v0.json
             build/b04-b05-b06-b07-alpha-gm-preflight-v0.json
