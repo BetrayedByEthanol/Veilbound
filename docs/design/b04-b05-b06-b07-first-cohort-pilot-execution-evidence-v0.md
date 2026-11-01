@@ -15,6 +15,8 @@ This is the existing **COHORT-ALPHA** allocation from readiness #197, not the hi
 
 **Go/no-go:** There is no established single source-native mixed-Alpha four-PC G8 L1 combat engine. A specialized standalone adapter is not blanket permission to resolve every mixed party action. The GM and independent referee must select and test source-legal scene compositions first, or mark the chosen combat BLOCKED. Do not downlevel a G8 enemy or reuse historical fixed party victories as real Alpha play.
 
+**New bounded Alpha native L1 source witness:** [B04/B05/B06 Alpha Mixed-Party Encounter v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) proves exact shared G0/G3/G4/G5 co-existence of all four selected Focuses, both complete Low Priest A/B chosen Rites, one source Medium Anointed invested Step, native Gifted/Scholar Flame and four cautious exits against the original Soldier. It supplies **one author-fixed policy**, not a general source-legal player tactical menu. Any actual GM/player choices beyond that authored policy still need separate source preflight and human evidence.
+
 ## Before real sessions
 
 The GM and independent reviewer examine all four full original L1 sheets, source hashes, legal gear, selected/saved Talent/Training, initial HP/Vigor/VP/AP and native action eligibility. Select L2/L3 advancement choices without awarding levels in advance. A first-cohort packet leaves Low Priest A/B selection blank until the **player actually chooses**. Assign participant, GM, author and separate reviewer responsibilities outside the repository; keep personally identifying data and raw private session evidence in controlled local storage, never in these PR fixtures.

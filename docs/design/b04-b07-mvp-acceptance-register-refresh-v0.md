@@ -18,6 +18,8 @@
 
 **First Alpha cohort execution and verification prep:** [B04/B05/B06/B07 First Cohort Pilot Execution & Independent Evidence Verification v0](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) creates a reusable private-evidence manifest, exact original four-Focus Alpha source identities and source-limited encounter blocking notes. 84 C1–C7 tasks remain unobserved; optional SHA checks validate only file integrity, not human identities or actual play. The existing 0/12 Focus certification and 0/6 gate counts remain.
 
+**First-cohort native combat implementation:** [B04/B05/B06 Alpha L1 Mixed-Party Source-Legal Encounter v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) closes one bounded L1 combination blocker for full selected Low Priest A/B, High Scholar, High Gifted and Medium Anointed against original Soldier; retains exact resource/clock/action receipts and real G5 withdrawal. This cannot independently count as any real-play observation, representative Alpha battle, Focus certificate or MVP exit.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
