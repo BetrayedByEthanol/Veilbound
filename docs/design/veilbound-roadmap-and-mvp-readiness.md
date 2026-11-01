@@ -210,6 +210,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **Proposed B04/B06/B07 milestone/persistent party source chain:** [Integrated L1–3 Milestone Advancement & Persistent Party Adventure v0](b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md) connects original four G0 source characters through an L1 native noncombat clock, separately declared author-fixture Level 2 and 3 GM milestone candidates, an original L2 G8 Soldier withdrawal, and an original L3 G8 Sentry battle. All actual original party HP/Vigor/VP/arrow debt and Recovery event identities remain; conservative newly gained VP capacity begins spent. This is a bounded author-run source witness, not certified external play, actual GM endorsement of the story beat, or general level-up resource policy.
 
+**Proposed B04/B06/B07 independent acceptance readiness:** [Persistent Party Adventure Acceptance & Independent Certification Readiness v0](b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md) identifies all 12×3 Focus-level C1–C7 outside-party evidence obligations, uses current original roster hashes and bounded #196 native fixture truth, schedules three four-player cohorts, and separates conditional implementation gaps from actual external GM/player/reviewer execution. This is a candidate test procedure, not a new B06 G-stage, authored Focus power, real session, full-play certificate or closed MVP gate.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.

@@ -14,6 +14,8 @@
 
 **Pilot progression chain supplement:** [B04/B06/B07 Integrated L1–3 Milestone Advancement & Persistent Party Adventure v0](b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md) executes two explicit candidate GM milestone transitions on one live source-bounded party, preserving wounds, ammunition, HP/Vigor and original clock obligations through L2/L3 G8 battle. It does not transform either author-fixture level award into an authenticated human GM declaration or improve strict gate/certification counts.
 
+**Independent acceptance readiness supplement:** [B04/B06/B07 Persistent Party Adventure Acceptance & Independent Certification Readiness v0](b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md) audits the merged #196 G0/G8 authored milestone chain against all C1–C7 criteria and six strict exit gates, distinguishes its two Low Priest physical proxies and High Scholar from unobserved Focuses, and yields 36 level-specific play/review cards plus blank cohorts. All independent Focus certificates and gate statuses remain at zero; only verified external GM/player evidence can change acceptance.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
