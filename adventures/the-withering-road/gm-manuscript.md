@@ -148,7 +148,7 @@ Use **Core Resolution**: relevant `d20 + Ability + narrow applicable Training + 
 
 ### GM preparation
 
-Print player handouts selectively rather than giving every page at once. Draw the **seven depot zones** and **seven cavern points** from their chapter schematics; they are route diagrams, not measured tactical maps. Prepare original source-backed Soldier/Hunter references if actual confrontation is possible. Know where the essential clues remain if the players avoid combat, refuse entry or visit the chapters out of order. Prepare Talla and Naeris for early visits. Before beginning, establish how the group's characters know or meet each other; avoid forcing a single PC motive.
+Print **individual props by identifier** from [player-handouts.md](player-handouts.md); do not hand out the entire collection. Session 1 uses P-1 (public notice) and P-2 (public route sketch), the Market M-1–M-3, the Depot D-1–D-5, the Cavern C-1–C-4, and Ember Watch F-1–F-3. Blank signatures and release quantities are completed only if earned in play.  Draw the **seven depot zones** and **seven cavern points** from their chapter schematics; they are route diagrams, not measured tactical maps. Prepare original source-backed Soldier/Hunter references if actual confrontation is possible. Know where the essential clues remain if the players avoid combat, refuse entry or visit the chapters out of order. Prepare Talla and Naeris for early visits. Before beginning, establish how the group's characters know or meet each other; avoid forcing a single PC motive.
 
 
 
@@ -193,7 +193,7 @@ Do not telegraph this solution as the right answer during Session 1. A villager'
 ### The magical boundary
 
 - **Mira Fen is an experienced ordinary healer**, not a free source of Restoration spells. Her skill, ethics and physical care matter even when there is no caster present.
-- Mira once carried a **ring bearing an observable Life / Restoration Veil signature**, now carried by courier Talla. The ring can later be found in the depot/cache material. It is an identification heirloom, **not a cure, magical antidote, or secretly active item**. Its significance can be learned by mundane testimony without magical Inspection.
+- Mira once carried a **ring bearing an observable Life / Restoration Veil signature**, now carried by courier **Talla at Ember Watch**. The ring is **not** in the depot, old-road cache, or abandoned-refuge dispatch case. A note recovered there may mention the ring, but **Talla retains the actual heirloom** unless players change its custody through play. It is an identification heirloom, **not a cure, magical antidote, or secretly active item**. Its significance can be learned by mundane testimony without magical Inspection.
 - A player character may use an **actually known, legal** technique if they choose; pay normal AP/VP and obey access, targets and effect boundaries. Universal Veil Inspection is relevant only if the actual item is **held** by the inspecting character and the canonical cost is met; it does not automatically disclose history or hidden function.
 - The GM should neither stage a gratuitous magical display nor punish a character for using their own rare ability. An actual working is an event villagers may notice and interpret differently; it does not make its effect larger than the rules allow.
 - There are **no universal bonuses, healing effects, prophetic messages, regional Pillar modifiers or mandatory Faith checks** attached to Dunmere's traditions.
@@ -410,7 +410,7 @@ A village custom is **not** a spell. A ring bearing a Veil signature is **not** 
 ### GM prep checklist
 
 - [ ] Confirm the characters' reason to be in or near Dunmere; ask rather than prescribe.
-- [ ] Print or describe the market hearth, public ledger and the Lot 17 notice.
+- [ ] Print or describe **P-1 Public Notice** and **P-2 Public Route Sketch** from [player-handouts.md](player-handouts.md), the market hearth and the public ledger. Reveal other handouts individually only when the relevant record is genuinely accessed.
 - [ ] Keep Mira, Edda, Renn and Hale's limited knowledge distinct.
 - [ ] Keep the **spoiled goods mundane** and the **Ember Watch reserve intact**.
 - [ ] Keep the Life / Restoration ring outside Session 1 unless players genuinely pursue its known location; its meaning is personal and its Veil signature is not a cure.
@@ -501,7 +501,7 @@ The contradiction is between the notice's implied completeness and the actual sp
 >
 > “A record can be accurate,” she says, “and still be used to tell an untrue story.”
 
-**Evidence reward:** If the party requests a copy, Edda can produce a dated, attested extract **without requiring a check**. Obtaining custody of the originals requires a stronger reason and may never be necessary. A thoughtful request can also persuade her to accompany a hearing or send a message to Naeris. Use Handout M-1.
+**Evidence reward:** If the party requests a copy, Edda can produce a dated, attested extract **without requiring a check**. Obtaining custody of the originals requires a stronger reason and may never be necessary. A thoughtful request can also persuade her to accompany a hearing or send a message to Naeris. Give **M-1** from [player-handouts.md](player-handouts.md); fill its attestation only when Edda actually signs it. **M-2** is an optional witness statement template (not a pre-signed admission), and **M-3** is a blank petition.
 
 ### Scene S3 — Renn's explanation
 
@@ -628,7 +628,7 @@ These are **adventure-local suggested targets**, not universal rules for locks, 
 
 > Under a hanging scale, the clerk has spread two papers beneath a brass weight. A chalk board says six crates were expected. Four dark rectangles on the stone show where boxes recently stood. Across the newest seals, someone has written *under inspection* in bright ink.
 
-**Give players Handouts D-1 and D-2** as physically inspected records. The first is a six-crate outbound manifest. The second shows four crates returned. D-3, a damaged transfer slip, can be found in the office, offered by the porter, or recovered from a duplicate; it confirms 03 and 05 stayed at Old Kiln Rest.
+**Give players Handouts D-1 and D-2** from [player-handouts.md](player-handouts.md) as physically inspected records. **D-1** lists all six outbound crate marks; **D-2** lists only the four received crate marks, with no printed solution. **D-3**, a water-damaged transfer slip, can be found in the office, offered by the porter, or recovered from a duplicate; it explicitly records 03 and 05 left at Old Kiln Rest. Let the players compare those documents rather than announcing the missing numbers first.
 
 **GM solution:** 17-01, 17-02, 17-04, 17-06 returned. 17-03 and 17-05 stayed at Old Kiln Rest. Returned crates were not universally dry: some bundles show saturated wrapping under replacement labels. The public expression “held for inspection” withheld this meaningful loss. Comparing evidence reveals no proof of theft.
 
@@ -662,7 +662,7 @@ A loading shutter opens at scheduled intervals when staff are active. A narrow s
 
 A properly secured cabinet contains the route authorization and **an independent Ember Watch reserve voucher**. Its lock is difficult but does not require the secret archive. With authorized access, the clerk can open it. Under pressure, a plausible maintenance lock attempt is **Precision + Lockwork vs 15**; forcing the cabinet is noisy and risks damage to fragile documents. Players can instead bring Edda or ask the clerk for copies.
 
-**The documents show:** Renn authorized the diversion; four crates were recorded as received; the clean Ember Watch reserve was catalogued separately and is not represented by the spoiled lot. Provide Handout D-4 when inspected or properly copied. Naeris remains entitled to verify a release; the voucher does not mean the party legally owns the medicine.
+**The documents show:** Renn authorized the diversion; four crates were recorded as received; the clean Ember Watch reserve was catalogued separately and is not represented by the spoiled lot. Provide **D-4** from [player-handouts.md](player-handouts.md) when inspected or properly copied; its two distinct vault leaves may be revealed separately. It is an authentic authorization and reserve record, not a completed medicine release. Naeris remains entitled to verify a release; the voucher does not mean the party legally owns the medicine.
 
 ## Area G — The Three Obligations (optional secret archive)
 
@@ -680,7 +680,7 @@ Three rotary discs bear multiple symbols. The first bears Fire, Stone, Wind and 
 
 The inscription itself gives much of the sequence. A player who understands it opens the door without rolling. Other paths: ask Edda about the old rebuilding; locate the renovation drawing; inspect visible machinery using Intellect + Engineering **15** when meaningful; pick the separate maintenance lock with Precision + Lockwork **18**; physically force an accessible panel with Strength **18** and leverage, accepting historic damage and noise. Wrong sequence: ordinary resistance, a visible latch reset and perhaps a click heard by staff; no magical damage or hard lockout.
 
-**Optional finds:** (a) older **protected duplicate reserve voucher**, useful if the normal copy's origin is disputed; (b) historical emergency release procedure, describing recorded need, witnessed custody and proposed transport—not an automatic authorization; (c) a folded covered-route plan and a list of useful cargo fittings. Give Handout D-5. Players can leave with full main-plot evidence without ever finding G.
+**Optional finds:** (a) older **protected duplicate reserve voucher**, useful if the normal copy's origin is disputed; (b) historical emergency release procedure, describing recorded need, witnessed custody and proposed transport—not an automatic authorization; (c) a folded covered-route plan and a list of useful cargo fittings. Give **D-5** from [player-handouts.md](player-handouts.md), only if the optional protected archive is actually explored. Players can leave with full main-plot evidence without ever finding G.
 
 ### Guard response and social/combat boundary
 
@@ -790,11 +790,11 @@ A narrow natural ledge overlooks the webbed gallery. With appropriate climbing g
 
 ## Area F — Abandoned refuge: the essential case
 
-This former wagon shelter is reached from the upper ledge or lower gallery. Behind a dry limestone lip is a **sealed dispatch case**, abandoned during the rain-diversion confusion and later overlooked. It is **not in the Heartweb Chamber**. Give the player the physical prop **C-1 Dispatch note** upon finding and opening it by ordinary means. A broken seal or difficult lid changes provenance or time but not the fact that the case exists.
+This former wagon shelter is reached from the upper ledge or lower gallery. Behind a dry limestone lip is a **sealed dispatch case**, abandoned during the rain-diversion confusion and later overlooked. It is **not in the Heartweb Chamber**. Give the player **C-1 Dispatch note** from [player-handouts.md](player-handouts.md) upon finding and opening the case by ordinary means. A broken seal or difficult lid changes provenance or time but not the fact that the case exists.
 
 **Contents:** a dated route order signed for Renn Calder (`R.C.`), note of crates **17-03/17-05** left at Old Kiln Rest, confirmation that four crates went onward, and a reference to the **separate dry grayleaf reserve at Ember Watch**. The dispatch does not state that Renn concealed public loss—that is inferred when compared with the posted notice or a witness and later established through his response.
 
-**Optional second note:** A folded dispatch-copy fragment indicates Talla headed for Ember Watch with an emergency request. It gives a reason to look for her, not proof of supernatural intervention. Her family ring remains with her at Ember Watch unless the players' actual actions change it.
+**Optional second note — C-4:** A folded, unsent message in the abandoned-refuge dispatch copies says Talla took Mira's request toward Ember Watch. Give **C-4** only if the players find that note. She writes that she **kept the family ring with her**; the physical ring remains with Talla at Ember Watch unless the players' actual actions change custody. The note indicates a destination, not guaranteed safe arrival or supernatural intervention.
 
 **Alternative access/failure:** The case may be retrieved by reaching F through either route; it can be partially wet and its seal challenged, but readable basic contents survive unless players deliberately destroy it. An NPC witness, depot order and Edda's record independently support the same facts. A party may leave with the case without fighting either spider species.
 
@@ -847,7 +847,7 @@ Ask the party whether it has identified a return route suitable for **people, pa
 - **After depot:** Numbers 03/05 can be matched against the crate fragments, strengthening provenance and the later petition.
 - **After early Ember Watch:** The route may now be explored expressly for safe freight and the case for public accountability; the motivation changes without making the branch redundant.
 
-**GM closure notes:** dispatch recovered/condition; route assessed for foot and loaded transport separately; Nell rescued or left; mundane spiders disturbed; Heartweb approached/avoided/resolved; Hunter signs/contact; actual wounds, Vigor, VP and time; optional equipment or silk recovered. **Handouts:** C-1 dispatch case, C-2 old-road sketch, C-3 optional cargo contents.
+**GM closure notes:** dispatch recovered/condition; **C-1 case, C-2 field sketch, C-3 optional salvage inventory, and C-4 optional unsent note** revealed only as actually earned; route assessed for foot and loaded transport separately; Nell rescued or left; mundane spiders disturbed; Heartweb approached/avoided/resolved; Hunter signs/contact; actual wounds, Vigor, VP and time; optional equipment or silk recovered. **Handouts:** **C-1** sealed dispatch when opened; **C-2** old-road field sketch when the party finds or makes a reliable route sketch; **C-3** optional older courier strongbox inventory only if the box is actually recovered; **C-4** optional Talla note only when discovered in the refuge copies. All four are individual sections in [player-handouts.md](player-handouts.md).
 
 
 
@@ -927,7 +927,7 @@ Ask the group to decide: **How many parcels now? Who certifies the handoff? Who 
 
 **Success is a workable plan, not a particular item check:** An authentic receipt plus viable covered transport is one solution. Public Edda certification may be replaced by two independent witnesses if trustworthy. Salvage equipment can substitute for purchased straps. Renn's wagon is useful but not mandatory. Mira can confirm which patients need care but cannot retroactively make spoiled medicine safe.
 
-**Give Handout F-1** as a blank release and receipt form; let the players complete it aloud or on paper. No numerical logistics subsystem or forced group check is created.
+**Give Handout F-1** from [player-handouts.md](player-handouts.md) as a **blank** release-and-custody form; complete quantities, signatures and transport only according to the actual decision and handover. **F-2** is the optional blank Dunmere public correction after delivery; **F-3** is an optional Naeris letter template, not a pre-committed award. No numerical logistics subsystem or forced group check is created.
 
 ### Meaningful consequences, not generic failure
 
