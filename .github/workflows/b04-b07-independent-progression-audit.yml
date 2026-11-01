@@ -9,6 +9,9 @@ on:
       - 'scripts/b04_b05_low_priest_complete_noncombat_v0.py'
       - 'scripts/b05_b06_native_party_continuity_v0.py'
       - 'scripts/b05_b06_cross_encounter_effect_continuity_v0.py'
+      - 'scripts/b04_b06_b07_integrated_milestone_persistent_party_v0.py'
+      - 'tests/test_b04_b06_b07_integrated_milestone_persistent_party_v0.py'
+      - 'docs/design/b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md'
       - 'tests/test_b05_b06_cross_encounter_effect_continuity_v0.py'
       - 'docs/design/b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md'
       - 'tests/test_b05_b06_native_party_continuity_v0.py'
@@ -191,6 +194,13 @@ jobs:
           mkdir -p build
           python -m scripts.b05_b06_cross_encounter_effect_continuity_v0 > build/b05-b06-cross-encounter-effects-v0.json
           python -m json.tool build/b05-b06-cross-encounter-effects-v0.json > /dev/null
+      - name: Verify native L1-3 milestone advancement and retained party resources
+        run: python -m unittest discover -s tests -p 'test_b04_b06_b07_integrated_milestone_persistent_party_v0.py' -v
+      - name: Produce L1-3 milestone and persistent party adventure source evidence
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b06_b07_integrated_milestone_persistent_party_v0 > build/b04-b06-b07-persistent-milestone-adventure-v0.json
+          python -m json.tool build/b04-b06-b07-persistent-milestone-adventure-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -216,4 +226,5 @@ jobs:
             build/b04-b05-low-priest-full-noncombat-v0.json
             build/b05-b06-native-party-continuity-v0.json
             build/b05-b06-cross-encounter-effects-v0.json
+            build/b04-b06-b07-persistent-milestone-adventure-v0.json
           if-no-files-found: error

@@ -12,6 +12,8 @@
 
 **Candidate effect persistence supplement:** [B05/B06 toxin/effect/duration continuation](b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md) permits actual native pending poison pulses, source-supported Endurance expiry and maintained G3 host reservations to carry into subsequent combat without resetting VP or deadlines; not a fully observed adventure session or authorization to ignore unresolved dangers.
 
+**Author-fixture progression integration:** [B04/B06/B07 L1–3 persistent party chain](b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md) demonstrates continuous original G0/G4.2 party source state and two *explicitly supplied* provisional GM milestone decisions through native L2–3 Soldier/Sentry encounters. It does **not** claim the played four-session arc, GM shrine outcome or 12-Focus independent certificates; L1 G8 combat remains unauthorized.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.

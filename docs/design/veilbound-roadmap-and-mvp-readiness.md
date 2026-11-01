@@ -208,6 +208,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **Proposed B05/B06 follow-up:** [Cross-Encounter Toxin, Maintained Effect & Duration Continuity v0](b05-b06-cross-encounter-toxin-effect-duration-continuity-v0.md) retains original G4.3/4.4 hazard keys, precommitted wounds/interval units, Endurance expiry and actual source-supported G3 maintained hosts between source G8 encounters; explicitly rejects unsupported round-based duration conversion. It does not independently certify a Focus, human pilot, or arbitrary campaign persistence.
 
+**Proposed B04/B06/B07 milestone/persistent party source chain:** [Integrated L1–3 Milestone Advancement & Persistent Party Adventure v0](b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md) connects original four G0 source characters through an L1 native noncombat clock, separately declared author-fixture Level 2 and 3 GM milestone candidates, an original L2 G8 Soldier withdrawal, and an original L3 G8 Sentry battle. All actual original party HP/Vigor/VP/arrow debt and Recovery event identities remain; conservative newly gained VP capacity begins spent. This is a bounded author-run source witness, not certified external play, actual GM endorsement of the story beat, or general level-up resource policy.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.
