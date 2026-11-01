@@ -15,6 +15,7 @@ This repository is intended to become the **single structured source of truth** 
 
 ```text
 docs/       Human-readable rules, world material, and design records
+adventures/ Published GM adventure manuscripts and player handouts
 content/    Structured canonical game content
 schemas/    Schemas defining structured content contracts
 apps/web/   Minimal PWA shell and future Veilbound companion UI
@@ -38,5 +39,7 @@ A design note or audit entry does **not** override canonical rules/content merel
 Veilbound is in its **level 1–3 tabletop MVP implementation and verification phase**. The original **B06 G0–G8 bounded source-native combat milestones** are merged (including native G1/G5 off-turn Sword Opportunity resolution in #148), but this does **not** close the encounter-content blocker. **6/12 Archetype × Focus pairings have structural L1–3 builds** (Priest and Scholar Low/Medium/High); **0/12 are independently certified** for complete combat, noncombat and progression. Representative GM encounter/adventure packs remain open. The first web application remains a deliberately limited reference shell; production character building, campaign state, multiplayer and VTT-style features are deferred.
 
 For the **current development roadmap, completed milestones, remaining priorities and six strict MVP exit gates**, use the [active roadmap and MVP readiness register](docs/design/veilbound-roadmap-and-mvp-readiness.md). Its planning status does not override canonical rules.
+
+See the [adventure index](adventures/README.md) for GM adventure modules.
 
 See [docs/README.md](docs/README.md) for documentation conventions and [CONTRIBUTING.md](CONTRIBUTING.md) for change workflow.
