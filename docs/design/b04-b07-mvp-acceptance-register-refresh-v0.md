@@ -28,6 +28,8 @@
 
 **Operational Alpha GM execution handoff after merged #202:** [B04/B05/B06/B07 Alpha Pilot Readiness & GM Execution Handoff v0](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md) reclassifies old mixed L1/Hunter/Sentry source gaps against verified bounded implementation, prints actual-tabletop conditional go/no-go and classifies GM decisions, conditional implementation and independent evidence. The existing untrusted Alpha 84-slot intake is preserved; no machine review authenticates human play, closes Create/Act/Resolve/Advance/Challenge/Observe or credits any of the 12 Focuses.
 
+**First real Alpha session preflight — no claimed play:** [B04/B05/B06/B07 Alpha Session 1 GM Preparation & Execution Packet v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) narrows the merged #203 operational GM handoff to genuine L1 supply diagnosis, crossing/records alternatives and optional original Soldier gate conflict. Source numerical examples and an unobserved local worksheet feed the *unchanged* Alpha private 84-slot intake, never externally authenticate sessions or grant the candidate gate milestone. The six gates and Focus certifications remain open.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
