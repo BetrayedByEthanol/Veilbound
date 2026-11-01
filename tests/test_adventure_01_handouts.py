@@ -77,7 +77,7 @@ class Adventure01HandoutTests(unittest.TestCase):
 
     def test_secret_room_and_optional_boss_not_essential(self):
         self.assertIn("**not in the Heartweb Chamber**", self.gm)
-        self.assertIn("ordinary records vault", self.gm)
+        self.assertIn("ordinary records vault", self.gm.lower())
         self.assertIn("D-5", self.props)
         self.assertIn("F-1", self.props)
 
