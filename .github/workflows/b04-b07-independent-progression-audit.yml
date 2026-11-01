@@ -15,6 +15,10 @@ on:
       - 'scripts/b04_b05_b06_alpha_mixed_native_v0.py'
       - 'scripts/b04_b05_b06_alpha_l1_tactics_v0.py'
       - 'scripts/b04_b05_b06_alpha_l2_l3_progression_v0.py'
+      - 'scripts/b04_b05_b06_alpha_l2_hazard_sentry_v0.py'
+      - 'tests/test_b04_b05_b06_alpha_l2_hazard_sentry_v0.py'
+      - 'scripts/b05_b06_cross_encounter_effect_continuity_v0.py'
+      - 'docs/design/b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md'
       - 'tests/test_b04_b05_b06_alpha_l2_l3_progression_v0.py'
       - 'docs/design/b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md'
       - 'tests/test_b04_b05_b06_alpha_l1_tactics_v0.py'
@@ -267,6 +271,15 @@ jobs:
           python -m scripts.b04_b05_b06_alpha_l2_l3_progression_v0 --variant B > build/b04-b05-b06-alpha-l3-chain-b-v0.json
           python -m json.tool build/b04-b05-b06-alpha-l3-chain-a-v0.json > /dev/null
           python -m json.tool build/b04-b05-b06-alpha-l3-chain-b-v0.json > /dev/null
+      - name: Verify Alpha L2 native Hunter venom, Endurance, Sentry and same-level effect carry
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_alpha_l2_hazard_sentry_v0.py' -v
+      - name: Produce bounded Alpha native A/B venom and Sentry damage witnesses
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_b06_alpha_l2_hazard_sentry_v0 --variant A > build/b04-b05-b06-alpha-venom-sentry-a-v0.json
+          python -m scripts.b04_b05_b06_alpha_l2_hazard_sentry_v0 --variant B > build/b04-b05-b06-alpha-venom-sentry-b-v0.json
+          python -m json.tool build/b04-b05-b06-alpha-venom-sentry-a-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-alpha-venom-sentry-b-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -302,4 +315,5 @@ jobs:
             build/b04-b05-b06-alpha-l1-b-v0.json
             build/b04-b05-b06-alpha-tactical-*-v0.json
             build/b04-b05-b06-alpha-l3-chain-*-v0.json
+            build/b04-b05-b06-alpha-venom-sentry-*-v0.json
           if-no-files-found: error

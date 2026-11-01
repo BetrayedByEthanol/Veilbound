@@ -2,6 +2,8 @@
 
 > **Author-fixture source integration only.** Continues the complete selected four-Focus Alpha roster (Priest/Low A or B, Scholar/High, Gifted/High, Anointed/Medium) through L1, L2 and L3 without substituting historical A/B/R/F G8 characters. All source events are reproducible native G0–G5. A machine-generated story beat is **not** a GM's actual milestone, a human session, representative opposition calibration or independent Focus certification.
 
+**Separate live-hazard companion (same L2 only):** [Alpha Native Hunter Venom, Endurance, Sentry Damage and G4.2/G4.4 Continuity v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) demonstrates one actual Hunter Bite and Full poison, source-eligible L2 B-only Venom Endurance, a second same-level Sentry fight with actual enhanced HP/Fire/Vigor damage and retained poison timers. The clean three-level progression shown here **does not** splice that ongoing hazard into an invented L2→L3 advancement; it still rejects it.
+
 ## Integrated L1–L3 pilot spine
 
 | Stage | Source-native event | Actual native proof / strict limit |
@@ -13,6 +15,8 @@
 | L3 village | Full Alpha L3, original **cold Firebound Sentry** | Unscaled **B06-EN-01 cold_start** spends real Projection AP and commits source VP for its original Chosen Sword Reserve; its enhanced B06-AT-02 melee is resolved on a genuine following turn (authored natural-1 miss). Medium Anointed pays 24 General AP to invest the injured, consenting Priest, whose **genuine G4 Regeneration Step** provides exactly one Medium pulse with recipient Vigor cost. The full Priest pays its correct selected L3 A/B Chosen Rite, High Gifted exercises Joy/Flame and High Scholar original Flame. Four G1/G5 exits prove withdrawal, **not** Sentry defeat. |
 
 The original L2/L3 **Alpha source identities** are reconstructed independently from `full_low_priest_actor(A|B, level)`, `party_actor("F", ...)`, `gifted_actor(level,...)` and `party_actor("AM",...)`. This is not a universal character importer or a new Hunter/Sentry AI. No retroactive Reactions, fictitious wounds, auto-resolved Bow hits, unchosen devotions, or new Anointed Destiny awards are permitted.
+
+**Companion live-hazard safety correction:** The separate [Alpha L2 Hunter venom/Sentry handoff](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) rejects a contaminated destination (even unscheduled native short toxins or historical exposure IDs) before any travel, and preflights all potentially damaging G4.2 travel on a deep source copy. A harmful six-second TX-HM tick cannot leave either encounter partially mutated when the transfer fails. The primary L1–L3 milestone chain continues to reject unresolved live hazard cross-level transfers.
 
 ## Continuity and milestone trust boundaries
 

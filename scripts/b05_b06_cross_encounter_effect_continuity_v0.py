@@ -13,7 +13,7 @@ PARTY = ("vanguard", "guardian", "archer", "scholar")
 CLOCK_TAGS = ("mundane:", "hunter:", "endurance:")
 
 
-def _legacy_provenance(e):
+def _legacy_provenance(e, *, party=PARTY):
     """Authenticate legacy TX-HM from native G4 receipt or prior live import.
 
     The original G4 schedule deliberately does NOT claim a G4.3 exposure ID.
@@ -54,7 +54,7 @@ def _legacy_provenance(e):
                     "recipient","origin_scene","origin_source_id",
                     "origin_source_sha256","native_schedule_index"}
                 or witness["recipient"]!=t["recipient"]
-                or witness["recipient"] not in PARTY
+                or witness["recipient"] not in party
                 or type(witness["origin_scene"]) is not str
                 or not witness["origin_scene"]
                 or type(witness["origin_source_id"]) is not str
@@ -67,30 +67,30 @@ def _legacy_provenance(e):
     return provenance
 
 
-def effect_state(e):
+def effect_state(e, *, party=PARTY):
     """Stable receipts including active and historical unique hazard keys."""
     d = e.g4
     return {
         "short_toxins": deepcopy([t for t in d.short_toxins
-                                  if t["recipient"] in PARTY]),
-        "legacy_toxin_provenance": deepcopy(_legacy_provenance(e)),
+                                  if t["recipient"] in party]),
+        "legacy_toxin_provenance": deepcopy(_legacy_provenance(e,party=party)),
         "unified_instances": deepcopy({
-            k:v for k,v in d.toxins.instances.items() if k in PARTY}),
+            k:v for k,v in d.toxins.instances.items() if k in party}),
         "exposure_ids": sorted(d.toxins.exposure_ids),
         "hunter_keys": sorted(d.venom.hunter_keys),
         "endurance_effects": deepcopy({
             k:v for k,v in d.venom.effects.items()
-            if v["caster"] in PARTY or v["recipient"] in PARTY}),
+            if v["caster"] in party or v["recipient"] in party}),
         "endurance_serial": d.venom.next_effect,
         "damage_toxin_events": sorted(k for k in d.used_events
                                       if k.startswith("toxin:")),
         "modifiers": {n:deepcopy(getattr(e.actors[n],"toxin_modifiers",{}))
-                      for n in PARTY},
+                      for n in party},
         "clock_events": {
             k:asdict(ev) for k,ev in d.clock.events.items()
-            if ev.actor_id in PARTY},
+            if ev.actor_id in party},
         "recovery_serial": {
-            n:d.clock.recovery_serial[n] for n in PARTY},
+            n:d.clock.recovery_serial[n] for n in party},
         "world_seconds": d.clock.world_seconds,
     }
 
@@ -103,11 +103,11 @@ def _active_marker(e, actor, ident, source):
         raise UnresolvedDecision("Active toxin/Endurance marker lost its G4.2 deadline")
 
 
-def validate_source(e):
+def validate_source(e, *, party=PARTY):
     """Read-only validation for party hazards before committing any travel."""
     d=e.g4
-    legacy_provenance=_legacy_provenance(e)
-    for n in PARTY:
+    legacy_provenance=_legacy_provenance(e,party=party)
+    for n in party:
         a=e.actors[n]
         if a.dead or a.hp<=0:
             raise UnresolvedDecision("Ongoing hazard needs a live party recipient")
@@ -168,8 +168,8 @@ def validate_source(e):
     for ident,v in d.venom.effects.items():
         if not v["active"]:
             continue
-        if (v["id"]!=ident or v["caster"] not in PARTY
-                or v["recipient"] not in PARTY or
+        if (v["id"]!=ident or v["caster"] not in party
+                or v["recipient"] not in party or
                 v["mode"] not in ("ward","suppression")
                 or v["cost"] not in (1,2,3)
                 or type(v["units"]) is not int or not 0<=v["units"]<=5
@@ -184,7 +184,7 @@ def validate_source(e):
             if actual is None or actual["key"]!=v["bound_key"]:
                 raise UnresolvedDecision("Endurance suppression target was lost")
     for ev in d.clock._pending():
-        if ev.actor_id in PARTY and ev.kind=="milestone":
+        if ev.actor_id in party and ev.kind=="milestone":
             if not ev.source.startswith(CLOCK_TAGS):
                 raise UnresolvedDecision("Unsupported live non-toxin milestone")
             if ev.source.startswith("endurance:") and not any(
@@ -204,7 +204,7 @@ def validate_source(e):
                 raise UnresolvedDecision("Unowned mundane toxin marker")
 
 
-def restore(previous, following):
+def restore(previous, following, *, party=PARTY):
     """Copy source-owned G4 ledgers after prior clock was settled & transferred.
 
     The existing G4.2 handoff copies chronological event IDs, deadlines and
@@ -213,24 +213,24 @@ def restore(previous, following):
     """
     p,f=previous.g4,following.g4
     f.short_toxins=deepcopy([v for v in p.short_toxins
-                            if v["recipient"] in PARTY])
+                            if v["recipient"] in party])
     # Preserve the authenticated original G4 schedule witness for a third
     # (or later) handoff. The new encounter ledger does not replay exposure.
-    f.legacy_toxin_provenance=deepcopy(_legacy_provenance(previous))
+    f.legacy_toxin_provenance=deepcopy(_legacy_provenance(previous,party=party))
     f.toxins.instances=deepcopy({k:v for k,v in p.toxins.instances.items()
-                                if k in PARTY})
+                                if k in party})
     f.toxins.exposure_ids=set(p.toxins.exposure_ids)
     f.venom.effects=deepcopy({
         k:v for k,v in p.venom.effects.items()
-        if v["caster"] in PARTY or v["recipient"] in PARTY})
+        if v["caster"] in party or v["recipient"] in party})
     f.venom.next_effect=p.venom.next_effect
     f.venom.hunter_keys=set(p.venom.hunter_keys)
     f.venom.hit_keys=set()  # Earlier encounter-local Bite indices lack authority here.
     f.used_events.update(k for k in p.used_events if k.startswith("toxin:"))
-    for n in PARTY:
+    for n in party:
         # State is first checked as a *source* value; no free ability/MP/AP.
         f.toxins._synchronize(n)
-    if effect_state(previous)!=effect_state(following):
+    if effect_state(previous,party=party)!=effect_state(following,party=party):
         raise AssertionError("Native toxin/Endurance continuation identity changed")
 
 

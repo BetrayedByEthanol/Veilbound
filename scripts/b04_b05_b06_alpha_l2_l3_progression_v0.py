@@ -85,7 +85,7 @@ def _state(e):
     } for n in PARTY}
 
 
-def _clean_boundary(e,*,terminal=True):
+def _clean_boundary(e,*,terminal=True,carry_hazards=False):
     if (e.current is not None or e.pending_regeneration is not None
             or not e.round or e.cursor!=len(e.order)
             or not any(x["kind"]=="round_end" and x["round"]==e.round
@@ -94,10 +94,16 @@ def _clean_boundary(e,*,terminal=True):
             or e.g4.clock.mode!="exploration" or e.g1.pounce is not None
             or any(e.g2.aims.get(n) for n in PARTY)
             or e.g3.effects
-            or e.g4.short_toxins or e.g4.toxins.instances
-            or e.g4.toxins.exposure_ids or e.g4.venom.effects
-            or any(v.kind!="recovery" and not v.consumed and not v.canceled
-                   for v in e.g4.clock.events.values())
+            or (not carry_hazards and (
+                e.g4.short_toxins or e.g4.toxins.instances
+                or e.g4.toxins.exposure_ids or e.g4.venom.effects
+                or any(v.kind!="recovery" and not v.consumed and not v.canceled
+                       for v in e.g4.clock.events.values())))
+            or (carry_hazards and (
+                e.g4.toxins.instances.keys()-set(PARTY)
+                or any(x["recipient"] not in PARTY for x in e.g4.short_toxins)
+                or any(x["caster"] not in PARTY or x["recipient"] not in PARTY
+                       for x in e.g4.venom.effects.values())))
             or any(e.actors[n].maintained or e.actors[n].hp<=0
                    or e.actors[n].dead for n in PARTY)):
         raise UnresolvedDecision("Alpha level handoff needs settled living party, no active effects or pending actions")
@@ -108,6 +114,9 @@ def _clean_boundary(e,*,terminal=True):
                 or any(tuple(e.actors[n].occupied[0])!=EXIT_SQUARES[n]
                        for n in PARTY)):
             raise UnresolvedDecision("All four source-attested exit receipts required before advancement")
+    if carry_hazards:
+        from scripts.b05_b06_cross_encounter_effect_continuity_v0 import validate_source
+        validate_source(e,party=PARTY)
     e.check()
 
 
@@ -237,12 +246,69 @@ def _scene(level,variant,kind,seed):
     return combat,low,joy,am
 
 
-def _carry(previous,following,*,travel_seconds,reference):
+def _preflight_alpha_destination(following):
+    """Read-only pristine G0/G4 destination preflight before source travel.
+
+    A native G4.3 short toxin may have no scheduled milestone and may leave
+    HP/VP untouched. Source carry must NEVER overwrite an already-used
+    destination's toxin, Endurance or historical exposure key.
+    """
+    from scripts.b06_world_clock_v0 import SIX_HOURS
+
+    d=following.g4
+    if (d is None or following.g3 is None or following.g2 is None
+            or following.g1 is None or getattr(following,"g5",None) is None):
+        raise UnresolvedDecision("Destination requires complete fresh native source adapters")
+    if (d.short_toxins or getattr(d,"legacy_toxin_provenance",{})
+            or d.toxins.instances or d.toxins.exposure_ids
+            or d.venom.effects or d.venom.next_effect!=0
+            or d.venom.hit_keys or d.venom.hunter_keys
+            or d.used_events or any(
+                getattr(a,"toxin_modifiers",{}) for a in following.actors.values())):
+        raise UnresolvedDecision(
+            "Destination G4 toxin, Endurance, exposure history or modifiers must be pristine")
+    # Clock events are state too. Reject altered recovery records and new
+    # milestones BEFORE copying old source events or charging route seconds.
+    clock=d.clock
+    expected={f"recovery:{ident}:1" for ident in following.actors}
+    if (clock.mode!="exploration" or clock.world_seconds!=0
+            or clock.entry_round is not None
+            or set(clock.events)!=expected
+            or set(clock.recovery_serial)!=set(following.actors)
+            or clock.sequence!=len(expected)):
+        raise UnresolvedDecision("Destination G4.2 recovery clock is not pristine")
+    for serial,(ident,actor) in enumerate(following.actors.items(),1):
+        ev=clock.events[f"recovery:{ident}:1"]
+        if (ev.ident!=f"recovery:{ident}:1"
+                or ev.actor_id!=ident
+                or ev.actor_source!=actor.source.source_id
+                or ev.source_digest!=actor.source.digest
+                or ev.kind!="recovery" or ev.phase!="recovery"
+                or ev.source!="canonical:6h-recovery"
+                or ev.serial!=serial
+                or ev.due_seconds!=SIX_HOURS
+                or ev.original_order!=SIX_HOURS
+                or ev.due_round is not None or ev.consumed or ev.canceled
+                or clock.recovery_serial[ident]!=2):
+            raise UnresolvedDecision("Destination has altered source Recovery identity")
+    following.check()
+
+
+def _carry(previous,following,*,travel_seconds,reference,carry_hazards=False):
     """Strict source-identity and clock transfer, no new state or free rest."""
     if (type(travel_seconds) is not int or not 0<=travel_seconds<=600
             or type(reference) is not str or not reference):
         raise ValueError("Exactly bounded explicit route time/reference needed")
-    _clean_boundary(previous)
+    if type(carry_hazards) is not bool:
+        raise ValueError("Explicit hazard continuity switch must be bool")
+    if carry_hazards and any(
+            previous.actors[n].level!=following.actors[n].level for n in PARTY):
+        raise UnresolvedDecision("Live venom/Endurance cannot cross Alpha level-up")
+    _clean_boundary(previous,carry_hazards=carry_hazards)
+    before_hazards=None
+    if carry_hazards:
+        from scripts.b05_b06_cross_encounter_effect_continuity_v0 import effect_state
+        before_hazards=effect_state(previous,party=PARTY)
     if (following.round or following.current is not None
             or following.g4.clock.mode!="exploration"
             or following.g4.clock.world_seconds!=0
@@ -265,21 +331,34 @@ def _carry(previous,following,*,travel_seconds,reference):
                 or set(following.g2.wielded[n])!=
                    {item for item,state in pristine.source.equipment if state=="wielded"}):
             raise UnresolvedDecision("Source-ledger/pristine destination character mismatch")
+    # The G4 hazard and original Recovery preflight is deliberately before
+    # ANY travel mutation. The destination might contain an authentic TX-MY
+    # with no G4.2 milestone and unchanged actor resources; copying the
+    # source must never erase that pre-existing exposure or its history.
+    _preflight_alpha_destination(following)
     old_clock=previous.g4.clock
     if (old_clock.world_seconds+travel_seconds>=21600
-            or any(v.kind!="recovery" and not v.consumed and not v.canceled
-                   for v in old_clock.events.values())):
+            or (not carry_hazards and
+                any(v.kind!="recovery" and not v.consumed and not v.canceled
+                    for v in old_clock.events.values()))):
         raise UnresolvedDecision("Long Recovery/hazard boundary needs separate source handoff")
-    # Advance genuine G4.2 time and only THEN copy the resulting native
-    # source events, not forged absolute event fields from caller JSON.
+    if carry_hazards:
+        # Real poison ticks, native G4.2 milestones and Endurance expiry may
+        # harm or incapacitate an actor while travelling. Preflight a deep
+        # native copy, including the POST-TRAVEL settled party boundary, before
+        # spending one source second or mutating the target encounter.
+        # This mirrors the historical source-bound continuity handoff.
+        trial=deepcopy(previous)
+        trial.g4.clock.advance_exploration(travel_seconds)
+        _clean_boundary(trial,carry_hazards=True)
+    # All source/destination preconditions are settled. Commit native travel
+    # exactly once and carry only actual post-travel source events/state.
     old_clock.advance_exploration(travel_seconds)
+    _clean_boundary(previous,carry_hazards=carry_hazards)
     earlier=_state(previous)
     old_events={key:deepcopy(value) for key,value in old_clock.events.items()
                 if value.actor_id in PARTY}
     next_clock=following.g4.clock
-    if (set(next_clock.events)!={f"recovery:{n}:1" for n in (*PARTY,"foe")}
-            or any(next_clock.recovery_serial[n]!=2 for n in (*PARTY,"foe"))):
-        raise UnresolvedDecision("Fresh destination Recovery state changed")
     for n in PARTY:
         source=previous.actors[n]
         target=following.actors[n]
@@ -301,6 +380,15 @@ def _carry(previous,following,*,travel_seconds,reference):
         next_clock.recovery_serial[n]=old_clock.recovery_serial[n]
     next_clock.sequence=old_clock.sequence+1
     next_clock.world_seconds=old_clock.world_seconds
+    if carry_hazards:
+        from scripts.b05_b06_cross_encounter_effect_continuity_v0 import (
+            restore, validate_source, effect_state,
+        )
+        restore(previous,following,party=PARTY)
+        validate_source(following,party=PARTY)
+        if effect_state(following,party=PARTY)!=effect_state(
+                previous,party=PARTY):
+            raise AssertionError("Native Alpha toxin/Endurance identity lost on handoff")
     following.check()
     if earlier!=_state(following):
         raise AssertionError("Cross-scene Alpha resources or legal wielding refilled")
@@ -314,6 +402,12 @@ def _carry(previous,following,*,travel_seconds,reference):
             {k:asdict(v) for k,v in old_events.items()}),
         "world_seconds":old_clock.world_seconds,
         "no_free_refill":True,"no_imported_foe_status":True,
+        "carry_source_hazards":carry_hazards,
+        "before_hazard_sha256":(
+            canonical_digest(before_hazards) if before_hazards is not None else None),
+        "after_hazard_sha256":(
+            canonical_digest(effect_state(following,party=PARTY))
+            if carry_hazards else None),
     }
     following.log("b04_b05_b06_alpha_party_handoff",**receipt)
     return receipt
