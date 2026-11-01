@@ -8,12 +8,12 @@ import unittest
 
 from scripts.b04_b05_b06_b07_alpha_session_one_v0 import (
     brief,blank_worksheet,validate_worksheet,
-    VERSION,STAGES,STAGE_FIELDS,GM_PREP_FIELDS,ROOT,
+    VERSION,STAGES,STAGE_FIELDS,GM_PREP_FIELDS,
 )
 from scripts.b04_b05_b06_b07_first_cohort_pilot_v0 import (
     blank_packet as alpha_blank,validate as alpha_validate,
 )
-from scripts.b04_b05_b06_b07_alpha_pilot_handoff_v0 import handoff
+from scripts.b04_b05_b06_b07_alpha_pilot_handoff_v0 import handoff, ROOT
 from scripts.b04_b05_b06_alpha_l1_tactics_v0 import OPTIONS
 from scripts.b05_b06_integrated_noncombat_adventure_v0 import DETOUR_SECONDS
 from scripts.b06_g7a_native_terminal_census_v0 import canonical_digest
