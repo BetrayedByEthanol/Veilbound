@@ -13,6 +13,8 @@ from scripts.b05_b06_cross_encounter_effect_continuity_v0 import (
 )
 from scripts.b06_encounter_state_v0 import UnresolvedDecision
 from scripts.b06_g7a_native_terminal_census_v0 import canonical_digest
+from scripts.b04_b05_b06_alpha_l2_l3_progression_v0 import _state
+from dataclasses import asdict
 
 
 class AlphaHunterSentryHazardTests(unittest.TestCase):
@@ -151,6 +153,132 @@ class AlphaHunterSentryHazardTests(unittest.TestCase):
         with self.assertRaises(UnresolvedDecision):
             _carry(hunter.e,next_combat.e,travel_seconds=0,
                    reference="omitted-opt-in")
+
+
+    @staticmethod
+    def _live_snapshot(e):
+        """Include unscheduled G4.3, unused IDs and every G4.2 record."""
+        return canonical_digest({
+            "ledger":e.ledger,
+            "party":_state(e),
+            "clock":{k:asdict(v) for k,v in e.g4.clock.events.items()},
+            "world":e.g4.clock.world_seconds,
+            "sequence":e.g4.clock.sequence,
+            "recovery_serial":e.g4.clock.recovery_serial,
+            "hazards":effect_state(e,party=PARTY),
+            "all_actor_hp":{k:a.hp for k,a in e.actors.items()},
+        })
+
+    def test_11_destination_native_TX_MY_does_not_get_erased(self):
+        for variant in ("A","B"):
+            with self.subTest(variant=variant):
+                hunter,_=_hunter_scene(variant,0)
+                target,_,_,_=_scene(2,variant,"sentry_cold",1)
+                d=target.e.g4
+                scholar=target.e.actors["scholar"]
+                original_hp=scholar.hp
+                accepted=d.toxins.apply(
+                    "scholar","TX-MY",exposure_key="native:dest:scholar:my",
+                    source="GM-fixture:pre-existing-destination-dose",
+                    route="injection",delivery_verified=True,
+                    residual_piercing_hp=1,resistance_die=1)
+                self.assertEqual(accepted["outcome"],"accepted")
+                self.assertEqual(scholar.hp,original_hp)
+                self.assertTrue(d.toxins.active("scholar"))
+                # This Minor short toxin schedules no future G4.2 milestone.
+                self.assertEqual(len(d.clock.events),len(target.e.actors))
+                source_before=self._live_snapshot(hunter.e)
+                target_before=self._live_snapshot(target.e)
+                with self.assertRaises(UnresolvedDecision):
+                    _carry(hunter.e,target.e,travel_seconds=12,
+                           reference="native-dest-TX-MY-must-survive",
+                           carry_hazards=True)
+                self.assertEqual(self._live_snapshot(hunter.e),source_before)
+                self.assertEqual(self._live_snapshot(target.e),target_before)
+                self.assertIn("native:dest:scholar:my",d.toxins.exposure_ids)
+                self.assertEqual(d.toxins.active("scholar")["profile"],"TX-MY")
+
+    def test_12_destination_historical_g4_ledger_preflight(self):
+        # Even inactive or historical state must not be replaced. The G4
+        # source domain includes legacy toxins, hit IDs and exposure history.
+        for change in ("exposure","endurance_serial","hunter_key",
+                       "used_event","actor_modifier","recovery"):
+            with self.subTest(change=change):
+                hunter,_=_hunter_scene("A",0)
+                target,_,_,_=_scene(2,"A","sentry_cold",1)
+                d=target.e.g4
+                if change=="exposure":
+                    d.toxins.exposure_ids.add("previous:unresolved")
+                elif change=="endurance_serial":
+                    d.venom.next_effect=1
+                elif change=="hunter_key":
+                    d.venom.hunter_keys.add("historic-bite")
+                elif change=="used_event":
+                    d.used_events.add("toxin:other-packet")
+                elif change=="actor_modifier":
+                    target.e.actors["scholar"].toxin_modifiers={"mp":-2}
+                else:
+                    d.clock.events["recovery:scholar:1"].due_seconds-=6
+                before_source=self._live_snapshot(hunter.e)
+                before_target=self._live_snapshot(target.e)
+                with self.assertRaises(UnresolvedDecision):
+                    _carry(hunter.e,target.e,travel_seconds=6,
+                           reference="destination-historical-G4-refusal",
+                           carry_hazards=True)
+                self.assertEqual(before_source,self._live_snapshot(hunter.e))
+                self.assertEqual(before_target,self._live_snapshot(target.e))
+
+    def test_13_fatal_TX_HM_travel_preflight_atomic_to_both_encounters(self):
+        for variant in ("A","B"):
+            with self.subTest(variant=variant):
+                hunter,_=_hunter_scene(variant,0)
+                source=hunter.e
+                # Native verified source TX-HM on a living Scholar at 1 HP.
+                # The very first actual six-second interval would tick HP
+                # across zero, invalidating safe scene handoff.
+                scholar=source.actors["scholar"]
+                scholar.hp=1
+                source.g4.schedule_hemotoxin(
+                    "scholar",exposure_key="source:scholar:real-HM",
+                    actual_exposure=True,resistance_total=1,
+                    wound_location_roll=8)
+                target,_,_,_=_scene(2,variant,"sentry_cold",1)
+                prior_source=self._live_snapshot(source)
+                prior_target=self._live_snapshot(target.e)
+                old_time=source.g4.clock.world_seconds
+                with self.assertRaises(UnresolvedDecision):
+                    _carry(source,target.e,travel_seconds=6,
+                           reference="actual-six-seconds-native-HM",
+                           carry_hazards=True)
+                self.assertEqual(source.actors["scholar"].hp,1)
+                self.assertEqual(source.g4.clock.world_seconds,old_time)
+                self.assertEqual(self._live_snapshot(source),prior_source)
+                self.assertEqual(self._live_snapshot(target.e),prior_target)
+                self.assertEqual(source.g4.short_toxins[0]["left"],5)
+
+    def test_14_rejected_hazard_travel_is_retryable_with_safe_interval(self):
+        hunter,_=_hunter_scene("A",0)
+        source=hunter.e
+        source.actors["scholar"].hp=1
+        source.g4.schedule_hemotoxin(
+            "scholar",exposure_key="source:scholar:real-HM-retry",
+            actual_exposure=True,resistance_total=1,wound_location_roll=8)
+        target,_,_,_=_scene(2,"A","sentry_cold",1)
+        before=self._live_snapshot(source)
+        with self.assertRaises(UnresolvedDecision):
+            _carry(source,target.e,travel_seconds=6,
+                   reference="would-cross-zero",carry_hazards=True)
+        self.assertEqual(self._live_snapshot(source),before)
+        receipt=_carry(source,target.e,travel_seconds=0,
+                       reference="safe-immediate-handoff",carry_hazards=True)
+        self.assertTrue(receipt["carry_source_hazards"])
+        self.assertEqual(receipt["elapsed_seconds"],0)
+        self.assertEqual(target.e.actors["scholar"].hp,1)
+        self.assertEqual(source.g4.clock.world_seconds,
+                         target.e.g4.clock.world_seconds)
+        self.assertEqual(
+            effect_state(source,party=PARTY),
+            effect_state(target.e,party=PARTY))
 
     def test_09_exact_replay_rejects_reshashed_source_ledger(self):
         for variant,r in (("A",self.a),("B",self.b)):

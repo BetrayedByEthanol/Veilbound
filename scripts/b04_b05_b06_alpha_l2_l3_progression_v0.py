@@ -246,6 +246,54 @@ def _scene(level,variant,kind,seed):
     return combat,low,joy,am
 
 
+def _preflight_alpha_destination(following):
+    """Read-only pristine G0/G4 destination preflight before source travel.
+
+    A native G4.3 short toxin may have no scheduled milestone and may leave
+    HP/VP untouched. Source carry must NEVER overwrite an already-used
+    destination's toxin, Endurance or historical exposure key.
+    """
+    from scripts.b06_world_clock_v0 import SIX_HOURS
+
+    d=following.g4
+    if (d is None or following.g3 is None or following.g2 is None
+            or following.g1 is None or getattr(following,"g5",None) is None):
+        raise UnresolvedDecision("Destination requires complete fresh native source adapters")
+    if (d.short_toxins or getattr(d,"legacy_toxin_provenance",{})
+            or d.toxins.instances or d.toxins.exposure_ids
+            or d.venom.effects or d.venom.next_effect!=0
+            or d.venom.hit_keys or d.venom.hunter_keys
+            or d.used_events or any(
+                getattr(a,"toxin_modifiers",{}) for a in following.actors.values())):
+        raise UnresolvedDecision(
+            "Destination G4 toxin, Endurance, exposure history or modifiers must be pristine")
+    # Clock events are state too. Reject altered recovery records and new
+    # milestones BEFORE copying old source events or charging route seconds.
+    clock=d.clock
+    expected={f"recovery:{ident}:1" for ident in following.actors}
+    if (clock.mode!="exploration" or clock.world_seconds!=0
+            or clock.entry_round is not None
+            or set(clock.events)!=expected
+            or set(clock.recovery_serial)!=set(following.actors)
+            or clock.sequence!=len(expected)):
+        raise UnresolvedDecision("Destination G4.2 recovery clock is not pristine")
+    for serial,(ident,actor) in enumerate(following.actors.items(),1):
+        ev=clock.events[f"recovery:{ident}:1"]
+        if (ev.ident!=f"recovery:{ident}:1"
+                or ev.actor_id!=ident
+                or ev.actor_source!=actor.source.source_id
+                or ev.source_digest!=actor.source.digest
+                or ev.kind!="recovery" or ev.phase!="recovery"
+                or ev.source!="canonical:6h-recovery"
+                or ev.serial!=serial
+                or ev.due_seconds!=SIX_HOURS
+                or ev.original_order!=SIX_HOURS
+                or ev.due_round is not None or ev.consumed or ev.canceled
+                or clock.recovery_serial[ident]!=2):
+            raise UnresolvedDecision("Destination has altered source Recovery identity")
+    following.check()
+
+
 def _carry(previous,following,*,travel_seconds,reference,carry_hazards=False):
     """Strict source-identity and clock transfer, no new state or free rest."""
     if (type(travel_seconds) is not int or not 0<=travel_seconds<=600
@@ -283,22 +331,34 @@ def _carry(previous,following,*,travel_seconds,reference,carry_hazards=False):
                 or set(following.g2.wielded[n])!=
                    {item for item,state in pristine.source.equipment if state=="wielded"}):
             raise UnresolvedDecision("Source-ledger/pristine destination character mismatch")
+    # The G4 hazard and original Recovery preflight is deliberately before
+    # ANY travel mutation. The destination might contain an authentic TX-MY
+    # with no G4.2 milestone and unchanged actor resources; copying the
+    # source must never erase that pre-existing exposure or its history.
+    _preflight_alpha_destination(following)
     old_clock=previous.g4.clock
     if (old_clock.world_seconds+travel_seconds>=21600
             or (not carry_hazards and
                 any(v.kind!="recovery" and not v.consumed and not v.canceled
                     for v in old_clock.events.values()))):
         raise UnresolvedDecision("Long Recovery/hazard boundary needs separate source handoff")
-    # Advance genuine G4.2 time and only THEN copy the resulting native
-    # source events, not forged absolute event fields from caller JSON.
+    if carry_hazards:
+        # Real poison ticks, native G4.2 milestones and Endurance expiry may
+        # harm or incapacitate an actor while travelling. Preflight a deep
+        # native copy, including the POST-TRAVEL settled party boundary, before
+        # spending one source second or mutating the target encounter.
+        # This mirrors the historical source-bound continuity handoff.
+        trial=deepcopy(previous)
+        trial.g4.clock.advance_exploration(travel_seconds)
+        _clean_boundary(trial,carry_hazards=True)
+    # All source/destination preconditions are settled. Commit native travel
+    # exactly once and carry only actual post-travel source events/state.
     old_clock.advance_exploration(travel_seconds)
+    _clean_boundary(previous,carry_hazards=carry_hazards)
     earlier=_state(previous)
     old_events={key:deepcopy(value) for key,value in old_clock.events.items()
                 if value.actor_id in PARTY}
     next_clock=following.g4.clock
-    if (set(next_clock.events)!={f"recovery:{n}:1" for n in (*PARTY,"foe")}
-            or any(next_clock.recovery_serial[n]!=2 for n in (*PARTY,"foe"))):
-        raise UnresolvedDecision("Fresh destination Recovery state changed")
     for n in PARTY:
         source=previous.actors[n]
         target=following.actors[n]

@@ -16,6 +16,8 @@
 
 The original L2/L3 **Alpha source identities** are reconstructed independently from `full_low_priest_actor(A|B, level)`, `party_actor("F", ...)`, `gifted_actor(level,...)` and `party_actor("AM",...)`. This is not a universal character importer or a new Hunter/Sentry AI. No retroactive Reactions, fictitious wounds, auto-resolved Bow hits, unchosen devotions, or new Anointed Destiny awards are permitted.
 
+**Companion live-hazard safety correction:** The separate [Alpha L2 Hunter venom/Sentry handoff](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) rejects a contaminated destination (even unscheduled native short toxins or historical exposure IDs) before any travel, and preflights all potentially damaging G4.2 travel on a deep source copy. A harmful six-second TX-HM tick cannot leave either encounter partially mutated when the transfer fails. The primary L1–L3 milestone chain continues to reject unresolved live hazard cross-level transfers.
+
 ## Continuity and milestone trust boundaries
 
 `scripts/b04_b05_b06_alpha_l2_l3_progression_v0.py` processes exactly **two authored candidate awards** at distinct source stages. A stage must have ended its full native Initiative round with four authentic G5 border exits and no pending attacks or reservations; all actors must be alive and mobile, and clocks must be in exploration. Advancement rejects active magical hosts, toxin/venom histories requiring new source authority, other pending clock milestones or borrowed source identities. The author candidate marker must follow a native scene terminal; it is **not** permission to award a level for a real table.
