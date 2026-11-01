@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
+**L1 Alpha native combat integration:** [B04/B05/B06 — Alpha Cohort Source-Legal Mixed-Party Encounter Integration v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) joins a full selected Low Priest A/B Chosen Rite, High Scholar Fire, High Gifted Joy/Thrown Flame and Medium Anointed real invested recipient Step against the unchanged Soldier; four genuine G5 withdrawals. An author-fixture source witness only, not real human play, a generalized Alpha combat engine or independent Focus certification.
+
 **First human-cohort execution preparation:** [B04/B05/B06/B07 — First Cohort Pilot Execution & Independent Evidence Verification v0](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) selects candidate Alpha (Priest/Low, Scholar/High, Gifted/High, Anointed/Medium), supports private evidence file hashing/scene preflight and 84 C1–C7 review slots. The generated data is **blank/unverified**; no actual GM/player sessions or Focus certificates are claimed.
 
 **Human GM/independent review execution:** [B04/B06/B07 — Persistent Party Adventure Acceptance & Independent Certification Readiness v0](b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md) derives a 36-slot C1–C7 Focus-level gap matrix (252 unmet external review obligations), three practical four-PC source cohorts, a 3–5-session GM test plan and unchanged six-gate open status. It does not claim any real-play observation or certification.

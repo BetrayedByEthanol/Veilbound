@@ -214,6 +214,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **First-cohort Alpha pilot execution/evidence kit:** [B04/B05/B06/B07 First Cohort Pilot Execution & Independent Evidence Verification v0](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) adds a source-matched, four-character Alpha intake and 84 explicit C1–C7 review slots, offline SHA256 evidence checks, GM/player session procedure and independent-reviewer queue. Existing G8 A/B/R/F native scripts **cannot** be misreported as a full playable Alpha encounter; real on-table decisions and source-legal conditional encounter adapters remain required. All certification/exit counters remain zero.
 
+**Alpha Cohort L1 mixed native Soldier encounter (bounded v0):** [B04/B05/B06 Alpha Source-Legal Mixed-Party Encounter Integration v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) now provides the *actual four chosen Alpha Focus source identities* (full Low Priest A/B rather than physical proxy, F, G, AM) sharing original G0/G1/G2/G3/G4/G5 costs and native L1 withdrawal. Fixed policy and unchanged L3-equivalent Soldier, no false opponent calibration, real GM choice, Level-2/3 mixed encounter or independent certification.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.
