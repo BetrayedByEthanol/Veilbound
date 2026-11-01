@@ -216,6 +216,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **Alpha Cohort L1 mixed native Soldier encounter (bounded v0):** [B04/B05/B06 Alpha Source-Legal Mixed-Party Encounter Integration v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) now provides the *actual four chosen Alpha Focus source identities* (full Low Priest A/B rather than physical proxy, F, G, AM) sharing original G0/G1/G2/G3/G4/G5 costs and native L1 withdrawal. Fixed policy and unchanged L3-equivalent Soldier, no false opponent calibration, real GM choice, Level-2/3 mixed encounter or independent certification.
 
+**Alpha L1 tactical options and native defensive response (bounded v0):** [B04/B05/B06 Alpha L1 Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) extends the #199 four-Focus source scene with pre-roll G0 Guard/Dodge/Take Hit, actor-paid tactical alternatives, conditional Medium recipient G4 pulse and nonterminal held-position policies. No new B06 phase, L2–L3 native mixed party, real GM/player choices or acceptance gate is implied.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.

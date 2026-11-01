@@ -20,6 +20,8 @@
 
 **First-cohort native combat implementation:** [B04/B05/B06 Alpha L1 Mixed-Party Source-Legal Encounter v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) closes one bounded L1 combination blocker for full selected Low Priest A/B, High Scholar, High Gifted and Medium Anointed against original Soldier; retains exact resource/clock/action receipts and real G5 withdrawal. This cannot independently count as any real-play observation, representative Alpha battle, Focus certificate or MVP exit.
 
+**L1 Alpha player-choice implementation follow-up:** [B04/B05/B06 Alpha Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) adds five authored native player-response policies for the genuine selected Alpha party, with paid Guard/Dodge, alternative casting/Investment/Rite decisions and source-authenticated departure vs unresolved stand. Automated fixed-policy evidence does not increase real human sessions, 0/12 independent Focus certifications or 0/6 accepted gates.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
