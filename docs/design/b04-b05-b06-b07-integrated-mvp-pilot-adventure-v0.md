@@ -14,6 +14,8 @@
 
 **Author-fixture progression integration:** [B04/B06/B07 L1–3 persistent party chain](b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md) demonstrates continuous original G0/G4.2 party source state and two *explicitly supplied* provisional GM milestone decisions through native L2–3 Soldier/Sentry encounters. It does **not** claim the played four-session arc, GM shrine outcome or 12-Focus independent certificates; L1 G8 combat remains unauthorized.
 
+**Real-table verification runbook (non-certifying):** [B04/B06/B07 Persistent Party Adventure Acceptance & Independent Certification Readiness v0](b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md) supplies a 3–5-session GM/player/independent reviewer procedure, twelve Focus coverage across three four-player candidate cohorts, source-linked C1–C7 gaps, conditional mechanical blockers and unchanged six open gates. Author fixture milestones are not authenticated human story beats.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.
