@@ -4,6 +4,8 @@
 
 **Session 1 ready-to-prepare runbook:** [B04/B05/B06/B07 Alpha L1 Supply & Soldier Gate GM Execution Packet v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) adds printable source cards, a confidential GM truth sheet, stage-by-stage choice/resource tracking, and a blank local source-reference worksheet with compatibility notes for the existing first-cohort intake. No actual session, selected Low Priest A/B, GM milestone or independent review is implied.
 
+**Private Session 1 first human-evidence workflow:** [B04/B05/B06/B07 Alpha Session 1 Live Evidence Intake v0](b04-b05-b06-b07-alpha-session-one-live-intake-v0.md) adds source-identity and private-file byte preflight for the existing Session 1 worksheet and canonical 84-slot Alpha intake, with an explicit HOLD for unresolved tactics or missing GM milestones. No human identity, action legality or independent certification is machine-authenticated.
+
 ## Current decision: conditional controlled-tabletop GO, not automated-pilot GO
 
 | Intended use | Decision | Required boundary |

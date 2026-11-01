@@ -9,6 +9,8 @@
 
 **Alpha Session 1 practical GM table packet:** [B04/B05/B06/B07 Alpha Session 1 Preparation & Execution v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) supplies source-anchored L1 supply → gate story beats, concrete cross/inspect/records options, conditional Soldier combat, GM truth sheet, source stop/no-auto-milestone policy and private blank worksheet. The packet is not a second human intake, a new source mechanic, a session, or any Create/Act/Resolve/Advance/Challenge/Observe certification.
 
+**Actual Alpha Session 1 preflight and local intake:** [B04/B05/B06/B07 Session 1 Live Evidence Intake v0](b04-b05-b06-b07-alpha-session-one-live-intake-v0.md) reads private GM/player evidence as untrusted candidate material, preserves original four Focus sheet identities, L1 supply/gate stage choices, resources, G4.2 time, original manifest SHA256 and separately declared GM event. Blank checks remain NO GO for evidence acceptance; matched local bytes still cannot authenticate human play or independent review.
+
 ## Status and evidence policy
 
 - **Delivered:** merged implementation or authored design. This does **not** certify a full playable feature.
