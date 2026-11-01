@@ -2,6 +2,8 @@
 
 > **Execution runbook and source-linked gap register, not a completed certification.** Uses the merged L1→L3 [persistent party fixture](b04-b06-b07-integrated-milestone-persistent-party-adventure-v0.md), the [independent twelve-Focus protocol](b04-b07-independent-twelve-focus-certification-protocol-pilot-roster-v0.md), the [flexible cohort intake](b04-b07-pilot-evidence-flexibility-multi-cohort-v0.md), the [3–5-session candidate adventure](b04-b05-b06-b07-integrated-mvp-pilot-adventure-v0.md) and the [six-gate acceptance register](b04-b07-mvp-acceptance-register-refresh-v0.md). **No player, GM, reviewer, session, milestone, difficulty rating or acceptance claim is fabricated.**
 
+**First-cohort execution handoff:** [Alpha Pilot Execution & Independent Evidence Verification v0](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) moves the Alpha planning cohort into a *blank, structured execution packet*: participant/source manifest, actual scene and GM milestone intake, 84 C1–C7 review tasks and optional local evidence-file hash comparison. Requires real players/GM/independent reviewer and actual source-legal Alpha scenes; no CI output is presented as actual play.
+
 ## Verified starting point — different evidence is not interchangeable
 
 | Evidence | What is already source-backed | What is still missing |

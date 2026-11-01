@@ -16,6 +16,8 @@
 
 **Real-table verification runbook (non-certifying):** [B04/B06/B07 Persistent Party Adventure Acceptance & Independent Certification Readiness v0](b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md) supplies a 3–5-session GM/player/independent reviewer procedure, twelve Focus coverage across three four-player candidate cohorts, source-linked C1–C7 gaps, conditional mechanical blockers and unchanged six open gates. Author fixture milestones are not authenticated human story beats.
 
+**First-cohort real-table execution preparation:** [Alpha evidence intake and reviewer procedure](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) defines the existing four-Focus Alpha roster, distinct from the older fixed A/B/R/F fixture, plus real player/GM evidence collection, legal encounter go/no-go and independent reviewer checks. No human session or candidate GM milestone is assumed completed.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.

@@ -11,6 +11,9 @@ on:
       - 'scripts/b05_b06_cross_encounter_effect_continuity_v0.py'
       - 'scripts/b04_b06_b07_integrated_milestone_persistent_party_v0.py'
       - 'scripts/b04_b06_b07_persistent_adventure_acceptance_readiness_v0.py'
+      - 'scripts/b04_b05_b06_b07_first_cohort_pilot_v0.py'
+      - 'tests/test_b04_b05_b06_b07_first_cohort_pilot_v0.py'
+      - 'docs/design/b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md'
       - 'tests/test_b04_b06_b07_persistent_adventure_acceptance_readiness_v0.py'
       - 'docs/design/b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md'
       - 'tests/test_b04_b06_b07_integrated_milestone_persistent_party_v0.py'
@@ -213,6 +216,17 @@ jobs:
           python -m scripts.b04_b06_b07_persistent_adventure_acceptance_readiness_v0 --cohort-templates > build/b04-b06-b07-blank-cohorts-v0.json
           python -m json.tool build/b04-b06-b07-acceptance-readiness-v0.json > /dev/null
           python -m json.tool build/b04-b06-b07-blank-cohorts-v0.json > /dev/null
+      - name: Verify first cohort candidate execution evidence and private-file safety
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_b07_first_cohort_pilot_v0.py' -v
+      - name: Produce blank first cohort execution packet and noncertifying readiness
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_b06_b07_first_cohort_pilot_v0 --blank > build/b04-b05-b06-b07-first-cohort-blank-v0.json
+          python -m scripts.b04_b05_b06_b07_first_cohort_pilot_v0 > build/b04-b05-b06-b07-first-cohort-readiness-v0.json
+          python -m scripts.b04_b05_b06_b07_first_cohort_pilot_v0 --check build/b04-b05-b06-b07-first-cohort-blank-v0.json > build/b04-b05-b06-b07-first-cohort-preflight-v0.json
+          python -m json.tool build/b04-b05-b06-b07-first-cohort-blank-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-b07-first-cohort-readiness-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-b07-first-cohort-preflight-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -241,4 +255,7 @@ jobs:
             build/b04-b06-b07-persistent-milestone-adventure-v0.json
             build/b04-b06-b07-acceptance-readiness-v0.json
             build/b04-b06-b07-blank-cohorts-v0.json
+            build/b04-b05-b06-b07-first-cohort-blank-v0.json
+            build/b04-b05-b06-b07-first-cohort-readiness-v0.json
+            build/b04-b05-b06-b07-first-cohort-preflight-v0.json
           if-no-files-found: error

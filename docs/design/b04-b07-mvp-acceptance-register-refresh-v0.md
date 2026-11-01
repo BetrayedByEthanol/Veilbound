@@ -16,6 +16,8 @@
 
 **Independent acceptance readiness supplement:** [B04/B06/B07 Persistent Party Adventure Acceptance & Independent Certification Readiness v0](b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md) audits the merged #196 G0/G8 authored milestone chain against all C1–C7 criteria and six strict exit gates, distinguishes its two Low Priest physical proxies and High Scholar from unobserved Focuses, and yields 36 level-specific play/review cards plus blank cohorts. All independent Focus certificates and gate statuses remain at zero; only verified external GM/player evidence can change acceptance.
 
+**First Alpha cohort execution and verification prep:** [B04/B05/B06/B07 First Cohort Pilot Execution & Independent Evidence Verification v0](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) creates a reusable private-evidence manifest, exact original four-Focus Alpha source identities and source-limited encounter blocking notes. 84 C1–C7 tasks remain unobserved; optional SHA checks validate only file integrity, not human identities or actual play. The existing 0/12 Focus certification and 0/6 gate counts remain.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |

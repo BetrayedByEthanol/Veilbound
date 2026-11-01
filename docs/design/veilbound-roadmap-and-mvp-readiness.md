@@ -212,6 +212,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **Proposed B04/B06/B07 independent acceptance readiness:** [Persistent Party Adventure Acceptance & Independent Certification Readiness v0](b04-b06-b07-persistent-adventure-acceptance-certification-readiness-v0.md) identifies all 12×3 Focus-level C1–C7 outside-party evidence obligations, uses current original roster hashes and bounded #196 native fixture truth, schedules three four-player cohorts, and separates conditional implementation gaps from actual external GM/player/reviewer execution. This is a candidate test procedure, not a new B06 G-stage, authored Focus power, real session, full-play certificate or closed MVP gate.
 
+**First-cohort Alpha pilot execution/evidence kit:** [B04/B05/B06/B07 First Cohort Pilot Execution & Independent Evidence Verification v0](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) adds a source-matched, four-character Alpha intake and 84 explicit C1–C7 review slots, offline SHA256 evidence checks, GM/player session procedure and independent-reviewer queue. Existing G8 A/B/R/F native scripts **cannot** be misreported as a full playable Alpha encounter; real on-table decisions and source-legal conditional encounter adapters remain required. All certification/exit counters remain zero.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.
