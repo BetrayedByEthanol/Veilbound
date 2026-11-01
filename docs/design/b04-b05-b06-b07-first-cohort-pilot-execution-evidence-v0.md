@@ -19,6 +19,8 @@ This is the existing **COHORT-ALPHA** allocation from readiness #197, not the hi
 
 **Alpha L1 tactical-choice preflight supplement:** [B04/B05/B06 Alpha L1 Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) enumerates independently auditable Guard/Dodge/Take Hit, actual G0 AP/VP paid actions and nonterminal hold-position outcomes for the full selected Alpha L1 party. Players and the GM must still actually choose actions/defenses and report original evidence; source-fixed test branches do not constitute human C1–C7 play.
 
+**Original four-Focus Alpha level-two/three source witness:** [B04/B05/B06 Alpha L2–L3 Mixed-Party Encounter & Advancement v0](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) adds narrow no-refill L1→L2→L3 source progression, Hunter head-forward Bite attempts and cold Sentry Chosen Reserve, with strict clean native source boundaries. The two milestone proposals remain authored candidates. This is neither an actual GM/story award, a complete Hunter venom scene, general cross-level effect rebinding nor human evidence in the blank Alpha pilot packet.
+
 ## Before real sessions
 
 The GM and independent reviewer examine all four full original L1 sheets, source hashes, legal gear, selected/saved Talent/Training, initial HP/Vigor/VP/AP and native action eligibility. Select L2/L3 advancement choices without awarding levels in advance. A first-cohort packet leaves Low Priest A/B selection blank until the **player actually chooses**. Assign participant, GM, author and separate reviewer responsibilities outside the repository; keep personally identifying data and raw private session evidence in controlled local storage, never in these PR fixtures.

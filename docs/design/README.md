@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
+**Original Alpha L1–L3 native progression and mixed Hunter/Sentry:** [B04/B05/B06 Alpha Cohort L2–L3 Mixed-Party Encounter & Advancement v0](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) carries all four selected Alpha actors, HP/Vigor/VP and genuine G4.2 Recovery events across author-candidate milestones, L2 1×2 Hunter and L3 cold Sentry native source windows. **No real GM award, human play, independent certification, universal toxin rebind or accepted MVP gate** is claimed.
+
 **Alpha L1 native tactical choice and response:** [B04/B05/B06 Alpha L1 Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) runs predeclared native Guard/Dodge/Take Hit, optional source-paid Priest/Gifted/Scholar/Anointed actions, real Medium pulse only on injury, and separate withdrawal vs ongoing-engagement results. Fixed source policies are **not** human play or Focus certification.
 
 **L1 Alpha native combat integration:** [B04/B05/B06 — Alpha Cohort Source-Legal Mixed-Party Encounter Integration v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) joins a full selected Low Priest A/B Chosen Rite, High Scholar Fire, High Gifted Joy/Thrown Flame and Medium Anointed real invested recipient Step against the unchanged Soldier; four genuine G5 withdrawals. An author-fixture source witness only, not real human play, a generalized Alpha combat engine or independent Focus certification.

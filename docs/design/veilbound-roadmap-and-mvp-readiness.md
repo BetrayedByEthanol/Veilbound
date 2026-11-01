@@ -218,6 +218,8 @@ The original bounded **B06 G0–G8** implementation milestones stay closed; do n
 
 **Alpha L1 tactical options and native defensive response (bounded v0):** [B04/B05/B06 Alpha L1 Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) extends the #199 four-Focus source scene with pre-roll G0 Guard/Dodge/Take Hit, actor-paid tactical alternatives, conditional Medium recipient G4 pulse and nonterminal held-position policies. No new B06 phase, L2–L3 native mixed party, real GM/player choices or acceptance gate is implied.
 
+**B04/B05/B06 — original Alpha L2–L3 source-native mixed encounters and advancement v0:** [Source chain and trust boundaries](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md). The actual Priest/Low A/B, Scholar/High, Gifted/High, Anointed/Medium party carries native HP/Vigor/VP, equipment and 6-hour Recovery events from L1 Soldier through two distinct nonautomatic author-candidate milestones, L2 source Hunter Bite/withdrawal and L3 source cold Sentry Reserve/withdrawal. This **bounded fixed policy** cannot certify real GM story milestones, representative damage/venom tests or Focus readiness; 0/12 and 0/6 remain unchanged.
+
 ### Active progress checklist
 
 - [x] Original **B06 G0–G8** bounded source-native milestones; fixed historical G7-H/G8 three-terminal records, not representative packs.

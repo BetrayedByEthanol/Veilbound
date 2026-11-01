@@ -22,6 +22,8 @@
 
 **L1 Alpha player-choice implementation follow-up:** [B04/B05/B06 Alpha Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) adds five authored native player-response policies for the genuine selected Alpha party, with paid Guard/Dodge, alternative casting/Investment/Rite decisions and source-authenticated departure vs unresolved stand. Automated fixed-policy evidence does not increase real human sessions, 0/12 independent Focus certifications or 0/6 accepted gates.
 
+**Original Alpha four-Focus L2–L3 mechanical continuation:** [B04/B05/B06 Alpha Mixed Hunter/Sentry & Advancement v0](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) now carries selected full Low Priest A/B, High Scholar, High Gifted and Medium Anointed source state across original-source Hunter and Sentry scenes. Uses explicit separate author-candidate gate/shrine milestones only after original G5 source withdrawals, without refilling HP/Vigor/Available VP or authenticating GM/player evidence. Live cross-level toxin/magic remains a blocking gap; Focus and MVP acceptance counts stay zero.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |

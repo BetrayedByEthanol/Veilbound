@@ -18,6 +18,8 @@ The `b04_b05_b06_alpha_l1_tactics_v0.py` module creates exactly one original L1 
 
 This is a narrow **predeclared tactical source bridge**, not live free-form combat or automated adjudication of unknown alternative GM choices. Actual contested consent, alternate targets, nontrivial Interception/Opportunity, prone capability, risk amplification, critical confirmations, counterfire and full pursuit remain outside this module and must retain the existing native explicit gates.
 
+**L2–L3 continuation (separate bounded source test):** [Original Alpha Hunter/Sentry and progression v0](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) takes the source-selected Alpha L1 party through a clean original 1×2 Hunter encounter, two separate author-candidate (nonhuman) milestones and cold Sentry source encounter without resource refills. The L1 tactical policies remain fixed candidate demonstrations, not independently observed player choices.
+
 ## Five source-tested branches
 
 | Policy | Defense / first Soldier die | Party option variation | Result |
