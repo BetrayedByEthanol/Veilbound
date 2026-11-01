@@ -2,6 +2,8 @@
 
 > A **bounded, deterministic source-native L1 Soldier encounter** for the *first* proposed Alpha pilot party (Priest/Low, Scholar/High, Gifted/High, Anointed/Medium). It is **not** actual GM/player play, an interchangeable G8 four-character template, complete Focus certification, a validated Hunter CR, or a new general tactical rules engine.
 
+**Follow-up — controlled tactical player alternatives:** [Alpha L1 Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) adds native pre-roll Guard, Dodge and Take Hit branches, optional paid character actions, real pulse only after actual injury and source-attested withdrawal vs unresolved holding the line. The original authored #199 scene remains intact and retains its own regression witness. This does **not** make the engine general-purpose or human-play-certified.
+
 ## The source problem this closes
 
 The first-cohort [pilot package](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) had a concrete L1 combat prerequisite. Existing fixed G8 A/B/R/F parties include **physical-only Low Priest proxies** and cannot be relabelled as the four selected Alpha characters. Existing one-character or partial-party Gifted, Anointed, Low Priest and Scholar source engines also cannot independently prove that their costs, response gates and states cooperate in **one native encounter**.

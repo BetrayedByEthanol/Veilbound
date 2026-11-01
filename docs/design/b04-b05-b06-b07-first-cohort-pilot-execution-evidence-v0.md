@@ -17,6 +17,8 @@ This is the existing **COHORT-ALPHA** allocation from readiness #197, not the hi
 
 **New bounded Alpha native L1 source witness:** [B04/B05/B06 Alpha Mixed-Party Encounter v0](b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md) proves exact shared G0/G3/G4/G5 co-existence of all four selected Focuses, both complete Low Priest A/B chosen Rites, one source Medium Anointed invested Step, native Gifted/Scholar Flame and four cautious exits against the original Soldier. It supplies **one author-fixed policy**, not a general source-legal player tactical menu. Any actual GM/player choices beyond that authored policy still need separate source preflight and human evidence.
 
+**Alpha L1 tactical-choice preflight supplement:** [B04/B05/B06 Alpha L1 Tactical Choice & Defensive Response v0](b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md) enumerates independently auditable Guard/Dodge/Take Hit, actual G0 AP/VP paid actions and nonterminal hold-position outcomes for the full selected Alpha L1 party. Players and the GM must still actually choose actions/defenses and report original evidence; source-fixed test branches do not constitute human C1–C7 play.
+
 ## Before real sessions
 
 The GM and independent reviewer examine all four full original L1 sheets, source hashes, legal gear, selected/saved Talent/Training, initial HP/Vigor/VP/AP and native action eligibility. Select L2/L3 advancement choices without awarding levels in advance. A first-cohort packet leaves Low Priest A/B selection blank until the **player actually chooses**. Assign participant, GM, author and separate reviewer responsibilities outside the repository; keep personally identifying data and raw private session evidence in controlled local storage, never in these PR fixtures.

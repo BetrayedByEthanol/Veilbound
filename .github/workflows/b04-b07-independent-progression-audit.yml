@@ -13,6 +13,9 @@ on:
       - 'scripts/b04_b06_b07_persistent_adventure_acceptance_readiness_v0.py'
       - 'scripts/b04_b05_b06_b07_first_cohort_pilot_v0.py'
       - 'scripts/b04_b05_b06_alpha_mixed_native_v0.py'
+      - 'scripts/b04_b05_b06_alpha_l1_tactics_v0.py'
+      - 'tests/test_b04_b05_b06_alpha_l1_tactics_v0.py'
+      - 'docs/design/b04-b05-b06-alpha-l1-tactical-defensive-response-v0.md'
       - 'scripts/b05_low_life_native_rites_v0.py'
       - 'tests/test_b04_b05_b06_alpha_mixed_native_v0.py'
       - 'docs/design/b04-b05-b06-alpha-source-native-mixed-party-encounter-v0.md'
@@ -240,6 +243,18 @@ jobs:
           python -m scripts.b04_b05_b06_alpha_mixed_native_v0 --variant B > build/b04-b05-b06-alpha-l1-b-v0.json
           python -m json.tool build/b04-b05-b06-alpha-l1-a-v0.json > /dev/null
           python -m json.tool build/b04-b05-b06-alpha-l1-b-v0.json > /dev/null
+      - name: Verify Alpha L1 tactical choices and native Guard Dodge responses
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_alpha_l1_tactics_v0.py' -v
+      - name: Produce five bounded Alpha tactical outcomes for selected A/B Priests
+        run: |
+          mkdir -p build
+          for variant in A B; do
+            for policy in protected_guard evasive_dodge wounded_no_investment wounded_with_step defend_position; do
+              dest="build/b04-b05-b06-alpha-tactical-${variant}-${policy}-v0.json"
+              python -m scripts.b04_b05_b06_alpha_l1_tactics_v0 --variant "$variant" --policy "$policy" > "$dest"
+              python -m json.tool "$dest" > /dev/null
+            done
+          done
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -273,4 +288,5 @@ jobs:
             build/b04-b05-b06-b07-first-cohort-preflight-v0.json
             build/b04-b05-b06-alpha-l1-a-v0.json
             build/b04-b05-b06-alpha-l1-b-v0.json
+            build/b04-b05-b06-alpha-tactical-*-v0.json
           if-no-files-found: error
