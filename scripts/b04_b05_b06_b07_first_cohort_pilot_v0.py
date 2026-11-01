@@ -195,8 +195,24 @@ def _reference(ref, found, allowed, label):
         raise ValueError("Wrong evidence document category: "+label)
 
 
-def _cohort_crossbind(cohort, found):
-    """Bind real claimed scenes/levels to registered primary evidence files."""
+def _selected_sheet(selected, character_id, level):
+    """Require the exact source-selected sheet for one character at one level.
+
+    Manifest membership alone does not establish an authorized character or
+    source variant: every claimed nested sheet must resolve through this
+    explicit, validated selection.
+    """
+    record=selected.get(character_id)
+    if record is None or not record["selected_variant"]:
+        raise ValueError("Reported evidence requires a selected character variant")
+    ref=record["sheet_refs"].get(str(level))
+    if type(ref) is not str or not ref:
+        raise ValueError("Reported evidence requires the selected L%d sheet" % level)
+    return ref
+
+
+def _cohort_crossbind(cohort, found, selected):
+    """Bind claimed scenes and source-selected per-character, per-level sheets."""
     c=cohort["cohorts"][0]
     if c["cohort_id"]!=COHORT_ID or tuple(
             x["pairing"] for x in c["characters"])!=PAIRINGS:
@@ -225,9 +241,19 @@ def _cohort_crossbind(cohort, found):
                 ("story_achievement_ref",{"gm_adjudication"})):
             _reference(milestone[key],found,allowed,key)
         for sheet in milestone["reviewed_sheets"]:
+            # A level award is a transition of the SAME selected character;
+            # neither a substituted new sheet nor a missing prior-level
+            # source sheet can become evidence of a valid advancement.
+            _selected_sheet(selected,sheet["character_id"],milestone["from_level"])
+            expected=_selected_sheet(selected,sheet["character_id"],milestone["to_level"])
+            if sheet["sheet_ref"]!=expected:
+                raise ValueError("Milestone sheet does not match selected character/level")
             _reference(sheet["sheet_ref"],found,{"selected_sheet"},"milestone sheet")
             _reference(sheet["reviewer_ref"],found,{"review_notes"},"milestone review")
     for row in c["focus_level_evidence"]:
+        expected=_selected_sheet(selected,row["character_id"],row["level"])
+        if row["sheet_ref"]!=expected:
+            raise ValueError("Focus evidence sheet does not match selected character/level")
         for key,allowed in (
                 ("sheet_ref",{"selected_sheet"}),
                 ("combat_choice_ref",{"player_choice"}),
@@ -260,6 +286,7 @@ def validate(packet, *, evidence_root=None):
     if type(actual_chars) is not list or len(actual_chars)!=4:
         raise ValueError("Exactly four original Alpha characters")
     found=_validate_files(packet["evidence_files"],evidence_root)
+    selected_sheet_refs=set()
     for i,(record,baseline) in enumerate(zip(actual_chars,expected_chars)):
         _shape(record,baseline,"character source preflight")
         for k in ("character_id","pairing","source_fingerprints"):
@@ -274,7 +301,8 @@ def validate(packet, *, evidence_root=None):
                 ("",)+ALLOWED_VARIANTS.get(record["pairing"],("default",))):
             raise ValueError("Illegal or implicit character variant")
         sheets=record["sheet_refs"]
-        if type(sheets) is not dict or set(sheets)!=set(baseline["sheet_refs"]):
+        if (type(sheets) is not dict or set(sheets)!=set(baseline["sheet_refs"])
+                or any(type(ref) is not str for ref in sheets.values())):
             raise ValueError("Invalid level-sheet selection")
         reviewer=record["independent_sheet_reviewer_ref"]
         if type(reviewer) is not str:
@@ -286,13 +314,17 @@ def validate(packet, *, evidence_root=None):
             selected=[ref for ref in sheets.values() if ref]
             if len(selected)!=len(set(selected)):
                 raise ValueError("Level sheet cannot be reused for a different level")
+            if any(ref in selected_sheet_refs for ref in selected):
+                raise ValueError("Selected sheet reused by another character")
+            selected_sheet_refs.update(selected)
             for level,ref in sheets.items():
                 if ref:
                     _reference(ref,found,{"selected_sheet"},"L"+level+" sheet")
             if not reviewer:
                 raise ValueError("Selected sheet requires candidate independent review")
             _reference(reviewer,found,{"review_notes"},"sheet reviewer")
-    _cohort_crossbind(packet["cohort_packet"],found)
+    _cohort_crossbind(packet["cohort_packet"],found,
+                      {record["character_id"]:record for record in actual_chars})
     expected_queue=template["review_queue"]
     queue=packet["review_queue"]
     if type(queue) is not list or len(queue)!=len(expected_queue):

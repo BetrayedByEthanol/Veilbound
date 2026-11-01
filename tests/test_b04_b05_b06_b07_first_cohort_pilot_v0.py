@@ -62,6 +62,65 @@ def one_synthetic_session(packet, root=None):
     return choice
 
 
+
+def selected_sheet(packet, character_index, level):
+    """Select one distinct, synthetic sheet for an individual character."""
+    pc=packet["characters"][character_index]
+    ref=register(packet,"selected_sheet",
+                 f"sheet-PC-{character_index+1}-L{level}")
+    review_id=f"sheet-review-PC-{character_index+1}"
+    reviewer=(review_id if any(x["ref_id"]==review_id
+                              for x in packet["evidence_files"]) else
+              register(packet,"review_notes",review_id))
+    pc["selected_variant"]="A" if character_index==0 else "default"
+    pc["sheet_refs"][str(level)]=ref
+    pc["independent_sheet_reviewer_ref"]=reviewer
+    return ref,reviewer
+
+
+def _focus_row_fixture(packet, character_index=0, sheet_ref=None):
+    """Fictitious source-shaped L1 evidence; NEVER played human evidence."""
+    c=packet["cohort_packet"]["cohorts"][0]
+    character_id=f"PC-{character_index+1}"
+    def doc(kind,label):
+        return register(packet,kind,f"{character_id}-{label}")
+    if sheet_ref is None:
+        sheet_ref=doc("selected_sheet","nested-unselected-L1")
+    row={
+        "character_id":character_id,"level":1,"sheet_ref":sheet_ref,
+        "combat_scene_id":"TEST-SCENE-1",
+        "combat_choice_ref":doc("player_choice","combat"),
+        "noncombat_scene_id":"TEST-SCENE-1",
+        "noncombat_choice_ref":doc("player_choice","noncombat"),
+        "alternative_ref":doc("player_choice","alternative"),
+        "countercase_scene_id":"TEST-SCENE-1",
+        "countercase_ref":doc("countercase","negative"),
+        "reviewer_ref":doc("review_notes","review"),
+    }
+    c["focus_level_evidence"].append(row)
+    return row
+
+
+def _milestone_fixture(packet, selected):
+    """One test-only L1->L2 GM-shaped record (never authentic play)."""
+    c=packet["cohort_packet"]["cohorts"][0]
+    event={
+        "event_id":"TEST-MILESTONE-1","after_scene_id":"TEST-SCENE-1",
+        "from_level":1,"to_level":2,
+        "gm_declaration_ref":register(packet,"milestone_declaration",
+                                      "gm-fake-milestone-1"),
+        "story_achievement_ref":register(packet,"gm_adjudication",
+                                         "gm-fake-story-beat"),
+        "reviewed_sheets":[
+            {"character_id":f"PC-{i+1}","sheet_ref":selected[i][0],
+             "reviewer_ref":selected[i][1]}
+            for i in range(4)
+        ],
+    }
+    c["milestones"].append(event)
+    return event
+
+
 class FirstCohortPilotTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -246,6 +305,113 @@ class FirstCohortPilotTests(unittest.TestCase):
             selected["selected_variant"]="default"
             with self.assertRaises(ValueError):
                 validate(p,evidence_root=root)
+
+
+    def test_14_focus_evidence_requires_selected_variant_and_level_sheet(self):
+        p=blank_packet()
+        one_synthetic_session(p)
+        row=_focus_row_fixture(p)
+        self.assertEqual(
+            cohort_preflight(p["cohort_packet"])["candidate_unique_focus_level_slots"],1)
+        # Previously, the nested L1 sheet could bypass unselected A/B.
+        with self.assertRaisesRegex(ValueError,"selected character variant"):
+            validate(p)
+        p["characters"][0]["selected_variant"]="A"
+        with self.assertRaisesRegex(ValueError,"selected L1 sheet"):
+            validate(p)
+        p["characters"][0]["selected_variant"]=""
+        selected,_=selected_sheet(p,0,1)
+        with self.assertRaisesRegex(ValueError,"Focus evidence sheet"):
+            validate(p)
+        row["sheet_ref"]=selected
+        self.assertEqual(validate(p)["candidate_focus_level_slots"],1)
+        row["sheet_ref"]=register(p,"selected_sheet","unselected-alternate-L1")
+        with self.assertRaisesRegex(ValueError,"Focus evidence sheet"):
+            validate(p)
+        row["sheet_ref"]=selected
+        p["characters"][0]["selected_variant"]=""
+        with self.assertRaises(ValueError):
+            validate(p)
+
+    def test_15_focus_evidence_cannot_borrow_another_character_or_level(self):
+        p=blank_packet()
+        one_synthetic_session(p)
+        original,_=selected_sheet(p,0,1)
+        other,_=selected_sheet(p,1,1)
+        later,_=selected_sheet(p,0,2)
+        row=_focus_row_fixture(p,sheet_ref=original)
+        self.assertEqual(validate(p)["candidate_focus_level_slots"],1)
+        for candidate in (other,later):
+            with self.subTest(sheet=candidate):
+                row["sheet_ref"]=candidate
+                with self.assertRaisesRegex(ValueError,"Focus evidence sheet"):
+                    validate(p)
+        row["sheet_ref"]=original
+        self.assertEqual(validate(p)["candidate_focus_level_slots"],1)
+
+    def test_16_milestones_bind_each_party_member_to_selected_L1_L2_sheets(self):
+        p=blank_packet()
+        one_synthetic_session(p)
+        selections=[]
+        for i in range(4):
+            selected_sheet(p,i,1)
+            selections.append(selected_sheet(p,i,2))
+        event=_milestone_fixture(p,selections)
+        self.assertEqual(
+            cohort_preflight(p["cohort_packet"])["reported_milestone_references"],1)
+        result=validate(p)
+        self.assertEqual(result["candidate_milestones_reported"],1)
+        self.assertEqual(result["actual_gm_story_milestones_authenticated"],0)
+        event["reviewed_sheets"][0]["sheet_ref"]=selections[1][0]
+        with self.assertRaisesRegex(ValueError,"Milestone sheet"):
+            validate(p)
+        event["reviewed_sheets"][0]["sheet_ref"]=selections[0][0]
+        alt=register(p,"selected_sheet","unselected-milestone-L2")
+        event["reviewed_sheets"][0]["sheet_ref"]=alt
+        with self.assertRaisesRegex(ValueError,"Milestone sheet"):
+            validate(p)
+        event["reviewed_sheets"][0]["sheet_ref"]=selections[0][0]
+        l1=p["characters"][0]["sheet_refs"]["1"]
+        p["characters"][0]["sheet_refs"]["1"]=""
+        with self.assertRaisesRegex(ValueError,"selected L1 sheet"):
+            validate(p)
+        p["characters"][0]["sheet_refs"]["1"]=l1
+        self.assertEqual(validate(p)["candidate_milestones_reported"],1)
+
+    def test_17_milestones_cannot_bypass_variant_or_target_level_sheet(self):
+        p=blank_packet()
+        one_synthetic_session(p)
+        selections=[]
+        for i in range(4):
+            selected_sheet(p,i,1)
+            selections.append(selected_sheet(p,i,2))
+        _milestone_fixture(p,selections)
+        for name,modify in (
+            ("blank_variant",lambda q:q["characters"][0].update(
+                selected_variant="")),
+            ("blank_L2",lambda q:q["characters"][0]["sheet_refs"].update(
+                {"2":""})),
+            ("wrong_L2",lambda q:q["characters"][0]["sheet_refs"].update(
+                {"2":q["characters"][1]["sheet_refs"]["2"]})),
+        ):
+            with self.subTest(case=name):
+                changed=deepcopy(p)
+                modify(changed)
+                with self.assertRaises(ValueError):
+                    validate(changed)
+        self.assertEqual(validate(p)["candidate_milestones_reported"],1)
+
+
+    def test_18_selected_sheet_cannot_be_reused_between_different_PCs(self):
+        p=blank_packet()
+        selected,_=selected_sheet(p,0,1)
+        other,_=selected_sheet(p,1,1)
+        self.assertEqual(validate(p)["strict_mvp_exits_met"],0)
+        p["characters"][1]["sheet_refs"]["1"]=selected
+        with self.assertRaisesRegex(ValueError,"reused by another character"):
+            validate(p)
+        p["characters"][1]["sheet_refs"]["1"]=other
+        self.assertEqual(validate(p)["strict_mvp_exits_met"],0)
 
     def test_13_json_contract_is_stable(self):
         self.assertEqual(json.loads(json.dumps(self.blank)),self.blank)
