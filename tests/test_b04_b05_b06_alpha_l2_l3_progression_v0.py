@@ -11,6 +11,8 @@ from scripts.b04_b05_b06_alpha_l2_l3_progression_v0 import (
 )
 from scripts.b06_encounter_state_v0 import UnresolvedDecision
 from scripts.b06_g7a_native_terminal_census_v0 import canonical_digest
+from scripts.b06_world_clock_v0 import SIX_HOURS,ROUND_SECONDS_SURROGATE
+from scripts.b04_b05_b06_alpha_mixed_native_v0 import scene as l1_source_scene
 from scripts.b05_low_priest_life_l1_l3_v0 import profile as low_priest_profile
 
 
@@ -90,6 +92,98 @@ class AlphaProgressionTests(unittest.TestCase):
             self.assertEqual(r["world_seconds"][1],r["second_handoff"]["world_seconds"])
             self.assertEqual(r["world_seconds"][0],300)
             self.assertGreaterEqual(r["world_seconds"][1],600)
+
+
+    def test_12_L1_clock_enters_before_first_round_and_exits_after_terminal(self):
+        for variant in ("A","B"):
+            with self.subTest(variant=variant):
+                combat=_l1(variant,0)
+                e=combat.e
+                self.assertEqual(e.round,2)
+                self.assertEqual(e.g4.clock.mode,"exploration")
+                self.assertIsNone(e.g4.clock.entry_round)
+                self.assertEqual(e.g4.clock.world_seconds,0)
+                names=[x["kind"] for x in e.ledger]
+                self.assertEqual(names.count("g42_initiative_entered"),1)
+                self.assertEqual(names.count("g42_initiative_exited"),1)
+                self.assertEqual(names.count("g5_terminal_exit"),4)
+                self.assertLess(
+                    names.index("g42_initiative_entered"),
+                    names.index("round_begin"))
+                self.assertLess(
+                    max(x["index"] for x in e.ledger
+                        if x["kind"]=="round_end"),
+                    names.index("g42_initiative_exited"))
+                self.assertLess(
+                    max(x["index"] for x in e.ledger
+                        if x["kind"]=="g5_terminal_exit"),
+                    names.index("g42_initiative_exited"))
+                # Native G4.2 exit of a two-Round-Begin stage shortens
+                # the pending six-hour due instant by 18 seconds.
+                for name in (*PARTY,"foe"):
+                    recovery=e.g4.clock.events[f"recovery:{name}:1"]
+                    self.assertEqual(
+                        recovery.due_seconds,
+                        SIX_HOURS-3*ROUND_SECONDS_SURROGATE)
+                    self.assertIsNone(recovery.due_round)
+
+    def test_13_three_stage_native_recovery_deadlines_not_refilled(self):
+        stages=(
+            ("L1_after_two_rounds",3),
+            ("L2_entry",3),
+            ("L2_after_two_rounds",6),
+            ("L3_entry",6),
+            ("L3_after_two_rounds",9),
+        )
+        for variant,r in (("A",self.a),("B",self.b)):
+            with self.subTest(variant=variant):
+                snapshots=r["native_recovery_deadlines"]
+                self.assertEqual(set(snapshots),{name for name,_ in stages})
+                for stage,elapsed_surrogates in stages:
+                    expected=SIX_HOURS-elapsed_surrogates*ROUND_SECONDS_SURROGATE
+                    self.assertEqual(set(snapshots[stage]),set(PARTY))
+                    for actor,receipt in snapshots[stage].items():
+                        self.assertEqual(receipt["id"],f"recovery:{actor}:1")
+                        self.assertEqual(receipt["due_seconds"],expected)
+                self.assertEqual(
+                    snapshots["L1_after_two_rounds"],
+                    snapshots["L2_entry"])
+                self.assertEqual(
+                    snapshots["L2_after_two_rounds"],
+                    snapshots["L3_entry"])
+                self.assertEqual(
+                    r["milestone_one"]["world_seconds"],0)
+                self.assertEqual(
+                    r["milestone_two"]["world_seconds"],300)
+
+    def test_14_L1_clock_opt_in_preserves_old_standalone_witness(self):
+        default_scene,_,_,_=l1_source_scene(variant="A",seed=0)
+        self.assertEqual(default_scene.e.g4.clock.mode,"exploration")
+        self.assertFalse(any(x["kind"]=="g42_initiative_entered"
+                             for x in default_scene.e.ledger))
+        native_scene,_,_,_=l1_source_scene(
+            variant="A",seed=0,native_initiative_clock=True)
+        self.assertEqual(native_scene.e.g4.clock.mode,"initiative")
+        kinds=[x["kind"] for x in native_scene.e.ledger]
+        self.assertLess(kinds.index("g42_initiative_entered"),
+                        kinds.index("round_begin"))
+        with self.assertRaises(ValueError):
+            l1_source_scene(native_initiative_clock=1)
+
+    def test_15_zero_travel_still_counts_all_three_native_encounters(self):
+        for variant in ("A","B"):
+            with self.subTest(variant=variant):
+                r=run(variant=variant,travel_seconds=0)
+                self.assertEqual(r["world_seconds"],[0,0,0])
+                snapshots=r["native_recovery_deadlines"]
+                for stage,seconds in (
+                    ("L1_after_two_rounds",18),
+                    ("L2_after_two_rounds",36),
+                    ("L3_after_two_rounds",54)):
+                    for n in PARTY:
+                        self.assertEqual(
+                            snapshots[stage][n]["due_seconds"],
+                            SIX_HOURS-seconds)
 
     def test_04_real_hunter_head_front_original_bite_and_four_exits(self):
         for r in (self.a,self.b):

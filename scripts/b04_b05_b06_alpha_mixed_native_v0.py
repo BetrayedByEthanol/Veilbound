@@ -47,9 +47,16 @@ def _validate(variant,seed):
         raise ValueError("Explicit nonnegative integer native seed required")
 
 
-def scene(*,variant="A",seed=0):
-    """Build true source actors; no legacy A/B proxy, fixed G8 party or L1 enemy."""
+def scene(*,variant="A",seed=0,native_initiative_clock=False):
+    """Build true source actors; optional G4.2 entry precedes first Round Begin.
+
+    The opt-in keeps existing standalone #199/#200 source witnesses unchanged.
+    Persistent L1->L3 progression must use this real clock mode so each
+    completed L1 round debits its native Recovery deadline.
+    """
     _validate(variant,seed)
+    if type(native_initiative_clock) is not bool:
+        raise ValueError("Explicit native initiative-clock option required")
     actors=[
         anointed:=party_actor("AM",1,"anointed","party",
                              occupied=(POSITIONS["anointed"],)),
@@ -89,6 +96,8 @@ def scene(*,variant="A",seed=0):
             or gifted.source.source_id!="G"
             or anointed.source.source_id!="AM"):
         raise AssertionError("Selected full Focus source or enemy benchmark drift")
+    if native_initiative_clock:
+        e.g4.clock.enter_initiative()
     e.begin_round()
     e.log("b04_b05_b06_alpha_native_source_policy",
           variant=variant,level=1,opponent_level=3,

@@ -12,6 +12,8 @@ This integration creates **one** complete *source-selected* Low Priest A **or B*
 
 The Alpha encounter uses the actual G0-source G/F/AM actor adapters, the existing source-bound High Gifted Emotion/Thrown Flame, the Medium Anointed one-Vessel Investment with **one real recipient G4 Step**, Low Life Chosen Rite G3 host and original G3 High Scholar Fire. The unchanged source `B06-EN-02` Soldier retains its original L3-equivalent benchmark; **no enemy down-level** occurs.
 
+**Persistent-stage native clock:** The later [Alpha L2–L3 progression chain](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) opts its L1 scene into the G4.2 initiative clock *before* the first Round Begin, then uses the authenticated four-PC terminal to exit before advancing. Standalone original L1 witnesses retain their original mode and are not retroactively presented as full three-stage Recovery evidence.
+
 ## Authored L1 mixed-source policy and source receipts
 
 A source-fixed 8×7 open-gate grid is used, with an actual predeclared initiative order and four author-declared party border exits. **No hidden teleport or omniscient player AI.**

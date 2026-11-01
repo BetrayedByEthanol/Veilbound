@@ -56,6 +56,21 @@ def _source_actor(name,level,variant):
     raise ValueError("No non-Alpha actor allowed in source progression")
 
 
+def _recovery_due(e):
+    """Read authentic party six-hour Recovery deadlines at exploration boundary."""
+    if e.g4.clock.mode!="exploration":
+        raise UnresolvedDecision("Recovery deadline witness needs exploration clock")
+    result={}
+    for n in PARTY:
+        live=[event for event in e.g4.clock.events.values()
+              if event.kind=="recovery" and event.actor_id==n
+              and not event.consumed and not event.canceled]
+        if len(live)!=1 or type(live[0].due_seconds) is not int:
+            raise UnresolvedDecision("Exactly one live source Recovery deadline per Alpha PC")
+        result[n]={"id":live[0].ident,"due_seconds":live[0].due_seconds}
+    return result
+
+
 def _state(e):
     """Source and all persistent G0/G2 parts; no fake full-resource projection."""
     return {n:{
@@ -369,8 +384,13 @@ def _terminal(combat,kind):
 
 def _l1(variant,seed):
     """Old source Alpha gate; no maintained Rite/Investment to silently drop."""
-    combat,low,joy,am=l1_scene(variant=variant,seed=seed)
+    combat,low,joy,am=l1_scene(
+        variant=variant,seed=seed,native_initiative_clock=True)
     e=combat.e
+    # The native G4.2 initiative clock must already be active BEFORE the
+    # L1 scene's first Round Begin, not switched on after that boundary.
+    if (e.g4.clock.mode!="initiative" or e.g4.clock.entry_round!=1):
+        raise AssertionError("L1 Recovery clock did not enter before first Round Begin")
     for round_no in (1,2):
         if round_no==2:
             combat.bridge.begin_next_round()
@@ -388,6 +408,11 @@ def _l1(variant,seed):
             elif round_no==2 and who in PARTY:
                 _exit(combat,who)
             combat.bridge.end_current_turn()
+    # Authenticate the full four-PC terminal BEFORE exiting G4.2 initiative.
+    # _terminal uses the same source G5 exit checks and clock conversion as
+    # L2/L3, then _clean_boundary asserts the exploration handoff is settled.
+    if _terminal(combat,"soldier")!="party_scene_withdrawal":
+        raise AssertionError("L1 source Soldier stage lacks actual four-PC exit")
     _clean_boundary(e)
     if not any(x["kind"]=="g4_damage_applied" and
                x["detail"].get("recipient")=="priest" for x in e.ledger):
@@ -483,22 +508,27 @@ def run(*,variant="A",seed=0,awards=None,travel_seconds=300):
     first=_l1(variant,seed)
     e1=first.e
     l1_end=_state(e1)
+    l1_recovery=_recovery_due(e1)
     receipt1=award(e1,author[0],variant=variant)
     upgraded_l2=_state(e1)
     l2_combat,_,l2_joy,_=_scene(2,variant,"hunter",seed+1)
     transfer1=_carry(e1,l2_combat.e,travel_seconds=travel_seconds,
                      reference="ALPHA-FIXTURE:gate-to-forest")
     l2_begin=_state(l2_combat.e)
+    l2_entry_recovery=_recovery_due(l2_combat.e) if l2_combat.e.g4.clock.mode=="exploration" else None
     outcome_l2=_l2(l2_combat,l2_joy)
     l2_end=_state(l2_combat.e)
+    l2_recovery=_recovery_due(l2_combat.e)
     receipt2=award(l2_combat.e,author[1],variant=variant)
     upgraded_l3=_state(l2_combat.e)
     l3_combat,l3_low,l3_joy,l3_am=_scene(3,variant,"sentry_cold",seed+2)
     transfer2=_carry(l2_combat.e,l3_combat.e,travel_seconds=travel_seconds,
                      reference="ALPHA-FIXTURE:shrine-to-village")
     l3_begin=_state(l3_combat.e)
+    l3_entry_recovery=_recovery_due(l3_combat.e) if l3_combat.e.g4.clock.mode=="exploration" else None
     outcome_l3=_l3(l3_combat,l3_low,l3_joy,l3_am)
     final=_state(l3_combat.e)
+    l3_recovery=_recovery_due(l3_combat.e)
     if (l2_begin!=upgraded_l2 or l3_begin!=upgraded_l3
             or any(l1_end[n]["source_id"]!=final[n]["source_id"] for n in PARTY)
             or any(final[n]["level"]!=3 for n in PARTY)):
@@ -529,6 +559,13 @@ def run(*,variant="A",seed=0,awards=None,travel_seconds=300):
         "world_seconds":[e1.g4.clock.world_seconds,
                          l2_combat.e.g4.clock.world_seconds,
                          l3_combat.e.g4.clock.world_seconds],
+        "native_recovery_deadlines":{
+            "L1_after_two_rounds":l1_recovery,
+            "L2_entry":l2_entry_recovery,
+            "L2_after_two_rounds":l2_recovery,
+            "L3_entry":l3_entry_recovery,
+            "L3_after_two_rounds":l3_recovery,
+        },
         "native_source_stage_terminals":3,
         "human_sessions":0,"actual_GM_milestones_authenticated":0,
         "independently_certified_focuses":0,"strict_mvp_exits_met":0,
