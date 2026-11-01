@@ -10,6 +10,18 @@
 5. **Talla Fen** is alive at Ember Watch and carries Mira's inactive signature-bearing ring; the ring is not a cure.
 6. Cavern spiders and the territorial **Hunter** are uninvolved wildlife; Heartweb is an **optional** dangerous boss and salvage, not the location of the essential case.
 
+### Player prop routing (print only when found)
+
+| Scene | Matching player-facing props | Trigger |
+|---|---|---|
+| Session 1 | **P-1** public notice, **P-2** public road sketch | Publicly available or normally known |
+| Market | **M-1** Edda ledger; **M-2** witness statement; **M-3** petition | M-1 on inspection/copy; M-2 only if actually signed; M-3 blank if requested |
+| Depot | **D-1** outbound six; **D-2** received four; **D-3** relay slip; **D-4** two vault leaves; **D-5** archive notes | D-1/D-2 as inspected; D-3 through office/porter; D-4 ordinary vault; D-5 optional hidden archive |
+| Cavern | **C-1** sealed dispatch; **C-2** route sketch; **C-3** older courier box; **C-4** Talla's unsent note | C-1 is outside boss room; C-2 on actual mapping; C-3/C-4 only if discovered |
+| Ember Watch and return | **F-1** blank release receipt; **F-2** blank public correction; **F-3** optional letter | Fill according to decisions, never pre-award goods or signatures |
+
+Printable originals: [player-handouts.md](player-handouts.md). The C-4 note stays with the refuge records; **Mira's actual ring stays with Talla at Ember Watch**, not the note or a depot/cache pouch. Reveal no undiscovered record just because its code appears here.
+
 ### Adventure flow
 
 ```text
