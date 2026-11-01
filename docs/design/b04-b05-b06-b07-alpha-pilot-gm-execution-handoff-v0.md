@@ -2,6 +2,8 @@
 
 > **Operational go/no-go and external tabletop handoff, not a claimed playtest.** Source-checked against the merged Alpha L1–L3 native chain, L1 tactical branches, original Hunter venom and Sentry damage, and the already-versioned first-cohort evidence validator. This does not change canonical combat, level-up rules, the original Alpha packet schema, B06 G0–G8 milestones, independent certificate counts or MVP acceptance.
 
+**Session 1 ready-to-prepare runbook:** [B04/B05/B06/B07 Alpha L1 Supply & Soldier Gate GM Execution Packet v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) adds printable source cards, a confidential GM truth sheet, stage-by-stage choice/resource tracking, and a blank local source-reference worksheet with compatibility notes for the existing first-cohort intake. No actual session, selected Low Priest A/B, GM milestone or independent review is implied.
+
 ## Current decision: conditional controlled-tabletop GO, not automated-pilot GO
 
 | Intended use | Decision | Required boundary |

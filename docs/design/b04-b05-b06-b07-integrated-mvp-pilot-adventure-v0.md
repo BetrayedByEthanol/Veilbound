@@ -18,6 +18,8 @@
 
 **First-cohort real-table execution preparation:** [Alpha evidence intake and reviewer procedure](b04-b05-b06-b07-first-cohort-pilot-execution-evidence-v0.md) defines the existing four-Focus Alpha roster, distinct from the older fixed A/B/R/F fixture, plus real player/GM evidence collection, legal encounter go/no-go and independent reviewer checks. No human session or candidate GM milestone is assumed completed.
 
+**Session 1 runnable GM prep:** [Alpha L1 Supply Investigation & Soldier Gate v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) expands beats A+B with a read-aloud opening, GM-only truth/terrain/keeper facts, source-backed route/Medicine/held-ring/records prompts, optional L1 source-hostile Soldier and four Focus spotlight choices. Keep this historical #190 planner's original source limitations intact; they predate later bounded Alpha L1 combat and still do not authorize arbitrary auto-play.
+
 ## Player-facing premise: The Village's Withering Supplies
 
 A settlement's medicinal herb shipments are spoiled, leaving residents afraid and several patients in need of **ordinary help and source-legal treatment**, not an assumed mass healing spell. The supply-cache route is watched by an ordinary Soldier. An overlooked route passes near a territorial Hunter's forest. A Firebound Sentry guards a shrine that may hold credible records or evidence about the dangerous supply source. The characters must establish what actually happened, find a workable remedy and ensure the village can safely obtain future supplies.

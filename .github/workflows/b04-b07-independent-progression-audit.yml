@@ -13,6 +13,9 @@ on:
       - 'scripts/b04_b06_b07_persistent_adventure_acceptance_readiness_v0.py'
       - 'scripts/b04_b05_b06_b07_first_cohort_pilot_v0.py'
       - 'scripts/b04_b05_b06_b07_alpha_pilot_handoff_v0.py'
+      - 'scripts/b04_b05_b06_b07_alpha_session_one_v0.py'
+      - 'tests/test_b04_b05_b06_b07_alpha_session_one_v0.py'
+      - 'docs/design/b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md'
       - 'tests/test_b04_b05_b06_b07_alpha_pilot_handoff_v0.py'
       - 'docs/design/b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md'
       - 'scripts/b04_b05_b06_alpha_mixed_native_v0.py'
@@ -294,6 +297,17 @@ jobs:
           python -m json.tool build/b04-b05-b06-b07-alpha-gm-blank-v0.json > /dev/null
           python -m json.tool build/b04-b05-b06-b07-alpha-gm-handoff-v0.json > /dev/null
           python -m json.tool build/b04-b05-b06-b07-alpha-gm-preflight-v0.json > /dev/null
+      - name: Verify Alpha Session 1 GM card sources and blank private worksheet rules
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_b07_alpha_session_one_v0.py' -v
+      - name: Produce noncertifying Alpha L1 supply gate Session 1 GM cards and blank worksheet
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_b06_b07_alpha_session_one_v0 > build/b04-b05-b06-b07-alpha-session1-gm-cards-v0.json
+          python -m scripts.b04_b05_b06_b07_alpha_session_one_v0 --blank > build/b04-b05-b06-b07-alpha-session1-blank-v0.json
+          python -m scripts.b04_b05_b06_b07_alpha_session_one_v0 --check build/b04-b05-b06-b07-alpha-session1-blank-v0.json > build/b04-b05-b06-b07-alpha-session1-preflight-v0.json
+          python -m json.tool build/b04-b05-b06-b07-alpha-session1-gm-cards-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-b07-alpha-session1-blank-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-b07-alpha-session1-preflight-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -332,5 +346,8 @@ jobs:
             build/b04-b05-b06-alpha-venom-sentry-*-v0.json
             build/b04-b05-b06-b07-alpha-gm-blank-v0.json
             build/b04-b05-b06-b07-alpha-gm-handoff-v0.json
+            build/b04-b05-b06-b07-alpha-session1-gm-cards-v0.json
+            build/b04-b05-b06-b07-alpha-session1-blank-v0.json
+            build/b04-b05-b06-b07-alpha-session1-preflight-v0.json
             build/b04-b05-b06-b07-alpha-gm-preflight-v0.json
           if-no-files-found: error

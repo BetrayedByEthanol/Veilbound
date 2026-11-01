@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
+**Actual Alpha Session 1 GM preparation:** [B04/B05/B06/B07 Alpha Session 1 GM Preparation & Execution Packet v0](b04-b05-b06-b07-alpha-session-one-gm-packet-v0.md) provides the L1 supply/crossing/cache and Soldier gate prompts, original numerical *author examples*, selected full-party legal spotlight questions, real alternative outcomes, explicit GM/milestone stop rules, and private unobserved source-reference worksheet. It does not replace the Alpha 84-slot intake or add human sessions.
+
 **Alpha actual-tabletop GM execution handoff:** [B04/B05/B06/B07 — Alpha Pilot Readiness & GM Execution Handoff v0](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md) audits merged four-Focus L1–3 native scenes, distinguishes bounded automated options from GM/player choices, preserves the 84-slot private evidence intake and produces a no-fabricated-session operational go/no-go matrix. It does **not** issue a new Focus certificate or MVP gate.
 
 **Alpha source Hunter venom, Endurance and Sentry damage:** [B04/B05/B06 Alpha Hunter Venom, Sentry Damage & Persistent Effects v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) exercises real original Hunter injection and G4.4 scheduling, selected Low Priest B's paid Endurance suppression versus A's source refusal, exact same-level hazard handoff, and original enhanced Sentry sword HP/Fire/Vigor packets. Cross-level live toxins still fail closed; no human pilot/certification is implied.
