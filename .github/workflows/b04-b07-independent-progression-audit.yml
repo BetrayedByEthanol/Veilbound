@@ -12,6 +12,9 @@ on:
       - 'scripts/b04_b06_b07_integrated_milestone_persistent_party_v0.py'
       - 'scripts/b04_b06_b07_persistent_adventure_acceptance_readiness_v0.py'
       - 'scripts/b04_b05_b06_b07_first_cohort_pilot_v0.py'
+      - 'scripts/b04_b05_b06_b07_alpha_pilot_handoff_v0.py'
+      - 'tests/test_b04_b05_b06_b07_alpha_pilot_handoff_v0.py'
+      - 'docs/design/b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md'
       - 'scripts/b04_b05_b06_alpha_mixed_native_v0.py'
       - 'scripts/b04_b05_b06_alpha_l1_tactics_v0.py'
       - 'scripts/b04_b05_b06_alpha_l2_l3_progression_v0.py'
@@ -280,6 +283,17 @@ jobs:
           python -m scripts.b04_b05_b06_alpha_l2_hazard_sentry_v0 --variant B > build/b04-b05-b06-alpha-venom-sentry-b-v0.json
           python -m json.tool build/b04-b05-b06-alpha-venom-sentry-a-v0.json > /dev/null
           python -m json.tool build/b04-b05-b06-alpha-venom-sentry-b-v0.json > /dev/null
+      - name: Verify Alpha GM execution handoff preserves noncertifying packet and source boundaries
+        run: python -m unittest discover -s tests -p 'test_b04_b05_b06_b07_alpha_pilot_handoff_v0.py' -v
+      - name: Produce safe blank Alpha GM template and current noncertifying execution-readiness report
+        run: |
+          mkdir -p build
+          python -m scripts.b04_b05_b06_b07_alpha_pilot_handoff_v0 --blank-packet > build/b04-b05-b06-b07-alpha-gm-blank-v0.json
+          python -m scripts.b04_b05_b06_b07_alpha_pilot_handoff_v0 > build/b04-b05-b06-b07-alpha-gm-handoff-v0.json
+          python -m scripts.b04_b05_b06_b07_alpha_pilot_handoff_v0 --packet build/b04-b05-b06-b07-alpha-gm-blank-v0.json > build/b04-b05-b06-b07-alpha-gm-preflight-v0.json
+          python -m json.tool build/b04-b05-b06-b07-alpha-gm-blank-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-b07-alpha-gm-handoff-v0.json > /dev/null
+          python -m json.tool build/b04-b05-b06-b07-alpha-gm-preflight-v0.json > /dev/null
       - name: Run full repository unittest regression suite
         run: python -m unittest discover -s tests -v
       - name: Upload provenance and findings
@@ -316,4 +330,7 @@ jobs:
             build/b04-b05-b06-alpha-tactical-*-v0.json
             build/b04-b05-b06-alpha-l3-chain-*-v0.json
             build/b04-b05-b06-alpha-venom-sentry-*-v0.json
+            build/b04-b05-b06-b07-alpha-gm-blank-v0.json
+            build/b04-b05-b06-b07-alpha-gm-handoff-v0.json
+            build/b04-b05-b06-b07-alpha-gm-preflight-v0.json
           if-no-files-found: error

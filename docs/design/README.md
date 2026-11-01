@@ -15,6 +15,8 @@ The current Core Rules Audit should eventually live here as a tracked design/bac
 
 ## Current roadmap and MVP acceptance
 
+**Alpha actual-tabletop GM execution handoff:** [B04/B05/B06/B07 — Alpha Pilot Readiness & GM Execution Handoff v0](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md) audits merged four-Focus L1–3 native scenes, distinguishes bounded automated options from GM/player choices, preserves the 84-slot private evidence intake and produces a no-fabricated-session operational go/no-go matrix. It does **not** issue a new Focus certificate or MVP gate.
+
 **Alpha source Hunter venom, Endurance and Sentry damage:** [B04/B05/B06 Alpha Hunter Venom, Sentry Damage & Persistent Effects v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) exercises real original Hunter injection and G4.4 scheduling, selected Low Priest B's paid Endurance suppression versus A's source refusal, exact same-level hazard handoff, and original enhanced Sentry sword HP/Fire/Vigor packets. Cross-level live toxins still fail closed; no human pilot/certification is implied.
 
 **Original Alpha L1–L3 native progression and mixed Hunter/Sentry:** [B04/B05/B06 Alpha Cohort L2–L3 Mixed-Party Encounter & Advancement v0](b04-b05-b06-alpha-l2-l3-mixed-advancement-v0.md) carries all four selected Alpha actors, HP/Vigor/VP and genuine G4.2 Recovery events across author-candidate milestones, L2 1×2 Hunter and L3 cold Sentry native source windows. **No real GM award, human play, independent certification, universal toxin rebind or accepted MVP gate** is claimed.

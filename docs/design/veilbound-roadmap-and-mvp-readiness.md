@@ -5,6 +5,8 @@
 > [Canonical rules](../rules/) and [structured content](../../content/) outrank design/audit commentary.
 > Individual [design records](README.md) retain their own scope, results and historical limitations.
 
+**Post-#202 operational handoff (noncertifying):** [B04/B05/B06/B07 Alpha Cohort Pilot Readiness & GM Execution Handoff v0](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md) re-audits the first actual four-Focus Alpha pilot against merged L1 Guard/Dodge choices, clean L1–3 progression, Hunter poison/Endurance, Sentry damage, atomic same-level hazard carry and live GM/countercase obligations. **Controlled tabletop conditional GO** requires selected full sheets, GM-approved source adjudication, safety and private independent evidence; unrestricted automated mixed-party/cross-level effect/certification remains **NO GO**. All original acceptance counts remain 12/12 structural, 0/12 certified, 0/6 gates and 3/7 blockers definition-closed.
+
 ## Status and evidence policy
 
 - **Delivered:** merged implementation or authored design. This does **not** certify a full playable feature.

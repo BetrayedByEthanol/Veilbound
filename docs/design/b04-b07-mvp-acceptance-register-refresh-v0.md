@@ -26,6 +26,8 @@
 
 **Alpha original Hunter/Sentry mechanical gap — bounded source evidence:** [B04/B05/B06 Hunter Venom, Sentry Damage & Persistent Effects v0](b04-b05-b06-alpha-hunter-venom-sentry-effects-v0.md) adds a true source Hunter Bite, G4.4 delayed toxin, paid prepared B-only Venom Endurance vs A refusal and same-level native G4 history/clock handoff into cold Sentry original HP/Fire/Vigor damage. This is a fixed author fixture and **not** a legal general cross-level maintained/hazard importer, verified human campaign, representative combat calibration or any newly accepted exit gate.
 
+**Operational Alpha GM execution handoff after merged #202:** [B04/B05/B06/B07 Alpha Pilot Readiness & GM Execution Handoff v0](b04-b05-b06-b07-alpha-pilot-gm-execution-handoff-v0.md) reclassifies old mixed L1/Hunter/Sentry source gaps against verified bounded implementation, prints actual-tabletop conditional go/no-go and classifies GM decisions, conditional implementation and independent evidence. The existing untrusted Alpha 84-slot intake is preserved; no machine review authenticates human play, closes Create/Act/Resolve/Advance/Challenge/Observe or credits any of the 12 Focuses.
+
 ## Scope, evidence and status
 
 | Layer | Verified current count | What it means / does **not** mean |
